@@ -653,11 +653,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_model_piece_list(p0: i32, output: &mut [u8])
+pub fn get_model_piece_list(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -678,7 +683,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_model_piece_list(p0, descriptor_pointer);
+let status = raw::get_model_piece_list(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -691,7 +696,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -701,11 +706,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_model_piece_map(p0: i32, output: &mut [u8])
+pub fn get_model_piece_map(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -726,7 +736,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_model_piece_map(p0, descriptor_pointer);
+let status = raw::get_model_piece_map(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -739,7 +749,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -1338,11 +1348,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_projectile_damages(p0: i32, p1: i32, output: &mut [u8])
+pub fn get_projectile_damages(p0: i32, blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -1363,7 +1378,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_projectile_damages(p0, p1, descriptor_pointer);
+let status = raw::get_projectile_damages(p0, input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -1376,7 +1391,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0, p1);
+        let _ = (p0, blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -2060,11 +2075,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_side_data(p0: i32, output: &mut [u8])
+pub fn get_side_data(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -2085,7 +2105,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_side_data(p0, descriptor_pointer);
+let status = raw::get_side_data(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2098,7 +2118,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -2273,11 +2293,16 @@ pub safe fn get_unit_rules_params(p0: i32, p1: i32) -> i32;
         }
 
         #[inline]
-pub fn get_feature_rules_param(p0: i32, p1: i32, output: &mut [u8])
+pub fn get_feature_rules_param(p0: i32, blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -2298,7 +2323,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_feature_rules_param(p0, p1, descriptor_pointer);
+let status = raw::get_feature_rules_param(p0, input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2311,7 +2336,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0, p1);
+        let _ = (p0, blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -2369,11 +2394,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_game_rules_param(p0: i32, output: &mut [u8])
+pub fn get_game_rules_param(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -2394,7 +2424,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_game_rules_param(p0, descriptor_pointer);
+let status = raw::get_game_rules_param(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2407,7 +2437,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -2465,11 +2495,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_player_rules_param(p0: i32, p1: i32, output: &mut [u8])
+pub fn get_player_rules_param(p0: i32, blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -2490,7 +2525,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_player_rules_param(p0, p1, descriptor_pointer);
+let status = raw::get_player_rules_param(p0, input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2503,7 +2538,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0, p1);
+        let _ = (p0, blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -2561,11 +2596,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_team_rules_param(p0: i32, p1: i32, output: &mut [u8])
+pub fn get_team_rules_param(p0: i32, blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -2586,7 +2626,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_team_rules_param(p0, p1, descriptor_pointer);
+let status = raw::get_team_rules_param(p0, input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2599,7 +2639,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0, p1);
+        let _ = (p0, blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -2657,11 +2697,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_unit_rules_param(p0: i32, p1: i32, output: &mut [u8])
+pub fn get_unit_rules_param(p0: i32, blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -2682,7 +2727,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_unit_rules_param(p0, p1, descriptor_pointer);
+let status = raw::get_unit_rules_param(p0, input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2695,7 +2740,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0, p1);
+        let _ = (p0, blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -2948,11 +2993,16 @@ pub safe fn get_mouse_buttons_pressed(p0: i32, p1: i32) -> i32;
         }
 
         #[inline]
-pub fn get_action_hot_keys(p0: i32, output: &mut [u8])
+pub fn get_action_hot_keys(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -2973,7 +3023,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_action_hot_keys(p0, descriptor_pointer);
+let status = raw::get_action_hot_keys(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -2986,7 +3036,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -2996,11 +3046,19 @@ required: 0,
 }
 
         #[inline]
-pub fn get_key_bindings(p0: i32, output: &mut [u8])
+pub fn get_key_bindings(blob0: &[u8], blob1: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 4];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let (pointer, length) = crate::wasm_slice_parts(blob1).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[2] = pointer as u32;
+input[3] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -3021,7 +3079,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_key_bindings(p0, descriptor_pointer);
+let status = raw::get_key_bindings(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3034,7 +3092,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0, blob1);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -3044,11 +3102,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_mouse_buttons_pressed(p0: i32, output: &mut [u8])
+pub fn get_mouse_buttons_pressed(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -3069,7 +3132,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_mouse_buttons_pressed(p0, descriptor_pointer);
+let status = raw::get_mouse_buttons_pressed(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3082,7 +3145,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -3619,11 +3682,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_engine_atlas_textures(p0: i32, output: &mut [u8])
+pub fn get_engine_atlas_textures(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -3644,7 +3712,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_engine_atlas_textures(p0, descriptor_pointer);
+let status = raw::get_engine_atlas_textures(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3657,7 +3725,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -3828,11 +3896,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_icon_data(p0: i32, p1: i32, output: &mut [u8])
+pub fn get_icon_data(p0: i32, blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -3853,7 +3926,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_icon_data(p0, p1, descriptor_pointer);
+let status = raw::get_icon_data(p0, input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -3866,7 +3939,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0, p1);
+        let _ = (p0, blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -4061,11 +4134,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_document_path_requests(p0: i32, output: &mut [u8])
+pub fn get_document_path_requests(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -4086,7 +4164,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_document_path_requests(p0, descriptor_pointer);
+let status = raw::get_document_path_requests(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4099,7 +4177,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -4181,11 +4259,22 @@ pub safe fn sub_dirs(p0: i32, p1: i32, p2: i32) -> i32;
         }
 
         #[inline]
-pub fn dir_list(p0: i32, p1: i32, output: &mut [u8])
+pub fn dir_list(p0: i32, blob0: &[u8], blob1: &[u8], blob2: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 6];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let (pointer, length) = crate::wasm_slice_parts(blob1).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[2] = pointer as u32;
+input[3] = length as u32;
+let (pointer, length) = crate::wasm_slice_parts(blob2).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[4] = pointer as u32;
+input[5] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -4206,7 +4295,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::dir_list(p0, p1, descriptor_pointer);
+let status = raw::dir_list(p0, input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4219,7 +4308,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0, p1);
+        let _ = (p0, blob0, blob1, blob2);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -4277,11 +4366,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_archive_dependencies(p0: i32, output: &mut [u8])
+pub fn get_archive_dependencies(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -4302,7 +4396,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_archive_dependencies(p0, descriptor_pointer);
+let status = raw::get_archive_dependencies(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4315,7 +4409,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -4325,11 +4419,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_archive_info(p0: i32, output: &mut [u8])
+pub fn get_archive_info(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -4350,7 +4449,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_archive_info(p0, descriptor_pointer);
+let status = raw::get_archive_info(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4363,7 +4462,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -4373,11 +4472,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_archive_replaces(p0: i32, output: &mut [u8])
+pub fn get_archive_replaces(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -4398,7 +4502,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_archive_replaces(p0, descriptor_pointer);
+let status = raw::get_archive_replaces(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4411,7 +4515,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -4469,11 +4573,19 @@ required: 0,
 }
 
         #[inline]
-pub fn get_available_a_is(p0: i32, output: &mut [u8])
+pub fn get_available_a_is(blob0: &[u8], blob1: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 4];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let (pointer, length) = crate::wasm_slice_parts(blob1).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[2] = pointer as u32;
+input[3] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -4494,7 +4606,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_available_a_is(p0, descriptor_pointer);
+let status = raw::get_available_a_is(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4507,7 +4619,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0, blob1);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -4517,11 +4629,16 @@ required: 0,
 }
 
         #[inline]
-pub fn get_file_info(p0: i32, output: &mut [u8])
+pub fn get_file_info(blob0: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -4542,7 +4659,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::get_file_info(p0, descriptor_pointer);
+let status = raw::get_file_info(input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4555,7 +4672,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0);
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -4709,11 +4826,22 @@ required: 0,
 }
 
         #[inline]
-pub fn list_dir(p0: i32, p1: i32, output: &mut [u8])
+pub fn list_dir(p0: i32, blob0: &[u8], blob1: &[u8], blob2: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 6];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let (pointer, length) = crate::wasm_slice_parts(blob1).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[2] = pointer as u32;
+input[3] = length as u32;
+let (pointer, length) = crate::wasm_slice_parts(blob2).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[4] = pointer as u32;
+input[5] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -4734,7 +4862,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::list_dir(p0, p1, descriptor_pointer);
+let status = raw::list_dir(p0, input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4747,7 +4875,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0, p1);
+        let _ = (p0, blob0, blob1, blob2);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -4757,11 +4885,22 @@ required: 0,
 }
 
         #[inline]
-pub fn sub_dirs(p0: i32, p1: i32, output: &mut [u8])
+pub fn sub_dirs(p0: i32, blob0: &[u8], blob1: &[u8], blob2: &[u8], output: &mut [u8])
 -> core::result::Result<usize, super::DynamicOutputError>
 {
 #[cfg(target_arch = "wasm32")]
 {
+let mut input = [0u32; 6];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let (pointer, length) = crate::wasm_slice_parts(blob1).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[2] = pointer as u32;
+input[3] = length as u32;
+let (pointer, length) = crate::wasm_slice_parts(blob2).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[4] = pointer as u32;
+input[5] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
 let (output_pointer, output_capacity) =
 match crate::wasm_mut_slice_parts(output) {
 Ok(value) => value,
@@ -4782,7 +4921,7 @@ error,
 required: 0,
 }),
 };
-let status = raw::sub_dirs(p0, p1, descriptor_pointer);
+let status = raw::sub_dirs(p0, input_pointer, descriptor_pointer);
 let required = descriptor[2] as usize;
 if status == 0 {
 Ok(required)
@@ -4795,7 +4934,7 @@ required,
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
-        let _ = (p0, p1);
+        let _ = (p0, blob0, blob1, blob2);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),

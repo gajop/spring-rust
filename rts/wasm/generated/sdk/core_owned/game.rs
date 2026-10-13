@@ -743,20 +743,31 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_side_data {
-            #[link(wasm_import_module = "spring:game")]
-            unsafe extern "C" {
-                #[link_name = "get-side-data"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:game.get-side-data."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_side_data(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_side_data::call(p0, p1)
+        pub fn get_side_data(side_name: &str) -> Result<SideData> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + side_name.len()); __b.extend_from_slice(&(side_name.len() as u32).to_le_bytes()); __b.extend_from_slice(side_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::game::get_side_data(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = SideData { side_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, case_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, start_unit: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, side_index: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]

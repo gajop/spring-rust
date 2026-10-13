@@ -199,6 +199,7 @@ inline constexpr ImportDescriptor kImports[] = {
 	{MessagesModule, "send-to-unsynced", "i32,i32->i64", SyncedEnvironmentMask},
 
 	{RulesParamsModule, "set-unit-rules-param-f32", "i32,i32,i32,f32,i32->i64", SyncedEnvironmentMask},
+	{RulesParamsModule, "get-game-rules-param-f32", "i32,i32->i64", AllEnvironmentMask},
 	{RulesParamsModule, "get-unit-rules-param-f32", "i32,i32,i32->i64", AllEnvironmentMask},
 
 	{TerrainModule, "is-pos-in-map", "f32,f32->i64", AllEnvironmentMask},

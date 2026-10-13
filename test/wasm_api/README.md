@@ -57,3 +57,14 @@ for Core-WASM and native menu modules. Its `transition/` subfixture also runs
 two complete menu -> game -> menu cycles with an engine-generated map and no
 map archive. The fixture README contains the reproducible commands and archive
 layouts.
+
+The typed rules-param regression builds its own guest and runs all five scopes against the
+headless engine. Rebuild the engine first after changing host bindings, then run:
+
+```bash
+python3 test/wasm_api/check_rules_params.py
+```
+
+It covers bool/float/string round trips (including empty and long UTF-8 strings), missing and
+hidden values, size retries, and the allocation-free game float getter's value/type errors.
+Use `--spring /path/to/spring-headless` to select another engine build.

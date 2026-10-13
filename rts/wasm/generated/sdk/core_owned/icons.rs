@@ -133,20 +133,31 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_icon_data {
-            #[link(wasm_import_module = "spring:icons")]
-            unsafe extern "C" {
-                #[link_name = "get-icon-data"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:icons.get-icon-data."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_icon_data(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_get_icon_data::call(p0, p1, p2)
+        pub fn get_icon_data(icon_name: &str, full_data: bool) -> Result<IconDataEntry> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + icon_name.len()); __b.extend_from_slice(&(icon_name.len() as u32).to_le_bytes()); __b.extend_from_slice(icon_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::icons::get_icon_data(full_data as i32, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = IconDataEntry { name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, atlas_tex_coords: { let mut __items = Vec::with_capacity(4); for _ in 0..4usize { __items.push(crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items }, size: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, distance: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, radius_adjust: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]

@@ -4,6 +4,48 @@ Issues and requests found while working on Ship Game, newest first. Each names h
 Reports with measurements live beside this file (for example the
 [state hashing cost report](recoil_wasm_state_hash_cost_2026-10-12.md), resolved in `4dc4e25e0d`).
 
+## 2026-10-13 · Single rules-param getters have no typed Rust wrapper (game, team, player, feature)
+
+**Resolved:** the generated owned SDK now lowers string input descriptors together with
+recursive dynamic results. All five single-value getters return `Result<RulesParamValue>`;
+missing or visibility-hidden values return `ErrorCode::NotFound`. The façade also re-exports
+`RulesParamValue` and `RulesParamType`. `get_game_rules_param_f32(name)` uses a new compact,
+allocation-free host import and returns `InvalidArgument` for a non-float value.
+
+Verification: `python3 test/wasm_api/check_rules_params.py` builds a guest and runs the headless
+engine against all five scopes, round-tripping bools, floats, empty strings and long UTF-8
+strings, including buffer growth, cached sizes, missing/hidden values and float type errors.
+`python3 rts/wasm/verify_codegen.py` checks generated SDK and parity artifact reproducibility.
+
+Found adding wormholes to Ship Game: the synced rules publish match-wide state with
+`set_game_rules_param` (`los::PUBLIC`), and the unsynced and LuaUI Wasm modules could not read it
+back.
+
+In the generated SDK (`core_generated.rs`, module `owned::rules_params`), every **list** getter is
+typed (`get_game_rules_params(unused) -> Result<Vec<String>>`), but every **single-value** getter
+is only the exact Core ABI forwarder, `#[doc(hidden)]`:
+
+```rust
+pub fn get_game_rules_param(p0: i32, p1: i32) -> i32              // game
+pub fn get_team_rules_param(p0: i32, p1: i32, p2: i32) -> i32     // likewise team, player,
+pub fn get_feature_rules_param(p0: i32, p1: i32, p2: i32) -> i32  // feature, unit
+```
+
+The typed form a guest would expect is the mirror of the setter,
+`get_game_rules_param(name: &str) -> Result<RulesParamValue>`. The generator seems to skip it
+because the output is a record with a string inside. Units are only usable because
+`spring/src/rules_params.rs` hand-writes `get_unit_rules_param_f32` over its own import.
+`spring::rules_params` re-exports the raw forwarders under the typed names, so they look like the
+API.
+
+Ship Game works around it in `shipcore::game_params::float` by building the input descriptor
+(name wire) and decoding the output record (type, bool, float, string length and bytes, los,
+exists) by hand. That depends on the wire layout and breaks silently if it changes.
+
+**Request:** generate the typed single-value getters (`get_{game,team,player,feature,unit}_rules_param`
+returning `Result<RulesParamValue>`, with a not-found result), and for symmetry with units a
+`get_game_rules_param_f32(name) -> Result<f32>`. Once these exist, Ship Game drops its decoder.
+
 ## 2026-10-12 · Rules float code runs 2–3× slower with NaN canonicalization; nearest-enemy search costs its circle's area
 
 Found profiling a 1,000-a-side battle (`tools/launch.py check perf-combined` in Ship Game; report

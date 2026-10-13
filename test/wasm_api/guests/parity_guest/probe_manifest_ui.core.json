@@ -17,6 +17,7 @@
     "get_active_page",
     "get_mouse_start_position",
     "get_selection_box",
+    "get_action_hot_keys",
     "is_user_writing",
     "get_current_tooltip",
     "get_console_buffer_count",
@@ -54,15 +55,16 @@
     "ui_visibility_radar_view_position",
     "ui_visibility_radar_view_mid_position",
     "get_group_units_sorted_fixed",
+    "get_key_bindings_count",
     "get_active_cmd_descs_fixed_count",
     "get_active_cmd_desc_fixed_fields"
   ],
   "coverage": {
     "source_context": "widget",
     "source_test_count": 76,
-    "selected_count": 53,
+    "selected_count": 55,
     "selected_kind_counts": {
-      "readonly": 36,
+      "readonly": 38,
       "setter_getter": 17
     },
     "selected_ids": [
@@ -80,6 +82,7 @@
       "get_active_page",
       "get_mouse_start_position",
       "get_selection_box",
+      "get_action_hot_keys",
       "is_user_writing",
       "get_current_tooltip",
       "get_console_buffer_count",
@@ -117,6 +120,7 @@
       "ui_visibility_radar_view_position",
       "ui_visibility_radar_view_mid_position",
       "get_group_units_sorted_fixed",
+      "get_key_bindings_count",
       "get_active_cmd_descs_fixed_count",
       "get_active_cmd_desc_fixed_fields"
     ],
@@ -126,8 +130,6 @@
         "get_scan_symbol",
         "get_active_command",
         "get_default_command",
-        "get_action_hot_keys",
-        "get_key_bindings_count",
         "give_order_selected",
         "give_order_to_unit_unsynced",
         "give_order_to_unit_array_unsynced",

@@ -2304,20 +2304,54 @@ fn render_dynamic_output_forward(
     function: &FunctionModel,
     context: DynamicOutputRenderContext<'_>,
 ) -> bool {
-    if !matches!(context.plan.input_strategy, InputStrategy::Direct)
-        || !crate::render_core_wasm_dynamic_output_host::eligible(
-            context.plan,
-            &function.inputs,
-            &function.outputs,
-            context.all_records,
-        )
-        || !function.outputs.iter().all(|field| {
-            dynamic_decode_supported(&field.ty, context.all_records, context.all_enums)
-        })
+    if !crate::render_core_wasm_dynamic_output_host::eligible(
+        context.plan,
+        &function.inputs,
+        &function.outputs,
+        context.all_records,
+    ) || !function
+        .outputs
+        .iter()
+        .all(|field| dynamic_decode_supported(&field.ty, context.all_records, context.all_enums))
     {
         return false;
     }
 
+    // Variable input descriptors currently support blob pairs here; fixed
+    // record fields retain their existing transport path.
+    let blob_inputs = function
+        .inputs
+        .iter()
+        .filter(|field| !di_direct_type(&field.ty))
+        .collect::<Vec<_>>();
+    if !blob_inputs
+        .iter()
+        .all(|field| crate::render_core_wasm_wire::variable_type(&field.ty))
+    {
+        return false;
+    }
+    let blob_setup = blob_inputs
+        .iter()
+        .enumerate()
+        .map(|(index, field)| {
+            di_render_blob_encode(
+                &field.ty,
+                &rust_ident(&field.name),
+                index,
+                context.all_records,
+                context.records,
+            )
+        })
+        .collect::<String>();
+    let rules_param = context.module_ident == "rules_params"
+        && matches!(
+            function.name.as_str(),
+            "GetGameRulesParam"
+                | "GetTeamRulesParam"
+                | "GetPlayerRulesParam"
+                | "GetFeatureRulesParam"
+                | "GetUnitRulesParam"
+        );
     let params = function
         .inputs
         .iter()
@@ -2333,13 +2367,27 @@ fn render_dynamic_output_forward(
     let args = function
         .inputs
         .iter()
+        .filter(|field| di_direct_type(&field.ty))
         .map(|field| di_direct_arg(&field.ty, &rust_ident(&field.name)))
+        .chain((0..blob_inputs.len()).map(|index| format!("&__blob{index}")))
         .collect::<Vec<_>>()
         .join(", ");
-    let return_type = if function.outputs.len() == 1 {
+    let return_type = if rules_param {
+        "RulesParamValue".to_owned()
+    } else if function.outputs.len() == 1 {
         rust_type(&function.outputs[0].ty, context.records, context.enums)
     } else {
         format!("{}Value", function.name)
+    };
+    let result_projection = if rules_param {
+        "if !__result.exists { return Err(crate::ApiError::new(crate::ErrorCode::NotFound as i32)); }\n                        return Ok(__result.value);"
+    } else {
+        "return Ok(__result);"
+    };
+    let documentation = if rules_param {
+        "/// Read a rules param. Returns `ErrorCode::NotFound` if absent or hidden.\n        "
+    } else {
+        ""
     };
     let decode = dynamic_decode_outputs(function, context.all_records, context.all_enums);
     let arity_lint = too_many_arguments_attribute(function.inputs.len(), 8);
@@ -2357,9 +2405,9 @@ fn render_dynamic_output_forward(
         )
     };
     output.push_str(&format!(
-        r#"        #[inline]
+        r#"        {documentation}#[inline]
         {arity_lint}pub fn {name}({params}) -> Result<{return_type}> {{
-            // Last result size: repeated queries fit on the first call, so the
+{blob_setup}            // Last result size: repeated queries fit on the first call, so the
             // native getter does not run a second time just to size the buffer.
             static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
             let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
@@ -2372,7 +2420,7 @@ fn render_dynamic_output_forward(
 {decode}                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {{
                             return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
                         }}
-                        return Ok(__result);
+                        {result_projection}
                     }}
                     Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {{
                         __output.resize(error.required, 0);
@@ -2399,8 +2447,7 @@ fn dynamic_decode_supported(
         | SemanticType::Handle { .. }
         | SemanticType::String
         | SemanticType::Bytes => true,
-        // Enum decoding needs a generated value validation table. Keep those
-        // on the existing raw/handwritten path until that table is generated.
+        // Only enums with a generated validation table can be decoded safely.
         SemanticType::Enum { .. } => enums.contains_key(match ty {
             SemanticType::Enum { name } => name,
             _ => unreachable!(),

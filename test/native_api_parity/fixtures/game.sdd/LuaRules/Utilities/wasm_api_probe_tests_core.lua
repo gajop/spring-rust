@@ -163,6 +163,8 @@ return {
 
 		"get_team_max_units",
 
+		"unit_rules_param",
+
 		"get_unit_cost_table",
 
 		"unit_metal_extraction",
@@ -277,6 +279,10 @@ return {
 
 		"get_feature_root_piece",
 
+		"get_model_piece_list",
+
+		"get_model_piece_map",
+
 		"get_unit_piece_position",
 
 		"get_unit_piece_direction",
@@ -328,6 +334,8 @@ return {
 		"feature_fire_time",
 
 		"feature_smoke_time",
+
+		"side_data_by_name",
 
 		"side_data_by_index",
 
@@ -410,6 +418,8 @@ return {
 		"get_feature_team",
 
 		"get_feature_ally_team",
+
+		"feature_rules_param",
 
 		"get_feature_collision_volume_data",
 
@@ -585,7 +595,13 @@ return {
 
 		"get_team_ally_team_id",
 
+		"game_rules_param",
+
 		"team_resource",
+
+		"team_rules_param",
+
+		"player_rules_param",
 
 		"get_team_resource_stats",
 
@@ -721,6 +737,34 @@ return {
 
 		"piece_projectile_params",
 
+		"projectile_damage_armor",
+
+		"projectile_damage_paralyze",
+
+		"projectile_damage_impulse_factor",
+
+		"projectile_damage_impulse_boost",
+
+		"projectile_damage_crater_mult",
+
+		"projectile_damage_crater_boost",
+
+		"projectile_damage_dyn_exp",
+
+		"projectile_damage_dyn_min",
+
+		"projectile_damage_dyn_range",
+
+		"projectile_damage_dyn_inverted",
+
+		"projectile_damage_crater_aoe",
+
+		"projectile_damage_damage_aoe",
+
+		"projectile_damage_edge_effectiveness",
+
+		"projectile_damage_explosion_speed",
+
 		"projectile_position_after_set",
 
 		"projectile_velocity_after_set",
@@ -732,6 +776,8 @@ return {
 		"projectile_intercepted_after_set",
 
 		"projectile_ttl_after_set",
+
+		"projectile_damage_after_set",
 
 		"piece_projectile_params_after_set",
 
@@ -1000,6 +1046,11 @@ return {
 			positional = true,
 			checkMap = false,
 		},
+		["unit_rules_param"] = {
+			scope = "unit",
+			paramName = "native_api_parity_unit_rules_param",
+			value = 455.0,
+		},
 		["unit_metal_extraction"] = {
 			depth = 1.05,
 			range = 144.0,
@@ -1156,6 +1207,12 @@ return {
 		["get_model_root_piece"] = {
 			modelName = "fir_tree_small.s3o",
 		},
+		["get_model_piece_list"] = {
+			modelName = "fir_tree_small.s3o",
+		},
+		["get_model_piece_map"] = {
+			modelName = "fir_tree_small.s3o",
+		},
 		["get_unit_piece_position"] = {
 			pieceNum = 1,
 		},
@@ -1223,6 +1280,9 @@ return {
 		},
 		["feature_smoke_time"] = {
 			smokeTime = 6.5,
+		},
+		["side_data_by_name"] = {
+			sideName = "arm",
 		},
 		["side_data_by_index"] = {
 			sideIndex = 1,
@@ -1332,6 +1392,11 @@ return {
 		},
 		["feature_no_select"] = {
 			noSelect = false,
+		},
+		["feature_rules_param"] = {
+			scope = "feature",
+			paramName = "native_api_parity_feature_rules_param",
+			value = 455.0,
 		},
 		["feature_collision_volume_data"] = {
 			scaleX = 40.0,
@@ -1540,9 +1605,25 @@ return {
 			playerID1 = 0,
 			playerID2 = 0,
 		},
+		["game_rules_param"] = {
+			scope = "game",
+			paramName = "native_api_parity_game_rules_param",
+			value = 455.0,
+		},
 		["team_resource"] = {
 			resource = "metal",
 			amount = 500.0,
+		},
+		["team_rules_param"] = {
+			scope = "team",
+			paramName = "native_api_parity_team_rules_param",
+			value = 455.0,
+		},
+		["player_rules_param"] = {
+			scope = "player",
+			playerID = 0,
+			paramName = "native_api_parity_player_rules_param",
+			value = 455.0,
 		},
 		["get_team_resource_stats"] = {
 			teamID = 0,
@@ -1871,6 +1952,48 @@ return {
 			pieceNum = 1,
 			matrix = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		},
+		["projectile_damage_armor"] = {
+			tag = "0",
+		},
+		["projectile_damage_paralyze"] = {
+			tag = "paralyzeDamageTime",
+		},
+		["projectile_damage_impulse_factor"] = {
+			tag = "impulseFactor",
+		},
+		["projectile_damage_impulse_boost"] = {
+			tag = "impulseBoost",
+		},
+		["projectile_damage_crater_mult"] = {
+			tag = "craterMult",
+		},
+		["projectile_damage_crater_boost"] = {
+			tag = "craterBoost",
+		},
+		["projectile_damage_dyn_exp"] = {
+			tag = "dynDamageExp",
+		},
+		["projectile_damage_dyn_min"] = {
+			tag = "dynDamageMin",
+		},
+		["projectile_damage_dyn_range"] = {
+			tag = "dynDamageRange",
+		},
+		["projectile_damage_dyn_inverted"] = {
+			tag = "dynDamageInverted",
+		},
+		["projectile_damage_crater_aoe"] = {
+			tag = "craterAreaOfEffect",
+		},
+		["projectile_damage_damage_aoe"] = {
+			tag = "damageAreaOfEffect",
+		},
+		["projectile_damage_edge_effectiveness"] = {
+			tag = "edgeEffectiveness",
+		},
+		["projectile_damage_explosion_speed"] = {
+			tag = "explosionSpeed",
+		},
 		["projectile_position_after_set"] = {
 			x = 1024.0,
 			y = 128.0,
@@ -1897,6 +2020,10 @@ return {
 		},
 		["projectile_ttl_after_set"] = {
 			ttl = 777,
+		},
+		["projectile_damage_after_set"] = {
+			tag = "impulseFactor",
+			damageValue = 4.25,
 		},
 		["piece_projectile_params_after_set"] = {
 			explFlags = 66,

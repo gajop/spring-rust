@@ -406,6 +406,13 @@ def output_projection(
             output = outputs[output_index]
             expression = f"value.{rust_identifier(output['name'])}"
         type_info = output["type"]
+        # The owned rules-param getters project the native value/los/exists
+        # record to RulesParamValue; absence is represented by NotFound.
+        if function["name"] in {
+            "GetGameRulesParam", "GetTeamRulesParam", "GetPlayerRulesParam",
+            "GetFeatureRulesParam", "GetUnitRulesParam",
+        } and type_info.get("name") == "RulesParamValue":
+            expression = "value"
         optional = False
 
         # Some Lua APIs return several scalar values while the native

@@ -681,20 +681,33 @@
             crate::generated::borrowed::vfs::create_dir(__core_string_0_buf.as_cstr())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_dir_list {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "dir-list"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.dir-list."]
-        #[doc(hidden)]
         #[inline]
-        pub fn dir_list(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_dir_list::call(p0, p1, p2)
+        pub fn dir_list(path: &str, pattern: &str, mode: &str, recursive: bool) -> Result<Vec<DirEntry>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + pattern.len()); __b.extend_from_slice(&(pattern.len() as u32).to_le_bytes()); __b.extend_from_slice(pattern.as_bytes()); __b };
+            let __blob2 = { let mut __b = Vec::with_capacity(4 + mode.len()); __b.extend_from_slice(&(mode.len() as u32).to_le_bytes()); __b.extend_from_slice(mode.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::vfs::dir_list(recursive as i32, &__blob0, &__blob1, &__blob2, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(DirEntry { name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, is_directory: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? }); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -798,36 +811,58 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_archive_dependencies {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "get-archive-dependencies"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
+        #[inline]
+        pub fn get_archive_dependencies(archive_name: &str) -> Result<Vec<String>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + archive_name.len()); __b.extend_from_slice(&(archive_name.len() as u32).to_le_bytes()); __b.extend_from_slice(archive_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::vfs::get_archive_dependencies(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
             }
         }
 
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-dependencies."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_archive_dependencies(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_archive_dependencies::call(p0, p1)
-        }
-
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_archive_info {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "get-archive-info"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
+        pub fn get_archive_info(archive_name: &str) -> Result<Vec<ArchiveInfoEntry>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + archive_name.len()); __b.extend_from_slice(&(archive_name.len() as u32).to_le_bytes()); __b.extend_from_slice(archive_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::vfs::get_archive_info(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(ArchiveInfoEntry { key: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, type_: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, string_value: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, int_value: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, float_value: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, bool_value: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? }); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
             }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-info."]
-        #[doc(hidden)]
-        #[inline]
-        pub fn get_archive_info(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_archive_info::call(p0, p1)
         }
 
         #[inline]
@@ -853,20 +888,31 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_archive_replaces {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "get-archive-replaces"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-archive-replaces."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_archive_replaces(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_archive_replaces::call(p0, p1)
+        pub fn get_archive_replaces(archive_name: &str) -> Result<Vec<String>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + archive_name.len()); __b.extend_from_slice(&(archive_name.len() as u32).to_le_bytes()); __b.extend_from_slice(archive_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::vfs::get_archive_replaces(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -895,20 +941,32 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_available_a_is {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "get-available-a-is"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-available-a-is."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_available_a_is(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_available_a_is::call(p0, p1)
+        pub fn get_available_a_is(game_archive_name: &str, map_archive_name: &str) -> Result<Vec<AIInfoEntry>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + game_archive_name.len()); __b.extend_from_slice(&(game_archive_name.len() as u32).to_le_bytes()); __b.extend_from_slice(game_archive_name.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + map_archive_name.len()); __b.extend_from_slice(&(map_archive_name.len() as u32).to_le_bytes()); __b.extend_from_slice(map_archive_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::vfs::get_available_a_is(&__blob0, &__blob1, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(AIInfoEntry { short_name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, version: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, is_lua_ai: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? }); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -935,20 +993,34 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_file_info {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "get-file-info"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.get-file-info."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_file_info(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_file_info::call(p0, p1)
+        pub fn get_file_info(path: &str) -> Result<GetFileInfoValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::vfs::get_file_info(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = GetFileInfoValue {
+                            info: FileInfo { name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, size: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, mode: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, is_directory: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? },
+                            exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                        };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -1102,20 +1174,33 @@
             crate::generated::borrowed::vfs::is_directory(__core_string_0_buf.as_cstr())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_list_dir {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "list-dir"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.list-dir."]
-        #[doc(hidden)]
         #[inline]
-        pub fn list_dir(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_list_dir::call(p0, p1, p2)
+        pub fn list_dir(path: &str, pattern: &str, mode: &str, recursive: bool) -> Result<Vec<DirEntry>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + pattern.len()); __b.extend_from_slice(&(pattern.len() as u32).to_le_bytes()); __b.extend_from_slice(pattern.as_bytes()); __b };
+            let __blob2 = { let mut __b = Vec::with_capacity(4 + mode.len()); __b.extend_from_slice(&(mode.len() as u32).to_le_bytes()); __b.extend_from_slice(mode.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::vfs::list_dir(recursive as i32, &__blob0, &__blob1, &__blob2, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(DirEntry { name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, is_directory: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? }); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -1424,20 +1509,33 @@
             crate::generated::borrowed::vfs::set_map_square_texture(tex_square_x, tex_square_y, __core_string_2_buf.as_cstr())
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_sub_dirs {
-            #[link(wasm_import_module = "spring:vfs")]
-            unsafe extern "C" {
-                #[link_name = "sub-dirs"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:vfs.sub-dirs."]
-        #[doc(hidden)]
         #[inline]
-        pub fn sub_dirs(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_sub_dirs::call(p0, p1, p2)
+        pub fn sub_dirs(path: &str, pattern: &str, mode: &str, recursive: bool) -> Result<Vec<String>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path.as_bytes()); __b };
+            let __blob1 = { let mut __b = Vec::with_capacity(4 + pattern.len()); __b.extend_from_slice(&(pattern.len() as u32).to_le_bytes()); __b.extend_from_slice(pattern.as_bytes()); __b };
+            let __blob2 = { let mut __b = Vec::with_capacity(4 + mode.len()); __b.extend_from_slice(&(mode.len() as u32).to_le_bytes()); __b.extend_from_slice(mode.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::vfs::sub_dirs(recursive as i32, &__blob0, &__blob1, &__blob2, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]

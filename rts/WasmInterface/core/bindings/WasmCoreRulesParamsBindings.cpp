@@ -27,6 +27,52 @@ void ReturnStatus(wasmtime_val_raw_t* slots, Status status)
 		PackU32(0, static_cast<std::int32_t>(status)));
 }
 
+wasm_trap_t* GetGameRulesParamF32(void* environment, wasmtime_caller_t* caller,
+	wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+	auto* state = static_cast<HostState*>(environment);
+	if (state == nullptr || state->native == nullptr || state->native->rulesParams == nullptr ||
+		state->native->rulesParams->GetGameRulesParam == nullptr)
+		return Trap("GetGameRulesParam Core binding is unavailable");
+	if (slots == nullptr || slotCount != 2)
+		return Trap("GetGameRulesParamF32 Core ABI signature mismatch");
+
+	ImportGuard guard(state, 3);
+	if (!guard.Ok())
+		return Trap(guard.Error());
+	std::string memoryError;
+	if (!generated::EnsureMemory(state, caller, memoryError))
+		return Trap(memoryError);
+
+	GuestCString<> name;
+	if (!name.Read(state->memory, static_cast<std::uint32_t>(slots[0].i32),
+			static_cast<std::uint32_t>(slots[1].i32))) {
+		ReturnStatus(slots, Status::OutOfBounds);
+		return nullptr;
+	}
+
+	GetGameRulesParamQuery query{};
+	query.paramName = name.c_str();
+	GetGameRulesParamResult result{};
+	state->native->rulesParams->GetGameRulesParam(&query, &result);
+	const std::int32_t nativeError = NativeErrorCode(result.error);
+	if (nativeError != 0) {
+		slots[0].i64 = static_cast<std::int64_t>(PackU32(0, nativeError));
+		return nullptr;
+	}
+	if (!result.exists) {
+		ReturnStatus(slots, Status::NotFound);
+		return nullptr;
+	}
+	if (result.value.type != RULESPARAM_TYPE_FLOAT) {
+		ReturnStatus(slots, Status::InvalidArgument);
+		return nullptr;
+	}
+	const std::uint32_t bits = std::bit_cast<std::uint32_t>(result.value.floatValue);
+	slots[0].i64 = static_cast<std::int64_t>(PackU32(bits, 0));
+	return nullptr;
+}
+
 wasm_trap_t* GetUnitRulesParamF32(void* environment, wasmtime_caller_t* caller,
 	wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -135,9 +181,13 @@ bool RegisterRulesParamsImports(wasmtime_linker_t* linker, HostState* state,
 	}
 	if (state->native->rulesParams == nullptr)
 		return true;
+	const wasm_valkind_t gameGetParams[] = {WASM_I32, WASM_I32};
 	const wasm_valkind_t getParams[] = {WASM_I32, WASM_I32, WASM_I32};
 	const wasm_valkind_t setParams[] = {WASM_I32, WASM_I32, WASM_I32, WASM_F32, WASM_I32};
 	const wasm_valkind_t result[] = {WASM_I64};
+	if (!Define(linker, "get-game-rules-param-f32",
+			MakeFuncType(gameGetParams, 2, result, 1), GetGameRulesParamF32, state, error))
+		return false;
 	if (!Define(linker, "get-unit-rules-param-f32",
 			MakeFuncType(getParams, 3, result, 1), GetUnitRulesParamF32, state, error))
 		return false;

@@ -253,20 +253,42 @@
             pub exists: bool,
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_feature_rules_param {
-            #[link(wasm_import_module = "spring:rules-params")]
-            unsafe extern "C" {
-                #[link_name = "get-feature-rules-param"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-feature-rules-param."]
-        #[doc(hidden)]
+        /// Read a rules param. Returns `ErrorCode::NotFound` if absent or hidden.
         #[inline]
-        pub fn get_feature_rules_param(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_get_feature_rules_param::call(p0, p1, p2)
+        pub fn get_feature_rules_param(feature_id: i32, param_name: &str) -> Result<RulesParamValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + param_name.len()); __b.extend_from_slice(&(param_name.len() as u32).to_le_bytes()); __b.extend_from_slice(param_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::rules_params::get_feature_rules_param(feature_id, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = GetFeatureRulesParamValue {
+                            value: RulesParamValue { type_: { let __value = crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?; match __value {
+                            0 => RulesParamType::RulesparamTypeBool,
+                            1 => RulesParamType::RulesparamTypeFloat,
+                            2 => RulesParamType::RulesparamTypeString,
+                            _ => return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32)),
+                        } }, bool_value: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, float_value: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, string_value: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? },
+                            los: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                            exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                        };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        if !__result.exists { return Err(crate::ApiError::new(crate::ErrorCode::NotFound as i32)); }
+                        return Ok(__result.value);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -295,20 +317,42 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_game_rules_param {
-            #[link(wasm_import_module = "spring:rules-params")]
-            unsafe extern "C" {
-                #[link_name = "get-game-rules-param"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-game-rules-param."]
-        #[doc(hidden)]
+        /// Read a rules param. Returns `ErrorCode::NotFound` if absent or hidden.
         #[inline]
-        pub fn get_game_rules_param(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_game_rules_param::call(p0, p1)
+        pub fn get_game_rules_param(param_name: &str) -> Result<RulesParamValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + param_name.len()); __b.extend_from_slice(&(param_name.len() as u32).to_le_bytes()); __b.extend_from_slice(param_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::rules_params::get_game_rules_param(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = GetGameRulesParamValue {
+                            value: RulesParamValue { type_: { let __value = crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?; match __value {
+                            0 => RulesParamType::RulesparamTypeBool,
+                            1 => RulesParamType::RulesparamTypeFloat,
+                            2 => RulesParamType::RulesparamTypeString,
+                            _ => return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32)),
+                        } }, bool_value: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, float_value: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, string_value: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? },
+                            los: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                            exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                        };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        if !__result.exists { return Err(crate::ApiError::new(crate::ErrorCode::NotFound as i32)); }
+                        return Ok(__result.value);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -337,20 +381,42 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_player_rules_param {
-            #[link(wasm_import_module = "spring:rules-params")]
-            unsafe extern "C" {
-                #[link_name = "get-player-rules-param"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-player-rules-param."]
-        #[doc(hidden)]
+        /// Read a rules param. Returns `ErrorCode::NotFound` if absent or hidden.
         #[inline]
-        pub fn get_player_rules_param(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_get_player_rules_param::call(p0, p1, p2)
+        pub fn get_player_rules_param(player_id: i32, param_name: &str) -> Result<RulesParamValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + param_name.len()); __b.extend_from_slice(&(param_name.len() as u32).to_le_bytes()); __b.extend_from_slice(param_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::rules_params::get_player_rules_param(player_id, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = GetPlayerRulesParamValue {
+                            value: RulesParamValue { type_: { let __value = crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?; match __value {
+                            0 => RulesParamType::RulesparamTypeBool,
+                            1 => RulesParamType::RulesparamTypeFloat,
+                            2 => RulesParamType::RulesparamTypeString,
+                            _ => return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32)),
+                        } }, bool_value: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, float_value: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, string_value: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? },
+                            los: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                            exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                        };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        if !__result.exists { return Err(crate::ApiError::new(crate::ErrorCode::NotFound as i32)); }
+                        return Ok(__result.value);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -379,20 +445,42 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_team_rules_param {
-            #[link(wasm_import_module = "spring:rules-params")]
-            unsafe extern "C" {
-                #[link_name = "get-team-rules-param"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-team-rules-param."]
-        #[doc(hidden)]
+        /// Read a rules param. Returns `ErrorCode::NotFound` if absent or hidden.
         #[inline]
-        pub fn get_team_rules_param(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_get_team_rules_param::call(p0, p1, p2)
+        pub fn get_team_rules_param(team_id: i32, param_name: &str) -> Result<RulesParamValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + param_name.len()); __b.extend_from_slice(&(param_name.len() as u32).to_le_bytes()); __b.extend_from_slice(param_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::rules_params::get_team_rules_param(team_id, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = GetTeamRulesParamValue {
+                            value: RulesParamValue { type_: { let __value = crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?; match __value {
+                            0 => RulesParamType::RulesparamTypeBool,
+                            1 => RulesParamType::RulesparamTypeFloat,
+                            2 => RulesParamType::RulesparamTypeString,
+                            _ => return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32)),
+                        } }, bool_value: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, float_value: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, string_value: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? },
+                            los: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                            exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                        };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        if !__result.exists { return Err(crate::ApiError::new(crate::ErrorCode::NotFound as i32)); }
+                        return Ok(__result.value);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]
@@ -421,20 +509,42 @@
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_unit_rules_param {
-            #[link(wasm_import_module = "spring:rules-params")]
-            unsafe extern "C" {
-                #[link_name = "get-unit-rules-param"]
-                pub safe fn call(p0: i32, p1: i32, p2: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rules-params.get-unit-rules-param."]
-        #[doc(hidden)]
+        /// Read a rules param. Returns `ErrorCode::NotFound` if absent or hidden.
         #[inline]
-        pub fn get_unit_rules_param(p0: i32, p1: i32, p2: i32) -> i32 {
-            __core_owned_get_unit_rules_param::call(p0, p1, p2)
+        pub fn get_unit_rules_param(unit_id: i32, param_name: &str) -> Result<RulesParamValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + param_name.len()); __b.extend_from_slice(&(param_name.len() as u32).to_le_bytes()); __b.extend_from_slice(param_name.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::rules_params::get_unit_rules_param(unit_id, &__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = GetUnitRulesParamValue {
+                            value: RulesParamValue { type_: { let __value = crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?; match __value {
+                            0 => RulesParamType::RulesparamTypeBool,
+                            1 => RulesParamType::RulesparamTypeFloat,
+                            2 => RulesParamType::RulesparamTypeString,
+                            _ => return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32)),
+                        } }, bool_value: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, float_value: crate::generated::__core_wire::f32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, string_value: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? },
+                            los: crate::generated::__core_wire::i32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                            exists: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                        };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        if !__result.exists { return Err(crate::ApiError::new(crate::ErrorCode::NotFound as i32)); }
+                        return Ok(__result.value);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]

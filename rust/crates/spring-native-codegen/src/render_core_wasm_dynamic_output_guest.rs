@@ -7,7 +7,7 @@
 use heck::ToSnakeCase;
 use std::collections::BTreeMap;
 
-use crate::model::{ApiModel, RecordModel};
+use crate::model::{ApiModel, FunctionModel, RecordModel};
 use crate::render_core_wasm::{self, CoreType};
 use crate::render_core_wasm_dynamic_output_host;
 
@@ -50,8 +50,8 @@ pub fn render(model: &ApiModel) -> String {
             modules.push_str(&render_raw(plan));
         }
         modules.push_str("        }\n\n");
-        for (_, plan) in functions {
-            modules.push_str(&render_wrapper(plan));
+        for (function, plan) in functions {
+            modules.push_str(&render_wrapper(function, plan));
             modules.push('\n');
         }
         modules.push_str("    }\n\n");
@@ -102,29 +102,61 @@ fn render_raw(plan: &render_core_wasm::FunctionPlan) -> String {
     )
 }
 
-fn render_wrapper(plan: &render_core_wasm::FunctionPlan) -> String {
+fn render_wrapper(function: &FunctionModel, plan: &render_core_wasm::FunctionPlan) -> String {
     debug_assert_eq!(plan.direct_results, vec![CoreType::I32]);
     debug_assert!(!plan.direct_params.is_empty());
     let function_ident = rust_ident(&plan.function.to_snake_case());
-    let input_types = &plan.direct_params[..plan.direct_params.len() - 1];
-    let params = input_types
+    let blobs = function
+        .inputs
+        .iter()
+        .filter(|field| !crate::render_core_wasm_wire::direct_type(&field.ty))
+        .collect::<Vec<_>>();
+    let blob_descriptor = !blobs.is_empty()
+        && blobs
+            .iter()
+            .all(|field| crate::render_core_wasm_wire::variable_type(&field.ty));
+    let input_count = plan.direct_params.len() - 1 - usize::from(blob_descriptor);
+    let input_types = &plan.direct_params[..input_count];
+    let mut params = input_types
         .iter()
         .enumerate()
         .map(|(index, ty)| format!("p{index}: {}", rust_core_type(*ty)))
         .collect::<Vec<_>>()
         .join(", ");
-    let call_params = (0..input_types.len())
+    let mut input_setup = String::new();
+    if blob_descriptor {
+        for index in 0..blobs.len() {
+            if !params.is_empty() {
+                params.push_str(", ");
+            }
+            params.push_str(&format!("blob{index}: &[u8]"));
+        }
+        input_setup.push_str(&format!("let mut input = [0u32; {}];\n", blobs.len() * 2));
+        for index in 0..blobs.len() {
+            input_setup.push_str(&format!(
+                "let (pointer, length) = crate::wasm_slice_parts(blob{index}).map_err(|error| super::DynamicOutputError {{ error, required: 0 }})?;\ninput[{}] = pointer as u32;\ninput[{}] = length as u32;\n",
+                index * 2, index * 2 + 1,
+            ));
+        }
+        input_setup.push_str("let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;\n");
+    }
+    let mut call_params = (0..input_types.len())
         .map(|index| format!("p{index}"))
         .collect::<Vec<_>>();
+    let mut ignored_params = call_params.clone();
+    if blob_descriptor {
+        call_params.push("input_pointer".to_owned());
+        ignored_params.extend((0..blobs.len()).map(|index| format!("blob{index}")));
+    }
     let call_prefix = if call_params.is_empty() {
         String::new()
     } else {
         format!("{}, ", call_params.join(", "))
     };
-    let ignored = if input_types.is_empty() {
+    let ignored = if ignored_params.is_empty() {
         String::new()
     } else {
-        format!("        let _ = ({});\n", call_params.join(", "))
+        format!("        let _ = ({});\n", ignored_params.join(", "))
     };
     let signature_params = if params.is_empty() {
         "output: &mut [u8]".to_owned()
@@ -140,6 +172,7 @@ fn render_wrapper(plan: &render_core_wasm::FunctionPlan) -> String {
                  {{\n\
                      #[cfg(target_arch = \"wasm32\")]\n\
                      {{\n\
+         {input_setup}\
                          let (output_pointer, output_capacity) =\n\
                              match crate::wasm_mut_slice_parts(output) {{\n\
                                  Ok(value) => value,\n\
@@ -185,6 +218,7 @@ fn render_wrapper(plan: &render_core_wasm::FunctionPlan) -> String {
         signature_params = signature_params,
         call_prefix = call_prefix,
         ignored = ignored,
+        input_setup = input_setup,
     )
 }
 

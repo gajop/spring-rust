@@ -3256,20 +3256,31 @@
             })
         }
 
-        #[cfg(target_arch = "wasm32")]
-        mod __core_owned_get_document_path_requests {
-            #[link(wasm_import_module = "spring:rml-ui")]
-            unsafe extern "C" {
-                #[link_name = "get-document-path-requests"]
-                pub safe fn call(p0: i32, p1: i32) -> i32;
-            }
-        }
-
-        #[doc = "Exact Core ABI forwarding entry for spring:rml-ui.get-document-path-requests."]
-        #[doc(hidden)]
         #[inline]
-        pub fn get_document_path_requests(p0: i32, p1: i32) -> i32 {
-            __core_owned_get_document_path_requests::call(p0, p1)
+        pub fn get_document_path_requests(document_path: &str) -> Result<Vec<String>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + document_path.len()); __b.extend_from_slice(&(document_path.len() as u32).to_le_bytes()); __b.extend_from_slice(document_path.as_bytes()); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::rml_ui::get_document_path_requests(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
         }
 
         #[inline]

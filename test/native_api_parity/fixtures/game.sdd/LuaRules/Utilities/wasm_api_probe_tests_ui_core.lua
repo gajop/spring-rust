@@ -29,6 +29,8 @@ return {
 
 		"get_selection_box",
 
+		"get_action_hot_keys",
+
 		"is_user_writing",
 
 		"get_current_tooltip",
@@ -103,6 +105,8 @@ return {
 
 		"get_group_units_sorted_fixed",
 
+		"get_key_bindings_count",
+
 		"get_active_cmd_descs_fixed_count",
 
 		"get_active_cmd_desc_fixed_fields",
@@ -124,6 +128,9 @@ return {
 		},
 		["get_mouse_start_position"] = {
 			button = 1,
+		},
+		["get_action_hot_keys"] = {
+			action = "move",
 		},
 		["get_console_buffer_count"] = {
 			maxLines = 3,
@@ -218,6 +225,10 @@ return {
 		},
 		["get_group_units_sorted_fixed"] = {
 			groupID = 0,
+		},
+		["get_key_bindings_count"] = {
+			keySet1 = "",
+			keySet2 = "",
 		},
 		["get_active_cmd_desc_fixed_fields"] = {
 			cmdIndex = 1,
