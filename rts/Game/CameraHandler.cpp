@@ -6,6 +6,7 @@
 #include <cstdarg> // va_start
 
 #include "CameraHandler.h"
+#include "Game/WorldDrawBounds.h"
 
 #include "Action.h"
 #include "Camera.h"
@@ -148,6 +149,7 @@ void CCameraHandler::Init()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	cameraBounds = {}; // a new game starts with the normal whole-map view
+	worldDrawBounds::Clear();
 	{
 		InitControllers();
 
@@ -170,6 +172,7 @@ void CCameraHandler::Init()
 		RegisterAction("viewsave");
 		RegisterAction("viewload");
 
+		RegisterAction("drawbounds");
 		RegisterAction("camerabounds");
 		RegisterAction("camtimefactor");
 		RegisterAction("camtimeexponent");
@@ -200,6 +203,7 @@ void CCameraHandler::Kill()
 	configHandler->RemoveObserver(this);
 	KillControllers();
 	cameraBounds = {};
+	worldDrawBounds::Clear();
 }
 
 
@@ -770,6 +774,11 @@ void CCameraHandler::PushAction(const Action& action)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	switch (hashString(action.command.c_str())) {
+		case hashString("drawbounds"): {
+			if (!ViewRectangle::Parse(action.extra, mapDims.mapx * SQUARE_SIZE,
+				mapDims.mapy * SQUARE_SIZE, worldDrawBounds::rectangle))
+				LOG_L(L_WARNING, "Usage: drawbounds x0 z0 x1 z1 (inside map), or drawbounds clear");
+		} break;
 		case hashString("camerabounds"): {
 			if (!SetCameraBounds(action.extra))
 				LOG_L(L_WARNING, "Usage: camerabounds x0 z0 x1 z1 (inside map), or camerabounds clear");

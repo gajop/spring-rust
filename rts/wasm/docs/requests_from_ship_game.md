@@ -4,6 +4,40 @@ Issues and requests found while working on Ship Game, newest first. Each names h
 Reports with measurements live beside this file (for example the
 [state hashing cost report](recoil_wasm_state_hash_cost_2026-10-12.md), resolved in `4dc4e25e0d`).
 
+## 2026-10-14 · Draw only what lies in a world rectangle (follow-up to camera bounds)
+
+**Implemented:** unsynced `drawbounds x0 z0 x1 z1` / `drawbounds clear`, independent of
+camera bounds and the minimap view. It is off by default and cleared between games. Invalid,
+non-finite, unordered, empty or out-of-map rectangles leave the existing setting intact.
+
+The rectangle filters unit/feature models, world icons, ghosts, temporary build models,
+projectiles, engine particle emitters, flying pieces and ground flashes from the world and
+shadow passes (including reflection/refraction). Filtering uses interpolated object origins;
+simple particle systems also filter individual particles. It does not slice geometry that
+extends past an accepted origin. Simulation and LOS continue normally; minimap rendering
+keeps its independent rectangle, and game-authored drawing remains the game's responsibility.
+
+Verification: the tilted-camera fixture in `test/draw_bounds` checks render pixels for two
+regions' models, projectiles, particles and ground flashes, unit/feature shadow flags,
+invalid input, region switching, clearing and unchanged simulation objects. Run it with
+`--drawer 0` and `--drawer 1` for GLSL and GL4. The README includes the manual Ship Game check.
+
+With `camerabounds` and `minimap view` (`3346b4f768`), Ship Game's wormhole map keeps the camera
+and the minimap on one region. A tilted camera at a region's edge still looks across the empty
+gap, though, and the engine draws the other region's unit models, features (asteroids, wrecks)
+and projectiles there. Ship Game has already stopped drawing its own icons and badges for the
+other region.
+
+To see it: Ship Game branch `wormholes`, `just play wormhole-sandbox --modoption sb_wormhole_at=3`.
+Press N to view the frontier, scroll to its near (northern) edge and tilt the camera to look north:
+the home arena's ships and asteroids show past the gap.
+
+**Request:** an optional unsynced draw rectangle (x0, z0, x1, z1) outside which the world pass
+draws no units, features, projectiles or engine particles, and casts no shadows from them. It
+would be set with a text command such as `drawbounds x0 z0 x1 z1` / `drawbounds clear`, off by
+default and reset between games. Ship Game would send it with `camerabounds` on every system
+switch.
+
 ## 2026-10-13 · Camera bounds and a minimap view rectangle, for maps whose regions are seen one at a time
 
 **Implemented:** unsynced commands `camerabounds x0 z0 x1 z1` and
