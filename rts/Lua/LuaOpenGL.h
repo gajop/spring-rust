@@ -1,7 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
-#ifndef LUA_GL_H
-#define LUA_GL_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -53,6 +52,7 @@ class LuaOpenGL {
 		// Reset the matrix set selected by the active draw callback.  Native
 		// graphics callers use this to match gl.ResetMatrices() without
 		// duplicating the world/screen/minimap context selection.
+		static void ApplyMiniMapClipping();
 		static void ResetActiveMatrices() { if (resetMatrixFunc != nullptr) resetMatrixFunc(); else ResetScreenMatrices(); }
 
 		static void EnableDrawGenesis();
@@ -377,5 +377,3 @@ inline void LuaOpenGL::CheckMatrixState(lua_State* L, const char* fn, int error)
 		return;
 	GetLuaContextData(L)->glMatrixTracker.HandleMatrixStateError(error, fn);
 }
-
-#endif /* LUA_UNITDEFS_H */

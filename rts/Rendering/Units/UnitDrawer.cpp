@@ -343,35 +343,12 @@ void CUnitDrawerGLSL::DrawUnitMiniMapIcon(TypedRenderBuffer<VA_TYPE_2DTC3>& rb, 
 {
 	const float iconSizeX = (iconScale * minimap->GetUnitSizeX());
 	const float iconSizeY = (iconScale * minimap->GetUnitSizeY());
-	float posX = pos.x;
-	float posY = pos.z;
-
-	switch (minimap->GetRotationOption()) {
-		case CMiniMap::ROTATION_90:
-			posX = mapDims.mapx * SQUARE_SIZE - posX;
-
-			// Normalize the coordinates to the minimap
-			posX = posX / mapDims.mapx * mapDims.mapy;
-			posY = posY / mapDims.mapy * mapDims.mapx;
-
-			std::swap(posX, posY);
-			break;
-		case CMiniMap::ROTATION_180:
-			posX = mapDims.mapx * SQUARE_SIZE - posX;
-			posY = mapDims.mapy * SQUARE_SIZE - posY;
-			break;
-		case CMiniMap::ROTATION_270:
-			posY = mapDims.mapy * SQUARE_SIZE - posY;
-
-			// Normalize the coordinates to the minimap
-			posX = posX / mapDims.mapx * mapDims.mapy;
-			posY = posY / mapDims.mapy * mapDims.mapx;
-
-			std::swap(posX, posY);
-			break;
-		case CMiniMap::ROTATION_0:
-			break;
-	}
+	if (!minimap->IsInView(pos.x, pos.z))
+		return;
+	const auto normalized = minimap->WorldToMiniMap(pos.x, pos.z);
+	const auto view = minimap->GetViewRectangle();
+	const float posX = normalized.x * view.Width();
+	const float posY = (1.0f - normalized.y) * view.Height();
 
 	float x0 = posX - iconSizeX;
 	float x1 = posX + iconSizeX;

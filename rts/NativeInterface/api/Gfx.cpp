@@ -666,6 +666,7 @@ static void ResetGLState()
 	glDisable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glDisable(GL_SCISSOR_TEST);
+	LuaOpenGL::ApplyMiniMapClipping();
 	glDisable(GL_STENCIL_TEST);
 	glStencilMask(~0);
 	if (GLAD_GL_EXT_stencil_two_side)

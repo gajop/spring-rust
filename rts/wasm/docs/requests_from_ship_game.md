@@ -4,6 +4,67 @@ Issues and requests found while working on Ship Game, newest first. Each names h
 Reports with measurements live beside this file (for example the
 [state hashing cost report](recoil_wasm_state_hash_cost_2026-10-12.md), resolved in `4dc4e25e0d`).
 
+## 2026-10-13 · Camera bounds and a minimap view rectangle, for maps whose regions are seen one at a time
+
+**Implemented:** unsynced commands `camerabounds x0 z0 x1 z1` and
+`minimap view x0 z0 x1 z1` opt into the two independent rectangles, in world elmos.
+`camerabounds clear` and `minimap view clear` restore the whole map. Rectangles must be finite,
+ordered and inside the map; invalid input leaves the current rectangle unchanged. Neither
+setting persists into another game.
+
+Camera focus clamps apply to all controllers and transitions, with rectangle-sized Spring
+and Overhead zoom limits, centred zoom resets and a centred overview. Minimap backgrounds,
+world drawing, icons, notifications and camera frames use the rectangle; rotations and
+clicks use the same mapping. Icons centred outside it are omitted. Uniform minimap matrices
+include the region offset/scale; Lua/SDK `DrawInMiniMap` retains its pixel-space drawing
+contract and clips to the minimap. The uncached minimap path also supports the rectangle.
+
+Verification: `xvfb-run -a python3 test/view_rectangles/run.py` runs a graphical fixture with
+all seven camera modes, out-of-bounds targets/state, zoom limits/resets, clear/region switches,
+four minimap rotations and ray coordinates, cropped two-colour backgrounds, icon filtering,
+and oversized chart clipping. Repeat with `--direct` for `MiniMapRenderToTexture=0`.
+The normal and headless engines are rebuilt; the commands below are also a manual check in
+Ship Game after choosing a region.
+
+Ship Game's wormhole mode (branch `wormholes`, `docs/design/wormholes.md` there) puts two regions
+on one null map, a home arena and a frontier, with an empty gap between them that only a wormhole
+crosses. The player looks at one region at a time and switches with a game button. Today the
+engine lets the camera and the minimap cover the whole map, so arrow keys, edge scrolling,
+dragging and zooming out carry the view across the gap into the other region, and the minimap
+shows both regions squeezed together.
+
+To see it: in Ship Game, `just play wormhole`, zoom out and scroll down.
+
+**What the game needs:**
+
+1. **Camera bounds:** a world rectangle (x0, z0, x1, z1) that every camera controller keeps its
+   focus inside, in place of the map's edges. This covers keys, edge scroll, mouse drag,
+   minimap clicks and set state/target. The zoom-out limit (Spring `maxDist`, Overhead
+   `maxHeight`, both from the map's longest side today) should fit the rectangle, and the zoom
+   reset and the overview camera should centre on it. Clearing it restores the whole map.
+2. **Minimap view rectangle:** a world rectangle the minimap shows instead of the whole map. The
+   background, unit icons, the camera frustum box, `DrawWorldStuff` (projectiles, commands,
+   ranges) and the `DrawInMiniMap` transforms map through it. Clicks map into it
+   (`GetMapPosition`, which `trace_screen_ray(use_minimap)` uses), and nothing outside it is
+   drawn. Clearing it restores the whole map.
+
+Both are unsynced view state, off by default, with no effect on games that don't set them.
+Either form works for Ship Game: text commands it can send with `send_commands` (e.g.
+`camerabounds x0 z0 x1 z1`, `minimap view x0 z0 x1 z1`), or SDK calls. Camera clamp sites today:
+
+- `OverheadController.cpp` `Update`, its zoom reset and `maxHeight`
+- `SpringController.cpp` `Update`, its zoom reset and `maxDist` (const)
+- `RotOverheadController.cpp` `Update`
+- `FPSController.cpp`
+- `OverviewController.cpp` `SwitchTo`
+
+Minimap sites: `MiniMap.cpp` `UpdateGeometry` (`viewMats`), `GetMapPosition`,
+`DrawCameraFrustumAndMouseSelection`, `DrawUnitIcons`, `DrawWorldStuff`, `DrawBackground`,
+`DrawCircle`, the aspect-ratio helpers.
+
+Ship Game will send the current region's rectangle on every switch and keep its own boundary
+grid and minimap chart in step.
+
 ## 2026-10-13 · Single rules-param getters have no typed Rust wrapper (game, team, player, feature)
 
 **Resolved:** the generated owned SDK now lowers string input descriptors together with
