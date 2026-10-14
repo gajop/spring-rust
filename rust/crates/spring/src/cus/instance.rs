@@ -124,7 +124,8 @@ impl<S: UnitScript> CusInstance<S> {
         let f = |index: usize| float_arguments.get(index).copied().unwrap_or_default();
         let i = |index: usize| integer_arguments.get(index).copied().unwrap_or_default();
         let context = self.context();
-        self.with_state(|script| {
+        let mut animation_waiters = Vec::new();
+        let handled = self.with_state(|script| {
             match call {
                 UnitScriptCall::RawCall => script.raw_call(&context, i(0)),
                 UnitScriptCall::Create => script.create(&context),
@@ -233,13 +234,15 @@ impl<S: UnitScript> CusInstance<S> {
                 }
                 UnitScriptCall::AnimFinished => {
                     if let Some(key) = animation_key_from_call(i(0), i(1), i(2)) {
-                        self.scheduler.wake_animation(key);
+                        animation_waiters = self.scheduler.wake_animation(key);
                     }
                     script.anim_finished(&context, i(0), Piece(i(1)), i(2))
                 }
             }
             true
-        })
+        });
+        self.scheduler.resume_animation(animation_waiters);
+        handled
     }
 
     /// Dispatch a synchronous query through the typed script state.

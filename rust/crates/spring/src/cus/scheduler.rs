@@ -211,25 +211,25 @@ impl SchedulerState {
         }
     }
 
-    fn wake_animation(&mut self, key: AnimationKey) {
-        let Some(waiters) = self.animation_waiters.remove(&key) else {
-            return;
-        };
-        for id in waiters {
+    fn wake_animation(&mut self, key: AnimationKey) -> Vec<TaskId> {
+        let mut waiters = self.animation_waiters.remove(&key).unwrap_or_default();
+        waiters.retain(|&id| {
             let matches = self
                 .tasks
                 .iter()
                 .find(|task| task.id == id)
                 .is_some_and(|task| task.animation_wait == Some(key));
             if !matches {
-                continue;
+                return false;
             }
             if let Some(task) = self.tasks.iter_mut().find(|task| task.id == id) {
                 task.animation_wait = None;
                 task.animation_ready = true;
             }
             self.queue_ready(id);
-        }
+            true
+        });
+        waiters
     }
 
     fn take_animation_ready(&mut self, id: TaskId) -> bool {
@@ -631,13 +631,38 @@ impl CusScheduler {
         self.context.spawn(definition)
     }
 
-    pub(crate) fn wake_animation(&self, key: AnimationKey) {
-        self.context.scheduler.borrow_mut().wake_animation(key);
+    pub(crate) fn wake_animation(&self, key: AnimationKey) -> Vec<TaskId> {
+        self.context.scheduler.borrow_mut().wake_animation(key)
     }
 
-    /// Notify the scheduler that an engine animation has completed.
+    /// Resume the waiters for an engine animation at the current frame.
     pub fn animation_finished(&mut self, kind: AnimationKind, piece: Piece, axis: Option<Axis>) {
-        self.wake_animation(AnimationKey { kind, piece, axis });
+        let waiters = self.wake_animation(AnimationKey { kind, piece, axis });
+        self.resume_animation(waiters);
+    }
+
+    // Kept separate from tick: animation completions resume their waiters even
+    // after this frame's timer pass, as Lua does. Call after releasing the
+    // script-state borrow so a resumed task can access its script state.
+    pub(crate) fn resume_animation(&self, mut waiters: Vec<TaskId>) {
+        if waiters.is_empty() {
+            return;
+        }
+        let epoch = {
+            let mut scheduler = self.context.scheduler.borrow_mut();
+            scheduler.ready_tasks.retain(|id| !waiters.contains(id));
+            scheduler.epoch = scheduler.epoch.saturating_add(1);
+            scheduler.epoch
+        };
+        waiters.sort_unstable_by_key(|id| id.0);
+        for id in waiters {
+            poll_task(&self.context, id, epoch);
+        }
+        self.context
+            .scheduler
+            .borrow_mut()
+            .tasks
+            .retain(|task| !matches!(task.status, TaskStatus::Complete | TaskStatus::Cancelled));
     }
 
     /// Advance the instance to `frame` and drain only tasks which have a
@@ -648,9 +673,8 @@ impl CusScheduler {
         if frame < scheduler.frame.get() {
             return;
         }
-        // Drain each simulation frame at most once.  Wakes that arrive after
-        // this pass are intentionally deferred until the next frame so a
-        // repeated engine tick cannot poll a task twice in one frame.
+        // Drain timers and ordinary wakers at most once per simulation frame.
+        // Animation completion dispatch separately resumes only its waiters.
         if scheduler.last_drained_frame.get() == Some(frame) {
             return;
         }

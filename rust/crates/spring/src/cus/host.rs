@@ -39,6 +39,9 @@
 //!   [`CusHost::game_frame`] from the module's `GameFrame` to wake every script
 //!   there. Without it, a script still catches up before each call it gets,
 //!   and the rest wake in the engine's CUS tick after the unit update.
+//! - **Animation waits** resume during the animation-finished dispatch, after
+//!   the script callback releases its state borrow. A following sleep starts
+//!   from that completion frame, even when `GameFrame` already ran.
 
 use super::core_module::{CoreCusCallResult, CoreCusModule};
 use super::wasm::WasmCus;

@@ -241,6 +241,154 @@ fn animation_wait_yields_until_the_engine_reports_completion() {
 }
 
 #[test]
+fn animation_completion_after_the_frame_drain_only_resumes_its_waiters() {
+    let engine = Rc::new(RefCell::new(TestEngine {
+        active: true,
+        ..TestEngine::default()
+    }));
+    let polls = Rc::new(RefCell::new(0));
+    let context = UnitCtx::new(UnitId(7), Rc::clone(&engine));
+    let mut scheduler = CusScheduler::new(context);
+    scheduler.spawn(TaskDefinition::new("animating", animating));
+    scheduler.spawn(TaskDefinition::with_state(
+        "self-waking",
+        Rc::clone(&polls),
+        self_waking,
+    ));
+    scheduler.spawn(TaskDefinition::new("timer", |ctx| async move {
+        ctx.sleep_frames(2).await;
+        ctx.turn(Piece(6), Axis::X, Angle::ZERO, AngularSpeed(1.0));
+    }));
+    scheduler.tick(1);
+    assert_eq!(*polls.borrow(), 2);
+    assert_eq!(engine.borrow().events, vec![3]);
+
+    scheduler.animation_finished(AnimationKind::Turn, Piece(3), Some(Axis::Y));
+    assert_eq!(engine.borrow().events, vec![3]);
+    scheduler.animation_finished(AnimationKind::Turn, Piece(3), Some(Axis::X));
+    assert_eq!(engine.borrow().events, vec![3, 4]);
+    assert_eq!(*polls.borrow(), 2);
+    scheduler.animation_finished(AnimationKind::Turn, Piece(3), Some(Axis::X));
+    scheduler.tick(1);
+    assert_eq!(engine.borrow().events, vec![3, 4]);
+    assert_eq!(*polls.borrow(), 2);
+
+    scheduler.tick(2);
+    assert_eq!(engine.borrow().events, vec![3, 4, 6]);
+    assert_eq!(*polls.borrow(), 3);
+    assert_eq!(scheduler.task_count(), 0);
+}
+
+#[derive(Default)]
+struct CompletionScript {
+    callbacks: usize,
+    resumed_frames: Vec<u64>,
+    cancel_waiters: bool,
+}
+
+#[test]
+fn animation_completion_resumes_all_waiters_in_task_order() {
+    let engine = Rc::new(RefCell::new(TestEngine {
+        active: true,
+        ..TestEngine::default()
+    }));
+    let context = UnitCtx::new(UnitId(7), Rc::clone(&engine));
+    let mut scheduler = CusScheduler::new(context);
+    for marker in [9, 4, 6] {
+        scheduler.spawn(TaskDefinition::with_state(
+            "waiter",
+            Rc::new(RefCell::new(marker)),
+            |marker, ctx| async move {
+                ctx.wait_for_move(Piece(3), Axis::Y).await;
+                ctx.turn(
+                    Piece(*marker.borrow()),
+                    Axis::X,
+                    Angle::ZERO,
+                    AngularSpeed(1.0),
+                );
+            },
+        ));
+    }
+    scheduler.tick(1);
+    scheduler.animation_finished(AnimationKind::Move, Piece(3), Some(Axis::Y));
+    assert_eq!(engine.borrow().events, vec![9, 4, 6]);
+    assert_eq!(scheduler.task_count(), 0);
+}
+
+impl UnitScript for CompletionScript {
+    fn new(_: &mut InitCtx<'_>) -> Self {
+        Self::default()
+    }
+
+    fn anim_finished(&mut self, ctx: &UnitCtx, _: i32, _: Piece, _: i32) {
+        self.callbacks += 1;
+        if self.cancel_waiters {
+            ctx.signal(SignalMask::new(8));
+        }
+    }
+}
+
+fn animation_then_sleep_then_animation(
+    state: Rc<RefCell<CompletionScript>>,
+    ctx: UnitCtx,
+) -> TaskFuture {
+    Box::pin(async move {
+        ctx.set_signal_mask(SignalMask::new(8));
+        ctx.wait_for_move(Piece(3), Axis::Y).await;
+        assert_eq!(state.borrow().callbacks, 1);
+        state.borrow_mut().resumed_frames.push(ctx.frame());
+        ctx.sleep_frames(2).await;
+        state.borrow_mut().resumed_frames.push(ctx.frame());
+        ctx.wait_for_turn(Piece(4), Axis::X).await;
+        assert_eq!(state.borrow().callbacks, 2);
+        state.borrow_mut().resumed_frames.push(ctx.frame());
+    })
+}
+
+#[test]
+fn instance_completion_releases_state_and_starts_sleep_on_the_completion_frame() {
+    let engine = Rc::new(RefCell::new(TestEngine {
+        active: true,
+        ..TestEngine::default()
+    }));
+    let mut instance = CusInstance::attach(UnitId(7), CompletionScript::default(), engine);
+    instance.spawn_with_state("wait-sleep-wait", animation_then_sleep_then_animation);
+    instance.tick(10);
+    let mut result = UnitScriptCallResult::default();
+    assert!(instance.invoke(UnitScriptCall::AnimFinished, &[], &[2, 3, 1], &mut result));
+    assert_eq!(instance.state().borrow().resumed_frames, vec![10]);
+    instance.tick(10);
+    instance.tick(11);
+    assert_eq!(instance.state().borrow().resumed_frames, vec![10]);
+    instance.tick(12);
+    assert_eq!(instance.state().borrow().resumed_frames, vec![10, 12]);
+    assert!(instance.invoke(UnitScriptCall::AnimFinished, &[], &[0, 4, 0], &mut result));
+    assert_eq!(instance.state().borrow().resumed_frames, vec![10, 12, 12]);
+    assert_eq!(instance.scheduler().task_count(), 0);
+}
+
+#[test]
+fn completion_callback_can_cancel_a_waiter_before_it_resumes() {
+    let engine = Rc::new(RefCell::new(TestEngine {
+        active: true,
+        ..TestEngine::default()
+    }));
+    let script = CompletionScript {
+        cancel_waiters: true,
+        ..CompletionScript::default()
+    };
+    let mut instance = CusInstance::attach(UnitId(7), script, engine);
+    instance.spawn_with_state("cancelled-waiter", animation_then_sleep_then_animation);
+    instance.tick(10);
+    let mut result = UnitScriptCallResult::default();
+    instance.invoke(UnitScriptCall::AnimFinished, &[], &[2, 3, 1], &mut result);
+    instance.tick(11);
+    assert_eq!(instance.state().borrow().callbacks, 1);
+    assert!(instance.state().borrow().resumed_frames.is_empty());
+    assert_eq!(instance.scheduler().task_count(), 0);
+}
+
+#[test]
 fn named_tasks_can_access_the_attached_script_state() {
     let engine = Rc::new(RefCell::new(TestEngine::default()));
     let mut instance = CusInstance::attach(UnitId(7), 5i32, Rc::clone(&engine));
