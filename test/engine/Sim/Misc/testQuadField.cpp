@@ -5,12 +5,54 @@
 #include "System/SpringMath.h"
 #include <stdlib.h>
 #include <time.h>
+#include <chrono>
+#include <iostream>
 
 #include <catch_amalgamated.hpp>
 
 static inline float randf()
 {
 	return rand() / float(RAND_MAX);
+}
+
+// Container-only diagnostic: no renderer, simulation, or CUnit allocations.
+// Deliberately hidden from normal test runs; timings are not pass/fail gates.
+TEST_CASE("Null-map object-grid storage comparison", "[.storage-diagnostic]")
+{
+	for (const size_t mapSize: {8, 16, 32, 64}) {
+		const size_t side = mapSize * 4;
+		const size_t cells = side * side;
+		for (const size_t population: {100, 1000, 4000, 10000}) {
+			for (const bool sparse: {false, true}) {
+				CQuadField::QuadStore store;
+				store.Init(cells, 2, sparse);
+				// Odd stride visits every cell before repeating on these power-of-two grids.
+				for (size_t i = 0; i < population; ++i)
+					store.Write((i * 4051) % cells).units.push_back(nullptr);
+				for (const bool whole: {false, true}) {
+					const size_t queried = whole ? cells : std::min(cells, size_t(256));
+					volatile size_t consumed = 0;
+					const auto start = std::chrono::steady_clock::now();
+					for (int repeat = 0; repeat < 64; ++repeat) {
+						size_t count = 0;
+						for (size_t q = 0; q < queried; ++q)
+							count += store[q].units.size();
+						consumed = count;
+					}
+					const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start).count();
+					if (whole) CHECK(consumed == population);
+					// Structural storage only: excludes allocator overhead and per-object
+					// vector capacities, which are the same for both representations here.
+					const size_t occupied = std::min(population, cells);
+					const size_t bytesPerCell = sizeof(CQuadField::Quad) + 2 * sizeof(std::vector<CUnit*>);
+					const size_t bytes = sparse ? cells * sizeof(void*) + occupied * bytesPerCell : cells * bytesPerCell;
+					std::cout << "STORAGE map=" << mapSize << " n=" << population << " sparse=" << sparse
+						<< " whole=" << whole << " touched=" << occupied << " cells=" << cells
+						<< " structural_bytes=" << bytes << " ns=" << double(ns) / 64 << '\n';
+				}
+			}
+		}
+	}
 }
 
 template <typename T> T Clamp(T val, T min, T max)

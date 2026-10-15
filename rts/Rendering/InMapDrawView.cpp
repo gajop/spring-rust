@@ -186,6 +186,11 @@ void InMapDraw_QuadDrawer::DrawQuad(int x, int y)
 
 void CInMapDrawView::Draw()
 {
+	// Sparse/null maps can have millions of empty marker cells. Keep the ordinary
+	// terrain-map path unchanged; bypass this scan only in the runtime null mode.
+	if (readMap->IsNullMap() && inMapDrawerModel->GetNumPoints() == 0 && inMapDrawerModel->GetNumLines() == 0)
+		return;
+
 	InMapDraw_QuadDrawer drawer;
 	drawer.visibleLabels = &visibleLabels;
 	drawer.rbl = &rbl;

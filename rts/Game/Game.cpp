@@ -5,6 +5,7 @@
 #include <Rml/Backends/RmlUi_Backend.h>
 #include <RmlUi/Core.h>
 #include "Game.h"
+#include "Sim/Misc/QuadFieldStorage.h"
 #include "Camera.h"
 #include "CameraHandler.h"
 #include "ChatMessage.h"
@@ -689,7 +690,14 @@ void CGame::PreLoadSimulation(LuaParser* defsParser)
 
 	loadscreen->SetLoadMessage("Creating QuadField & CEGs");
 	moveDefHandler.Init(defsParser);
-	quadField.Init(int2(mapDims.mapx, mapDims.mapy), modInfo.quadFieldQuadSizeInElmos, readMap->IsNullMap());
+	bool sparseQuads = false;
+	if (readMap->IsNullMap()) {
+		const size_t quadSize = modInfo.quadFieldQuadSizeInElmos;
+		const size_t cells = (size_t(mapDims.mapx) * SQUARE_SIZE / quadSize) * (size_t(mapDims.mapy) * SQUARE_SIZE / quadSize);
+		const size_t bytesPerCell = sizeof(CQuadField::Quad) + teamHandler.ActiveAllyTeams() * sizeof(std::vector<CUnit*>);
+		sparseQuads = quadstorage::UseSparse(configHandler->GetInt("SparseMapQuadField"), cells, bytesPerCell);
+	}
+	quadField.Init(int2(mapDims.mapx, mapDims.mapy), modInfo.quadFieldQuadSizeInElmos, sparseQuads);
 	damageArrayHandler.Init(defsParser);
 	explGenHandler.Init();
 }

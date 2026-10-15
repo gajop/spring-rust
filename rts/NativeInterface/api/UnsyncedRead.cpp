@@ -29,6 +29,7 @@
 #include "Game/SelectedUnitsHandler.h"
 #include "Sim/Units/CommandAI/CommandDescription.h"
 #include "Map/ReadMap.h"
+#include "Rendering/VisibleObjectQuery.h"
 #include "System/Matrix44f.h"
 #include "System/float3.h"
 #include "System/float4.h"
@@ -177,6 +178,14 @@ protected:
 
 class CVisUnitQuadDrawer: public CWorldObjectQuadDrawer<CUnit> {
 public:
+	void CollectVisible() {
+		ResetState();
+		if (visibleobjects::CollectSpatial(*this, unitHandler.GetActiveUnits().size()))
+			return;
+		ResetState();
+		AddObjectList(&unitHandler.GetActiveUnits());
+	}
+
 	void DrawQuad(int x, int y) override {
 		const CQuadField::Quad& q = quadField.GetQuadAt(x, y);
 		AddObjectList(&q.units);
@@ -185,10 +194,24 @@ public:
 
 class CVisFeatureQuadDrawer: public CWorldObjectQuadDrawer<CFeature> {
 public:
+	void CollectVisible() {
+		ResetState();
+		if (visibleobjects::CollectSpatial(*this, featureHandler.GetActiveFeatureIDs().size()))
+			return;
+		ResetState();
+		activeObjects.clear();
+		for (const int id: featureHandler.GetActiveFeatureIDs())
+			activeObjects.push_back(featureHandler.GetFeature(id));
+		AddObjectList(&activeObjects);
+	}
+
 	void DrawQuad(int x, int y) override {
 		const CQuadField::Quad& q = quadField.GetQuadAt(x, y);
 		AddObjectList(&q.features);
 	}
+private:
+	ObjectList activeObjects;
+
 };
 
 class CVisProjectileQuadDrawer: public CWorldObjectQuadDrawer<CProjectile> {
@@ -761,8 +784,7 @@ static void NativeGetVisibleUnits(const GetVisibleUnitsQuery* query, GetVisibleU
 	const int readTeam = (gu != nullptr) ? gu->myTeam : -1;
 
 	static CVisUnitQuadDrawer unitQuadIter;
-	unitQuadIter.ResetState();
-	readMap->GridVisibility(nullptr, &unitQuadIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
+	unitQuadIter.CollectVisible();
 
 	visibleIDs.clear();
 	const int tempNum = gs != nullptr ? gs->GetTempNum() : 0;
@@ -811,8 +833,7 @@ static void NativeGetVisibleFeatures(const GetVisibleFeaturesQuery* query, GetVi
 	const int allyTeamID = (query->allyTeamID >= 0) ? query->allyTeamID : readAllyTeam;
 
 	static CVisFeatureQuadDrawer featureIter;
-	featureIter.ResetState();
-	readMap->GridVisibility(nullptr, &featureIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
+	featureIter.CollectVisible();
 
 	visibleIDs.clear();
 	const int tempNum = gs != nullptr ? gs->GetTempNum() : 0;
@@ -925,8 +946,7 @@ static void NativeGetUnitsInScreenRectangle(const GetUnitsInScreenRectangleQuery
 	const int readTeam = (gu != nullptr) ? gu->myTeam : -1;
 
 	static CVisUnitQuadDrawer unitIter;
-	unitIter.ResetState();
-	readMap->GridVisibility(nullptr, &unitIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
+	unitIter.CollectVisible();
 
 	visibleIDs.clear();
 	const int tempNum = gs != nullptr ? gs->GetTempNum() : 0;
@@ -978,8 +998,7 @@ static void NativeGetFeaturesInScreenRectangle(const GetFeaturesInScreenRectangl
 	if (t > b) std::swap(t, b);
 
 	static CVisFeatureQuadDrawer featureIter;
-	featureIter.ResetState();
-	readMap->GridVisibility(nullptr, &featureIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
+	featureIter.CollectVisible();
 
 	visibleIDs.clear();
 	const int tempNum = gs != nullptr ? gs->GetTempNum() : 0;

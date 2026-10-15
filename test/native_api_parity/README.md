@@ -64,6 +64,9 @@ python3 test/native_api_parity/run_harness.py --spring build-linux/install/sprin
 Rendering-required tests are skipped, and therefore not counted as covered,
 unless `--enable-rendering-tests` is set.
 
+`--blank-map-terrain null --blank-map-height 0` exercises the runtime sparse/null-map
+object-query path. The default `--blank-map-terrain blank` keeps the ordinary terrain path.
+
 An ASAN-built engine carries its own LeakSanitizer suppressions for known
 third-party leaks (`rts/System/Platform/LeakSanitizerSuppressions.h`), so the
 harness passes none.

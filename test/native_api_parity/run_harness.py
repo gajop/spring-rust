@@ -295,6 +295,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--blank-map-x", type=int, default=10)
     parser.add_argument("--blank-map-y", type=int, default=8)
     parser.add_argument("--blank-map-height", type=int, default=96)
+    parser.add_argument("--blank-map-terrain", choices=("blank", "null"), default="blank")
     parser.add_argument("--blank-map-seed", type=int)
     parser.add_argument("--test-seed", type=int)
     parser.add_argument("--cases", type=int, default=3)
@@ -523,6 +524,7 @@ def write_script(
         blank_map_x={args.blank_map_x};
         blank_map_y={args.blank_map_y};
         blank_map_height={args.blank_map_height};
+        blank_map_terrain={getattr(args, 'blank_map_terrain', 'blank')};
         blank_map_color_r=64;
         blank_map_color_g=128;
         blank_map_color_b=64;

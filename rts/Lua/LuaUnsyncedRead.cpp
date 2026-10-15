@@ -33,6 +33,7 @@
 #include "Map/BaseGroundTextures.h"
 #include "Map/Ground.h"
 #include "Map/ReadMap.h"
+#include "Rendering/VisibleObjectQuery.h"
 #include "Menu/LuaMenuController.h"
 #include "Net/GameServer.h"
 #include "Rendering/GlobalRendering.h"
@@ -2013,6 +2014,14 @@ protected:
 
 class CVisUnitQuadDrawer: public CWorldObjectQuadDrawer<CUnit> {
 public:
+	void CollectVisible() {
+		ResetState();
+		if (visibleobjects::CollectSpatial(*this, unitHandler.GetActiveUnits().size()))
+			return;
+		ResetState();
+		AddObjectList(&unitHandler.GetActiveUnits());
+	}
+
 	void DrawQuad(int x, int y) override {
 		const CQuadField::Quad& q = quadField.GetQuadAt(x, y);
 		const ObjectList* o = &q.units;
@@ -2023,12 +2032,26 @@ public:
 
 class CVisFeatureQuadDrawer: public CWorldObjectQuadDrawer<CFeature> {
 public:
+	void CollectVisible() {
+		ResetState();
+		if (visibleobjects::CollectSpatial(*this, featureHandler.GetActiveFeatureIDs().size()))
+			return;
+		ResetState();
+		activeObjects.clear();
+		for (const int id: featureHandler.GetActiveFeatureIDs())
+			activeObjects.push_back(featureHandler.GetFeature(id));
+		AddObjectList(&activeObjects);
+	}
+
 	void DrawQuad(int x, int y) override {
 		const CQuadField::Quad& q = quadField.GetQuadAt(x, y);
 		const ObjectList* o = &q.features;
 
 		AddObjectList(o);
 	}
+private:
+	ObjectList activeObjects;
+
 };
 
 class CVisProjectileQuadDrawer: public CWorldObjectQuadDrawer<CProjectile> {
@@ -2092,8 +2115,7 @@ int LuaUnsyncedRead::GetVisibleUnits(lua_State* L)
 
 	static CVisUnitQuadDrawer unitQuadIter;
 
-	unitQuadIter.ResetState();
-	readMap->GridVisibility(nullptr, &unitQuadIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
+	unitQuadIter.CollectVisible();
 
 	// Even though we're in unsynced it's ok to use gs->tempNum since its exact value
 	// doesn't matter
@@ -2180,8 +2202,7 @@ int LuaUnsyncedRead::GetVisibleFeatures(lua_State* L)
 
 	static CVisFeatureQuadDrawer featureQuadIter;
 
-	featureQuadIter.ResetState();
-	readMap->GridVisibility(nullptr, &featureQuadIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
+	featureQuadIter.CollectVisible();
 
 	// Even though we're in unsynced it's ok to use gs->tempNum since its exact value
 	// doesn't matter
@@ -2517,8 +2538,7 @@ int LuaUnsyncedRead::GetUnitsInScreenRectangle(lua_State* L)
 
 	static CVisUnitQuadDrawer unitQuadIter;
 
-	unitQuadIter.ResetState();
-	readMap->GridVisibility(nullptr, &unitQuadIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
+	unitQuadIter.CollectVisible();
 
 	const int readTeam = CLuaHandle::GetHandleReadTeam(L);
 	const int readATeam = CLuaHandle::GetHandleReadAllyTeam(L);
@@ -2601,8 +2621,7 @@ int LuaUnsyncedRead::GetFeaturesInScreenRectangle(lua_State* L)
 
 	static CVisFeatureQuadDrawer featureQuadIter;
 
-	featureQuadIter.ResetState();
-	readMap->GridVisibility(nullptr, &featureQuadIter, 1e9, CQuadField::BASE_QUAD_SIZE / SQUARE_SIZE);
+	featureQuadIter.CollectVisible();
 
 	const int tempNum = gs->GetTempNum();
 	lua_createtable(L, featureQuadIter.GetObjectCount(), 0);

@@ -8,6 +8,7 @@
 
 #include "xsimd/xsimd.hpp"
 #include "ReadMap.h"
+#include "VisibleGridQuery.h"
 #include "MapDamage.h"
 #include "MapInfo.h"
 #include "MetalMap.h"
@@ -34,6 +35,19 @@
 
 #include "System/Misc/TracyDefs.h"
 #include "System/ZeroPageAllocator.h"
+#include "System/Config/ConfigHandler.h"
+
+CONFIG(int, SparseMapVisibilityQuery)
+	.defaultValue(0)
+	.minimumValue(0)
+	.maximumValue(2)
+	.description("Null-map visibility queries: 0 automatic, 1 spatial grid, 2 active objects. Ordinary terrain maps always use their spatial grid.");
+
+CONFIG(int, SparseMapQuadField)
+	.defaultValue(0)
+	.minimumValue(0)
+	.maximumValue(2)
+	.description("Null-map object-grid storage: 0 automatic (bounded dense metadata), 1 dense, 2 sparse. Ordinary terrain maps always use dense storage. Applied at game load.");
 
 static constexpr size_t MAX_UHM_RECTS_PER_FRAME = 128;
 
@@ -501,48 +515,12 @@ void CReadMap::GridVisibility(CCamera* cam, IQuadDrawer* qd, float maxDist, int 
 	const CCamera::FrustumLine* negLines = cam->GetNegFrustumLines();
 	const CCamera::FrustumLine* posLines = cam->GetPosFrustumLines();
 
-	// iterate over quads row-wise between the left and right frustum lines
-	for (int y = sy; y <= ey; y++) {
-		int sx = sxi;
-		int ex = exi;
-
-		float xtest;
-		float xtest2;
-
-		// find the starting x-coordinate
-		for (int idx = 0, cnt = negLines[4].sign; idx < cnt; idx++) {
-			const CCamera::FrustumLine& fl = negLines[idx];
-
-			xtest  = ((fl.base + fl.dir * ( y * quadSize)            ));
-			xtest2 = ((fl.base + fl.dir * ((y * quadSize) + quadSize)));
-
-			xtest = std::min(xtest, xtest2);
-			xtest = std::clamp(xtest / quadSize, -1.0f, drawQuadsX * 1.0f + 1.0f);
-
-			// increase lower bound
-			if ((xtest - extraSize) > sx)
-				sx = ((int) xtest) - extraSize;
-		}
-
-		// find the ending x-coordinate
-		for (int idx = 0, cnt = posLines[4].sign; idx < cnt; idx++) {
-			const CCamera::FrustumLine& fl = posLines[idx];
-
-			xtest  = ((fl.base + fl.dir *  (y * quadSize)            ));
-			xtest2 = ((fl.base + fl.dir * ((y * quadSize) + quadSize)));
-
-			xtest = std::max(xtest, xtest2);
-			xtest = std::clamp(xtest / quadSize, -1.0f, drawQuadsX * 1.0f + 1.0f);
-
-			// decrease upper bound
-			if ((xtest + extraSize) < ex)
-				ex = ((int) xtest) + extraSize;
-		}
-
-		for (int x = sx; x <= ex; x++) {
-			qd->DrawQuad(x, y);
-		}
-	}
+	visiblegrid::VisitRows({drawQuadsX, drawQuadsY, sxi, exi, sy, ey}, quadSize, extraSize, negLines, posLines,
+		[qd](int sx, int ex, int y) {
+			for (int x = sx; x <= ex; ++x)
+				qd->DrawQuad(x, y);
+			return true;
+		});
 }
 
 void CReadMap::Initialize()

@@ -552,6 +552,13 @@ endif()
 
 ################################################################################
 ### QuadField
+	set(test_name VisibleGridQuery)
+	set(test_src
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Sim/Misc/testVisibleGridQuery.cpp"
+			${test_Common_sources}
+		)
+	add_spring_test(${test_name} "${test_src}" "" "-DNOT_USING_CREG -DNOT_USING_STREFLOP -DBUILDING_AI")
+
 	set(test_name QuadField)
 	set(test_src
 			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Sim/Misc/testQuadField.cpp"
