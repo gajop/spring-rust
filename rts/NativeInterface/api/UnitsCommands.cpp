@@ -33,7 +33,6 @@ static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .messa
 static const Error NOT_FACTORY_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Unit is not a factory" };
 static const Error NO_COMMAND_AI_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit has no command AI" };
 static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
-static const Error NOT_IMPLEMENTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Command issuing not implemented" };
 static const Error ORDERS_BLOCKED_ERROR = { .code = ERROR_PERMISSION_DENIED, .message = "Command issuing not allowed" };
 
 static bool IsReady() {
@@ -278,6 +277,9 @@ static void NativeGetFactoryCounts(const GetFactoryCountsQuery* query, GetFactor
 		return; // Not a factory, return zero counts
 	}
 
+	const CFactory* factory = dynamic_cast<const CFactory*>(unit);
+	result->info.currentCount = (factory != nullptr && factory->curBuild != nullptr) ? 1 : 0;
+
 	const CCommandQueue& commandQue = factoryCAI->commandQue;
 	int count = query->count;
 	if (count < 0) {
@@ -320,7 +322,6 @@ static void NativeGetFactoryCounts(const GetFactoryCountsQuery* query, GetFactor
 	result->info.counts = countStorage.data();
 	result->info.uniqueCount = idx;
 	result->info.totalCount = totalCount;
-	result->info.currentCount = (unit->beingBuilt) ? 0 : 1; // Simplified
 }
 
 static void NativeGetFactoryCommandCount(const GetFactoryCommandCountQuery* query, GetFactoryCommandCountResult* result)

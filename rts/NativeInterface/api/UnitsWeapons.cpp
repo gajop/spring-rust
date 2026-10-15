@@ -26,11 +26,10 @@ static bool IsReady() {
 
 static const CWeapon* GetWeaponByOneBasedNumber(const CUnit* unit, int32_t weaponNum)
 {
-	const int weaponIndex = weaponNum - 1;
-	if (weaponIndex < 0 || weaponIndex >= static_cast<int>(unit->weapons.size()))
+	if (weaponNum < 1 || size_t(weaponNum) > unit->weapons.size())
 		return nullptr;
 
-	return unit->weapons[weaponIndex];
+	return unit->weapons[weaponNum - 1];
 }
 
 static void NativeGetUnitWeaponCount(const GetUnitWeaponCountQuery* query, GetUnitWeaponCountResult* result)
@@ -110,7 +109,7 @@ static void NativeGetUnitWeaponState(const GetUnitWeaponStateQuery* query, GetUn
 	result->state.salvoDelay = weapon->salvoDelay * INV_GAME_SPEED;
 	result->state.salvoError = weapon->salvoError.Length();
 	result->state.targetMoveError = weapon->MoveErrorExperience();
-	result->state.turnRate = 0.0f; // Not easily accessible
+	result->state.turnRate = weapon->weaponDef->turnrate;
 	result->state.autoTarget = !weapon->noAutoTarget;
 }
 

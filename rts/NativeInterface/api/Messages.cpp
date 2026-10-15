@@ -69,8 +69,13 @@ static void NativeLog(const LogQuery* query, LogResult* result) {
 		return;
 	}
 
-	// Simplified: just log to default section
-	LOG("%s", query->message);
+	if (query->section == nullptr || query->level < 0) {
+		dynamicError = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid log section or level" };
+		result->error = &dynamicError;
+		result->success = false;
+		return;
+	}
+	log_frontend_record(query->level, query->section, "%s", query->message);
 	result->error = nullptr;
 	result->success = true;
 }

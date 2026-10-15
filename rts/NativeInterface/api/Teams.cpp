@@ -9,6 +9,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include "json/json.h"
 
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/GlobalConstants.h"
@@ -28,6 +29,20 @@ static thread_local std::vector<const char*> allyTeamKeys;
 static thread_local std::vector<const char*> allyTeamValues;
 static thread_local std::vector<AIOption> aiOptions;
 static thread_local std::vector<std::string> aiStringStorage;
+static thread_local std::string teamOptionsJson;
+static thread_local std::string playerOptionsJson;
+
+// The existing C ABI represents custom options as a string. Preserve that
+// layout while returning the full key/value table as deterministic JSON.
+static std::string EncodeCustomOptions(const auto& options)
+{
+	Json::Value object(Json::objectValue);
+	for (const auto& [key, value]: options)
+		object[key] = value;
+	Json::StreamWriterBuilder writer;
+	writer["indentation"] = "";
+	return Json::writeString(writer, object);
+}
 
 // Static errors
 static const Error INVALID_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid team ID" };
@@ -99,7 +114,9 @@ static void NativeGetTeamInfo(const GetTeamInfoQuery* query, GetTeamInfoResult* 
 
 	const unsigned char* c = team->color;
 	result->info.color = (c[0] << 24) | (c[1] << 16) | (c[2] << 8) | c[3];
-	result->info.customKeys = query->getTeamKeys ? "" : nullptr;
+	if (query->getTeamKeys)
+		teamOptionsJson = EncodeCustomOptions(team->GetAllValues());
+	result->info.customKeys = query->getTeamKeys ? teamOptionsJson.c_str() : nullptr;
 }
 
 static void NativeGetTeamAllyTeamID(const GetTeamAllyTeamIDQuery* query, GetTeamAllyTeamIDResult* result) {
@@ -409,7 +426,9 @@ static void NativeGetPlayerInfo(const GetPlayerInfoQuery* query, GetPlayerInfoRe
 	result->info.country = player->countryCode.c_str();
 	result->info.rank = player->rank;
 	result->info.hasSkirmishAIsInTeam = skirmishAIHandler.HasSkirmishAIsInTeam(player->team);
-	result->info.customKeys = query->getPlayerOpts ? "" : nullptr;
+	if (query->getPlayerOpts)
+		playerOptionsJson = EncodeCustomOptions(player->GetAllValues());
+	result->info.customKeys = query->getPlayerOpts ? playerOptionsJson.c_str() : nullptr;
 	result->info.desynced = player->desynced;
 }
 

@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/wasm.yml"
       - "rts/NativeInterface/**"
+      - "rts/Lua/**"
       - "rts/WasmInterface/**"
       - "rts/wasm/**"
       - "CMakeLists.txt"
@@ -15,13 +16,16 @@ on:
       - "test/CMakeLists.txt"
       - "test/wasm_api/**"
       - "test/native_api_parity/**"
+      - "test/native_stub_regressions/**"
       - "docker-build-v2/**"
   push:
     branches:
       - master
+      - rust-wip
     paths:
       - ".github/workflows/wasm.yml"
       - "rts/NativeInterface/**"
+      - "rts/Lua/**"
       - "rts/WasmInterface/**"
       - "rts/wasm/**"
       - "CMakeLists.txt"
@@ -31,6 +35,7 @@ on:
       - "test/CMakeLists.txt"
       - "test/wasm_api/**"
       - "test/native_api_parity/**"
+      - "test/native_stub_regressions/**"
       - "docker-build-v2/**"
 
 permissions:
@@ -51,8 +56,8 @@ jobs:
       - name: Install Wasm target
         run: rustup target add wasm32-unknown-unknown
 
-      - name: Install libclang
-        run: sudo apt-get update && sudo apt-get install --yes libclang-18-dev
+      - name: Install libclang and native regression dependencies
+        run: sudo apt-get update && sudo apt-get install --yes libclang-18-dev libsdl2-dev libjsoncpp-dev libgl-dev libgl1-mesa-dri
 
       - name: Locate libclang
         run: echo "LIBCLANG_PATH=/usr/lib/llvm-18/lib" >> "$GITHUB_ENV"
@@ -97,6 +102,13 @@ jobs:
             --timeout 180 \
             --skip-callin-compare \
             --output-dir test/native_api_parity/out-ci-native
+
+      - name: Reject native stub regressions with non-default values
+        env:
+          SDL_VIDEODRIVER: offscreen
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          LP_NUM_THREADS: "1"
+        run: python3 test/native_stub_regressions/run.py --output test/native_api_parity/out-ci-stub-regressions
 
       - name: Run Wasm parity fixture
         run: |

@@ -1,4 +1,10 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Utils.h"
+#include "NativeInterface/WasmUiVisibility.h"
+#include "Sim/MoveTypes/MoveDefHandler.h"
+#include "Sim/MoveTypes/MoveMath/MoveMath.h"
+#include "Sim/Misc/LosHandler.h"
 
 #include "Sim/Projectiles/ExplosionGenerator.h"
 #include "Sim/Units/UnitDefHandler.h"
@@ -147,6 +153,7 @@ static void NativeClosestBuildPos(const ClosestBuildPosQuery* query, ClosestBuil
 static void NativeTestMoveOrder(const TestMoveOrderQuery* query, TestMoveOrderResult* result)
 {
 	bufferPos = 0;
+	result->canMove = false;
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -160,10 +167,24 @@ static void NativeTestMoveOrder(const TestMoveOrderQuery* query, TestMoveOrderRe
 		return;
 	}
 
-	// Simplified: just check if unit has a valid path type
-	// Full implementation would query pathfinder
 	result->error = nullptr;
-	result->canMove = true;
+	const MoveDef* moveDef = moveDefHandler.GetMoveDefByPathType(unitDef->pathType);
+	if (moveDef == nullptr) {
+		result->canMove = !unitDef->IsImmobileUnit();
+		return;
+	}
+	const float3 pos(query->pos.x, query->pos.y, query->pos.z);
+	const float3 dir(query->dir.x, query->dir.y, query->dir.z);
+	// Lua checks ground LOS, rather than radar or air LOS, before testing an
+	// unsynced player's movement square. Authoritative native callers have full read.
+	if (WasmUiVisibility::Active() && !WasmUiVisibility::FullRead()) {
+		const int allyTeam = WasmUiVisibility::ReadAllyTeam();
+		if (allyTeam < 0 || losHandler == nullptr || !losHandler->InLos(pos, allyTeam))
+			return;
+	}
+	MoveTypes::CheckCollisionQuery collisionQuery(moveDef, pos);
+	result->canMove = moveDef->TestMoveSquare(collisionQuery, pos, dir,
+		query->options.testTerrain, query->options.testObjects, query->options.centerOnly);
 }
 
 // Unit dimensions

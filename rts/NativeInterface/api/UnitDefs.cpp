@@ -2,6 +2,7 @@
 
 #include "Sim/Units/UnitDefHandler.h"
 #include "Sim/Units/UnitDef.h"
+#include "Sim/MoveTypes/MoveDefHandler.h"
 #include "Sim/Weapons/WeaponDef.h"
 #include "Lua/LuaUnitDefs.h"
 #include "Lua/LuaDefs.h"
@@ -337,7 +338,8 @@ static void NativeGetUnitDefByID(const GetUnitDefByIDQuery* query, GetUnitDefByI
 	result->physics.brakeRate = ud->maxDec;
 	result->physics.canFly = ud->canfly;
 	result->physics.canMove = ud->canmove;
-	result->physics.canHover = ud->hoverAttack;  // Closest equivalent
+	const MoveDef* moveDef = ud->pathType < moveDefHandler.GetNumMoveDefs() ? moveDefHandler.GetMoveDefByPathType(ud->pathType) : nullptr;
+	result->physics.canHover = moveDef != nullptr && moveDef->speedModClass == MoveDef::Hover;
 	result->physics.floatOnWater = ud->floatOnWater;
 	result->physics.moveDefID = (ud->pathType != -1U) ? static_cast<int32_t>(ud->pathType) : -1;
 	result->physics.canSubmerge = ud->canSubmerge;

@@ -13,6 +13,8 @@
 #include "Sim/Misc/DamageArray.h"
 #include "Sim/Units/Unit.h"
 #include "Sim/Weapons/WeaponDef.h"
+#include "Rendering/Models/3DModel.hpp"
+#include "Rendering/Models/3DModelPiece.hpp"
 #include "System/float3.h"
 
 #include <vector>
@@ -239,9 +241,16 @@ static void NativeGetPieceProjectileParams(const GetPieceProjectileParamsQuery* 
 	result->params.spinVec.x = pProj->spinVec.x;
 	result->params.spinVec.y = pProj->spinVec.y;
 	result->params.spinVec.z = pProj->spinVec.z;
-	result->params.modelPieceNum = 0;
-	result->params.modelObjectType = 0;
-	result->params.modelName = "";
+	result->params.modelPieceNum = -1;
+	result->params.modelObjectType = -1;
+	result->params.modelName = nullptr;
+	if (pProj->omp != nullptr) {
+		if (const S3DModel* model = pProj->omp->GetParentModel(); model != nullptr) {
+			result->params.modelPieceNum = model->FindPieceOffset(pProj->omp->name);
+			result->params.modelObjectType = model->type;
+			result->params.modelName = model->name.c_str();
+		}
+	}
 	result->params.team = pProj->GetTeamID();
 }
 

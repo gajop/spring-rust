@@ -3,6 +3,7 @@
 #include "Gfx.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <limits>
 #include <memory>
@@ -2634,26 +2635,73 @@ static void ClearAttachmentFBO(const GfxClearAttachmentFBOQuery* query, GfxBoolR
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-
-	float values[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	for (uint32_t i = 0; i < query->count; ++i)
-		values[i] = query->values[i];
-
-	const GLenum attachment = query->attachment;
+	GLenum bindingQuery;
+	switch (query->target) {
+		case GL_READ_FRAMEBUFFER: bindingQuery = GL_READ_FRAMEBUFFER_BINDING; break;
+		case GL_DRAW_FRAMEBUFFER: case GL_FRAMEBUFFER: bindingQuery = GL_DRAW_FRAMEBUFFER_BINDING; break;
+		default: result->error = &INVALID_ARGUMENT_ERROR; return;
+	}
+	GLint framebuffer = 0;
+	glGetIntegerv(bindingQuery, &framebuffer);
+	if (framebuffer == 0)
+		return;
+	GLenum attachment = query->attachment;
+	GLenum bufferType = GL_COLOR;
+	GLint drawBuffer = 0;
 	if (attachment == GL_DEPTH || attachment == GL_DEPTH_ATTACHMENT) {
-		glClearBufferfv(GL_DEPTH, 0, values);
-		result->value = true;
+		attachment = GL_DEPTH_ATTACHMENT;
+		bufferType = GL_DEPTH;
+	} else if (attachment == GL_STENCIL || attachment == GL_STENCIL_ATTACHMENT) {
+		attachment = GL_STENCIL_ATTACHMENT;
+		bufferType = GL_STENCIL;
+	} else if (attachment >= GL_COLOR_ATTACHMENT0 && attachment <= GL_COLOR_ATTACHMENT15) {
+		drawBuffer = attachment - GL_COLOR_ATTACHMENT0;
+	} else {
+		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-	if (attachment == GL_STENCIL || attachment == GL_STENCIL_ATTACHMENT) {
-		const GLint stencilValue = values[0];
-		glClearBufferiv(GL_STENCIL, 0, &stencilValue);
-		result->value = true;
+	GLint objectType = GL_NONE;
+	glGetFramebufferAttachmentParameteriv(query->target, attachment, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &objectType);
+	if (objectType == GL_NONE || objectType == GL_FRAMEBUFFER_DEFAULT)
+		return;
+	GLint componentType = 0;
+	glGetFramebufferAttachmentParameteriv(query->target, attachment, GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE, &componentType);
+	if (componentType != GL_INT && componentType != GL_UNSIGNED_INT && componentType != GL_FLOAT &&
+		componentType != GL_SIGNED_NORMALIZED && componentType != GL_UNSIGNED_NORMALIZED) {
+		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
-
-	const GLint drawBuffer = (attachment >= GL_COLOR_ATTACHMENT0 && attachment <= GL_COLOR_ATTACHMENT15) ? (attachment - GL_COLOR_ATTACHMENT0) : 0;
-	glClearBufferfv(GL_COLOR, drawBuffer, values);
+	float values[4] = {};
+	for (uint32_t i = 0; i < query->count; ++i) values[i] = query->values[i];
+	if (bufferType == GL_STENCIL || componentType == GL_INT || componentType == GL_UNSIGNED_INT) {
+		const bool isUnsigned = bufferType != GL_STENCIL && componentType == GL_UNSIGNED_INT;
+		const double low = isUnsigned ? 0.0 : double(std::numeric_limits<GLint>::min());
+		const double high = isUnsigned ? double(std::numeric_limits<GLuint>::max()) : double(std::numeric_limits<GLint>::max());
+		for (const float value: values) {
+			if (!std::isfinite(value) || double(value) < low || double(value) > high) {
+				result->error = &INVALID_ARGUMENT_ERROR;
+				return;
+			}
+		}
+	}
+	// ClearBuffer always operates on DRAW, even if the caller selected READ.
+	// Bind the requested object temporarily so a read-only binding never causes
+	// us to clear the default framebuffer or an unrelated draw framebuffer.
+	GLint previousDraw = 0;
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &previousDraw);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+	if (bufferType == GL_STENCIL || componentType == GL_INT) {
+		GLint integers[4] = {};
+		for (int i = 0; i < 4; ++i) integers[i] = values[i];
+		glClearBufferiv(bufferType, drawBuffer, integers);
+	} else if (componentType == GL_UNSIGNED_INT) {
+		GLuint integers[4] = {};
+		for (int i = 0; i < 4; ++i) integers[i] = values[i];
+		glClearBufferuiv(bufferType, drawBuffer, integers);
+	} else {
+		glClearBufferfv(bufferType, drawBuffer, values);
+	}
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, previousDraw);
 	result->value = true;
 }
 

@@ -1107,7 +1107,7 @@ static void NativeIsUnitIcon(const IsUnitIconQuery* query, IsUnitIconResult* res
 }
 
 // ====================================================================
-// Additional stubs
+// Additional unsynced queries
 // ====================================================================
 
 static void NativeGetActiveCmdDesc(const GetActiveCmdDescQuery* query, GetActiveCmdDescResult* result) {

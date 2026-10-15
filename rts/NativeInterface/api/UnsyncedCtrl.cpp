@@ -1003,16 +1003,6 @@ static void NativeSetDrawModelsDeferred(const SetDrawModelsDeferredQuery* query,
 	result->featuresForward = featureDrawer->DrawForward();
 }
 
-static void NativeStubNotAvailable(const Error** error, bool* success)
-{
-	if (error != nullptr) {
-		*error = &NOT_AVAILABLE_ERROR;
-	}
-	if (success != nullptr) {
-		*success = false;
-	}
-}
-
 static void NativeSetAtmosphere(const SetAtmosphereQuery* query, SetAtmosphereResult* result)
 {
 	result->error = nullptr;

@@ -14,6 +14,7 @@ pub struct TeamInfo {
     pub is_dead: bool,
     pub side: String,
     pub color: u32,
+    /// Custom key/value options as JSON when requested; `None` otherwise.
     pub custom_keys: Option<String>,
 }
 
@@ -31,6 +32,7 @@ pub struct PlayerInfo {
     pub country: String,
     pub rank: i32,
     pub has_skirmish_ais_in_team: bool,
+    /// Custom key/value options as JSON when requested; `None` otherwise.
     pub custom_keys: Option<String>,
     pub desynced: bool,
 }

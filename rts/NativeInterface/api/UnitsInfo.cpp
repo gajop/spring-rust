@@ -20,6 +20,7 @@
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Weapons/PlasmaRepulser.h"
+#include "Sim/Weapons/WeaponDef.h"
 #include "System/float3.h"
 #include "System/SpringMath.h"
 #include "Rendering/Units/UnitDrawer.h"
@@ -1208,6 +1209,7 @@ static void NativeGetUnitShieldState(const GetUnitShieldStateQuery* query, GetUn
 	bufferPos = 0;
 	result->error = nullptr;
 	result->hasShield = false;
+	result->shield = {};
 
 	if (!IsReady()) {
 		result->error = &NOT_READY_ERROR;
@@ -1220,17 +1222,19 @@ static void NativeGetUnitShieldState(const GetUnitShieldStateQuery* query, GetUn
 		return;
 	}
 
-	// Check if unit has a shield weapon
-	for (CWeapon* w : unit->weapons) {
-		CPlasmaRepulser* shield = dynamic_cast<CPlasmaRepulser*>(w);
-		if (shield != nullptr) {
-			result->hasShield = true;
-			result->shield.shieldEnabled = shield->IsEnabled();
-			result->shield.shieldPower = shield->GetCurPower();
-			result->shield.shieldAlpha = 1.0f;
-			break;
-		}
-	}
+	// Match Lua's one-based slot, including fallback to the designated shield
+	// for an omitted/out-of-range slot. An in-range non-shield returns no state.
+	const CPlasmaRepulser* shield = nullptr;
+	if (query->weaponNum < 1 || size_t(query->weaponNum) > unit->weapons.size())
+		shield = static_cast<const CPlasmaRepulser*>(unit->shieldWeapon);
+	else
+		shield = dynamic_cast<const CPlasmaRepulser*>(unit->weapons[query->weaponNum - 1]);
+	if (shield == nullptr)
+		return;
+	result->hasShield = true;
+	result->shield.shieldEnabled = shield->IsEnabled();
+	result->shield.shieldPower = shield->GetCurPower();
+	result->shield.shieldAlpha = shield->weaponDef->shieldAlpha;
 }
 
 static void NativeGetUnitFlanking(const GetUnitFlankingQuery* query, GetUnitFlankingResult* result) {
