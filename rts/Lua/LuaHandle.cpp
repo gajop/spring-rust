@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "LuaHandle.h"
+#include "System/GamePerformanceLog.h"
 #include "lua_privileges.h"
 
 #include "LuaGaia.h"
@@ -362,6 +363,7 @@ int CLuaHandle::RunCallInTraceback(
 	bool popErrorFunc
 ) {
 	RECOIL_DETAILED_TRACY_ZONE;
+	spring::game_perf::Scope perfScope(spring::game_perf::Kind::Lua);
 	const char* benchmarkName = hs != nullptr ? hs->GetString() : "";
 	if (strcmp(benchmarkName, "GameFrame") == 0)
 		benchmarkName = spring::benchmark_callins::GameFrameTestName().data();

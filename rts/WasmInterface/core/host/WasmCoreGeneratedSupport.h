@@ -3,6 +3,7 @@
 #pragma once
 
 #include <array>
+#include "System/GamePerformanceLog.h"
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -24,6 +25,7 @@ inline std::int32_t NativeErrorCode(const Error* error)
 }
 
 class ImportGuard {
+	spring::game_perf::Scope perfScope{spring::game_perf::Kind::Import};
 public:
 	ImportGuard(HostState* state, std::uint64_t work)
 		: uiContext(state != nullptr && state->environment == WasmEnvironment::UI)

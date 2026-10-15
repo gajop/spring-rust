@@ -1,5 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include "System/GamePerformanceLog.h"
 #include "UnitDef.h"
 #include "Unit.h"
 #include "UnitHandler.h"
@@ -385,6 +386,7 @@ void CUnit::PostInit(const CUnit* builder)
 	const bool preBeingBuilt = beingBuilt;
 
 	// these must precede UnitFinished from FinishedBuilding
+	spring::game_perf::Count(spring::game_perf::Event::Created);
 	eventHandler.UnitCreated(this, builder);
 	eoh->UnitCreated(*this, builder);
 
@@ -483,6 +485,7 @@ void CUnit::ForcedKillUnit(CUnit* attacker, bool selfDestruct, bool reclaimed, i
 	ReleaseTransportees(attacker, selfDestruct, reclaimed);
 
 	// pre-destruction event; unit may be kept around for its death sequence
+	spring::game_perf::Count(spring::game_perf::Event::Destroyed);
 	eventHandler.UnitDestroyed(this, attacker, weaponDefID);
 	eoh->UnitDestroyed(*this, attacker, weaponDefID);
 
@@ -1354,6 +1357,7 @@ void CUnit::DoDamage(
 	ApplyDamage(attacker, damages, baseDamage, experienceMod);
 
 	{
+		spring::game_perf::Count(spring::game_perf::Event::Damaged, baseDamage);
 		eventHandler.UnitDamaged(this, attacker, baseDamage, weaponDefID, projectileID, isParalyzer);
 
 		// unit might have been killed via Lua from within UnitDamaged (e.g.

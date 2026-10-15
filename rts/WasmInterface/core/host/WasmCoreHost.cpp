@@ -1,6 +1,8 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "WasmCoreHost.h"
+#include "System/GamePerformanceLog.h"
+#include "System/TimeProfiler.h"
 
 #include <algorithm>
 #include <array>
@@ -1831,6 +1833,20 @@ void WasmCoreHost::FaultHost(WasmCoreHost* host, std::string reason)
 bool WasmCoreHost::Dispatch(const recoil::wasm::core::WasmCoreDispatchPlan* plan,
 	const void* query, void* result, std::string& error)
 {
+	spring::game_perf::Scope perfScope(spring::game_perf::Kind::Wasm);
+	static TimerNameRegistrar syncedTimer("Wasm::Callins::Synced");
+	static TimerNameRegistrar unsyncedTimer("Wasm::Callins::Unsynced");
+	static TimerNameRegistrar uiTimer("Wasm::Callins::UI");
+	const bool synced = plan != nullptr && plan->host != nullptr && WasmEnvironmentMatrix::Policy(plan->host->environment).synced;
+	ScopedTimer contextTimer(synced ? hashString("Wasm::Callins::Synced") :
+		(plan != nullptr && plan->uiEnvironment ? hashString("Wasm::Callins::UI") : hashString("Wasm::Callins::Unsynced")), false, true);
+	ZoneScopedN("Wasm::Callin");
+#ifdef TRACY_ENABLE
+	if (plan != nullptr && plan->host != nullptr) {
+		const auto name = recoil::wasm::core::CallinName(plan->callin);
+		ZoneNameF("%s::%.*s", plan->host->moduleName.c_str(), int(name.size()), name.data());
+	}
+#endif
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	void* previousOwner = RmlGui::GetCurrentContextOwner();
 	const bool previousMenuPhase = RmlGui::IsCurrentContextMenuPhase();

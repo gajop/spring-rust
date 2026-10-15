@@ -5,6 +5,7 @@
 #include <Rml/Backends/RmlUi_Backend.h>
 #include <RmlUi/Core.h>
 #include "Game.h"
+#include "System/GamePerformanceLog.h"
 #include "Sim/Misc/QuadFieldStorage.h"
 #include "Camera.h"
 #include "CameraHandler.h"
@@ -1235,6 +1236,13 @@ bool CGame::Update()
 	ENTER_SYNCED_CODE();
 	SendClientProcUsage();
 	ClientReadNet(); // issues new SimFrame()s
+	static const bool perfUnpaused = [] { const char* value = std::getenv("SPRING_PERF_UNPAUSED"); return value != nullptr && std::string_view(value)=="1"; }();
+	static bool perfUnpauseRequested = false;
+	if (!gs->paused) perfUnpauseRequested = false;
+	if (perfUnpaused && gs->paused && !perfUnpauseRequested) {
+		ActionPressed(Action("pause 0"), false);
+		perfUnpauseRequested = true;
+	}
 
 	if (!gameOver) {
 		if (clientNet->NeedsReconnect())
@@ -1496,6 +1504,7 @@ bool CGame::UpdateUnsynced(const spring_time currentTime)
 
 
 bool CGame::Draw() {
+	spring::game_perf::Frame perfFrame("draw", gs->frameNum);
 	const spring_time currentTimePreUpdate = spring_gettime();
 
 	if (UpdateUnsynced(currentTimePreUpdate))
@@ -1762,6 +1771,14 @@ void CGame::SimFrame() {
 
 	// note: starts at -1, first actual frame is 0
 	gs->frameNum += 1;
+	spring::game_perf::Frame perfFrame("sim", gs->frameNum);
+	for (const auto& [frame, command]: spring::game_perf::Inputs()) {
+		if (frame > gs->frameNum) break;
+		if (frame == gs->frameNum) {
+			if (command.starts_with(" local ")) ActionPressed(Action(command.substr(7)), false);
+			else ActionReceived(Action(command), gu->myPlayerNum);
+		}
+	}
 #ifdef SYNC_HISTORY
 	CSyncChecker::NewGameFrame();
 #endif
@@ -1874,6 +1891,24 @@ void CGame::SimFrame() {
 		WasmSyncVerification::EndFrame(gs->frameNum);
 	}
 
+	if (spring::game_perf::Enabled()) {
+		// Quantised state, in stable unit-ID order, is an equivalence diagnostic;
+		// it never enters synced state or the network checksum.
+		std::uint64_t digest = 14695981039346656037ull;
+		auto mixDigest = [&](std::uint64_t value) { for (int b=0; b<8; ++b) { digest ^= (value >> (b*8)) & 255; digest *= 1099511628211ull; } };
+		auto units = unitHandler.GetActiveUnits();
+		std::sort(units.begin(), units.end(), [](const CUnit* a, const CUnit* b) { return a->id < b->id; });
+		for (const CUnit* unit: units) {
+			mixDigest(unit->id);
+			for (const unsigned char c: unit->unitDef->name) mixDigest(c);
+			mixDigest(unit->team);
+			for (const float value: {unit->pos.x, unit->pos.y, unit->pos.z, float(unit->health)})
+				mixDigest(std::isfinite(value) ? static_cast<std::uint64_t>(static_cast<std::int64_t>(std::clamp<double>(double(value)*1000.0, -9e18, 9e18))) : UINT64_MAX);
+		}
+		perfFrame.Finish(units.size(), projectileHandler.GetActiveProjectiles(true).size(), digest, featureHandler.GetActiveFeatureIDs().size(), projectileHandler.GetCurrentParticles());
+	}
+	if (spring::game_perf::StopFrame() >= 0 && gs->frameNum >= spring::game_perf::StopFrame())
+		gu->globalQuit = true;
 	lastSimFrameTime = spring_gettime();
 	gu->avgSimFrameTime = mix(gu->avgSimFrameTime, (lastSimFrameTime - lastFrameTime).toMilliSecsf(), 0.05f);
 	gu->avgSimFrameTime = std::max(gu->avgSimFrameTime, 0.01f);

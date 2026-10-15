@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 
+#include "System/GamePerformanceLog.h"
 #include "CommandAI.h"
 
 #include "BuilderCAI.h"
@@ -824,6 +825,7 @@ void CCommandAI::GiveCommand(const Command& c, int playerNum, bool fromSynced, b
 	if (!eventHandler.AllowCommand(owner, c, playerNum, fromSynced, fromLua))
 		return;
 
+	spring::game_perf::Count(spring::game_perf::Event::Commands);
 	eventHandler.UnitCommand(owner, c, playerNum, fromSynced, fromLua);
 	GiveCommandReal(c, fromSynced); // send to the sub-classes
 }

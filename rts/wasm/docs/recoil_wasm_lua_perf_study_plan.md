@@ -1,8 +1,19 @@
 # Recoil Wasm vs Lua Performance Study Plan
 
-Status: planned, not started (2026-10-11; reviewed 2026-10-15).
+Status: in progress (2026-10-15). Shared frame instrumentation, engine input/stop controls and a paired-run harness are implemented. Seven game pairs were run diagnostically; accepted performance comparisons remain incomplete.
 
-Execution is deferred while the user needs the PC responsive. The small correctness fixture added under [No Stubs](recoil_wasm_no_stubs_plan.md) does not implement this study, establish Lua/Wasm performance, or justify an accepted timing result. No cross-game or fleet stress campaign was run for this review.
+The 40-minute intensive-work window ended at approximately 12:00 JST on 2026-10-15. Intensive jobs have stopped. The implementation is committed; accepted performance comparisons remain pending.
+
+## Current implementation and evidence
+
+`GamePerformanceLog.h` provides opt-in CSV timing and frame-thread counters. Lua and Wasm callins share the recorder, generated import guards are counted, and Wasm calls have context profiler timers and ordinary Tracy zones with module/callin names. Engine input files and a frame limit avoid per-language quit/driver gadgets. Normal games do not enable the recorder.
+
+`springcabal-games/verification/perf/run.py` stages private content, normalizes seeds/map/settings, records hashes and host state, runs alternating pairs, and writes distributions, state divergence, alive-count comparison and diagnostic ratios. It supports headless and realtime autonomous/scripted runs with bounded process/campaign timeouts. See its README for scope and limits.
+
+Evidence is preserved in `springcabal-games/perf-runs/2026-10-15-autonomous-diagnostic`: five MyCube pairs and a pilot covering all seven game pairs. No performance claim is accepted. Several Lua games error in headless UI/render paths; Gravitas Lua did not reach frame 0; Area 17's shared LuaGaia code errored; state/count comparisons also diverge. The raw result files identify each failing side and keep the logs. These are prerequisites to fix or isolate before a language-speed comparison, not reasons to discard inconvenient runs.
+
+Still needed: per-definition and unit-script work equivalence, per-gadget/per-import detail, load/memory instrumentation, lockstep and attribution modes, controlled scale/scenario patches, instrumentation-overhead measurements, settled repeated runs and accepted comparisons. Existing counters are frame-thread observations and do not claim coverage of private worker jobs. This plan has not met its final acceptance conditions.
+
 
 Goal: establish whether the SpringCabal Wasm ports are faster than their original Lua versions in real games on this engine, by how much of a whole frame, where the difference comes from, and what engine or Wasm runtime problems show up on the way. The microbenchmarks ([benchmarking.md](benchmarking.md), [generated results](generated/benchmarking_results.md), [interpretation](impl/core_benchmark_results.md)) measure single calls and synthetic workloads. They do not show what share of a real game's frame is script time, or whether that share changes.
 

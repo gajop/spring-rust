@@ -1,5 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include "System/GamePerformanceLog.h"
 #include "UnitDrawer.h"
 
 #include <map>
@@ -296,6 +297,7 @@ CUnitDrawerGLSL::~CUnitDrawerGLSL()
 
 void CUnitDrawerGLSL::DrawUnitModel(const CUnit* unit, bool noLuaCall) const
 {
+	spring::game_perf::Count(spring::game_perf::Event::Drawn);
 	RECOIL_DETAILED_TRACY_ZONE;
 	if (!noLuaCall && unit->luaDraw && eventHandler.DrawUnit(unit))
 		return;

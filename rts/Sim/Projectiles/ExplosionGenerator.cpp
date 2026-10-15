@@ -1,5 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include "System/GamePerformanceLog.h"
 #include <algorithm>
 #include <cstring>
 #include <iostream>
@@ -376,6 +377,7 @@ bool CExplosionGeneratorHandler::GenExplosion(
 	bool withMutex
 ) {
 	RECOIL_DETAILED_TRACY_ZONE;
+	spring::game_perf::Count(spring::game_perf::Event::Ceg);
 	IExplosionGenerator* expGen = GetGenerator(expGenID);
 
 	if (expGen == nullptr)

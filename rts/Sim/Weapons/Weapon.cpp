@@ -1,5 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include "System/GamePerformanceLog.h"
 #include "Weapon.h"
 #include "WeaponDefHandler.h"
 #include "WeaponMemPool.h"
@@ -1247,6 +1248,7 @@ void CWeapon::Init()
 
 void CWeapon::Fire(bool scriptCall)
 {
+	spring::game_perf::Count(spring::game_perf::Event::Fired);
 	RECOIL_DETAILED_TRACY_ZONE;
 	owner->lastFireWeapon = gs->frameNum;
 
