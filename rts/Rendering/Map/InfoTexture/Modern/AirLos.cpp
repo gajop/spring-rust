@@ -132,10 +132,10 @@ void CAirLosTexture::Update()
 	}
 
 	const auto& myAirLos = losHandler->airLos.losMaps[gu->myAllyTeam].GetLosMap();
-	{
-		auto binding = uploadTex.ScopedBind();
-		uploadTex.UploadImage(myAirLos.data());
-	}
+	// Keep the sensor counts on unit 0 until the fullscreen shader has read them.
+	// Restoring the previous binding after uploading would sample an unrelated texture.
+	auto binding = uploadTex.ScopedBind();
+	uploadTex.UploadImage(myAirLos.data());
 
 	// do post-processing on the gpu (los-checking & scaling)
 	using namespace GL::State;
@@ -145,6 +145,6 @@ void CAirLosTexture::Update()
 	RunFullScreenPass();
 
 	// generate mipmaps
-	auto binding = texture.ScopedBind();
+	texture.ScopedBind(binding);
 	texture.ProduceMipmaps();
 }
