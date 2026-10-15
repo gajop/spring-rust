@@ -13,6 +13,9 @@ pub(crate) const CORE_UNSYNCED_ENVIRONMENT_MASK: u32 = (1u32 << 1) | (1u32 << 3)
 /// guests at all. This is a security/capability decision, not a safety, sync,
 /// or visibility decision.
 pub(crate) fn production_import_allowed(module: &str, function: &str) -> bool {
+    if !super::parity_public(module, function) {
+        return false;
+    }
     match module {
         // Process lifecycle/watchdog/restart/share controls are engine/process
         // authority. CallAsTeam is different: it scopes simulation team context
@@ -177,6 +180,12 @@ mod tests {
         production_function_environment_mask, production_import_allowed, production_process_safe,
         production_visibility_environment_mask,
     };
+
+    #[test]
+    fn withholds_unverified_additions() {
+        assert!(!production_import_allowed("new_module", "NewFunction"));
+        assert!(!production_import_allowed("units_info", "NewFunction"));
+    }
 
     #[test]
     fn withholds_process_and_local_authority() {

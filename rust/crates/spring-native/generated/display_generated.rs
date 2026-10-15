@@ -398,4 +398,40 @@ impl<'a> Display<'a> {
         }
     }
 
+    pub fn get_screen_geometry_full(&self, screen_num: i32, query_usable: bool) -> Result<(sys::ViewGeometry, sys::ViewGeometry, bool), Error> {
+        unsafe {
+            let query = sys::GetScreenGeometryQuery {
+                screenNum: screen_num,
+                queryUsable: query_usable,
+            };
+            let mut result = MaybeUninit::<sys::GetScreenGeometryFullResult>::zeroed();
+            let func = self.api.GetScreenGeometryFull.expect("GetScreenGeometryFull function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            let value = (
+                result.geom,
+                result.usable,
+                result.hasUsable,
+            );
+            Error::result_or(result.error, value)
+        }
+    }
+
+    pub fn have_adv_shading_full(&self) -> Result<(bool, bool), Error> {
+        unsafe {
+            let query = sys::HaveAdvShadingQuery {
+                _unused: 0,
+            };
+            let mut result = MaybeUninit::<sys::HaveAdvShadingFullResult>::zeroed();
+            let func = self.api.HaveAdvShadingFull.expect("HaveAdvShadingFull function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            let value = (
+                result.enabled,
+                result.groundEnabled,
+            );
+            Error::result_or(result.error, value)
+        }
+    }
+
 }

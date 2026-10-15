@@ -81,7 +81,7 @@ static void NativeGetFeatureDefByID(const GetFeatureDefByIDQuery* query, GetFeat
 	result->info.floating = def->floating;
 	result->info.geoThermal = def->geoThermal;
 	result->info.modelName = def->modelName.c_str();
-	result->info.resurrectAs = ""; // Would need to look up unit def by ID
+	result->info.resurrectAs = nullptr; // Resurrection identity belongs to a feature instance, not its shared definition.
 }
 
 static void NativeGetFeatureDefIDByName(const GetFeatureDefIDByNameQuery* query, GetFeatureDefIDByNameResult* result) {

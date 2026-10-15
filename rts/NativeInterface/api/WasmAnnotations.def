@@ -45,3 +45,5 @@ EXCLUDE(memory, FreeInt3Array, native pointer-management API is never exposed to
 EXCLUDE(memory, FreeStringArray, native pointer-management API is never exposed to Wasm)
 EXCLUDE(memory, FreeUInt32Array, native pointer-management API is never exposed to Wasm)
 SYNCED_ONLY(messages, SendToUnsynced, bridge from a deterministic synced module to the unsynced Lua handle)
+
+EXCLUDE(los, GetClosestValidPosition, Lua and native implementations are unsupported; no callable production import)

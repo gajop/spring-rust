@@ -18,7 +18,7 @@ extern "C" {
 struct FileInfo {
 	RECOIL_WASM_STRING const char* name;
 	uint32_t size;
-	uint32_t mode;  // File mode (permissions)
+	uint32_t mode;  // Backing-file POSIX permissions; zero if unavailable (archives/directories).
 	bool isDirectory;
 };
 

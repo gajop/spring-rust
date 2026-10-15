@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 from collections import Counter
+import hashlib
 import json
 import math
 import os
@@ -16,7 +18,7 @@ import tempfile
 import time
 from pathlib import Path
 
-from spec_loader import load_api_tests, load_known_issues
+from spec_loader import load_api_tests, load_known_issues, required_compare_fields
 
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = ROOT / "test" / "native_api_parity"
@@ -368,17 +370,83 @@ CORE_CONTEXT_FEATURES = {
 }
 
 
-def ensure_wasm_built(
-	skip: bool, transport: str = "core", context: str = "synced_gadget"
+@contextlib.contextmanager
+def probe_build_lock(path: Path):
+    with path.open("a+b") as lock:
+        if os.name == "nt":
+            import msvcrt
+            if lock.seek(0, os.SEEK_END) == 0:
+                lock.write(b"0")
+                lock.flush()
+            while True:
+                lock.seek(0)
+                try:
+                    msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+                    break
+                except OSError:
+                    time.sleep(0.1)
+            try:
+                yield
+            finally:
+                lock.seek(0)
+                msvcrt.locking(lock.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            yield
+
+
+BUILT_PROBE_CONTEXTS: set[str] = set()
+
+
+def ensure_wasm_built(skip: bool, transport: str = "core", context: str = "synced_gadget", include_rendering: bool = False) -> None:
+    BUILT_PROBE_CONTEXTS.add(context)
+    _ensure_wasm_built(skip, transport, context, include_rendering)
+
+
+def probe_build_fingerprint(context: str, include_rendering: bool) -> str:
+    """Bind a cached binary to its probe selection and SDK inputs."""
+    crate = WASM_PARITY_CRATE.parent
+    inputs = [WASM_PARITY_CRATE, crate / "Cargo.lock",
+              WASM_CONTEXT_CORE_MANIFESTS[context], WASM_CONTEXT_CORE_LUA_OUTPUTS[context],
+              ROOT / "rts/wasm/generated/model.json"]
+    inputs.extend(sorted((crate / "src").rglob("*.rs")))
+    inputs.extend(sorted((ROOT / "rts/wasm/generated/sdk").rglob("*.rs")))
+    inputs.extend(sorted((ROOT / "rust/crates/spring/src").rglob("*.rs")))
+    dependency_manifest = ROOT / "rust/crates/spring/Cargo.toml"
+    if dependency_manifest.exists():
+        inputs.append(dependency_manifest)
+    digest = hashlib.sha256(f"{context}:{include_rendering}".encode())
+    for path in inputs:
+        digest.update(str(path.relative_to(ROOT)).encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _ensure_wasm_built(
+	skip: bool, transport: str = "core", context: str = "synced_gadget", include_rendering: bool = False
 ) -> None:
+	build_context = context
+	generator_args = ["python3", str(WASM_PROBE_GENERATOR), "--context", build_context]
+	generator_args.extend(["--transport", "core"])
+	if include_rendering:
+		generator_args.append("--include-rendering")
+	lua_output = WASM_CONTEXT_CORE_LUA_OUTPUTS[build_context]
+	generator_args.extend(["--lua-output", str(lua_output)])
+	manifests = WASM_CONTEXT_CORE_MANIFESTS
+	generator_args.extend(["--manifest-output", str(manifests[build_context])])
+	subprocess.run(generator_args, cwd=ROOT, check=True)
+	fingerprint = probe_build_fingerprint(context, include_rendering)
+	core_module = WASM_CONTEXT_CORE_MODULES[context]
+	stamp = core_module.with_suffix(".provenance.json")
 	if skip:
-		missing = [WASM_CONTEXT_CORE_MODULES[context], WASM_CONTEXT_CORE_MANIFESTS[context]]
-		if context.startswith("gaia_"):
-			missing.append(WASM_CONTEXT_MAP_MANIFESTS[context])
-		missing.append(WASM_CONTEXT_CORE_LUA_OUTPUTS[context])
-		missing = [path for path in missing if not path.is_file()]
-		if missing:
-			raise RuntimeError("missing Core Wasm parity artifacts: " + ", ".join(map(str, missing)))
+		if not core_module.is_file() or not stamp.is_file():
+			raise RuntimeError("missing Core Wasm probe build/provenance; rerun without --skip-wasm-build")
+		metadata = json.loads(stamp.read_text())
+		if metadata.get("inputs") != fingerprint or metadata.get("module_sha256") != hashlib.sha256(core_module.read_bytes()).hexdigest():
+			raise RuntimeError("stale Core Wasm probe or different rendering selection; rerun without --skip-wasm-build")
 		return
 
 	installed_targets = subprocess.run(
@@ -390,14 +458,6 @@ def ensure_wasm_built(
 	).stdout.splitlines()
 	if "wasm32-unknown-unknown" not in installed_targets:
 		subprocess.run(["rustup", "target", "add", "wasm32-unknown-unknown"], cwd=ROOT, check=True)
-	build_context = context
-	generator_args = ["python3", str(WASM_PROBE_GENERATOR), "--context", build_context]
-	generator_args.extend(["--transport", "core"])
-	lua_output = WASM_CONTEXT_CORE_LUA_OUTPUTS[build_context]
-	generator_args.extend(["--lua-output", str(lua_output)])
-	manifests = WASM_CONTEXT_CORE_MANIFESTS
-	generator_args.extend(["--manifest-output", str(manifests[build_context])])
-	subprocess.run(generator_args, cwd=ROOT, check=True)
 	build_args = [
 		"cargo",
 		"build",
@@ -411,6 +471,8 @@ def ensure_wasm_built(
 	core_module = WASM_CONTEXT_CORE_MODULES[build_context]
 	core_module.parent.mkdir(parents=True, exist_ok=True)
 	shutil.copy2(WASM_PARITY_CORE, core_module)
+	stamp.write_text(json.dumps({"inputs": fingerprint,
+		"module_sha256": hashlib.sha256(core_module.read_bytes()).hexdigest()}, indent=2) + "\n")
 
 
 def link_or_copy(src: Path, dst: Path) -> None:
@@ -1001,7 +1063,14 @@ def compare_wasm_details(
             continue
         expected_fields = expected_row.get("fields", {})
         actual_fields = actual_row.get("fields", {})
-        compare_fields = API_TEST_BY_ID.get(test_id, {}).get("compare", {}).get("fields", [])
+        compare_spec = API_TEST_BY_ID.get(test_id, {}).get("compare", {})
+        compare_fields = compare_spec.get("fields", [])
+        missing_required = [field for field in required_compare_fields(API_TEST_BY_ID.get(test_id, {}))
+                            if field not in expected_fields or field not in actual_fields]
+        if missing_required:
+            api_mismatches.append({"testName": test_id, "missing_required_fields": missing_required,
+                                   "expected": expected_row, "actual": actual_row})
+            continue
         if compare_fields:
             expected_fields = {
                 field: expected_fields.get(field, {"__missing__": True})
@@ -1030,15 +1099,15 @@ def compare_wasm_details(
                 return type(value).__name__
             return value
 
-        if set(expected_fields) != set(actual_fields) or any(
-            not values_match(
+        differing_fields = [field for field in set(expected_fields) | set(actual_fields)
+            if not values_match(
                 test_id,
                 comparable_field(field, expected_fields.get(field)),
                 comparable_field(field, actual_fields.get(field)),
-            )
-            for field in set(expected_fields) | set(actual_fields)
-        ):
-            api_mismatches.append({"testName": test_id, "expected": expected_row, "actual": actual_row})
+            )]
+        if set(expected_fields) != set(actual_fields) or differing_fields:
+            api_mismatches.append({"testName": test_id, "expected": expected_row, "actual": actual_row,
+                                   "differing_fields": sorted(differing_fields)})
 
     accepted_error_ids = set(api_error_matches)
     vacuous_ids = sorted(
@@ -2241,6 +2310,8 @@ def write_coverage_details(
 
 
 def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict | None) -> None:
+    if compare_info is not None:
+        (base_output / "comparison.json").write_text(json.dumps(compare_info, indent=2) + "\n")
     # --mode wasm uses two isolated in-engine harness runs.  That directory
     # contains source="lua-api" reference and source="wasm-api" observation
     # runs.  The two runs are separate because setter probes mutate engine
@@ -2496,7 +2567,10 @@ def write_report(base_output: Path, args: argparse.Namespace, compare_info: dict
 
     lines.extend([
         "",
-        "## API Coverage",
+        "## API Label Inventory",
+        "",
+        "These counts identify named checks; they do not establish behavioural verification.",
+        "Function evidence is recorded separately in `parity_ledger.json` and aggregate reports.",
         "",
         f"- Details: {report_link(coverage_details)}",
         f"- Known problems: `{len(KNOWN_ISSUES)}`",
@@ -2689,7 +2763,7 @@ def run_one(
     return run_output
 
 
-def main() -> int:
+def _main() -> int:
     args = parse_args()
     # Spring requires absolute isolated and write-directory paths.  Resolve
     # user-supplied relative output roots before creating temporary fixtures;
@@ -2703,7 +2777,7 @@ def main() -> int:
     if args.mode in ("native", "both"):
         ensure_native_built(args.skip_native_build)
     if args.mode == "wasm":
-        ensure_wasm_built(args.skip_wasm_build, args.wasm_transport, args.wasm_context)
+        ensure_wasm_built(args.skip_wasm_build, args.wasm_transport, args.wasm_context, args.enable_rendering_tests)
 
     if args.mode == "compare":
         if not args.output_dir.is_dir():
@@ -2803,6 +2877,22 @@ def main() -> int:
 
     print(base_output)
     return 0
+
+
+def main() -> int:
+    # Generation, compilation, reference and guest execution share fixture
+    # artifacts. Hold one lock through comparison, then restore the committed
+    # non-rendering projections even when a run fails or is interrupted.
+    with probe_build_lock(WASM_PARITY_CRATE.parent / ".probe-build.lock"):
+        try:
+            return _main()
+        finally:
+            if BUILT_PROBE_CONTEXTS:
+                contexts = sorted(BUILT_PROBE_CONTEXTS - {"synced_gadget"}) + ["synced_gadget"]
+                for context in contexts:
+                    subprocess.run(["python3", str(WASM_PROBE_GENERATOR), "--context", context,
+                        "--lua-output", str(WASM_CONTEXT_CORE_LUA_OUTPUTS[context]),
+                        "--manifest-output", str(WASM_CONTEXT_CORE_MANIFESTS[context])], cwd=ROOT, check=True)
 
 
 if __name__ == "__main__":

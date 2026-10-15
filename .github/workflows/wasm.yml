@@ -20,6 +20,7 @@ on:
       - "docker-build-v2/**"
   push:
     branches:
+      - main
       - master
       - rust-wip
     paths:
@@ -57,7 +58,7 @@ jobs:
         run: rustup target add wasm32-unknown-unknown
 
       - name: Install libclang and native regression dependencies
-        run: sudo apt-get update && sudo apt-get install --yes libclang-18-dev libsdl2-dev libjsoncpp-dev libgl-dev libgl1-mesa-dri
+        run: sudo apt-get update && sudo apt-get install --yes libclang-18-dev libsdl2-dev libjsoncpp-dev libgl-dev libgl1-mesa-dri python3-clang-18 libopenal-dev libfreetype-dev libfontconfig-dev libogg-dev libvorbis-dev libopus-dev libminizip-dev libunwind-dev
 
       - name: Locate libclang
         run: echo "LIBCLANG_PATH=/usr/lib/llvm-18/lib" >> "$GITHUB_ENV"
@@ -89,7 +90,15 @@ jobs:
             test/wasm_api/guests/parity_guest/probe_manifest.json
 
       - name: Build engine and Wasm tests with ASAN
-        run: ./docker-build-v2/build.sh linux -DUSE_ASAN=ON
+        run: ./docker-build-v2/build.sh linux -DUSE_ASAN=ON -DNATIVE_API_TEST_HOOKS=ON
+
+      - name: Audit native implementations and generated mutants
+        run: |
+          ninja -C build-amd64-linux -t compdb > "$RUNNER_TEMP/native-commands.json"
+          /usr/bin/python3 rts/wasm/check_native_stubs.py --commands "$RUNNER_TEMP/native-commands.json"
+          /usr/bin/python3 -m unittest discover -s rts/wasm/tests -p 'test_native_stub_*.py'
+          python3 test/native_api_parity/generate_mutants.py --check
+          python3 -m unittest discover -s test/native_api_parity/tests -v
 
       - name: Run engine tests
         run: ./docker-build-v2/build.sh --compile linux -t check
@@ -108,7 +117,9 @@ jobs:
           SDL_VIDEODRIVER: offscreen
           LIBGL_ALWAYS_SOFTWARE: "1"
           LP_NUM_THREADS: "1"
-        run: python3 test/native_stub_regressions/run.py --output test/native_api_parity/out-ci-stub-regressions
+        run: |
+          python3 test/native_stub_regressions/run.py --output test/native_api_parity/out-ci-stub-regressions
+          python3 test/native_api_parity/parity_ledger.py --native-audit-log test/native_api_parity/out-ci-stub-regressions/spring.log --gate --output "$RUNNER_TEMP/parity-ledger.json"
 
       - name: Run Wasm parity fixture
         run: |

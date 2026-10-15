@@ -937,6 +937,33 @@
     },
     {
       "module": "display",
+      "function": "GetScreenGeometryFull",
+      "import_module": "spring:display",
+      "import_name": "get-screen-geometry-full",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 36,
+          "alignment": 4
+        }
+      },
+      "direct_params": [
+        "i32",
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32,i32->i32",
+      "notes": []
+    },
+    {
+      "module": "display",
       "function": "GetTeamColor",
       "import_module": "spring:display",
       "import_name": "get-team-color",
@@ -1078,6 +1105,32 @@
         "i64"
       ],
       "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "display",
+      "function": "HaveAdvShadingFull",
+      "import_module": "spring:display",
+      "import_name": "have-adv-shading-full",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 8,
+          "alignment": 4
+        }
+      },
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
       "notes": []
     },
     {
@@ -10959,35 +11012,6 @@
         "i64"
       ],
       "signature": "i32,i32->i64",
-      "notes": []
-    },
-    {
-      "module": "los",
-      "function": "GetClosestValidPosition",
-      "import_module": "spring:los",
-      "import_name": "get-closest-valid-position",
-      "environment_mask": 31,
-      "mutating": false,
-      "visibility_sensitive": true,
-      "source_status": "automatic",
-      "input_strategy": "direct",
-      "result_strategy": {
-        "fixed-output-buffer": {
-          "bytes": 12,
-          "alignment": 4
-        }
-      },
-      "direct_params": [
-        "i32",
-        "f32",
-        "f32",
-        "f32",
-        "i32"
-      ],
-      "direct_results": [
-        "i32"
-      ],
-      "signature": "i32,f32,f32,f32,i32->i32",
       "notes": []
     },
     {
@@ -31678,7 +31702,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1205,
+  "automatic_count": 1206,
   "manual_count": 202,
   "unsupported_count": 17
 }

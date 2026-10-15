@@ -331,6 +331,67 @@ wasm_trap_t* CoreOption_camera_set_camera_target(void* environment, wasmtime_cal
     return nullptr;
 }
 
+wasm_trap_t* CoreOption_display_get_screen_geometry_full(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->display == nullptr ||
+        state->native->display->GetScreenGeometryFull == nullptr)
+        return Trap("GetScreenGeometryFull generated Core binding is unavailable");
+    if (3 != 0 && (slots == nullptr || slotCount != 3))
+        return Trap("GetScreenGeometryFull generated Core ABI signature mismatch");
+    if (3 == 0 && slotCount != 0)
+        return Trap("GetScreenGeometryFull generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 4u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t output = static_cast<std::uint32_t>(slots[2].i32);
+    if (!state->memory.Contains(output, 36u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+
+    GetScreenGeometryQuery query{};
+    query.screenNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.screenNum)>>>(slots[0].i32);
+    query.queryUsable = slots[1].i32 != 0;
+    GetScreenGeometryFullResult result{};
+    state->native->display->GetScreenGeometryFull(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    std::array<std::uint8_t, 36> wire{};
+    WireWriter writer(wire);
+    if (!writer.I32(result.geom.viewSizeX)) return Trap("generated Core wire overflow");
+    if (!writer.I32(result.geom.viewSizeY)) return Trap("generated Core wire overflow");
+    if (!writer.I32(result.geom.viewPosX)) return Trap("generated Core wire overflow");
+    if (!writer.I32(result.geom.viewPosY)) return Trap("generated Core wire overflow");
+    if (!writer.Align(4u)) return Trap("generated option record alignment overflow");
+    if (!writer.Bool(result.hasUsable)) return Trap("generated option output overflow");
+    if (result.hasUsable) {
+        if (!writer.I32(result.usable.viewSizeX)) return Trap("generated Core wire overflow");
+        if (!writer.I32(result.usable.viewSizeY)) return Trap("generated Core wire overflow");
+        if (!writer.I32(result.usable.viewPosX)) return Trap("generated Core wire overflow");
+        if (!writer.I32(result.usable.viewPosY)) return Trap("generated Core wire overflow");
+        if (!writer.Align(4u)) return Trap("generated option record alignment overflow");
+    } else {
+        std::remove_cv_t<std::remove_reference_t<decltype(result.usable)>> coreDefault{};
+        if (!writer.I32(coreDefault.viewSizeX)) return Trap("generated Core wire overflow");
+        if (!writer.I32(coreDefault.viewSizeY)) return Trap("generated Core wire overflow");
+        if (!writer.I32(coreDefault.viewPosX)) return Trap("generated Core wire overflow");
+        if (!writer.I32(coreDefault.viewPosY)) return Trap("generated Core wire overflow");
+        if (!writer.Align(4u)) return Trap("generated option record alignment overflow");
+    }
+    if (!writer.Finish(4u)) return Trap("generated option output layout mismatch");
+    if (!state->memory.Write(output, wire.data(), wire.size())) return Trap("generated option output range changed unexpectedly");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreOption_tracing_trace_ray_ground_between_positions(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -1226,6 +1287,13 @@ bool RegisterGeneratedOptionImports(wasmtime_linker_t* linker, HostState* state,
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedOption(linker, "spring:display", "get-screen-geometry-full",
+                MakeFuncType(params, 3, results, 1), CoreOption_display_get_screen_geometry_full, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedOption(linker, "spring:tracing", "trace-ray-ground-between-positions",
@@ -1292,6 +1360,6 @@ bool RegisterGeneratedOptionImports(wasmtime_linker_t* linker, HostState* state,
     return true;
 }
 
-static_assert(14 >= 0, "generated option Core callback count");
+static_assert(15 >= 0, "generated option Core callback count");
 
 } // namespace recoil::wasm::core::generated

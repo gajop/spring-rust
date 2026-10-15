@@ -135,7 +135,9 @@ pub fn create_shader(
     // The engine reports a failed compile or link as shader 0; the log has
     // the compiler's messages.
     if shader.shader_id == 0 {
-        return Err(crate::ApiError::new(crate::ErrorCode::OperationFailed as i32));
+        return Err(crate::ApiError::new(
+            crate::ErrorCode::OperationFailed as i32,
+        ));
     }
 
     if params.uniform_ints.is_empty() && params.uniform_floats.is_empty() {

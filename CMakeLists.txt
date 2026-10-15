@@ -303,6 +303,11 @@ endif (USE_ASAN)
 
 ### Tracy related stuff
 option(RECOIL_DETAILED_TRACY_ZONING "Enable additional detailed tracy zones (only enable this for testing/debugging)" FALSE)
+option(NATIVE_API_TEST_HOOKS "Enable private native/Wasm API table mutants for parity tests" FALSE)
+if(NATIVE_API_TEST_HOOKS)
+	add_definitions(-DNATIVE_API_TEST_HOOKS)
+endif()
+
 option(RECOIL_WASM_JOB_DETAIL_ZONES "Trace Wasm job setup, copies, execution and teardown (requires Tracy)" FALSE)
 if(RECOIL_WASM_JOB_DETAIL_ZONES)
 	add_definitions(-DRECOIL_WASM_JOB_DETAIL_ZONES)

@@ -25,8 +25,8 @@
     },
     {
       "name": "display_generated.rs",
-      "sha256": "9b253ac1bf490c57f56953cb1fb7184d52bf49e6f52bea33b45706c116c70afd",
-      "bytes": 15374
+      "sha256": "5158f2b206dc997983a23202d02bfb71de5647d4835276c5166d92e43f5a4df0",
+      "bytes": 16854
     },
     {
       "name": "effects_control_generated.rs",
@@ -90,8 +90,8 @@
     },
     {
       "name": "los_generated.rs",
-      "sha256": "79dc52f2a1a35caf4a1265c83d008f697d744eb3dc8d7b5ad35fab59d295255d",
-      "bytes": 6513
+      "sha256": "92fffb086f46719d36b588e64ffa0005809f9cbbd9c4aa40fb670a7680f7619d",
+      "bytes": 6631
     },
     {
       "name": "markers_generated.rs",

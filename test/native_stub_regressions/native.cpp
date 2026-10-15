@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "NativeInterface/NativeInterface.h"
+#include "../native_api_parity/generated/NativeApiMutants.h"
 #include <SDL2/SDL_video.h>
 #include <GL/glcorearb.h>
 #include <jsoncpp/json/json.h>
@@ -17,6 +18,7 @@ static int moduleData;
 static bool testingMutant = false;
 static bool mutantDetected = false;
 static std::set<std::string> killedMutants;
+static bool killedHeadingNoop = false;
 
 static void Check(bool valid, const char* name)
 {
@@ -165,6 +167,19 @@ void HandleLuaCall(NativeInterface* api, void*, const HandleLuaCallQuery* query,
 		Check(!r.error && r.hasShield == bool(present), "selected shield presence equals Lua");
 		if (present) Check(r.shield.shieldEnabled == bool(enabled) && std::abs(r.shield.shieldPower-power) < .01f &&
 			std::abs(r.shield.shieldAlpha-alpha) < .01f, "selected shield fields are real values");
+	} else if (command == "heading") {
+		int unit; input >> unit;
+		GetUnitHeadingQuery read{unit,false}; GetUnitHeadingResult before{},after{};
+		api->unitsInfo->GetUnitHeading(&read,&before);
+		SetUnitHeadingQuery q{unit,static_cast<short>(int(before.heading)+8192),false};
+		SetUnitHeadingResult r{};
+		api->syncedCtrl->unit->SetUnitHeading(&q,&r);
+		api->unitsInfo->GetUnitHeading(&read,&after);
+		GetUnitDirectionQuery directionQuery{unit}; GetUnitDirectionResult direction{};
+		api->unitsInfo->GetUnitDirection(&directionQuery,&direction);
+		const double angle=double(q.heading)*6.283185307179586/65536.0;
+		Check(!r.error && r.success && !after.error && after.heading==q.heading, "heading setter changes heading");
+		Check(!direction.error && std::abs(direction.direction.x-std::sin(angle))<.01 && std::abs(direction.direction.z-std::cos(angle))<.01, "heading updates front direction");
 	} else if (command == "hover") {
 		GetUnitDefByIDQuery q{};
 		bool expected;
@@ -213,11 +228,46 @@ void HandleLuaCall(NativeInterface* api, void*, const HandleLuaCallQuery* query,
 		LogResult r{};
 		api->messages->Log(&q, &r);
 		Check(!r.error && r.success, "section/level log accepted");
+	} else if (command == "display") {
+		GetScreenGeometryQuery q{};
+		ViewGeometry expected{}, usable{};
+		input >> q.screenNum >> q.queryUsable >> expected.viewSizeX >> expected.viewSizeY >> expected.viewPosX >> expected.viewPosY;
+		if (q.queryUsable) input >> usable.viewSizeX >> usable.viewSizeY >> usable.viewPosX >> usable.viewPosY;
+		GetScreenGeometryFullResult r{};
+		api->display->GetScreenGeometryFull(&q, &r);
+		auto same=[](const ViewGeometry& a,const ViewGeometry& b) { return a.viewSizeX==b.viewSizeX && a.viewSizeY==b.viewSizeY && a.viewPosX==b.viewPosX && a.viewPosY==b.viewPosY; };
+		Check(!r.error && expected.viewSizeX>0 && same(r.geom,expected), "full display bounds equal Lua");
+		Check(r.hasUsable==q.queryUsable && (!q.queryUsable || same(r.usable,usable)), "optional usable display bounds equal Lua");
+		GetScreenGeometryResult legacy{};
+		api->display->GetScreenGeometry(&q,&legacy);
+		Check(!legacy.error && same(legacy.geom,q.queryUsable ? usable : expected), "legacy display selects requested bounds");
+		q.screenNum=2147483647;
+		api->display->GetScreenGeometryFull(&q,&r);
+		Check(r.error!=nullptr && !r.hasUsable, "invalid display rejected");
+	} else if (command == "shading") {
+		bool expected, ground;
+		input >> expected >> ground;
+		HaveAdvShadingQuery q{};
+		HaveAdvShadingFullResult r{};
+		api->display->HaveAdvShadingFull(&q,&r);
+		Check(!r.error && expected && r.enabled==expected && r.groundEnabled==ground, "both shading returns equal Lua");
+	} else if (command == "files") {
+		GetFileInfoQuery q{"modinfo.lua"};
+		GetFileInfoResult r{};
+		api->vfs->GetFileInfo(&q,&r);
+		Check(!r.error && r.exists && !r.info.isDirectory && r.info.size>0 && r.info.mode==0600u, "file metadata uses actual permissions");
+		q.path="gamedata/";
+		api->vfs->GetFileInfo(&q,&r);
+		Check(!r.error && r.exists && r.info.isDirectory, "VFS directory recognized");
+		q.path="this-fixture-has-no-such-file";
+		api->vfs->GetFileInfo(&q,&r);
+		Check(!r.error && !r.exists && r.info.size==0, "missing file clears output");
 	} else if (command == "draw") {
 		CheckFramebuffers(api);
 	} else if (command == "finish") {
 		for (const auto& name: killedMutants) std::fprintf(stderr,"NO_STUBS_MUTANT_KILLED %s\n",name.c_str());
-		Check(killedMutants.size() == 10, "all audited zero-return mutants were killed");
+		Check(killedHeadingNoop, "heading success-no-op mutant killed by readback");
+		Check(killedMutants.size() == 14, "all audited zero-return mutants were killed");
 		if (!failed && checks >= 30) std::fprintf(stderr, "NO_STUBS_PASS %u checks, %zu killed mutants\n", checks, killedMutants.size());
 		else Check(false, "all audit cases executed");
 	} else Check(false, "known audit command");
@@ -226,39 +276,31 @@ void HandleLuaCall(NativeInterface* api, void*, const HandleLuaCallQuery* query,
 	// other callers are untouched. Replaying the same Lua observation must
 	// expose a zero-return stub in at least one case for each audited function.
 	if (testingMutant || command == "finish") return;
-	NativeInterface copy = *api;
-	UtilsApi utils = *api->utils;
-	UnitsInfoApi unitsInfo = *api->unitsInfo;
-	UnitsWeaponsApi weapons = *api->unitsWeapons;
-	UnitDefsApi defs = *api->unitDefs;
-	UnitsCommandsApi commands = *api->unitsCommands;
-	MessagesApi messages = *api->messages;
-	TeamsApi teams = *api->teams;
-	ProjectilesApi projectiles = *api->projectiles;
-	GfxApi gfx = *api->gfx;
-	copy.utils=&utils;copy.unitsInfo=&unitsInfo;copy.unitsWeapons=&weapons;
-	copy.unitDefs=&defs;copy.unitsCommands=&commands;copy.messages=&messages;
-	copy.teams=&teams;copy.projectiles=&projectiles;copy.gfx=&gfx;
-	std::string mutant;
-	if (command == "move") { utils.TestMoveOrder=Zero<TestMoveOrderQuery,TestMoveOrderResult>;mutant="TestMoveOrder"; }
-	if (command == "shield") { unitsInfo.GetUnitShieldState=Zero<GetUnitShieldStateQuery,GetUnitShieldStateResult>;mutant="GetUnitShieldState"; }
-	if (command == "turn") { weapons.GetUnitWeaponState=Zero<GetUnitWeaponStateQuery,GetUnitWeaponStateResult>;mutant="GetUnitWeaponState"; }
-	if (command == "hover") { defs.GetUnitDefByID=Zero<GetUnitDefByIDQuery,GetUnitDefByIDResult>;mutant="GetUnitDefByID"; }
-	if (command == "factory") { commands.GetFactoryCounts=Zero<GetFactoryCountsQuery,GetFactoryCountsResult>;mutant="GetFactoryCounts"; }
-	if (command == "piece") { projectiles.GetPieceProjectileParams=Zero<GetPieceProjectileParamsQuery,GetPieceProjectileParamsResult>;mutant="GetPieceProjectileParams"; }
-	if (command == "log") { messages.Log=Zero<LogQuery,LogResult>;mutant="Log"; }
-	if (command == "draw") { gfx.ClearAttachmentFBO=Zero<GfxClearAttachmentFBOQuery,GfxBoolResult>;mutant="ClearAttachmentFBO"; }
-	if (command == "options") { teams.GetTeamInfo=Zero<GetTeamInfoQuery,GetTeamInfoResult>;mutant="GetTeamInfo"; }
-	if (mutant.empty()) return;
-	testingMutant=true;mutantDetected=false;
-	HandleLuaCall(&copy,nullptr,query,result);
-	if (mutantDetected) killedMutants.insert(mutant);
-	if (command == "options") {
-		teams=*api->teams;
-		teams.GetPlayerInfo=Zero<GetPlayerInfoQuery,GetPlayerInfoResult>;
-		mutantDetected=false;
-		HandleLuaCall(&copy,nullptr,query,result);
-		if (mutantDetected) killedMutants.insert("GetPlayerInfo");
+	struct Candidate { const char* command; const char* module; const char* function; };
+	const Candidate candidates[] = {
+		{"move","utils","TestMoveOrder"}, {"shield","units_info","GetUnitShieldState"},
+		{"turn","units_weapons","GetUnitWeaponState"}, {"hover","unit_defs","GetUnitDefByID"},
+		{"factory","units_commands","GetFactoryCounts"}, {"piece","projectiles","GetPieceProjectileParams"},
+		{"log","messages","Log"}, {"draw","gfx","ClearAttachmentFBO"},
+		{"options","teams","GetTeamInfo"}, {"options","teams","GetPlayerInfo"},
+		{"display","display","GetScreenGeometryFull"}, {"shading","display","HaveAdvShadingFull"},
+		{"files","vfs","GetFileInfo"}, {"heading","unit_control","SetUnitHeading"},
+	};
+	for (const auto& candidate: candidates) {
+		if (command!=candidate.command) continue;
+		NativeApiMutants copy(*api);
+		Check(copy.Select(candidate.module,candidate.function), "mutant exists in generated inventory");
+		testingMutant=true; mutantDetected=false;
+		HandleLuaCall(&copy.api,nullptr,query,result);
+		if (mutantDetected) killedMutants.insert(candidate.function);
+		if (command=="heading") {
+			copy.Reset(*api);
+			copy.Select(candidate.module,candidate.function,true);
+			mutantDetected=false;
+			HandleLuaCall(&copy.api,nullptr,query,result);
+			killedHeadingNoop=mutantDetected;
+		}
+		testingMutant=false;
 	}
 	testingMutant=false;
 }

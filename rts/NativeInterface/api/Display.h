@@ -79,7 +79,7 @@ struct GetWindowGeometryResult {
 
 struct GetScreenGeometryQuery {
 	int32_t screenNum;
-	bool queryUsable;
+	bool queryUsable; // Legacy: select usable rectangle. Full: include it alongside full bounds.
 };
 
 struct GetScreenGeometryResult {
@@ -241,6 +241,19 @@ struct SetTeamColorResult {
 	bool success;
 };
 
+// Full Lua display results, appended as new slots to preserve existing C layouts.
+struct GetScreenGeometryFullResult {
+	const Error* error;
+	ViewGeometry geom;
+	ViewGeometry usable;
+	bool hasUsable;
+};
+struct HaveAdvShadingFullResult {
+	const Error* error;
+	bool enabled;
+	bool groundEnabled;
+};
+
 // API structure
 struct DisplayApi {
 	void (*GetNumDisplays)(
@@ -362,6 +375,8 @@ struct DisplayApi {
 		const SetTeamColorQuery* query,
 		SetTeamColorResult* result
 	);
+	void (*GetScreenGeometryFull)(const GetScreenGeometryQuery* query, GetScreenGeometryFullResult* result);
+	void (*HaveAdvShadingFull)(const HaveAdvShadingQuery* query, HaveAdvShadingFullResult* result);
 };
 
 extern const DisplayApi DISPLAY_API;

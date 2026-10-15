@@ -130,12 +130,6 @@
         pub use super::types::{AtmosphereParams, BoolResult, CollisionVolumeData, CommonErrorCode, DefRef, Error, Float2, Float2Result, Float3, Float3Array, Float3Result, Float4, Float4Result, FloatArray, FloatResult, GiveOrderArrayToUnitArrayQuery, GiveOrderArrayToUnitArrayResult, GiveOrderArrayToUnitQuery, GiveOrderArrayToUnitResult, GiveOrderToUnitArrayQuery, GiveOrderToUnitArrayResult, GiveOrderToUnitQuery, GiveOrderToUnitResult, Int2, Int3, Int32Array, Int32Result, MapRenderingParams, NativeCommand, NativeExplosionParams, NativeProjectileParams, NextFloatQuery, NextFloatResult, NextIntQuery, NextIntResult, NextIntUpToQuery, NextIntUpToResult, NumberOrBool, ProjectileTargetRef, ResourcePack, RgbColor, SetSeedQuery, SetSeedResult, SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array, UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams};
 
         #[inline]
-        pub fn get_closest_valid_position(unit_def_id: i32, x: f32, z: f32, radius: f32) -> Result<Float3> {
-            let value = crate::generated::los::get_closest_valid_position(unit_def_id, x, z, radius)?;
-            Ok(Float3 { x: value.x, y: value.y, z: value.z })
-        }
-
-        #[inline]
         pub fn get_position_los_state(pos: Float3, ally_team_id: i32) -> Result<PositionLosState> {
             let value = crate::generated::los::get_position_los_state(crate::generated::los::Float3 { x: pos.x, y: pos.y, z: pos.z }, ally_team_id)?;
             Ok(PositionLosState { in_los_or_radar: value.in_los_or_radar, in_los: value.in_los, in_radar: value.in_radar, in_jammer: value.in_jammer })

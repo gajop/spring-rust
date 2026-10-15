@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
+from parity_ledger import gate, inventory as evidence_inventory, markdown, observe, observe_native_audit, specs
 
 from run_harness import (
     coverage_summary,
@@ -39,6 +41,9 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help="aggregate report path (defaults to <base-run>/coverage_aggregate.md)",
     )
+    parser.add_argument("--native-audit-log", type=Path, action="append", default=[])
+    parser.add_argument("--gate", action="store_true", help="reject evidence regressions or unverified additions")
+    parser.add_argument("--write-ledger", action="store_true", help="replace the checked-in ledger after a passing gate")
     return parser.parse_args()
 
 
@@ -60,6 +65,18 @@ def main() -> int:
     validate_run(base_run)
     for run in process_runs:
         validate_run(run)
+
+    evidence = evidence_inventory(ROOT, json.loads((ROOT / "rts/wasm/generated/model.json").read_text()))
+    for run in [base_run, *process_runs]:
+        observe(evidence, specs(ROOT), run)
+    for log in args.native_audit_log:
+        observe_native_audit(evidence, log.resolve())
+    baseline_path = ROOT / "test/native_api_parity/parity_ledger.json"
+    failures = gate(evidence, json.loads(baseline_path.read_text())) if args.gate or args.write_ledger else []
+    ledger_path = base_run / "parity_ledger.json"
+    ledger_path.write_text(json.dumps(evidence, indent=2) + "\n")
+    if args.write_ledger and not failures:
+        baseline_path.write_text(ledger_path.read_text())
 
     all_checked_names: set[str] = set()
     all_surface_test_ids: set[str] = set()
@@ -89,10 +106,15 @@ def main() -> int:
         f"- Base rendering run: {report_link(base_run)}",
     ]
     lines.extend(f"- Isolated process run: {report_link(run)}" for run in process_runs)
+    lines.extend(["", "## Function Evidence", "",
+                  "Levels require observed fields and direct comparisons. Label counts below are navigation only.", "",
+                  *markdown(evidence), "", f"- Evidence ledger: {report_link(ledger_path)}"])
+    if failures:
+        lines.extend(["", "Evidence gate failed:", "", *(f"- {failure}" for failure in failures)])
     lines.extend(
         [
             "",
-            "## Coverage",
+            "## Label Inventory",
             "",
             "| Surface | Total Functions | Tested Functions | Coverage | Unknown Tested Names |",
             "| --- | ---: | ---: | ---: | ---: |",
@@ -131,7 +153,7 @@ def main() -> int:
     )
     output.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(output)
-    return 0
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":

@@ -97,8 +97,8 @@ static void NativeGetMouseState(const GetMouseStateQuery* query, GetMouseStateRe
 	result->error = nullptr;
 	result->state.x = static_cast<float>(mouse->lastx - globalRendering->viewPosX);
 	result->state.y = static_cast<float>(globalRendering->viewSizeY - mouse->lasty - 1);
-	result->state.dx = 0.0f; // Delta not directly available
-	result->state.dy = 0.0f;
+	result->state.dx = static_cast<float>(mouse->lastMoveX);
+	result->state.dy = -static_cast<float>(mouse->lastMoveY);
 	result->state.left = mouse->buttons[SDL_BUTTON_LEFT].pressed;
 	result->state.middle = mouse->buttons[SDL_BUTTON_MIDDLE].pressed;
 	result->state.right = mouse->buttons[SDL_BUTTON_RIGHT].pressed;

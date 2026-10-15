@@ -26,6 +26,7 @@
 #include <cstring>
 #include <fstream>
 #include <algorithm>
+#include <sys/stat.h>
 
 extern "C" bool GetNativeGfxTextureInfo(const char* name, uint32_t* id, int32_t* xsize, int32_t* ysize, uint32_t* target);
 
@@ -133,22 +134,37 @@ static void NativeFileExists(const FileExistsQuery* query, FileExistsResult* res
 
 static void NativeGetFileInfo(const GetFileInfoQuery* query, GetFileInfoResult* result) {
 	bufferPos = 0;
-	result->exists = false;
-
+	*result = {};
 	if (!IsReady()) { result->error = &NOT_READY_ERROR; return; }
-
-	CFileHandler fh(query->path, SPRING_VFS_ALL);
-	if (!fh.FileExists()) {
-		result->error = nullptr;
-		return; // Not an error, just doesn't exist
+	if (query->path == nullptr || query->path[0] == '\0') {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
 	}
-
-	result->error = nullptr;
+	std::string path = query->path;
+	std::replace(path.begin(), path.end(), '\\', '/');
+	while (path.size() > 1 && path.back() == '/') path.pop_back();
+	// VFS directories are synthetic. Match a parent's listing exactly rather
+	// than reporting a nonempty child list as proof that the directory exists.
+	const auto directories = CFileHandler::SubDirs(FileSystem::GetDirectory(path), "*", SPRING_VFS_ALL, false);
+	for (auto directory: directories) {
+		std::replace(directory.begin(), directory.end(), '\\', '/');
+		while (directory.size() > 1 && directory.back() == '/') directory.pop_back();
+		if (directory == path) { result->info.isDirectory = true; break; }
+	}
+	CFileHandler file;
+	if (!result->info.isDirectory) {
+		file.Open(path, SPRING_VFS_ALL);
+		if (!file.FileExists()) return;
+		result->info.size = static_cast<uint32_t>(file.FileSize());
+	}
 	result->exists = true;
 	result->info.name = query->path;
-	result->info.size = static_cast<uint32_t>(fh.FileSize());
-	result->info.mode = 0644; // Default read permissions
-	result->info.isDirectory = false; // Files only, VFS doesn't track directory metadata
+	// Archive entries have no POSIX permissions; zero explicitly means
+	// unavailable. For a real backing file return its actual mode.
+	const std::string absolute = result->info.isDirectory ? "" : CFileHandler::GetFileAbsolutePath(path, SPRING_VFS_ALL);
+	struct stat metadata{};
+	if (!absolute.empty() && stat(absolute.c_str(), &metadata) == 0)
+		result->info.mode = metadata.st_mode & 07777;
 }
 
 static void NativeGetFileSize(const GetFileSizeQuery* query, GetFileSizeResult* result) {

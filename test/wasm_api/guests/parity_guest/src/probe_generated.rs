@@ -2434,15 +2434,6 @@ fn probe_side_data_count(fixture: &super::Fixture) -> String {
     format!("WASM_API|side_data_count|{fields}")
 }
 
-fn probe_closest_valid_position(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::los::get_closest_valid_position((fixture.unit_def_id) as i32, (1024.0f32) as f32, (1024.0f32) as f32, (64f32) as f32);
-    let fields = match result {
-        Ok(_value) => "__unexpected_value|b|1".to_string(),
-        Err(_error) => String::new(),
-    };
-    format!("WASM_API|closest_valid_position|{fields}")
-}
-
 fn probe_closest_build_pos(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::utils::closest_build_pos((fixture.team_id) as i32, (fixture.unit_def_id) as i32, crate::bindings::recoil::spring_api::utils::Float3 { x: (1024.0f32) as f32, y: (128.0f32) as f32, z: (1024.0f32) as f32 }, (0f32) as f32, (0i32) as i32, (0i32) as i32);
     let fields = match result {
@@ -6041,38 +6032,6 @@ fn probe_bugger_off(fixture: &super::Fixture) -> String {
     format!("WASM_API|bugger_off|{fields}")
 }
 
-fn probe_kill_team(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::team_control::kill_team((fixture.team_id) as i32) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|kill_team|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::teams::get_team_info((fixture.team_id) as i32, false);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("isDead", value.is_dead)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|kill_team|{fields}")
-}
-
-fn probe_game_over(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::team_control::game_over(&vec![0i32]) {
-        Ok(_) => {},
-        Err(error) => return format!("WASM_API|game_over|__error|i|{}", error.code),
-    }
-    let result = crate::bindings::recoil::spring_api::game::is_game_over(0u8);
-    let fields = match result {
-        Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_bool("gameOver", value)];
-            output_fields.join("|")
-        }
-        Err(error) => format!("__error|i|{}", error.code),
-    };
-    format!("WASM_API|game_over|{fields}")
-}
-
 pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_game_frame(fixture));
     emit(probe_game_seconds(fixture));
@@ -6244,7 +6203,6 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_side_data_by_name(fixture));
     emit(probe_side_data_by_index(fixture));
     emit(probe_side_data_count(fixture));
-    emit(probe_closest_valid_position(fixture));
     emit(probe_closest_build_pos(fixture));
     emit(probe_test_build_order(fixture));
     emit(probe_unit_rotation(fixture));
@@ -6504,6 +6462,4 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_unit_detach(fixture));
     emit(probe_unit_detach_from_air(fixture));
     emit(probe_bugger_off(fixture));
-    emit(probe_kill_team(fixture));
-    emit(probe_game_over(fixture));
 }

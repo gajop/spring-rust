@@ -59,6 +59,7 @@ def main():
         if game.is_symlink():game.unlink()
         else:shutil.rmtree(game)
         shutil.copytree(GAME_FIXTURE,game)
+        os.chmod(game/'modinfo.lua',0o600)
         for path in (game/'LuaRules/Gadgets').glob('*.lua'):path.unlink()
         shutil.copy2(HERE/'setup.lua',game/'LuaRules/Gadgets/audit.lua')
         shutil.copy2(HERE/'checks.lua',game/'LuaUI/main.lua')

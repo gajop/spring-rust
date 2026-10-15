@@ -125,7 +125,7 @@ static void NativeGetWaterPlaneLevel(const GetWaterPlaneLevelQuery* query, GetWa
 	}
 
 	result->error = nullptr;
-	result->level = 0.0f;  // Default water level
+	result->level = CGround::GetWaterPlaneLevel();
 }
 
 static void NativeGetWaterLevel(const GetWaterLevelQuery* query, GetWaterLevelResult* result)
@@ -138,7 +138,7 @@ static void NativeGetWaterLevel(const GetWaterLevelQuery* query, GetWaterLevelRe
 	}
 
 	result->error = nullptr;
-	result->level = 0.0f;  // Water level same everywhere
+	result->level = CGround::GetWaterLevel(query->x, query->z);
 }
 
 static void NativeGetGroundNormal(const GetGroundNormalQuery* query, GetGroundNormalResult* result)

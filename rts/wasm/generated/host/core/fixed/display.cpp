@@ -702,6 +702,53 @@ wasm_trap_t* Core_display_have_adv_shading(void* environment, wasmtime_caller_t*
     return nullptr;
 }
 
+wasm_trap_t* Core_display_have_adv_shading_full(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->display == nullptr ||
+        state->native->display->HaveAdvShadingFull == nullptr)
+        return Trap("HaveAdvShadingFull generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("HaveAdvShadingFull generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("HaveAdvShadingFull generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
+    if (!state->memory.Contains(output, 8u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+
+    HaveAdvShadingQuery query{};
+    query._unused = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query._unused)>>>(slots[0].i32);
+    HaveAdvShadingFullResult result{};
+    state->native->display->HaveAdvShadingFull(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) {
+        slots[0].i32 = errorCode;
+        return nullptr;
+    }
+    std::array<std::uint8_t, 8> wire{};
+    WireWriter writer(wire);
+    if (!writer.Bool(result.enabled)) return Trap("generated Core wire overflow");
+    if (!writer.Bool(result.groundEnabled)) return Trap("generated Core wire overflow");
+    if (!writer.Finish(4u))
+        return Trap("generated Core wire layout mismatch for HaveAdvShadingFull");
+    if (!state->memory.Write(output, wire.data(), wire.size()))
+        return Trap("generated Core output range changed unexpectedly");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* Core_display_have_shadows(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -1015,6 +1062,13 @@ bool RegisterGeneratedImports_display(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGenerated(linker, "spring:display", "have-adv-shading-full",
+                MakeFuncType(params, 2, results, 1), Core_display_have_adv_shading_full, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:display", "have-shadows",
@@ -1053,6 +1107,6 @@ bool RegisterGeneratedImports_display(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(21 >= 0, "generated Core Wasm callback count");
+static_assert(22 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

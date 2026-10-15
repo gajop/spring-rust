@@ -18,8 +18,8 @@ extern "C" {
 struct MouseState {
 	float x;
 	float y;
-	float dx;
-	float dy;
+	float dx; // Last delivered motion event; repeated queries do not consume it.
+	float dy; // Positive upwards, matching state.y.
 	bool left;
 	bool middle;
 	bool right;

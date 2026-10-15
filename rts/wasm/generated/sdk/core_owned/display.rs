@@ -129,6 +129,12 @@
             pub count: u32,
         }
 
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GetScreenGeometryFullResult {
+            pub geom: ViewGeometry,
+            pub usable: Option<ViewGeometry>,
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetScreenGeometryQuery {
             pub screen_num: i32,
@@ -189,6 +195,12 @@
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetWindowGeometryResult {
             pub geom: ViewGeometry,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct HaveAdvShadingFullResult {
+            pub enabled: bool,
+            pub ground_enabled: bool,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -320,9 +332,21 @@
         }
 
         #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GetScreenGeometryFullValue {
+            pub geom: ViewGeometry,
+            pub usable: Option<ViewGeometry>,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct GetWaterModeValue {
             pub mode: i32,
             pub name: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct HaveAdvShadingFullValue {
+            pub enabled: bool,
+            pub ground_enabled: bool,
         }
 
         #[inline]
@@ -452,6 +476,15 @@
         }
 
         #[inline]
+        pub fn get_screen_geometry_full(screen_num: i32, query_usable: bool) -> Result<GetScreenGeometryFullValue> {
+            let value = crate::generated::display::get_screen_geometry_full(screen_num, query_usable)?;
+            Ok(GetScreenGeometryFullValue {
+                geom: ViewGeometry { view_size_x: value.0.view_size_x, view_size_y: value.0.view_size_y, view_pos_x: value.0.view_pos_x, view_pos_y: value.0.view_pos_y },
+                usable: match value.1 { Some(value) => Some(ViewGeometry { view_size_x: value.view_size_x, view_size_y: value.view_size_y, view_pos_x: value.view_pos_x, view_pos_y: value.view_pos_y }), None => None }
+            })
+        }
+
+        #[inline]
         pub fn get_team_color(team_id: i32) -> Result<TeamColor> {
             let value = crate::generated::display::get_team_color(team_id)?;
             Ok(TeamColor { r: value.r, g: value.g, b: value.b, a: value.a })
@@ -495,6 +528,15 @@
         pub fn have_adv_shading(unused: u8) -> Result<bool> {
             let value = crate::generated::display::have_adv_shading(unused)?;
             Ok(value)
+        }
+
+        #[inline]
+        pub fn have_adv_shading_full(unused: u8) -> Result<HaveAdvShadingFullValue> {
+            let value = crate::generated::display::have_adv_shading_full(unused)?;
+            Ok(HaveAdvShadingFullValue {
+                enabled: value.0,
+                ground_enabled: value.1
+            })
         }
 
         #[inline]

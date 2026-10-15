@@ -33,9 +33,9 @@ pub(crate) fn record_callins_enabled() -> bool {
 // scan is larger than the dispatch being measured.
 pub(crate) fn benchmark_callin_variant_is(variant: &str) -> bool {
     static VARIANT: OnceLock<String> = OnceLock::new();
-    VARIANT.get_or_init(|| {
-        std::env::var("SPRING_NATIVE_BENCHMARK_CALLIN_VARIANT").unwrap_or_default()
-    }) == variant
+    VARIANT
+        .get_or_init(|| std::env::var("SPRING_NATIVE_BENCHMARK_CALLIN_VARIANT").unwrap_or_default())
+        == variant
 }
 
 pub(crate) fn benchmark_case_is(name: &str) -> bool {
@@ -44,6 +44,37 @@ pub(crate) fn benchmark_case_is(name: &str) -> bool {
 }
 
 impl NativeApiParity {
+    fn record_comparison(
+        &self,
+        label: &str,
+        message: &Value,
+        field: &str,
+        kind: &str,
+    ) -> Result<(), String> {
+        if !record_callins_enabled() {
+            return Ok(());
+        }
+        let path = self.output_path.with_file_name("comparisons.jsonl");
+        let _guard = RECORD_LOCK
+            .lock()
+            .map_err(|e| format!("comparison recorder: {e}"))?;
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+        let mut file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(path)
+            .map_err(|e| e.to_string())?;
+        let name = message.get("testName").or_else(|| message.get("name"))
+            .and_then(Value::as_str).unwrap_or(label);
+        let name = name.strip_prefix("native_").unwrap_or(name);
+        let row = serde_json::json!({"test": name,
+            "field": field, "compared": message.get(field).is_some(), "kind": kind,
+            "case": message.get("case")});
+        writeln!(file, "{row}").map_err(|e| e.to_string())
+    }
+
     pub(crate) fn record_callin(&self, name: &str, arity: usize) {
         if !record_callins_enabled() {
             return;
@@ -459,6 +490,7 @@ impl NativeApiParity {
         field: &str,
         native: f32,
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         if message.get(field).is_some() {
             self.same(
                 &format!("{label}.{field}"),
@@ -475,6 +507,7 @@ impl NativeApiParity {
         field: &str,
         native: f32,
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "shape")?;
         if message.get(field).is_some() {
             let lua = f32_field(message, field)?;
             if !lua.is_finite() || !native.is_finite() {
@@ -492,6 +525,7 @@ impl NativeApiParity {
         field: &str,
         native: bool,
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         if message.get(field).is_some() {
             let lua = bool_field(message, field)?;
             if native != lua {
@@ -507,6 +541,7 @@ impl NativeApiParity {
         field: &str,
         native: i32,
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         if message.get(field).is_some() {
             let lua = i32_field(message, field)?;
             if native != lua {
@@ -543,6 +578,7 @@ impl NativeApiParity {
         field: &str,
         native: &str,
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         if message.get(field).is_some() {
             let lua = str_field(message, field)?;
             if native != lua {
@@ -558,6 +594,7 @@ impl NativeApiParity {
         field: &str,
         native: &[i32],
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -586,6 +623,7 @@ impl NativeApiParity {
         field: &str,
         native: &[f32],
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -619,6 +657,7 @@ impl NativeApiParity {
         field: &str,
         native: &[i32],
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -650,6 +689,7 @@ impl NativeApiParity {
         field: &str,
         native: &[String],
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -681,6 +721,7 @@ impl NativeApiParity {
         field: &str,
         native: &[(String, i32)],
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -719,6 +760,7 @@ impl NativeApiParity {
         field: &str,
         native: &[spring_native::sys::UnitDefCount],
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -760,6 +802,7 @@ impl NativeApiParity {
         field: &str,
         native: &[spring_native::sys::TeamUnitsByDef],
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         let Some(value) = message.get(field) else {
             return Ok(());
         };
@@ -820,6 +863,7 @@ impl NativeApiParity {
         field: &str,
         native: &[spring_native::sys::StartPosition],
     ) -> Result<(), String> {
+        self.record_comparison(label, message, field, "value")?;
         let Some(value) = message.get(field) else {
             return Ok(());
         };

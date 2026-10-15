@@ -1,6 +1,10 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "NativeInterfaceSystem.h"
+#ifdef NATIVE_API_TEST_HOOKS
+#include "../../test/native_api_parity/generated/NativeApiMutants.h"
+#endif
+#include <stdexcept>
 
 #include <algorithm>
 #include <charconv>
@@ -144,6 +148,9 @@ namespace {
 class NativeInterfaceSystem::Impl {
 public:
 	NativeInterface nativeInterface;
+#ifdef NATIVE_API_TEST_HOOKS
+	std::unique_ptr<NativeApiMutants> testApi;
+#endif
 	std::unique_ptr<SharedLib> sharedLib;
 	std::unique_ptr<NativeInterfaceEventClient> eventClient;
 	std::vector<std::unique_ptr<NativeInterfaceEventClient>> benchmarkEventClients;
@@ -198,6 +205,25 @@ public:
 		nativeInterface.tracing = &TRACING_API;
 		nativeInterface.utils = &UTILS_API;
 		nativeInterface.player = &PLAYER_API;
+#ifdef NATIVE_API_TEST_HOOKS
+		if (const char* selection = std::getenv("SPRING_NATIVE_API_MUTANT"); selection != nullptr && *selection != '\0') {
+			const std::string_view spec(selection);
+			const auto dot = spec.find('.');
+			const auto colon = spec.find(':');
+			if (dot == std::string_view::npos || colon == std::string_view::npos || dot >= colon)
+				throw std::runtime_error("Expected SPRING_NATIVE_API_MUTANT=module.Function:zero|noop");
+			const auto module = spec.substr(0,dot);
+			const auto function = spec.substr(dot+1,colon-dot-1);
+			const auto kind = spec.substr(colon+1);
+			if (kind != "zero" && kind != "noop")
+				throw std::runtime_error("Invalid native API mutant kind");
+			testApi = std::make_unique<NativeApiMutants>(nativeInterface);
+			if (!testApi->Select(module,function,kind == "noop"))
+				throw std::runtime_error("Unknown native API mutant: " + std::string(spec));
+			nativeInterface = testApi->api;
+			LOG("[NativeApiMutant] %s", selection);
+		}
+#endif
 		wasmSystem = std::make_unique<WasmInterfaceSystem>(&nativeInterface,
 			WasmRuntimeConfigForGame());
 	}

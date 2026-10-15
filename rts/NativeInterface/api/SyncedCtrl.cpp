@@ -3023,9 +3023,11 @@ static void NativeSetUnitHeading(const SetUnitHeadingQuery* query, SetUnitHeadin
 		return;
 	}
 
-	unit->heading = static_cast<short>(query->heading);
+	// Smoothing blends the terrain/object up-vector as in normal unit turning;
+	// heading itself is applied immediately, including front/right/aim vectors.
+	unit->SetHeading(static_cast<short>(query->heading), !unit->upright && unit->IsOnGround(),
+		unit->IsInAir(), query->useSmoothing ? unit->unitDef->upDirSmoothing : 0.0f);
 	unit->SetFacingFromHeading();
-	unit->UpdateMidAndAimPos();
 
 	result->success = true;
 }

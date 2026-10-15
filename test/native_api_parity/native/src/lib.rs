@@ -109,12 +109,14 @@ struct TestSpec {
     name: &'static str,
     check: CheckFn,
     set: SetFn,
+    required_fields: &'static [&'static str],
 }
 
 macro_rules! native_tests {
-    ($($name:ident { check = $check:ident, set = $set:ident, })*) => {
+    ($($name:ident { check = $check:ident, set = $set:ident, required = [$($field:literal),*], })*) => {
         const TESTS: &[TestSpec] = &[
-            $(TestSpec { name: stringify!($name), check: NativeApiParity::$check, set: NativeApiParity::$set },)*
+            $(TestSpec { name: stringify!($name), check: NativeApiParity::$check, set: NativeApiParity::$set,
+                required_fields: &[$($field),*] },)*
         ];
     };
 }
@@ -259,7 +261,14 @@ impl NativeModule for NativeApiParity {
             let test_name = name.strip_prefix("native_").unwrap_or(name);
             self.find(test_name)
                 .ok_or_else(|| format!("unknown native read check `{name}`"))
-                .and_then(|spec| (spec.check)(self, &parsed, name))
+                .and_then(|spec| {
+                    for field in spec.required_fields {
+                        if parsed.get(*field).is_none() {
+                            return Err(format!("{name}: missing required Lua result `{field}`; optional results require a spec reason"));
+                        }
+                    }
+                    (spec.check)(self, &parsed, name)
+                })
         };
 
         if let Err(err) = result {

@@ -749,6 +749,29 @@ fn primitive_from_name(name: &str) -> Option<Primitive> {
     }
 }
 
+fn native_requires_unverified_feature(api_struct: &str, function: &str) -> bool {
+    let Some(definition) = manifest::API_DEFINITIONS
+        .iter()
+        .find(|entry| entry.api_struct == api_struct)
+    else {
+        return false;
+    };
+    // Native allocation helpers are deliberately outside the Wasm callout model.
+    if definition.module == "memory" {
+        return false;
+    }
+    static LEDGER: std::sync::OnceLock<serde_json::Value> = std::sync::OnceLock::new();
+    let ledger = LEDGER.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "../../../../test/native_api_parity/parity_ledger.json"
+        ))
+        .expect("valid parity ledger")
+    });
+    let entry = &ledger["functions"][format!("{}.{}", definition.module, function)];
+    !entry["grandfathered"].as_bool().unwrap_or(false)
+        && !matches!(entry["level"].as_str(), Some("verified" | "exempt"))
+}
+
 fn render_api(spec: &ApiSpec, config: &ApiConfig<'_>) -> Result<String> {
     let mut out = String::new();
 
@@ -822,6 +845,9 @@ fn render_api(spec: &ApiSpec, config: &ApiConfig<'_>) -> Result<String> {
             .structs
             .get(&func.result)
             .with_context(|| format!("missing result struct {}", func.result))?;
+        if native_requires_unverified_feature(config.api_struct, &func.name) {
+            out.push_str("    /// Unverified or unsupported API: available only through explicit opt-in.\n    #[cfg(feature = \"unverified-api\")]\n");
+        }
         let method = render_method(func, query, result)?;
         out.push_str(&method);
         out.push('\n');

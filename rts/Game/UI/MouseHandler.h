@@ -121,6 +121,8 @@ private:
 public:
 	int lastx = -1;
 	int lasty = -1;
+	int lastMoveX = 0; // Last delivered motion event, after ignoreMove filtering.
+	int lastMoveY = 0;
 	int activeButtonIdx = -1;
 	int activeCursorIdx = -1;
 

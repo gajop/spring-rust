@@ -74,3 +74,42 @@ harness passes none.
 Use installed binaries for renderer runs. Running `build-linux/spring` directly
 without the installed data tree can fail on assets such as `fonts/FreeSansBold.otf`;
 `build-linux/install/spring` is the expected portable install layout.
+
+## Evidence and stub checks
+
+`compare.fields` are required results. Missing fields fail native and Wasm
+comparisons, including when both sides omit the same field. An intentionally
+optional field must be listed in `compare.optional_fields` with a nonempty
+reason. Optionality does not supply behavioural evidence: absent/default fields
+and shape-only comparisons cannot qualify a function as verified.
+
+Native `*_if_present` helpers write `comparisons.jsonl`, keyed by test identity
+and field. Each run also saves `comparison.json`; Wasm mutant checks require an
+actual differing compared field rather than crediting a trap or absent row.
+
+`aggregate_coverage.py` writes a function evidence ledger and module-level
+headline, keeping label coverage in a separate inventory. `--gate` rejects
+regressions and unverified additions. `--native-audit-log` includes the targeted
+fixture evidence. `--write-ledger` updates the checked-in baseline only after
+the gate passes. The baseline currently has no verified functions.
+
+Offline checks need no running engine:
+
+```sh
+python3 -m unittest discover -s test/native_api_parity/tests -v
+python3 test/native_api_parity/generate_mutants.py --check
+python3 test/native_api_parity/sweep_mutants.py --list --limit 10 --output /tmp/mutant-inventory
+```
+
+A real mutant sweep requires `-DNATIVE_API_TEST_HOOKS=ON`. The engine accepts
+`SPRING_NATIVE_API_MUTANT=module.Function:zero` (or `:noop`) only in that build.
+It hands modules private API-table copies, leaving the global tables intact.
+`sweep_mutants.py` runs a passing baseline followed by fresh mutant processes,
+supports sharding, and records activation plus targeted failures. It is an
+intensive integration check; generating the replacements does not execute them.
+
+Probe builds/runs are serialized and restore the canonical non-rendering
+generated sources afterward. `--skip-wasm-build` checks a fingerprint of the
+probe selection, rendering flag, SDK sources and binary; old artifacts without
+provenance require one rebuild. Rendering-enabled probes are generated with the
+same flag used to run them.

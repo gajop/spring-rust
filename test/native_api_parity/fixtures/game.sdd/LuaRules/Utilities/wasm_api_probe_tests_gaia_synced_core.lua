@@ -341,8 +341,6 @@ return {
 
 		"side_data_count",
 
-		"closest_valid_position",
-
 		"closest_build_pos",
 
 		"test_build_order",
@@ -861,10 +859,6 @@ return {
 
 		"bugger_off",
 
-		"kill_team",
-
-		"game_over",
-
 	},
 	values = {
 		["heading_from_facing"] = {
@@ -1286,12 +1280,6 @@ return {
 		},
 		["side_data_by_index"] = {
 			sideIndex = 1,
-		},
-		["closest_valid_position"] = {
-			x = 1024.0,
-			y = 128.0,
-			z = 1024.0,
-			radius = 64,
 		},
 		["closest_build_pos"] = {
 			x = 1024.0,
@@ -2166,9 +2154,6 @@ return {
 		},
 		["get_cobscript_id_non_cob"] = {
 			funcName = "NativeApiParityMissingCobFunction",
-		},
-		["game_over"] = {
-			winningAllyTeams = {0},
 		},
 	},
 }

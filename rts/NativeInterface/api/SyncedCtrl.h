@@ -490,7 +490,7 @@ struct ForceUnitCollisionUpdateQuery { int32_t unitID; };
 struct ForceUnitCollisionUpdateResult { const Error* error; bool success; };
 
 // Set unit heading query
-struct SetUnitHeadingQuery { int32_t unitID; int32_t heading; bool useSmoothing; };
+struct SetUnitHeadingQuery { int32_t unitID; int32_t heading; bool useSmoothing; /* blend the up-vector using unitDef.upDirSmoothing */ };
 struct SetUnitHeadingResult { const Error* error; bool success; };
 
 // Set unit heading and up direction query

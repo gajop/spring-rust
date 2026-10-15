@@ -63,11 +63,11 @@ mod benchmark;
 /// lets crates built on top of the SDK (spring-addons) compile and run their
 /// unit tests natively.
 pub mod callback;
+#[cfg(target_arch = "wasm32")]
+mod cob_script;
 /// Engine calls queued until the current callin returns.
 #[cfg(feature = "alloc")]
 pub mod commands;
-#[cfg(target_arch = "wasm32")]
-mod cob_script;
 #[cfg(target_arch = "wasm32")]
 pub mod config;
 pub mod default_interface;
@@ -75,12 +75,12 @@ pub mod default_interface;
 /// importing anything here makes a synced guest desync. See `desync.rs`.
 #[cfg(target_arch = "wasm32")]
 pub mod desync;
-#[cfg(target_arch = "wasm32")]
-pub mod jobs;
 #[cfg(all(feature = "alloc", target_arch = "wasm32"))]
 pub mod game_options;
 #[cfg(target_arch = "wasm32")]
 pub mod gfx;
+#[cfg(target_arch = "wasm32")]
+pub mod jobs;
 #[cfg(target_arch = "wasm32")]
 pub mod math_extra;
 #[cfg(target_arch = "wasm32")]
@@ -99,9 +99,9 @@ mod result_ext;
 #[cfg(all(feature = "alloc", target_arch = "wasm32"))]
 pub use result_ext::ResultExt;
 #[cfg(all(feature = "alloc", target_arch = "wasm32"))]
-pub mod pick;
-#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
 pub mod kinds;
+#[cfg(all(feature = "alloc", target_arch = "wasm32"))]
+pub mod pick;
 #[cfg(target_arch = "wasm32")]
 pub mod rml_ui;
 #[cfg(target_arch = "wasm32")]
@@ -1158,7 +1158,14 @@ mod tests {
         assert_eq!(Float3::new(-1.0, 0.0, 0.0).heading(), -16384);
         assert_eq!(Float3::new(0.0, 0.0, -1.0).heading(), -32767);
         // Values from the engine's C++ GetHeadingFromVector.
-        let cases = [(1.0, 1.0), (-3.0, 2.0), (0.3, -7.0), (-0.001, -5.0), (5.0, 0.0001), (-2.5, -2.5)];
+        let cases = [
+            (1.0, 1.0),
+            (-3.0, 2.0),
+            (0.3, -7.0),
+            (-0.001, -5.0),
+            (5.0, 0.0001),
+            (-2.5, -2.5),
+        ];
         let headings = cases.map(|(x, z)| Float3::new(x, 0.0, z).heading());
         assert_eq!(headings, [8148, -10199, 32321, -32765, 16383, -24619]);
         assert_eq!(Float3::new(2.0, 4.0, 6.0) / 2.0, Float3::new(1.0, 2.0, 3.0));
@@ -1198,6 +1205,10 @@ mod tests {
 
 #[cfg(all(test, target_arch = "wasm32"))]
 mod job_result_export_compile_test {
-    fn handle(_id: crate::jobs::JobId, _result: core::result::Result<&[u8], crate::jobs::JobError>) {}
+    fn handle(
+        _id: crate::jobs::JobId,
+        _result: core::result::Result<&[u8], crate::jobs::JobError>,
+    ) {
+    }
     crate::export_job_results!(handle, 4096);
 }

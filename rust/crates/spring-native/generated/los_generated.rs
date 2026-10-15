@@ -142,6 +142,8 @@ impl<'a> Los<'a> {
         }
     }
 
+    /// Unverified or unsupported API: available only through explicit opt-in.
+    #[cfg(feature = "unverified-api")]
     pub fn get_closest_valid_position(&self, unit_def_id: i32, x: f32, z: f32, radius: f32) -> Result<sys::Float3, Error> {
         unsafe {
             let query = sys::GetClosestValidPositionQuery {

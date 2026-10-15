@@ -264,6 +264,8 @@ void CMouseHandler::MouseMove(int x, int y, int dx, int dy)
 	// jump, so always ignore one SDL_MOUSEMOTION after entering it
 	dx *= (1 - ignoreMove);
 	dy *= (1 - ignoreMove);
+	lastMoveX = dx;
+	lastMoveY = dy;
 
 	ignoreMove = false;
 

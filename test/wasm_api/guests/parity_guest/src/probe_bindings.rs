@@ -31,7 +31,7 @@ pub(crate) mod bindings {
             pub(crate) use spring::owned::game_config::{SetGodModeOptions, set_cheating_enabled, set_experience_grade, set_god_mode, set_no_pause, set_radar_error_params, set_square_building_mask};
         }
         pub(crate) mod los {
-            pub(crate) use spring::owned::los::{Float3, get_closest_valid_position, get_position_los_state, get_radar_error_params, is_pos_in_air_los, is_pos_in_los, is_pos_in_radar, is_unit_in_air_los, is_unit_in_jammer, is_unit_in_los, is_unit_in_radar};
+            pub(crate) use spring::owned::los::{Float3, get_position_los_state, get_radar_error_params, is_pos_in_air_los, is_pos_in_los, is_pos_in_radar, is_unit_in_air_los, is_unit_in_jammer, is_unit_in_los, is_unit_in_radar};
         }
         pub(crate) mod math_extra {
             pub(crate) use spring::owned::math_extra::{Float3, bit_and, bit_bits, bit_inv, bit_or, bit_xor, clamp, diag, erf, hypot, mix, normalize, round, sgn, smooth_step};
@@ -55,7 +55,7 @@ pub(crate) mod bindings {
             pub(crate) use spring::owned::rules_params::{RulesParamType, RulesParamValue, get_feature_rules_param, get_game_rules_param, get_player_rules_param, get_team_rules_param, get_unit_rules_param, set_feature_rules_param, set_game_rules_param, set_player_rules_param, set_team_rules_param, set_unit_rules_param};
         }
         pub(crate) mod team_control {
-            pub(crate) use spring::owned::team_control::{Float3, add_team_resource, add_team_resource_excess_stats, assign_player_to_team, game_over, kill_team, set_ally, set_ally_team_start_box, set_global_los, set_player_ready_state, set_team_resource, set_team_start_position, transfer_team_max_units, use_team_resource};
+            pub(crate) use spring::owned::team_control::{Float3, add_team_resource, add_team_resource_excess_stats, assign_player_to_team, set_ally, set_ally_team_start_box, set_global_los, set_player_ready_state, set_team_resource, set_team_start_position, transfer_team_max_units, use_team_resource};
         }
         pub(crate) mod teams {
             pub(crate) use spring::owned::teams::{are_players_allied, are_teams_allied, get_ai_info, get_ally_team_info, get_ally_team_list, get_player_controlled_unit, get_player_info, get_player_list, get_player_list_in_ally_team, get_player_list_in_team, get_team_ally_team_id, get_team_info, get_team_list, get_team_lua_ai, get_team_max_units, get_team_resource_stats, get_team_resources, get_team_unit_stats};

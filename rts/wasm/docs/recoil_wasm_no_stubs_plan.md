@@ -1,28 +1,26 @@
 # Recoil Native and Wasm Interfaces: No Stubs Plan
 
-Status: in progress (2026-10-15); targeted fixes and a native regression gate are implemented. The full static audit, behavioural ledger, and Wasm verification remain planned.
+Status: in progress (2026-10-15). Native gaps are resolved or explicitly classified; the static gate, generated mutants, comparator recording and evidence ledger are implemented. Full behavioural/Wasm verification remains incomplete.
 
 Goal: every function in the NativeInterface API tables (`rts/NativeInterface/api/*.cpp`) does what its Lua counterpart in `rts/Lua/LuaSynced*` / `LuaUnsynced*` / `LuaOpenGL` / `LuaFBOs` does, for native Rust modules and for Wasm modules (`rts/wasm/generated`, `rts/WasmInterface`). A stub must fail CI on the day it is written, not when a game notices.
 
-This plan extends [Parity & Testing](recoil_wasm_parity_testing.md) sections 5 (runtime parity harness) and 10 (CI gates), and fills the `verified` field the generator already emits in `rts/wasm/generated/core-executable-coverage.json` (hard-coded `false` in `rust/crates/spring-native-codegen/src/render_core_wasm_registry.rs`).
+This plan extends [Parity & Testing](recoil_wasm_parity_testing.md) sections 5 (runtime parity harness) and 10 (CI gates). The generator now reads `verified` from the evidence ledger; it remains false for all current functions because complete evidence has not been collected.
 
 ## Implementation status (2026-10-15)
 
-The targeted implementation is committed in `2a28593232`. The inventory below is the original 2026-10-11 baseline, not a current list of unresolved defects.
+The implementation below is committed. The inventory is the historical 2026-10-11 baseline; remaining acceptance work is listed separately.
 
-| Area | Completed | Remaining |
-|---|---|---|
-| A: Lua differences | Team/player custom options, log section/level, movement-square testing and options, one-based shield selection, FBO target/default binding checks | Screen geometry and advanced-shading return shape |
-| B: Invented fields | Weapon turn rate, piece model metadata, factory construction count, authored shield alpha, hovercraft classification | Mouse deltas, feature-definition resurrection semantics, VFS metadata, heading smoothing semantics |
-| E: Dead residue | Removed the unused command error and native stub helper; renamed the misleading banner | None |
-| Targeted evidence | `test/native_stub_regressions` uses blocked/open movement, distinct shields, nonempty options, a real piece projectile, a working factory, and GL pixel readback. Its ten local zero-return mutants must all fail the same observations | All-module mutants, per-field vacuity tracking, and the multi-environment Wasm pass |
-| CI | The small regression fixture is wired into `wasm.yml`; Lua changes trigger the job, as do pushes to `rust-wip` | Static S1–S6 audit, return mapping, ledger ratchet, and codegen gating |
+- A: full display returns use appended `GetScreenGeometryFull` / `HaveAdvShadingFull` slots, preserving older native result layouts. Native ABI minor version is 1.15. Legacy display queries now select the requested screen/usable rectangle.
+- B: mouse deltas report the last delivered motion event in screen-up coordinates; feature-definition resurrection identity is explicitly unavailable (use the instance query); VFS distinguishes directories and reports backing-file permissions or zero for unavailable metadata; heading updates direction vectors and uses the requested up-vector smoothing. Water queries call `CGround`.
+- C/D/E: semantic exceptions are recorded in `ParityExemptions.def` and source-hash-bound dispositions. Unsupported closest-position queries are excluded from Wasm and require `unverified-api` in the native Rust SDK. Dead residue was removed earlier.
+- The libclang audit scans the model's native implementations using build commands and has candidate checks for S1–S6. It rejects new/stale findings, changed reviewed source, missing reasons and parse errors. Analysis releases each translation unit rather than retaining all engine ASTs. It is a conservative source audit, not a proof of behavioural correctness.
+- Private native table copies and zero/no-op replacements are generated for all 1,425 modeled callouts. The targeted fixture passes 179 checks, kills 14 zero replacements and detects a success-no-op heading setter through readback. `NATIVE_API_TEST_HOOKS` adds process-scoped selection via `SPRING_NATIVE_API_MUTANT`; the fresh-process sweeper requires baseline success, activation and targeted failure. Hook-enabled source syntax checks pass; a hook-enabled engine build and full sweep remain pending. Replacement generation alone is not D5 evidence.
+- All 13 `*_if_present` comparator helpers record whether a comparison actually happened. Declared fields are required in native and Wasm checks unless explicitly optional with a reason; both sides omitting a required field now fails. The ledger tracks missing/default/distinct fields and requires direct comparison, return mapping, mutants and Wasm environments before `verified`. Current evidence: **14 exercised, 1,411 untested, zero verified**. Aggregate reports headline function evidence. Strict generation rejects new identities without evidence/exemption, production Wasm imports withhold them and the native SDK requires `unverified-api`. Stale test references and increases in grandfathering fail gates.
+- CI includes the audit, audit tests, generated-mutant check, targeted native run and ledger ratchet. Remote CI has not been executed.
 
-Custom option tables use JSON in the existing string field, preserving the C ABI. Missing piece-model metadata is explicit (`-1` / null). The FBO regression uses an independent GL readback oracle: clearing a READ target must preserve a different DRAW target and restore its binding; integer attachments use integer clears, and non-finite integer values are rejected.
+Validation: both engine variants built; 12 audit tests, 15 code-generator library tests, 8 production-policy tests and 11 offline evidence tests passed. The targeted native parity run passed before the stricter required-field checks. Full native parity exposed destructive `kill_team`/`game_over` tests ending the shared fixture early; they now run once at the end, with runtime recheck pending. A Wasm rendering probe exposed missing rendering-flag forwarding; this is fixed, builds/runs are serialized, cached binaries carry selection/SDK fingerprints, and default projections are restored afterward. Its follow-up timed out during font discovery and is **not** a passing Wasm result. Generated Wasm artifacts are reproducible, the 57-file native snapshot is current, and changed codegen files pass rustfmt. The workspace format check passes after formatting the SDK, AI example and bindings tool. Testing remains light at the user's request; no further engine or benchmark runs were started.
 
-Validation: the single-worker incremental engine build passed. The four-unit regression passed with hardware GL and with single-threaded software GL, including ten killed mutants. These are correctness runs, not performance measurements. CI itself has not been run remotely. No generated `verified` flag or global coverage claim is changed by this targeted fixture.
-
-The remaining native-only fields require defined semantics or explicit exemptions rather than substituting another constant. The existing result shapes also cannot represent every Lua return from the two open display queries. Keep this plan until the acceptance conditions below are met.
+Remaining acceptance work: strict required/optional return mappings across the full surface, full native/Wasm behavioural evidence in all environments, all-function mutant execution, and runtime rechecks of the fixture changes and hook-enabled engine. Full performance acceptance is tracked separately. The plans stay open; no `verified` claim is inferred from labels or from generating a mutant.
 
 ## Why the existing gates passed a stub
 
@@ -137,7 +135,7 @@ A function is a stub if any rule below holds and no exemption covers it. Every r
 | S5 Constant function | Past the guards, every result assignment is a literal |
 | S6 Marker | A comment or error message in the body matches the marker list (`stub`, `TODO`, `FIXME`, `not implemented`, `simplif`, `for now`, `would need`, `not easily/directly available/accessible`, `placeholder`, `assume`) |
 
-The tool parses with libclang (installed in `wasm.yml` already for `spring-native-codegen`) using the engine's `compile_commands.json`, so macros such as `IMPL_SIMPLE_QUERY` and helper calls resolve. It writes `rts/wasm/docs/generated/native_stub_audit.md` beside `generated_synced_callout_audit.md`. Handwritten Wasm adapters (`rts/WasmInterface/core/bindings`, class `handwritten-reviewed` in the coverage file) get S1 and S6, plus a check that each adapter calls its own table slot.
+The tool parses with libclang using the engine's compilation commands, so macros such as `IMPL_SIMPLE_QUERY` resolve. The implemented report is `rts/wasm/docs/generated/native_stub_audit.json`. Handwritten Wasm adapter auditing remains additional work; the current audit covers modeled native slots.
 
 ### Dynamic rules (parity harness, engine run)
 
@@ -215,16 +213,16 @@ Additions the triage requires:
 
 ## Stub mutants
 
-The generator emits one mutant per table slot into `rts/wasm/generated/NativeApiMutants.h` from `model.json`, so every new function gets one without hand work:
+The generator emits one mutant per modeled table slot into `test/native_api_parity/generated/NativeApiMutants.h` from `model.json`, so every new function gets one without hand work:
 
 | Mutant | Body | Applies to |
 |---|---|---|
 | `zero` | `*result = Result{};` (no error, all fields default) | All |
 | `noop` | No effect; `success = true` | Mutating functions (`mutating` in the model) |
 
-With the CMake option `NATIVE_API_TEST_HOOKS` (on in the CI ASAN build, off in release), `NativeInterfaceSystem` hands modules mutable copies of the API tables instead of `&TEAMS_API` and friends, and installs a test-only `ParityHooks.set_mutant(module, function, kind)`. Wasm reaches the same copies through `state->native`.
+With the CMake option `NATIVE_API_TEST_HOOKS` (on in the CI ASAN build, off in release), `NativeInterfaceSystem` hands modules private copies of the API tables when `SPRING_NATIVE_API_MUTANT=module.Function:zero|noop` is set. Wasm reaches the same copies through `state->native`. Invalid selections fail before modules are instantiated.
 
-In the native harness module each test runs normally, then once per function it names with that function's mutants enabled, against the Lua reference already recorded. The mutated run must fail. A pass is D5. One engine process covers all mutants; setter state is restored by the test's own reset step.
+The sweeper runs passing baselines and mutants in fresh processes, preventing destructive setters from contaminating later tests. A matching failure and activation log are required; crashes, missing observations and unrelated failures are inconclusive. Wasm kill evidence additionally requires an actual compared field difference. Full sweep execution is pending.
 
 ## Coverage metric and ledger
 

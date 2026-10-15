@@ -15,6 +15,8 @@
     },
     {
       "id": "kill_team",
+      "deferred": true,
+      "single_case": true,
       "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "setter_getter",
@@ -40,6 +42,8 @@
     },
     {
       "id": "game_over",
+      "deferred": true,
+      "single_case": true,
       "wasm_mutating": true,
       "context": "synced_gadget",
       "kind": "setter_getter",

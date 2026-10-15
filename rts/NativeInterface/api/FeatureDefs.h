@@ -31,7 +31,7 @@ struct FeatureDefInfo {
 	bool floating;
 	bool geoThermal;
 	const char* modelName;
-	const char* resurrectAs;  // Unit def name to resurrect as
+	const char* resurrectAs;  // Always null: use Features.GetFeatureResurrect on an instance.
 };
 
 // Queries

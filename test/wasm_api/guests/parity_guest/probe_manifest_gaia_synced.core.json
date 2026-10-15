@@ -173,7 +173,6 @@
     "side_data_by_name",
     "side_data_by_index",
     "side_data_count",
-    "closest_valid_position",
     "closest_build_pos",
     "test_build_order",
     "unit_rotation",
@@ -432,17 +431,15 @@
     "unit_attach",
     "unit_detach",
     "unit_detach_from_air",
-    "bugger_off",
-    "kill_team",
-    "game_over"
+    "bugger_off"
   ],
   "coverage": {
     "source_context": "synced_gadget",
     "source_test_count": 507,
-    "selected_count": 432,
+    "selected_count": 429,
     "selected_kind_counts": {
-      "readonly": 344,
-      "setter_getter": 88
+      "readonly": 343,
+      "setter_getter": 86
     },
     "selected_ids": [
       "game_frame",
@@ -615,7 +612,6 @@
       "side_data_by_name",
       "side_data_by_index",
       "side_data_count",
-      "closest_valid_position",
       "closest_build_pos",
       "test_build_order",
       "unit_rotation",
@@ -874,9 +870,7 @@
       "unit_attach",
       "unit_detach",
       "unit_detach_from_air",
-      "bugger_off",
-      "kill_team",
-      "game_over"
+      "bugger_off"
     ],
     "excluded": {
       "core_owned_unsupported": [
@@ -952,10 +946,15 @@
       ],
       "deferred": [
         "get_factory_bugger_off",
-        "projectile_spawn"
+        "projectile_spawn",
+        "kill_team",
+        "game_over"
       ],
       "no_lua_runtime": [
         "set_factory_bugger_off"
+      ],
+      "no_native_function": [
+        "closest_valid_position"
       ],
       "rendering_disabled": [
         "unit_add_object_decal",

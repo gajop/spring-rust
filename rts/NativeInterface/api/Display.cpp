@@ -116,12 +116,22 @@ static void NativeGetScreenGeometry(const GetScreenGeometryQuery* query, GetScre
 		return;
 	}
 
-	// Simplified: return window geometry (multi-screen not fully supported)
 	result->error = nullptr;
-	result->geom.viewSizeX = globalRendering->screenSizeX;
-	result->geom.viewSizeY = globalRendering->screenSizeY;
-	result->geom.viewPosX = globalRendering->screenPosX;
-	result->geom.viewPosY = globalRendering->screenPosY;
+	result->geom = {};
+	if (query->screenNum < -1 || query->screenNum >= SDL_GetNumVideoDisplays()) {
+		dynamicError = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid display index" };
+		result->error = &dynamicError;
+		return;
+	}
+	const int* index = query->screenNum == -1 ? nullptr : &query->screenNum;
+	SDL_Rect rect{};
+	if (query->queryUsable)
+		globalRendering->GetUsableDisplayBounds(rect, index);
+	else if (index != nullptr)
+		globalRendering->GetDisplayBounds(rect, index);
+	else
+		rect = {globalRendering->screenPosX, globalRendering->screenPosY, globalRendering->screenSizeX, globalRendering->screenSizeY};
+	result->geom = {rect.w, rect.h, rect.x, rect.y};
 }
 
 static void NativeGetMiniMapGeometry(const GetMiniMapGeometryQuery* query, GetMiniMapGeometryResult* result)
@@ -427,7 +437,36 @@ static void NativeHaveAdvShading(const HaveAdvShadingQuery* query, HaveAdvShadin
 	bufferPos = 0;
 
 	result->error = nullptr;
-	result->enabled = true; // Simplified: assume advanced shading available
+	result->enabled = true; // Lua's first return reports renderer availability; Full includes ground state.
+}
+
+static void NativeGetScreenGeometryFull(const GetScreenGeometryQuery* query, GetScreenGeometryFullResult* result)
+{
+	*result = {};
+	GetScreenGeometryQuery fullQuery = *query;
+	fullQuery.queryUsable = false;
+	GetScreenGeometryResult full{};
+	NativeGetScreenGeometry(&fullQuery, &full);
+	result->error = full.error;
+	result->geom = full.geom;
+	if (result->error != nullptr || !query->queryUsable)
+		return;
+	fullQuery.queryUsable = true;
+	NativeGetScreenGeometry(&fullQuery, &full);
+	result->error = full.error;
+	result->usable = full.geom;
+	result->hasUsable = result->error == nullptr;
+}
+
+static void NativeHaveAdvShadingFull(const HaveAdvShadingQuery*, HaveAdvShadingFullResult* result)
+{
+	*result = {};
+	if (readMap == nullptr || readMap->GetGroundDrawer() == nullptr) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+	result->enabled = true;
+	result->groundEnabled = readMap->GetGroundDrawer()->UseAdvShading();
 }
 
 // Control
@@ -484,4 +523,6 @@ const DisplayApi DISPLAY_API = {
 	.HaveAdvShading = NativeHaveAdvShading,
 
 	.SetTeamColor = NativeSetTeamColor,
+	.GetScreenGeometryFull = NativeGetScreenGeometryFull,
+	.HaveAdvShadingFull = NativeHaveAdvShadingFull,
 };

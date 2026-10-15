@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from spec_loader import load_api_tests
+from spec_loader import load_api_tests, required_compare_fields
 
 HARNESS = Path(__file__).resolve().parent
 RUST_OUT = HARNESS / "native" / "src" / "generated_tests.rs"
@@ -27,7 +27,9 @@ def write_rust(tests: list[dict]) -> None:
         set_handler = rust.get("set", "set_noop")
         if not check:
             raise ValueError(f"{test_id} is missing rust.check")
-        lines.append(f"    {test_id} {{ check = {check}, set = {set_handler}, }}")
+        required = ", ".join(json.dumps(field, ensure_ascii=False)
+                             for field in required_compare_fields(test))
+        lines.append(f"    {test_id} {{ check = {check}, set = {set_handler}, required = [{required}], }}")
     lines.append("}")
     RUST_OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

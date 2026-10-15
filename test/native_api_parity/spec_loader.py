@@ -12,6 +12,12 @@ SPEC = HARNESS / "api_tests.json"
 KNOWN_ISSUES = HARNESS / "known_issues.json"
 
 
+def required_compare_fields(test: dict) -> list[str]:
+    compare = test.get("compare", {})
+    optional = compare.get("optional_fields", {})
+    return [field for field in compare.get("fields", []) if field not in optional]
+
+
 def load_api_tests(spec: Path = SPEC) -> list[dict]:
     with spec.open(encoding="utf-8") as file:
         data = json.load(file)
@@ -72,6 +78,19 @@ def validate_tests(tests: list[dict], source: Path = SPEC) -> None:
         seen.add(test_id)
         if "requires_rendering" in test and not isinstance(test["requires_rendering"], bool):
             raise ValueError(f"{test_id}.requires_rendering must be a boolean")
+
+        compare = test.get("compare", {})
+        if not isinstance(compare, dict):
+            raise ValueError(f"{test_id}.compare must be an object")
+        fields = compare.get("fields", [])
+        if not isinstance(fields, list) or any(not isinstance(field, str) for field in fields):
+            raise ValueError(f"{test_id}.compare.fields must be a list of field names")
+        optional = compare.get("optional_fields", {})
+        if not isinstance(optional, dict):
+            raise ValueError(f"{test_id}.compare.optional_fields must map fields to reasons")
+        for field, reason in optional.items():
+            if field not in fields or not isinstance(reason, str) or not reason.strip():
+                raise ValueError(f"{test_id}: optional field {field!r} needs a compared field and a reason")
 
         params = test.get("params", {})
         if not isinstance(params, dict):

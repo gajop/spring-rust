@@ -4244,11 +4244,6 @@ pub mod los {
     pub mod raw {
         #[link(wasm_import_module = "spring:los")]
         unsafe extern "C" {
-            #[link_name = "get-closest-valid-position"]
-            pub safe fn core_get_closest_valid_position(p0: i32, p1: f32, p2: f32, p3: f32, p4: i32) -> i32;
-        }
-        #[link(wasm_import_module = "spring:los")]
-        unsafe extern "C" {
             #[link_name = "get-position-los-state"]
             pub safe fn core_get_position_los_state(p0: i32, p1: i32, p2: i32) -> i32;
         }
@@ -4291,30 +4286,6 @@ pub mod los {
         unsafe extern "C" {
             #[link_name = "is-unit-in-radar"]
             pub safe fn core_is_unit_in_radar(p0: i32, p1: i32) -> i64;
-        }
-    }
-
-    #[inline]
-    pub fn get_closest_valid_position(unit_def_id: i32, x: f32, z: f32, radius: f32) -> Result<Float3> {
-        #[cfg(target_arch = "wasm32")]
-        {
-            let mut wire = [0u8; 12];
-            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
-            let status = raw::core_get_closest_valid_position(unit_def_id, x, z, radius, output_pointer);
-            if status != 0 {
-                return Err(ApiError::new(status));
-            }
-            let mut cursor = 0usize;
-            let value = { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
-            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
-                return Err(ApiError::new(ErrorCode::Internal as i32));
-            }
-            Ok(value)
-        }
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            let _ = (unit_def_id, x, z, radius);
-            Err(unreachable!())
         }
     }
 
@@ -8504,6 +8475,11 @@ pub mod display {
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
+            #[link_name = "get-screen-geometry-full"]
+            pub safe fn core_get_screen_geometry_full(p0: i32, p1: i32, p2: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:display")]
+        unsafe extern "C" {
             #[link_name = "get-team-color"]
             pub safe fn core_get_team_color(p0: i32, p1: i32) -> i32;
         }
@@ -8531,6 +8507,11 @@ pub mod display {
         unsafe extern "C" {
             #[link_name = "have-adv-shading"]
             pub safe fn core_have_adv_shading(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:display")]
+        unsafe extern "C" {
+            #[link_name = "have-adv-shading-full"]
+            pub safe fn core_have_adv_shading_full(p0: i32, p1: i32) -> i32;
         }
         #[link(wasm_import_module = "spring:display")]
         unsafe extern "C" {
@@ -8794,6 +8775,30 @@ pub mod display {
     }
 
     #[inline]
+    pub fn get_screen_geometry_full(screen_num: i32, query_usable: bool) -> Result<(ViewGeometry, Option<ViewGeometry>)> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut wire = [0u8; 36];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_screen_geometry_full(screen_num, if query_usable { 1 } else { 0 }, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let mut cursor = 0usize;
+            let value = ({ let core_value = ViewGeometry { view_size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }, { let core_present = super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?; let core_value = { let core_value = ViewGeometry { view_size_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_size_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_x: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, view_pos_y: super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value }; if core_present { Some(core_value) } else { None } });
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (screen_num, query_usable);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn get_team_color(team_id: i32) -> Result<TeamColor> {
         #[cfg(target_arch = "wasm32")]
         {
@@ -8903,6 +8908,30 @@ pub mod display {
                 1 => Ok(true),
                 _ => Err(ApiError::new(ErrorCode::Internal as i32)),
             }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unused,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn have_adv_shading_full(unused: u8) -> Result<(bool, bool)> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut wire = [0u8; 8];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_have_adv_shading_full(unused as i32, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let mut cursor = 0usize;
+            let value = (super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::boolean(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {

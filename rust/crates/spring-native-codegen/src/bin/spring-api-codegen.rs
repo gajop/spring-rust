@@ -124,6 +124,65 @@ fn run() -> Result<()> {
     let validation = model.validate(ValidationMode::Report);
     if arguments.strict {
         model.validate(ValidationMode::Strict)?;
+        let ledger_path = root.join("test/native_api_parity/parity_ledger.json");
+        let ledger: serde_json::Value = serde_json::from_str(
+            &fs::read_to_string(&ledger_path)
+                .with_context(|| format!("read parity ledger {}", ledger_path.display()))?,
+        )?;
+        let parity_dir = root.join("test/native_api_parity");
+        let spec: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(parity_dir.join("api_tests.json"))?)?;
+        let mut test_ids = std::collections::BTreeSet::new();
+        for include in spec["includes"].as_array().into_iter().flatten() {
+            let value: serde_json::Value = serde_json::from_str(&fs::read_to_string(
+                parity_dir.join(include.as_str().context("parity include must be a path")?),
+            )?)?;
+            for test in value["tests"].as_array().into_iter().flatten() {
+                test_ids.insert(
+                    test["id"]
+                        .as_str()
+                        .context("parity test must have an id")?
+                        .to_owned(),
+                );
+            }
+        }
+        let surface: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(parity_dir.join("surface_tests.json"))?)?;
+        for test in surface["tests"].as_array().into_iter().flatten() {
+            test_ids.insert(
+                test["id"]
+                    .as_str()
+                    .context("surface test must have an id")?
+                    .to_owned(),
+            );
+        }
+        for (identity, entry) in ledger["functions"]
+            .as_object()
+            .context("ledger functions must be an object")?
+        {
+            for test in entry["tests"].as_array().into_iter().flatten() {
+                let test = test.as_str().context("ledger test must be an id")?;
+                if !test_ids.contains(test) {
+                    return Err(anyhow!("{identity}: stale parity test identity {test}"));
+                }
+            }
+        }
+        for module in &model.modules {
+            for function in &module.functions {
+                let identity = format!("{}.{}", module.name, function.name);
+                let entry = &ledger["functions"][&identity];
+                let level = entry["level"].as_str().unwrap_or("untested");
+                if !entry["grandfathered"].as_bool().unwrap_or(false)
+                    && level != "verified"
+                    && level != "exempt"
+                {
+                    return Err(anyhow!(
+                        "{identity}: new API has no verified parity evidence or reviewed exemption"
+                    ));
+                }
+            }
+        }
+
         if arguments.only.is_none() {
             let core_callin_errors = render_core_wasm_callin_coverage::coverage_errors(&model)?;
             if !core_callin_errors.is_empty() {
@@ -371,7 +430,9 @@ fn run() -> Result<()> {
 
     let summary = model.summary();
     let core_summary = render_core_wasm::plan(&model);
-    let mut report = serde_json::to_string_pretty(&summary)?;
+    let mut report_value = serde_json::to_value(&summary)?;
+    report_value["parity"] = render_core_wasm_registry::parity_summary(&model);
+    let mut report = serde_json::to_string_pretty(&report_value)?;
     report.push('\n');
     report.push_str(&format!(
         "\n# core-wasm planning\nautomatic={} manual={} unsupported={}\n",

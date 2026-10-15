@@ -49,6 +49,7 @@ local function run(frame)
 		local alpha=power==42 and .2 or .7
 		send('shield',unit,slot,present,present and enabled~=0 and enabled~=false or false,power or 0,alpha)
 	end
+	send('heading',unit)
 	send('turn',unit,1,WeaponDefs[UnitDefs[def].weapons[1].weaponDef].turnRate)
 	send('hover',UnitDefNames.audit_hovercraft.id,true)
 	send('hover',UnitDefNames.audit_hover_aircraft.id,false)

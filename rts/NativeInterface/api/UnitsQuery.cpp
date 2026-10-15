@@ -629,7 +629,7 @@ static void NativeGetUnitArrayCentroid(const GetUnitArrayCentroidQuery* query, G
 
 static void NativeGetUnitMapCentroid(const GetUnitMapCentroidQuery* query, GetUnitMapCentroidResult* result)
 {
-	// Same as array centroid for now
+	// Native inputs represent both Lua map keys and array values as an ID list.
 	GetUnitArrayCentroidQuery q = { .unitIDs = query->unitIDs, .count = query->count };
 	GetUnitArrayCentroidResult r;
 	NativeGetUnitArrayCentroid(&q, &r);

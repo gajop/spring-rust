@@ -5,6 +5,10 @@ edition = "2024"
 description = "Safe Rust façade over Spring's NativeInterface"
 license = "GPL-2.0-or-later"
 
+[features]
+default = []
+unverified-api = []
+
 [dependencies]
 spring = { path = "../spring", features = ["alloc"] }
 spring-native-sys = { path = "../spring-native-sys" }

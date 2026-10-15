@@ -10,6 +10,55 @@
 //! grant guest authority, expose an unsafe adapter, or widen information access.
 
 use serde::Serialize;
+
+fn parity_level(module: &str, function: &str) -> (&'static str, bool) {
+    static LEDGER: std::sync::OnceLock<serde_json::Value> = std::sync::OnceLock::new();
+    let ledger = LEDGER.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "../../../../test/native_api_parity/parity_ledger.json"
+        ))
+        .expect("valid parity ledger")
+    });
+    let entry = &ledger["functions"][format!("{module}.{function}")];
+    let level = match entry["level"].as_str() {
+        Some("verified") => "verified",
+        Some("behavioural") => "behavioural",
+        Some("exercised") => "exercised",
+        Some("exempt") => "exempt",
+        _ => "untested",
+    };
+    (level, entry["grandfathered"].as_bool().unwrap_or(false))
+}
+
+fn parity_public(module: &str, function: &str) -> bool {
+    let (level, grandfathered) = parity_level(module, function);
+    grandfathered || matches!(level, "verified" | "exempt")
+}
+
+pub fn parity_summary(model: &ApiModel) -> serde_json::Value {
+    let mut counts = BTreeMap::new();
+    for module in &model.modules {
+        for function in &module.functions {
+            let (level, grandfathered) = parity_level(&module.name, &function.name);
+            *counts.entry(level).or_insert(0usize) += 1;
+            if grandfathered {
+                *counts.entry("grandfathered").or_insert(0) += 1;
+            }
+        }
+    }
+    for name in [
+        "untested",
+        "exercised",
+        "behavioural",
+        "verified",
+        "exempt",
+        "grandfathered",
+    ] {
+        counts.entry(name).or_insert(0);
+    }
+    serde_json::json!(counts)
+}
+
 use std::collections::BTreeMap;
 
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};
@@ -87,6 +136,8 @@ struct CoverageEntry {
     /// exists. Production authority, process safety, sync, and information
     /// visibility are reported separately.
     verified: bool,
+    parity_level: String,
+    grandfathered: bool,
     production_import_allowed: bool,
     production_process_safe: bool,
     production_sync_environment_mask: u32,
@@ -145,7 +196,9 @@ pub fn render_coverage_json(model: &ApiModel) -> anyhow::Result<String> {
                 plan.environment_mask,
             );
             let production_mask = sync_mask & visibility_mask;
-            let reason = if !production_allowed {
+            let reason = if !parity_public(&module.name, &function.name) {
+                Some("unverified: no parity evidence or reviewed exemption".to_owned())
+            } else if !production_allowed {
                 Some(
                     "withheld from production Core import registry by capability policy".to_owned(),
                 )
@@ -180,7 +233,9 @@ pub fn render_coverage_json(model: &ApiModel) -> anyhow::Result<String> {
                     import_module: plan.import_module.clone(),
                     import_name: plan.import_name.clone(),
                     class: Some(class.to_owned()),
-                    verified: false,
+                    verified: parity_level(&module.name, &function.name).0 == "verified",
+                    parity_level: parity_level(&module.name, &function.name).0.into(),
+                    grandfathered: parity_level(&module.name, &function.name).1,
                     production_import_allowed: production_allowed,
                     production_process_safe: process_safe,
                     production_sync_environment_mask: sync_mask,
@@ -196,7 +251,9 @@ pub fn render_coverage_json(model: &ApiModel) -> anyhow::Result<String> {
                     import_module: plan.import_module.clone(),
                     import_name: plan.import_name.clone(),
                     class: None,
-                    verified: false,
+                    verified: parity_level(&module.name, &function.name).0 == "verified",
+                    parity_level: parity_level(&module.name, &function.name).0.into(),
+                    grandfathered: parity_level(&module.name, &function.name).1,
                     production_import_allowed: production_allowed,
                     production_process_safe: process_safe,
                     production_sync_environment_mask: sync_mask,
@@ -233,7 +290,7 @@ pub fn render_coverage_json(model: &ApiModel) -> anyhow::Result<String> {
     let report = CoverageReport {
         total: executable.len() + pending.len(),
         executable_total: executable.len(),
-        verified_total: 0,
+        verified_total: executable.iter().filter(|entry| entry.verified).count(),
         production_import_total,
         by_class,
         executable,
