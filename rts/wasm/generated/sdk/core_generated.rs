@@ -4918,6 +4918,11 @@ pub mod weapon_defs {
         }
         #[link(wasm_import_module = "spring:weapon-defs")]
         unsafe extern "C" {
+            #[link_name = "get-weapon-def-projectile-params"]
+            pub safe fn core_get_weapon_def_projectile_params(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:weapon-defs")]
+        unsafe extern "C" {
             #[link_name = "get-weapon-def-range"]
             pub safe fn core_get_weapon_def_range(p0: i32) -> i64;
         }
@@ -4956,6 +4961,30 @@ pub mod weapon_defs {
                 return Err(ApiError::new(status));
             }
             Ok(f32::from_bits(packed as u32))
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (weapon_def_id,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn get_weapon_def_projectile_params(weapon_def_id: i32) -> Result<(i32, f32)> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut wire = [0u8; 8];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_weapon_def_projectile_params(weapon_def_id, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let mut cursor = 0usize;
+            let value = (super::__core_wire::i32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
         }
         #[cfg(not(target_arch = "wasm32"))]
         {

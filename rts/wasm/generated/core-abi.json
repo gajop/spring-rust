@@ -31613,6 +31613,32 @@
     },
     {
       "module": "weapon_defs",
+      "function": "GetWeaponDefProjectileParams",
+      "import_module": "spring:weapon-defs",
+      "import_name": "get-weapon-def-projectile-params",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 8,
+          "alignment": 4
+        }
+      },
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
+    },
+    {
+      "module": "weapon_defs",
       "function": "GetWeaponDefRange",
       "import_module": "spring:weapon-defs",
       "import_name": "get-weapon-def-range",
@@ -31652,7 +31678,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1204,
+  "automatic_count": 1205,
   "manual_count": 202,
   "unsupported_count": 17
 }

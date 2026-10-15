@@ -84,6 +84,17 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetWeaponDefProjectileParamsQuery {
+            pub weapon_def_id: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetWeaponDefProjectileParamsResult {
+            pub projectiles: i32,
+            pub spray_angle: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetWeaponDefRangeQuery {
             pub weapon_def_id: i32,
         }
@@ -143,6 +154,12 @@
         pub struct GetWeaponDefByIDValue {
             pub info: WeaponDefInfo,
             pub exists: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetWeaponDefProjectileParamsValue {
+            pub projectiles: i32,
+            pub spray_angle: f32,
         }
 
         #[inline]
@@ -305,6 +322,15 @@
                 let _ = (weapon_def_id);
                 Err(unreachable!())
             }
+        }
+
+        #[inline]
+        pub fn get_weapon_def_projectile_params(weapon_def_id: i32) -> Result<GetWeaponDefProjectileParamsValue> {
+            let value = crate::generated::weapon_defs::get_weapon_def_projectile_params(weapon_def_id)?;
+            Ok(GetWeaponDefProjectileParamsValue {
+                projectiles: value.0,
+                spray_angle: value.1
+            })
         }
 
         #[inline]

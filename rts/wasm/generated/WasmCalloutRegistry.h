@@ -264,6 +264,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"weapon_defs", "GetWeaponDefID", 31u, false, false, LoweringStatus::automatic},
 	{"weapon_defs", "GetWeaponDefIDs", 31u, false, false, LoweringStatus::annotated},
 	{"weapon_defs", "GetWeaponDefName", 31u, false, false, LoweringStatus::automatic},
+	{"weapon_defs", "GetWeaponDefProjectileParams", 31u, false, false, LoweringStatus::automatic},
 	{"weapon_defs", "GetWeaponDefRange", 31u, false, false, LoweringStatus::automatic},
 	{"weapon_defs", "ValidWeaponDefID", 31u, false, false, LoweringStatus::automatic},
 	{"game", "AreHelperAIsEnabled", 31u, false, false, LoweringStatus::automatic},

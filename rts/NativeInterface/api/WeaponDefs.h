@@ -1,3 +1,4 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 #pragma once
 
 #include <stdint.h>
@@ -60,6 +61,9 @@ struct GetWeaponDefCustomParamResult { const Error* error; const char* value; };
 struct GetWeaponDefCustomParamKeysQuery { int32_t weaponDefID; };
 struct GetWeaponDefCustomParamKeysResult { const Error* error; const char** keys; uint32_t count; };
 
+struct GetWeaponDefProjectileParamsQuery { int32_t weaponDefID; };
+struct GetWeaponDefProjectileParamsResult { const Error* error; int32_t projectiles; float sprayAngle; };
+
 // API structure
 struct WeaponDefsApi {
 	void (*GetWeaponDefIDs)(const GetWeaponDefIDsQuery* query, GetWeaponDefIDsResult* result);
@@ -72,6 +76,7 @@ struct WeaponDefsApi {
 	void (*GetWeaponDefDamage)(const GetWeaponDefDamageQuery* query, GetWeaponDefDamageResult* result);
 	void (*GetWeaponDefCustomParam)(const GetWeaponDefCustomParamQuery* query, GetWeaponDefCustomParamResult* result);
 	void (*GetWeaponDefCustomParamKeys)(const GetWeaponDefCustomParamKeysQuery* query, GetWeaponDefCustomParamKeysResult* result);
+	void (*GetWeaponDefProjectileParams)(const GetWeaponDefProjectileParamsQuery* query, GetWeaponDefProjectileParamsResult* result);
 };
 
 extern const WeaponDefsApi WEAPON_DEFS_API;

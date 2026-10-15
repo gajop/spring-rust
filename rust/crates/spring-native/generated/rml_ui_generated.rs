@@ -3195,12 +3195,12 @@ impl<'a> RmlUi<'a> {
         }
     }
 
-    pub fn data_model_set_rows(&self, rows_handle: u64, values: &sys::RmlDataValue, row_count: u64) -> Result<bool, Error> {
+    pub fn data_model_set_rows(&self, rows_handle: u64, values: &sys::RmlDataValue, value_count: u64) -> Result<bool, Error> {
         unsafe {
             let query = sys::RmlDataModelSetRowsQuery {
                 rowsHandle: rows_handle,
                 values: values as *const _,
-                rowCount: row_count,
+                valueCount: value_count,
             };
             let mut result = MaybeUninit::<sys::RmlElementBoolResult>::zeroed();
             let func = self.api.DataModelSetRows.expect("DataModelSetRows function pointer must be initialized");

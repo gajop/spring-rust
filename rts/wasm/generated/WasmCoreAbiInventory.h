@@ -1431,6 +1431,7 @@ inline constexpr Candidate kCandidates[] = {
 	{"spring:weapon-defs", "get-weapon-def-id", "i32->i64", 31u, Strategy::variableInput},
 	{"spring:weapon-defs", "get-weapon-def-i-ds", "i32,i32->i32", 31u, Strategy::manual},
 	{"spring:weapon-defs", "get-weapon-def-name", "i32,i32->i32", 31u, Strategy::variableOutput},
+	{"spring:weapon-defs", "get-weapon-def-projectile-params", "i32,i32->i32", 31u, Strategy::fixedOutput},
 	{"spring:weapon-defs", "get-weapon-def-range", "i32->i64", 31u, Strategy::direct},
 	{"spring:weapon-defs", "valid-weapon-def-id", "i32->i64", 31u, Strategy::direct},
 };

@@ -211,7 +211,7 @@ struct RmlDataModelRowsResult { const Error* error; uint64_t rowsHandle; bool su
 struct RmlDataModelSetRowsQuery {
 	uint64_t rowsHandle;
 	const RmlDataValue* values;
-	uint64_t rowCount;
+	uint64_t valueCount;
 };
 // Arguments delivered to a data-model event callback. Pointers are valid only
 // while the callback is running.

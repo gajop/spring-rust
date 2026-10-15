@@ -747,7 +747,7 @@ impl<'api> RmlDataRows<'api> {
             values: native_values
                 .first()
                 .map_or(ptr::null(), |value| value as *const _),
-            rowCount: (values.len() / self.field_count) as u64,
+            valueCount: values.len() as u64,
         };
 
         unsafe {

@@ -1,3 +1,4 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 #include "WeaponDefs.h"
 
 #include "Sim/Weapons/WeaponDefHandler.h"
@@ -231,6 +232,19 @@ static void NativeGetWeaponDefCustomParamKeys(const GetWeaponDefCustomParamKeysQ
 	result->count = customParamKeys.size();
 }
 
+static void NativeGetWeaponDefProjectileParams(const GetWeaponDefProjectileParamsQuery* query, GetWeaponDefProjectileParamsResult* result) {
+	result->error = nullptr;
+	result->projectiles = 0;
+	result->sprayAngle = 0.0f;
+	const WeaponDef* wd = weaponDefHandler->GetWeaponDefByID(query->weaponDefID);
+	if (wd == nullptr) {
+		result->error = &INVALID_WEAPONDEF_ERROR;
+		return;
+	}
+	result->projectiles = wd->projectilespershot;
+	result->sprayAngle = wd->sprayAngle;
+}
+
 } // namespace
 
 const WeaponDefsApi WEAPON_DEFS_API = {
@@ -244,4 +258,5 @@ const WeaponDefsApi WEAPON_DEFS_API = {
 	.GetWeaponDefDamage = NativeGetWeaponDefDamage,
 	.GetWeaponDefCustomParam = NativeGetWeaponDefCustomParam,
 	.GetWeaponDefCustomParamKeys = NativeGetWeaponDefCustomParamKeys,
+	.GetWeaponDefProjectileParams = NativeGetWeaponDefProjectileParams,
 };

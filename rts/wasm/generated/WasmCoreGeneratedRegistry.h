@@ -249,6 +249,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:weapon-defs", "get-weapon-def-id", "i32->i64", 31u},
     {"spring:weapon-defs", "get-weapon-def-i-ds", "i32,i32->i32", 31u},
     {"spring:weapon-defs", "get-weapon-def-name", "i32,i32->i32", 31u},
+    {"spring:weapon-defs", "get-weapon-def-projectile-params", "i32,i32->i32", 31u},
     {"spring:weapon-defs", "get-weapon-def-range", "i32->i64", 31u},
     {"spring:weapon-defs", "valid-weapon-def-id", "i32->i64", 31u},
     {"spring:game", "are-helper-a-is-enabled", "i32->i64", 31u},

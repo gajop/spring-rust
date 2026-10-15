@@ -160,8 +160,8 @@
     },
     {
       "name": "rml_ui_generated.rs",
-      "sha256": "9f91411c376c216583cc6caf4e2c35b6aa43be95745da7807b3d40a314bcd0c0",
-      "bytes": 143335
+      "sha256": "c967c03612483c85a2f20544f28ab616747b51fc48fbc74ab3b1fe94037cc270",
+      "bytes": 143341
     },
     {
       "name": "rules_params_generated.rs",
@@ -285,8 +285,8 @@
     },
     {
       "name": "weapon_defs_generated.rs",
-      "sha256": "0d99dde217afb354624a5ba8a343b04a984beaee27198906d17cf8961bbfcf96",
-      "bytes": 7894
+      "sha256": "7123bf4eab62b1e6fc09e4d9bd0f1e49d06b857515d50cc57f8f94194c1ff94e",
+      "bytes": 8643
     }
   ]
 }

@@ -1473,19 +1473,19 @@ static void NativeDataModelSetRows(const RmlDataModelSetRowsQuery* query, RmlEle
 	result->success = false;
 	NativeDataModel* model = nullptr;
 	NativeDataRows* rows = GetNativeDataRows(query->rowsHandle, &model);
-	if (rows == nullptr || (query->rowCount != 0 && query->values == nullptr)) {
+	if (rows == nullptr || (query->valueCount != 0 && query->values == nullptr)) {
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
 
 	const size_t fieldCount = rows->fields.size() - 1;
-	if (query->rowCount > static_cast<uint64_t>(std::numeric_limits<size_t>::max())
-		|| query->rowCount > static_cast<uint64_t>(std::numeric_limits<size_t>::max() / fieldCount)) {
+	if (query->valueCount % fieldCount != 0
+		|| query->valueCount > static_cast<uint64_t>(std::numeric_limits<size_t>::max())) {
 		result->error = &INVALID_ARGUMENT_ERROR;
 		return;
 	}
 
-	const size_t rowCount = static_cast<size_t>(query->rowCount);
+	const size_t rowCount = static_cast<size_t>(query->valueCount / fieldCount);
 	const size_t highWaterCount = std::max(rows->rows.size(), rowCount);
 	if (highWaterCount > rows->rows.max_size()) {
 		result->error = &INVALID_ARGUMENT_ERROR;

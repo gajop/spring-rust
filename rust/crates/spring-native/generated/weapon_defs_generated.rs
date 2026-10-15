@@ -186,4 +186,21 @@ impl<'a> WeaponDefs<'a> {
         }
     }
 
+    pub fn get_weapon_def_projectile_params(&self, weapon_def_id: i32) -> Result<(i32, f32), Error> {
+        unsafe {
+            let query = sys::GetWeaponDefProjectileParamsQuery {
+                weaponDefID: weapon_def_id,
+            };
+            let mut result = MaybeUninit::<sys::GetWeaponDefProjectileParamsResult>::zeroed();
+            let func = self.api.GetWeaponDefProjectileParams.expect("GetWeaponDefProjectileParams function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            let value = (
+                result.projectiles,
+                result.sprayAngle,
+            );
+            Error::result_or(result.error, value)
+        }
+    }
+
 }
