@@ -1200,6 +1200,15 @@ void CGlobalRendering::GetAllDisplayBounds(SDL_Rect& r) const
 
 void CGlobalRendering::GetWindowPosSizeBounded(int& x, int& y, int& w, int& h) const
 {
+	if (const char* driver = SDL_GetCurrentVideoDriver(); driver != nullptr && SDL_strcmp(driver, "offscreen") == 0) {
+		// The offscreen driver's display bounds are synthetic; its drawable can be larger.
+		x = 0;
+		y = 0;
+		w = std::max(w, minRes.x * (1 - fullScreen));
+		h = std::max(h, minRes.y * (1 - fullScreen));
+		return;
+	}
+
 	SDL_Rect r;
 	GetAllDisplayBounds(r);
 

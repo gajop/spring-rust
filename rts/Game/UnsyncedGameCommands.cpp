@@ -2516,7 +2516,7 @@ public:
 			TakeScreenshot("", 80);
 		} else {
 			int quality = args.size() > 1 ? StringToInt(args[1]) : 80;
-			LOG_L(L_WARNING, "/%s: quality = %d", GetCommand().c_str(), quality);
+			LOG_L(L_INFO, "/%s: quality = %d", GetCommand().c_str(), quality);
 			quality = std::clamp(quality, 1, 99);
 			TakeScreenshot(args[0], quality);
 		}
