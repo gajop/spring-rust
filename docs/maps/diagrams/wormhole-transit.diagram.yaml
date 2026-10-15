@@ -1,0 +1,40 @@
+title: Proposed wormhole transit between two maps — not implemented
+direction: DOWN
+nodes:
+  - id: order
+    label: Order into another map
+    detail: "Move, build, guard or rally; from the main view, a minimap tab, the overview or a PiP"
+  - { id: mapa, label: "Map A (space)", kind: process }
+  - id: route
+    in: mapa
+    label: Route over mouths
+    detail: "CSpaceRouter picks the cheapest mouth by path time, transit time and queue wait"
+  - id: leg1
+    in: mapa
+    label: Leg to the mouth
+    detail: "Ordinary path on map A; re-route once if the queue wait grows too long"
+  - id: queue
+    in: mapa
+    label: Pad and queue
+    shape: decision
+    detail: "MoveDef and footprint fit, cargo fits, cooldown over, window budget, AllowUnitTransit"
+  - id: throat
+    label: Throat
+    detail: "In no space: hidden, untouchable, orders kept; transit flare at both mouths"
+  - { id: mapb, label: "Map B (space)", kind: process }
+  - id: exit
+    in: mapb
+    label: Exit spread
+    detail: "Nearest free position to the far pad; held in the throat if none; velocity and facing mapped"
+  - id: leg2
+    in: mapb
+    label: Next leg and the original order
+    detail: "Path on map B, then build, attack or guard in range"
+edges:
+  - { from: order, to: route, main: true }
+  - { from: route, to: leg1, main: true }
+  - { from: leg1, to: queue, main: true }
+  - { from: queue, to: throat, label: admitted, main: true }
+  - { from: queue, to: queue, label: wait }
+  - { from: throat, to: exit, label: after transit time, main: true }
+  - { from: exit, to: leg2, main: true }

@@ -1,0 +1,45 @@
+title: Proposed spherical planets in Recoil — not implemented
+direction: DOWN
+nodes:
+  - { id: match, label: One lockstep match (CWorld of map spaces), kind: process }
+  - id: system
+    in: match
+    label: CSolarSystem (synced)
+    shape: entity
+    fields: ["Bodies: space id, parent, radius, gravity", "Rails: circular orbit, period, phase; centres in double", "Limits: sphere of influence, engine slots, destroyed flag"]
+  - id: planet
+    in: match
+    label: "Planet space: SphereSurface"
+    detail: "Six tangent-warped cube faces of N × N squares; SMF-style height, type, metal grids with halo seams; objects in planet-local float3 with frame orientation"
+  - id: sim
+    in: match
+    label: Per-face sim services
+    detail: "QTPFS roots per face with seam links, great-circle heuristic; LOS and radar with curvature horizon; face cell field; radial gravity, numeric aiming"
+  - id: orbit
+    in: match
+    label: Orbital band
+    detail: "Altitude shell inside the planet space; OrbitMoveType on great circles; orbital target category"
+  - id: transit
+    in: match
+    label: "System space (sun frame)"
+    detail: "Null surface; landers, unit-cannon shots, smash bodies; cross-space links at each body's sphere of influence"
+  - id: other
+    in: match
+    label: Other planet and moon spaces
+    detail: "Sphere or flat SMF surfaces; same services"
+  - id: smash
+    in: match
+    label: Planet-scale weapons
+    detail: "Halley transfer solved from rails; Annihilaser; impact empties the target space and closes it"
+  - id: views
+    label: Unsynced views
+    detail: "CDLOD per face, water and atmosphere shells, globe camera with free up vector, system view, globe minimap"
+edges:
+  - { from: system, to: planet, label: frame centre }
+  - { from: planet, to: sim, main: true }
+  - { from: sim, to: orbit, label: launch, main: true }
+  - { from: orbit, to: transit, label: leave SOI, main: true }
+  - { from: transit, to: other, label: enter SOI, main: true }
+  - { from: system, to: smash, label: rails }
+  - { from: smash, to: other, label: impact }
+  - { from: other, to: views, label: every space drawn }

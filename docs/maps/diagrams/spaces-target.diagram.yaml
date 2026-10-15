@@ -1,0 +1,41 @@
+title: Proposed multiple map spaces — not implemented
+direction: DOWN
+nodes:
+  - id: apis
+    label: "Orders and game APIs"
+    detail: "Players, Lua, native, Wasm and AI calls; bare positions resolve in the context space; one space means today's behaviour"
+  - { id: world, label: "CWorld (synced)", kind: process }
+  - id: global
+    in: world
+    label: Global state
+    shape: entity
+    fields: ["Time: frame, gsRNG, sync checksum", "Sides: teams, economy, players, commands", "Objects: unit, feature, projectile handlers", "Scripts: Lua, Wasm, native modules, callins"]
+  - id: router
+    in: world
+    label: "CSpaceRouter"
+    detail: "A* over link ends; each leg is a path request on one space's path manager"
+  - id: space0
+    in: world
+    label: "CMapSpace A"
+    shape: entity
+    fields: ["Surface: flat, null or sphere", "Map: info, ground grids, water, gravity", "Grids: QuadField, LOS, blocking, damage", "Paths: path manager; wind and tidal"]
+  - id: links
+    in: world
+    label: "CLinkHandler"
+    detail: "Queue, detach from A, throat, exit slot, attach to B; at one point of the frame"
+  - id: space1
+    in: world
+    label: "CMapSpace B … N-1"
+    detail: "Same members, own map; objects carry a SpaceId and are seen only by their own space's grids and sensors"
+  - { id: client, label: Each client, kind: process }
+  - id: views
+    in: client
+    label: "View space"
+    detail: "CSpaceRenderer of the viewed space: ground, water, sky, decals, minimap; camera saved per space; PiP of another space"
+edges:
+  - { from: apis, to: router, label: order into another space, main: true }
+  - { from: global, to: space0, label: per-space updates in id order }
+  - { from: router, to: space0, label: leg to a link end, main: true }
+  - { from: space0, to: links, label: unit on a pad, main: true }
+  - { from: links, to: space1, label: attach, main: true }
+  - { from: space1, to: views, label: draw the viewed space }
