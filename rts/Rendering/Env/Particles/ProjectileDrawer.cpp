@@ -247,6 +247,11 @@ void CProjectileDrawer::Init() {
 	plasmatex          = &textureAtlas->GetTextureWithBackup("plasmatexture",          "circularthingy");
 
 
+	// Games may provide no ground effects at all. Give the empty atlas a
+	// transparent backing texture instead of treating zero entries as an
+	// allocation failure. Populated atlases keep their real failure checks.
+	if (groundFXAtlas->GetTextures().empty())
+		groundFXAtlas->AddTex("__empty_groundfx", 4, 4);
 	if (!groundFXAtlas->Finalize()) {
 #ifndef HEADLESS
 		LOG_L(L_ERROR, "Could not finalize groundFX texture atlas. Use fewer/smaller textures.");
