@@ -122,6 +122,7 @@ list(APPEND FILES
 	LuaHandler/Utilities/vector.lua
 	LuaHandler/Utilities/setupdefs.lua
 	LuaHandler/Utilities/ctrlpanel.lua
+	LuaHandler/Utilities/game_controls.lua
 	LuaHandler/Utilities/keysym.lua
 	LuaHandler/Utilities/list.lua
 	LuaHandler/Utilities/cache.lua
@@ -145,4 +146,3 @@ list(APPEND FILES
 )
 
 create_base_content_archive("base" "springcontent.sdz" "${FILES}")
-

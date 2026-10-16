@@ -51,6 +51,7 @@ pub mod keys {
     pub const ENTER: i32 = 13;
     pub const ESCAPE: i32 = 27;
     pub const DELETE: i32 = 127;
+    pub const PAUSE: i32 = scancode(72);
     pub const RIGHT: i32 = scancode(79);
     pub const LEFT: i32 = scancode(80);
     pub const DOWN: i32 = scancode(81);
@@ -74,9 +75,10 @@ pub mod keys {
 impl<'a> KeyEvent<'a> {
     /// Whether this is `symbol`: a character (`"a"`, `"1"`), or one of `space`,
     /// `enter`, `escape`, `tab`, `backspace`, `delete`, `up`, `down`, `left`,
-    /// `right`, `home`, `end`, `pageup`, `pagedown`, `f1` .. `f12`.
+    /// `right`, `home`, `end`, `pageup`, `pagedown`, `pause`, `f1` .. `f12`.
     pub fn matches(&self, symbol: &str) -> bool {
         let named = match symbol {
+            "pause" => Some(keys::PAUSE),
             "tab" => Some(keys::TAB),
             "backspace" => Some(keys::BACKSPACE),
             "delete" => Some(keys::DELETE),
@@ -184,6 +186,7 @@ mod tests {
 
     #[test]
     fn named_keys_match_their_codes() {
+        assert!(key(0x4000_0048, b"").matches("pause"));
         assert!(key(keys::UP, b"").matches("up"));
         assert!(!key(keys::UP, b"").matches("down"));
         assert!(key(0x4000_003A, b"").matches("f1"));
