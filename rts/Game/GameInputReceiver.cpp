@@ -43,6 +43,9 @@ bool CGameInputReceiver::KeyPressed(int keyCode, int scanCode, bool isRepeat)
 
 	lastActionList = keyBindings.GetActionList(curKeyCodeChain, curScanCodeChain);
 
+	if (gameTextInput.ConsumePressedKey(keyCode, scanCode, lastActionList))
+		return false;
+
 	// Native modules own their modal input (for example Chonsole completion)
 	// before RmlUi can use Tab to traverse unrelated editor controls. If they
 	// decline it, the normal RmlUi/Lua/input-receiver path remains unchanged.
@@ -50,11 +53,6 @@ bool CGameInputReceiver::KeyPressed(int keyCode, int scanCode, bool isRepeat)
 		return false;
 
 	if (RmlGui::ProcessKeyPressed(keyCode, scanCode, isRepeat)) {
-		cancelNativePreDispatch();
-		return false;
-	}
-
-	if (gameTextInput.ConsumePressedKey(keyCode, scanCode, lastActionList)) {
 		cancelNativePreDispatch();
 		return false;
 	}
