@@ -2818,7 +2818,7 @@ def main() -> None:
         "--model",
         type=Path,
         default=MODEL_PATH,
-        help="generated model JSON to project into the probe",
+        help="generated model JSON to project into the probe, alongside its SDK and coverage metadata",
     )
     parser.add_argument(
         "--include-rendering",
@@ -2830,9 +2830,10 @@ def main() -> None:
     parser.add_argument("--manifest-output", type=Path)
     args = parser.parse_args()
 
-    functions, records, _, enums = load_model(args.model.resolve())
+    model_path = args.model.resolve()
+    functions, records, _, enums = load_model(model_path)
     selected, coverage = select_tests_with_coverage(
-        functions, records, args.context, args.include_rendering, args.transport
+        functions, records, args.context, args.include_rendering, args.transport, model_path
     )
     if not selected:
         raise SystemExit("the Wasm parity probe selected no tests")

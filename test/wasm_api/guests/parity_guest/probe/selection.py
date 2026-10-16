@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 from functools import lru_cache
+from pathlib import Path
 
 from . import core
 from .model import load_model, load_tests, native_function
@@ -31,9 +32,10 @@ def select_tests(
     context: str = "synced_gadget",
     include_rendering: bool = False,
     transport: str = "core",
+    model_path: Path = core.MODEL_PATH,
 ) -> list[tuple[dict, str, str, dict, list[str]]]:
     selected, _coverage = select_tests_with_coverage(
-        functions, records, context, include_rendering, transport
+        functions, records, context, include_rendering, transport, model_path
     )
     return selected
 
@@ -72,8 +74,8 @@ CORE_OWNED_UNSUPPORTED_TESTS = frozenset(
 
 
 @lru_cache(maxsize=1)
-def core_import_coverage() -> dict[tuple[str, str], dict]:
-    coverage_path = ROOT / "rts" / "wasm" / "generated" / "core-executable-coverage.json"
+def core_import_coverage(model_path: Path = core.MODEL_PATH) -> dict[tuple[str, str], dict]:
+    coverage_path = model_path.parent / "core-executable-coverage.json"
     entries = json.loads(coverage_path.read_text(encoding="utf-8"))
     return {
         (entry["module"], entry["function"]): entry
@@ -83,14 +85,14 @@ def core_import_coverage() -> dict[tuple[str, str], dict]:
 
 
 @lru_cache(maxsize=1)
-def core_owned_unsupported() -> frozenset[tuple[str, str]]:
+def core_owned_unsupported(model_path: Path = core.MODEL_PATH) -> frozenset[tuple[str, str]]:
     """Return model callouts absent from the generated owned façade.
 
     The façade intentionally omits shapes without a reviewed lowering.  Keep
     the parity manifest honest by excluding those tests at generation time;
     an absent Rust item must never be turned into a vacuous runtime result.
     """
-    owned_dir = ROOT / "rts" / "wasm" / "generated" / "sdk"
+    owned_dir = model_path.parent / "sdk"
     owned_path = owned_dir / "core_owned.rs"
     text = owned_path.read_text(encoding="utf-8")
     shard_dir = owned_dir / "core_owned"
@@ -119,7 +121,7 @@ def core_owned_unsupported() -> frozenset[tuple[str, str]]:
         functions.difference_update(hidden_function_pattern.findall(body))
         modules[match.group(1)] = functions
 
-    model_functions, _records, _modules, _enums = load_model()
+    model_functions, _records, _modules, _enums = load_model(model_path)
     return frozenset(
         (module, snake(function.get("name", "")))
         for (module, _name), function in model_functions.items()
@@ -127,11 +129,13 @@ def core_owned_unsupported() -> frozenset[tuple[str, str]]:
     )
 
 
-def core_import_allowed(module: str, function: dict, context: str) -> bool:
+def core_import_allowed(
+    module: str, function: dict, context: str, model_path: Path = core.MODEL_PATH
+) -> bool:
     function_name = snake(function.get("name", ""))
-    if (module, function_name) in core_owned_unsupported():
+    if (module, function_name) in core_owned_unsupported(model_path):
         return False
-    entry = core_import_coverage().get((module, function.get("name")))
+    entry = core_import_coverage(model_path).get((module, function.get("name")))
     if entry is None:
         return False
     return bool(
@@ -148,6 +152,7 @@ def core_test_policy_allows(
     context: str,
     functions: dict[tuple[str, str], dict],
     records: dict[str, dict],
+    model_path: Path = core.MODEL_PATH,
 ) -> bool:
     if test.get("id") in CORE_OWNED_UNSUPPORTED_TESTS:
         return False
@@ -166,7 +171,10 @@ def core_test_policy_allows(
         if callback_target is None:
             return False
         targets.append((callback_target[0], callback_target[2]))
-    return all(core_import_allowed(target_module, target_function, context) for target_module, target_function in targets)
+    return all(
+        core_import_allowed(target_module, target_function, context, model_path)
+        for target_module, target_function in targets
+    )
 
 
 def select_tests_with_coverage(
@@ -175,6 +183,7 @@ def select_tests_with_coverage(
     context: str = "synced_gadget",
     include_rendering: bool = False,
     transport: str = "core",
+    model_path: Path = core.MODEL_PATH,
 ) -> tuple[
     list[tuple[dict, str, str, dict, list[str]]],
     dict,
@@ -273,6 +282,7 @@ def select_tests_with_coverage(
                 context,
                 functions,
                 records,
+                model_path,
             ):
                 selected_entry = None
                 reason = (
@@ -281,7 +291,7 @@ def select_tests_with_coverage(
                     else (
                         "core_owned_unsupported"
                         if any(
-                            target in core_owned_unsupported()
+                            target in core_owned_unsupported(model_path)
                             for target in [
                                 (selected_module, snake(selected_function.get("name", "")))
                             ]

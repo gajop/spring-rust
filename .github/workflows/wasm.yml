@@ -77,17 +77,14 @@ jobs:
           SPRING_NATIVE_REGENERATE=1 cargo build --manifest-path rust/Cargo.toml -p spring-native --lib
           python3 rust/crates/spring-native-codegen/snapshot_native.py --root . --check
 
-      - name: Check parity generated artifacts
+      # verify_codegen.py already regenerates every Core probe context in a
+      # temporary tree using fresh metadata; no checkout model.json is needed.
+      - name: Check native parity generated artifacts
         run: |
           python3 test/native_api_parity/generate_from_spec.py
-          python3 test/wasm_api/guests/parity_guest/generate_probe.py
           git diff --exit-code -- \
             test/native_api_parity/native/src/generated_tests.rs \
-            test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/generated_api_tests.lua \
-            test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/wasm_api_probe_tests.lua \
-            test/wasm_api/guests/parity_guest/wit/parity.wit \
-            test/wasm_api/guests/parity_guest/src/probe_generated.rs \
-            test/wasm_api/guests/parity_guest/probe_manifest.json
+            test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/generated_api_tests.lua
 
       - name: Build engine and Wasm tests with ASAN
         run: ./docker-build-v2/build.sh linux -DUSE_ASAN=ON -DNATIVE_API_TEST_HOOKS=ON
