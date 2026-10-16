@@ -23,7 +23,9 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -256,15 +258,23 @@ static void NativeSendCommands(const SendCommandsQuery* query, SendCommandsResul
 		return;
 	}
 
-	std::string command = query->command;
-	if (query->rest != nullptr && query->rest[0] != '\0') {
-		command += "\n";
-		command += query->rest;
+	std::vector<std::string> commands;
+	for (const char* text: {query->command, query->rest}) {
+		if (text == nullptr)
+			continue;
+		std::istringstream lines(text);
+		for (std::string command; std::getline(lines, command);) {
+			if (!command.empty() && command.back() == '\r')
+				command.pop_back();
+			if (command.empty())
+				continue;
+			if (command[0] != '@')
+				command = "@@" + command;
+			commands.push_back(std::move(command));
+		}
 	}
-	if (!command.empty() && command[0] != '@')
-		command = "@@" + command;
 
-	guihandler->RunCustomCommands({command}, false);
+	guihandler->RunCustomCommands(commands, false);
 	result->error = nullptr;
 	result->success = true;
 }

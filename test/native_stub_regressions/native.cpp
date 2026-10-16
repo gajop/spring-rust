@@ -43,6 +43,37 @@ static Json::Value Decode(const char* text)
 	return value;
 }
 
+static void CheckCommands(NativeInterface* api)
+{
+	auto send = [api](const char* command, const char* rest) {
+		SendCommandsQuery query{command, rest};
+		SendCommandsResult result{};
+		api->messages->SendCommands(&query, &result);
+		Check(!result.error && result.success, "native command batch accepted");
+	};
+	auto bound = [api](const char* action) {
+		GetActionHotKeysQuery query{action};
+		GetActionHotKeysResult result{};
+		api->input->GetActionHotKeys(&query, &result);
+		Check(!result.error, "command binding readback available");
+		return result.count != 0;
+	};
+	send("bind f10 native_audit_first\nunbindaction native_audit_first\nbind f11 native_audit_second",
+		"unbindaction native_audit_second\r\n\r\n@@bind f10 native_audit_final\n");
+	Check(!bound("native_audit_first"), "command lines execute separately and in order");
+	Check(!bound("native_audit_second"), "rest lines execute after command lines");
+	Check(bound("native_audit_final"), "rest executes after blank lines and retains command modifiers");
+	send("@@bind f11 native_audit_single", nullptr);
+	Check(bound("native_audit_single"), "single prefixed command still executes");
+	send("unbindaction native_audit_final", "");
+	send("unbindaction native_audit_single", nullptr);
+	Check(!bound("native_audit_final") && !bound("native_audit_single"), "command test bindings removed");
+	SendCommandsQuery query{nullptr, "bind f10 native_audit_rejected"};
+	SendCommandsResult result{};
+	api->messages->SendCommands(&query, &result);
+	Check(!result.success && !bound("native_audit_rejected"), "missing command rejects the rest");
+}
+
 // GL is supplied by the engine's current context, without linking a second
 // loader or assuming that native modules share the engine's GLAD globals.
 template<typename T> static T Proc(const char* name)
@@ -228,6 +259,8 @@ void HandleLuaCall(NativeInterface* api, void*, const HandleLuaCallQuery* query,
 		LogResult r{};
 		api->messages->Log(&q, &r);
 		Check(!r.error && r.success, "section/level log accepted");
+	} else if (command == "commands") {
+		CheckCommands(api);
 	} else if (command == "display") {
 		GetScreenGeometryQuery q{};
 		ViewGeometry expected{}, usable{};
