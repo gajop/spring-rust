@@ -14,9 +14,7 @@ one local commit, at the user's request. Historical binary hashes and test
 provenance below remain unchanged. The original
 engine's code was already committed, so no additional pre-work code checkpoint
 was necessary. Its pending documentation was copied into this worktree for
-context and kept out of the engine-code checkpoint. The accidental Planet Wars
-map article, its diagram files, and its index links were removed; the Planetary
-Annihilation article remains.
+context and kept out of the engine-code checkpoint.
 
 All builds, tests, benchmarks, recordings, and replay comparisons ran on this
 machine. No GitHub Actions were changed or invoked. No repositories were pushed.
