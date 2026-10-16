@@ -1604,9 +1604,9 @@ bool CGame::Draw() {
 		debugDrawerAI->Draw();
 
 		DrawInputReceivers();
-		DrawInputText();
 		DrawInterfaceWidgets();
 		RmlGui::RenderFrame();
+		DrawInputText();
 		mouse->DrawCursor();
 
 		eventHandler.DrawScreenPost();
