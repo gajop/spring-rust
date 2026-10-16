@@ -52,6 +52,7 @@ pub mod keys {
     pub const ESCAPE: i32 = 27;
     pub const DELETE: i32 = 127;
     pub const PAUSE: i32 = scancode(72);
+    pub const INSERT: i32 = scancode(73);
     pub const RIGHT: i32 = scancode(79);
     pub const LEFT: i32 = scancode(80);
     pub const DOWN: i32 = scancode(81);
@@ -61,6 +62,8 @@ pub mod keys {
     pub const END: i32 = scancode(77);
     pub const PAGE_DOWN: i32 = scancode(78);
     pub const KEYPAD_ENTER: i32 = scancode(88);
+    pub const KEYPAD_PLUS: i32 = scancode(87);
+    pub const KEYPAD_MINUS: i32 = scancode(86);
 
     /// `F1` .. `F12` as `f(1)` .. `f(12)`; other numbers give -1.
     pub const fn f(number: i32) -> i32 {
@@ -74,14 +77,18 @@ pub mod keys {
 
 impl<'a> KeyEvent<'a> {
     /// Whether this is `symbol`: a character (`"a"`, `"1"`), or one of `space`,
-    /// `enter`, `escape`, `tab`, `backspace`, `delete`, `up`, `down`, `left`,
-    /// `right`, `home`, `end`, `pageup`, `pagedown`, `pause`, `f1` .. `f12`.
+    /// `enter`, `escape`, `tab`, `backspace`, `insert`, `delete`, `up`, `down`,
+    /// `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `pause`, `numpad+`,
+    /// `numpad-`, `f1` .. `f12`.
     pub fn matches(&self, symbol: &str) -> bool {
         let named = match symbol {
             "pause" => Some(keys::PAUSE),
             "tab" => Some(keys::TAB),
             "backspace" => Some(keys::BACKSPACE),
             "delete" => Some(keys::DELETE),
+            "insert" => Some(keys::INSERT),
+            "numpad+" => Some(keys::KEYPAD_PLUS),
+            "numpad-" => Some(keys::KEYPAD_MINUS),
             "up" => Some(keys::UP),
             "down" => Some(keys::DOWN),
             "left" => Some(keys::LEFT),
@@ -90,9 +97,11 @@ impl<'a> KeyEvent<'a> {
             "end" => Some(keys::END),
             "pageup" => Some(keys::PAGE_UP),
             "pagedown" => Some(keys::PAGE_DOWN),
-            value if value.len() > 1 && value.starts_with('f') => {
-                value[1..].parse().ok().map(keys::f).filter(|code| *code >= 0)
-            }
+            value if value.len() > 1 && value.starts_with('f') => value[1..]
+                .parse()
+                .ok()
+                .map(keys::f)
+                .filter(|code| *code >= 0),
             _ => None,
         };
         if let Some(code) = named {
@@ -198,5 +207,13 @@ mod tests {
         assert!(key(13, b"").matches("enter"));
         assert!(key(0x4000_0058, b"").matches("enter"));
         assert!(!key(271, b"").matches("enter"));
+    }
+
+    #[test]
+    fn speed_control_keys_match_engine_symbols() {
+        assert!(key(0x4000_0049, b"").matches("insert"));
+        assert!(key(0x4000_0057, b"").matches("numpad+"));
+        assert!(key(0x4000_0056, b"").matches("numpad-"));
+        assert!(!key(0x4000_0057, b"").matches("numpad-"));
     }
 }
