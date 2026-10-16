@@ -2,6 +2,14 @@
 
 local controls = {}
 
+function controls.IsWriting()
+	if Spring.IsUserWriting() then
+		return true
+	end
+	local focused = WG.Chili and WG.Chili.Screen0.focusedControl
+	return not not (focused and focused.visible and focused.classname == "editbox")
+end
+
 function controls:GetInfo()
 	return {
 		name = "Game controls",
