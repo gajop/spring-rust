@@ -57,8 +57,6 @@ function controls:KeyPress(key, mods, isRepeat)
 		command = "pause"
 	elseif key == Spring.GetKeyCode("f12") then
 		command = "screenshot"
-	elseif key == Spring.GetKeyCode("enter") then
-		command = "chat"
 	elseif mods.alt and not mods.ctrl and not mods.meta then
 		if key == Spring.GetKeyCode("=") or key == Spring.GetKeyCode("+")
 			or key == Spring.GetKeyCode("numpad+") or key == Spring.GetKeyCode("insert") then
