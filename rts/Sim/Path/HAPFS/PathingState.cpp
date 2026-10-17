@@ -586,11 +586,15 @@ bool PathingState::WriteFile(const std::string& peFileName, const std::string& m
 
 	// write center-offsets
 	for (int pathType = 0; pathType < moveDefHandler.GetNumMoveDefs(); ++pathType) {
-		zipWriteInFileInZip(file, (const void*) &blockStates.peNodeOffsets[pathType][0], blockStates.peNodeOffsets[pathType].size() * sizeof(short2));
+		const auto& offsets = blockStates.peNodeOffsets[pathType];
+		if (!offsets.empty())
+			zipWriteInFileInZip(file, offsets.data(), offsets.size() * sizeof(short2));
 	}
 
-	// write vertex-costs
-	zipWriteInFileInZip(file, vertexCosts.data(), vertexCosts.size() * sizeof(float));
+	// Classic minizip passes empty.data() through to crc32. A null buffer resets
+	// the CRC even at length zero, corrupting caches for games with no move defs.
+	if (!vertexCosts.empty())
+		zipWriteInFileInZip(file, vertexCosts.data(), vertexCosts.size() * sizeof(float));
 
 	zipCloseFileInZip(file);
 	zipClose(file, nullptr);
