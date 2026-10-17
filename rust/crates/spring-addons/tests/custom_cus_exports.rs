@@ -5,8 +5,14 @@ use spring_addons::GadgetHandler;
 use spring_addons::reexports::{self as spring, All, Result, Spring};
 use std::cell::Cell;
 
-#[derive(Default)]
-pub struct Global;
+pub struct Global {
+    initial_frame: u32,
+}
+fn create_global(spring: &Spring<'_, All>) -> Result<Global> {
+    Ok(Global {
+        initial_frame: spring.game().get_game_frame()?.low16,
+    })
+}
 #[derive(Default)]
 pub struct Scripts {
     tick: Cell<u32>,
@@ -53,9 +59,11 @@ impl CusModule<All> for Scripts {
         Ok(())
     }
 }
-fn setup(_: &mut GadgetHandler<Global, All>, _: &Spring<'_, All>) {}
+fn setup(handler: &mut GadgetHandler<Global, All>, _: &Spring<'_, All>) {
+    assert_eq!(handler.global.initial_frame, 42);
+}
 spring_addons::export_rules_gadgets! {
-    state: Global, setup: setup, scratch: 4096, environment: All, cus: Scripts,
+    state: Global, create: create_global, setup: setup, scratch: 4096, environment: All, cus: Scripts,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
