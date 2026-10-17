@@ -480,7 +480,7 @@
             let value = crate::generated::display::get_screen_geometry_full(screen_num, query_usable)?;
             Ok(GetScreenGeometryFullValue {
                 geom: ViewGeometry { view_size_x: value.0.view_size_x, view_size_y: value.0.view_size_y, view_pos_x: value.0.view_pos_x, view_pos_y: value.0.view_pos_y },
-                usable: match value.1 { Some(value) => Some(ViewGeometry { view_size_x: value.view_size_x, view_size_y: value.view_size_y, view_pos_x: value.view_pos_x, view_pos_y: value.view_pos_y }), None => None }
+                usable: value.1.map(|value| ViewGeometry { view_size_x: value.view_size_x, view_size_y: value.view_size_y, view_pos_x: value.view_pos_x, view_pos_y: value.view_pos_y })
             })
         }
 

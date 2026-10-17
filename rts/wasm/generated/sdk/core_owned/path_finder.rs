@@ -145,7 +145,7 @@
         #[inline]
         pub fn get_next_way_point(path_id: u32, caller_pos: Float3, min_dist: f32) -> Result<Option<Float3>> {
             let value = crate::generated::path_finder::get_next_way_point(path_id, crate::generated::path_finder::Float3 { x: caller_pos.x, y: caller_pos.y, z: caller_pos.z }, min_dist)?;
-            Ok(match value { Some(value) => Some(Float3 { x: value.x, y: value.y, z: value.z }), None => None })
+            Ok(value.map(|value| Float3 { x: value.x, y: value.y, z: value.z }))
         }
 
         #[inline]

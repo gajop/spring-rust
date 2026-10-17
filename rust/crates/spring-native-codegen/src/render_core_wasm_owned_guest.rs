@@ -1669,6 +1669,7 @@ fn render_fixed_forward(
                 records,
                 enums,
                 module_ident,
+                true,
             )
         })
         .collect::<Vec<_>>()
@@ -1728,6 +1729,7 @@ fn convert_to_core(
     records: &BTreeMap<String, &RecordModel>,
     enums: &BTreeMap<String, &EnumModel>,
     module_ident: &str,
+    input_slice: bool,
 ) -> String {
     match ty {
         SemanticType::Enum { name } => {
@@ -1759,7 +1761,8 @@ fn convert_to_core(
                             &format!("{expression}.{field_name}"),
                             records,
                             enums,
-                            module_ident
+                            module_ident,
+                            false,
                         )
                     )
                 })
@@ -1780,10 +1783,15 @@ fn convert_to_core(
                 element_type.as_str(),
                 "i8" | "i16" | "i32" | "i64" | "u8" | "u16" | "u32" | "u64" | "f32" | "f64"
             ) {
+                let expression = if !input_slice {
+                    format!("&{expression}[..]")
+                } else {
+                    expression.to_owned()
+                };
                 format!(
-                    "{{ let __values = &{expression}[..]; \
+                    "{{ let __values = {expression}; \
                      if __values.len() > {length} {{ return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }} \
-                     let mut __array = [0 as {element_type}; {length}]; \
+                     let mut __array: [{element_type}; {length}] = [Default::default(); {length}]; \
                      __array[..__values.len()].copy_from_slice(__values); \
                      __array }}"
                 )
@@ -1794,11 +1802,17 @@ fn convert_to_core(
             }
         }
         SemanticType::Option { inner } => {
-            let converted = convert_to_core(inner, "value", records, enums, module_ident);
+            let converted = convert_to_core(inner, "value", records, enums, module_ident, false);
             if converted == "value" {
                 expression.to_owned()
             } else {
-                format!("match {expression} {{ Some(value) => Some({converted}), None => None }}")
+                if converted.contains('?') || converted.contains("return ") {
+                    format!(
+                        "match {expression} {{ Some(value) => Some({converted}), None => None }}"
+                    )
+                } else {
+                    format!("{expression}.map(|value| {converted})")
+                }
             }
         }
         _ => expression.to_owned(),
@@ -1865,7 +1879,13 @@ fn convert_from_core(
             if converted == "value" {
                 expression.to_owned()
             } else {
-                format!("match {expression} {{ Some(value) => Some({converted}), None => None }}")
+                if converted.contains('?') || converted.contains("return ") {
+                    format!(
+                        "match {expression} {{ Some(value) => Some({converted}), None => None }}"
+                    )
+                } else {
+                    format!("{expression}.map(|value| {converted})")
+                }
             }
         }
         _ => expression.to_owned(),
