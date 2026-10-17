@@ -25,6 +25,9 @@ class NativeInterfaceSystem {
 public:
 	NativeInterfaceSystem();
 	~NativeInterfaceSystem();
+	// Release module resources while the game's UI, sound and simulation still
+	// exist. The DLL stays mapped until the system itself is destroyed.
+	void ShutdownModules();
 
 	// Request a module reload. Once a module is active, the reload is delayed
 	// until Update() so no native callback can unload its own code or data.

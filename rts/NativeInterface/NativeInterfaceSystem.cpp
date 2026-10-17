@@ -440,6 +440,11 @@ NativeInterfaceSystem::~NativeInterfaceSystem() {
 	// pImpl destructor handles cleanup
 }
 
+void NativeInterfaceSystem::ShutdownModules() {
+	pImpl->UnloadEventClients();
+	pImpl->wasmSystem->UnloadAll();
+}
+
 void NativeInterfaceSystem::Reload() {
 	pImpl->RequestReload();
 }
