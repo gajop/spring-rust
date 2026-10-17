@@ -45,6 +45,7 @@ use alloc::rc::Rc;
 use core::cell::{Cell, RefCell};
 
 type Command = Box<dyn FnOnce()>;
+type Continuation<T> = Rc<RefCell<Option<Box<dyn FnOnce(T)>>>>;
 
 /// Stops a queue that keeps refilling itself (a `.then` that always queues
 /// another command). Far above anything a frame does.
@@ -102,7 +103,7 @@ mod storage {
 /// The result of a queued command, for a `.then`.
 #[must_use = "a command's result is only available through `.then`; drop it if unused"]
 pub struct Pending<T> {
-    then: Rc<RefCell<Option<Box<dyn FnOnce(T)>>>>,
+    then: Continuation<T>,
 }
 
 impl<T: 'static> Pending<T> {
@@ -115,7 +116,7 @@ impl<T: 'static> Pending<T> {
 
 /// Queue `f`, usually one engine call. Its result goes to [`Pending::then`].
 pub fn queue<T: 'static>(f: impl FnOnce() -> T + 'static) -> Pending<T> {
-    let then: Rc<RefCell<Option<Box<dyn FnOnce(T)>>>> = Rc::new(RefCell::new(None));
+    let then: Continuation<T> = Rc::new(RefCell::new(None));
     let slot = Rc::clone(&then);
     push(Box::new(move || {
         let result = f();
