@@ -137,7 +137,13 @@ fn host_reentry_is_immediate_and_does_not_lock_the_context() {
     REENTER.with(|v| v.set(true));
     EVENTS.with(|e| e.borrow_mut().clear());
     let frame = context
-        .with_spring(|spring| spring.game().get_game_frame())
+        .with_spring(|spring| {
+            let units = spring.units();
+            let game = spring.game();
+            let frame = game.get_game_frame();
+            assert_eq!(units.get_all_units().unwrap().len(), 2);
+            frame
+        })
         .unwrap()
         .unwrap();
     CONTEXT.with(|c| c.set(ptr::null()));
@@ -1051,7 +1057,7 @@ fn stored_module_identity_only_opens_scopes_inside_its_own_live_callin() {
     );
     context
         .with_spring(|spring| {
-            let mut helper = spring.reborrow();
+            let helper = spring.reborrow();
             assert_eq!(helper.units().get_all_units()?.len(), 2);
             reference.with_spring(|spring| {
                 assert_eq!(spring.game().get_game_frame()?.low16, 42);
@@ -1091,4 +1097,59 @@ fn stored_module_identity_only_opens_scopes_inside_its_own_live_callin() {
             .code,
         ErrorCode::InvalidState as i32
     );
+}
+
+unsafe extern "C" fn pointer_delta(
+    query: *const sys::RmlContextHandleQuery,
+    result: *mut sys::RmlContextPointerDeltaResult,
+) {
+    let status = unsafe { (*query).contextHandle as i32 };
+    unsafe {
+        *result = sys::RmlContextPointerDeltaResult {
+            error: ptr::null(),
+            deltaX: -7,
+            deltaY: 11,
+            status,
+        };
+    }
+}
+
+#[test]
+fn pointer_capture_preserves_deltas_and_rejects_unknown_status() {
+    use rml::PointerCaptureStatus::{Active, Cancelled, None, Released};
+    let rml = sys::RmlUiApi {
+        ContextTakePointerCaptureDelta: Some(pointer_delta),
+        ..Default::default()
+    };
+    let interface = sys::NativeInterface {
+        rmlUi: &rml,
+        ..Default::default()
+    };
+    let context = unsafe { ModuleContext::<All>::from_native(&interface) }.unwrap();
+    context
+        .with_spring(|spring| {
+            for (raw, status) in [None, Active, Released, Cancelled].into_iter().enumerate() {
+                let delta = spring
+                    .rml_ui()
+                    .take_pointer_capture_delta(raw as u64)
+                    .unwrap();
+                assert_eq!(
+                    delta,
+                    rml::PointerCaptureDelta {
+                        delta_x: -7,
+                        delta_y: 11,
+                        status
+                    }
+                );
+            }
+            assert_eq!(
+                spring
+                    .rml_ui()
+                    .take_pointer_capture_delta(4)
+                    .unwrap_err()
+                    .code,
+                ErrorCode::InvalidState as i32
+            );
+        })
+        .unwrap();
 }
