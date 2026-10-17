@@ -222,7 +222,15 @@ measured images meet the existing 8% limit. Its renderer revision gate is
 still red. Diagnostic builds now explicitly enable their INFO sections so
 verification markers remain visible with the engine's default NOTICE filter.
 
-The other three Cabal game-code ports, the other game-code port, and job helpers
+Parts Needed's Wasm port passes 70 gameplay assertions and its UI handshake
+on Linux and Wine, strict default/all-feature Clippy and four shared unit
+tests. Its live Lua/Wasm unit-script comparison passes across 3,498 samples
+(maximum transform difference 0.00003384, existing limit 0.0001), alongside
+the source/keyframe comparison. All six visual captures complete, including
+the non-black and settled-camera checks; every manually measured image/crop
+meets its existing limit. The Mesa package revision gate remains red.
+
+The other two Cabal game-code ports, the other game-code port, and job helpers
 remain unfinished. Discovery, rooms, and reconnect UI are also still separate
 work. No private game content has been uploaded or released.
 A live native/Wasm `All` fixture also tests terrain mutation and drawing in one
