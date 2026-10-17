@@ -75,6 +75,16 @@ macro_rules! __addon_module {
                 }
                 Ok(())
             }
+            fn job_result(
+                &self,
+                spring: &mut $crate::reexports::Spring<'_, $environment>,
+                id: $crate::reexports::jobs::JobId,
+                result: $crate::reexports::jobs::JobResult<'_>,
+            ) -> $crate::reexports::Result<()> {
+                self.ensure_initialized(spring);
+                self.handler.job_result(spring, id, result);
+                Ok(())
+            }
         }
         $crate::reexports::export_module!(HANDLER, $environment, __SpringAddonModule);
         #[allow(dead_code)]
@@ -103,6 +113,15 @@ macro_rules! __addon_module {
         pub fn with_global<R>(f: impl FnOnce(&$state_type) -> R) -> R {
             with_addon_context(|ctx| f(ctx.global()))
         }
+    };
+}
+
+/// Declare pure workers for an addon module. Addons receive results through
+/// their `job_result` method, with the usual context and command queue.
+#[macro_export]
+macro_rules! export_jobs {
+    ({$($workers:tt)*}) => {
+        $crate::reexports::export_jobs!(HANDLER, {$($workers)*});
     };
 }
 

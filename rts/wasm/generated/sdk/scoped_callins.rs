@@ -1748,9 +1748,9 @@ macro_rules! export_game_frame {
         __spring_wasm_core_callin_game_frame(game_frame : i32) { { let
         value:$crate::types::callins::GameFrameResult
         =$crate::module::wasm_boundary($slot .with(| slot | slot
-        .invoke_for_environment::< 31, _ > (| module, spring | { let query = { let
-        game_frame = game_frame; $crate::types::callins::GameFrameQuery { game_frame } };
-        let returned =$handler (module, spring, query.game_frame) ?; Ok({ let () =
+        .invoke_tick_for_environment::< 31, 1, _ > (| module, spring | { let query = {
+        let game_frame = game_frame; $crate::types::callins::GameFrameQuery { game_frame
+        } }; let returned =$handler (module, spring, query.game_frame) ?; Ok({ let () =
         returned;$crate::types::callins::GameFrameResult {} }) }))); { let _ = value; }
         }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub unsafe extern
         "C" fn GameFrame(_interface:* const $crate::__sys::NativeInterface, data:* mut
@@ -1758,8 +1758,8 @@ macro_rules! export_game_frame {
         $crate::__sys::GameFrameResult) { let Some(result) = (unsafe { result.as_mut() })
         else { return; }; * result = Default::default(); result.error
         =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
-        .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
-        spring | { let query = unsafe {
+        .validate_identity(data) ?; slot.invoke_tick_for_environment::< 31, 1, _ > (|
+        module, spring | { let query = unsafe {
         $crate::__native_callins::decode_game_frame_query(query) } ?; let returned
         =$handler (module, spring, query.game_frame) ?; let value = { let () =
         returned;$crate::types::callins::GameFrameResult {}
@@ -4825,18 +4825,19 @@ macro_rules! export_update {
         #[cfg(target_arch = "wasm32")] #[unsafe (export_name = "spring:callin/update")]
         pub extern "C" fn __spring_wasm_core_callin_update(delta_seconds : f32) { { let
         value:$crate::types::callins::UpdateResult =$crate::module::wasm_boundary($slot
-        .with(| slot | slot.invoke_for_environment::< 58, _ > (| module, spring | { let
-        query = { let delta_seconds = delta_seconds; $crate::types::callins::UpdateQuery
-        { delta_seconds } }; let returned =$handler (module, spring, query.delta_seconds)
-        ?; Ok({ let () = returned;$crate::types::callins::UpdateResult {} }) }))); { let
-        _ = value; } }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub
-        unsafe extern "C" fn Update(_interface:* const $crate::__sys::NativeInterface,
-        data:* mut core::ffi::c_void, query:* const $crate::__sys::UpdateQuery, result:*
-        mut $crate::__sys::UpdateResult) { let Some(result) = (unsafe { result.as_mut()
-        }) else { return; }; * result = Default::default(); result.error
+        .with(| slot | slot.invoke_tick_for_environment::< 58, 2, _ > (| module, spring |
+        { let query = { let delta_seconds = delta_seconds;
+        $crate::types::callins::UpdateQuery { delta_seconds } }; let returned =$handler
+        (module, spring, query.delta_seconds) ?; Ok({ let () =
+        returned;$crate::types::callins::UpdateResult {} }) }))); { let _ = value; } }; }
+        #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub unsafe extern "C"
+        fn Update(_interface:* const $crate::__sys::NativeInterface, data:* mut
+        core::ffi::c_void, query:* const $crate::__sys::UpdateQuery, result:* mut
+        $crate::__sys::UpdateResult) { let Some(result) = (unsafe { result.as_mut() })
+        else { return; }; * result = Default::default(); result.error
         =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
-        .validate_identity(data) ?; slot.invoke_for_environment::< 58, _ > (| module,
-        spring | { let query = unsafe {
+        .validate_identity(data) ?; slot.invoke_tick_for_environment::< 58, 2, _ > (|
+        module, spring | { let query = unsafe {
         $crate::__native_callins::decode_update_query(query) } ?; let returned =$handler
         (module, spring, query.delta_seconds) ?; let value = { let () =
         returned;$crate::types::callins::UpdateResult {}

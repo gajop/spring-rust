@@ -64,6 +64,14 @@ goes through the engine back into the CUS host and returns the expected value.
 The runner requires the CUS success marker on each backend. No downstream game
 assets are used.
 
+Both game variants also submit real SDK jobs. They check ordered byte results,
+empty output, a rejected oversized output, and submission from a result callback
+with fresh Spring access. One job uses `in_wasm_module` to run in the separately
+loaded 16 MiB worker module. Native executes the same shared pure Rust functions
+on its thread pool. The runner requires the job success marker and shutdown
+asserts that every result arrived. The default RulesSynced run checks the
+existing engine's next-frame job path; `--all-game` checks local Update delivery.
+
 `--all-game --fail-game-init --transport native` instead returns an error from
 the game's initializer on both launches. The menu must still recover and quit
 normally. The rejected game must receive no later callins. This also catches

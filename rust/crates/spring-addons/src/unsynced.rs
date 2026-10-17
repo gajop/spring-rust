@@ -19,6 +19,13 @@ pub trait UnsyncedAddon<G = (), E: spring::capabilities::Common = spring::RulesU
     fn init(&self, _ctx: &AddonContext<'_, G, E>) {}
     fn shutdown(&self, _ctx: &AddonContext<'_, G, E>) {}
     fn update(&self, _ctx: &AddonContext<'_, G, E>, _dt: f32) {}
+    fn job_result(
+        &self,
+        _ctx: &AddonContext<'_, G, E>,
+        _id: spring::jobs::JobId,
+        _result: spring::jobs::JobResult<'_>,
+    ) {
+    }
     fn game_frame(&self, _ctx: &AddonContext<'_, G, E>, _frame: i32) {}
     fn unit_created(
         &self,
@@ -211,6 +218,21 @@ impl<G, E: spring::capabilities::Common> UnsyncedHandler<G, E> {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.update(ctx, dt);
+                }
+            }
+        });
+    }
+
+    pub fn job_result(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        id: spring::jobs::JobId,
+        result: spring::jobs::JobResult<'_>,
+    ) {
+        self.dispatch(spring, "JobResult", |ctx| {
+            for (i, addon) in self.addons.iter().enumerate() {
+                if self.enabled[i].get() {
+                    addon.job_result(ctx, id, result);
                 }
             }
         });

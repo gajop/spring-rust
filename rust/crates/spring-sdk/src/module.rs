@@ -15,6 +15,16 @@ pub trait Module<E: Environment>: Sized + 'static {
     fn shutdown(&self, _spring: &mut Spring<'_, E>) -> Result<()> {
         Ok(())
     }
+    /// Results arrive in submission order, before the next GameFrame (synced)
+    /// or Update (local). The bytes belong to this callback; copy to retain them.
+    fn job_result(
+        &self,
+        _spring: &mut Spring<'_, E>,
+        _id: crate::jobs::JobId,
+        _result: core::result::Result<&[u8], crate::jobs::JobError>,
+    ) -> Result<()> {
+        Ok(())
+    }
 }
 
 struct Instance<E: Environment, T> {
@@ -148,6 +158,41 @@ impl<E: Environment, T: Module<E>> ModuleSlot<E, T> {
         });
         self.transitioning.set(false);
         result
+    }
+
+    #[doc(hidden)]
+    pub fn deliver_job_result(
+        &self,
+        id: crate::jobs::JobId,
+        result: core::result::Result<&[u8], crate::jobs::JobError>,
+    ) -> Result<()> {
+        self.invoke(|module, spring| module.job_result(spring, id, result))
+    }
+
+    #[doc(hidden)]
+    pub fn invoke_tick_for_environment<const MASK: u32, const PHASE: u8, R>(
+        &self,
+        handler: impl for<'call> FnOnce(&T, &mut Spring<'call, E>) -> Result<R>,
+    ) -> Result<R> {
+        self.invoke_for_environment::<MASK, _>(|module, spring| {
+            #[cfg(not(target_arch = "wasm32"))]
+            let advance = crate::jobs::native::is_phase::<E>(PHASE);
+            #[cfg(not(target_arch = "wasm32"))]
+            if advance {
+                let deliveries = spring.engine.owner.jobs.borrow_mut().begin()?;
+                // Release the queue borrow before user callbacks. They may
+                // submit more work or make reentrant engine calls.
+                for (id, result) in deliveries {
+                    module.job_result(spring, id, result.as_deref().map_err(|e| *e))?;
+                }
+            }
+            let result = handler(module, spring)?;
+            #[cfg(not(target_arch = "wasm32"))]
+            if advance {
+                spring.engine.owner.jobs.borrow_mut().end()?;
+            }
+            Ok(result)
+        })
     }
 
     #[doc(hidden)]
