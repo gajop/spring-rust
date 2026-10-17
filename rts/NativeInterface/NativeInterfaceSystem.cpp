@@ -338,6 +338,12 @@ public:
 		eventClient = std::make_unique<NativeInterfaceEventClient>(&nativeInterface, sharedLib.get(), wasmSystem.get(), false);
 		eventClient->LoadSymbols();
 		eventClient->Initialize();
+		if (!eventClient->IsInitialized()) {
+			UnloadEventClients();
+			// Loading-thread TLS destructors may still point into this library.
+			// Keep it loaded until a later reload or normal game teardown.
+			return;
+		}
 		if (unitScriptEngine != nullptr)
 			unitScriptEngine->AddCusBackend(eventClient->CusBackend());
 		eventHandler.AddClient(eventClient.get());
@@ -360,6 +366,12 @@ public:
 				&nativeInterface, sharedLib.get(), wasmSystem.get(), false);
 			client->LoadSymbols();
 			client->Initialize();
+			if (!client->IsInitialized()) {
+				NativeRmlUi::ClearOwnerContexts(client->ContextOwner(), RemoveNativeRmlContext);
+				if (RmlGui::GetCurrentContextOwner() == client->ContextOwner())
+					RmlGui::SetCurrentContextOwner(nullptr, false);
+				break;
+			}
 			if (unitScriptEngine != nullptr)
 				unitScriptEngine->AddCusBackend(client->CusBackend());
 			eventHandler.AddClient(client.get());

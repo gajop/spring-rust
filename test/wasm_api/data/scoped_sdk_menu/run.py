@@ -20,7 +20,7 @@ ROOT = FIXTURE.parents[3]
 LEGACY = FIXTURE.parent / "rml_menu_fixture/transition"
 
 
-def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all_game: bool = False, wine: Path | None = None) -> dict:
+def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all_game: bool = False, wine: Path | None = None, fail_game_init: bool = False) -> dict:
     native_target = ["--target", "x86_64-pc-windows-gnu"] if wine else []
     target = ["--target", "wasm32-unknown-unknown"] if transport == "wasm" else native_target
     if fail_init:
@@ -47,6 +47,7 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
             "--release",
             *(native_target if all_game and transport == "native" else ["--target", "wasm32-unknown-unknown"]),
             *(["--features", "all"] if all_game else []),
+            *(["--features", "fail-init"] if fail_game_init else []),
         ],
         cwd=ROOT,
         check=True,
@@ -170,7 +171,10 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
         "[ScopedSdkGame] callin",
         "[ScopedSdkGame] shutdown",
     ]
-    if all_game:
+    if fail_game_init:
+        expected = [s for s in expected if not s.startswith("[ScopedSdkGame]")]
+        expected.append("Failed to initialize native module" if transport == "native" else "Core Wasm SDK initialization failed")
+    elif all_game:
         expected.extend(["[ScopedSdkGame] terrain edited", "[ScopedSdkGame] draw"])
         if transport == "native":
             expected.append("[ScopedSdkGame] loading-thread handoff")
@@ -229,6 +233,11 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
             ]
         )
     ]
+    if fail_game_init:
+        failures = [line for line in failures if "failed to initialize" not in line.lower()]
+        for forbidden in ["[ScopedSdkGame] initialized", "[ScopedSdkGame] callin", "[ScopedSdkGame] draw", "[ScopedSdkGame] shutdown"]:
+            if forbidden in log:
+                failures.append(f"failed game module received user code: {forbidden}")
     result = {
         "transport": transport,
         "exit": exit_code,
@@ -257,8 +266,11 @@ def main() -> int:
     )
     parser.add_argument("--wine", type=Path, help="Wine loader for a Windows engine; uses the caller's dedicated Wine environment")
     parser.add_argument("--all-game", action="store_true", help="test All native/Wasm game loading, terrain edits and rendering")
+    parser.add_argument("--fail-game-init", action="store_true", help="verify an All game module returning an initialization error receives no later callins")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if args.fail_game_init and (not args.all_game or args.fail_init):
+        parser.error("--fail-game-init requires --all-game and a successful menu")
     transports = ["native", "wasm"] if args.transport == "both" else [args.transport]
     # Cargo switches the same artifact between normal and fail-init features.
     # Hold the fixture lock through staging so concurrent invocations cannot
@@ -275,6 +287,7 @@ def main() -> int:
                 args.fail_init,
                 args.all_game,
                 args.wine,
+                args.fail_game_init,
             )
             for name in transports
         ]
