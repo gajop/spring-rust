@@ -160,6 +160,13 @@ pub fn alloc_imports(source: &str) -> String {
     imports
 }
 
+// Numeric C arrays also back counted inputs such as scalar/vec2 uniforms.
+// Match the owned Wasm adapter: accept a prefix and zero-fill the capacity.
+fn padded_numeric_array(ty: &SemanticType) -> bool {
+    matches!(ty, SemanticType::Scalar { name } if matches!(name.as_str(),
+        "i8" | "i16" | "i32" | "i64" | "u8" | "u16" | "u32" | "u64" | "f32" | "f64"))
+}
+
 fn validate_input(ty: &SemanticType, value: &str, module: &ApiModule, depth: usize) -> String {
     let bad = "return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32));";
     match ty {
@@ -186,7 +193,12 @@ fn validate_input(ty: &SemanticType, value: &str, module: &ApiModule, depth: usi
             let item = format!("input_item{depth}");
             let nested = validate_input(element, &item, module, depth + 1);
             let length = if let SemanticType::FixedArray { length, .. } = ty {
-                format!("if ({value}).len()!={length} {{ {bad} }}")
+                let comparison = if padded_numeric_array(element) {
+                    ">"
+                } else {
+                    "!="
+                };
+                format!("if ({value}).len(){comparison}{length} {{ {bad} }}")
             } else {
                 String::new()
             };
@@ -815,9 +827,16 @@ impl NativeRenderer<'_> {
                 },
             ) => {
                 let converted = self.input_value(element, raw_element, "item")?;
-                format!(
-                    "{{ if ({value}).len() != {length} {{ return Err(ApiError::new(ErrorCode::InvalidArgument as i32)); }} let mut converted = Vec::with_capacity({length}); for item in ({value}).iter() {{ converted.push({converted}); }} converted.try_into().map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))? }}"
-                )
+                if padded_numeric_array(element) {
+                    let raw_ty = native_type(raw_element)?;
+                    format!(
+                        "{{ if ({value}).len() > {length} {{ return Err(ApiError::new(ErrorCode::InvalidArgument as i32)); }} let mut converted = [0 as {raw_ty}; {length}]; for (slot, item) in converted.iter_mut().zip(({value}).iter()) {{ *slot = {converted}; }} converted }}"
+                    )
+                } else {
+                    format!(
+                        "{{ if ({value}).len() != {length} {{ return Err(ApiError::new(ErrorCode::InvalidArgument as i32)); }} let mut converted = Vec::with_capacity({length}); for item in ({value}).iter() {{ converted.push({converted}); }} converted.try_into().map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))? }}"
+                    )
+                }
             }
             (SemanticType::Record { name }, CType::Record(_)) => {
                 self.to.insert(name.clone());

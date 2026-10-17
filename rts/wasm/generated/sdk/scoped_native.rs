@@ -19874,76 +19874,66 @@ pub(crate) mod unsynced_ctrl {
     ) -> Result<sys::AtmosphereParams> {
         let native_fog_color = match &value.fog_color {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_sky_color = match &value.sky_color {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_sun_color = match &value.sun_color {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_cloud_color = match &value.cloud_color {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_sky_axis_angle = match &value.sky_axis_angle {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
@@ -20008,31 +19998,27 @@ pub(crate) mod unsynced_ctrl {
     ) -> Result<sys::MapRenderingParams> {
         let native_splat_tex_scales = match &value.splat_tex_scales {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_splat_tex_mults = match &value.splat_tex_mults {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
@@ -20136,91 +20122,79 @@ pub(crate) mod unsynced_ctrl {
     ) -> Result<sys::SunLightingParams> {
         let native_ground_ambient_color = match &value.ground_ambient_color {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_ground_diffuse_color = match &value.ground_diffuse_color {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_ground_specular_color = match &value.ground_specular_color {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_model_ambient_color = match &value.model_ambient_color {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_model_diffuse_color = match &value.model_diffuse_color {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_model_specular_color = match &value.model_specular_color {
             Some(value) => {
-                if (value).len() != 4 {
+                if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(4);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 4];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
@@ -20263,106 +20237,92 @@ pub(crate) mod unsynced_ctrl {
     ) -> Result<sys::WaterParams> {
         let native_absorb = match &value.absorb {
             Some(value) => {
-                if (value).len() != 3 {
+                if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(3);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 3];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_base_color = match &value.base_color {
             Some(value) => {
-                if (value).len() != 3 {
+                if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(3);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 3];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_min_color = match &value.min_color {
             Some(value) => {
-                if (value).len() != 3 {
+                if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(3);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 3];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_surface_color = match &value.surface_color {
             Some(value) => {
-                if (value).len() != 3 {
+                if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(3);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 3];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_diffuse_color = match &value.diffuse_color {
             Some(value) => {
-                if (value).len() != 3 {
+                if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(3);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 3];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_specular_color = match &value.specular_color {
             Some(value) => {
-                if (value).len() != 3 {
+                if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(3);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 3];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
         let native_plane_color = match &value.plane_color {
             Some(value) => {
-                if (value).len() != 3 {
+                if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = Vec::with_capacity(3);
-                for item in (value).iter() {
-                    converted.push(*(item) as _);
+                let mut converted = [0 as f32; 3];
+                for (slot, item) in converted.iter_mut().zip((value).iter()) {
+                    *slot = *(item) as _;
                 }
                 converted
-                    .try_into()
-                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
             }
             None => unsafe { core::mem::zeroed() }
         };
@@ -21462,16 +21422,14 @@ pub(crate) mod gfx {
     ) -> Result<()> {
         let native_bits = (bits) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxClearQuery {
@@ -21504,16 +21462,14 @@ pub(crate) mod gfx {
         let native_target = (target) as _;
         let native_attachment = (attachment) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxClearAttachmentFBOQuery {
@@ -21641,16 +21597,14 @@ pub(crate) mod gfx {
     ) -> Result<()> {
         let native_plane = (plane) as _;
         let native_equation = {
-            if (equation).len() != 4 {
+            if (equation).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (equation).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((equation).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let query = sys::GfxClipPlaneQuery {
             plane: native_plane,
@@ -25240,16 +25194,14 @@ pub(crate) mod gfx {
         let native_options = to_gfx_light_options(&(options), &mut inputs)?;
         let native_pname = (pname) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxLightQuery {
@@ -25402,16 +25354,14 @@ pub(crate) mod gfx {
         values: &[f32],
     ) -> Result<()> {
         let native_values = {
-            if (values).len() != 16 {
+            if (values).len() > 16 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(16);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 16];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let query = sys::GfxMatrixQuery {
             values: native_values,
@@ -25467,16 +25417,14 @@ pub(crate) mod gfx {
     ) -> Result<()> {
         let native_pname = (pname) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxMaterialQuery {
@@ -25619,16 +25567,14 @@ pub(crate) mod gfx {
         values: &[f32],
     ) -> Result<()> {
         let native_values = {
-            if (values).len() != 16 {
+            if (values).len() > 16 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(16);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 16];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let query = sys::GfxMatrixQuery {
             values: native_values,
@@ -25702,16 +25648,14 @@ pub(crate) mod gfx {
         let native_target = (target) as _;
         let native_pname = (pname) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxMultiTexEnvQuery {
@@ -25753,16 +25697,14 @@ pub(crate) mod gfx {
         let native_options = to_gfx_multi_tex_gen_options(&(options), &mut inputs)?;
         let native_pname = (pname) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxMultiTexGenQuery {
@@ -25899,16 +25841,14 @@ pub(crate) mod gfx {
         let native_pname = (pname) as _;
         let native_value = (value) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxPointParameterQuery {
@@ -26861,16 +26801,14 @@ pub(crate) mod gfx {
         let native_param = (param) as _;
         let native_value = (value) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_value_count = (value_count) as _;
         let native_use_float_array = (use_float_array) as _;
@@ -27315,16 +27253,14 @@ pub(crate) mod gfx {
         let native_target = (target) as _;
         let native_pname = (pname) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxTexEnvQuery {
@@ -27361,16 +27297,14 @@ pub(crate) mod gfx {
         let native_options = to_gfx_tex_gen_options(&(options), &mut inputs)?;
         let native_pname = (pname) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxTexGenQuery {
@@ -27485,16 +27419,14 @@ pub(crate) mod gfx {
         let native_target = (target) as _;
         let native_pname = (pname) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxTexEnvQuery {
@@ -27628,16 +27560,14 @@ pub(crate) mod gfx {
     ) -> Result<()> {
         let native_location = (location) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxUniformFloatQuery {
@@ -27752,16 +27682,14 @@ pub(crate) mod gfx {
     ) -> Result<()> {
         let native_location = (location) as _;
         let native_values = {
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in (values).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as i32; 4];
+            for (slot, item) in converted.iter_mut().zip((values).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_count = (count) as _;
         let query = sys::GfxUniformIntQuery {
@@ -28592,52 +28520,44 @@ pub(crate) mod gfx {
         _inputs: &mut Inputs,
     ) -> Result<sys::GfxVertexData> {
         let native_vertex = {
-            if value.vertex.len() != 3 {
+            if value.vertex.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.vertex.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.vertex.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_normal = {
-            if value.normal.len() != 3 {
+            if value.normal.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.normal.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.normal.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_tex_coord = {
-            if value.tex_coord.len() != 2 {
+            if value.tex_coord.len() > 2 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(2);
-            for item in value.tex_coord.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 2];
+            for (slot, item) in converted.iter_mut().zip(value.tex_coord.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_color = {
-            if value.color.len() != 4 {
+            if value.color.len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(4);
-            for item in value.color.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 4];
+            for (slot, item) in converted.iter_mut().zip(value.color.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_has_vertex = value.has_vertex as _;
         let native_has_normal = value.has_normal as _;
@@ -28699,7 +28619,6 @@ pub(crate) mod gfx {
 }
 pub(crate) mod lights {
     use crate::types::lights::LightParams;
-    use alloc::vec::Vec;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
     use super::{Inputs, check_error};
@@ -28926,136 +28845,122 @@ pub(crate) mod lights {
         _inputs: &mut Inputs,
     ) -> Result<sys::LightParams> {
         let native_position = {
-            if value.position.len() != 3 {
+            if value.position.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.position.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.position.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_direction = {
-            if value.direction.len() != 3 {
+            if value.direction.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.direction.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.direction.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_ambient_color = {
-            if value.ambient_color.len() != 3 {
+            if value.ambient_color.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.ambient_color.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.ambient_color.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_diffuse_color = {
-            if value.diffuse_color.len() != 3 {
+            if value.diffuse_color.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.diffuse_color.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.diffuse_color.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_specular_color = {
-            if value.specular_color.len() != 3 {
+            if value.specular_color.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.specular_color.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.specular_color.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_intensity_weight = {
-            if value.intensity_weight.len() != 3 {
+            if value.intensity_weight.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.intensity_weight.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.intensity_weight.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_attenuation = {
-            if value.attenuation.len() != 3 {
+            if value.attenuation.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.attenuation.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.attenuation.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_ambient_decay_rate = {
-            if value.ambient_decay_rate.len() != 3 {
+            if value.ambient_decay_rate.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.ambient_decay_rate.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.ambient_decay_rate.iter())
+            {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_diffuse_decay_rate = {
-            if value.diffuse_decay_rate.len() != 3 {
+            if value.diffuse_decay_rate.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.diffuse_decay_rate.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted.iter_mut().zip(value.diffuse_decay_rate.iter())
+            {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_specular_decay_rate = {
-            if value.specular_decay_rate.len() != 3 {
+            if value.specular_decay_rate.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.specular_decay_rate.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted
+                .iter_mut()
+                .zip(value.specular_decay_rate.iter())
+            {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_decay_function_type = {
-            if value.decay_function_type.len() != 3 {
+            if value.decay_function_type.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(3);
-            for item in value.decay_function_type.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 3];
+            for (slot, item) in converted
+                .iter_mut()
+                .zip(value.decay_function_type.iter())
+            {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_radius = value.radius as _;
         let native_fov = value.fov as _;
@@ -42052,16 +41957,14 @@ pub(crate) mod unit_control {
         let native_unit_id = (unit_id) as _;
         let native_piece_index = (piece_index) as _;
         let native_matrix = {
-            if (matrix).len() != 16 {
+            if (matrix).len() > 16 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(16);
-            for item in (matrix).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 16];
+            for (slot, item) in converted.iter_mut().zip((matrix).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let query = sys::SetUnitPieceMatrixQuery {
             unitID: native_unit_id,
@@ -43409,7 +43312,6 @@ pub(crate) mod unit_control {
 }
 pub(crate) mod feature_control {
     use crate::types::feature_control::{DefRef, Float3, SetFeatureBlockingOptions};
-    use alloc::vec::Vec;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
     use super::{Inputs, check_error};
@@ -44115,16 +44017,14 @@ pub(crate) mod feature_control {
         let native_feature_id = (feature_id) as _;
         let native_piece_index = (piece_index) as _;
         let native_matrix = {
-            if (matrix).len() != 16 {
+            if (matrix).len() > 16 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(16);
-            for item in (matrix).iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 16];
+            for (slot, item) in converted.iter_mut().zip((matrix).iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let query = sys::SetFeaturePieceMatrixQuery {
             featureID: native_feature_id,
@@ -48207,28 +48107,24 @@ pub(crate) mod object_rendering {
         let native_name = inputs.string(&value.name)? as _;
         let native_type_ = value.type_ as _;
         let native_float_values = {
-            if value.float_values.len() != 32 {
+            if value.float_values.len() > 32 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(32);
-            for item in value.float_values.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as f32; 32];
+            for (slot, item) in converted.iter_mut().zip(value.float_values.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_int_values = {
-            if value.int_values.len() != 32 {
+            if value.int_values.len() > 32 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = Vec::with_capacity(32);
-            for item in value.int_values.iter() {
-                converted.push(*(item) as _);
+            let mut converted = [0 as i32; 32];
+            for (slot, item) in converted.iter_mut().zip(value.int_values.iter()) {
+                *slot = *(item) as _;
             }
             converted
-                .try_into()
-                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?
         };
         let native_value_count = value.value_count as _;
         Ok(sys::ObjectMaterialUniform {
