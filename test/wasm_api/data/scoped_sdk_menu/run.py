@@ -9,6 +9,7 @@ import json
 import os
 import shutil
 import signal
+import struct
 import subprocess
 import tempfile
 from pathlib import Path
@@ -18,6 +19,30 @@ from PIL import Image
 FIXTURE = Path(__file__).resolve().parent
 ROOT = FIXTURE.parents[3]
 LEGACY = FIXTURE.parent / "rml_menu_fixture/transition"
+
+
+def stage_cus_unit(game: Path) -> None:
+    """A generated triangle model with one real piece; no downstream game assets."""
+    (game / "gamedata/unitdefs.lua").write_text(
+        '-- This file is part of the Spring engine (GPL v2 or later), see LICENSE.html\n'
+        'return {sdk_probe = {name="SDK probe", objectName="sdk_probe.s3o", '
+        'script="sdk_probe.lua", footprintX=1, footprintZ=1, maxDamage=100}}\n'
+    )
+    objects = game / "objects3d"
+    objects.mkdir()
+    textures = game / "unittextures"
+    textures.mkdir()
+    Image.new("RGBA", (2, 2), (255, 255, 255, 255)).save(textures / "sdk_probe.png")
+    strings = b"root\0sdk_probe.png\0"
+    vertex_offset = (104 + len(strings) + 3) & ~3
+    index_offset = vertex_offset + 3 * 32
+    header = struct.pack("<12si5f4i", b"Spring unit\0", 0, 8, 8, 0, 4, 0, 52, 0, 109, 109)
+    piece = struct.pack("<10i3f", 104, 0, 0, 3, vertex_offset, 0, 0, 3, index_offset, 0, 0, 0, 0)
+    model = (header + piece + strings).ljust(vertex_offset, b"\0")
+    for x, y, z in [(0, 0, 0), (8, 0, 0), (0, 8, 0)]:
+        model += struct.pack("<8f", x, y, z, 0, 0, 1, 0, 0)
+    model += struct.pack("<3i", 0, 1, 2)
+    (objects / "sdk_probe.s3o").write_bytes(model)
 
 
 def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all_game: bool = False, wine: Path | None = None, fail_game_init: bool = False) -> dict:
@@ -64,6 +89,8 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
     shutil.copy2(LEGACY / "startscript.txt", menu / "startscript.txt")
     game = output / "games/RmlUi Menu Transition Game 0.1.sdd"
     shutil.copytree(LEGACY / "game.sdd", game)
+    if all_game and not fail_init:
+        stage_cus_unit(game)
     if not fail_init:
         if all_game and transport == "native":
             native_name = "scoped_sdk_game.dll" if wine else "libscoped_sdk_game.so"
@@ -175,7 +202,7 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
         expected = [s for s in expected if not s.startswith("[ScopedSdkGame]")]
         expected.append("Failed to initialize native module" if transport == "native" else "Core Wasm SDK initialization failed")
     elif all_game:
-        expected.extend(["[ScopedSdkGame] terrain edited", "[ScopedSdkGame] draw"])
+        expected.extend(["[ScopedSdkGame] terrain edited", "[ScopedSdkGame] draw", "[ScopedSdkGame] CUS live passed"])
         if transport == "native":
             expected.append("[ScopedSdkGame] loading-thread handoff")
     settings = (write / "springsettings.cfg").read_text(errors="replace")

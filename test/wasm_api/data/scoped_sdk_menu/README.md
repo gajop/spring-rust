@@ -57,6 +57,13 @@ native initialization on a different loading thread from later game callins.
 `LoadingMT=1` is explicit in the runner. Both game launches must pass, and the
 menus must still render identical pixels and quit normally.
 
+The All game also creates a generated one-piece unit and attaches the SDK CUS
+host. Its Create callback moves the piece, a task resumes two frames later and
+moves it again, and a real engine piece query verifies the result. A named call
+goes through the engine back into the CUS host and returns the expected value.
+The runner requires the CUS success marker on each backend. No downstream game
+assets are used.
+
 `--all-game --fail-game-init --transport native` instead returns an error from
 the game's initializer on both launches. The menu must still recover and quit
 normally. The rejected game must receive no later callins. This also catches

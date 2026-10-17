@@ -20763,10 +20763,11 @@ pub mod profiling {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::profiling::diff_timers(
+                    spring::profiling::diff_timers(
                         end_timer,
                         start_timer,
-                        options,
+                        options.return_ms,
+                        options.from_micro_secs,
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
@@ -20895,8 +20896,7 @@ pub mod profiling {
         pub fn get_timer_micros(&self) -> Result<u64> {
             self._engine.check()?;
             let result = {
-                #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::profiling::get_timer_micros(0) }
+                #[cfg(target_arch = "wasm32")] { spring::desync::get_timer_micros() }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::profiling::get_timer_micros(&self._engine) }
             };
