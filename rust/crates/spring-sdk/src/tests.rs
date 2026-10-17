@@ -9,6 +9,55 @@ use std::{
 };
 
 #[test]
+fn graphics_counted_arrays_accept_short_inputs_and_zero_fill_native_capacity() {
+    unsafe extern "C" fn uniform(
+        query: *const sys::GfxUniformFloatQuery,
+        _: *mut sys::GfxEmptyResult,
+    ) {
+        let query = unsafe { &*query };
+        assert_eq!(query.count, 2);
+        assert_eq!(query.values, [1280.0, 720.0, 0.0, 0.0]);
+    }
+    unsafe extern "C" fn uniform_int(
+        query: *const sys::GfxUniformIntQuery,
+        _: *mut sys::GfxEmptyResult,
+    ) {
+        let query = unsafe { &*query };
+        assert_eq!(query.count, 1);
+        assert_eq!(query.values, [7, 0, 0, 0]);
+    }
+    unsafe extern "C" fn clear(query: *const sys::GfxClearQuery, _: *mut sys::GfxEmptyResult) {
+        let query = unsafe { &*query };
+        assert_eq!(query.count, 1);
+        assert_eq!(query.values, [1.0, 0.0, 0.0, 0.0]);
+    }
+    let gfx = sys::GfxApi {
+        Uniform: Some(uniform),
+        UniformInt: Some(uniform_int),
+        Clear: Some(clear),
+        ..Default::default()
+    };
+    let interface = sys::NativeInterface {
+        gfx: &gfx,
+        ..Default::default()
+    };
+    let context = unsafe { ModuleContext::<Ui>::from_native(&interface) }.unwrap();
+    context
+        .with_spring(|spring| {
+            spring.gfx().uniform(3, &[1280.0, 720.0], 2).unwrap();
+            spring.gfx().uniform_int(4, &[7], 1).unwrap();
+            spring
+                .gfx()
+                .clear(spring::gl::DEPTH_BUFFER_BIT, &[1.0], 1)
+                .unwrap();
+            assert!(spring.gfx().uniform(3, &[1.0; 5], 5).is_err());
+            assert!(spring.gfx().uniform_int(4, &[1; 5], 5).is_err());
+            assert!(spring.gfx().clear(0, &[1.0; 5], 5).is_err());
+        })
+        .unwrap();
+}
+
+#[test]
 fn local_random_preserves_pcg_sequence_and_seeds_each_module_only_once() {
     thread_local! { static SEEDS: Cell<u32> = const { Cell::new(0) }; }
     unsafe extern "C" fn seed(query: *const sys::NextIntQuery, result: *mut sys::NextIntResult) {

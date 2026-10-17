@@ -11441,35 +11441,35 @@ pub mod unsynced_ctrl {
         pub fn set_atmosphere(&self, params: AtmosphereParams) -> Result<bool> {
             self._engine.check()?;
             if let Some(input_option1) = ((params).fog_color).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).sky_color).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).sun_color).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).cloud_color).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).sky_axis_angle).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
@@ -12224,14 +12224,14 @@ pub mod unsynced_ctrl {
         ) -> Result<bool> {
             self._engine.check()?;
             if let Some(input_option1) = ((params).splat_tex_scales).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).splat_tex_mults).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
@@ -12517,42 +12517,42 @@ pub mod unsynced_ctrl {
         pub fn set_sun_lighting(&self, params: SunLightingParams) -> Result<bool> {
             self._engine.check()?;
             if let Some(input_option1) = ((params).ground_ambient_color).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).ground_diffuse_color).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).ground_specular_color).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).model_ambient_color).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).model_diffuse_color).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).model_specular_color).as_ref()
-                && (input_option1).len() != 4
+                && (input_option1).len() > 4
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
@@ -13019,49 +13019,49 @@ pub mod unsynced_ctrl {
         pub fn set_water_params(&self, params: WaterParams) -> Result<bool> {
             self._engine.check()?;
             if let Some(input_option1) = ((params).absorb).as_ref()
-                && (input_option1).len() != 3
+                && (input_option1).len() > 3
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).base_color).as_ref()
-                && (input_option1).len() != 3
+                && (input_option1).len() > 3
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).min_color).as_ref()
-                && (input_option1).len() != 3
+                && (input_option1).len() > 3
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).surface_color).as_ref()
-                && (input_option1).len() != 3
+                && (input_option1).len() > 3
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).diffuse_color).as_ref()
-                && (input_option1).len() != 3
+                && (input_option1).len() > 3
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).specular_color).as_ref()
-                && (input_option1).len() != 3
+                && (input_option1).len() > 3
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
             if let Some(input_option1) = ((params).plane_color).as_ref()
-                && (input_option1).len() != 3
+                && (input_option1).len() > 3
             {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
@@ -13917,7 +13917,7 @@ pub mod gfx {
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn clear(&self, bits: u32, values: &[f32], count: u32) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -13940,7 +13940,7 @@ pub mod gfx {
             count: u32,
         ) -> Result<bool> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -14020,7 +14020,7 @@ pub mod gfx {
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn clip_plane(&self, plane: u32, equation: &[f32]) -> Result<()> {
             self._engine.check()?;
-            if (equation).len() != 4 {
+            if (equation).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -16537,7 +16537,7 @@ pub mod gfx {
             count: u32,
         ) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -16657,7 +16657,7 @@ pub mod gfx {
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn load_matrix(&self, values: &[f32]) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 16 {
+            if (values).len() > 16 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -16686,7 +16686,7 @@ pub mod gfx {
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn material(&self, pname: u32, values: &[f32], count: u32) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -16775,7 +16775,7 @@ pub mod gfx {
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn mult_matrix(&self, values: &[f32]) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 16 {
+            if (values).len() > 16 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -16838,7 +16838,7 @@ pub mod gfx {
             count: u32,
         ) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -16880,7 +16880,7 @@ pub mod gfx {
             count: u32,
         ) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -17008,7 +17008,7 @@ pub mod gfx {
             count: u32,
         ) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -17648,7 +17648,7 @@ pub mod gfx {
             use_float_array: bool,
         ) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -17725,22 +17725,22 @@ pub mod gfx {
         pub fn shape(&self, primitive: u32, vertices: &[GfxVertexData]) -> Result<()> {
             self._engine.check()?;
             for input_item0 in (vertices).iter() {
-                if ((input_item0).vertex).len() != 3 {
+                if ((input_item0).vertex).len() > 3 {
                     return Err(
                         crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                     );
                 }
-                if ((input_item0).normal).len() != 3 {
+                if ((input_item0).normal).len() > 3 {
                     return Err(
                         crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                     );
                 }
-                if ((input_item0).tex_coord).len() != 2 {
+                if ((input_item0).tex_coord).len() > 2 {
                     return Err(
                         crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                     );
                 }
-                if ((input_item0).color).len() != 4 {
+                if ((input_item0).color).len() > 4 {
                     return Err(
                         crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                     );
@@ -17945,7 +17945,7 @@ pub mod gfx {
             count: u32,
         ) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -17977,7 +17977,7 @@ pub mod gfx {
             count: u32,
         ) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -18091,7 +18091,7 @@ pub mod gfx {
             count: u32,
         ) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -18184,7 +18184,7 @@ pub mod gfx {
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn uniform(&self, location: i32, values: &[f32], count: u32) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -18266,7 +18266,7 @@ pub mod gfx {
             count: u32,
         ) -> Result<()> {
             self._engine.check()?;
-            if (values).len() != 4 {
+            if (values).len() > 4 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -18698,57 +18698,57 @@ pub mod lights {
     impl<E: crate::capabilities::Game> Lights<'_, E> {
         pub fn add_map_light(&self, params: &LightParams) -> Result<u32> {
             self._engine.check()?;
-            if ((params).position).len() != 3 {
+            if ((params).position).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).direction).len() != 3 {
+            if ((params).direction).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).ambient_color).len() != 3 {
+            if ((params).ambient_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).diffuse_color).len() != 3 {
+            if ((params).diffuse_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).specular_color).len() != 3 {
+            if ((params).specular_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).intensity_weight).len() != 3 {
+            if ((params).intensity_weight).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).attenuation).len() != 3 {
+            if ((params).attenuation).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).ambient_decay_rate).len() != 3 {
+            if ((params).ambient_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).diffuse_decay_rate).len() != 3 {
+            if ((params).diffuse_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).specular_decay_rate).len() != 3 {
+            if ((params).specular_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).decay_function_type).len() != 3 {
+            if ((params).decay_function_type).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -18765,57 +18765,57 @@ pub mod lights {
     impl<E: crate::capabilities::Game> Lights<'_, E> {
         pub fn add_model_light(&self, params: &LightParams) -> Result<u32> {
             self._engine.check()?;
-            if ((params).position).len() != 3 {
+            if ((params).position).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).direction).len() != 3 {
+            if ((params).direction).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).ambient_color).len() != 3 {
+            if ((params).ambient_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).diffuse_color).len() != 3 {
+            if ((params).diffuse_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).specular_color).len() != 3 {
+            if ((params).specular_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).intensity_weight).len() != 3 {
+            if ((params).intensity_weight).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).attenuation).len() != 3 {
+            if ((params).attenuation).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).ambient_decay_rate).len() != 3 {
+            if ((params).ambient_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).diffuse_decay_rate).len() != 3 {
+            if ((params).diffuse_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).specular_decay_rate).len() != 3 {
+            if ((params).specular_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).decay_function_type).len() != 3 {
+            if ((params).decay_function_type).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -18902,57 +18902,57 @@ pub mod lights {
             params: &LightParams,
         ) -> Result<bool> {
             self._engine.check()?;
-            if ((params).position).len() != 3 {
+            if ((params).position).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).direction).len() != 3 {
+            if ((params).direction).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).ambient_color).len() != 3 {
+            if ((params).ambient_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).diffuse_color).len() != 3 {
+            if ((params).diffuse_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).specular_color).len() != 3 {
+            if ((params).specular_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).intensity_weight).len() != 3 {
+            if ((params).intensity_weight).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).attenuation).len() != 3 {
+            if ((params).attenuation).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).ambient_decay_rate).len() != 3 {
+            if ((params).ambient_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).diffuse_decay_rate).len() != 3 {
+            if ((params).diffuse_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).specular_decay_rate).len() != 3 {
+            if ((params).specular_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).decay_function_type).len() != 3 {
+            if ((params).decay_function_type).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -18984,57 +18984,57 @@ pub mod lights {
             params: &LightParams,
         ) -> Result<bool> {
             self._engine.check()?;
-            if ((params).position).len() != 3 {
+            if ((params).position).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).direction).len() != 3 {
+            if ((params).direction).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).ambient_color).len() != 3 {
+            if ((params).ambient_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).diffuse_color).len() != 3 {
+            if ((params).diffuse_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).specular_color).len() != 3 {
+            if ((params).specular_color).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).intensity_weight).len() != 3 {
+            if ((params).intensity_weight).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).attenuation).len() != 3 {
+            if ((params).attenuation).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).ambient_decay_rate).len() != 3 {
+            if ((params).ambient_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).diffuse_decay_rate).len() != 3 {
+            if ((params).diffuse_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).specular_decay_rate).len() != 3 {
+            if ((params).specular_decay_rate).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((params).decay_function_type).len() != 3 {
+            if ((params).decay_function_type).len() > 3 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -29465,7 +29465,7 @@ pub mod unit_control {
             matrix: &[f32],
         ) -> Result<bool> {
             self._engine.check()?;
-            if (matrix).len() != 16 {
+            if (matrix).len() > 16 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -31023,7 +31023,7 @@ pub mod feature_control {
             matrix: &[f32],
         ) -> Result<bool> {
             self._engine.check()?;
-            if (matrix).len() != 16 {
+            if (matrix).len() > 16 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -33860,12 +33860,12 @@ pub mod object_rendering {
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((uniform).float_values).len() != 32 {
+            if ((uniform).float_values).len() > 32 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((uniform).int_values).len() != 32 {
+            if ((uniform).int_values).len() > 32 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
@@ -33911,12 +33911,12 @@ pub mod object_rendering {
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((uniform).float_values).len() != 32 {
+            if ((uniform).float_values).len() > 32 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
             }
-            if ((uniform).int_values).len() != 32 {
+            if ((uniform).int_values).len() > 32 {
                 return Err(
                     crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
                 );
