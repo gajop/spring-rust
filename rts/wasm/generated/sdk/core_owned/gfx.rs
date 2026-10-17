@@ -1940,13 +1940,13 @@
 
         #[inline]
         pub fn clear(bits: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::clear(bits, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::clear(bits, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
         #[inline]
         pub fn clear_attachment_fbo(target: u32, attachment: u32, values: &[f32], count: u32) -> Result<bool> {
-            let value = crate::generated::gfx::clear_attachment_fbo(target, attachment, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            let value = crate::generated::gfx::clear_attachment_fbo(target, attachment, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(value)
         }
 
@@ -1976,7 +1976,7 @@
 
         #[inline]
         pub fn clip_plane(plane: u32, equation: &[f32]) -> Result<()> {
-            crate::generated::gfx::clip_plane(plane, { let __values = &equation[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array })?;
+            crate::generated::gfx::clip_plane(plane, { let __values = equation; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array })?;
             Ok(())
         }
 
@@ -3168,7 +3168,7 @@
 
         #[inline]
         pub fn light(light: i32, options: GfxLightOptions, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::light(light, crate::generated::gfx::GfxLightOptions { set_state: options.set_state, state: options.state }, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::light(light, crate::generated::gfx::GfxLightOptions { set_state: options.set_state, state: options.state }, pname, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3208,7 +3208,7 @@
 
         #[inline]
         pub fn load_matrix(values: &[f32]) -> Result<()> {
-            crate::generated::gfx::load_matrix({ let __values = &values[..]; if __values.len() > 16 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 16]; __array[..__values.len()].copy_from_slice(__values); __array })?;
+            crate::generated::gfx::load_matrix({ let __values = values; if __values.len() > 16 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 16] = [Default::default(); 16]; __array[..__values.len()].copy_from_slice(__values); __array })?;
             Ok(())
         }
 
@@ -3220,7 +3220,7 @@
 
         #[inline]
         pub fn material(pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::material(pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::material(pname, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3249,7 +3249,7 @@
 
         #[inline]
         pub fn mult_matrix(values: &[f32]) -> Result<()> {
-            crate::generated::gfx::mult_matrix({ let __values = &values[..]; if __values.len() > 16 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 16]; __array[..__values.len()].copy_from_slice(__values); __array })?;
+            crate::generated::gfx::mult_matrix({ let __values = values; if __values.len() > 16 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 16] = [Default::default(); 16]; __array[..__values.len()].copy_from_slice(__values); __array })?;
             Ok(())
         }
 
@@ -3261,13 +3261,13 @@
 
         #[inline]
         pub fn multi_tex_env(tex_num: i32, target: u32, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::multi_tex_env(tex_num, target, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::multi_tex_env(tex_num, target, pname, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
         #[inline]
         pub fn multi_tex_gen(tex_num: i32, target: u32, options: GfxMultiTexGenOptions, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::multi_tex_gen(tex_num, target, crate::generated::gfx::GfxMultiTexGenOptions { set_state: options.set_state, state: options.state }, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::multi_tex_gen(tex_num, target, crate::generated::gfx::GfxMultiTexGenOptions { set_state: options.set_state, state: options.state }, pname, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3295,7 +3295,7 @@
 
         #[inline]
         pub fn point_parameter(pname: u32, value: f32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::point_parameter(pname, value, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::point_parameter(pname, value, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3592,7 +3592,7 @@
 
         #[inline]
         pub fn set_tesselation_shader_parameter(param: u32, value: i32, values: &[f32], value_count: u32, use_float_array: bool) -> Result<()> {
-            crate::generated::gfx::set_tesselation_shader_parameter(param, value, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, value_count, use_float_array)?;
+            crate::generated::gfx::set_tesselation_shader_parameter(param, value, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, value_count, use_float_array)?;
             Ok(())
         }
 
@@ -3681,13 +3681,13 @@
 
         #[inline]
         pub fn tex_env(target: u32, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::tex_env(target, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::tex_env(target, pname, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
         #[inline]
         pub fn tex_gen(target: u32, options: GfxTexGenOptions, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::tex_gen(target, crate::generated::gfx::GfxTexGenOptions { set_state: options.set_state, state: options.state }, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::tex_gen(target, crate::generated::gfx::GfxTexGenOptions { set_state: options.set_state, state: options.state }, pname, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3714,7 +3714,7 @@
 
         #[inline]
         pub fn text_env(target: u32, pname: u32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::text_env(target, pname, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::text_env(target, pname, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3748,7 +3748,7 @@
 
         #[inline]
         pub fn uniform(location: i32, values: &[f32], count: u32) -> Result<()> {
-            crate::generated::gfx::uniform(location, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as f32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::uniform(location, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [f32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 
@@ -3764,7 +3764,7 @@
 
         #[inline]
         pub fn uniform_int(location: i32, values: &[i32], count: u32) -> Result<()> {
-            crate::generated::gfx::uniform_int(location, { let __values = &values[..]; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array = [0 as i32; 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
+            crate::generated::gfx::uniform_int(location, { let __values = values; if __values.len() > 4 { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); } let mut __array: [i32; 4] = [Default::default(); 4]; __array[..__values.len()].copy_from_slice(__values); __array }, count)?;
             Ok(())
         }
 

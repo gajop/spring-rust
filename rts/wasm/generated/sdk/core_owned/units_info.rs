@@ -1063,7 +1063,7 @@
         #[inline]
         pub fn get_unit_last_attacker(unit_id: i32) -> Result<Option<UnitLastAttacker>> {
             let value = crate::generated::units_info::get_unit_last_attacker(unit_id)?;
-            Ok(match value { Some(value) => Some(UnitLastAttacker { attacker_id: value.attacker_id, attacker_def_id: value.attacker_def_id, attacker_team: value.attacker_team }), None => None })
+            Ok(value.map(|value| UnitLastAttacker { attacker_id: value.attacker_id, attacker_def_id: value.attacker_def_id, attacker_team: value.attacker_team }))
         }
 
         #[inline]
@@ -1183,7 +1183,7 @@
         #[inline]
         pub fn get_unit_shield_state(unit_id: i32, weapon_num: i32) -> Result<Option<UnitShieldState>> {
             let value = crate::generated::units_info::get_unit_shield_state(unit_id, weapon_num)?;
-            Ok(match value { Some(value) => Some(UnitShieldState { shield_enabled: value.shield_enabled, shield_power: value.shield_power, shield_alpha: value.shield_alpha }), None => None })
+            Ok(value.map(|value| UnitShieldState { shield_enabled: value.shield_enabled, shield_power: value.shield_power, shield_alpha: value.shield_alpha }))
         }
 
         #[inline]
@@ -1195,7 +1195,7 @@
         #[inline]
         pub fn get_unit_stockpile(unit_id: i32) -> Result<Option<UnitStockpile>> {
             let value = crate::generated::units_info::get_unit_stockpile(unit_id)?;
-            Ok(match value { Some(value) => Some(UnitStockpile { stockpile: value.stockpile, stockpile_queue_size: value.stockpile_queue_size, build_percent: value.build_percent }), None => None })
+            Ok(value.map(|value| UnitStockpile { stockpile: value.stockpile, stockpile_queue_size: value.stockpile_queue_size, build_percent: value.build_percent }))
         }
 
         #[inline]
