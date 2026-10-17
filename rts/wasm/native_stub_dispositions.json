@@ -160,7 +160,7 @@
     "field": "options",
     "detail": "Named query field is not read or forwarded",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "The shared font draw query contains position, size and draw options; height is normalized text height and only text and font are relevant.",
     "disposition": "exempt"
   },
@@ -171,7 +171,7 @@
     "field": "size",
     "detail": "Named query field is not read or forwarded",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "The shared font draw query contains position, size and draw options; height is normalized text height and only text and font are relevant.",
     "disposition": "exempt"
   },
@@ -182,7 +182,7 @@
     "field": "x",
     "detail": "Named query field is not read or forwarded",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "The shared font draw query contains position, size and draw options; height is normalized text height and only text and font are relevant.",
     "disposition": "exempt"
   },
@@ -193,7 +193,7 @@
     "field": "y",
     "detail": "Named query field is not read or forwarded",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "The shared font draw query contains position, size and draw options; height is normalized text height and only text and font are relevant.",
     "disposition": "exempt"
   },
@@ -204,7 +204,7 @@
     "field": "options",
     "detail": "Named query field is not read or forwarded",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "The shared font draw query contains position, size and draw options; width is normalized text width and only text and font are relevant.",
     "disposition": "exempt"
   },
@@ -215,7 +215,7 @@
     "field": "size",
     "detail": "Named query field is not read or forwarded",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "The shared font draw query contains position, size and draw options; width is normalized text width and only text and font are relevant.",
     "disposition": "exempt"
   },
@@ -226,7 +226,7 @@
     "field": "x",
     "detail": "Named query field is not read or forwarded",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "The shared font draw query contains position, size and draw options; width is normalized text width and only text and font are relevant.",
     "disposition": "exempt"
   },
@@ -237,7 +237,7 @@
     "field": "y",
     "detail": "Named query field is not read or forwarded",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "The shared font draw query contains position, size and draw options; width is normalized text width and only text and font are relevant.",
     "disposition": "exempt"
   },
@@ -248,7 +248,7 @@
     "field": "pageNum",
     "detail": "Only one literal is assigned to this output",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "The global texture atlas has one page; Lua returns only UV coordinates and the native-only page index is zero.",
     "disposition": "exempt"
   },
@@ -259,7 +259,7 @@
     "field": "x",
     "detail": "Only one literal is assigned to this output",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "Lua returns a file-static zero vector that is never written; preserve its established semantics.",
     "disposition": "exempt"
   },
@@ -270,7 +270,7 @@
     "field": "y",
     "detail": "Only one literal is assigned to this output",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "Lua returns a file-static zero vector that is never written; preserve its established semantics.",
     "disposition": "exempt"
   },
@@ -281,7 +281,7 @@
     "field": "z",
     "detail": "Only one literal is assigned to this output",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "Lua returns a file-static zero vector that is never written; preserve its established semantics.",
     "disposition": "exempt"
   },
@@ -292,7 +292,7 @@
     "field": "",
     "detail": "Only literal result assignments found; review forwarded work and validity guards",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "Lua returns a file-static zero vector that is never written; preserve its established semantics.",
     "disposition": "exempt"
   },
@@ -303,7 +303,7 @@
     "field": "teamID",
     "detail": "Named query field is not read or forwarded",
     "source": "rts/NativeInterface/api/Gfx.cpp",
-    "source_sha256": "1ff80dad8997675f3e9a78a29c2005d9b34fd72d1f1fbeca497cd0b26be0c6a7",
+    "source_sha256": "7c59e7c7df107628ace2b5db74d318b31862578c213e3b174adc38a9f5773114",
     "reason": "The projectile matrix query shares the unit matrix descriptor; teamID is a unit-only filter.",
     "disposition": "exempt"
   },

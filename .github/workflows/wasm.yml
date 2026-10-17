@@ -86,6 +86,12 @@ jobs:
             test/native_api_parity/native/src/generated_tests.rs \
             test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/generated_api_tests.lua
 
+      # The snapshot verifier generates into a temporary tree. The native
+      # implementation audit and mutant generator below require fresh metadata
+      # in the checkout, including ignored model.json on a clean runner.
+      - name: Generate native audit metadata
+        run: cargo run --manifest-path rust/Cargo.toml -p spring-native-codegen --bin spring-api-codegen -- --root . --output rts/wasm/generated --strict
+
       - name: Build engine and Wasm tests with ASAN
         run: ./docker-build-v2/build.sh linux -DUSE_ASAN=ON -DNATIVE_API_TEST_HOOKS=ON
 
