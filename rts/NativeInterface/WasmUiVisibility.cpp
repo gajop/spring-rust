@@ -48,7 +48,7 @@ bool IsPlayerVisible(int) { return !Active(); }
 bool IsLosPerspectiveAllowed(int) { return !Active(); }
 int UnitRulesParamMask(const CUnit*) { return 63; }
 int FeatureRulesParamMask(const CFeature*) { return 63; }
-bool RulesParamVisible(int paramLos, int allowedMask) { return (paramLos & allowedMask) != 0; }
+bool RulesParamVisible(int paramLos, int allowedMask) { return !Active() || (paramLos & allowedMask) != 0; }
 
 } // namespace WasmUiVisibility
 
@@ -318,7 +318,7 @@ int FeatureRulesParamMask(const CFeature* feature)
 
 bool RulesParamVisible(int paramLos, int allowedMask)
 {
-	return (paramLos & allowedMask) != 0;
+	return !Active() || (paramLos & allowedMask) != 0;
 }
 
 } // namespace WasmUiVisibility
