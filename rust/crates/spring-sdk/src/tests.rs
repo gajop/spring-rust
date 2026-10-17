@@ -9,6 +9,66 @@ use std::{
 };
 
 #[test]
+fn local_random_preserves_pcg_sequence_and_seeds_each_module_only_once() {
+    thread_local! { static SEEDS: Cell<u32> = const { Cell::new(0) }; }
+    unsafe extern "C" fn seed(query: *const sys::NextIntQuery, result: *mut sys::NextIntResult) {
+        let query = unsafe { &*query };
+        assert_eq!((query.lower, query.upper), (i32::MIN, i32::MAX));
+        SEEDS.with(|count| count.set(count.get() + 1));
+        unsafe {
+            (*result).value = 42;
+        }
+    }
+    let random = sys::UnsyncedRandomApi {
+        NextInt: Some(seed),
+        ..Default::default()
+    };
+    let ctrl = sys::UnsyncedCtrlApi {
+        random: &random,
+        ..Default::default()
+    };
+    let interface = sys::NativeInterface {
+        unsyncedCtrl: &ctrl,
+        ..Default::default()
+    };
+    let first = unsafe { ModuleContext::<Ui>::from_native(&interface) }.unwrap();
+    let second = unsafe { ModuleContext::<Ui>::from_native(&interface) }.unwrap();
+    let mut expected = pcg::Pcg32::seeded(42);
+    first
+        .with_spring(|spring| {
+            assert_eq!(
+                spring.unsynced_random().int(-5, 9).unwrap(),
+                expected.int(-5, 9)
+            );
+            assert_eq!(spring.unsynced_random().float().unwrap(), expected.float());
+            assert_eq!(
+                spring.unsynced_random().up_to(20).unwrap(),
+                expected.int(1, 20)
+            );
+        })
+        .unwrap();
+    second
+        .with_spring(|spring| {
+            assert_eq!(
+                spring.unsynced_random().float().unwrap(),
+                pcg::Pcg32::seeded(42).float()
+            );
+            spring.unsynced_random().seed(7).unwrap();
+            assert_eq!(
+                spring.unsynced_random().float().unwrap(),
+                pcg::Pcg32::seeded(7).float()
+            );
+        })
+        .unwrap();
+    first
+        .with_spring(|spring| {
+            assert_eq!(spring.unsynced_random().float().unwrap(), expected.float());
+        })
+        .unwrap();
+    SEEDS.with(|count| assert_eq!(count.get(), 2));
+}
+
+#[test]
 fn default_unit_creation_does_not_request_an_existing_unit_id() {
     unsafe extern "C" fn create(
         query: *const sys::CreateUnitQuery,

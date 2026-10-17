@@ -27,6 +27,7 @@ extern crate alloc;
 /// independent of the transport used by the host.
 #[cfg(feature = "alloc")]
 pub mod cus;
+pub mod rules_param_los;
 
 // Keep the exported Core-CUS ABI macro type-checked in the same target build
 // used by game modules. This catches changes to the guest-side scratch ABI
