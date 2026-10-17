@@ -160,10 +160,41 @@ fresh scope through the owning module. Missing or rejected CUS operations
 produce errors. The new host and dispatch tests are not yet full game tests.
 The 10 addon tests pass on Linux and Wine, including native CUS reentry during
 attachment, named results, task wakeups, unit-ID reuse, and shutdown. The SDK
-has 38 unit tests, an export test, and 8 compile-fail checks. These checks do
+has 42 unit tests, an export test, and 8 compile-fail checks. These checks do
 not replace actual game execution.
 
-The seven Cabal game-code ports, the other game-code port, and job helpers
+`UnitCtx::with_spring` gives a unit-script task a fresh synced Spring reference
+for one operation. It rejects workers and detached scripts. Suspended tasks
+retain only the checked module identifier. The SDK also provides scoped frame,
+numeric rules-param, and screen-picking helpers used by the game ports. Default
+unit creation requests automatic IDs on both backends.
+
+`spring.unsynced_random().float()`/`int()` preserve the former module-local
+PCG stream, seeded once from the engine. The generated `next_float()`/`next_int()`
+methods draw directly from the engine's unsynced RNG. Game ports must retain
+that distinction so rendering cannot change a module's random sequence.
+
+MyCube's Wasm game code now uses the SDK. Its existing 32-check integration
+suite passes on Linux and Wine, including unit scripts, UI messages and restart.
+All workspace features pass strict Clippy. Its five-shot visual scenario
+completes; manually measured pixels meet all six existing tolerances. The
+visual suite still rejects the installed Mesa Ubuntu package revision `.4`
+versus the recorded `.2`. No golden images or tolerances changed.
+
+Actual game loading caught two callback defects: UI addons must not export
+`DrawUnit`, which the engine only supports in unsynced gadgets, and the Wasm
+`DrawWorld` callback must have zero arguments. Both are fixed in the source
+generator/addon exports, with a real cdylib example and ABI compile check.
+Unit-script callbacks also participate in the addon's command queue, so queued
+work waits until the callback returns. Tasks started by `Create` now update
+the scheduler's next deadline immediately.
+
+Game teardown now shuts down native/Wasm modules before destroying GUI and
+sound services, allowing addons to restore UI state and stop music cleanly.
+The existing 38 engine suites, native/Wasm launch-and-return fixtures on Linux
+and Wine, and SpringBoard's full test command pass with that change.
+
+The other six Cabal game-code ports, the other game-code port, and job helpers
 remain unfinished. Discovery, rooms, and reconnect UI are also still separate
 work. No private game content has been uploaded or released.
 A live native/Wasm `All` fixture also tests terrain mutation and drawing in one
