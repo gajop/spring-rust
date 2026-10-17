@@ -398,6 +398,9 @@ include!(concat!(
 ));
 
 pub use spring::{cmd, consts, gl, los_state, mouse};
+#[path = "../../spring/src/gfx_params.rs"]
+mod gfx_params;
+pub use gfx_params::*;
 pub mod log_level {
     pub const DEBUG: i32 = 20;
     pub const INFO: i32 = 30;
