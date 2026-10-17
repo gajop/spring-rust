@@ -521,7 +521,12 @@ pub fn render(
             continue;
         }
         let alloc_api = alloc_imports(&family_methods);
-        api.push_str(&format!("pub mod {name} {{ pub use crate::types::{name}::*; use crate::Result; {alloc_api} pub struct {family}<'a,E> {{ pub(crate) _engine: crate::Backend<'a>, pub(crate) environment: core::marker::PhantomData<E> }} impl<'a,E: crate::Environment> crate::Spring<'a,E> {{ pub fn {name}(&self) -> {family}<'_,E> {{ {family} {{ _engine: self.engine.reborrow(), environment: core::marker::PhantomData }} }} }} {family_methods} }}\n"));
+        let constants = if name == "rules_params" {
+            "pub use spring::rules_param_los as los;"
+        } else {
+            ""
+        };
+        api.push_str(&format!("pub mod {name} {{ pub use crate::types::{name}::*; {constants} use crate::Result; {alloc_api} pub struct {family}<'a,E> {{ pub(crate) _engine: crate::Backend<'a>, pub(crate) environment: core::marker::PhantomData<E> }} impl<'a,E: crate::Environment> crate::Spring<'a,E> {{ pub fn {name}(&self) -> {family}<'_,E> {{ {family} {{ _engine: self.engine.reborrow(), environment: core::marker::PhantomData }} }} }} {family_methods} }}\n"));
         let native_source = format!("{native_methods}{converters}");
         let imports = type_imports(&native_source, semantic) + &alloc_imports(&native_source);
         let helpers = ["Inputs", "read_string", "read_slice", "check_error"]

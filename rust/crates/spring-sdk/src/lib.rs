@@ -19,6 +19,8 @@ use std::rc::Rc as Shared;
 use std::sync::Arc as Shared;
 #[cfg(not(target_arch = "wasm32"))]
 mod native_thread;
+#[path = "../../spring/src/pcg.rs"]
+mod pcg;
 
 /// Native retained captures must survive the loading-to-game-thread handoff.
 #[cfg(not(target_arch = "wasm32"))]
@@ -159,6 +161,7 @@ impl<E: Environment> ModuleContext<E> {
                 scopes: Cell::new(0),
                 alive: Cell::new(true),
                 error: Cell::new(None),
+                unsynced_rng: Cell::new(None),
                 panic: Default::default(),
                 foreign_callback: Default::default(),
             }),
@@ -176,6 +179,7 @@ impl<E: Environment> ModuleContext<E> {
                 scopes: Cell::new(0),
                 alive: Cell::new(true),
                 error: Cell::new(None),
+                unsynced_rng: Cell::new(None),
             }),
             environment: PhantomData,
             affinity: PhantomData,
@@ -239,6 +243,7 @@ struct Authority {
     scopes: Cell<usize>,
     alive: Cell<bool>,
     error: Cell<Option<ApiError>>,
+    unsynced_rng: Cell<Option<pcg::Pcg32>>,
     #[cfg(not(target_arch = "wasm32"))]
     panic: std::cell::RefCell<Option<Box<dyn core::any::Any + Send>>>,
     #[cfg(not(target_arch = "wasm32"))]
@@ -403,7 +408,9 @@ pub mod log_level {
 }
 #[doc(hidden)]
 pub use alloc::format as __format;
+mod helpers;
 mod logging;
+pub use helpers::Hit;
 pub use logging::ResultExt;
 pub mod callbacks;
 pub mod commands;

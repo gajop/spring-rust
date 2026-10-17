@@ -15,20 +15,7 @@ pub use crate::owned::rules_params::{
 /// `0` hides it from everyone — including the module that wrote it. Lua's
 /// setters default to [`PRIVATE`](los::PRIVATE); there is no such default here, so pass one
 /// of these explicitly.
-pub mod los {
-    /// Readable by the owning ally only. Lua's default.
-    pub const PRIVATE: i32 = 1;
-    /// Readable by the owning ally and its in-game allies.
-    pub const ALLIED: i32 = 2;
-    /// Readable while the unit is in line of sight.
-    pub const INLOS: i32 = 4;
-    /// Readable once the unit has been identified (radar plus a past LOS).
-    pub const TYPED: i32 = 8;
-    /// Readable while the unit is on radar.
-    pub const INRADAR: i32 = 16;
-    /// Readable by everyone, including spectators and unsynced code.
-    pub const PUBLIC: i32 = 32;
-}
+pub use crate::rules_param_los as los;
 
 use super::{Result, UnitId, decode_packed_f32, unpack_bool};
 
