@@ -46,7 +46,7 @@ unsafe extern "C" fn frame(_: *const sys::GetGameFrameQuery, result: *mut sys::G
             context
                 .with_spring(|spring| {
                     EVENTS.with(|e| e.borrow_mut().push("nested callin"));
-                    assert_eq!(spring.units_query().get_all_units().unwrap().len(), 2);
+                    assert_eq!(spring.units().get_all_units().unwrap().len(), 2);
                 })
                 .unwrap();
         });
@@ -111,11 +111,11 @@ fn results_own_scratch_and_owned_snapshots_can_cross_threads() {
     let context = unsafe { ModuleContext::<Ui>::from_native(&interface) }.unwrap();
     GENERATION.with(|n| n.set(0));
     let first = context
-        .with_spring(|spring| spring.units_query().get_all_units())
+        .with_spring(|spring| spring.units().get_all_units())
         .unwrap()
         .unwrap();
     let second = context
-        .with_spring(|spring| spring.units_query().get_all_units())
+        .with_spring(|spring| spring.units().get_all_units())
         .unwrap()
         .unwrap();
     assert_eq!(first, [11, 12]);
@@ -316,8 +316,8 @@ fn synchronous_callback_reentry_and_foreign_thread_fail_without_aliasing() {
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::InvalidState as i32);
     SYNC_MODE.with(|v| v.set(1));
-    let called = Rc::new(Cell::new(false));
-    let observed = Rc::clone(&called);
+    let called = std::sync::Arc::new(TestCell::new(false));
+    let observed = std::sync::Arc::clone(&called);
     let error = context
         .with_spring(|spring| {
             spring
@@ -405,7 +405,7 @@ fn destroy_registration() {
     }
 }
 
-struct Capture(Rc<Cell<usize>>);
+struct Capture(std::sync::Arc<TestCell<usize>>);
 impl Drop for Capture {
     fn drop(&mut self) {
         self.0.set(self.0.get() + 1);
@@ -424,10 +424,10 @@ fn retained_events_own_values_and_context_drop_cancels_the_callback() {
     };
     let context = unsafe { ModuleContext::<Menu>::from_native(&interface) }.unwrap();
     REJECT_REGISTRATION.with(|v| v.set(false));
-    let events = Rc::new(RefCell::new(Vec::new()));
-    let observed = Rc::clone(&events);
-    let drops = Rc::new(Cell::new(0));
-    let capture = Capture(Rc::clone(&drops));
+    let events = std::sync::Arc::new(TestRefCell::new(Vec::new()));
+    let observed = std::sync::Arc::clone(&events);
+    let drops = std::sync::Arc::new(TestCell::new(0));
+    let capture = Capture(std::sync::Arc::clone(&drops));
     let registration = context
         .with_spring(|spring| {
             spring
@@ -469,8 +469,8 @@ fn failed_registration_and_self_destruction_drop_captures_once() {
         ..Default::default()
     };
     let context = unsafe { ModuleContext::<Menu>::from_native(&interface) }.unwrap();
-    let drops = Rc::new(Cell::new(0));
-    let capture = Capture(Rc::clone(&drops));
+    let drops = std::sync::Arc::new(TestCell::new(0));
+    let capture = Capture(std::sync::Arc::clone(&drops));
     REJECT_REGISTRATION.with(|v| v.set(true));
     let registration = context
         .with_spring(|spring| {
@@ -486,8 +486,8 @@ fn failed_registration_and_self_destruction_drop_captures_once() {
     assert!(!registration.success);
     assert_eq!(drops.get(), 1);
     REJECT_REGISTRATION.with(|v| v.set(false));
-    let capture = Capture(Rc::clone(&drops));
-    let observed = Rc::clone(&drops);
+    let capture = Capture(std::sync::Arc::clone(&drops));
+    let observed = std::sync::Arc::clone(&drops);
     context
         .with_spring(|spring| {
             spring
@@ -517,7 +517,7 @@ fn retained_callback_resource_conflict_is_reported_at_the_scope_boundary() {
     };
     let context = unsafe { ModuleContext::<Menu>::from_native(&interface) }.unwrap();
     REJECT_REGISTRATION.with(|v| v.set(false));
-    let state = Rc::new(RefCell::new(0));
+    let state = std::sync::Arc::new(TestRefCell::new(0));
     context
         .with_spring(|spring| {
             spring
@@ -551,9 +551,9 @@ fn same_retained_callback_reenters_immediately_with_shared_state() {
     };
     let context = unsafe { ModuleContext::<Menu>::from_native(&interface) }.unwrap();
     REJECT_REGISTRATION.with(|v| v.set(false));
-    let nested = Rc::new(Cell::new(false));
-    let order = Rc::new(RefCell::new(Vec::new()));
-    let observed = Rc::clone(&order);
+    let nested = std::sync::Arc::new(TestCell::new(false));
+    let order = std::sync::Arc::new(TestRefCell::new(Vec::new()));
+    let observed = std::sync::Arc::clone(&order);
     context
         .with_spring(|spring| {
             spring
@@ -592,8 +592,8 @@ fn retained_callback_from_foreign_host_thread_is_rejected_and_reported() {
     };
     let context = unsafe { ModuleContext::<Menu>::from_native(&interface) }.unwrap();
     REJECT_REGISTRATION.with(|v| v.set(false));
-    let called = Rc::new(Cell::new(false));
-    let observed = Rc::clone(&called);
+    let called = std::sync::Arc::new(TestCell::new(false));
+    let observed = std::sync::Arc::clone(&called);
     context
         .with_spring(|spring| {
             spring
@@ -817,4 +817,145 @@ fn module_slot_reenters_without_a_module_wide_borrow_and_contains_panics() {
     assert!(slot.invoke(|_, _| Ok(())).is_err());
     slot.shutdown().unwrap();
     assert!(slot.validate_identity(identity).is_err());
+}
+
+#[test]
+fn all_environment_combines_render_and_simulation_access() {
+    fn capabilities<
+        E: capabilities::Game
+            + capabilities::Render
+            + capabilities::Synced
+            + capabilities::Local
+            + capabilities::Session
+            + capabilities::Common
+            + capabilities::Launch
+            + capabilities::Downloads
+            + capabilities::Replay
+            + capabilities::World,
+    >() {
+    }
+    capabilities::<All>();
+    assert_eq!(All::MASK, 127);
+}
+
+struct TestCell<T>(std::sync::Mutex<T>);
+impl<T: Copy> TestCell<T> {
+    fn new(value: T) -> Self {
+        Self(std::sync::Mutex::new(value))
+    }
+    fn get(&self) -> T {
+        *self.0.lock().unwrap()
+    }
+    fn set(&self, value: T) {
+        *self.0.lock().unwrap() = value;
+    }
+    fn replace(&self, value: T) -> T {
+        std::mem::replace(&mut *self.0.lock().unwrap(), value)
+    }
+}
+struct TestRefCell<T>(std::sync::Mutex<T>);
+impl<T> TestRefCell<T> {
+    fn new(value: T) -> Self {
+        Self(std::sync::Mutex::new(value))
+    }
+    fn borrow(&self) -> std::sync::MutexGuard<'_, T> {
+        self.0.lock().unwrap()
+    }
+    fn borrow_mut(&self) -> std::sync::MutexGuard<'_, T> {
+        self.0.lock().unwrap()
+    }
+    fn try_borrow_mut(&self) -> std::sync::TryLockResult<std::sync::MutexGuard<'_, T>> {
+        self.0.try_lock()
+    }
+}
+
+#[test]
+fn native_module_and_retained_callbacks_survive_loading_thread_handoff() {
+    use crate::module::{Module, NativeSlot};
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    static CALLS: AtomicUsize = AtomicUsize::new(0);
+    struct App {
+        count: Cell<usize>,
+    }
+    impl Module<All> for App {
+        fn initialize(spring: &mut Spring<'_, All>) -> Result<Self> {
+            spring
+                .rml_ui()
+                .data_model_bind_event(1, "event", &[3, 1], |spring, _| {
+                    CALLS.fetch_add(1, Ordering::Relaxed);
+                    // A fresh Spring scope uses the engine interface after handoff.
+                    assert_eq!(spring.units().get_all_units()?.len(), 2);
+                    Ok(())
+                })?;
+            Ok(Self {
+                count: Cell::new(0),
+            })
+        }
+    }
+    CALLS.store(0, Ordering::Relaxed);
+    let (_, units, _) = tables();
+    let rml = sys::RmlUiApi {
+        DataModelBindEvent: Some(bind_event),
+        ..Default::default()
+    };
+    let interface = sys::NativeInterface {
+        unitsQuery: &units,
+        rmlUi: &rml,
+        ..Default::default()
+    };
+    let address = &interface as *const sys::NativeInterface as usize;
+    let slot = NativeSlot::<All, App>::new();
+    let (identity, registration) = std::thread::scope(|threads| {
+        threads
+            .spawn(|| {
+                REJECT_REGISTRATION.with(|v| v.set(false));
+                unsafe {
+                    slot.with_host(|slot| {
+                        let identity = slot.initialize_native(address as *const _).unwrap();
+                        let registration = REGISTRATION.with(|r| r.borrow_mut().take().unwrap());
+                        (identity as usize, registration)
+                    })
+                }
+            })
+            .join()
+            .unwrap()
+    });
+    // Safe user access on an unadmitted thread cannot transfer the module.
+    let refused = std::thread::scope(|threads| {
+        threads
+            .spawn(|| std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| slot.with(|_| ()))))
+            .join()
+            .unwrap()
+    });
+    assert!(refused.is_err());
+    // Only the real host entry is allowed to transfer thread ownership.
+    unsafe {
+        slot.with_host(|slot| {
+            slot.validate_identity(identity as *mut _).unwrap();
+            slot.invoke(|module, spring| {
+                module.count.set(module.count.get() + 1);
+                assert_eq!(spring.units().get_all_units()?.len(), 2);
+                Ok(())
+            })
+            .unwrap();
+        })
+    };
+    REGISTRATION.with(|r| *r.borrow_mut() = Some(registration));
+    fire_data_event();
+    assert_eq!(CALLS.load(Ordering::Relaxed), 1);
+    slot.with(|slot| {
+        slot.invoke(|app, _| {
+            assert_eq!(app.count.get(), 1);
+            Ok(())
+        })
+        .unwrap()
+    });
+    unsafe { slot.with_host(|slot| slot.shutdown().unwrap()) };
+    fire_data_event();
+    assert_eq!(CALLS.load(Ordering::Relaxed), 1);
+    destroy_registration();
+    // Bindings are transferable data; every operation still needs Spring.
+    fn send<T: Send>() {}
+    send::<crate::rml::DataModel>();
+    send::<crate::rml::Variable<String>>();
 }

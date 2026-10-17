@@ -2,10 +2,10 @@
 
 //! Owned RmlUi events and retained, engine-thread callbacks.
 use crate::{ApiError, Authority, Backend, Environment, ErrorCode, PhantomData, Result, Spring};
+#[cfg(target_arch = "wasm32")]
+use std::cell::RefCell;
 use std::{
-    cell::RefCell,
     collections::BTreeMap,
-    rc::Rc,
     sync::atomic::{AtomicU32, Ordering},
 };
 
@@ -42,33 +42,36 @@ pub struct Event {
     pub values: Vec<Value>,
 }
 
+#[cfg(target_arch = "wasm32")]
 type Handler = dyn Fn(Option<Event>) -> Result<()>;
+#[cfg(not(target_arch = "wasm32"))]
+type Handler = dyn Fn(Option<Event>) -> Result<()> + Send;
 struct Node {
-    owner: Rc<Authority>,
+    owner: crate::Shared<Authority>,
     handler: Box<Handler>,
 }
-thread_local! {static REGISTRY:RefCell<BTreeMap<u32,Rc<Node>>>=const {RefCell::new(BTreeMap::new())};}
-// Never reuse an ID, including across threads. A stale/foreign native callback
-// cannot accidentally select a different thread's listener.
-static NEXT_ID: AtomicU32 = AtomicU32::new(1);
+#[cfg(target_arch = "wasm32")]
+thread_local! {static REGISTRY:RefCell<BTreeMap<u32,crate::Shared<Node>>>=const {RefCell::new(BTreeMap::new())};}
 #[cfg(not(target_arch = "wasm32"))]
-type Origin = (
-    std::thread::ThreadId,
-    std::sync::Weak<std::sync::atomic::AtomicBool>,
-);
-#[cfg(not(target_arch = "wasm32"))]
-static ORIGINS: std::sync::Mutex<BTreeMap<u32, Origin>> = std::sync::Mutex::new(BTreeMap::new());
+static REGISTRY: std::sync::Mutex<BTreeMap<u32, crate::Shared<Node>>> =
+    std::sync::Mutex::new(BTreeMap::new());
 
+// Handlers may move with their module (Send), but are called only under their
+// owner's reentrant gate. No registry lock is held while invoking/dropping one.
 #[cfg(not(target_arch = "wasm32"))]
-fn record_foreign(id: u32) {
-    let origins = ORIGINS.lock().unwrap_or_else(|p| p.into_inner());
-    if let Some((thread, flag)) = origins.get(&id)
-        && *thread != std::thread::current().id()
-        && let Some(flag) = flag.upgrade()
+unsafe impl Sync for Node {}
+fn registry<R>(access: impl FnOnce(&mut BTreeMap<u32, crate::Shared<Node>>) -> R) -> R {
+    #[cfg(target_arch = "wasm32")]
     {
-        flag.store(true, Ordering::Relaxed);
+        REGISTRY.with(|r| access(&mut r.borrow_mut()))
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        access(&mut REGISTRY.lock().unwrap_or_else(|p| p.into_inner()))
     }
 }
+// IDs are never reused, including across module reloads and engine threads.
+static NEXT_ID: AtomicU32 = AtomicU32::new(1);
 #[cfg(target_arch = "wasm32")]
 const INVOKE: u32 = 0x5344_4b45;
 #[cfg(target_arch = "wasm32")]
@@ -80,7 +83,7 @@ pub(crate) fn register<E: Environment, F>(
     handler: F,
 ) -> Result<u32>
 where
-    F: for<'call> Fn(&mut Spring<'call, E>, Event) -> Result<()> + 'static,
+    F: for<'call> Fn(&mut Spring<'call, E>, Event) -> Result<()> + crate::RetainedCapture + 'static,
 {
     engine.check()?;
     if schema.is_some_and(|s| s.iter().any(|&t| t > 6)) {
@@ -89,23 +92,15 @@ where
     let id = NEXT_ID
         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
         .map_err(|_| ApiError::new(ErrorCode::OutOfBounds as i32))?;
-    let owner = Rc::clone(&engine.owner);
-    #[cfg(not(target_arch = "wasm32"))]
-    ORIGINS.lock().unwrap_or_else(|p| p.into_inner()).insert(
-        id,
-        (
-            owner.thread,
-            std::sync::Arc::downgrade(&owner.foreign_callback),
-        ),
-    );
-    let callback_owner = Rc::clone(&owner);
+    let owner = crate::Shared::clone(&engine.owner);
+    let callback_owner = crate::Shared::clone(&owner);
     let schema = schema.map(<[u8]>::to_vec);
     // Keep the Rml reader in the registered closure. The common dispatcher
     // must not pull unsynced Rml imports into a synced Wasm module which has
     // no Rml registrations.
     let callback = Box::new(move |event: Option<Event>| {
         let backend = Backend {
-            owner: Rc::clone(&callback_owner),
+            owner: crate::Shared::clone(&callback_owner),
             scope: PhantomData,
         };
         backend.check()?;
@@ -120,10 +115,10 @@ where
         let result = backend.with_nested::<E, _>(|spring| handler(spring, event));
         backend.finish(result)
     });
-    REGISTRY.with(|r| {
-        r.borrow_mut().insert(
+    registry(|r| {
+        r.insert(
             id,
-            Rc::new(Node {
+            crate::Shared::new(Node {
                 owner,
                 handler: callback,
             }),
@@ -133,41 +128,25 @@ where
 }
 
 pub(crate) fn remove(id: u32) {
-    let node = REGISTRY.with(|r| r.borrow_mut().remove(&id));
-    #[cfg(not(target_arch = "wasm32"))]
-    ORIGINS
-        .lock()
-        .unwrap_or_else(|p| p.into_inner())
-        .remove(&id);
-    drop(node); // User captures are dropped after releasing the registry borrow.
+    let node = registry(|r| r.remove(&id));
+    drop(node);
 }
 
-pub(crate) fn clear_owner(owner: &Rc<Authority>) {
-    let nodes = REGISTRY.with(|r| {
-        let mut r = r.borrow_mut();
+pub(crate) fn clear_owner(owner: &crate::Shared<Authority>) {
+    let nodes = registry(|r| {
         let ids = r
             .iter()
-            .filter(|(_, n)| Rc::ptr_eq(&n.owner, owner))
+            .filter(|(_, n)| crate::Shared::ptr_eq(&n.owner, owner))
             .map(|(&id, _)| id)
             .collect::<Vec<_>>();
         ids.into_iter()
-            .filter_map(|id| r.remove(&id).map(|node| (id, node)))
+            .filter_map(|id| r.remove(&id))
             .collect::<Vec<_>>()
     });
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let mut origins = ORIGINS.lock().unwrap_or_else(|p| p.into_inner());
-        for (id, _) in &nodes {
-            origins.remove(id);
-        }
-    }
     drop(nodes);
 }
-
-fn get(id: u32) -> Result<Rc<Node>> {
-    REGISTRY
-        .with(|r| r.borrow().get(&id).cloned())
-        .ok_or(ApiError::new(ErrorCode::InvalidState as i32))
+fn get(id: u32) -> Result<crate::Shared<Node>> {
+    registry(|r| r.get(&id).cloned()).ok_or(ApiError::new(ErrorCode::InvalidState as i32))
 }
 
 fn validate_event(schema: Option<&[u8]>, event: &Event) -> Result<()> {
@@ -272,11 +251,14 @@ pub fn __dispatch(callback_id: u32, id: u32) {
 fn native_boundary(id: u32, event: impl FnOnce(&Backend<'_>) -> Result<Event>) {
     use std::panic::{AssertUnwindSafe, catch_unwind};
     let Ok(node) = get(id) else {
-        record_foreign(id);
+        return;
+    };
+    let Ok(_entry) = node.owner.gate.enter() else {
+        node.owner.foreign_callback.store(true, Ordering::Relaxed);
         return;
     };
     let engine = Backend {
-        owner: Rc::clone(&node.owner),
+        owner: crate::Shared::clone(&node.owner),
         scope: PhantomData,
     };
     let result = catch_unwind(AssertUnwindSafe(|| {
@@ -352,10 +334,13 @@ pub(crate) unsafe extern "C" fn native_destroy(data: *mut core::ffi::c_void) {
     // surface it at the next scope boundary after the host has cleaned up.
     let id = data as usize as u32;
     let Ok(node) = get(id) else {
-        record_foreign(id);
         return;
     };
-    let owner = Rc::clone(&node.owner);
+    let owner = crate::Shared::clone(&node.owner);
+    let Ok(_entry) = owner.gate.enter() else {
+        owner.foreign_callback.store(true, Ordering::Relaxed);
+        return;
+    };
     drop(node);
     if let Err(panic) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| remove(id))) {
         *owner.panic.borrow_mut() = Some(panic);

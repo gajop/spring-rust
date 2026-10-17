@@ -445,7 +445,7 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
             // Add native C exports to the same macro expansion. String-buffer
             // capacity is only a Wasm transport concern.
             let native = format!(
-                "#[cfg(not(target_arch=\"wasm32\"))] #[unsafe(no_mangle)] pub unsafe extern \"C\" fn {native_name}(_interface:*const $crate::__sys::NativeInterface,data:*mut core::ffi::c_void,query:*const $crate::__sys::{query},result:*mut $crate::__sys::{result}) {{ let Some(result)=(unsafe {{result.as_mut()}}) else {{return;}}; *result=Default::default(); result.error=$crate::module::error_pointer($slot.with(|slot| {{slot.validate_identity(data)?; slot.invoke_for_environment::<{environment_mask},_>(|module,spring| {{let {query_name}=unsafe {{$crate::__native_callins::decode_{decode}(query)}}?;let returned=$handler(module,spring{invoke_args})?;let value={pack_result};$crate::__native_callins::encode_{encode}(&value,result)}})}})); }}",
+                "#[cfg(not(target_arch=\"wasm32\"))] #[unsafe(no_mangle)] pub unsafe extern \"C\" fn {native_name}(_interface:*const $crate::__sys::NativeInterface,data:*mut core::ffi::c_void,query:*const $crate::__sys::{query},result:*mut $crate::__sys::{result}) {{ let Some(result)=(unsafe {{result.as_mut()}}) else {{return;}}; *result=Default::default(); result.error=$crate::module::error_pointer(unsafe {{$slot.with_host(|slot| {{slot.validate_identity(data)?; slot.invoke_for_environment::<{environment_mask},_>(|module,spring| {{let {query_name}=unsafe {{$crate::__native_callins::decode_{decode}(query)}}?;let returned=$handler(module,spring{invoke_args})?;let value={pack_result};$crate::__native_callins::encode_{encode}(&value,result)}})}})}}); }}",
                 query = callin.query,
                 result = callin.result,
                 decode = ident(&callin.query),
@@ -497,7 +497,7 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
         }
         let ty = format!("{environment:?}");
         let slot = format!("MODULE_{}", ty.to_snake_case().to_uppercase());
-        smoke.push_str(&format!("std::thread_local!{{static {slot}:spring_sdk::module::ModuleSlot<spring_sdk::{ty},Fixture>=const{{spring_sdk::module::ModuleSlot::new()}};}}\n"));
+        smoke.push_str(&format!("#[cfg(target_arch=\"wasm32\")] std::thread_local!{{static {slot}:spring_sdk::module::ModuleSlot<spring_sdk::{ty},Fixture>=const{{spring_sdk::module::ModuleSlot::new()}};}}\n#[cfg(not(target_arch=\"wasm32\"))] #[allow(dead_code)] static {slot}:spring_sdk::module::NativeSlot<spring_sdk::{ty},Fixture>=const{{spring_sdk::module::NativeSlot::new()}};\n"));
     }
     for name in &emitted {
         let callin = model

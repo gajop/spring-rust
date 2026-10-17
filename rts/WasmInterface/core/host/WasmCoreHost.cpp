@@ -622,7 +622,7 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		return false;
 	}
 	const std::int32_t expectedEnvironmentMask =
-		static_cast<std::int32_t>(1u << static_cast<std::uint32_t>(environment));
+		static_cast<std::int32_t>(WasmEnvironmentMatrix::ApiMask(environment));
 	if (markerSlot.i32 != expectedEnvironmentMask) {
 		error = "Core Wasm environment marker mismatch: manifest=" +
 			std::string(WasmEnvironmentMatrix::Name(environment)) +

@@ -377,7 +377,7 @@ namespace {
 					std::string(moduleName) + "." + functionName;
 				return false;
 			}
-			const std::uint32_t environmentBit = 1u << static_cast<std::uint32_t>(environment);
+			const std::uint32_t environmentBit = WasmEnvironmentMatrix::ApiMask(environment);
 			if ((descriptor->environmentMask & environmentBit) == 0) {
 				wasmtime_component_item_delete(&child);
 				error = "Spring Component Model import function is unavailable in environment " +

@@ -2,7 +2,7 @@
 
 This generic fixture builds the same Rust source and RML as a native menu and
 as a Core-Wasm menu. It uses the new `spring-sdk` module factory, scoped callouts,
-shared callin queries/results, typed Rml bindings and retained callbacks.
+ordinary callin arguments, typed Rml bindings and retained callbacks.
 It does not contain or migrate a downstream game/menu.
 
 With the SDK engine built in `build-amd64-linux/install/`, run from repository
@@ -49,3 +49,10 @@ creates and removes a context with the same name. Native fallback runs the
 probe after rejection; the Wasm manifest rolls back the probe after the second
 module fails. Both cases must reject the failed initializer, report cleanup,
 receive no activation callin and quit with exit code zero.
+
+Use `--all-game` to load the game through the same backend as the menu, in the
+`All` environment. This verifies terrain editing inside its synchronous callback,
+reading the resulting height, drawing, one GameFrame invocation per frame, and
+native initialization on a different loading thread from later game callins.
+`LoadingMT=1` is explicit in the runner. Both game launches must pass, and the
+menus must still render identical pixels and quit normally.

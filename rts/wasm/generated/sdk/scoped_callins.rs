@@ -19,14 +19,14 @@ macro_rules! export_activate_game {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery,
         result:* mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 32, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `AllowBuilderHoldFire` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<bool>`.
@@ -50,14 +50,14 @@ macro_rules! export_allow_builder_hold_fire {
         $crate::__sys::AllowBuilderHoldFireQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_builder_hold_fire_query(query) } ?; let
         returned =$handler (module, spring, query.unit_id, query.unit_def_id, query
         .action) ?; let value = { $crate::types::callins::BoolCallinResult { value :
         returned } };$crate::__native_callins::encode_bool_callin_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `AllowDirectUnitControl` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<bool>`.
@@ -82,14 +82,15 @@ macro_rules! export_allow_direct_unit_control {
         $crate::__sys::AllowDirectUnitControlQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_direct_unit_control_query(query) } ?; let
         returned =$handler (module, spring, query.unit_id, query.unit_def_id, query
         .unit_team, query.player_id) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowDraw` handler: `(&Module, &mut Spring) -> Result<bool>`.
@@ -110,13 +111,14 @@ macro_rules! export_allow_draw {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 32, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 32, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowFeatureBuildStep` handler: `(&Module, &mut Spring, i32, i32, i32, i32, f32) -> Result<bool>`.
@@ -142,14 +144,15 @@ macro_rules! export_allow_feature_build_step {
         $crate::__sys::AllowFeatureBuildStepQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_feature_build_step_query(query) } ?; let
         returned =$handler (module, spring, query.builder_id, query.builder_team, query
         .feature_id, query.feature_def_id, query.part) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowFeatureCreation` handler: `(&Module, &mut Spring, i32, i32, $crate::Float3) -> Result<bool>`.
@@ -175,14 +178,14 @@ macro_rules! export_allow_feature_creation {
         mut core::ffi::c_void, query:* const $crate::__sys::AllowFeatureCreationQuery,
         result:* mut $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_feature_creation_query(query) } ?; let
         returned =$handler (module, spring, query.feature_def_id, query.team_id, query
         .position) ?; let value = { $crate::types::callins::BoolCallinResult { value :
         returned } };$crate::__native_callins::encode_bool_callin_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `AllowStartPosition` handler: `(&Module, &mut Spring, i32, i32, u8, $crate::Float3, $crate::Float3) -> Result<bool>`.
@@ -212,14 +215,15 @@ macro_rules! export_allow_start_position {
         core::ffi::c_void, query:* const $crate::__sys::AllowStartPositionQuery, result:*
         mut $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_start_position_query(query) } ?; let
         returned =$handler (module, spring, query.player_id, query.team_id, query
         .ready_state, query.clamped_pos, query.raw_pick_pos) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowUnitBuildStep` handler: `(&Module, &mut Spring, i32, i32, i32, i32, f32) -> Result<bool>`.
@@ -245,14 +249,15 @@ macro_rules! export_allow_unit_build_step {
         $crate::__sys::AllowUnitBuildStepQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_build_step_query(query) } ?; let
         returned =$handler (module, spring, query.builder_id, query.builder_team, query
         .unit_id, query.unit_def_id, query.part) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowUnitCaptureStep` handler: `(&Module, &mut Spring, i32, i32, i32, i32, f32) -> Result<bool>`.
@@ -278,14 +283,15 @@ macro_rules! export_allow_unit_capture_step {
         $crate::__sys::AllowUnitBuildStepQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_build_step_query(query) } ?; let
         returned =$handler (module, spring, query.builder_id, query.builder_team, query
         .unit_id, query.unit_def_id, query.part) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowUnitCloak` handler: `(&Module, &mut Spring, i32, bool, i32) -> Result<bool>`.
@@ -307,13 +313,14 @@ macro_rules! export_allow_unit_cloak {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::AllowUnitCloakQuery, result:* mut $crate::__sys::BoolCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (|
-        module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 5, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_cloak_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.has_enemy, query.enemy_id) ?; let
         value = { $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowUnitDecloak` handler: `(&Module, &mut Spring, i32, bool, i32, bool, i32) -> Result<bool>`.
@@ -339,14 +346,15 @@ macro_rules! export_allow_unit_decloak {
         $crate::__sys::AllowUnitDecloakQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_decloak_query(query) } ?; let
         returned =$handler (module, spring, query.unit_id, query.has_object, query
         .object_id, query.has_weapon, query.weapon_num) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowUnitKamikaze` handler: `(&Module, &mut Spring, i32, i32, bool) -> Result<bool>`.
@@ -369,14 +377,14 @@ macro_rules! export_allow_unit_kamikaze {
         $crate::__sys::AllowUnitKamikazeQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_kamikaze_query(query) } ?; let
         returned =$handler (module, spring, query.unit_id, query.target_id, query
         .allowed) ?; let value = { $crate::types::callins::BoolCallinResult { value :
         returned } };$crate::__native_callins::encode_bool_callin_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `AllowUnitTransfer` handler: `(&Module, &mut Spring, i32, i32, i32, i32, bool) -> Result<bool>`.
@@ -402,14 +410,15 @@ macro_rules! export_allow_unit_transfer {
         $crate::__sys::AllowUnitTransferQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_transfer_query(query) } ?; let
         returned =$handler (module, spring, query.unit_id, query.unit_def_id, query
         .old_team, query.new_team, query.capture) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowUnitTransport` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32, i32) -> Result<bool>`.
@@ -439,7 +448,7 @@ macro_rules! export_allow_unit_transport {
         $crate::__sys::AllowUnitTransportQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_transport_query(query) } ?; let
@@ -447,7 +456,8 @@ macro_rules! export_allow_unit_transport {
         .transporter_def_id, query.transporter_team, query.transportee_id, query
         .transportee_def_id, query.transportee_team) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowUnitTransportPosition` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32, i32, $crate::Float3, bool) -> Result<bool>`.
@@ -484,7 +494,7 @@ macro_rules! export_allow_unit_transport_position {
         $crate::__sys::AllowUnitTransportPositionQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_transport_position_query(query) } ?;
@@ -493,7 +503,7 @@ macro_rules! export_allow_unit_transport_position {
         query.units.transportee_def_id, query.units.transportee_team, query.position,
         query.allowed) ?; let value = { $crate::types::callins::BoolCallinResult { value
         : returned } };$crate::__native_callins::encode_bool_callin_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `AllowUnitTransportLoad` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32, i32, $crate::Float3, bool) -> Result<bool>`.
@@ -530,7 +540,7 @@ macro_rules! export_allow_unit_transport_load {
         $crate::__sys::AllowUnitTransportPositionQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_transport_position_query(query) } ?;
@@ -539,7 +549,7 @@ macro_rules! export_allow_unit_transport_load {
         query.units.transportee_def_id, query.units.transportee_team, query.position,
         query.allowed) ?; let value = { $crate::types::callins::BoolCallinResult { value
         : returned } };$crate::__native_callins::encode_bool_callin_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `AllowUnitTransportUnload` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32, i32, $crate::Float3, bool) -> Result<bool>`.
@@ -576,7 +586,7 @@ macro_rules! export_allow_unit_transport_unload {
         $crate::__sys::AllowUnitTransportPositionQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_transport_position_query(query) } ?;
@@ -585,7 +595,7 @@ macro_rules! export_allow_unit_transport_unload {
         query.units.transportee_def_id, query.units.transportee_team, query.position,
         query.allowed) ?; let value = { $crate::types::callins::BoolCallinResult { value
         : returned } };$crate::__native_callins::encode_bool_callin_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `AllowWeaponInterceptTarget` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<bool>`.
@@ -612,14 +622,15 @@ macro_rules! export_allow_weapon_intercept_target {
         $crate::__sys::AllowWeaponInterceptTargetQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_weapon_intercept_target_query(query) } ?;
         let returned =$handler (module, spring, query.interceptor_unit_id, query
         .interceptor_weapon_id, query.interceptor_target_id) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowWeaponTarget` handler: `(&Module, &mut Spring, i32, i32, i32, i32, bool, f32) -> Result<(bool, f32)>`.
@@ -651,7 +662,7 @@ macro_rules! export_allow_weapon_target {
         $crate::__sys::AllowWeaponTargetQuery, result:* mut
         $crate::__sys::AllowWeaponTargetResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_weapon_target_query(query) } ?; let
@@ -661,7 +672,7 @@ macro_rules! export_allow_weapon_target {
         $crate::types::callins::AllowWeaponTargetResult { allowed : returned.0,
         target_priority : returned.1 }
         };$crate::__native_callins::encode_allow_weapon_target_result(& value, result) })
-        })); }
+        }) }); }
     };
 }
 /// Shared scoped `AllowWeaponTargetCheck` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<i32>`.
@@ -687,14 +698,14 @@ macro_rules! export_allow_weapon_target_check {
         mut core::ffi::c_void, query:* const $crate::__sys::AllowWeaponTargetCheckQuery,
         result:* mut $crate::__sys::IntCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_weapon_target_check_query(query) } ?; let
         returned =$handler (module, spring, query.attacker_id, query.attacker_weapon_num,
         query.attacker_weapon_def_id) ?; let value = {
         $crate::types::callins::IntCallinResult { value : returned }
-        };$crate::__native_callins::encode_int_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_int_callin_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `ArchiveCallin` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -715,14 +726,14 @@ macro_rules! export_archive_callin {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery,
         result:* mut $crate::__sys::ArchiveCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 15, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::ArchiveCallinResult {}
-        };$crate::__native_callins::encode_archive_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_archive_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `CollectGarbage` handler: `(&Module, &mut Spring, bool) -> Result<()>`.
@@ -744,14 +755,14 @@ macro_rules! export_collect_garbage {
         $crate::__sys::CollectGarbageQuery, result:* mut
         $crate::__sys::CollectGarbageResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_collect_garbage_query(query) } ?; let returned
         =$handler (module, spring, query.forced) ?; let value = { let () =
         returned;$crate::types::callins::CollectGarbageResult {}
-        };$crate::__native_callins::encode_collect_garbage_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_collect_garbage_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DefaultCommand` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<(bool, i32)>`.
@@ -777,15 +788,15 @@ macro_rules! export_default_command {
         core::ffi::c_void, query:* const $crate::__sys::DefaultCommandQuery, result:* mut
         $crate::__sys::DefaultCommandResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_default_command_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.feature_id, query
         .current_command) ?; let value = { $crate::types::callins::DefaultCommandResult {
         value : returned.0, command : returned.1 }
-        };$crate::__native_callins::encode_default_command_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_default_command_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DownloadFailed` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -808,14 +819,14 @@ macro_rules! export_download_failed {
         $crate::__sys::DownloadFailedQuery, result:* mut
         $crate::__sys::DownloadFailedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_download_failed_query(query) } ?; let returned
         =$handler (module, spring, query.download_id, query.error_id) ?; let value = {
         let () = returned;$crate::types::callins::DownloadFailedResult {}
-        };$crate::__native_callins::encode_download_failed_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_download_failed_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DownloadFinished` handler: `(&Module, &mut Spring, i32) -> Result<()>`.
@@ -837,14 +848,14 @@ macro_rules! export_download_finished {
         $crate::__sys::DownloadFinishedQuery, result:* mut
         $crate::__sys::DownloadFinishedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_download_finished_query(query) } ?; let returned
         =$handler (module, spring, query.download_id) ?; let value = { let () =
         returned;$crate::types::callins::DownloadFinishedResult {}
         };$crate::__native_callins::encode_download_finished_result(& value, result) })
-        })); }
+        }) }); }
     };
 }
 /// Shared scoped `DownloadProgress` handler: `(&Module, &mut Spring, i32, i64, i64) -> Result<()>`.
@@ -868,14 +879,14 @@ macro_rules! export_download_progress {
         $crate::__sys::DownloadProgressQuery, result:* mut
         $crate::__sys::DownloadProgressResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_download_progress_query(query) } ?; let returned
         =$handler (module, spring, query.download_id, query.downloaded, query.total) ?;
         let value = { let () = returned;$crate::types::callins::DownloadProgressResult {}
         };$crate::__native_callins::encode_download_progress_result(& value, result) })
-        })); }
+        }) }); }
     };
 }
 /// Shared scoped `DownloadStarted` handler: `(&Module, &mut Spring, i32) -> Result<()>`.
@@ -897,14 +908,14 @@ macro_rules! export_download_started {
         $crate::__sys::DownloadStartedQuery, result:* mut
         $crate::__sys::DownloadStartedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_download_started_query(query) } ?; let returned
         =$handler (module, spring, query.download_id) ?; let value = { let () =
         returned;$crate::types::callins::DownloadStartedResult {}
-        };$crate::__native_callins::encode_download_started_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_download_started_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawAlphaObjectsLua` handler: `(&Module, &mut Spring, bool, bool) -> Result<()>`.
@@ -929,7 +940,7 @@ macro_rules! export_draw_alpha_objects_lua {
         $crate::__sys::DrawAlphaObjectsLuaQuery, result:* mut
         $crate::__sys::DrawAlphaObjectsLuaResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_alpha_objects_lua_query(query) } ?; let
@@ -937,7 +948,7 @@ macro_rules! export_draw_alpha_objects_lua {
         ?; let value = { let () =
         returned;$crate::types::callins::DrawAlphaObjectsLuaResult {}
         };$crate::__native_callins::encode_draw_alpha_objects_lua_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `DrawAlphaFeaturesLua` handler: `(&Module, &mut Spring, bool, bool) -> Result<()>`.
@@ -962,7 +973,7 @@ macro_rules! export_draw_alpha_features_lua {
         $crate::__sys::DrawAlphaObjectsLuaQuery, result:* mut
         $crate::__sys::DrawAlphaObjectsLuaResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_alpha_objects_lua_query(query) } ?; let
@@ -970,7 +981,7 @@ macro_rules! export_draw_alpha_features_lua {
         ?; let value = { let () =
         returned;$crate::types::callins::DrawAlphaObjectsLuaResult {}
         };$crate::__native_callins::encode_draw_alpha_objects_lua_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `DrawAlphaUnitsLua` handler: `(&Module, &mut Spring, bool, bool) -> Result<()>`.
@@ -995,7 +1006,7 @@ macro_rules! export_draw_alpha_units_lua {
         $crate::__sys::DrawAlphaObjectsLuaQuery, result:* mut
         $crate::__sys::DrawAlphaObjectsLuaResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_alpha_objects_lua_query(query) } ?; let
@@ -1003,7 +1014,7 @@ macro_rules! export_draw_alpha_units_lua {
         ?; let value = { let () =
         returned;$crate::types::callins::DrawAlphaObjectsLuaResult {}
         };$crate::__native_callins::encode_draw_alpha_objects_lua_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `DrawFeature` handler: `(&Module, &mut Spring, i32, i32) -> Result<bool>`.
@@ -1025,13 +1036,14 @@ macro_rules! export_draw_feature {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::DrawFeatureQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 15, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 15, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_feature_query(query) } ?; let returned
         =$handler (module, spring, query.feature_id, query.draw_mode) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `DrawLoadScreen` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -1052,14 +1064,14 @@ macro_rules! export_draw_load_screen {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery,
         result:* mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 64, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawMaterial` handler: `(&Module, &mut Spring, i32, i32) -> Result<bool>`.
@@ -1080,13 +1092,14 @@ macro_rules! export_draw_material {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::DrawMaterialQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 15, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 15, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_material_query(query) } ?; let returned
         =$handler (module, spring, query.uuid, query.draw_mode) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `DrawObjectsLua` handler: `(&Module, &mut Spring, bool, bool, bool) -> Result<()>`.
@@ -1112,15 +1125,15 @@ macro_rules! export_draw_objects_lua {
         $crate::__sys::DrawObjectsLuaQuery, result:* mut
         $crate::__sys::DrawObjectsLuaResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_objects_lua_query(query) } ?; let returned
         =$handler (module, spring, query.deferred_pass, query.draw_reflection, query
         .draw_refraction) ?; let value = { let () =
         returned;$crate::types::callins::DrawObjectsLuaResult {}
-        };$crate::__native_callins::encode_draw_objects_lua_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_draw_objects_lua_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawOpaqueFeaturesLua` handler: `(&Module, &mut Spring, bool, bool, bool) -> Result<()>`.
@@ -1146,15 +1159,15 @@ macro_rules! export_draw_opaque_features_lua {
         $crate::__sys::DrawObjectsLuaQuery, result:* mut
         $crate::__sys::DrawObjectsLuaResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_objects_lua_query(query) } ?; let returned
         =$handler (module, spring, query.deferred_pass, query.draw_reflection, query
         .draw_refraction) ?; let value = { let () =
         returned;$crate::types::callins::DrawObjectsLuaResult {}
-        };$crate::__native_callins::encode_draw_objects_lua_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_draw_objects_lua_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawOpaqueUnitsLua` handler: `(&Module, &mut Spring, bool, bool, bool) -> Result<()>`.
@@ -1180,15 +1193,15 @@ macro_rules! export_draw_opaque_units_lua {
         $crate::__sys::DrawObjectsLuaQuery, result:* mut
         $crate::__sys::DrawObjectsLuaResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_objects_lua_query(query) } ?; let returned
         =$handler (module, spring, query.deferred_pass, query.draw_reflection, query
         .draw_refraction) ?; let value = { let () =
         returned;$crate::types::callins::DrawObjectsLuaResult {}
-        };$crate::__native_callins::encode_draw_objects_lua_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_draw_objects_lua_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawProjectile` handler: `(&Module, &mut Spring, i32, i32) -> Result<bool>`.
@@ -1210,13 +1223,14 @@ macro_rules! export_draw_projectile {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::DrawProjectileQuery, result:* mut $crate::__sys::BoolCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 15, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 15, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_projectile_query(query) } ?; let returned
         =$handler (module, spring, query.projectile_id, query.draw_mode) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `DrawScreen` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -1238,13 +1252,14 @@ macro_rules! export_draw_screen {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::DrawScreenQuery, result:* mut $crate::__sys::DrawScreenResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_screen_query(query) } ?; let returned
         =$handler (module, spring, query.view_size_x, query.view_size_y) ?; let value = {
         let () = returned;$crate::types::callins::DrawScreenResult {}
-        };$crate::__native_callins::encode_draw_screen_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_draw_screen_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `DrawScreenEffects` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -1266,13 +1281,14 @@ macro_rules! export_draw_screen_effects {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::DrawScreenQuery, result:* mut $crate::__sys::DrawScreenResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_screen_query(query) } ?; let returned
         =$handler (module, spring, query.view_size_x, query.view_size_y) ?; let value = {
         let () = returned;$crate::types::callins::DrawScreenResult {}
-        };$crate::__native_callins::encode_draw_screen_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_draw_screen_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `DrawScreenPost` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -1294,13 +1310,14 @@ macro_rules! export_draw_screen_post {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::DrawScreenQuery, result:* mut $crate::__sys::DrawScreenResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_screen_query(query) } ?; let returned
         =$handler (module, spring, query.view_size_x, query.view_size_y) ?; let value = {
         let () = returned;$crate::types::callins::DrawScreenResult {}
-        };$crate::__native_callins::encode_draw_screen_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_draw_screen_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `ScreenCallin` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -1322,13 +1339,14 @@ macro_rules! export_screen_callin {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::DrawScreenQuery, result:* mut $crate::__sys::DrawScreenResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_screen_query(query) } ?; let returned
         =$handler (module, spring, query.view_size_x, query.view_size_y) ?; let value = {
         let () = returned;$crate::types::callins::DrawScreenResult {}
-        };$crate::__native_callins::encode_draw_screen_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_draw_screen_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `DrawShield` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<bool>`.
@@ -1350,13 +1368,14 @@ macro_rules! export_draw_shield {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::DrawShieldQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 15, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 15, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_shield_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.weapon_id, query.draw_mode) ?;
         let value = { $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `DrawUnit` handler: `(&Module, &mut Spring, i32, i32) -> Result<bool>`.
@@ -1378,13 +1397,14 @@ macro_rules! export_draw_unit {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::DrawUnitQuery, result:* mut $crate::__sys::BoolCallinResult) { let
         Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 15, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 15, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_unit_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.draw_mode) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `DrawWorldPreParticles` handler: `(&Module, &mut Spring, bool, bool, bool, bool) -> Result<()>`.
@@ -1411,7 +1431,7 @@ macro_rules! export_draw_world_pre_particles {
         $crate::__sys::DrawWorldPreParticlesQuery, result:* mut
         $crate::__sys::DrawWorldPreParticlesResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_world_pre_particles_query(query) } ?; let
@@ -1419,7 +1439,7 @@ macro_rules! export_draw_world_pre_particles {
         .draw_below_water, query.draw_reflection, query.draw_refraction) ?; let value = {
         let () = returned;$crate::types::callins::DrawWorldPreParticlesResult {}
         };$crate::__native_callins::encode_draw_world_pre_particles_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `Explosion` handler: `(&Module, &mut Spring, i32, $crate::Float3, i32, i32) -> Result<bool>`.
@@ -1444,14 +1464,14 @@ macro_rules! export_explosion {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::ExplosionQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_explosion_query(query) } ?; let returned
         =$handler (module, spring, query.weapon_def_id, query.pos, query.owner_id, query
         .projectile_id) ?; let value = { $crate::types::callins::BoolCallinResult { value
         : returned } };$crate::__native_callins::encode_bool_callin_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `FeatureCreated` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -1474,14 +1494,14 @@ macro_rules! export_feature_created {
         $crate::__sys::FeatureCreatedQuery, result:* mut
         $crate::__sys::FeatureCreatedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_feature_created_query(query) } ?; let returned
         =$handler (module, spring, query.feature_id, query.ally_team_id) ?; let value = {
         let () = returned;$crate::types::callins::FeatureCreatedResult {}
-        };$crate::__native_callins::encode_feature_created_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_feature_created_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `FeatureDamaged` handler: `(&Module, &mut Spring, i32, i32, i32, f32, i32, i32, i32, i32, i32) -> Result<()>`.
@@ -1513,7 +1533,7 @@ macro_rules! export_feature_damaged {
         $crate::__sys::FeatureDamagedQuery, result:* mut
         $crate::__sys::FeatureDamagedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_feature_damaged_query(query) } ?; let returned
@@ -1521,8 +1541,8 @@ macro_rules! export_feature_damaged {
         .feature_team, query.damage, query.weapon_def_id, query.projectile_id, query
         .attacker_id, query.attacker_def_id, query.attacker_team) ?; let value = { let ()
         = returned;$crate::types::callins::FeatureDamagedResult {}
-        };$crate::__native_callins::encode_feature_damaged_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_feature_damaged_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `FeatureDestroyed` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -1545,14 +1565,14 @@ macro_rules! export_feature_destroyed {
         $crate::__sys::FeatureDestroyedQuery, result:* mut
         $crate::__sys::FeatureDestroyedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_feature_destroyed_query(query) } ?; let returned
         =$handler (module, spring, query.feature_id, query.ally_team_id) ?; let value = {
         let () = returned;$crate::types::callins::FeatureDestroyedResult {}
         };$crate::__native_callins::encode_feature_destroyed_result(& value, result) })
-        })); }
+        }) }); }
     };
 }
 /// Shared scoped `FeatureMoved` handler: `(&Module, &mut Spring, i32, $crate::Float3) -> Result<()>`.
@@ -1576,14 +1596,14 @@ macro_rules! export_feature_moved {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::FeatureMovedQuery,
         result:* mut $crate::__sys::FeatureMovedResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_feature_moved_query(query) } ?; let returned
         =$handler (module, spring, query.feature_id, query.old_pos) ?; let value = { let
         () = returned;$crate::types::callins::FeatureMovedResult {}
-        };$crate::__native_callins::encode_feature_moved_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_feature_moved_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `FeaturePreDamaged` handler: `(&Module, &mut Spring, i32, i32, i32, f32, i32, i32, i32, i32, i32) -> Result<(f32, f32)>`.
@@ -1616,7 +1636,7 @@ macro_rules! export_feature_pre_damaged {
         $crate::__sys::FeatureDamagedQuery, result:* mut
         $crate::__sys::DamageCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_feature_damaged_query(query) } ?; let returned
@@ -1625,8 +1645,8 @@ macro_rules! export_feature_pre_damaged {
         .attacker_id, query.attacker_def_id, query.attacker_team) ?; let value = {
         $crate::types::callins::DamageCallinResult { new_damage : returned.0,
         impulse_mult : returned.1 }
-        };$crate::__native_callins::encode_damage_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_damage_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `Float3Callin` handler: `(&Module, &mut Spring, $crate::Float3) -> Result<()>`.
@@ -1649,14 +1669,14 @@ macro_rules! export_float3_callin {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::Float3CallinQuery,
         result:* mut $crate::__sys::Float3CallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_float3_callin_query(query) } ?; let returned
         =$handler (module, spring, query.value) ?; let value = { let () =
         returned;$crate::types::callins::Float3CallinResult {}
-        };$crate::__native_callins::encode_float3_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_float3_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `CameraPositionChanged` handler: `(&Module, &mut Spring, $crate::Float3) -> Result<()>`.
@@ -1679,14 +1699,14 @@ macro_rules! export_camera_position_changed {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::Float3CallinQuery, result:* mut $crate::__sys::Float3CallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_float3_callin_query(query) } ?; let returned
         =$handler (module, spring, query.value) ?; let value = { let () =
         returned;$crate::types::callins::Float3CallinResult {}
-        };$crate::__native_callins::encode_float3_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_float3_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `CameraRotationChanged` handler: `(&Module, &mut Spring, $crate::Float3) -> Result<()>`.
@@ -1709,14 +1729,14 @@ macro_rules! export_camera_rotation_changed {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::Float3CallinQuery, result:* mut $crate::__sys::Float3CallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_float3_callin_query(query) } ?; let returned
         =$handler (module, spring, query.value) ?; let value = { let () =
         returned;$crate::types::callins::Float3CallinResult {}
-        };$crate::__native_callins::encode_float3_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_float3_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `GameFrame` handler: `(&Module, &mut Spring, i32) -> Result<()>`.
@@ -1737,13 +1757,13 @@ macro_rules! export_game_frame {
         core::ffi::c_void, query:* const $crate::__sys::GameFrameQuery, result:* mut
         $crate::__sys::GameFrameResult) { let Some(result) = (unsafe { result.as_mut() })
         else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_game_frame_query(query) } ?; let returned
         =$handler (module, spring, query.game_frame) ?; let value = { let () =
         returned;$crate::types::callins::GameFrameResult {}
-        };$crate::__native_callins::encode_game_frame_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_game_frame_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `GameFramePost` handler: `(&Module, &mut Spring, i32) -> Result<()>`.
@@ -1764,14 +1784,14 @@ macro_rules! export_game_frame_post {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::GameFramePostQuery,
         result:* mut $crate::__sys::GameFramePostResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_game_frame_post_query(query) } ?; let returned
         =$handler (module, spring, query.game_frame) ?; let value = { let () =
         returned;$crate::types::callins::GameFramePostResult {}
-        };$crate::__native_callins::encode_game_frame_post_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_game_frame_post_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `GamePaused` handler: `(&Module, &mut Spring, i32, bool) -> Result<()>`.
@@ -1793,13 +1813,14 @@ macro_rules! export_game_paused {
         core::ffi::c_void, query:* const $crate::__sys::GamePausedQuery, result:* mut
         $crate::__sys::GamePausedResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_game_paused_query(query) } ?; let returned
         =$handler (module, spring, query.player_id, query.paused) ?; let value = { let ()
         = returned;$crate::types::callins::GamePausedResult {}
-        };$crate::__native_callins::encode_game_paused_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_game_paused_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `GamePreload` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -1819,13 +1840,14 @@ macro_rules! export_game_preload {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::GamePreloadQuery, result:* mut $crate::__sys::GamePreloadResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_game_preload_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::GamePreloadResult {}
-        };$crate::__native_callins::encode_game_preload_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_game_preload_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `GameProgress` handler: `(&Module, &mut Spring, i32) -> Result<()>`.
@@ -1846,14 +1868,14 @@ macro_rules! export_game_progress {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::GameProgressQuery,
         result:* mut $crate::__sys::GameProgressResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 26, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_game_progress_query(query) } ?; let returned
         =$handler (module, spring, query.game_frame) ?; let value = { let () =
         returned;$crate::types::callins::GameProgressResult {}
-        };$crate::__native_callins::encode_game_progress_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_game_progress_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `GameStart` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -1873,13 +1895,13 @@ macro_rules! export_game_start {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::GameStartQuery, result:* mut $crate::__sys::GameStartResult) { let
         Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_game_start_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::GameStartResult {}
-        };$crate::__native_callins::encode_game_start_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_game_start_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `GenerateDefs` handler: `(&Module, &mut Spring) -> Result<String>`.
@@ -1911,14 +1933,14 @@ macro_rules! export_generate_defs {
         core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery, result:* mut
         $crate::__sys::StringCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 1, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = {
         $crate::types::callins::StringCallinResult { value : returned }
-        };$crate::__native_callins::encode_string_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_string_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `GroupChanged` handler: `(&Module, &mut Spring, i32) -> Result<bool>`.
@@ -1939,13 +1961,14 @@ macro_rules! export_group_changed {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::GroupChangedQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_group_changed_query(query) } ?; let returned
         =$handler (module, spring, query.group_id) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `KeyMapChanged` handler: `(&Module, &mut Spring) -> Result<bool>`.
@@ -1966,13 +1989,14 @@ macro_rules! export_key_map_changed {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `LastMessagePosition` handler: `(&Module, &mut Spring, $crate::Float3) -> Result<()>`.
@@ -1995,14 +2019,14 @@ macro_rules! export_last_message_position {
         $crate::__sys::LastMessagePositionQuery, result:* mut
         $crate::__sys::LastMessagePositionResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_last_message_position_query(query) } ?; let
         returned =$handler (module, spring, query.pos) ?; let value = { let () =
         returned;$crate::types::callins::LastMessagePositionResult {}
         };$crate::__native_callins::encode_last_message_position_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `Load` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -2022,14 +2046,14 @@ macro_rules! export_load {
         core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery, result:* mut
         $crate::__sys::ArchiveCallinResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::ArchiveCallinResult {}
-        };$crate::__native_callins::encode_archive_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_archive_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `MiniMapDraw` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -2050,14 +2074,14 @@ macro_rules! export_mini_map_draw {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::MiniMapDrawQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_mini_map_draw_query(query) } ?; let returned
         =$handler (module, spring, query.size_x, query.size_y) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawInMiniMap` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -2078,14 +2102,14 @@ macro_rules! export_draw_in_mini_map {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::MiniMapDrawQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_mini_map_draw_query(query) } ?; let returned
         =$handler (module, spring, query.size_x, query.size_y) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawInMiniMapBackground` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -2106,14 +2130,14 @@ macro_rules! export_draw_in_mini_map_background {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::MiniMapDrawQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_mini_map_draw_query(query) } ?; let returned
         =$handler (module, spring, query.size_x, query.size_y) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `MiniMapGeometryChanged` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32, i32, i32, i32) -> Result<()>`.
@@ -2143,7 +2167,7 @@ macro_rules! export_mini_map_geometry_changed {
         $crate::__sys::MiniMapGeometryChangedQuery, result:* mut
         $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_mini_map_geometry_changed_query(query) } ?; let
@@ -2151,8 +2175,8 @@ macro_rules! export_mini_map_geometry_changed {
         .new_dim_x, query.new_dim_y, query.old_pos_x, query.old_pos_y, query.old_dim_x,
         query.old_dim_y) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `MiniMapRotationChanged` handler: `(&Module, &mut Spring, f32, f32) -> Result<()>`.
@@ -2175,14 +2199,14 @@ macro_rules! export_mini_map_rotation_changed {
         $crate::__sys::MiniMapRotationChangedQuery, result:* mut
         $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_mini_map_rotation_changed_query(query) } ?; let
         returned =$handler (module, spring, query.new_rot, query.old_rot) ?; let value =
         { let () = returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `MiniMapStateChanged` handler: `(&Module, &mut Spring, bool, bool, bool) -> Result<()>`.
@@ -2206,15 +2230,15 @@ macro_rules! export_mini_map_state_changed {
         $crate::__sys::MiniMapStateChangedQuery, result:* mut
         $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_mini_map_state_changed_query(query) } ?; let
         returned =$handler (module, spring, query.is_minimized, query.is_maximized, query
         .is_slaved) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `MouseMove` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32) -> Result<bool>`.
@@ -2236,13 +2260,14 @@ macro_rules! export_mouse_move {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::MouseMoveQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_mouse_move_query(query) } ?; let returned
         =$handler (module, spring, query.x, query.y, query.dx, query.dy, query.button) ?;
         let value = { $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `MousePress` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<bool>`.
@@ -2263,13 +2288,14 @@ macro_rules! export_mouse_press {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::MousePressQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_mouse_press_query(query) } ?; let returned
         =$handler (module, spring, query.x, query.y, query.button) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `MouseRelease` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -2290,14 +2316,14 @@ macro_rules! export_mouse_release {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::MouseReleaseQuery, result:* mut $crate::__sys::MouseReleaseResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_mouse_release_query(query) } ?; let returned
         =$handler (module, spring, query.x, query.y, query.button) ?; let value = { let
         () = returned;$crate::types::callins::MouseReleaseResult {}
-        };$crate::__native_callins::encode_mouse_release_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_mouse_release_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `MouseWheel` handler: `(&Module, &mut Spring, bool, f32) -> Result<bool>`.
@@ -2318,13 +2344,14 @@ macro_rules! export_mouse_wheel {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::MouseWheelQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_mouse_wheel_query(query) } ?; let returned
         =$handler (module, spring, query.up, query.value) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `MoveCtrlNotify` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<bool>`.
@@ -2348,14 +2375,14 @@ macro_rules! export_move_ctrl_notify {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::MoveCtrlNotifyQuery, result:* mut $crate::__sys::BoolCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (|
-        module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 5, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_move_ctrl_notify_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.data) ?; let value = { $crate::types::callins::BoolCallinResult { value :
         returned } };$crate::__native_callins::encode_bool_callin_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `PlayerAdded` handler: `(&Module, &mut Spring, i32) -> Result<()>`.
@@ -2376,13 +2403,14 @@ macro_rules! export_player_added {
         core::ffi::c_void, query:* const $crate::__sys::PlayerAddedQuery, result:* mut
         $crate::__sys::PlayerAddedResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_player_added_query(query) } ?; let returned
         =$handler (module, spring, query.player_id) ?; let value = { let () =
         returned;$crate::types::callins::PlayerAddedResult {}
-        };$crate::__native_callins::encode_player_added_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_player_added_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `PlayerChanged` handler: `(&Module, &mut Spring, i32) -> Result<()>`.
@@ -2403,14 +2431,14 @@ macro_rules! export_player_changed {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::PlayerChangedQuery,
         result:* mut $crate::__sys::PlayerChangedResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_player_changed_query(query) } ?; let returned
         =$handler (module, spring, query.player_id) ?; let value = { let () =
         returned;$crate::types::callins::PlayerChangedResult {}
-        };$crate::__native_callins::encode_player_changed_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_player_changed_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `PlayerRemoved` handler: `(&Module, &mut Spring, i32, i32) -> Result<()>`.
@@ -2432,14 +2460,14 @@ macro_rules! export_player_removed {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::PlayerRemovedQuery,
         result:* mut $crate::__sys::PlayerRemovedResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_player_removed_query(query) } ?; let returned
         =$handler (module, spring, query.player_id, query.reason) ?; let value = { let ()
         = returned;$crate::types::callins::PlayerRemovedResult {}
-        };$crate::__native_callins::encode_player_removed_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_player_removed_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `Pong` handler: `(&Module, &mut Spring, u8, i64, i64) -> Result<()>`.
@@ -2462,14 +2490,14 @@ macro_rules! export_pong {
         core::ffi::c_void, query:* const $crate::__sys::PongQuery, result:* mut
         $crate::__sys::PongResult) { let Some(result) = (unsafe { result.as_mut() }) else
         { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 26, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_pong_query(query) } ?; let returned =$handler
         (module, spring, query.ping_tag, query.packet_send_time_millis, query
         .packet_recv_time_millis) ?; let value = { let () =
         returned;$crate::types::callins::PongResult {}
-        };$crate::__native_callins::encode_pong_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_pong_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `ProjectileEvent` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -2493,15 +2521,15 @@ macro_rules! export_projectile_event {
         $crate::__sys::ProjectileEventQuery, result:* mut
         $crate::__sys::ProjectileEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_projectile_event_query(query) } ?; let returned
         =$handler (module, spring, query.projectile_id, query.owner_id, query
         .weapon_def_id) ?; let value = { let () =
         returned;$crate::types::callins::ProjectileEventResult {}
-        };$crate::__native_callins::encode_projectile_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_projectile_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `ProjectileCreated` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -2525,15 +2553,15 @@ macro_rules! export_projectile_created {
         $crate::__sys::ProjectileEventQuery, result:* mut
         $crate::__sys::ProjectileEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_projectile_event_query(query) } ?; let returned
         =$handler (module, spring, query.projectile_id, query.owner_id, query
         .weapon_def_id) ?; let value = { let () =
         returned;$crate::types::callins::ProjectileEventResult {}
-        };$crate::__native_callins::encode_projectile_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_projectile_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `ProjectileDestroyed` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -2558,15 +2586,15 @@ macro_rules! export_projectile_destroyed {
         $crate::__sys::ProjectileEventQuery, result:* mut
         $crate::__sys::ProjectileEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_projectile_event_query(query) } ?; let returned
         =$handler (module, spring, query.projectile_id, query.owner_id, query
         .weapon_def_id) ?; let value = { let () =
         returned;$crate::types::callins::ProjectileEventResult {}
-        };$crate::__native_callins::encode_projectile_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_projectile_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `RectChanged` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<()>`.
@@ -2588,13 +2616,14 @@ macro_rules! export_rect_changed {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::RectChangedQuery,
         result:* mut $crate::__sys::RectChangedResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_rect_changed_query(query) } ?; let returned
         =$handler (module, spring, query.x1, query.z1, query.x2, query.z2) ?; let value =
         { let () = returned;$crate::types::callins::RectChangedResult {}
-        };$crate::__native_callins::encode_rect_changed_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_rect_changed_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `UnsyncedHeightMapUpdate` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<()>`.
@@ -2616,13 +2645,14 @@ macro_rules! export_unsynced_height_map_update {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::RectChangedQuery, result:* mut $crate::__sys::RectChangedResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_rect_changed_query(query) } ?; let returned
         =$handler (module, spring, query.x1, query.z1, query.x2, query.z2) ?; let value =
         { let () = returned;$crate::types::callins::RectChangedResult {}
-        };$crate::__native_callins::encode_rect_changed_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_rect_changed_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `RenderUnitDestroyed` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -2646,7 +2676,7 @@ macro_rules! export_render_unit_destroyed {
         $crate::__sys::RenderUnitDestroyedQuery, result:* mut
         $crate::__sys::RenderUnitDestroyedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_render_unit_destroyed_query(query) } ?; let
@@ -2654,7 +2684,7 @@ macro_rules! export_render_unit_destroyed {
         .unit_team) ?; let value = { let () =
         returned;$crate::types::callins::RenderUnitDestroyedResult {}
         };$crate::__native_callins::encode_render_unit_destroyed_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `Save` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -2674,14 +2704,14 @@ macro_rules! export_save {
         core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery, result:* mut
         $crate::__sys::ArchiveCallinResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 15, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::ArchiveCallinResult {}
-        };$crate::__native_callins::encode_archive_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_archive_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `ScreenPosition` handler: `(&Module, &mut Spring, i32, i32) -> Result<bool>`.
@@ -2702,13 +2732,14 @@ macro_rules! export_screen_position {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::ScreenPositionQuery, result:* mut $crate::__sys::BoolCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_screen_position_query(query) } ?; let returned
         =$handler (module, spring, query.x, query.y) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `IsAbove` handler: `(&Module, &mut Spring, i32, i32) -> Result<bool>`.
@@ -2728,13 +2759,14 @@ macro_rules! export_is_above {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::ScreenPositionQuery, result:* mut $crate::__sys::BoolCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_screen_position_query(query) } ?; let returned
         =$handler (module, spring, query.x, query.y) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `ScreenTooltip` handler: `(&Module, &mut Spring, i32, i32) -> Result<String>`.
@@ -2767,14 +2799,14 @@ macro_rules! export_screen_tooltip {
         core::ffi::c_void, query:* const $crate::__sys::ScreenPositionQuery, result:* mut
         $crate::__sys::StringCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_screen_position_query(query) } ?; let returned
         =$handler (module, spring, query.x, query.y) ?; let value = {
         $crate::types::callins::StringCallinResult { value : returned }
-        };$crate::__native_callins::encode_string_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_string_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `GetTooltip` handler: `(&Module, &mut Spring, i32, i32) -> Result<String>`.
@@ -2806,14 +2838,14 @@ macro_rules! export_get_tooltip {
         core::ffi::c_void, query:* const $crate::__sys::ScreenPositionQuery, result:* mut
         $crate::__sys::StringCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_screen_position_query(query) } ?; let returned
         =$handler (module, spring, query.x, query.y) ?; let value = {
         $crate::types::callins::StringCallinResult { value : returned }
-        };$crate::__native_callins::encode_string_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_string_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `ShieldPreDamaged` handler: `(&Module, &mut Spring, i32, i32, i32, i32, bool, i32, i32, $crate::Float3, $crate::Float3) -> Result<bool>`.
@@ -2850,7 +2882,7 @@ macro_rules! export_shield_pre_damaged {
         core::ffi::c_void, query:* const $crate::__sys::ShieldPreDamagedQuery, result:*
         mut $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_shield_pre_damaged_query(query) } ?; let
@@ -2859,7 +2891,8 @@ macro_rules! export_shield_pre_damaged {
         .bounce_projectile, query.beam_emitter_weapon_num, query.beam_emitter_unit_id,
         query.start_pos, query.hit_pos) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `SimpleCallin` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -2880,14 +2913,14 @@ macro_rules! export_simple_callin {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery,
         result:* mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 127, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawFeaturesPostDeferred` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -2908,14 +2941,14 @@ macro_rules! export_draw_features_post_deferred {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawGenesis` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -2936,14 +2969,14 @@ macro_rules! export_draw_genesis {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery,
         result:* mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 127, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawGroundDeferred` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -2964,14 +2997,14 @@ macro_rules! export_draw_ground_deferred {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawGroundPostDeferred` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -2992,14 +3025,14 @@ macro_rules! export_draw_ground_post_deferred {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawGroundPostForward` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3020,14 +3053,14 @@ macro_rules! export_draw_ground_post_forward {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawGroundPreDeferred` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3048,14 +3081,14 @@ macro_rules! export_draw_ground_pre_deferred {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawGroundPreForward` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3076,14 +3109,14 @@ macro_rules! export_draw_ground_pre_forward {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawPreDecals` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3104,14 +3137,14 @@ macro_rules! export_draw_pre_decals {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery,
         result:* mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 127, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawShadowFeaturesLua` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3132,14 +3165,14 @@ macro_rules! export_draw_shadow_features_lua {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawShadowPassTransparent` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3160,14 +3193,14 @@ macro_rules! export_draw_shadow_pass_transparent {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawShadowUnitsLua` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3188,14 +3221,14 @@ macro_rules! export_draw_shadow_units_lua {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawUnitsPostDeferred` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3216,14 +3249,14 @@ macro_rules! export_draw_units_post_deferred {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawWaterPost` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3244,14 +3277,14 @@ macro_rules! export_draw_water_post {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery,
         result:* mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 127, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawWorld` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3272,14 +3305,14 @@ macro_rules! export_draw_world {
         mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery, result:*
         mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 127, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawWorldPreUnit` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3300,14 +3333,14 @@ macro_rules! export_draw_world_pre_unit {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery,
         result:* mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 127, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawWorldReflection` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3328,14 +3361,14 @@ macro_rules! export_draw_world_reflection {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawWorldRefraction` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3356,14 +3389,14 @@ macro_rules! export_draw_world_refraction {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::SimpleCallinQuery, result:* mut $crate::__sys::SimpleCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let _ = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawWorldShadow` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3384,14 +3417,14 @@ macro_rules! export_draw_world_shadow {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery,
         result:* mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 127, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `FontsChanged` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3412,14 +3445,14 @@ macro_rules! export_fonts_changed {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery,
         result:* mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 127, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `StockpileChanged` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32, i32) -> Result<()>`.
@@ -3446,7 +3479,7 @@ macro_rules! export_stockpile_changed {
         $crate::__sys::StockpileChangedQuery, result:* mut
         $crate::__sys::StockpileChangedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_stockpile_changed_query(query) } ?; let returned
@@ -3454,7 +3487,7 @@ macro_rules! export_stockpile_changed {
         query.weapon_num, query.old_count, query.new_count) ?; let value = { let () =
         returned;$crate::types::callins::StockpileChangedResult {}
         };$crate::__native_callins::encode_stockpile_changed_result(& value, result) })
-        })); }
+        }) }); }
     };
 }
 /// Shared scoped `SunChanged` handler: `(&Module, &mut Spring) -> Result<()>`.
@@ -3475,13 +3508,14 @@ macro_rules! export_sun_changed {
         core::ffi::c_void, query:* const $crate::__sys::SunChangedQuery, result:* mut
         $crate::__sys::SunChangedResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let _ = unsafe {
         $crate::__native_callins::decode_sun_changed_query(query) } ?; let returned
         =$handler (module, spring) ?; let value = { let () =
         returned;$crate::types::callins::SunChangedResult {}
-        };$crate::__native_callins::encode_sun_changed_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_sun_changed_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `TeamChanged` handler: `(&Module, &mut Spring, i32) -> Result<()>`.
@@ -3502,13 +3536,14 @@ macro_rules! export_team_changed {
         core::ffi::c_void, query:* const $crate::__sys::TeamChangedQuery, result:* mut
         $crate::__sys::TeamChangedResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_team_changed_query(query) } ?; let returned
         =$handler (module, spring, query.team_id) ?; let value = { let () =
         returned;$crate::types::callins::TeamChangedResult {}
-        };$crate::__native_callins::encode_team_changed_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_team_changed_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `TeamDied` handler: `(&Module, &mut Spring, i32) -> Result<()>`.
@@ -3528,13 +3563,13 @@ macro_rules! export_team_died {
         core::ffi::c_void, query:* const $crate::__sys::TeamDiedQuery, result:* mut
         $crate::__sys::TeamDiedResult) { let Some(result) = (unsafe { result.as_mut() })
         else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_team_died_query(query) } ?; let returned
         =$handler (module, spring, query.team_id) ?; let value = { let () =
         returned;$crate::types::callins::TeamDiedResult {}
-        };$crate::__native_callins::encode_team_died_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_team_died_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `TerraformComplete` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32, i32) -> Result<bool>`.
@@ -3561,14 +3596,15 @@ macro_rules! export_terraform_complete {
         core::ffi::c_void, query:* const $crate::__sys::TerraformCompleteQuery, result:*
         mut $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_terraform_complete_query(query) } ?; let
         returned =$handler (module, spring, query.unit_id, query.unit_def_id, query
         .unit_team, query.build_unit_id, query.build_unit_def_id, query.build_unit_team)
         ?; let value = { $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `UnitCloakEvent` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -3592,14 +3628,14 @@ macro_rules! export_unit_cloak_event {
         $crate::__sys::UnitCloakEventQuery, result:* mut
         $crate::__sys::UnitCloakEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_cloak_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team) ?;
         let value = { let () = returned;$crate::types::callins::UnitCloakEventResult {}
-        };$crate::__native_callins::encode_unit_cloak_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_unit_cloak_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitCloaked` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -3623,14 +3659,14 @@ macro_rules! export_unit_cloaked {
         $crate::__sys::UnitCloakEventQuery, result:* mut
         $crate::__sys::UnitCloakEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_cloak_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team) ?;
         let value = { let () = returned;$crate::types::callins::UnitCloakEventResult {}
-        };$crate::__native_callins::encode_unit_cloak_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_unit_cloak_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitDecloaked` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -3654,14 +3690,14 @@ macro_rules! export_unit_decloaked {
         $crate::__sys::UnitCloakEventQuery, result:* mut
         $crate::__sys::UnitCloakEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_cloak_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team) ?;
         let value = { let () = returned;$crate::types::callins::UnitCloakEventResult {}
-        };$crate::__native_callins::encode_unit_cloak_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_unit_cloak_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitConstructionDecayed` handler: `(&Module, &mut Spring, i32, i32, i32, f32, f32, f32) -> Result<()>`.
@@ -3689,7 +3725,7 @@ macro_rules! export_unit_construction_decayed {
         $crate::__sys::UnitConstructionDecayedQuery, result:* mut
         $crate::__sys::UnitConstructionDecayedResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_construction_decayed_query(query) } ?; let
@@ -3698,7 +3734,7 @@ macro_rules! export_unit_construction_decayed {
         let value = { let () =
         returned;$crate::types::callins::UnitConstructionDecayedResult {}
         };$crate::__native_callins::encode_unit_construction_decayed_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `UnitCreated` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<()>`.
@@ -3722,14 +3758,15 @@ macro_rules! export_unit_created {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitCreatedQuery, result:* mut $crate::__sys::UnitCreatedResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_created_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.builder_id) ?; let value = { let () =
         returned;$crate::types::callins::UnitCreatedResult {}
-        };$crate::__native_callins::encode_unit_created_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_unit_created_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `UnitDamaged` handler: `(&Module, &mut Spring, i32, i32, i32, f32, bool, i32, i32, i32, i32, i32) -> Result<()>`.
@@ -3760,7 +3797,7 @@ macro_rules! export_unit_damaged {
         core::ffi::c_void, query:* const $crate::__sys::UnitDamagedQuery, result:* mut
         $crate::__sys::UnitDamagedResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_damaged_query(query) } ?; let returned
@@ -3768,7 +3805,8 @@ macro_rules! export_unit_damaged {
         query.damage, query.paralyzer, query.weapon_def_id, query.projectile_id, query
         .attacker_id, query.attacker_def_id, query.attacker_team) ?; let value = { let ()
         = returned;$crate::types::callins::UnitDamagedResult {}
-        };$crate::__native_callins::encode_unit_damaged_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_unit_damaged_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `UnitDestroyed` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32, i32, i32) -> Result<()>`.
@@ -3796,7 +3834,7 @@ macro_rules! export_unit_destroyed {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::UnitDestroyedQuery,
         result:* mut $crate::__sys::UnitDestroyedResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_destroyed_query(query) } ?; let returned
@@ -3804,8 +3842,8 @@ macro_rules! export_unit_destroyed {
         query.attacker_id, query.attacker_def_id, query.attacker_team, query
         .weapon_def_id) ?; let value = { let () =
         returned;$crate::types::callins::UnitDestroyedResult {}
-        };$crate::__native_callins::encode_unit_destroyed_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_unit_destroyed_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitExperience` handler: `(&Module, &mut Spring, i32, i32, i32, f32, f32) -> Result<()>`.
@@ -3832,15 +3870,15 @@ macro_rules! export_unit_experience {
         $crate::__sys::UnitExperienceQuery, result:* mut
         $crate::__sys::UnitExperienceResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_experience_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.experience, query.old_experience) ?; let value = { let () =
         returned;$crate::types::callins::UnitExperienceResult {}
-        };$crate::__native_callins::encode_unit_experience_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_unit_experience_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitFeatureCollision` handler: `(&Module, &mut Spring, i32, i32) -> Result<bool>`.
@@ -3863,13 +3901,14 @@ macro_rules! export_unit_feature_collision {
         $crate::__sys::UnitFeatureCollisionQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_feature_collision_query(query) } ?; let
         returned =$handler (module, spring, query.collider_id, query.collidee_id) ?; let
         value = { $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `UnitFinished` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -3891,14 +3930,14 @@ macro_rules! export_unit_finished {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitFinishedQuery, result:* mut $crate::__sys::UnitFinishedResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_finished_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team) ?;
         let value = { let () = returned;$crate::types::callins::UnitFinishedResult {}
-        };$crate::__native_callins::encode_unit_finished_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_unit_finished_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitFromFactory` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32, bool) -> Result<()>`.
@@ -3925,7 +3964,7 @@ macro_rules! export_unit_from_factory {
         $crate::__sys::UnitFromFactoryQuery, result:* mut
         $crate::__sys::UnitFromFactoryResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_from_factory_query(query) } ?; let returned
@@ -3933,7 +3972,7 @@ macro_rules! export_unit_from_factory {
         query.factory_id, query.factory_def_id, query.user_orders) ?; let value = { let
         () = returned;$crate::types::callins::UnitFromFactoryResult {}
         };$crate::__native_callins::encode_unit_from_factory_result(& value, result) })
-        })); }
+        }) }); }
     };
 }
 /// Shared scoped `UnitGiven` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<()>`.
@@ -3956,14 +3995,14 @@ macro_rules! export_unit_given {
         core::ffi::c_void, query:* const $crate::__sys::UnitGivenQuery, result:* mut
         $crate::__sys::UnitGivenResult) { let Some(result) = (unsafe { result.as_mut() })
         else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_given_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.old_team,
         query.new_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitGivenResult {}
-        };$crate::__native_callins::encode_unit_given_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_unit_given_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `UnitHarvestStorageFull` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -3988,7 +4027,7 @@ macro_rules! export_unit_harvest_storage_full {
         $crate::__sys::UnitHarvestStorageFullQuery, result:* mut
         $crate::__sys::UnitHarvestStorageFullResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_harvest_storage_full_query(query) } ?; let
@@ -3996,7 +4035,7 @@ macro_rules! export_unit_harvest_storage_full {
         .unit_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitHarvestStorageFullResult {}
         };$crate::__native_callins::encode_unit_harvest_storage_full_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `UnitIdle` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4018,13 +4057,13 @@ macro_rules! export_unit_idle {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitIdleQuery, result:* mut $crate::__sys::UnitIdleResult) { let
         Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_idle_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team) ?;
         let value = { let () = returned;$crate::types::callins::UnitIdleResult {}
-        };$crate::__native_callins::encode_unit_idle_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_unit_idle_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `UnitLoaded` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32) -> Result<()>`.
@@ -4050,14 +4089,15 @@ macro_rules! export_unit_loaded {
         core::ffi::c_void, query:* const $crate::__sys::UnitLoadedQuery, result:* mut
         $crate::__sys::UnitLoadedResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_loaded_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.transport_id, query.transport_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitLoadedResult {}
-        };$crate::__native_callins::encode_unit_loaded_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_unit_loaded_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `UnitLosEvent` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<()>`.
@@ -4081,15 +4121,15 @@ macro_rules! export_unit_los_event {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitLosEventQuery, result:* mut $crate::__sys::UnitLosEventResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_los_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.ally_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitLosEventResult {}
-        };$crate::__native_callins::encode_unit_los_event_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_unit_los_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitEnteredLos` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<()>`.
@@ -4113,15 +4153,15 @@ macro_rules! export_unit_entered_los {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitLosEventQuery, result:* mut $crate::__sys::UnitLosEventResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_los_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.ally_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitLosEventResult {}
-        };$crate::__native_callins::encode_unit_los_event_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_unit_los_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitEnteredRadar` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<()>`.
@@ -4145,15 +4185,15 @@ macro_rules! export_unit_entered_radar {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitLosEventQuery, result:* mut $crate::__sys::UnitLosEventResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_los_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.ally_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitLosEventResult {}
-        };$crate::__native_callins::encode_unit_los_event_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_unit_los_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitLeftLos` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<()>`.
@@ -4177,15 +4217,15 @@ macro_rules! export_unit_left_los {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitLosEventQuery, result:* mut $crate::__sys::UnitLosEventResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_los_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.ally_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitLosEventResult {}
-        };$crate::__native_callins::encode_unit_los_event_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_unit_los_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitLeftRadar` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<()>`.
@@ -4209,15 +4249,15 @@ macro_rules! export_unit_left_radar {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitLosEventQuery, result:* mut $crate::__sys::UnitLosEventResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_los_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.ally_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitLosEventResult {}
-        };$crate::__native_callins::encode_unit_los_event_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_unit_los_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitMoveEvent` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4240,14 +4280,14 @@ macro_rules! export_unit_move_event {
         $crate::__sys::UnitMoveEventQuery, result:* mut
         $crate::__sys::UnitMoveEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_move_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team) ?;
         let value = { let () = returned;$crate::types::callins::UnitMoveEventResult {}
-        };$crate::__native_callins::encode_unit_move_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_unit_move_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitArrivedAtGoal` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4270,14 +4310,14 @@ macro_rules! export_unit_arrived_at_goal {
         $crate::__sys::UnitMoveEventQuery, result:* mut
         $crate::__sys::UnitMoveEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_move_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team) ?;
         let value = { let () = returned;$crate::types::callins::UnitMoveEventResult {}
-        };$crate::__native_callins::encode_unit_move_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_unit_move_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitMoveFailed` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4300,14 +4340,14 @@ macro_rules! export_unit_move_failed {
         $crate::__sys::UnitMoveEventQuery, result:* mut
         $crate::__sys::UnitMoveEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_move_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team) ?;
         let value = { let () = returned;$crate::types::callins::UnitMoveEventResult {}
-        };$crate::__native_callins::encode_unit_move_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_unit_move_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitMoved` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4330,14 +4370,14 @@ macro_rules! export_unit_moved {
         $crate::__sys::UnitMoveEventQuery, result:* mut
         $crate::__sys::UnitMoveEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_move_event_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team) ?;
         let value = { let () = returned;$crate::types::callins::UnitMoveEventResult {}
-        };$crate::__native_callins::encode_unit_move_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_unit_move_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitMovementClassEvent` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4362,7 +4402,7 @@ macro_rules! export_unit_movement_class_event {
         $crate::__sys::UnitMovementClassEventQuery, result:* mut
         $crate::__sys::UnitMovementClassEventResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_movement_class_event_query(query) } ?; let
@@ -4370,7 +4410,7 @@ macro_rules! export_unit_movement_class_event {
         .unit_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitMovementClassEventResult {}
         };$crate::__native_callins::encode_unit_movement_class_event_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `UnitEnteredAir` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4395,7 +4435,7 @@ macro_rules! export_unit_entered_air {
         $crate::__sys::UnitMovementClassEventQuery, result:* mut
         $crate::__sys::UnitMovementClassEventResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_movement_class_event_query(query) } ?; let
@@ -4403,7 +4443,7 @@ macro_rules! export_unit_entered_air {
         .unit_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitMovementClassEventResult {}
         };$crate::__native_callins::encode_unit_movement_class_event_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `UnitEnteredUnderwater` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4428,7 +4468,7 @@ macro_rules! export_unit_entered_underwater {
         $crate::__sys::UnitMovementClassEventQuery, result:* mut
         $crate::__sys::UnitMovementClassEventResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_movement_class_event_query(query) } ?; let
@@ -4436,7 +4476,7 @@ macro_rules! export_unit_entered_underwater {
         .unit_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitMovementClassEventResult {}
         };$crate::__native_callins::encode_unit_movement_class_event_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `UnitEnteredWater` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4461,7 +4501,7 @@ macro_rules! export_unit_entered_water {
         $crate::__sys::UnitMovementClassEventQuery, result:* mut
         $crate::__sys::UnitMovementClassEventResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_movement_class_event_query(query) } ?; let
@@ -4469,7 +4509,7 @@ macro_rules! export_unit_entered_water {
         .unit_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitMovementClassEventResult {}
         };$crate::__native_callins::encode_unit_movement_class_event_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `UnitLeftAir` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4494,7 +4534,7 @@ macro_rules! export_unit_left_air {
         $crate::__sys::UnitMovementClassEventQuery, result:* mut
         $crate::__sys::UnitMovementClassEventResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_movement_class_event_query(query) } ?; let
@@ -4502,7 +4542,7 @@ macro_rules! export_unit_left_air {
         .unit_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitMovementClassEventResult {}
         };$crate::__native_callins::encode_unit_movement_class_event_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `UnitLeftUnderwater` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4527,7 +4567,7 @@ macro_rules! export_unit_left_underwater {
         $crate::__sys::UnitMovementClassEventQuery, result:* mut
         $crate::__sys::UnitMovementClassEventResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_movement_class_event_query(query) } ?; let
@@ -4535,7 +4575,7 @@ macro_rules! export_unit_left_underwater {
         .unit_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitMovementClassEventResult {}
         };$crate::__native_callins::encode_unit_movement_class_event_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `UnitLeftWater` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4560,7 +4600,7 @@ macro_rules! export_unit_left_water {
         $crate::__sys::UnitMovementClassEventQuery, result:* mut
         $crate::__sys::UnitMovementClassEventResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_movement_class_event_query(query) } ?; let
@@ -4568,7 +4608,7 @@ macro_rules! export_unit_left_water {
         .unit_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitMovementClassEventResult {}
         };$crate::__native_callins::encode_unit_movement_class_event_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `UnitPreDamaged` handler: `(&Module, &mut Spring, i32, i32, i32, f32, bool, i32, i32, i32, i32, i32) -> Result<(f32, f32)>`.
@@ -4600,17 +4640,17 @@ macro_rules! export_unit_pre_damaged {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitDamagedQuery, result:* mut $crate::__sys::DamageCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (|
-        module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 5, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_damaged_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.damage, query.paralyzer, query.weapon_def_id, query.projectile_id, query
         .attacker_id, query.attacker_def_id, query.attacker_team) ?; let value = {
         $crate::types::callins::DamageCallinResult { new_damage : returned.0,
         impulse_mult : returned.1 }
-        };$crate::__native_callins::encode_damage_callin_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_damage_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitReverseBuilt` handler: `(&Module, &mut Spring, i32, i32, i32) -> Result<()>`.
@@ -4634,7 +4674,7 @@ macro_rules! export_unit_reverse_built {
         $crate::__sys::UnitReverseBuiltQuery, result:* mut
         $crate::__sys::UnitReverseBuiltResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_reverse_built_query(query) } ?; let
@@ -4642,7 +4682,7 @@ macro_rules! export_unit_reverse_built {
         .unit_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitReverseBuiltResult {}
         };$crate::__native_callins::encode_unit_reverse_built_result(& value, result) })
-        })); }
+        }) }); }
     };
 }
 /// Shared scoped `UnitSeismicPing` handler: `(&Module, &mut Spring, $crate::Float3, f32, i32, i32, i32) -> Result<()>`.
@@ -4669,7 +4709,7 @@ macro_rules! export_unit_seismic_ping {
         $crate::__sys::UnitSeismicPingQuery, result:* mut
         $crate::__sys::UnitSeismicPingResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_seismic_ping_query(query) } ?; let returned
@@ -4677,7 +4717,7 @@ macro_rules! export_unit_seismic_ping {
         .unit_id, query.unit_def_id) ?; let value = { let () =
         returned;$crate::types::callins::UnitSeismicPingResult {}
         };$crate::__native_callins::encode_unit_seismic_ping_result(& value, result) })
-        })); }
+        }) }); }
     };
 }
 /// Shared scoped `UnitStunned` handler: `(&Module, &mut Spring, i32, i32, i32, bool) -> Result<()>`.
@@ -4701,14 +4741,15 @@ macro_rules! export_unit_stunned {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::UnitStunnedQuery,
         result:* mut $crate::__sys::UnitStunnedResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_stunned_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.stunned) ?; let value = { let () =
         returned;$crate::types::callins::UnitStunnedResult {}
-        };$crate::__native_callins::encode_unit_stunned_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_unit_stunned_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `UnitTaken` handler: `(&Module, &mut Spring, i32, i32, i32, i32) -> Result<()>`.
@@ -4731,14 +4772,14 @@ macro_rules! export_unit_taken {
         core::ffi::c_void, query:* const $crate::__sys::UnitTakenQuery, result:* mut
         $crate::__sys::UnitTakenResult) { let Some(result) = (unsafe { result.as_mut() })
         else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_taken_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.old_team,
         query.new_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitTakenResult {}
-        };$crate::__native_callins::encode_unit_taken_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_unit_taken_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `UnitUnitCollision` handler: `(&Module, &mut Spring, i32, i32) -> Result<bool>`.
@@ -4761,13 +4802,14 @@ macro_rules! export_unit_unit_collision {
         $crate::__sys::UnitUnitCollisionQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_unit_collision_query(query) } ?; let
         returned =$handler (module, spring, query.collider_id, query.collidee_id) ?; let
         value = { $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `UnitUnloaded` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32) -> Result<()>`.
@@ -4793,15 +4835,15 @@ macro_rules! export_unit_unloaded {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::UnitUnloadedQuery,
         result:* mut $crate::__sys::UnitUnloadedResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_unloaded_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,
         query.transport_id, query.transport_team) ?; let value = { let () =
         returned;$crate::types::callins::UnitUnloadedResult {}
-        };$crate::__native_callins::encode_unit_unloaded_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_unit_unloaded_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `Update` handler: `(&Module, &mut Spring, f32) -> Result<()>`.
@@ -4820,13 +4862,13 @@ macro_rules! export_update {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::UpdateQuery, result:*
         mut $crate::__sys::UpdateResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 58, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_update_query(query) } ?; let returned =$handler
         (module, spring, query.delta_seconds) ?; let value = { let () =
         returned;$crate::types::callins::UpdateResult {}
-        };$crate::__native_callins::encode_update_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_update_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `ViewResize` handler: `(&Module, &mut Spring, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32) -> Result<()>`.
@@ -4866,9 +4908,9 @@ macro_rules! export_view_resize {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::ViewResizeQuery, result:* mut $crate::__sys::ViewResizeResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_view_resize_query(query) } ?; let returned
         =$handler (module, spring, query.screen_size_x, query.screen_size_y, query
         .screen_pos_x, query.screen_pos_y, query.window_size_x, query.window_size_y,
@@ -4876,7 +4918,8 @@ macro_rules! export_view_resize {
         .window_border_left, query.window_border_bottom, query.window_border_right, query
         .view_size_x, query.view_size_y, query.view_pos_x, query.view_pos_y) ?; let value
         = { let () = returned;$crate::types::callins::ViewResizeResult {}
-        };$crate::__native_callins::encode_view_resize_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_view_resize_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `WorldTooltip` handler: `(&Module, &mut Spring, i32, i32, i32, $crate::Float3) -> Result<String>`.
@@ -4913,14 +4956,14 @@ macro_rules! export_world_tooltip {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::WorldTooltipQuery, result:* mut $crate::__sys::StringCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 26, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 26, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_world_tooltip_query(query) } ?; let returned
         =$handler (module, spring, query.kind, query.unit_id, query.feature_id, query
         .ground_pos) ?; let value = { $crate::types::callins::StringCallinResult { value
         : returned } };$crate::__native_callins::encode_string_callin_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `ActivateMenu` handler: `(&Module, &mut Spring, &str) -> Result<()>`.
@@ -4949,14 +4992,14 @@ macro_rules! export_activate_menu {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::ActivateMenuQuery, result:* mut $crate::__sys::ActivateMenuResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 32, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 32, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_activate_menu_query(query) } ?; let returned
         =$handler (module, spring, query.message.as_str()) ?; let value = { let () =
         returned;$crate::types::callins::ActivateMenuResult {}
-        };$crate::__native_callins::encode_activate_menu_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_activate_menu_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `ActiveCommandChanged` handler: `(&Module, &mut Spring, i32, i32, &str, &str, &str) -> Result<()>`.
@@ -4993,7 +5036,7 @@ macro_rules! export_active_command_changed {
         $crate::__sys::ActiveCommandChangedQuery, result:* mut
         $crate::__sys::ActiveCommandChangedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_active_command_changed_query(query) } ?; let
@@ -5001,7 +5044,7 @@ macro_rules! export_active_command_changed {
         .as_str(), query.action.as_str(), query.tooltip.as_str()) ?; let value = { let ()
         = returned;$crate::types::callins::ActiveCommandChangedResult {}
         };$crate::__native_callins::encode_active_command_changed_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `AllowCommand` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::types::callins::NativeCallinCommand, i32, bool, bool) -> Result<bool>`.
@@ -5054,14 +5097,15 @@ macro_rules! export_allow_command {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitCommandQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (|
-        module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 5, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_command_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,&
         query.command, query.player_num, query.from_synced, query.from_lua) ?; let value
         = { $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowResourceLevel` handler: `(&Module, &mut Spring, i32, &str, f32) -> Result<bool>`.
@@ -5092,14 +5136,14 @@ macro_rules! export_allow_resource_level {
         $crate::__sys::AllowResourceLevelQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_resource_level_query(query) } ?; let
         returned =$handler (module, spring, query.team_id, query.type_.as_str(), query
         .level) ?; let value = { $crate::types::callins::BoolCallinResult { value :
         returned } };$crate::__native_callins::encode_bool_callin_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `AllowResourceTransfer` handler: `(&Module, &mut Spring, i32, i32, &str, f32) -> Result<bool>`.
@@ -5134,14 +5178,15 @@ macro_rules! export_allow_resource_transfer {
         $crate::__sys::AllowResourceTransferQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_resource_transfer_query(query) } ?; let
         returned =$handler (module, spring, query.old_team, query.new_team, query.type_
         .as_str(), query.amount) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `CommandFallback` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::types::callins::NativeCallinCommand) -> Result<bool>`.
@@ -5189,14 +5234,14 @@ macro_rules! export_command_fallback {
         $crate::__sys::CommandFallbackQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_command_fallback_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,&
         query.command) ?; let value = { $crate::types::callins::BoolCallinResult { value
         : returned } };$crate::__native_callins::encode_bool_callin_result(& value,
-        result) }) })); }
+        result) }) }) }); }
     };
 }
 /// Shared scoped `DownloadQueued` handler: `(&Module, &mut Spring, i32, &str, &str) -> Result<()>`.
@@ -5230,15 +5275,15 @@ macro_rules! export_download_queued {
         $crate::__sys::DownloadQueuedQuery, result:* mut
         $crate::__sys::DownloadQueuedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_download_queued_query(query) } ?; let returned
         =$handler (module, spring, query.download_id, query.archive_name.as_str(), query
         .archive_type.as_str()) ?; let value = { let () =
         returned;$crate::types::callins::DownloadQueuedResult {}
-        };$crate::__native_callins::encode_download_queued_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_download_queued_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `DrawBuildSquare` handler: `(&Module, &mut Spring, i32, i32, i32, i32, &[u8]) -> Result<()>`.
@@ -5273,7 +5318,7 @@ macro_rules! export_draw_build_square {
         $crate::__sys::DrawBuildSquareQuery, result:* mut
         $crate::__sys::DrawBuildSquareResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_draw_build_square_query(query) } ?; let returned
@@ -5281,7 +5326,7 @@ macro_rules! export_draw_build_square {
         query.statuses.as_slice()) ?; let value = { let () =
         returned;$crate::types::callins::DrawBuildSquareResult {}
         };$crate::__native_callins::encode_draw_build_square_result(& value, result) })
-        })); }
+        }) }); }
     };
 }
 /// Shared scoped `GameID` handler: `(&Module, &mut Spring, &[u8]) -> Result<()>`.
@@ -5306,13 +5351,13 @@ macro_rules! export_game_id {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::GameIDQuery, result:*
         mut $crate::__sys::GameIDResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_game_id_query(query) } ?; let returned =$handler
         (module, spring, query.game_id.as_slice()) ?; let value = { let () =
         returned;$crate::types::callins::GameIDResult {}
-        };$crate::__native_callins::encode_game_id_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_game_id_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `GameOver` handler: `(&Module, &mut Spring, &[u8]) -> Result<()>`.
@@ -5340,14 +5385,14 @@ macro_rules! export_game_over {
         mut core::ffi::c_void, query:* const $crate::__sys::GameOverEventQuery, result:*
         mut $crate::__sys::GameOverEventResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_game_over_event_query(query) } ?; let returned
         =$handler (module, spring, query.winning_ally_teams.as_slice()) ?; let value = {
         let () = returned;$crate::types::callins::GameOverEventResult {}
-        };$crate::__native_callins::encode_game_over_event_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_game_over_event_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `GameSetup` handler: `(&Module, &mut Spring, &str, bool, &[$crate::types::callins::GameSetupPlayerState]) -> Result<(bool, bool)>`.
@@ -5392,14 +5437,14 @@ macro_rules! export_game_setup {
         core::ffi::c_void, query:* const $crate::__sys::GameSetupQuery, result:* mut
         $crate::__sys::GameSetupResult) { let Some(result) = (unsafe { result.as_mut() })
         else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 26, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_game_setup_query(query) } ?; let returned
         =$handler (module, spring, query.state.as_str(), query.ready, query.player_states
         .as_slice()) ?; let value = { $crate::types::callins::GameSetupResult { handled :
         returned.0, ready : returned.1 }
-        };$crate::__native_callins::encode_game_setup_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_game_setup_result(& value, result) }) }) }); }
     };
 }
 /// Shared scoped `HandleLuaCall` handler: `(&Module, &mut Spring, &[u8]) -> Result<()>`.
@@ -5427,14 +5472,14 @@ macro_rules! export_handle_lua_call {
         $crate::__sys::HandleLuaCallQuery, result:* mut
         $crate::__sys::HandleLuaCallResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 15, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_handle_lua_call_query(query) } ?; let returned
         =$handler (module, spring, query.message.as_slice()) ?; let value = { let () =
         returned;$crate::types::callins::HandleLuaCallResult {}
-        };$crate::__native_callins::encode_handle_lua_call_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_handle_lua_call_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `HandleLuaMsg` handler: `(&Module, &mut Spring, i32, i32, i32, &[u8]) -> Result<()>`.
@@ -5467,15 +5512,15 @@ macro_rules! export_handle_lua_msg {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::HandleLuaMsgQuery,
         result:* mut $crate::__sys::HandleLuaMsgResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 15, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_handle_lua_msg_query(query) } ?; let returned
         =$handler (module, spring, query.player_id, query.script, query.mode, query.data
         .as_slice()) ?; let value = { let () =
         returned;$crate::types::callins::HandleLuaMsgResult {}
-        };$crate::__native_callins::encode_handle_lua_msg_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_handle_lua_msg_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `KeyPress` handler: `(&Module, &mut Spring, i32, bool, bool, bool, bool, bool, &str, i32, i32, &[$crate::types::callins::KeyAction]) -> Result<bool>`.
@@ -5538,15 +5583,16 @@ macro_rules! export_key_press {
         const $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::KeyPressQuery, result:* mut $crate::__sys::BoolCallinResult) { let
         Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_key_press_query(query) } ?; let returned
         =$handler (module, spring, query.key_code, query.alt, query.ctrl, query.meta,
         query.shift, query.is_repeat, query.label.as_str(), query.utf32_char, query
         .scan_code, query.action_list.as_slice()) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `KeyRelease` handler: `(&Module, &mut Spring, i32, bool, bool, bool, bool, &str, i32, i32, &[$crate::types::callins::KeyAction]) -> Result<bool>`.
@@ -5607,15 +5653,16 @@ macro_rules! export_key_release {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::KeyReleaseQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 127, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_key_release_query(query) } ?; let returned
         =$handler (module, spring, query.key_code, query.alt, query.ctrl, query.meta,
         query.shift, query.label.as_str(), query.utf32_char, query.scan_code, query
         .action_list.as_slice()) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `LoadProgress` handler: `(&Module, &mut Spring, &str, u8) -> Result<()>`.
@@ -5647,14 +5694,14 @@ macro_rules! export_load_progress {
         data:* mut core::ffi::c_void, query:* const $crate::__sys::LoadProgressQuery,
         result:* mut $crate::__sys::LoadProgressResult) { let Some(result) = (unsafe {
         result.as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 64, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_load_progress_query(query) } ?; let returned
         =$handler (module, spring, query.message.as_str(), query.replace_last_line) ?;
         let value = { let () = returned;$crate::types::callins::LoadProgressResult {}
-        };$crate::__native_callins::encode_load_progress_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_load_progress_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `MapDrawCmd` handler: `(&Module, &mut Spring, i32, i32, bool, $crate::Float3, bool, $crate::Float3, bool, &str) -> Result<bool>`.
@@ -5704,14 +5751,15 @@ macro_rules! export_map_draw_cmd {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::MapDrawCmdQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_map_draw_cmd_query(query) } ?; let returned
         =$handler (module, spring, query.player_id, query.type_, query.has_pos0, query
         .pos0, query.has_pos1, query.pos1, query.has_label, query.label.as_str()) ?; let
         value = { $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `RecvFromSynced` handler: `(&Module, &mut Spring, &[u8]) -> Result<()>`.
@@ -5739,14 +5787,14 @@ macro_rules! export_recv_from_synced {
         $crate::__sys::RecvFromSyncedQuery, result:* mut
         $crate::__sys::RecvFromSyncedResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 26, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_recv_from_synced_query(query) } ?; let returned
         =$handler (module, spring, query.message.as_slice()) ?; let value = { let () =
         returned;$crate::types::callins::RecvFromSyncedResult {}
-        };$crate::__native_callins::encode_recv_from_synced_result(& value, result) })
-        })); }
+        };$crate::__native_callins::encode_recv_from_synced_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `ResourceExcess` handler: `(&Module, &mut Spring, &[$crate::types::callins::ResourceExcessEntry]) -> Result<bool>`.
@@ -5787,13 +5835,14 @@ macro_rules! export_resource_excess {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::ResourceExcessQuery, result:* mut $crate::__sys::BoolCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (|
-        module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 5, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_resource_excess_query(query) } ?; let returned
         =$handler (module, spring, query.entries.as_slice()) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `TextEditing` handler: `(&Module, &mut Spring, &str, u32, u32) -> Result<bool>`.
@@ -5824,13 +5873,14 @@ macro_rules! export_text_editing {
         core::ffi::c_void, query:* const $crate::__sys::TextEditingQuery, result:* mut
         $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
         }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_text_editing_query(query) } ?; let returned
         =$handler (module, spring, query.utf8.as_str(), query.start, query.length) ?; let
         value = { $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `TextInput` handler: `(&Module, &mut Spring, &str) -> Result<bool>`.
@@ -5857,13 +5907,14 @@ macro_rules! export_text_input {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::TextInputQuery, result:* mut $crate::__sys::BoolCallinResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_text_input_query(query) } ?; let returned
         =$handler (module, spring, query.utf8.as_str()) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `UnitCmdDone` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::types::callins::NativeCallinCommand) -> Result<()>`.
@@ -5910,15 +5961,15 @@ macro_rules! export_unit_cmd_done {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitCmdDoneQuery, result:* mut $crate::__sys::UnitCmdDoneResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_cmd_done_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,&
         query.command) ?; let value = { let () =
         returned;$crate::types::callins::UnitCmdDoneResult {}
-        };$crate::__native_callins::encode_unit_cmd_done_result(& value, result) }) }));
-        }
+        };$crate::__native_callins::encode_unit_cmd_done_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `UnitCommand` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::types::callins::NativeCallinCommand, i32, bool, bool) -> Result<()>`.
@@ -5971,14 +6022,15 @@ macro_rules! export_unit_command {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::UnitCommandQuery, result:* mut $crate::__sys::UnitCommandResult) {
         let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_command_query(query) } ?; let returned
         =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,&
         query.command, query.player_num, query.from_synced, query.from_lua) ?; let value
         = { let () = returned;$crate::types::callins::UnitCommandResult {}
-        };$crate::__native_callins::encode_unit_command_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_unit_command_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `AllowUnitCreation` handler: `(&Module, &mut Spring, i32, i32, i32, bool, $crate::Float3, i32) -> Result<(bool, bool)>`.
@@ -6009,7 +6061,7 @@ macro_rules! export_allow_unit_creation {
         $crate::__sys::AllowUnitCreationQuery, result:* mut
         $crate::__sys::AllowUnitCreationResult) { let Some(result) = (unsafe { result
         .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer($slot .with(| slot | { slot
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_unit_creation_query(query) } ?; let
@@ -6018,7 +6070,7 @@ macro_rules! export_allow_unit_creation {
         value = { $crate::types::callins::AllowUnitCreationResult { allow : returned.0,
         drop_order : returned.1 }
         };$crate::__native_callins::encode_allow_unit_creation_result(& value, result) })
-        })); }
+        }) }); }
     };
 }
 /// Shared scoped `AddConsoleLine` handler: `(&Module, &mut Spring, &str, &str, i32) -> Result<bool>`.
@@ -6045,14 +6097,14 @@ macro_rules! export_add_console_line {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::AddConsoleLineQuery, result:* mut $crate::__sys::BoolCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 63, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_add_console_line_query(query) } ?; let returned
         =$handler (module, spring, query.message.as_str(), query.section.as_str(), query
         .level) ?; let value = { $crate::types::callins::BoolCallinResult { value :
         returned } };$crate::__native_callins::encode_bool_callin_result(& value, result)
-        }) })); }
+        }) }) }); }
     };
 }
 /// Shared scoped `CommandNotify` handler: `(&Module, &mut Spring, &$crate::types::callins::NativeCallinCommand) -> Result<bool>`.
@@ -6082,12 +6134,13 @@ macro_rules! export_command_notify {
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
         $crate::__sys::CommandNotifyQuery, result:* mut $crate::__sys::BoolCallinResult)
         { let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer($slot .with(|
-        slot | { slot.validate_identity(data) ?; slot.invoke_for_environment::< 31, _ >
-        (| module, spring | { let query = unsafe {
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_command_notify_query(query) } ?; let returned
         =$handler (module, spring,& query.command) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
-        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) })); }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }

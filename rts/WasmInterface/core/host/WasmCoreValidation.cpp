@@ -217,7 +217,7 @@ bool ValidateImportSection(Reader& section, WasmEnvironment environment,
 		}
 		const ImportLookup descriptor = LookupImport(module, name);
 		const std::uint32_t environmentBit =
-			1u << static_cast<std::uint32_t>(environment);
+			WasmEnvironmentMatrix::ApiMask(environment);
 		if (kind != 0 || !descriptor.found ||
 			(descriptor.environmentMask & environmentBit) == 0) {
 			error = "unknown or unavailable Core Wasm import: " + module + "." + name;

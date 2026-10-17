@@ -97,7 +97,7 @@ void WasmInterfaceSystem::CoreSubscriberIndex::Rebuild(
 		route.uiContributesResult = uiPolicy.contributesResult;
 		for (const WasmEnvironment environment : WasmEnvironmentMatrix::All()) {
 			const std::uint32_t bit = 1u << static_cast<std::uint32_t>(environment);
-			if ((policy.environmentMask & bit) == 0)
+			if ((policy.environmentMask & WasmEnvironmentMatrix::ApiMask(environment)) == 0)
 				continue;
 			Range& range = route.perEnvironment[static_cast<std::size_t>(environment)];
 			range.begin = static_cast<std::uint32_t>(plans.size());
@@ -232,7 +232,9 @@ bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
 		1u << static_cast<std::uint32_t>(WasmEnvironment::Menu);
 	static constexpr std::uint32_t introBit =
 		1u << static_cast<std::uint32_t>(WasmEnvironment::Intro);
-	static constexpr std::uint32_t standaloneBits = uiBit | menuBit | introBit;
+	static constexpr std::uint32_t allBit =
+		1u << static_cast<std::uint32_t>(WasmEnvironment::All);
+	static constexpr std::uint32_t standaloneBits = uiBit | menuBit | introBit | allBit;
 
 	// Synced-originated event callins are broadcasts. Lua sends their event
 	// half to both the synced and unsynced gadget handles, in that order. The
@@ -283,7 +285,7 @@ bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
 		return success;
 	}
 
-	std::array<CoreCallinInvocation, 7> invocations{};
+	std::array<CoreCallinInvocation, 8> invocations{};
 	std::size_t invocationCount = 0;
 	for (const WasmEnvironment environment : primary) {
 		if ((reachable & (1u << static_cast<std::uint32_t>(environment))) != 0)
@@ -307,6 +309,9 @@ bool WasmInterfaceSystem::DispatchOwnCoreCallin(WasmCoreCallin callin,
 		invocations[invocationCount++] = {WasmEnvironment::Menu, query, true};
 	if ((reachable & introBit) != 0)
 		invocations[invocationCount++] = {WasmEnvironment::Intro, query, true};
+
+	if ((reachable & allBit) != 0)
+		invocations[invocationCount++] = {WasmEnvironment::All, query, true};
 
 	if (invocationCount == 0) {
 		spring::benchmark_callins::End(selectionStage);
@@ -378,6 +383,10 @@ bool WasmInterfaceSystem::DispatchIgnoredCallin(WasmCoreCallin callin,
 		if (!run(WasmEnvironment::Intro, query))
 			return false;
 	}
+	static constexpr std::uint32_t allBit =
+		1u << static_cast<std::uint32_t>(WasmEnvironment::All);
+	if ((reachable & allBit) != 0 && !run(WasmEnvironment::All, query))
+		return false;
 	return true;
 }
 

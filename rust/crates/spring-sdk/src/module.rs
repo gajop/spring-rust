@@ -27,6 +27,8 @@ pub struct ModuleSlot<E: Environment, T> {
     instance: RefCell<Option<Rc<Instance<E, T>>>>,
     transitioning: Cell<bool>,
     poisoned: Cell<bool>,
+    #[cfg(not(target_arch = "wasm32"))]
+    native_gate: RefCell<Option<std::sync::Arc<crate::native_thread::Gate>>>,
 }
 impl<E: Environment, T: Module<E>> Default for ModuleSlot<E, T> {
     fn default() -> Self {
@@ -39,6 +41,8 @@ impl<E: Environment, T: Module<E>> ModuleSlot<E, T> {
             instance: RefCell::new(None),
             transitioning: Cell::new(false),
             poisoned: Cell::new(false),
+            #[cfg(not(target_arch = "wasm32"))]
+            native_gate: RefCell::new(None),
         }
     }
 
@@ -49,7 +53,10 @@ impl<E: Environment, T: Module<E>> ModuleSlot<E, T> {
         &self,
         interface: *const crate::__sys::NativeInterface,
     ) -> Result<*mut core::ffi::c_void> {
-        let context = unsafe { ModuleContext::<E>::from_native(interface)? };
+        let mut context = unsafe { ModuleContext::<E>::from_native(interface)? };
+        if let Some(gate) = self.native_gate.borrow().as_ref() {
+            std::sync::Arc::get_mut(&mut context.owner).unwrap().gate = gate.clone();
+        }
         self.initialize(context)?;
         Ok(self.identity())
     }
@@ -279,4 +286,56 @@ pub fn command_payload(bytes: &[u8]) -> Result<(i32, i32, u32, u32, u8, Vec<f32>
         options,
         params,
     ))
+}
+
+/// Native storage shared by initialization, subsequent engine threads, and
+/// shutdown. The module is Send so its owned state can move between serialized
+/// engine entries. A scoped Spring reference still cannot leave a callin.
+#[cfg(not(target_arch = "wasm32"))]
+pub struct NativeSlot<E: Environment, T> {
+    gate: std::sync::OnceLock<std::sync::Arc<crate::native_thread::Gate>>,
+    slot: std::cell::UnsafeCell<ModuleSlot<E, T>>,
+}
+// The gate excludes concurrent accesses to the slot. Its internal Rc instance
+// clones never escape an entry. T and retained user captures are Send; no user
+// value is accessed while another engine thread owns the gate.
+#[cfg(not(target_arch = "wasm32"))]
+unsafe impl<E: Environment, T: Send> Sync for NativeSlot<E, T> {}
+#[cfg(not(target_arch = "wasm32"))]
+impl<E: Environment, T: Module<E> + Send> Default for NativeSlot<E, T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+#[cfg(not(target_arch = "wasm32"))]
+impl<E: Environment, T: Module<E> + Send> NativeSlot<E, T> {
+    pub const fn new() -> Self {
+        Self {
+            gate: std::sync::OnceLock::new(),
+            slot: std::cell::UnsafeCell::new(ModuleSlot::new()),
+        }
+    }
+    /// Read/invoke from the current engine thread. This cannot admit a worker.
+    pub fn with<R>(&self, call: impl for<'a> FnOnce(&'a ModuleSlot<E, T>) -> R) -> R {
+        let gate = self.gate.get().expect("native module has not initialized");
+        let _entry = gate
+            .enter()
+            .expect("native module accessed outside engine thread");
+        call(unsafe { &*self.slot.get() })
+    }
+    /// # Safety
+    /// Called only from an engine ABI entry for this module, with live host
+    /// arguments. The host must finish all entries before unloading the DLL.
+    #[doc(hidden)]
+    pub unsafe fn with_host<R>(&self, call: impl for<'a> FnOnce(&'a ModuleSlot<E, T>) -> R) -> R {
+        let gate = self
+            .gate
+            .get_or_init(|| std::sync::Arc::new(crate::native_thread::Gate::new()));
+        let _entry = unsafe { gate.enter_host() };
+        let slot = unsafe { &*self.slot.get() };
+        if slot.native_gate.borrow().is_none() {
+            *slot.native_gate.borrow_mut() = Some(gate.clone());
+        }
+        call(slot)
+    }
 }

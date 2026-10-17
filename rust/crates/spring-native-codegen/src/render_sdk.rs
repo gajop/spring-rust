@@ -337,6 +337,15 @@ pub fn render(
                     .inputs
                     .iter()
                     .any(|f| matches!(f.ty, SemanticType::Callback { .. }));
+                if scoped_callback && name == "rml_ui" {
+                    for parameter in &mut sig.generics.params {
+                        if let syn::GenericParam::Type(ty) = parameter
+                            && ty.ident == "F"
+                        {
+                            ty.bounds.push(syn::parse_quote!(crate::RetainedCapture));
+                        }
+                    }
+                }
                 let sync_callback = scoped_callback && name != "rml_ui";
                 let retained_callback = scoped_callback && name == "rml_ui";
                 if scoped_callback {
@@ -482,6 +491,9 @@ pub fn render(
         // Generate only converters reached by a real method. Unsupported
         // converters propagate a generation error instead of becoming stubs.
         let converters = renderer.converters()?;
+        if name == "units_query" {
+            api.push_str("impl<'a, E: crate::Environment> crate::Spring<'a, E> { pub fn units(&mut self) -> units_query::UnitsQuery<'_, E> { self.units_query() } }\n");
+        }
         if family_methods.is_empty() {
             continue;
         }

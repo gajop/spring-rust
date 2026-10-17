@@ -327,11 +327,9 @@ public:
 			return;
 		}
 
-		// Scoped SDK admission is currently implemented by the standalone menu
-		// loader. Never admit a marked menu (or another not-yet-supported scoped
-		// environment) as a legacy unrestricted game module.
-		if (sharedLib->FindAddress("NativeModuleEnvironment") != nullptr) {
-			LOG_L(L_ERROR, "Scoped native SDK modules currently require the menu loader");
+		if (const auto* environment = static_cast<const uint32_t*>(sharedLib->FindAddress("NativeModuleEnvironment"));
+			environment != nullptr && *environment != 127u) {
+			LOG_L(L_ERROR, "Native in-game SDK modules must use the All environment");
 			sharedLib.reset();
 			return;
 		}

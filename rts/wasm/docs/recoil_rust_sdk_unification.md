@@ -2,7 +2,8 @@
 
 The optional `spring-sdk` crate lives on `sdk-unification`, separate from
 `rust-wip`. Existing games, SpringBoard and both existing menus keep their
-current APIs. Native automatic loading currently supports **menus only**.
+current APIs until ported in their dedicated worktrees. Native loading supports
+menus and in-game `All` modules, including initialization on the loading thread.
 
 ## Using it
 
@@ -24,7 +25,7 @@ multiple answers. ABI query/result structs, dummy arguments and redundant
 lengths stay inside the adapters.
 
 `spring` gives the handler access to engine calls, such as
-`spring.units_query().get_all_units()`. Native code calls the C API tables;
+`spring.units().get_all_units()`. Native code calls the C API tables;
 Wasm code uses Core-Wasm imports. Both expose the same Rust-facing API.
 
 ## Compile time or runtime?
@@ -41,7 +42,10 @@ Wasm code uses Core-Wasm imports. Both expose the same Rust-facing API.
 | Team permissions, LOS and engine state | Existing engine runtime checks |
 
 Rust types distinguish rules synced/unsynced, gaia synced/unsynced, UI, menu
-and intro. The engine still validates a compiled module's declared environment
+and intro. `All` is available on native and Wasm: it combines these APIs and
+callins for editors, tools, single-player games and games with their own
+synchronization. It does not make arbitrary simulation changes deterministic.
+The engine still validates a compiled module's declared environment
 when loading it; a loaded file need not have been written using this SDK.
 
 The native adapter checks for null API tables/function pointers. This covers
@@ -63,6 +67,14 @@ Arguments and engine results are copied before user code runs or another call
 can overwrite engine scratch storage. No SDK module/callback-registry borrow
 is held across user code. The same Rml listener can reenter if its application
 state allows it; a synchronous `FnMut` callback rejects recursion into itself.
+
+Native module state and retained callback captures must be `Send`: the engine
+can initialize on its loading thread and invoke later callins on another thread.
+It does not require the application state to be `Sync`. Native entries are
+serialized per module, and same-thread reentry runs immediately. Typed Rml
+bindings are transferable identifiers and still need a fresh Spring reference
+for every engine operation. Use `Arc` and synchronized shared state for captures
+that need sharing; Wasm-only captures can still use `Rc`.
 
 Spring references stay on the engine thread. Workers receive copied data and
 send results back. This does not enable arbitrary worker-thread engine calls
@@ -106,7 +118,9 @@ game launches and failed-initialization cleanup. Both render identical pixels:
 
 Still separate: production native-menu conversion, discovery/rooms/reconnect
 UI, and porting the remaining addons, command queues, CUS and job helpers.
-Native game/tools loading needs an explicit simulation/render-thread design;
-the initialization thread alone cannot determine where later callins may run.
+A live native/Wasm `All` fixture also tests terrain mutation and drawing in one
+module, two launches, shutdown, and native loading-thread handoff
+([results](data/scoped-sdk-2026-10-17/all-results.json)). Consumer ports
+are still in progress; the fixture is not a claim that they have been migrated.
 Native Windows gameplay remains untested. Packaging keeps using independently
 built engine releases.

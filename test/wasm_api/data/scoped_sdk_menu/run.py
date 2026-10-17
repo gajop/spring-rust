@@ -20,7 +20,7 @@ ROOT = FIXTURE.parents[3]
 LEGACY = FIXTURE.parent / "rml_menu_fixture/transition"
 
 
-def run(engine: Path, transport: str, output: Path, fail_init: bool = False) -> dict:
+def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all_game: bool = False) -> dict:
     target = ["--target", "wasm32-unknown-unknown"] if transport == "wasm" else []
     if fail_init:
         target += ["--features", "fail-init"]
@@ -44,8 +44,8 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False) -> 
             "--manifest-path",
             str(FIXTURE / helper / "Cargo.toml"),
             "--release",
-            "--target",
-            "wasm32-unknown-unknown",
+            *([] if all_game and transport == "native" else ["--target", "wasm32-unknown-unknown"]),
+            *(["--features", "all"] if all_game else []),
         ],
         cwd=ROOT,
         check=True,
@@ -63,15 +63,22 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False) -> 
     game = output / "games/RmlUi Menu Transition Game 0.1.sdd"
     shutil.copytree(LEGACY / "game.sdd", game)
     if not fail_init:
-        wasm = game / "LuaRules/wasm"
-        wasm.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(
-            FIXTURE / "game/target/wasm32-unknown-unknown/release/scoped_sdk_game.wasm",
-            wasm / "scoped_sdk_game.wasm",
-        )
-        (wasm / "manifest.txt").write_text(
-            "module(scoped-sdk-game, LuaRules/wasm/scoped_sdk_game.wasm, rules-synced, 0, 1.0.0)\n"
-        )
+        if all_game and transport == "native":
+            native = game / "libscoped_sdk_game.so"
+            shutil.copy2(FIXTURE / "game/target/release/libscoped_sdk_game.so", native)
+            info = game / "modinfo.lua"
+            info.write_text(info.read_text().replace('modtype = 1,', 'modtype = 1,\n nativeModule = "scoped_sdk_game",'))
+        else:
+            wasm = game / "LuaRules/wasm"
+            wasm.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(
+                FIXTURE / "game/target/wasm32-unknown-unknown/release/scoped_sdk_game.wasm",
+                wasm / "scoped_sdk_game.wasm",
+            )
+            environment = "all" if all_game else "rules-synced"
+            (wasm / "manifest.txt").write_text(
+                f"module(scoped-sdk-game, LuaRules/wasm/scoped_sdk_game.wasm, {environment}, 0, 1.0.0)\n"
+            )
     for name in ["base", "fonts"]:
         shutil.copytree(engine.parent / name, output / name)
     if transport == "native":
@@ -99,7 +106,7 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False) -> 
     write = output / "write"
     write.mkdir()
     (write / "springsettings.cfg").write_text(
-        "Sound = 0\nFullscreen = 0\nXResolutionWindowed = 960\nYResolutionWindowed = 640\nWindowBorderless = 1\n"
+        "LoadingMT = 1\nSound = 0\nFullscreen = 0\nXResolutionWindowed = 960\nYResolutionWindowed = 640\nWindowBorderless = 1\n"
     )
     command = [
         "xvfb-run",
@@ -158,6 +165,10 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False) -> 
         "[ScopedSdkGame] callin",
         "[ScopedSdkGame] shutdown",
     ]
+    if all_game:
+        expected.extend(["[ScopedSdkGame] terrain edited", "[ScopedSdkGame] draw"])
+        if transport == "native":
+            expected.append("[ScopedSdkGame] loading-thread handoff")
     settings = (write / "springsettings.cfg").read_text(errors="replace")
     missing = [s for s in expected if s not in log]
     if "shutdown:bindings-invalidated" not in settings:
@@ -239,6 +250,7 @@ def main() -> int:
         action="store_true",
         help="reject an intentional initialization panic and verify owner cleanup",
     )
+    parser.add_argument("--all-game", action="store_true", help="test All native/Wasm game loading, terrain edits and rendering")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     transports = ["native", "wasm"] if args.transport == "both" else [args.transport]
@@ -255,6 +267,7 @@ def main() -> int:
                 name,
                 args.output.resolve() / name,
                 args.fail_init,
+                args.all_game,
             )
             for name in transports
         ]

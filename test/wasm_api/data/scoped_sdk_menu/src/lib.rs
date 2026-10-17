@@ -6,7 +6,13 @@ use spring_sdk::{
     rml::{Color, DataModel, Percent, Pixels, Value, ValueType, Variable},
     types::{gfx::GfxSaveImageOptions, rml_ui::RmlDocumentShowOptions},
 };
-use std::{cell::Cell, rc::Rc};
+use std::{
+    cell::Cell,
+    sync::{
+        Arc,
+        atomic::{AtomicU32, Ordering},
+    },
+};
 
 struct MenuFixture {
     context: u64,
@@ -15,7 +21,7 @@ struct MenuFixture {
     model: DataModel,
     count: Variable<i32>,
     status: Variable<String>,
-    events: Rc<Cell<u32>>,
+    events: Arc<AtomicU32>,
     activations: Cell<u32>,
     frames: Cell<u32>,
     script: String,
@@ -69,8 +75,8 @@ impl Module<Menu> for MenuFixture {
                 Value::Int(3),
             ],
         )?;
-        let events = Rc::new(Cell::new(0));
-        let event_count = Rc::clone(&events);
+        let events = Arc::new(AtomicU32::new(0));
+        let event_count = Arc::clone(&events);
         let status_copy = status.clone();
         let count_copy = count.clone();
         model.event(
@@ -82,7 +88,7 @@ impl Module<Menu> for MenuFixture {
                     event.values,
                     vec![Value::String("captured 日本語".into()), Value::Float(7.0)]
                 );
-                event_count.set(event_count.get() + 1);
+                event_count.fetch_add(1, Ordering::Relaxed);
                 count_copy.set(spring, 7)?;
                 status_copy.set(spring, "Clicked #7".into())?;
                 checkpoint(spring, "typed-event:7")
@@ -106,16 +112,16 @@ impl Module<Menu> for MenuFixture {
         assert!(button.exists);
         // Same retained handler reenters itself synchronously. Its Cell state
         // is shared, with no mutable handler or module borrow spanning dispatch.
-        let depth = Rc::new(Cell::new(0));
-        let calls = Rc::clone(&depth);
+        let depth = Arc::new(AtomicU32::new(0));
+        let calls = Arc::clone(&depth);
         let element = button.element_handle;
         let listener = spring.rml_ui().element_add_event_listener(
             element,
             "change",
             false,
             move |spring, _| {
-                let before = calls.get();
-                calls.set(before + 1);
+                let before = calls.load(Ordering::Relaxed);
+                calls.store(before + 1, Ordering::Relaxed);
                 if before == 0 {
                     assert!(spring.rml_ui().element_dispatch_event(element, "change")?);
                 }
@@ -124,7 +130,7 @@ impl Module<Menu> for MenuFixture {
         )?;
         assert!(listener.success);
         assert!(spring.rml_ui().element_dispatch_event(element, "change")?);
-        assert_eq!(depth.get(), 2);
+        assert_eq!(depth.load(Ordering::Relaxed), 2);
         checkpoint(spring, "initialized:reentry=2")?;
         if cfg!(feature = "fail-init") {
             checkpoint(spring, "expected-init-failure")?;
@@ -187,13 +193,13 @@ fn update(module: &MenuFixture, spring: &mut Spring<'_, Menu>, _delta_seconds: f
     let frame = module.frames.get() + 1;
     module.frames.set(frame);
     if frame == 30 {
-        let before = module.events.get();
+        let before = module.events.load(Ordering::Relaxed);
         assert!(
             spring
                 .rml_ui()
                 .element_dispatch_event(module.button, "click")?
         );
-        assert_eq!(module.events.get(), before + 1);
+        assert_eq!(module.events.load(Ordering::Relaxed), before + 1);
         assert_eq!(module.count.get(spring)?, 7);
         assert_eq!(module.status.get(spring)?, "Clicked #7");
     }
