@@ -10,7 +10,7 @@ default = ["std"]
 std = []
 
 [dependencies]
-spring = { path = "../spring", features = ["alloc"] }
+spring = { package = "spring-sdk", path = "../spring-sdk" }
 
 [lints.rust]
 warnings = "deny"

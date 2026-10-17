@@ -1,8 +1,31 @@
-//! Engine logging that is safe to call from any target.
-//!
-//! `spring`'s message imports only exist on wasm32, so every call has to be
-//! target-gated. Doing that once here keeps the rest of the crate portable and
-//! lets it compile and run its unit tests on the host.
+//! Logging through the current addon's scoped engine handle.
+
+use alloc::{rc::Rc, vec::Vec};
+use core::cell::RefCell;
+
+type Logger = Rc<dyn Fn(i32, &str)>;
+std::thread_local! {
+    static LOGGERS: RefCell<Vec<Logger>> = const { RefCell::new(Vec::new()) };
+}
+
+pub(crate) struct Scope;
+impl Drop for Scope {
+    fn drop(&mut self) {
+        LOGGERS.with(|loggers| {
+            loggers.borrow_mut().pop();
+        });
+    }
+}
+
+pub(crate) fn enter<E: spring::capabilities::Common>(spring: &spring::Spring<'_, E>) -> Scope {
+    let module = spring.module_ref();
+    LOGGERS.with(|loggers| {
+        loggers.borrow_mut().push(Rc::new(move |level, message| {
+            let _ = module.with_spring(|spring| spring.messages().log(SECTION, level, message));
+        }))
+    });
+    Scope
+}
 
 const SECTION: &str = "spring-addons";
 
@@ -34,10 +57,10 @@ pub fn info(message: &str) {
 }
 
 fn write(level: i32, message: &str) {
-    #[cfg(target_arch = "wasm32")]
-    let _ = spring::log(SECTION, level, message);
-    #[cfg(not(target_arch = "wasm32"))]
-    let _ = (level, message, SECTION);
+    let logger = LOGGERS.with(|loggers| loggers.borrow().last().cloned());
+    if let Some(logger) = logger {
+        logger(level, message);
+    }
 }
 
 /// Report a callback the guest was asked to run but does not know about.

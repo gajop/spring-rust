@@ -44,7 +44,6 @@ mod callin_stack {
         }
     }
 
-    #[cfg(feature = "std")]
     mod storage {
         use super::Stack;
         use core::cell::Cell;
@@ -63,23 +62,6 @@ mod callin_stack {
 
         pub fn snapshot() -> Stack {
             STACK.with(Cell::get)
-        }
-    }
-
-    /// Without `std` there is no thread-local, so this falls back to a plain
-    /// static. That is sound for a wasm guest, which is single-threaded.
-    #[cfg(not(feature = "std"))]
-    mod storage {
-        use super::Stack;
-
-        static mut STACK: Stack = Stack::new();
-
-        pub fn update(f: impl FnOnce(&mut Stack)) {
-            unsafe { f(&mut *core::ptr::addr_of_mut!(STACK)) }
-        }
-
-        pub fn snapshot() -> Stack {
-            unsafe { *core::ptr::addr_of!(STACK) }
         }
     }
 
@@ -120,39 +102,43 @@ pub fn with_active_callins<R>(f: impl FnOnce(&[&'static str]) -> R) -> R {
     callin_stack::with_active(f)
 }
 
-/// Work deferred out of a callin, to run once the outermost one returns.
-type DelayedAction<G> = Box<dyn FnOnce(&G)>;
+#[cfg(not(target_arch = "wasm32"))]
+type DelayedAction<G, E> = Box<dyn for<'call> FnOnce(&AddonContext<'call, G, E>) + Send>;
+#[cfg(target_arch = "wasm32")]
+type DelayedAction<G, E> = Box<dyn for<'call> FnOnce(&AddonContext<'call, G, E>)>;
 
-/// Per-handler execution state shared by all addon callins.
-///
-/// A delayed action runs only after the outermost addon callin has returned.
-/// Nested callins can enqueue more actions; they are appended to the same FIFO
-/// queue and drained by the outermost dispatcher.
-pub struct AddonRuntime<G> {
-    delayed: RefCell<VecDeque<DelayedAction<G>>>,
+pub struct AddonRuntime<G, E: spring::capabilities::Common = spring::RulesSynced> {
+    delayed: RefCell<VecDeque<DelayedAction<G, E>>>,
     depth: Cell<usize>,
     flushing: Cell<bool>,
+    commands: spring::commands::Queue<E>,
 }
 
-impl<G> Default for AddonRuntime<G> {
+impl<G, E: spring::capabilities::Common> Default for AddonRuntime<G, E> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<G> AddonRuntime<G> {
+impl<G, E: spring::capabilities::Common> AddonRuntime<G, E> {
     pub const fn new() -> Self {
         Self {
             delayed: RefCell::new(VecDeque::new()),
             depth: Cell::new(0),
             flushing: Cell::new(false),
+            commands: spring::commands::Queue::new(),
         }
     }
 
-    pub fn context<'a>(&'a self, global: &'a G) -> AddonContext<'a, G> {
+    pub fn context<'a>(
+        &'a self,
+        global: &'a G,
+        spring: &'a spring::Spring<'_, E>,
+    ) -> AddonContext<'a, G, E> {
         AddonContext {
             global,
             runtime: self,
+            spring: spring.reborrow(),
         }
     }
 
@@ -160,76 +146,82 @@ impl<G> AddonRuntime<G> {
         &self,
         name: &'static str,
         global: &G,
-        f: impl FnOnce(&AddonContext<'_, G>) -> R,
+        spring: &spring::Spring<'_, E>,
+        f: impl FnOnce(&AddonContext<'_, G, E>) -> R,
     ) -> R {
-        // Queued `spring::commands` run when the outermost callin of the module
-        // returns, after this callin's delayed actions.
-        let _commands = spring::commands::Scope::enter();
-        let depth = {
+        struct Leave<'a>(&'a Cell<usize>);
+        impl Drop for Leave<'_> {
+            fn drop(&mut self) {
+                self.0.set(self.0.get() - 1);
+            }
+        }
+        let result = {
             let _entry = callin_stack::Entry::push(name);
+            let _log = crate::log::enter(spring);
             self.depth.set(self.depth.get() + 1);
-            let ctx = self.context(global);
-            let result = f(&ctx);
-            let depth = self.depth.get() - 1;
-            self.depth.set(depth);
-            (result, depth)
+            let _leave = Leave(&self.depth);
+            let ctx = self.context(global, spring);
+            f(&ctx)
         };
-        let (result, depth) = depth;
-        if depth == 0 {
+        if self.depth.get() == 0 && !self.flushing.get() {
             let _entry = callin_stack::Entry::push("delayed");
-            self.flush(global);
+            let _log = crate::log::enter(spring);
+            self.flush(global, spring);
+            self.commands.flush(&mut spring.reborrow());
         }
         result
     }
 
-    fn delay(&self, f: DelayedAction<G>) {
+    fn delay(&self, f: DelayedAction<G, E>) {
         self.delayed.borrow_mut().push_back(f);
     }
 
-    fn flush(&self, global: &G) {
+    fn flush(&self, global: &G, spring: &spring::Spring<'_, E>) {
         if self.flushing.replace(true) {
             return;
         }
-
+        struct Reset<'a>(&'a Cell<bool>);
+        impl Drop for Reset<'_> {
+            fn drop(&mut self) {
+                self.0.set(false);
+            }
+        }
+        let _reset = Reset(&self.flushing);
         loop {
-            // Keep the queue borrow scoped to the pop. A delayed action may
-            // issue a callout, re-enter through another callin, and enqueue
-            // more work.
-            let action = { self.delayed.borrow_mut().pop_front() };
+            let action = self.delayed.borrow_mut().pop_front();
             let Some(action) = action else {
                 break;
             };
-            action(global);
+            action(&self.context(global, spring));
         }
-
-        self.flushing.set(false);
     }
 }
 
-/// Context supplied to addon callins.
-///
-/// `global()` returns the shared game-global container. Games that need mutable
-/// state should put independently borrowable resources inside that container
-/// (for example [`Resources`]) rather than borrowing the entire global for the
-/// duration of a callin.
-pub struct AddonContext<'a, G> {
+/// Game state and scoped engine access for the current addon callin.
+pub struct AddonContext<'a, G, E: spring::capabilities::Common = spring::RulesSynced> {
     global: &'a G,
-    runtime: &'a AddonRuntime<G>,
+    runtime: &'a AddonRuntime<G, E>,
+    spring: spring::Spring<'a, E>,
 }
 
-impl<'a, G> AddonContext<'a, G> {
-    #[inline]
+impl<'a, G, E: spring::capabilities::Common> AddonContext<'a, G, E> {
     pub const fn global(&self) -> &'a G {
         self.global
     }
 
-    /// Run work after the outermost currently-active addon callin returns.
-    ///
-    /// This is deliberately a general closure rather than a typed command
-    /// buffer: it can contain Spring callouts, state access, or arbitrary game
-    /// logic. Captured data must be owned because the action can outlive the
-    /// current callin stack.
-    pub fn delay(&self, f: impl FnOnce(&G) + 'static) {
+    pub const fn spring(&self) -> &spring::Spring<'a, E> {
+        &self.spring
+    }
+
+    pub const fn commands(&self) -> &spring::commands::Queue<E> {
+        &self.runtime.commands
+    }
+
+    /// Run after the outermost addon callin, before queued commands.
+    pub fn delay(
+        &self,
+        f: impl for<'call> FnOnce(&AddonContext<'call, G, E>) + spring::RetainedCapture + 'static,
+    ) {
         self.runtime.delay(Box::new(f));
     }
 }
@@ -307,9 +299,14 @@ impl<T> Resource<T> {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+type ResourceValue = dyn Any + Send;
+#[cfg(target_arch = "wasm32")]
+type ResourceValue = dyn Any;
+
 struct ResourceEntry {
     type_id: TypeId,
-    value: RefCell<Box<dyn Any>>,
+    value: RefCell<Box<ResourceValue>>,
 }
 
 /// A typed resource container intended for addon globals.
@@ -335,7 +332,7 @@ impl Resources {
     ///
     /// Duplicate resource types are rejected; each Rust type identifies one
     /// resource slot.
-    pub fn insert<T: 'static>(&mut self, value: T) {
+    pub fn insert<T: spring::RetainedCapture + 'static>(&mut self, value: T) {
         let type_id = TypeId::of::<T>();
         assert!(
             !self.entries.iter().any(|entry| entry.type_id == type_id),
@@ -449,10 +446,18 @@ impl Resources {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use super::*;
     use alloc::rc::Rc;
+
+    fn with_spring<R>(call: impl FnOnce(&spring::Spring<'_, spring::RulesSynced>) -> R) -> R {
+        let interface = spring::__sys::NativeInterface::default();
+        let context =
+            unsafe { spring::ModuleContext::<spring::RulesSynced>::from_native(&interface) }
+                .unwrap();
+        context.with_spring(|spring| call(spring)).unwrap()
+    }
 
     #[test]
     fn resources_are_borrowed_independently() {
@@ -484,15 +489,17 @@ mod tests {
     fn conflicting_resource_borrow_reports_the_active_callins() {
         struct Units;
 
-        let runtime = AddonRuntime::new();
+        let runtime = AddonRuntime::<_, spring::RulesSynced>::new();
         let units = Resource::new(Units);
 
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            runtime.callin("GameFrame", &(), |_| {
-                let _held = units.access_mut();
-                runtime.callin("UnitCreated", &(), |_| {
-                    let _conflict = units.access();
-                });
+            with_spring(|spring| {
+                runtime.callin("GameFrame", &(), spring, |_| {
+                    let _held = units.access_mut();
+                    runtime.callin("UnitCreated", &(), spring, |_| {
+                        let _conflict = units.access();
+                    });
+                })
             });
         }));
 
@@ -507,16 +514,18 @@ mod tests {
 
     #[test]
     fn delayed_work_runs_after_outermost_callin() {
-        let runtime = AddonRuntime::new();
+        let runtime = AddonRuntime::<_, spring::RulesSynced>::new();
         let state = Rc::new(Cell::new(0));
 
-        runtime.callin("outer", &state, |outer| {
-            outer.delay(|state| state.set(state.get() + 10));
-            runtime.callin("inner", &state, |inner| {
-                inner.delay(|state| state.set(state.get() + 1));
+        with_spring(|spring| {
+            runtime.callin("outer", &state, spring, |outer| {
+                outer.delay(|ctx| ctx.global().set(ctx.global().get() + 10));
+                runtime.callin("inner", &state, spring, |inner| {
+                    inner.delay(|ctx| ctx.global().set(ctx.global().get() + 1));
+                    assert_eq!(state.get(), 0);
+                });
                 assert_eq!(state.get(), 0);
-            });
-            assert_eq!(state.get(), 0);
+            })
         });
 
         assert_eq!(state.get(), 11);

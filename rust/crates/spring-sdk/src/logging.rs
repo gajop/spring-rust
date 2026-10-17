@@ -5,12 +5,12 @@ use core::{fmt::Debug, panic::Location};
 use std::sync::Mutex;
 
 pub trait ResultExt<T> {
-    fn log_err<E: Common>(self, spring: &mut Spring<'_, E>, context: &str) -> Option<T>;
+    fn log_err<E: Common>(self, spring: &Spring<'_, E>, context: &str) -> Option<T>;
     #[track_caller]
-    fn log_err_once<E: Common>(self, spring: &mut Spring<'_, E>, context: &str) -> Option<T>;
+    fn log_err_once<E: Common>(self, spring: &Spring<'_, E>, context: &str) -> Option<T>;
 }
 impl<T, Error: Debug> ResultExt<T> for core::result::Result<T, Error> {
-    fn log_err<E: Common>(self, spring: &mut Spring<'_, E>, context: &str) -> Option<T> {
+    fn log_err<E: Common>(self, spring: &Spring<'_, E>, context: &str) -> Option<T> {
         match self {
             Ok(value) => Some(value),
             Err(error) => {
@@ -20,7 +20,7 @@ impl<T, Error: Debug> ResultExt<T> for core::result::Result<T, Error> {
         }
     }
     #[track_caller]
-    fn log_err_once<E: Common>(self, spring: &mut Spring<'_, E>, context: &str) -> Option<T> {
+    fn log_err_once<E: Common>(self, spring: &Spring<'_, E>, context: &str) -> Option<T> {
         static FAILED: Mutex<Vec<(&'static str, u32, u32)>> = Mutex::new(Vec::new());
         match self {
             Ok(value) => Some(value),

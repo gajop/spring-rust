@@ -1,122 +1,79 @@
-# spring-addons re-entrancy and `delay()`
+# Addons and the scoped SDK
 
-Spring callouts are synchronous. A callout made from a gadget or widget callin may cause the engine to immediately enter another callin on the same Wasm stack. `spring-addons` therefore does not assume that one addon callin finishes before another starts.
-
-## Coming from the queued model
-
-Earlier versions queued nested callins (for example `UnitCreated` raised by a `CreateUnit` callout) and ran them after the current callin returned. That is no longer the case: a nested callin is dispatched **immediately**, on the same stack, before the callout returns. Code or comments that rely on "UnitCreated is queued" are out of date. When a deferred effect is really wanted, schedule it explicitly with `ctx.delay(...)` (below).
-
-## Classic addon model
-
-The classic model intentionally stays close to Lua semantics:
-
-- gadget/widget objects are dispatched through `&self`, not a handler-wide `&mut self`;
-- the game global is shared (`&G`) and is not itself locked for the duration of a callin;
-- mutable state is borrowed explicitly from smaller resources;
-- incompatible resource borrows fail loudly at runtime;
-- callins that need an immediate return value are never silently queued or given a fallback answer;
-- `ctx.delay(...)` is the explicit escape hatch when deferral is semantically valid.
-
-`Resources` is the provided typed resource container:
+Gadgets, widgets and unsynced addons use the same SDK on native and Wasm.
+An addon receives game state and the current engine handle through `ctx`:
 
 ```rust,ignore
-use spring_addons::{GadgetHandler, Resources};
-
-#[derive(Default)]
-struct Units { /* ... */ }
-#[derive(Default)]
-struct Economy { /* ... */ }
-
-type Global = Resources;
-
-fn setup(handler: &mut GadgetHandler<Global>) {
-    handler.global.insert(Units::default());
-    handler.global.insert(Economy::default());
-    // handler.add(...)
+fn game_frame(&self, ctx: &AddonContext<'_, Global>, frame: i32) {
+    let units = ctx.spring().units().get_all_units()?;
+    // Borrow only the game state needed for this operation.
 }
 ```
 
-A callin borrows only the resource it needs:
+`AddonContext<'_, G>` defaults to `RulesSynced`. Widgets use
+`AddonContext<'_, G, Ui>`; unsynced rules use `RulesUnsynced`. The environment
+can also be `All`, including native games and tools. Environment restrictions
+still come from the SDK's compile-time bounds.
+
+An engine call can immediately run another callin. The handler keeps shared
+access to the global, and `Resource<T>` / `Resources` let unrelated state be
+borrowed independently. A conflicting borrow panics with the active callin
+names. An immediate-result callin runs immediately; its result is never queued
+or replaced with an invented answer.
+
+## Explicitly delayed work
+
+`ctx.delay` runs owned work after the outermost addon callin returns. Its
+argument is a fresh context, with the same global and a valid engine handle:
 
 ```rust,ignore
-fn game_frame(&self, ctx: &spring_addons::AddonContext<'_, Global>, _frame: i32) {
-    let mut units = ctx.global().access_mut::<Units>();
-    // mutate Units
-}
-```
-
-Holding a mutable `Units` borrow does not block a re-entrant callin that only needs `Economy`. A re-entrant callin that also needs `Units` fails at the resource access, exposing the actual re-entrancy conflict instead of changing engine semantics.
-
-Games do not have to use `Resources`. A custom `Global` may expose its own `access()` / `access_mut()` scheme or use `Cell` / `RefCell` fields directly. The important property is that the global container itself should not be one giant exclusive borrow.
-
-## `delay()` semantics
-
-`ctx.delay(...)` appends an owned closure to a FIFO queue. The queue is drained only after the **outermost** active addon callin returns. If a nested callin schedules more delayed work, it joins the same queue and does not run while an outer callin is still active.
-
-The closure receives the shared global:
-
-```rust,ignore
-ctx.delay(move |global| {
-    // state access, Spring callouts, or arbitrary game logic
+ctx.delay(move |ctx| {
+    ctx.global().units.access_mut().remove(unit_id);
+    // Engine calls use ctx.spring(), after the state borrow ends.
 });
 ```
 
-`delay()` is general-purpose. There is no separate command-buffer abstraction.
+Delayed work is FIFO. Work added by nested callins joins that queue. It can
+still cause immediate reentry; finish incompatible state borrows before making
+an engine call.
 
-### Pattern 1: defer callouts
-
-If game logic can compute what should happen before entering Spring, capture the result and issue the callout after the active callin stack unwinds:
+`ctx.commands()` returns the module's SDK command queue. These commands run
+after delayed addon work. A continuation runs immediately after its command,
+before the next command; commands appended during dispatch join the end:
 
 ```rust,ignore
-fn game_frame(&self, ctx: &spring_addons::AddonContext<'_, Global>, _frame: i32) {
-    let unit_id = {
-        let mut units = ctx.global().access_mut::<Units>();
-        units.pick_unit_to_destroy()
-    }; // the Units borrow ends here
-
-    ctx.delay(move |_global| {
-        // issue the DestroyUnit callout here
-        destroy_unit(unit_id);
+ctx.commands().queue(|spring| spring.units().get_all_units())
+    .then(|spring, result| {
+        // The owned result and a fresh engine handle are available here.
     });
+```
+
+Neither delayed work nor queued commands can capture a borrowed `Spring`.
+Native captures and addon objects must be `Send` so the engine can move owned
+module state from loading to game execution. Scoped engine handles remain
+neither `Send` nor `Sync`. Handler entry is serialized by the SDK; nested
+callins on the current thread remain immediate.
+
+## Exports
+
+Setup receives `(&mut Handler, &Spring)`. The existing three export macros
+create SDK modules and export every callin represented by their traits.
+`with_global` gives module-local state access; `with_addon_context` obtains a
+fresh checked context for helpers and callbacks. SDK Rml data models own their
+retained callbacks; there is no separate addon callback registry.
+
+Native exports select `environment: All`. For example:
+
+```rust,ignore
+spring_addons::export_rules_gadgets! {
+    state: Global,
+    setup: setup,
+    scratch: 65536,
+    environment: spring::All,
 }
 ```
 
-This avoids making the callout while the callin holds the state borrow that a resulting re-entrant callin may need.
-
-A delayed block is not magically non-re-entrant. If it borrows a resource and then performs a callout while keeping that borrow alive, the same conflict can still occur. Prefer calculating or copying what the callout needs before issuing it.
-
-### Pattern 2: defer work from a re-entrant callin
-
-A nested callin may need to update state that the outer callin is already using. If that work does not contribute to an immediate return value, schedule the state update instead:
-
-```rust,ignore
-fn unit_destroyed(
-    &self,
-    ctx: &spring_addons::AddonContext<'_, Global>,
-    event: &spring_addons::UnitDestroyedEvent,
-) {
-    let unit_id = event.unit_id;
-
-    ctx.delay(move |global| {
-        global.access_mut::<Units>().remove(unit_id);
-    });
-}
-```
-
-This is appropriate when the callin's effects may be applied after the current re-entrant stack unwinds.
-
-It is **not** a solution for an immediate-result callin whose answer depends on state that is currently incompatibly borrowed. For example, if `UnitPreDamaged` must inspect a resource to calculate its damage result and that resource is already mutably borrowed, the classic model treats that as a runtime game error. The framework does not pass damage through unchanged, invent an `AllowCommand` result, or queue a result for later.
-
-## Callin exports
-
-Phase 1 deliberately exports every callin represented by the widget/gadget traits. Game code should only implement trait methods; it should not maintain a second manual list of exported callins.
-
-This may cause extra engine-to-Wasm traffic for callins whose trait methods use their defaults. A later phase can optimize this by deriving the implemented callin set at compile time, for example from a proc macro on the addon implementation, and exporting only the union needed by the registered addons.
-
-The old per-callin export macros are removed. `reentrant_unit_pre_damaged:` is also removed; re-entrant `UnitPreDamaged` uses the same gadget chain as a top-level `UnitPreDamaged`.
-
-## Guarantees and non-guarantees
-
-This is the Lua-compatible, runtime-checked model. A game can still hold an incompatible resource borrow across a callout and discover the problem only when the engine actually re-enters a callin that needs that resource.
-
-A stricter API that prevents this class of problem at compile time is intentionally not part of this implementation.
+The default environments of the Wasm macros remain `RulesSynced`, `Ui` and
+`RulesUnsynced`. An initialized handler receives shutdown before its state is
+dropped. Addon initialization runs after the module has been installed, so an
+initialization callout can immediately reenter its callins.

@@ -1,38 +1,45 @@
 use alloc::boxed::Box;
-use alloc::collections::BTreeMap;
-use alloc::rc::Rc;
 use alloc::vec::Vec;
-use core::cell::{Cell, RefCell};
+use core::cell::Cell;
 
 use crate::event::{EventResult, KeyEvent, UnitDestroyedEvent, ViewGeometry};
 use crate::runtime::{AddonContext, AddonRuntime};
 
-pub trait Widget<G = ()> {
+pub trait Widget<G = (), E: spring::capabilities::Common = spring::Ui>:
+    spring::RetainedCapture
+{
     fn name(&self) -> &'static str;
 
     fn is_enabled(&self) -> bool {
         true
     }
 
-    fn init(&self, _ctx: &AddonContext<'_, G>) {}
-    fn shutdown(&self, _ctx: &AddonContext<'_, G>) {}
+    fn init(&self, _ctx: &AddonContext<'_, G, E>) {}
+    fn shutdown(&self, _ctx: &AddonContext<'_, G, E>) {}
 
-    fn update(&self, _ctx: &AddonContext<'_, G>, _dt: f32) {}
+    fn update(&self, _ctx: &AddonContext<'_, G, E>, _dt: f32) {}
     fn unit_created(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _unit_team: i32,
         _builder_id: i32,
     ) {
     }
-    fn feature_created(&self, _ctx: &AddonContext<'_, G>, _feature_id: i32, _ally_team_id: i32) {}
-    fn feature_destroyed(&self, _ctx: &AddonContext<'_, G>, _feature_id: i32, _ally_team_id: i32) {}
-    fn unit_destroyed(&self, _ctx: &AddonContext<'_, G>, _event: &UnitDestroyedEvent) {}
+    fn feature_created(&self, _ctx: &AddonContext<'_, G, E>, _feature_id: i32, _ally_team_id: i32) {
+    }
+    fn feature_destroyed(
+        &self,
+        _ctx: &AddonContext<'_, G, E>,
+        _feature_id: i32,
+        _ally_team_id: i32,
+    ) {
+    }
+    fn unit_destroyed(&self, _ctx: &AddonContext<'_, G, E>, _event: &UnitDestroyedEvent) {}
     fn unit_given(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _old_team: i32,
@@ -41,7 +48,7 @@ pub trait Widget<G = ()> {
     }
     fn unit_taken(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _old_team: i32,
@@ -50,7 +57,7 @@ pub trait Widget<G = ()> {
     }
     fn unit_entered_los(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _unit_team: i32,
@@ -59,7 +66,7 @@ pub trait Widget<G = ()> {
     }
     fn unit_left_los(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _unit_team: i32,
@@ -68,7 +75,7 @@ pub trait Widget<G = ()> {
     }
     fn unit_entered_radar(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _unit_team: i32,
@@ -77,7 +84,7 @@ pub trait Widget<G = ()> {
     }
     fn unit_left_radar(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _unit_team: i32,
@@ -86,7 +93,7 @@ pub trait Widget<G = ()> {
     }
     fn projectile_created(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _projectile_id: i32,
         _owner_id: i32,
         _weapon_def_id: i32,
@@ -94,25 +101,25 @@ pub trait Widget<G = ()> {
     }
     fn projectile_destroyed(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _projectile_id: i32,
         _owner_id: i32,
         _weapon_def_id: i32,
     ) {
     }
-    fn draw_screen(&self, _ctx: &AddonContext<'_, G>, _width: i32, _height: i32) {}
-    fn draw_genesis(&self, _ctx: &AddonContext<'_, G>) {}
-    fn draw_world(&self, _ctx: &AddonContext<'_, G>) {}
+    fn draw_screen(&self, _ctx: &AddonContext<'_, G, E>, _width: i32, _height: i32) {}
+    fn draw_genesis(&self, _ctx: &AddonContext<'_, G, E>) {}
+    fn draw_world(&self, _ctx: &AddonContext<'_, G, E>) {}
 
-    fn key_press(&self, _ctx: &AddonContext<'_, G>, _event: &KeyEvent<'_>) -> EventResult {
+    fn key_press(&self, _ctx: &AddonContext<'_, G, E>, _event: &KeyEvent<'_>) -> EventResult {
         EventResult::Ignored
     }
-    fn key_release(&self, _ctx: &AddonContext<'_, G>, _event: &KeyEvent<'_>) -> EventResult {
+    fn key_release(&self, _ctx: &AddonContext<'_, G, E>, _event: &KeyEvent<'_>) -> EventResult {
         EventResult::Ignored
     }
     fn mouse_move(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _x: i32,
         _y: i32,
         _dx: i32,
@@ -123,7 +130,7 @@ pub trait Widget<G = ()> {
     }
     fn mouse_press(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _x: i32,
         _y: i32,
         _button: i32,
@@ -132,37 +139,47 @@ pub trait Widget<G = ()> {
     }
     fn mouse_release(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _x: i32,
         _y: i32,
         _button: i32,
     ) -> EventResult {
         EventResult::Ignored
     }
-    fn mouse_wheel(&self, _ctx: &AddonContext<'_, G>, _up: bool, _value: f32) -> EventResult {
+    fn mouse_wheel(&self, _ctx: &AddonContext<'_, G, E>, _up: bool, _value: f32) -> EventResult {
         EventResult::Ignored
     }
 
-    fn draw_world_pre_unit(&self, _ctx: &AddonContext<'_, G>) {}
-    fn draw_world_refraction(&self, _ctx: &AddonContext<'_, G>) {}
-    fn draw_screen_effects(&self, _ctx: &AddonContext<'_, G>, _view_width: i32, _view_height: i32) {
+    fn draw_world_pre_unit(&self, _ctx: &AddonContext<'_, G, E>) {}
+    fn draw_world_refraction(&self, _ctx: &AddonContext<'_, G, E>) {}
+    fn draw_screen_effects(
+        &self,
+        _ctx: &AddonContext<'_, G, E>,
+        _view_width: i32,
+        _view_height: i32,
+    ) {
     }
-    fn draw_unit(&self, _ctx: &AddonContext<'_, G>, _unit_id: i32, _draw_mode: i32) -> EventResult {
+    fn draw_unit(
+        &self,
+        _ctx: &AddonContext<'_, G, E>,
+        _unit_id: i32,
+        _draw_mode: i32,
+    ) -> EventResult {
         EventResult::Ignored
     }
-    fn view_resize(&self, _ctx: &AddonContext<'_, G>, _geometry: &ViewGeometry) {}
-    fn game_over(&self, _ctx: &AddonContext<'_, G>, _winning_ally_teams: &[u8]) {}
-    fn recv_from_synced(&self, _ctx: &AddonContext<'_, G>, _message: &[u8]) {}
+    fn view_resize(&self, _ctx: &AddonContext<'_, G, E>, _geometry: &ViewGeometry) {}
+    fn game_over(&self, _ctx: &AddonContext<'_, G, E>, _winning_ally_teams: &[u8]) {}
+    fn recv_from_synced(&self, _ctx: &AddonContext<'_, G, E>, _message: &[u8]) {}
 }
 
-pub struct WidgetHandler<G> {
+pub struct WidgetHandler<G, E: spring::capabilities::Common = spring::Ui> {
     pub global: G,
-    widgets: Vec<Box<dyn Widget<G>>>,
+    widgets: Vec<Box<dyn Widget<G, E>>>,
     enabled: Vec<Cell<bool>>,
-    runtime: AddonRuntime<G>,
+    runtime: AddonRuntime<G, E>,
 }
 
-impl<G> WidgetHandler<G> {
+impl<G, E: spring::capabilities::Common> WidgetHandler<G, E> {
     pub fn new(global: G) -> Self {
         Self {
             global,
@@ -172,7 +189,7 @@ impl<G> WidgetHandler<G> {
         }
     }
 
-    pub fn add(&mut self, widget: Box<dyn Widget<G>>) {
+    pub fn add(&mut self, widget: Box<dyn Widget<G, E>>) {
         let is_enabled = widget.is_enabled();
         self.widgets.push(widget);
         self.enabled.push(Cell::new(is_enabled));
@@ -183,16 +200,25 @@ impl<G> WidgetHandler<G> {
         &self.global
     }
 
-    pub fn with_context<R>(&self, f: impl FnOnce(&AddonContext<'_, G>) -> R) -> R {
-        self.runtime.callin("external", &self.global, f)
+    pub fn with_context<R>(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        f: impl FnOnce(&AddonContext<'_, G, E>) -> R,
+    ) -> R {
+        self.runtime.callin("external", &self.global, spring, f)
     }
 
-    fn dispatch<R>(&self, callin: &'static str, f: impl FnOnce(&AddonContext<'_, G>) -> R) -> R {
-        self.runtime.callin(callin, &self.global, f)
+    fn dispatch<R>(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        callin: &'static str,
+        f: impl FnOnce(&AddonContext<'_, G, E>) -> R,
+    ) -> R {
+        self.runtime.callin(callin, &self.global, spring, f)
     }
 
-    pub fn init(&self) {
-        self.dispatch("Init", |ctx| {
+    pub fn init(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "Init", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.init(ctx);
@@ -201,8 +227,18 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn set_enabled(&self, name: &str, enabled: bool) {
-        self.dispatch("SetEnabled", |ctx| {
+    pub fn shutdown(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "Shutdown", |ctx| {
+            for (i, addon) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    addon.shutdown(ctx);
+                }
+            }
+        });
+    }
+
+    pub fn set_enabled(&self, spring: &spring::Spring<'_, E>, name: &str, enabled: bool) {
+        self.dispatch(spring, "SetEnabled", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if widget.name() == name {
                     if self.enabled[i].replace(enabled) != enabled {
@@ -226,8 +262,8 @@ impl<G> WidgetHandler<G> {
             .unwrap_or(false)
     }
 
-    pub fn update(&self, dt: f32) {
-        self.dispatch("Update", |ctx| {
+    pub fn update(&self, spring: &spring::Spring<'_, E>, dt: f32) {
+        self.dispatch(spring, "Update", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.update(ctx, dt);
@@ -236,8 +272,15 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn unit_created(&self, unit_id: i32, unit_def_id: i32, unit_team: i32, builder_id: i32) {
-        self.dispatch("UnitCreated", |ctx| {
+    pub fn unit_created(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        builder_id: i32,
+    ) {
+        self.dispatch(spring, "UnitCreated", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.unit_created(ctx, unit_id, unit_def_id, unit_team, builder_id);
@@ -246,8 +289,13 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn feature_created(&self, feature_id: i32, ally_team_id: i32) {
-        self.dispatch("FeatureCreated", |ctx| {
+    pub fn feature_created(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        feature_id: i32,
+        ally_team_id: i32,
+    ) {
+        self.dispatch(spring, "FeatureCreated", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.feature_created(ctx, feature_id, ally_team_id);
@@ -256,8 +304,13 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn feature_destroyed(&self, feature_id: i32, ally_team_id: i32) {
-        self.dispatch("FeatureDestroyed", |ctx| {
+    pub fn feature_destroyed(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        feature_id: i32,
+        ally_team_id: i32,
+    ) {
+        self.dispatch(spring, "FeatureDestroyed", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.feature_destroyed(ctx, feature_id, ally_team_id);
@@ -266,8 +319,8 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn unit_destroyed(&self, event: &UnitDestroyedEvent) {
-        self.dispatch("UnitDestroyed", |ctx| {
+    pub fn unit_destroyed(&self, spring: &spring::Spring<'_, E>, event: &UnitDestroyedEvent) {
+        self.dispatch(spring, "UnitDestroyed", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.unit_destroyed(ctx, event);
@@ -276,8 +329,15 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn unit_given(&self, unit_id: i32, unit_def_id: i32, old_team: i32, new_team: i32) {
-        self.dispatch("UnitGiven", |ctx| {
+    pub fn unit_given(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        unit_id: i32,
+        unit_def_id: i32,
+        old_team: i32,
+        new_team: i32,
+    ) {
+        self.dispatch(spring, "UnitGiven", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.unit_given(ctx, unit_id, unit_def_id, old_team, new_team);
@@ -286,8 +346,15 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn unit_taken(&self, unit_id: i32, unit_def_id: i32, old_team: i32, new_team: i32) {
-        self.dispatch("UnitTaken", |ctx| {
+    pub fn unit_taken(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        unit_id: i32,
+        unit_def_id: i32,
+        old_team: i32,
+        new_team: i32,
+    ) {
+        self.dispatch(spring, "UnitTaken", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.unit_taken(ctx, unit_id, unit_def_id, old_team, new_team);
@@ -296,8 +363,15 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn unit_entered_los(&self, unit_id: i32, unit_def_id: i32, unit_team: i32, ally_team: i32) {
-        self.dispatch("UnitEnteredLos", |ctx| {
+    pub fn unit_entered_los(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        ally_team: i32,
+    ) {
+        self.dispatch(spring, "UnitEnteredLos", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.unit_entered_los(ctx, unit_id, unit_def_id, unit_team, ally_team);
@@ -306,8 +380,15 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn unit_left_los(&self, unit_id: i32, unit_def_id: i32, unit_team: i32, ally_team: i32) {
-        self.dispatch("UnitLeftLos", |ctx| {
+    pub fn unit_left_los(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        ally_team: i32,
+    ) {
+        self.dispatch(spring, "UnitLeftLos", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.unit_left_los(ctx, unit_id, unit_def_id, unit_team, ally_team);
@@ -318,12 +399,13 @@ impl<G> WidgetHandler<G> {
 
     pub fn unit_entered_radar(
         &self,
+        spring: &spring::Spring<'_, E>,
         unit_id: i32,
         unit_def_id: i32,
         unit_team: i32,
         ally_team: i32,
     ) {
-        self.dispatch("UnitEnteredRadar", |ctx| {
+        self.dispatch(spring, "UnitEnteredRadar", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.unit_entered_radar(ctx, unit_id, unit_def_id, unit_team, ally_team);
@@ -332,8 +414,15 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn unit_left_radar(&self, unit_id: i32, unit_def_id: i32, unit_team: i32, ally_team: i32) {
-        self.dispatch("UnitLeftRadar", |ctx| {
+    pub fn unit_left_radar(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        ally_team: i32,
+    ) {
+        self.dispatch(spring, "UnitLeftRadar", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.unit_left_radar(ctx, unit_id, unit_def_id, unit_team, ally_team);
@@ -342,8 +431,14 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn projectile_created(&self, projectile_id: i32, owner_id: i32, weapon_def_id: i32) {
-        self.dispatch("ProjectileCreated", |ctx| {
+    pub fn projectile_created(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        projectile_id: i32,
+        owner_id: i32,
+        weapon_def_id: i32,
+    ) {
+        self.dispatch(spring, "ProjectileCreated", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.projectile_created(ctx, projectile_id, owner_id, weapon_def_id);
@@ -352,8 +447,14 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn projectile_destroyed(&self, projectile_id: i32, owner_id: i32, weapon_def_id: i32) {
-        self.dispatch("ProjectileDestroyed", |ctx| {
+    pub fn projectile_destroyed(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        projectile_id: i32,
+        owner_id: i32,
+        weapon_def_id: i32,
+    ) {
+        self.dispatch(spring, "ProjectileDestroyed", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.projectile_destroyed(ctx, projectile_id, owner_id, weapon_def_id);
@@ -362,8 +463,8 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn draw_screen(&self, width: i32, height: i32) {
-        self.dispatch("DrawScreen", |ctx| {
+    pub fn draw_screen(&self, spring: &spring::Spring<'_, E>, width: i32, height: i32) {
+        self.dispatch(spring, "DrawScreen", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.draw_screen(ctx, width, height);
@@ -372,8 +473,8 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn draw_world(&self) {
-        self.dispatch("DrawWorld", |ctx| {
+    pub fn draw_world(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "DrawWorld", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.draw_world(ctx);
@@ -382,8 +483,8 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn draw_genesis(&self) {
-        self.dispatch("DrawGenesis", |ctx| {
+    pub fn draw_genesis(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "DrawGenesis", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.draw_genesis(ctx);
@@ -392,8 +493,8 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn key_press(&self, event: &KeyEvent<'_>) -> bool {
-        self.dispatch("KeyPress", |ctx| {
+    pub fn key_press(&self, spring: &spring::Spring<'_, E>, event: &KeyEvent<'_>) -> bool {
+        self.dispatch(spring, "KeyPress", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() && widget.key_press(ctx, event).is_handled() {
                     return true;
@@ -403,8 +504,8 @@ impl<G> WidgetHandler<G> {
         })
     }
 
-    pub fn key_release(&self, event: &KeyEvent<'_>) -> bool {
-        self.dispatch("KeyRelease", |ctx| {
+    pub fn key_release(&self, spring: &spring::Spring<'_, E>, event: &KeyEvent<'_>) -> bool {
+        self.dispatch(spring, "KeyRelease", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() && widget.key_release(ctx, event).is_handled() {
                     return true;
@@ -414,8 +515,16 @@ impl<G> WidgetHandler<G> {
         })
     }
 
-    pub fn mouse_move(&self, x: i32, y: i32, dx: i32, dy: i32, button: i32) -> bool {
-        self.dispatch("MouseMove", |ctx| {
+    pub fn mouse_move(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        x: i32,
+        y: i32,
+        dx: i32,
+        dy: i32,
+        button: i32,
+    ) -> bool {
+        self.dispatch(spring, "MouseMove", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get()
                     && widget.mouse_move(ctx, x, y, dx, dy, button).is_handled()
@@ -427,8 +536,8 @@ impl<G> WidgetHandler<G> {
         })
     }
 
-    pub fn mouse_press(&self, x: i32, y: i32, button: i32) -> bool {
-        self.dispatch("MousePress", |ctx| {
+    pub fn mouse_press(&self, spring: &spring::Spring<'_, E>, x: i32, y: i32, button: i32) -> bool {
+        self.dispatch(spring, "MousePress", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() && widget.mouse_press(ctx, x, y, button).is_handled() {
                     return true;
@@ -438,8 +547,8 @@ impl<G> WidgetHandler<G> {
         })
     }
 
-    pub fn mouse_release(&self, x: i32, y: i32, button: i32) {
-        self.dispatch("MouseRelease", |ctx| {
+    pub fn mouse_release(&self, spring: &spring::Spring<'_, E>, x: i32, y: i32, button: i32) {
+        self.dispatch(spring, "MouseRelease", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() && widget.mouse_release(ctx, x, y, button).is_handled() {
                     return;
@@ -448,8 +557,8 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn mouse_wheel(&self, up: bool, value: f32) -> bool {
-        self.dispatch("MouseWheel", |ctx| {
+    pub fn mouse_wheel(&self, spring: &spring::Spring<'_, E>, up: bool, value: f32) -> bool {
+        self.dispatch(spring, "MouseWheel", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() && widget.mouse_wheel(ctx, up, value).is_handled() {
                     return true;
@@ -459,8 +568,8 @@ impl<G> WidgetHandler<G> {
         })
     }
 
-    pub fn draw_world_pre_unit(&self) {
-        self.dispatch("DrawWorldPreUnit", |ctx| {
+    pub fn draw_world_pre_unit(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "DrawWorldPreUnit", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.draw_world_pre_unit(ctx);
@@ -469,8 +578,8 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn draw_world_refraction(&self) {
-        self.dispatch("DrawWorldRefraction", |ctx| {
+    pub fn draw_world_refraction(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "DrawWorldRefraction", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.draw_world_refraction(ctx);
@@ -479,8 +588,13 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn draw_screen_effects(&self, view_width: i32, view_height: i32) {
-        self.dispatch("DrawScreenEffects", |ctx| {
+    pub fn draw_screen_effects(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        view_width: i32,
+        view_height: i32,
+    ) {
+        self.dispatch(spring, "DrawScreenEffects", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.draw_screen_effects(ctx, view_width, view_height);
@@ -489,8 +603,8 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn draw_unit(&self, unit_id: i32, draw_mode: i32) -> bool {
-        self.dispatch("DrawUnit", |ctx| {
+    pub fn draw_unit(&self, spring: &spring::Spring<'_, E>, unit_id: i32, draw_mode: i32) -> bool {
+        self.dispatch(spring, "DrawUnit", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() && widget.draw_unit(ctx, unit_id, draw_mode).is_handled() {
                     return true;
@@ -500,8 +614,8 @@ impl<G> WidgetHandler<G> {
         })
     }
 
-    pub fn view_resize(&self, geometry: &ViewGeometry) {
-        self.dispatch("ViewResize", |ctx| {
+    pub fn view_resize(&self, spring: &spring::Spring<'_, E>, geometry: &ViewGeometry) {
+        self.dispatch(spring, "ViewResize", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.view_resize(ctx, geometry);
@@ -510,8 +624,8 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn game_over(&self, winning_ally_teams: &[u8]) {
-        self.dispatch("GameOver", |ctx| {
+    pub fn game_over(&self, spring: &spring::Spring<'_, E>, winning_ally_teams: &[u8]) {
+        self.dispatch(spring, "GameOver", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.game_over(ctx, winning_ally_teams);
@@ -520,80 +634,14 @@ impl<G> WidgetHandler<G> {
         });
     }
 
-    pub fn recv_from_synced(&self, message: &[u8]) {
-        self.dispatch("RecvFromSynced", |ctx| {
+    pub fn recv_from_synced(&self, spring: &spring::Spring<'_, E>, message: &[u8]) {
+        self.dispatch(spring, "RecvFromSynced", |ctx| {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.recv_from_synced(ctx, message);
                 }
             }
         });
-    }
-}
-
-const DESTROY_BIT: u32 = 0x8000_0000;
-type UiCallback<G> = Rc<RefCell<Box<dyn FnMut(&G)>>>;
-
-/// Retained UI callbacks use per-callback runtime borrowing rather than one
-/// registry-wide mutable borrow. Different callbacks may therefore re-enter
-/// each other; recursively invoking the same `FnMut` still fails loudly.
-pub struct UiCallbackRegistry<G> {
-    next_id: Cell<u32>,
-    callbacks: RefCell<BTreeMap<u32, UiCallback<G>>>,
-}
-
-impl<G> Default for UiCallbackRegistry<G> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl<G> UiCallbackRegistry<G> {
-    pub const fn new() -> Self {
-        Self {
-            next_id: Cell::new(0x1000),
-            callbacks: RefCell::new(BTreeMap::new()),
-        }
-    }
-
-    pub fn register(
-        &self,
-        callback: impl FnMut(&G) + 'static,
-    ) -> spring::callback::RetainedCallback {
-        let id = self.next_id.get();
-        self.next_id.set(id + 1);
-        debug_assert!(
-            id & DESTROY_BIT == 0,
-            "callback id space exhausted; ids must stay below the destroy bit"
-        );
-        let destroy_id = id | DESTROY_BIT;
-        self.callbacks
-            .borrow_mut()
-            .insert(id, Rc::new(RefCell::new(Box::new(callback))));
-        spring::callback::RetainedCallback::new(id, 0, destroy_id)
-    }
-
-    pub fn unregister(&self, callback: spring::callback::RetainedCallback) {
-        self.callbacks
-            .borrow_mut()
-            .remove(&(callback.id & !DESTROY_BIT));
-    }
-
-    pub fn dispatch(&self, global: &G, callback_id: u32, _user_data: u32) -> bool {
-        if callback_id & DESTROY_BIT != 0 {
-            self.callbacks
-                .borrow_mut()
-                .remove(&(callback_id & !DESTROY_BIT));
-            return true;
-        }
-
-        let callback = self.callbacks.borrow().get(&callback_id).cloned();
-        if let Some(callback) = callback {
-            callback.borrow_mut()(global);
-            true
-        } else {
-            false
-        }
     }
 }
 
@@ -614,24 +662,24 @@ impl HideDefaultInterface {
     }
 }
 
-impl<G> Widget<G> for HideDefaultInterface {
+impl<G, E: spring::capabilities::Common + spring::capabilities::Game> Widget<G, E>
+    for HideDefaultInterface
+{
     fn name(&self) -> &'static str {
         "HideDefaultInterface"
     }
-
-    fn init(&self, _ctx: &AddonContext<'_, G>) {
-        #[cfg(target_arch = "wasm32")]
-        if let Err(error) = spring::default_interface::hide(self.parts) {
-            crate::log::warning(&alloc::format!(
-                "HideDefaultInterface: hiding failed: {error:?}"
-            ));
-        }
+    fn init(&self, ctx: &AddonContext<'_, G, E>) {
+        use spring::ResultExt;
+        ctx.spring()
+            .default_interface()
+            .hide(self.parts)
+            .log_err(ctx.spring(), "hide default interface");
     }
-
-    fn shutdown(&self, _ctx: &AddonContext<'_, G>) {
-        #[cfg(target_arch = "wasm32")]
-        let _ = spring::default_interface::show(self.parts);
-        #[cfg(not(target_arch = "wasm32"))]
-        let _ = self.parts;
+    fn shutdown(&self, ctx: &AddonContext<'_, G, E>) {
+        use spring::ResultExt;
+        ctx.spring()
+            .default_interface()
+            .show(self.parts)
+            .log_err(ctx.spring(), "restore default interface");
     }
 }

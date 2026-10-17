@@ -3,7 +3,6 @@
 
 extern crate alloc;
 
-#[cfg(feature = "std")]
 extern crate std;
 
 pub mod event;
@@ -17,15 +16,6 @@ pub mod unsynced;
 
 pub mod reexports {
     pub use spring::*;
-    #[cfg(target_arch = "wasm32")]
-    pub use spring::{
-        export_callin_scratch, export_draw_feature, export_draw_genesis, export_draw_screen,
-        export_draw_screen_effects, export_draw_unit, export_draw_world_pre_particles,
-        export_draw_world_pre_unit, export_feature_created, export_feature_destroyed,
-        export_projectile_created, export_projectile_destroyed, export_recv_from_synced,
-        export_unit_destroyed, export_unit_finished, export_unit_given, export_unit_taken,
-        export_view_resize,
-    };
     #[cfg(feature = "std")]
     pub use std::thread_local;
 }
@@ -41,7 +31,11 @@ pub use unsynced::{UnsyncedAddon, UnsyncedHandler};
 mod export_macro_compile_tests {
     use super::UnsyncedHandler;
 
-    fn setup(_handler: &mut UnsyncedHandler<()>) {}
+    fn setup(
+        _handler: &mut UnsyncedHandler<()>,
+        _spring: &spring::Spring<'_, spring::RulesUnsynced>,
+    ) {
+    }
 
     crate::export_rules_unsynced_addons! {
         state: (),

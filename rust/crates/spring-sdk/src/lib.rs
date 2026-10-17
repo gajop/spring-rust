@@ -8,7 +8,7 @@ compile_error!(
     "native spring-sdk modules require panic=unwind to contain panics at C ABI boundaries"
 );
 use core::marker::PhantomData;
-pub use spring::{ApiError, ErrorCode, Float3, Result};
+pub use spring::{ApiError, DamageResult, ErrorCode, Float3, Result};
 #[cfg(not(target_arch = "wasm32"))]
 #[doc(hidden)]
 pub use spring_native_sys as __sys;
@@ -60,22 +60,22 @@ environments!(
 pub mod capabilities {
     use super::*;
     macro_rules! capability {
-        ($name:ident: $($environment:ident),*) => {
-            pub trait $name: Environment {}
+        ($name:ident: [$($parent:ident),*] => $($environment:ident),*) => {
+            pub trait $name: Environment $(+ $parent)* {}
             $(impl $name for $environment {})*
             impl $name for All {}
         };
     }
-    capability!(Game: RulesSynced, RulesUnsynced, GaiaSynced, GaiaUnsynced, Ui);
-    capability!(Render: RulesUnsynced, GaiaUnsynced, Ui, Menu, Intro);
-    capability!(Synced: RulesSynced, GaiaSynced);
-    capability!(Local: RulesUnsynced, GaiaUnsynced, Ui);
-    capability!(Session: RulesUnsynced, GaiaUnsynced, Ui, Menu);
-    capability!(Common: RulesSynced, RulesUnsynced, GaiaSynced, GaiaUnsynced, Ui, Menu, Intro);
-    capability!(Launch: RulesSynced, RulesUnsynced, GaiaSynced, GaiaUnsynced, Ui, Menu);
-    capability!(Downloads: Ui, Menu);
-    capability!(Replay: RulesUnsynced, GaiaUnsynced, Ui, Intro);
-    capability!(World: RulesSynced, RulesUnsynced, GaiaSynced, GaiaUnsynced, Ui, Intro);
+    capability!(Common: [] => RulesSynced, RulesUnsynced, GaiaSynced, GaiaUnsynced, Ui, Menu, Intro);
+    capability!(Render: [Common] => RulesUnsynced, GaiaUnsynced, Ui, Menu, Intro);
+    capability!(World: [Common] => RulesSynced, RulesUnsynced, GaiaSynced, GaiaUnsynced, Ui, Intro);
+    capability!(Launch: [Common] => RulesSynced, RulesUnsynced, GaiaSynced, GaiaUnsynced, Ui, Menu);
+    capability!(Game: [World, Launch] => RulesSynced, RulesUnsynced, GaiaSynced, GaiaUnsynced, Ui);
+    capability!(Session: [Render, Launch] => RulesUnsynced, GaiaUnsynced, Ui, Menu);
+    capability!(Synced: [Game] => RulesSynced, GaiaSynced);
+    capability!(Local: [Game, Session] => RulesUnsynced, GaiaUnsynced, Ui);
+    capability!(Downloads: [Session] => Ui, Menu);
+    capability!(Replay: [Render, World] => RulesUnsynced, GaiaUnsynced, Ui, Intro);
 }
 
 /// Access to Spring for one engine callin. It cannot be stored beyond that
@@ -407,6 +407,7 @@ mod logging;
 pub use logging::ResultExt;
 pub mod callbacks;
 pub mod commands;
+pub mod default_interface;
 mod exports;
 pub mod module;
 #[cfg(not(target_arch = "wasm32"))]
