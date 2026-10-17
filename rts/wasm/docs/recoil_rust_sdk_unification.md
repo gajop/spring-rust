@@ -160,7 +160,7 @@ fresh scope through the owning module. Missing or rejected CUS operations
 produce errors. The new host and dispatch tests are not yet full game tests.
 The 10 addon tests pass on Linux and Wine, including native CUS reentry during
 attachment, named results, task wakeups, unit-ID reuse, and shutdown. The SDK
-has 42 unit tests, an export test, and 8 compile-fail checks. These checks do
+has 44 unit tests, an export test, and 8 compile-fail checks. These checks do
 not replace actual game execution.
 
 `UnitCtx::with_spring` gives a unit-script task a fresh synced Spring reference
@@ -194,7 +194,27 @@ sound services, allowing addons to restore UI state and stop music cleanly.
 The existing 38 engine suites, native/Wasm launch-and-return fixtures on Linux
 and Wine, and SpringBoard's full test command pass with that change.
 
-The other six Cabal game-code ports, the other game-code port, and job helpers
+Flove's Wasm port passes all 84 existing integration assertions on Linux and
+Wine, and its Lua/Rust unit animations agree within the existing tolerance.
+Its visual run caught a real SDK bug: fixed-capacity graphics arrays rejected
+scalar, vec2 and vec3 inputs. Both backends now accept and zero-fill those
+prefixes, matching the old Wasm adapter. A native ABI regression test verifies
+the exact values passed to the engine and rejects oversized arrays. Black
+outlines and mouse-over highlights are restored. All nine captures complete;
+measured differences against the pre-port code on the same renderer are
+0–2.08%. Four later images exceed the old golden limit in both versions, and
+the renderer revision gate remains red. No expected images or limits changed.
+
+Hunted's Wasm port passes strict default/all-feature Clippy and 30 common unit
+tests. All 35 integration assertions have passed on Linux and Wine, but Linux
+runs remain intermittent: the moving rabbit in the nearby-shot fear test can
+disappear before the assertion. Initial UI response timing differs between
+runs. A pre-port baseline run passed; this failure still needs resolving.
+Its visual scenario and HUD/restart checks complete, with all eight measured
+images/crops within their existing tolerances. The Mesa revision gate is
+still red.
+
+The other four Cabal game-code ports, the other game-code port, and job helpers
 remain unfinished. Discovery, rooms, and reconnect UI are also still separate
 work. No private game content has been uploaded or released.
 A live native/Wasm `All` fixture also tests terrain mutation and drawing in one
