@@ -9,6 +9,10 @@ use alloc::vec::Vec;
 /// Both the native adapter and the Core-Wasm host implement this trait. The
 /// defaults make small tests and game-owned mock backends easy to write.
 pub trait UnitEngine: super::shared::Capture {
+    #[doc(hidden)]
+    fn engine_scope(&self) -> super::shared::EngineScope {
+        Default::default()
+    }
     fn turn(
         &mut self,
         _unit: UnitId,

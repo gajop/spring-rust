@@ -9,10 +9,13 @@ use std::sync::atomic::{AtomicU32, Ordering};
 static FRAME: AtomicU32 = AtomicU32::new(42);
 static CREATED: AtomicU32 = AtomicU32::new(0);
 static DROPPED: AtomicU32 = AtomicU32::new(0);
+static QUEUED: AtomicU32 = AtomicU32::new(0);
 #[cfg(not(target_arch = "wasm32"))]
 static OPERATIONS: AtomicU32 = AtomicU32::new(0);
 #[cfg(not(target_arch = "wasm32"))]
 static ATTACHED: AtomicU32 = AtomicU32::new(0);
+#[cfg(not(target_arch = "wasm32"))]
+static SAVED_CONTEXT: std::sync::Mutex<Option<UnitCtx>> = std::sync::Mutex::new(None);
 
 pub type Scripts = CusHost<Script, (), All>;
 #[derive(Default)]
@@ -29,6 +32,25 @@ async fn wake(ctx: UnitCtx) {
 }
 impl UnitScript for Script {
     fn create(&mut self, ctx: &UnitCtx) {
+        ctx.with_spring(|spring| {
+            assert_eq!(spring.game().get_game_frame()?.low16 as u64, ctx.frame());
+            Ok(())
+        })
+        .unwrap();
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let worker = ctx.clone();
+            assert_eq!(
+                std::thread::spawn(move || worker
+                    .with_spring(|spring| spring.game().get_game_frame())
+                    .unwrap_err()
+                    .code)
+                .join()
+                .unwrap(),
+                spring::ErrorCode::InvalidState as i32
+            );
+            *SAVED_CONTEXT.lock().unwrap() = Some(ctx.clone());
+        }
         CREATED.fetch_add(1, Ordering::Relaxed);
         ctx.move_now(Piece(3), Axis::X, 12.0);
         ctx.spawn(TaskDefinition::new("wake", wake));
@@ -46,6 +68,13 @@ impl UnitScript for Script {
         if name != "sum" {
             return None;
         }
+        let queued_before = QUEUED.load(Ordering::Relaxed);
+        with_addon_context(|ctx| {
+            ctx.commands().run(|_| {
+                QUEUED.fetch_add(1, Ordering::Relaxed);
+            })
+        });
+        assert_eq!(QUEUED.load(Ordering::Relaxed), queued_before);
         returns[0] = args.iter().sum();
         Some(1)
     }
@@ -147,15 +176,17 @@ mod native {
             }
             assert!(result.error.is_null());
             assert_eq!(result.handled, 1);
-            let weapon = [0];
-            call.call = UnitScriptCall::QueryWeapon as u32;
-            call.integerArguments = weapon.as_ptr();
-            call.integerCount = 1;
-            unsafe {
-                RustCUSInvoke(interface as *const _, data as *mut _, &call, &mut result);
+            if CREATED.load(Ordering::Relaxed) > 1 {
+                let weapon = [0];
+                call.call = UnitScriptCall::QueryWeapon as u32;
+                call.integerArguments = weapon.as_ptr();
+                call.integerCount = 1;
+                unsafe {
+                    RustCUSInvoke(interface as *const _, data as *mut _, &call, &mut result);
+                }
+                assert!(result.error.is_null());
+                assert_eq!((result.handled, result.intValue), (1, 3));
             }
-            assert!(result.error.is_null());
-            assert_eq!((result.handled, result.intValue), (1, 3));
         });
         unsafe {
             (*out).attached = 1;
@@ -243,6 +274,7 @@ mod native {
             ),
             (1, 1, 1, 6.0)
         );
+        assert_eq!(QUEUED.load(Ordering::Relaxed), 1);
         with_cus_module(|host, spring| {
             assert_eq!(
                 host.call(spring, UnitId(7), "sum", &[2.0, 4.0], &mut [0.0; 1])?,
@@ -252,6 +284,7 @@ mod native {
         })
         .unwrap();
         let mut detached = sys::CusDetachResult::default();
+        let previous_context = SAVED_CONTEXT.lock().unwrap().take().unwrap();
         unsafe {
             RustCUSDetach(
                 &*interface,
@@ -264,6 +297,18 @@ mod native {
         }
         assert!(detached.error.is_null());
         assert_eq!(DROPPED.load(Ordering::Relaxed), 1);
+        assert!(!previous_context.is_alive());
+        with_cus_module(|_, _| {
+            assert_eq!(
+                previous_context
+                    .with_spring(|spring| spring.game().get_game_frame())
+                    .unwrap_err()
+                    .code,
+                spring::ErrorCode::InvalidState as i32
+            );
+            Ok(())
+        })
+        .unwrap();
         FRAME.store(44, Ordering::Relaxed);
         let mut frame = sys::GameFrameResult::default();
         unsafe {

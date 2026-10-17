@@ -3,6 +3,7 @@
 use core::{future::Future, pin::Pin};
 
 pub use crate::RetainedCapture as Capture;
+pub type EngineScope = Option<crate::ModuleRef<crate::RulesSynced>>;
 #[cfg(not(target_arch = "wasm32"))]
 pub use std::sync::{Arc as Shared, Weak};
 #[cfg(target_arch = "wasm32")]

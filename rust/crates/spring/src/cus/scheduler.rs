@@ -135,6 +135,7 @@ struct TaskSlot {
 }
 
 struct SchedulerState {
+    alive: bool,
     frame: Cell<u64>,
     last_drained_frame: Cell<Option<u64>>,
     epoch: u64,
@@ -150,6 +151,7 @@ struct SchedulerState {
 impl SchedulerState {
     fn new() -> Self {
         Self {
+            alive: true,
             frame: Cell::new(0),
             last_drained_frame: Cell::new(None),
             epoch: 0,
@@ -259,6 +261,7 @@ pub(crate) fn remove_waiter<K: Ord, V: PartialEq>(
 /// Per-instance unit-script context.
 #[derive(Clone)]
 pub struct UnitCtx {
+    pub(super) engine_scope: super::shared::EngineScope,
     unit: UnitId,
     engine: Rc<RefCell<dyn UnitEngine>>,
     scheduler: Rc<RefCell<SchedulerState>>,
@@ -272,8 +275,10 @@ impl UnitCtx {
     where
         E: UnitEngine + 'static,
     {
+        let engine_scope = engine.borrow().engine_scope();
         let engine: Rc<RefCell<dyn UnitEngine>> = engine;
         Self {
+            engine_scope,
             unit,
             engine,
             scheduler: Rc::new(RefCell::new(SchedulerState::new())),
@@ -284,6 +289,7 @@ impl UnitCtx {
     #[inline]
     fn for_task(&self, task: TaskId) -> Self {
         Self {
+            engine_scope: self.engine_scope.clone(),
             unit: self.unit,
             engine: Rc::clone(&self.engine),
             scheduler: Rc::clone(&self.scheduler),
@@ -294,6 +300,10 @@ impl UnitCtx {
     #[inline]
     pub const fn unit(&self) -> UnitId {
         self.unit
+    }
+
+    pub fn is_alive(&self) -> bool {
+        self.scheduler.borrow().alive
     }
 
     #[inline]
@@ -617,7 +627,11 @@ pub struct CusScheduler {
 
 impl Drop for CusScheduler {
     fn drop(&mut self) {
-        let tasks = core::mem::take(&mut self.context.scheduler.borrow_mut().tasks);
+        let tasks = {
+            let mut scheduler = self.context.scheduler.borrow_mut();
+            scheduler.alive = false;
+            core::mem::take(&mut scheduler.tasks)
+        };
         drop(tasks);
     }
 }

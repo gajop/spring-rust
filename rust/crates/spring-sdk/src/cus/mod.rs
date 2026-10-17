@@ -38,6 +38,23 @@ pub use registry::*;
 pub use scheduler::*;
 pub use script::*;
 pub use transport::{Cus, CusEngine};
+
+impl UnitCtx {
+    /// Run synced engine calls during this script's active module callin.
+    /// Suspended tasks keep an identifier, never a borrowed Spring handle.
+    pub fn with_spring<R>(
+        &self,
+        call: impl for<'call> FnOnce(&mut crate::Spring<'call, crate::RulesSynced>) -> crate::Result<R>,
+    ) -> crate::Result<R> {
+        if !self.is_alive() {
+            return Err(crate::ApiError::new(crate::ErrorCode::InvalidState as i32));
+        }
+        self.engine_scope
+            .as_ref()
+            .ok_or(crate::ApiError::new(crate::ErrorCode::NotAvailable as i32))?
+            .with_spring(call)
+    }
+}
 pub use types::*;
 
 pub mod prelude {

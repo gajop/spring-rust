@@ -197,6 +197,7 @@ impl<S: UnitScript, State, E: Synced> CusHost<S, State, E> {
                 &mut UnitScriptCallResult::default(),
             );
         }
+        self.registry.borrow_mut().refresh(instance.unit());
         Ok(Some((handle, instance)))
     }
 }

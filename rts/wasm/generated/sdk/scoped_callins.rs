@@ -3287,34 +3287,6 @@ macro_rules! export_draw_water_post {
         }); }
     };
 }
-/// Shared scoped `DrawWorld` handler: `(&Module, &mut Spring) -> Result<()>`.
-#[macro_export]
-macro_rules! export_draw_world {
-    ($slot:ident, $handler:path) => {
-        #[cfg(target_arch = "wasm32")] #[unsafe (export_name =
-        "spring:callin/draw-world")] pub extern "C" fn
-        __spring_wasm_core_callin_draw_world(unused : i32) { { let
-        value:$crate::types::callins::SimpleCallinResult
-        =$crate::module::wasm_boundary($slot .with(| slot | slot
-        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = { let unused =
-        unused as u8; $crate::types::callins::SimpleCallinQuery { unused } }; let
-        returned =$handler (module, spring) ?; Ok({ let () =
-        returned;$crate::types::callins::SimpleCallinResult {} }) }))); { let _ = value;
-        } }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub unsafe
-        extern "C" fn DrawWorld(_interface:* const $crate::__sys::NativeInterface, data:*
-        mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery, result:*
-        mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe { result
-        .as_mut() }) else { return; }; * result = Default::default(); result.error
-        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
-        .validate_identity(data) ?; slot.invoke_for_environment::< 127, _ > (| module,
-        spring | { let _ = unsafe {
-        $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
-        =$handler (module, spring) ?; let value = { let () =
-        returned;$crate::types::callins::SimpleCallinResult {}
-        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
-        }); }
-    };
-}
 /// Shared scoped `DrawWorldPreUnit` handler: `(&Module, &mut Spring) -> Result<()>`.
 #[macro_export]
 macro_rules! export_draw_world_pre_unit {
@@ -6031,6 +6003,34 @@ macro_rules! export_unit_command {
         = { let () = returned;$crate::types::callins::UnitCommandResult {}
         };$crate::__native_callins::encode_unit_command_result(& value, result) }) }) });
         }
+    };
+}
+/// Shared scoped `DrawWorld` handler: `(&Module, &mut Spring) -> Result<()>`.
+#[macro_export]
+macro_rules! export_draw_world {
+    ($slot:ident, $handler:path) => {
+        #[cfg(target_arch = "wasm32")] #[unsafe (export_name =
+        "spring:callin/draw-world")] pub extern "C" fn
+        __spring_wasm_core_callin_draw_world() { { let
+        value:$crate::types::callins::SimpleCallinResult
+        =$crate::module::wasm_boundary($slot .with(| slot | slot
+        .invoke_for_environment::< 127, _ > (| module, spring | { let _ = { let unused =
+        0u8; $crate::types::callins::SimpleCallinQuery { unused } }; let returned
+        =$handler (module, spring) ?; Ok({ let () =
+        returned;$crate::types::callins::SimpleCallinResult {} }) }))); { let _ = value;
+        } }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub unsafe
+        extern "C" fn DrawWorld(_interface:* const $crate::__sys::NativeInterface, data:*
+        mut core::ffi::c_void, query:* const $crate::__sys::SimpleCallinQuery, result:*
+        mut $crate::__sys::SimpleCallinResult) { let Some(result) = (unsafe { result
+        .as_mut() }) else { return; }; * result = Default::default(); result.error
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
+        .validate_identity(data) ?; slot.invoke_for_environment::< 127, _ > (| module,
+        spring | { let _ = unsafe {
+        $crate::__native_callins::decode_simple_callin_query(query) } ?; let returned
+        =$handler (module, spring) ?; let value = { let () =
+        returned;$crate::types::callins::SimpleCallinResult {}
+        };$crate::__native_callins::encode_simple_callin_result(& value, result) }) })
+        }); }
     };
 }
 /// Shared scoped `AllowUnitCreation` handler: `(&Module, &mut Spring, i32, i32, i32, bool, $crate::Float3, i32) -> Result<(bool, bool)>`.
