@@ -174,3 +174,10 @@ impl<E: Game> crate::units_pieces::UnitsPieces<'_, E> {
             .map(Some)
     }
 }
+
+impl<E: crate::capabilities::Render> crate::gfx::Gfx<'_, E> {
+    pub fn get_view_projection_matrix_inverse(&self) -> Result<[f32; 16]> {
+        // Engine-defined matrix selector, shared by both transports.
+        self.get_matrix_data(0x10000)
+    }
+}

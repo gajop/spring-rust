@@ -171,7 +171,14 @@ impl<S: UnitScript, State, E: Synced> CusHost<S, State, E> {
         .map(Option::flatten)
     }
     pub fn game_frame(&self, frame: i32) {
-        self.cus_tick(frame.max(0) as u32);
+        self.advance(frame.max(0) as u64);
+    }
+    fn advance(&self, frame: u64) {
+        let due = self.registry.borrow_mut().due(frame);
+        for (_, instance) in due {
+            instance.tick(frame);
+            self.registry.borrow_mut().refresh(instance.unit());
+        }
     }
     pub fn registry(&self) -> RefMut<'_, CusRegistry<S>> {
         self.registry.borrow_mut()
@@ -234,6 +241,8 @@ pub struct CusCallResult<'a> {
     pub int_count: usize,
     pub int_values: &'a mut [i32],
 }
+/// A custom unit-script host. Every entry receives the current engine scope;
+/// no borrowed Spring reference needs to be retained between callbacks.
 pub trait CusModule<E: Synced> {
     fn cus_invoke(
         &self,
@@ -253,8 +262,8 @@ pub trait CusModule<E: Synced> {
         returns: &mut [f32],
         found: &mut bool,
     ) -> Result<Option<usize>>;
-    fn cus_tick(&self, frame: u32);
-    fn cus_detach(&self, instance: u32);
+    fn cus_tick(&self, spring: &Spring<'_, E>, frame: u32) -> Result<()>;
+    fn cus_detach(&self, spring: &Spring<'_, E>, instance: u32) -> Result<()>;
 }
 impl<S: UnitScript, State, E: Synced> CusModule<E> for CusHost<S, State, E> {
     fn cus_invoke(
@@ -322,14 +331,11 @@ impl<S: UnitScript, State, E: Synced> CusModule<E> for CusHost<S, State, E> {
         *found = count.is_some();
         Ok(Some(count.unwrap_or(0)))
     }
-    fn cus_tick(&self, frame: u32) {
-        let due = self.registry.borrow_mut().due(u64::from(frame));
-        for (_, instance) in due {
-            instance.tick(u64::from(frame));
-            self.registry.borrow_mut().refresh(instance.unit());
-        }
+    fn cus_tick(&self, _spring: &Spring<'_, E>, frame: u32) -> Result<()> {
+        self.advance(u64::from(frame));
+        Ok(())
     }
-    fn cus_detach(&self, instance: u32) {
+    fn cus_detach(&self, _spring: &Spring<'_, E>, instance: u32) -> Result<()> {
         self.pending_create.borrow_mut().remove(&instance);
         if let Some(handle) = self.handles.borrow_mut().remove(&instance) {
             if let Some(script) = self.registry.borrow().instance(handle) {
@@ -337,5 +343,6 @@ impl<S: UnitScript, State, E: Synced> CusModule<E> for CusHost<S, State, E> {
             }
             self.registry.borrow_mut().detach(handle);
         }
+        Ok(())
     }
 }
