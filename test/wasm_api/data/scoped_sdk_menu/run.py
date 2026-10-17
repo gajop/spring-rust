@@ -12,6 +12,7 @@ import signal
 import struct
 import subprocess
 import tempfile
+import zipfile
 from pathlib import Path
 
 from PIL import Image
@@ -182,11 +183,12 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
     env["LIBGL_ALWAYS_SOFTWARE"] = "1"
     env["LP_NUM_THREADS"] = "2"
     env["RAYON_NUM_THREADS"] = "2"
-    env["FONTCONFIG_FILE"] = path_arg(output / "fonts.conf")
+    # Wine's host Fontconfig reads this too, before the Windows engine starts.
+    env["FONTCONFIG_FILE"] = str(output / "fonts.conf")
     with (output / "stdout.log").open("w") as stdout:
         process = subprocess.Popen(
             command,
-            cwd=ROOT,
+            cwd=output,
             env=env,
             stdout=stdout,
             stderr=subprocess.STDOUT,
@@ -279,11 +281,26 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
                 "trap:",
                 "failed to initialize",
                 "failed to instantiate",
+                "warning:",
+                "error:",
             ]
         )
     ]
     if fail_game_init:
-        failures = [line for line in failures if "failed to initialize" not in line.lower()]
+        failures = [line for line in failures if "failed to initialize" not in line.lower()
+                    and "core wasm sdk initialization failed" not in line.lower()]
+    else:
+        caches = sorted((write / "cache/paths").glob("*.zip"))
+        if not caches:
+            missing.append("generated path-cache archives")
+        for cache in caches:
+            try:
+                with zipfile.ZipFile(cache) as archive:
+                    bad = archive.testzip()
+                    if bad is not None:
+                        failures.append(f"invalid path-cache CRC: {cache.name}/{bad}")
+            except (OSError, zipfile.BadZipFile) as error:
+                failures.append(f"invalid path cache {cache.name}: {error}")
         for forbidden in ["[ScopedSdkGame] initialized", "[ScopedSdkGame] callin", "[ScopedSdkGame] draw", "[ScopedSdkGame] shutdown"]:
             if forbidden in log:
                 failures.append(f"failed game module received user code: {forbidden}")
