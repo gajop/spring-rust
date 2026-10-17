@@ -9,6 +9,105 @@ use std::{
 };
 
 #[test]
+fn shader_params_preserve_stage_options_and_initialize_uniforms_on_native() {
+    thread_local! { static BOUND: RefCell<Vec<u32>> = const { RefCell::new(Vec::new()) }; }
+    unsafe extern "C" fn create(
+        query: *const sys::GfxCreateShaderQuery,
+        result: *mut sys::GfxCreateShaderResult,
+    ) {
+        let query = unsafe { &*query };
+        assert_eq!(
+            unsafe { CStr::from_ptr(query.vertex) }.to_str().unwrap(),
+            "vertex"
+        );
+        assert!(query.options.hasGeoOutputVerts);
+        assert_eq!(query.options.geoOutputVerts, 6);
+        let failed = unsafe { CStr::from_ptr(query.fragment) }.to_bytes() == b"fail";
+        unsafe {
+            (*result).shaderID = if failed { 0 } else { 17 };
+        }
+    }
+    unsafe extern "C" fn bind(query: *const sys::GfxShaderQuery, _: *mut sys::GfxUseShaderResult) {
+        BOUND.with(|bound| bound.borrow_mut().push(unsafe { (*query).shaderID }));
+    }
+    unsafe extern "C" fn location(
+        query: *const sys::GfxUniformLocationQuery,
+        result: *mut sys::GfxUniformLocationResult,
+    ) {
+        let query = unsafe { &*query };
+        assert_eq!(query.shaderID, 17);
+        let name = unsafe { CStr::from_ptr(query.name) }.to_bytes();
+        unsafe {
+            (*result).location = if name == b"sampler" { 2 } else { 3 };
+        }
+    }
+    unsafe extern "C" fn integer(
+        query: *const sys::GfxUniformIntQuery,
+        _: *mut sys::GfxEmptyResult,
+    ) {
+        let query = unsafe { &*query };
+        assert_eq!(
+            (query.location, query.count, query.values),
+            (2, 1, [4, 0, 0, 0])
+        );
+    }
+    unsafe extern "C" fn float(
+        query: *const sys::GfxUniformFloatQuery,
+        _: *mut sys::GfxEmptyResult,
+    ) {
+        let query = unsafe { &*query };
+        assert_eq!(
+            (query.location, query.count, query.values),
+            (3, 1, [0.5, 0.0, 0.0, 0.0])
+        );
+    }
+    let gfx = sys::GfxApi {
+        CreateShader: Some(create),
+        UseShader: Some(bind),
+        GetUniformLocation: Some(location),
+        UniformInt: Some(integer),
+        Uniform: Some(float),
+        ..Default::default()
+    };
+    let interface = sys::NativeInterface {
+        gfx: &gfx,
+        ..Default::default()
+    };
+    let context = unsafe { ModuleContext::<Ui>::from_native(&interface) }.unwrap();
+    context
+        .with_spring(|spring| {
+            let params = ShaderCreateParams {
+                vertex: "vertex",
+                fragment: "fragment",
+                geo_output_verts: Some(6),
+                uniform_ints: &[ShaderUniformInt {
+                    name: "sampler",
+                    value: 4,
+                }],
+                uniform_floats: &[ShaderUniformFloat {
+                    name: "scale",
+                    value: 0.5,
+                }],
+                ..Default::default()
+            };
+            assert_eq!(spring.gfx().compile_shader(params).unwrap().shader_id, 17);
+            assert_eq!(
+                spring
+                    .gfx()
+                    .compile_shader(ShaderCreateParams {
+                        fragment: "fail",
+                        ..params
+                    })
+                    .unwrap_err()
+                    .code,
+                ErrorCode::OperationFailed as i32
+            );
+        })
+        .unwrap();
+    BOUND.with(|bound| assert_eq!(&*bound.borrow(), &[17, 0]));
+}
+
+#[test]
 fn graphics_counted_arrays_accept_short_inputs_and_zero_fill_native_capacity() {
     unsafe extern "C" fn uniform(
         query: *const sys::GfxUniformFloatQuery,

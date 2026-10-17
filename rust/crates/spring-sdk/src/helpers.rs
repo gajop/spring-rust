@@ -176,8 +176,59 @@ impl<E: Game> crate::units_pieces::UnitsPieces<'_, E> {
 }
 
 impl<E: crate::capabilities::Render> crate::gfx::Gfx<'_, E> {
+    pub fn get_view_projection_matrix(&self) -> Result<[f32; 16]> {
+        self.get_matrix_data(crate::MATRIX_VIEWPROJECTION)
+    }
     pub fn get_view_projection_matrix_inverse(&self) -> Result<[f32; 16]> {
         // Engine-defined matrix selector, shared by both transports.
-        self.get_matrix_data(0x10000)
+        self.get_matrix_data(crate::MATRIX_VIEWPROJECTION_INVERSE)
+    }
+}
+
+impl<E: crate::capabilities::Render> crate::gfx::Gfx<'_, E> {
+    /// Compile the supplied stages and set any initial uniforms.
+    pub fn compile_shader(
+        &self,
+        params: crate::ShaderCreateParams<'_>,
+    ) -> Result<crate::gfx::CreateShaderValue> {
+        let shader = self.create_shader(
+            params.definitions,
+            params.vertex,
+            params.tcs,
+            params.tes,
+            params.geometry,
+            params.fragment,
+            params.compute,
+            crate::gfx::GfxCreateShaderOptions {
+                has_geo_input_type: params.geo_input_type.is_some(),
+                geo_input_type: params.geo_input_type.unwrap_or(0),
+                has_geo_output_type: params.geo_output_type.is_some(),
+                geo_output_type: params.geo_output_type.unwrap_or(0),
+                has_geo_output_verts: params.geo_output_verts.is_some(),
+                geo_output_verts: params.geo_output_verts.unwrap_or(0),
+            },
+        )?;
+        if shader.shader_id == 0 {
+            return Err(ApiError::new(ErrorCode::OperationFailed as i32));
+        }
+        if params.uniform_ints.is_empty() && params.uniform_floats.is_empty() {
+            return Ok(shader);
+        }
+        let configured = (|| {
+            self.use_shader(shader.shader_id)?;
+            for uniform in params.uniform_ints {
+                let location = self.get_uniform_location(shader.shader_id, uniform.name)?;
+                self.uniform_int(location, &[uniform.value], 1)?;
+            }
+            for uniform in params.uniform_floats {
+                let location = self.get_uniform_location(shader.shader_id, uniform.name)?;
+                self.uniform(location, &[uniform.value], 1)?;
+            }
+            Ok::<(), ApiError>(())
+        })();
+        let unbound = self.use_shader(0);
+        configured?;
+        unbound?;
+        Ok(shader)
     }
 }
