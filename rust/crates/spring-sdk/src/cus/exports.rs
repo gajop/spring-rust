@@ -96,11 +96,11 @@ pub mod wire {
     pub use spring::cus::core_module::{BUFFER_SIZE, MAX_RESULTS, buffer_range_contains};
 
     unsafe fn values<T: Copy>(pointer: i32, count: i32, base: usize) -> Result<Vec<T>> {
-        if pointer < 0 || count < 0 || count > 256 {
+        if pointer < 0 || !(0..=256).contains(&count) {
             return Err(invalid());
         }
         let bytes = count as usize * core::mem::size_of::<T>();
-        if pointer as usize % core::mem::align_of::<T>() != 0
+        if !(pointer as usize).is_multiple_of(core::mem::align_of::<T>())
             || !buffer_range_contains(pointer, bytes, base)
         {
             return Err(invalid());

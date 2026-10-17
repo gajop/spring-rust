@@ -1082,6 +1082,57 @@ fn native_module_and_retained_callbacks_survive_loading_thread_handoff() {
 }
 
 #[test]
+fn queued_order_copies_inputs_and_preserves_the_engine_result() {
+    thread_local! { static CALLED: Cell<bool> = const { Cell::new(false) }; }
+    unsafe extern "C" fn order(
+        query: *const sys::GiveOrderToUnitQuery,
+        result: *mut sys::GiveOrderToUnitResult,
+    ) {
+        let query = unsafe { &*query };
+        assert_eq!(
+            (query.unitID, query.cmdID, query.options, query.timeout),
+            (12, 10, 4, -1)
+        );
+        assert_eq!(
+            unsafe { core::slice::from_raw_parts(query.params, query.paramCount as usize) },
+            [2.0, 3.0]
+        );
+        CALLED.with(|called| called.set(true));
+        unsafe {
+            (*result).success = false;
+        }
+    }
+    let unit = sys::UnitControlApi {
+        GiveOrderToUnit: Some(order),
+        ..Default::default()
+    };
+    let ctrl = sys::SyncedCtrlApi {
+        unit: &unit,
+        ..Default::default()
+    };
+    let interface = sys::NativeInterface {
+        syncedCtrl: &ctrl,
+        ..Default::default()
+    };
+    let context = unsafe { ModuleContext::<RulesSynced>::from_native(&interface) }.unwrap();
+    let queue = commands::Queue::<RulesSynced>::new();
+    let result = std::sync::Arc::new(std::sync::Mutex::new(None));
+    let returned = result.clone();
+    let mut params = vec![2.0, 3.0];
+    queue
+        .give_order_to_unit(12, 10, &params, 4, -1)
+        .then(move |_, value| {
+            *returned.lock().unwrap() = Some(value);
+        });
+    params.fill(99.0);
+    drop(params);
+    CALLED.with(|called| assert!(!called.get()));
+    context.with_spring(|spring| queue.flush(spring)).unwrap();
+    assert_eq!(*result.lock().unwrap(), Some(Ok(false)));
+    CALLED.with(|called| assert!(called.get()));
+}
+
+#[test]
 fn queued_commands_keep_fifo_continuations_and_immediate_reentry() {
     use crate::{
         commands::Queue,
