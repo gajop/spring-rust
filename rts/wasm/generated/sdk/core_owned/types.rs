@@ -405,13 +405,15 @@
             pub feature_id: i32,
         }
 
-        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct CreateUnitOptions {
             pub build: bool,
             pub flatten_ground: bool,
             pub unit_id: i32,
             pub builder_id: i32,
         }
+
+        impl Default for CreateUnitOptions { fn default() -> Self { Self { build: false, flatten_ground: false, unit_id: -1, builder_id: -1 } } }
 
         #[derive(Debug, Clone, PartialEq, Default)]
         pub struct CreateUnitQuery {
