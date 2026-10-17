@@ -36,7 +36,7 @@ mod core_cus_export_compile_test {
     use super::cus::core_module::{CoreCusCallResult, CoreCusModule};
 
     #[derive(Default)]
-    struct ExampleModule;
+    pub struct ExampleModule;
 
     impl CoreCusModule for ExampleModule {
         fn cus_invoke(
