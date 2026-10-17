@@ -238,15 +238,17 @@ std::string FileSystem::GetFileModificationDate(const std::string& file)
 bool FileSystem::IsPathOnSpinningDisk(const std::string& path)
 {
 #ifdef _WIN32
+	// Mapped directories and network volumes need not expose a storage device.
+	// An unavailable performance hint keeps the conservative archive policy.
 	std::wstring volumePath; volumePath.resize(64);
 	if (!::GetVolumePathName(nowide::widen(path).c_str(), volumePath.data(), volumePath.size())) {
-		LOG_L(L_WARNING, "[%s] GetVolumePathNameA error: '%s'", __func__, Platform::GetLastErrorAsString().c_str());
+		LOG_L(L_DEBUG, "[%s] GetVolumePathName for '%s': '%s'", __func__, path.c_str(), Platform::GetLastErrorAsString().c_str());
 		return true;
 	}
 
 	std::wstring volumeName; volumeName.resize(1024);
 	if (!::GetVolumeNameForVolumeMountPoint(volumePath.data(), volumeName.data(), volumeName.size())) {
-		LOG_L(L_WARNING, "[%s] GetVolumeNameForVolumeMountPointA error: '%s'", __func__, Platform::GetLastErrorAsString().c_str());
+		LOG_L(L_DEBUG, "[%s] GetVolumeNameForVolumeMountPoint for '%s': '%s'", __func__, path.c_str(), Platform::GetLastErrorAsString().c_str());
 		return true;
 	}
 
@@ -256,7 +258,7 @@ bool FileSystem::IsPathOnSpinningDisk(const std::string& path)
 
 	HANDLE volHandle = ::CreateFile(volumeName.data(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
 	if (volHandle == INVALID_HANDLE_VALUE) {
-		LOG_L(L_WARNING, "[%s] CreateFileA error: '%s'", __func__, Platform::GetLastErrorAsString().c_str());
+		LOG_L(L_DEBUG, "[%s] CreateFile for volume of '%s': '%s'", __func__, path.c_str(), Platform::GetLastErrorAsString().c_str());
 		return true;
 	}
 
@@ -268,7 +270,7 @@ bool FileSystem::IsPathOnSpinningDisk(const std::string& path)
 
 	if (!::DeviceIoControl(volHandle, IOCTL_STORAGE_QUERY_PROPERTY, &query, sizeof(query), &result, sizeof(result), &bytesWritten, nullptr) || bytesWritten != sizeof(result))
 	{
-		LOG_L(L_WARNING, "[%s] DeviceIoControl error: '%s'", __func__, Platform::GetLastErrorAsString().c_str());
+		LOG_L(L_DEBUG, "[%s] Storage seek penalty unavailable for '%s': '%s'", __func__, path.c_str(), Platform::GetLastErrorAsString().c_str());
 		CloseHandle(volHandle);
 		return true;
 	}
