@@ -1,0 +1,20 @@
+[package]
+name = "scoped-sdk-menu"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[features]
+fail-init = []
+
+[workspace]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+spring-sdk = { path = "../../../../rust/crates/spring-sdk" }
+
+[profile.release]
+opt-level = 2
+lto = "thin"

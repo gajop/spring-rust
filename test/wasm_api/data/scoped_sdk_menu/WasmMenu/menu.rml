@@ -1,0 +1,13 @@
+<rml><head><title>Scoped SDK proof</title><style>
+body { width: 960px; height: 640px; margin: 0; font-family: "FreeSans"; font-size: 22px; color: #eef3fa; }
+#panel { position: absolute; left: 80px; top: 60px; width: 730px; height: 440px; padding: 24px; background-color: #172838; }
+div { display: block; }
+h1 { display: block; margin: 0 0 18px; font-size: 30px; color: #54bedc; } p { display: block; margin: 12px 0; }
+button { display: block; width: 350px; background-color: #287f98; padding: 12px 24px; margin-top: 15px; }
+</style></head><body data-model="scoped_fixture"><div id="panel">
+<h1>One menu source · native and Wasm</h1>
+<p>{{status}}</p><p>Typed count: {{count}}</p>
+<div data-for="player : players">{{player.name}} — {{player.score}}</div>
+<button id="action" data-event-click="clicked('captured 日本語', 7)">Exercise typed callback</button>
+<p>Immediate reentry · owned events · scoped engine access</p>
+</div></body></rml>

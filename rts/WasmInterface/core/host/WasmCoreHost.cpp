@@ -605,6 +605,11 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 	}
 	auto* context = wasmtime_store_context(backend->store);
 	recoil::wasm::core::RawExport environmentMarker;
+	recoil::wasm::core::RawExport sdkInitialize;
+	constexpr char sdkInitializeName[] = "spring:module/initialize";
+	if (!sdkInitialize.Resolve(context, backend->instance, sdkInitializeName,
+			sizeof(sdkInitializeName) - 1, {}, {}, true, error))
+		return false;
 	const wasm_valkind_t markerResults[] = {WASM_I32};
 	if (!environmentMarker.Resolve(context, backend->instance, "SPRING_ENV_MASK", 15, {},
 			std::span<const wasm_valkind_t>(markerResults, 1), false, error)) {
@@ -787,13 +792,51 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 	return false;
 #endif
 
+	WasmCoreHost* registered = host.get();
+	// Preserve the loader's lifetime lock through initialization: frontend and
+	// loading threads must not unload this host during its first entry. It is
+	// recursive, so callbacks on this engine thread still reenter immediately.
 	std::lock_guard registryLock(RegistryMutex());
 	Unload(host->moduleName);
 	host->backend = std::move(backend);
 	host->FlushPendingCusCalls();
 	Hosts().push_back(std::move(host));
-	// Resolve the dispatch plans once, now, so no callin ever pays for it.
-	Hosts().back()->BuildDispatchPlans();
+	// Resolve plans before SDK initialization can synchronously reenter.
+	registered->BuildDispatchPlans();
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	// New SDK modules opt into initialization after admission and binding,
+	// before any callin. Legacy modules retain their existing lifecycle.
+	// Enter with the same budget, UI visibility and Rml owner as a callin,
+	// and retain the recursive loader lifetime lock described above.
+	if (sdkInitialize.Present()) {
+		bool initialized = false;
+		if (registered->ResetBudgetImpl(error)) {
+			auto& budget = registered->backend->hot.budget;
+			if (budget.EnterCallback(true)) {
+				struct Scope {
+					WasmExecutionBudget& budget;
+					void* owner;
+					bool menu;
+					~Scope() { budget.LeaveCallback(); RmlGui::SetCurrentContextOwner(owner, menu); }
+				} scope{budget, RmlGui::GetCurrentContextOwner(), RmlGui::IsCurrentContextMenuPhase()};
+				RmlGui::SetCurrentContextOwner(registered, registered->IsMenuEnvironment());
+				WasmUiVisibility::ConditionalScopedContext uiContext(environment == WasmEnvironment::UI);
+				initialized = sdkInitialize.Call(context, nullptr, 0, error)
+					&& !registered->backend->hot.faulted;
+				if (!initialized && error.empty())
+					error = registered->backend->faultReason;
+			} else {
+				error = "Core Wasm SDK initialization budget rejected call";
+			}
+		}
+		if (!initialized) {
+			const std::string failedName = registered->moduleName;
+			Unload(failedName);
+			error = "Core Wasm SDK initialization failed: " + error;
+			return false;
+		}
+	}
+#endif
 	return true;
 }
 

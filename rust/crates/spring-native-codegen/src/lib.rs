@@ -12,6 +12,7 @@ pub mod lua_loader;
 pub mod manifest;
 pub mod model;
 pub mod render_core_native;
+pub mod render_sdk;
 
 pub use model::{ApiModel, ApiModule, Environment, FunctionModel, LoweringStatus, SemanticType};
 

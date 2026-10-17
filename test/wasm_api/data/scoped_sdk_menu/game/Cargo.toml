@@ -1,0 +1,17 @@
+[package]
+name = "scoped-sdk-game"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+spring-sdk = { path = "../../../../../rust/crates/spring-sdk" }
+
+[profile.release]
+opt-level = 2
+lto = "thin"

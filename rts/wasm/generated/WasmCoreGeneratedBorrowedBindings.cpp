@@ -13975,6 +13975,13 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedBorrowed(linker, "spring:units-info", "get-unit-build-params",
+                MakeFuncType(params, 3, results, 1), CoreBorrowed_units_info_get_unit_build_params, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:units-commands", "give-order-to-unit",
@@ -14073,6 +14080,20 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_F32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:path-finder", "request-path",
+                MakeFuncType(params, 3, results, 1), CoreBorrowed_path_finder_request_path, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:move-ctrl", "set-move-def",
+                MakeFuncType(params, 3, results, 1), CoreBorrowed_move_ctrl_set_move_def, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:input", "get-key-code",
@@ -14126,6 +14147,20 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:sound", "preload-sound-item",
                 MakeFuncType(params, 1, results, 1), CoreBorrowed_sound_preload_sound_item, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedBorrowed(linker, "spring:config", "get-config-float",
+                MakeFuncType(params, 2, results, 1), CoreBorrowed_config_get_config_float, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedBorrowed(linker, "spring:config", "get-config-int",
+                MakeFuncType(params, 2, results, 1), CoreBorrowed_config_get_config_int, state, error))
             return false;
     }
     {
@@ -14840,6 +14875,27 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "element-tab-set-set-tab",
                 MakeFuncType(params, 3, results, 1), CoreBorrowed_rml_ui_element_tab_set_set_tab, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "load-font-face",
+                MakeFuncType(params, 2, results, 1), CoreBorrowed_rml_ui_load_font_face, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "regiser-event-type",
+                MakeFuncType(params, 1, results, 1), CoreBorrowed_rml_ui_regiser_event_type, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:rml-ui", "register-event-type",
+                MakeFuncType(params, 1, results, 1), CoreBorrowed_rml_ui_register_event_type, state, error))
             return false;
     }
     {

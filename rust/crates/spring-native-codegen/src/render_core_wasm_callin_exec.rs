@@ -41,3 +41,7 @@ pub(crate) fn executable_canonical_names(model: &ApiModel) -> BTreeSet<String> {
         .map(|callin| callin.entry.callin.name.clone())
         .collect()
 }
+
+pub(crate) fn render_scoped_rust(model: &ApiModel) -> String {
+    guest::render_scoped_rust(model)
+}

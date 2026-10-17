@@ -211,7 +211,7 @@ fn output_list_element_supported(
     }
 }
 
-fn output_descriptor_layout(
+pub(crate) fn output_descriptor_layout(
     fields: &[FieldModel],
     records: &BTreeMap<String, RecordModel>,
 ) -> Option<OutputLayout> {

@@ -64,3 +64,6 @@ jobs:
 
       - name: Test workspace libraries
         run: cargo test --manifest-path rust/Cargo.toml --workspace --lib
+
+      - name: Test scoped SDK entry exports and lifetime guards
+        run: cargo test --manifest-path rust/Cargo.toml -p spring-sdk

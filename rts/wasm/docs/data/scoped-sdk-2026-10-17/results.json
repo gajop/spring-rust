@@ -1,0 +1,30 @@
+{
+  "menu-native": {
+    "transport": "native",
+    "exit": 0,
+    "missing": [],
+    "failures": [],
+    "pixel_sha256": "f45c589e5fa0a67149517fc3dc76589ed950e8ed4a738b8955ad44fc659f3708",
+    "ok": true
+  },
+  "failed-initialization-native": {
+    "transport": "native",
+    "exit": 0,
+    "missing": [],
+    "ok": true
+  },
+  "menu-wasm": {
+    "transport": "wasm",
+    "exit": 0,
+    "missing": [],
+    "failures": [],
+    "pixel_sha256": "f45c589e5fa0a67149517fc3dc76589ed950e8ed4a738b8955ad44fc659f3708",
+    "ok": true
+  },
+  "failed-initialization-wasm": {
+    "transport": "wasm",
+    "exit": 0,
+    "missing": [],
+    "ok": true
+  }
+}

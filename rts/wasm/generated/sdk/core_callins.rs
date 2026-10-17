@@ -958,7 +958,7 @@ macro_rules! export_generate_defs {
         pub extern "C" fn __spring_wasm_core_callin_generate_defs(
             unused: i32
         ) -> i64 {
-            let pointer = core::ptr::addr_of_mut!(__SPRING_CORE_STRING_RESULT_BUFFER_GENERATE_DEFS.0).cast::<u8>();
+            let pointer = unsafe { core::ptr::addr_of_mut!(__SPRING_CORE_STRING_RESULT_BUFFER_GENERATE_DEFS.0).cast::<u8>() };
             if $bytes > u32::MAX as usize || pointer as usize > u32::MAX as usize {
                 return ((u32::MAX as u64) << 32) as i64;
             }
@@ -1445,7 +1445,7 @@ macro_rules! export_screen_tooltip {
             x: i32,
             y: i32
         ) -> i64 {
-            let pointer = core::ptr::addr_of_mut!(__SPRING_CORE_STRING_RESULT_BUFFER_SCREEN_TOOLTIP.0).cast::<u8>();
+            let pointer = unsafe { core::ptr::addr_of_mut!(__SPRING_CORE_STRING_RESULT_BUFFER_SCREEN_TOOLTIP.0).cast::<u8>() };
             if $bytes > u32::MAX as usize || pointer as usize > u32::MAX as usize {
                 return ((u32::MAX as u64) << 32) as i64;
             }
@@ -1478,7 +1478,7 @@ macro_rules! export_get_tooltip {
             x: i32,
             y: i32
         ) -> i64 {
-            let pointer = core::ptr::addr_of_mut!(__SPRING_CORE_STRING_RESULT_BUFFER_GET_TOOLTIP.0).cast::<u8>();
+            let pointer = unsafe { core::ptr::addr_of_mut!(__SPRING_CORE_STRING_RESULT_BUFFER_GET_TOOLTIP.0).cast::<u8>() };
             if $bytes > u32::MAX as usize || pointer as usize > u32::MAX as usize {
                 return ((u32::MAX as u64) << 32) as i64;
             }
@@ -2537,7 +2537,7 @@ macro_rules! export_world_tooltip {
             ground_pos_y: f32,
             ground_pos_z: f32
         ) -> i64 {
-            let pointer = core::ptr::addr_of_mut!(__SPRING_CORE_STRING_RESULT_BUFFER_WORLD_TOOLTIP.0).cast::<u8>();
+            let pointer = unsafe { core::ptr::addr_of_mut!(__SPRING_CORE_STRING_RESULT_BUFFER_WORLD_TOOLTIP.0).cast::<u8>() };
             if $bytes > u32::MAX as usize || pointer as usize > u32::MAX as usize {
                 return ((u32::MAX as u64) << 32) as i64;
             }

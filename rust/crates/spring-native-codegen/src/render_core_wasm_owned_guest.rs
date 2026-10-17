@@ -928,7 +928,7 @@ fn render_borrowed_forward(
     all_records: &BTreeMap<String, RecordModel>,
     plan: &FunctionPlan,
 ) -> bool {
-    if !routes_to_borrowed(plan, &function.inputs, &function.outputs, all_records) {
+    if !owned_routes_to_borrowed(plan, &function.inputs, &function.outputs, all_records) {
         return false;
     }
 
@@ -998,6 +998,23 @@ fn render_borrowed_forward(
 /// format.  Host registration must match: only the borrowed handler should
 /// be registered for functions that return true here.
 pub fn routes_to_borrowed(
+    plan: &FunctionPlan,
+    inputs: &[crate::model::FieldModel],
+    outputs: &[crate::model::FieldModel],
+    records: &BTreeMap<String, RecordModel>,
+) -> bool {
+    // Preserve every existing wire route: borrowed strings require a trailing
+    // NUL, while the dynamic input transport uses length-prefixed blobs.
+    // Only fill a previously unclaimed transport when adding scoped adapters.
+    owned_routes_to_borrowed(plan, inputs, outputs, records)
+        || (crate::render_core_wasm_borrowed_host::eligible(plan, inputs, outputs, records)
+            && !crate::render_core_wasm_variable_host::eligible(plan, inputs, outputs, records)
+            && !crate::render_core_wasm_dynamic_input_host::eligible(
+                plan, inputs, outputs, records,
+            ))
+}
+
+fn owned_routes_to_borrowed(
     plan: &FunctionPlan,
     inputs: &[crate::model::FieldModel],
     outputs: &[crate::model::FieldModel],
@@ -1847,7 +1864,7 @@ fn convert_from_core(
     }
 }
 
-fn rust_type(
+pub(crate) fn rust_type(
     ty: &SemanticType,
     records: &BTreeMap<String, &RecordModel>,
     enums: &BTreeMap<String, &EnumModel>,
@@ -1914,7 +1931,7 @@ fn needs_borrow(ty: &SemanticType, records: &BTreeMap<String, &RecordModel>) -> 
     }
 }
 
-fn rust_param_type(
+pub(crate) fn rust_param_type(
     ty: &SemanticType,
     records: &BTreeMap<String, &RecordModel>,
     enums: &BTreeMap<String, &EnumModel>,
@@ -1955,7 +1972,7 @@ fn too_many_arguments_attribute(count: usize, indent: usize) -> String {
     String::new()
 }
 
-fn rust_ident(value: &str) -> String {
+pub(crate) fn rust_ident(value: &str) -> String {
     let value = value.to_snake_case();
     if matches!(
         value.as_str(),
