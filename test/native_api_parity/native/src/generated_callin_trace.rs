@@ -3358,7 +3358,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn camera_rotation_changed(&mut self, rot: crate::sys::Float3) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let trace_args = Vec::new();
+        let mut trace_args = Vec::new();
         if record_trace {
         trace_args.extend(self.trace_float3(&rot));
         }
@@ -3378,7 +3378,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn camera_position_changed(&mut self, pos: crate::sys::Float3) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let trace_args = Vec::new();
+        let mut trace_args = Vec::new();
         if record_trace {
         trace_args.extend(self.trace_float3(&pos));
         }
@@ -3685,7 +3685,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn command_notify(&mut self, command: crate::sys::NativeCallinCommand) -> Result<bool, Error> {
         let record_trace = record_callins_enabled();
-        let trace_args = Vec::new();
+        let mut trace_args = Vec::new();
         if record_trace {
         trace_args.extend(self.trace_command_without_tag(&command));
         }

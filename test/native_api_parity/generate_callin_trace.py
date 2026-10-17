@@ -455,7 +455,7 @@ def method_item(name: str, signature: str, params: list[tuple[str, str]], text: 
     body = text[brace + 1 : end]
     callback_name = next(symbol for symbol in native_symbols() if camel_to_snake(symbol) == name)
     trace = "\n".join(trace_statements(name, params))
-    if "trace_args.push" not in trace:
+    if "trace_args.push" not in trace and "trace_args.extend" not in trace:
         trace = trace.replace("let mut trace_args", "let trace_args")
     result_trace = "\n".join(result_trace_statements(name, signature))
     if name == "mouse_press":
