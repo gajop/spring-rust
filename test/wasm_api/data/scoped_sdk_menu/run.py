@@ -20,8 +20,9 @@ ROOT = FIXTURE.parents[3]
 LEGACY = FIXTURE.parent / "rml_menu_fixture/transition"
 
 
-def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all_game: bool = False) -> dict:
-    target = ["--target", "wasm32-unknown-unknown"] if transport == "wasm" else []
+def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all_game: bool = False, wine: Path | None = None) -> dict:
+    native_target = ["--target", "x86_64-pc-windows-gnu"] if wine else []
+    target = ["--target", "wasm32-unknown-unknown"] if transport == "wasm" else native_target
     if fail_init:
         target += ["--features", "fail-init"]
     subprocess.run(
@@ -44,7 +45,7 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
             "--manifest-path",
             str(FIXTURE / helper / "Cargo.toml"),
             "--release",
-            *([] if all_game and transport == "native" else ["--target", "wasm32-unknown-unknown"]),
+            *(native_target if all_game and transport == "native" else ["--target", "wasm32-unknown-unknown"]),
             *(["--features", "all"] if all_game else []),
         ],
         cwd=ROOT,
@@ -64,8 +65,9 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
     shutil.copytree(LEGACY / "game.sdd", game)
     if not fail_init:
         if all_game and transport == "native":
-            native = game / "libscoped_sdk_game.so"
-            shutil.copy2(FIXTURE / "game/target/release/libscoped_sdk_game.so", native)
+            native_name = "scoped_sdk_game.dll" if wine else "libscoped_sdk_game.so"
+            native_source = "x86_64-pc-windows-gnu/release" if wine else "release"
+            shutil.copy2(FIXTURE / "game/target" / native_source / native_name, game / native_name)
             info = game / "modinfo.lua"
             info.write_text(info.read_text().replace('modtype = 1,', 'modtype = 1,\n nativeModule = "scoped_sdk_game",'))
         else:
@@ -82,10 +84,9 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
     for name in ["base", "fonts"]:
         shutil.copytree(engine.parent / name, output / name)
     if transport == "native":
-        shutil.copy2(
-            FIXTURE / "target/release/libscoped_sdk_menu.so",
-            menu / "WasmMenu/libNativeMenu.so",
-        )
+        native_source = "x86_64-pc-windows-gnu/release/scoped_sdk_menu.dll" if wine else "release/libscoped_sdk_menu.so"
+        native_name = "NativeMenu.dll" if wine else "libNativeMenu.so"
+        shutil.copy2(FIXTURE / "target" / native_source, menu / "WasmMenu" / native_name)
         if not fail_init:
             (menu / "WasmMenu/manifest.json").unlink()
     else:
@@ -108,15 +109,19 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
     (write / "springsettings.cfg").write_text(
         "LoadingMT = 1\nSound = 0\nFullscreen = 0\nXResolutionWindowed = 960\nYResolutionWindowed = 640\nWindowBorderless = 1\n"
     )
+    def path_arg(path):
+        return "Z:" + str(path).replace("/", chr(92)) if wine else str(path)
+
     command = [
         "xvfb-run",
         "-a",
-        str(engine),
+        *([str(wine)] if wine else []),
+        path_arg(engine),
         "--isolation",
-        f"--isolation-dir={output}",
-        f"--write-dir={write}",
+        f"--isolation-dir={path_arg(output)}",
+        f"--write-dir={path_arg(write)}",
         "--config",
-        str(write / "springsettings.cfg"),
+        path_arg(write / "springsettings.cfg"),
         "--window",
         "--menu=Scoped SDK Menu 1",
         "--hidden",
@@ -128,7 +133,7 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
     env["LIBGL_ALWAYS_SOFTWARE"] = "1"
     env["LP_NUM_THREADS"] = "2"
     env["RAYON_NUM_THREADS"] = "2"
-    env["FONTCONFIG_FILE"] = str(output / "fonts.conf")
+    env["FONTCONFIG_FILE"] = path_arg(output / "fonts.conf")
     with (output / "stdout.log").open("w") as stdout:
         process = subprocess.Popen(
             command,
@@ -150,7 +155,7 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
             exit_code = 124
     log = (write / "infolog.txt").read_text(errors="replace")
     marker = (
-        "Successfully loaded native module WasmMenu/libNativeMenu.so"
+        ("Successfully loaded native module WasmMenu/NativeMenu.dll" if wine else "Successfully loaded native module WasmMenu/libNativeMenu.so")
         if transport == "native"
         else "Wasm manifest loaded from WasmMenu/manifest.json"
     )
@@ -250,6 +255,7 @@ def main() -> int:
         action="store_true",
         help="reject an intentional initialization panic and verify owner cleanup",
     )
+    parser.add_argument("--wine", type=Path, help="Wine loader for a Windows engine; uses the caller's dedicated Wine environment")
     parser.add_argument("--all-game", action="store_true", help="test All native/Wasm game loading, terrain edits and rendering")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -268,6 +274,7 @@ def main() -> int:
                 args.output.resolve() / name,
                 args.fail_init,
                 args.all_game,
+                args.wine,
             )
             for name in transports
         ]

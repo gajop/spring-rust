@@ -35,7 +35,7 @@ Wasm code uses Core-Wasm imports. Both expose the same Rust-facing API.
 | Synced code tries to draw | Compile time |
 | UI code tries to change synced unit state | Compile time |
 | Handler exported for the wrong environment | Compile time |
-| Engine reference saved past its callin or sent to a worker | Compile time |
+| Borrowed Spring handle saved past its callin or sent to a worker | Compile time |
 | Wrong native interface version | Runtime, during initialization |
 | Native callback on the wrong thread | Runtime, before user code runs |
 | Use after shutdown or typed Rml model close | Runtime |
@@ -81,6 +81,17 @@ send results back. This does not enable arbitrary worker-thread engine calls
 or change SpringBoard's existing threading assumptions. Drawing still belongs
 in the appropriate draw callin.
 
+Models that previously stored engine references can keep a `ModuleRef<E>`.
+`with_spring` supplies a fresh scoped reference, and succeeds only while this
+same module is already in a live callin. On native it also checks the thread;
+workers can carry an identifier but cannot open an engine scope. No engine calls
+run when the identifier is dropped.
+
+`commands::Queue<E>` holds owned closures taking Spring when executed. Its
+outer scope flushes FIFO after delayed addon actions; continuations run before
+the next command, and reentrant callins can append work. The queue holds no
+engine reference. `Spring::reborrow()` lets helpers share a shorter scope.
+
 Native panics are caught before crossing the C ABI; native builds require
 `panic=unwind`. Failed handlers stop subsequent use of the module. Wasm failures
 trap and follow the engine's module-fault handling.
@@ -116,11 +127,16 @@ game launches and failed-initialization cleanup. Both render identical pixels:
 [native](data/scoped-sdk-2026-10-17/native.png),
 [Wasm](data/scoped-sdk-2026-10-17/wasm.png).
 
-Still separate: production native-menu conversion, discovery/rooms/reconnect
-UI, and porting the remaining addons, command queues, CUS and job helpers.
+Both production menus have native/Wasm ports in dedicated consumer worktrees.
+The Cabal menu launches and returns from Lua Gravitas on both backends. The
+other menu completes its interaction tour, with matching rendered screens.
+Game-code ports, SpringBoard, discovery/rooms/reconnect UI and the remaining
+shared helpers are still in progress.
 A live native/Wasm `All` fixture also tests terrain mutation and drawing in one
 module, two launches, shutdown, and native loading-thread handoff
 ([results](data/scoped-sdk-2026-10-17/all-results.json)). Consumer ports
 are still in progress; the fixture is not a claim that they have been migrated.
-Native Windows gameplay remains untested. Packaging keeps using independently
+The Windows engine and same-source menu/game fixture pass under Wine,
+including `All` and loading-thread handoff. This is not native Windows or
+multiplayer gameplay verification. Packaging keeps using independently
 built engine releases.

@@ -39,6 +39,15 @@ impl Gate {
         state.depth += 1;
         Ok(Guard(self))
     }
+    pub(crate) fn enter_existing(&self) -> Result<Guard<'_>> {
+        let current = thread::current().id();
+        let mut state = self.state.lock().unwrap_or_else(|p| p.into_inner());
+        if state.engine != current || state.active != Some(current) {
+            return Err(ApiError::new(ErrorCode::InvalidState as i32));
+        }
+        state.depth += 1;
+        Ok(Guard(self))
+    }
     /// The caller is an engine ABI entry, not a worker requesting engine access.
     pub(crate) unsafe fn enter_host(&self) -> Guard<'_> {
         let current = thread::current().id();
