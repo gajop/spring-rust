@@ -23,7 +23,7 @@ spring_sdk::export_update!(APP, update);
 
 Use a `cdylib` crate. Build normally for native, or with
 `--target wasm32-unknown-unknown` for Wasm. Native builds require unwinding;
-the safe native factory currently supports Menu. Variable-size callins also
+native loading supports Menu and in-game All modules. Variable-size callins also
 require one `export_callin_scratch!(BYTES)` declaration on Wasm.
 
 Handlers receive shared module state and a fresh `&mut Spring<'_, E>`.
@@ -34,7 +34,9 @@ ABI query/result envelopes, dummy parameters and redundant lengths stay in
 adapters.
 
 Release state borrows before reentrant callouts. Send owned snapshots to
-workers; Spring references and Rml binding identities cannot cross threads.
+workers; Spring references cannot cross threads. Native module state and
+retained captures must be Send for loading-thread handoff. Rml binding
+identifiers can move with that state, but every operation needs Spring.
 The SDK does not queue immediate calls automatically.
 
 `rml::DataModel` and its typed bindings work on both targets. Every binding
@@ -42,4 +44,4 @@ operation takes a fresh Spring reference. Call `close` / `unbind` explicitly;
 engine cleanup handles resources still owned by an unloaded module.
 
 Run the [same-source live menu proof](../../../test/wasm_api/data/scoped_sdk_menu/README.md)
-for a working integration rather than converting an existing menu first.
+for a working integration, including the optional native/Wasm All game test.

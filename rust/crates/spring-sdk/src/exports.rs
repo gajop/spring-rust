@@ -1,8 +1,8 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 /// Declare module ownership and export initialization, shutdown, environment,
-/// and retained callbacks. Native automatic admission currently supports Menu;
-/// other native environments need a host dispatch/visibility contract first.
+/// and retained callbacks. Native module state and retained captures must be
+/// Send so initialization and subsequent engine entries can use different threads.
 /// Add the lifecycle exports your module uses with the individual macros.
 /// Exporting a callin outside its engine environment is a compile-time error:
 /// ```compile_fail
@@ -19,13 +19,14 @@
 #[macro_export]
 macro_rules! export_module {
     ($slot:ident, $environment:ty, $module:ty) => {
+        #[cfg(not(target_arch="wasm32"))]
+        static $slot: $crate::module::NativeSlot<$environment,$module> = const { $crate::module::NativeSlot::new() };
+        #[cfg(target_arch="wasm32")]
         std::thread_local! { static $slot: $crate::module::ModuleSlot<$environment,$module> = const { $crate::module::ModuleSlot::new() }; }
         $crate::export_callbacks!();
         #[cfg(target_arch="wasm32")]
         #[unsafe(no_mangle)]
         pub extern "C" fn SPRING_ENV_MASK() -> i32 { <$environment as $crate::Environment>::MASK as i32 }
-        #[cfg(not(target_arch="wasm32"))]
-        const _: () = assert!(<$environment as $crate::Environment>::MASK==32,"native module entry currently admits Menu only");
         #[cfg(not(target_arch="wasm32"))]
         #[unsafe(no_mangle)]
         pub static NativeModuleEnvironment: u32=<$environment as $crate::Environment>::MASK;
@@ -38,12 +39,12 @@ macro_rules! export_module {
             let Some(result)=(unsafe {result.as_mut()}) else {return;};
             *result=Default::default();
             [result.moduleVersionMajor,result.moduleVersionMinor,result.moduleVersionPatch]=$crate::NATIVE_API_VERSION;
-            let outcome=$slot.with(|slot| {
+            let outcome=unsafe {$slot.with_host(|slot| {
                 let query=unsafe {query.as_ref()}.ok_or($crate::ApiError::new($crate::ErrorCode::InvalidArgument as i32))?;
                 if query.hostVersionMajor!=$crate::NATIVE_API_VERSION[0] || query.hostVersionMinor<$crate::NATIVE_API_VERSION[1] {return Err($crate::ApiError::new($crate::ErrorCode::NotAvailable as i32));}
                 result.moduleData=unsafe {slot.initialize_native(interface)?};
                 Ok(())
-            });
+            })};
             result.error=$crate::module::error_pointer(outcome);
         }
         #[cfg(target_arch="wasm32")]
@@ -55,7 +56,7 @@ macro_rules! export_module {
         #[unsafe(no_mangle)]
         pub unsafe extern "C" fn Shutdown(_interface:*const $crate::__sys::NativeInterface, data:*mut core::ffi::c_void, _query:*const $crate::__sys::ShutdownQuery, result:*mut $crate::__sys::ShutdownResult) {
             let Some(result)=(unsafe {result.as_mut()}) else {return;};
-            result.error=$crate::module::error_pointer($slot.with(|slot|slot.validate_identity(data).and_then(|_|slot.shutdown())));
+            result.error=$crate::module::error_pointer(unsafe {$slot.with_host(|slot|slot.validate_identity(data).and_then(|_|slot.shutdown()))});
         }
         #[cfg(target_arch="wasm32")]
         #[unsafe(export_name="spring:callin/shutdown")]

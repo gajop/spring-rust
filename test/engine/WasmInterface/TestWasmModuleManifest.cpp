@@ -10,6 +10,7 @@
 #include "WasmInterface/core/host/WasmCoreValidation.h"
 #include "NativeInterface/WasmSyncedContext.h"
 #include "WasmInterface/runtime/WasmModuleManifest.h"
+#include "wasm/generated/WasmCalloutRegistry.h"
 
 // The WasmInterface unit-test target predates the production fast-Core path and
 // does not yet compile WasmCoreValidation.cpp as a separate source. Include the
@@ -134,6 +135,22 @@ TEST_CASE("Wasm module manifests parse deterministic declarations")
 	CHECK(declarations[1].interfaceVersion == "1.0.0");
 }
 
+TEST_CASE("All environment combines APIs without changing existing permissions")
+{
+	std::vector<WasmModuleDeclaration> declarations;
+	std::string error;
+	REQUIRE(WasmModuleManifest::Parse("module(editor, editor.wasm, all, 0)\n", declarations, error));
+	REQUIRE(declarations.size() == 1);
+	CHECK(declarations[0].environment == WasmEnvironment::All);
+	CHECK(WasmEnvironmentMatrix::ApiMask(WasmEnvironment::All) == 127);
+	CHECK_FALSE(WasmEnvironmentMatrix::Policy(WasmEnvironment::All).synced);
+	CHECK(WasmEnvironmentMatrix::Policy(WasmEnvironment::All).permitsSimulationMutation);
+	for (const auto& import: recoil::wasm::generated::kCallouts) {
+		if (import.environmentMask != 0)
+			CHECK(WasmEnvironmentMatrix::HasModule(WasmEnvironment::All, import.module));
+	}
+}
+
 TEST_CASE("Wasm module manifests reject malformed and duplicate declarations")
 {
 	std::vector<WasmModuleDeclaration> declarations;
@@ -252,7 +269,7 @@ TEST_CASE("Production Core ABI admits only reviewed synchronous callback imports
 	}
 }
 
-TEST_CASE("Job imports validate both signatures in all seven environments")
+TEST_CASE("Job imports validate both signatures in all environments")
 {
 	WasmRuntimeConfig config;
 	for (const auto& [name, count]: std::vector<std::pair<std::string_view, int>>{{"submit", 4}, {"submit-to", 6}}) {
@@ -263,7 +280,7 @@ TEST_CASE("Job imports validate both signatures in all seven environments")
 		AddCoreMemoryExport(module);
 		for (const auto environment: {WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced,
 			WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced, WasmEnvironment::UI,
-			WasmEnvironment::Menu, WasmEnvironment::Intro}) {
+			WasmEnvironment::Menu, WasmEnvironment::Intro, WasmEnvironment::All}) {
 			const auto result = recoil::wasm::core::ValidateModule(module, environment,
 				RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
 			INFO(name << ": " << WasmEnvironmentMatrix::Name(environment));
@@ -291,7 +308,7 @@ TEST_CASE("Checked desync timers validate full-width output-pointer signatures")
 		AddCoreMemoryExport(module);
 		for (const auto environment: {WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced,
 			WasmEnvironment::RulesUnsynced, WasmEnvironment::GaiaUnsynced,
-			WasmEnvironment::UI, WasmEnvironment::Menu, WasmEnvironment::Intro}) {
+			WasmEnvironment::UI, WasmEnvironment::Menu, WasmEnvironment::Intro, WasmEnvironment::All}) {
 			CHECK(recoil::wasm::core::ValidateModule(module, environment,
 				RECOIL_WASM_INTERFACE_VERSION_NUMBER, config).valid);
 		}

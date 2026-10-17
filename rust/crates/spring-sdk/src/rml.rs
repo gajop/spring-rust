@@ -8,11 +8,7 @@
 pub use crate::callbacks::{Event, Value};
 use crate::types::rml_ui::{RmlDataFieldDef, RmlDataValue};
 use crate::{ApiError, Authority, ErrorCode, Result, Spring, capabilities::Session};
-use std::{
-    cell::Cell,
-    marker::PhantomData,
-    rc::{Rc, Weak},
-};
+use std::marker::PhantomData;
 
 fn invalid() -> ApiError {
     ApiError::new(ErrorCode::InvalidState as i32)
@@ -22,24 +18,32 @@ fn success(ok: bool) -> Result<()> {
 }
 
 struct ModelState {
-    owner: Weak<Authority>,
-    alive: Cell<bool>,
+    #[cfg(target_arch = "wasm32")]
+    owner: std::rc::Weak<Authority>,
+    #[cfg(not(target_arch = "wasm32"))]
+    owner: std::sync::Weak<Authority>,
+    alive: std::sync::atomic::AtomicBool,
 }
 impl ModelState {
     fn check<E: Session>(&self, spring: &Spring<'_, E>) -> Result<()> {
         spring.engine.check()?;
-        if !self.alive.get() || !self.owner.ptr_eq(&Rc::downgrade(&spring.engine.owner)) {
+        if !self.alive.load(std::sync::atomic::Ordering::Relaxed)
+            || !self
+                .owner
+                .ptr_eq(&crate::Shared::downgrade(&spring.engine.owner))
+        {
             return Err(invalid());
         }
         Ok(())
     }
 }
 
+#[derive(Clone)]
 pub struct DataModel {
     context: u64,
     name: String,
     handle: u64,
-    state: Rc<ModelState>,
+    state: crate::Shared<ModelState>,
 }
 impl DataModel {
     pub fn create<E: Session>(
@@ -53,9 +57,9 @@ impl DataModel {
             context,
             name: name.into(),
             handle: result.data_model_handle,
-            state: Rc::new(ModelState {
-                owner: Rc::downgrade(&spring.engine.owner),
-                alive: Cell::new(true),
+            state: crate::Shared::new(ModelState {
+                owner: crate::Shared::downgrade(&spring.engine.owner),
+                alive: std::sync::atomic::AtomicBool::new(true),
             }),
         })
     }
@@ -70,7 +74,7 @@ impl DataModel {
         let handle = T::bind(spring, self.handle, name, initial)?;
         Ok(Variable {
             handle,
-            state: Rc::clone(&self.state),
+            state: crate::Shared::clone(&self.state),
             value: PhantomData,
         })
     }
@@ -98,7 +102,7 @@ impl DataModel {
         success(result.success)?;
         Ok(Rows {
             handle: result.rows_handle,
-            state: Rc::clone(&self.state),
+            state: crate::Shared::clone(&self.state),
             fields: fields.iter().map(|(_, ty)| *ty).collect(),
         })
     }
@@ -111,7 +115,9 @@ impl DataModel {
         callback: F,
     ) -> Result<EventBinding>
     where
-        F: for<'call> Fn(&mut Spring<'call, E>, Event) -> Result<()> + 'static,
+        F: for<'call> Fn(&mut Spring<'call, E>, Event) -> Result<()>
+            + crate::RetainedCapture
+            + 'static,
     {
         self.state.check(spring)?;
         let types = fields.iter().map(|ty| *ty as u8).collect::<Vec<_>>();
@@ -121,14 +127,16 @@ impl DataModel {
         success(result.success)?;
         Ok(EventBinding {
             handle: result.event_handle,
-            state: Rc::clone(&self.state),
+            state: crate::Shared::clone(&self.state),
         })
     }
 
     pub fn close<E: Session>(&self, spring: &mut Spring<'_, E>) -> Result<()> {
         self.state.check(spring)?;
         // Invalidate before a host call can reenter a listener for this model.
-        self.state.alive.set(false);
+        self.state
+            .alive
+            .store(false, std::sync::atomic::Ordering::Relaxed);
         success(
             spring
                 .rml_ui()
@@ -141,7 +149,7 @@ impl DataModel {
 #[derive(Clone)]
 pub struct Variable<T: DataType> {
     handle: u64,
-    state: Rc<ModelState>,
+    state: crate::Shared<ModelState>,
     value: PhantomData<T>,
 }
 impl<T: DataType> Variable<T> {
@@ -353,9 +361,10 @@ impl Value {
     }
 }
 
+#[derive(Clone)]
 pub struct Rows {
     handle: u64,
-    state: Rc<ModelState>,
+    state: crate::Shared<ModelState>,
     fields: Vec<ValueType>,
 }
 impl Rows {
@@ -377,7 +386,7 @@ impl Rows {
 
 pub struct EventBinding {
     handle: u64,
-    state: Rc<ModelState>,
+    state: crate::Shared<ModelState>,
 }
 impl EventBinding {
     pub fn unbind<E: Session>(&self, spring: &mut Spring<'_, E>) -> Result<()> {

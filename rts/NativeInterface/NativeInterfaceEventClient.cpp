@@ -755,7 +755,8 @@ void NativeInterfaceEventClient::DrawGenesis() {
 	const bool wasmWorldFBORequested = m_wasmSystem != nullptr &&
 		(m_wasmSystem->HasCoreModules(WasmEnvironment::RulesUnsynced) ||
 		 m_wasmSystem->HasCoreModules(WasmEnvironment::GaiaUnsynced) ||
-		 m_wasmSystem->HasCoreModules(WasmEnvironment::UI)) &&
+		 m_wasmSystem->HasCoreModules(WasmEnvironment::UI) ||
+		 m_wasmSystem->HasCoreModules(WasmEnvironment::All)) &&
 		fboAfter != fboBefore && fboAfter != 0;
 	m_wasmWorldFBO = wasmWorldFBORequested ? static_cast<std::uint32_t>(fboAfter) : 0;
 	spring::benchmark_callins::End(dispatchStage);

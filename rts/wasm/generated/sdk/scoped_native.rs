@@ -31675,7 +31675,7 @@ pub(crate) mod rml_ui {
         F: for<'call> Fn(
                 &mut crate::Spring<'call, E>,
                 crate::callbacks::Event,
-            ) -> Result<()> + 'static,
+            ) -> Result<()> + 'static + crate::RetainedCapture,
     >(
         engine: &crate::Backend<'_>,
         context_handle: u64,
@@ -32920,7 +32920,7 @@ pub(crate) mod rml_ui {
         F: for<'call> Fn(
                 &mut crate::Spring<'call, E>,
                 crate::callbacks::Event,
-            ) -> Result<()> + 'static,
+            ) -> Result<()> + 'static + crate::RetainedCapture,
     >(
         engine: &crate::Backend<'_>,
         data_model_handle: u64,
@@ -34172,7 +34172,7 @@ pub(crate) mod rml_ui {
         F: for<'call> Fn(
                 &mut crate::Spring<'call, E>,
                 crate::callbacks::Event,
-            ) -> Result<()> + 'static,
+            ) -> Result<()> + 'static + crate::RetainedCapture,
     >(
         engine: &crate::Backend<'_>,
         element_handle: u64,

@@ -14,6 +14,7 @@ enum class WasmEnvironment : std::uint8_t {
 	UI,
 	Menu,
 	Intro,
+	All,
 };
 
 struct WasmEnvironmentPolicy {
@@ -26,11 +27,18 @@ struct WasmEnvironmentPolicy {
 
 class WasmEnvironmentMatrix {
 public:
-	static constexpr std::array<WasmEnvironment, 7> All() {
+	static constexpr std::array<WasmEnvironment, 8> All() {
 		return {WasmEnvironment::RulesSynced, WasmEnvironment::RulesUnsynced,
 			WasmEnvironment::GaiaSynced, WasmEnvironment::GaiaUnsynced,
 			WasmEnvironment::UI, WasmEnvironment::Menu,
-			WasmEnvironment::Intro};
+			WasmEnvironment::Intro, WasmEnvironment::All};
+	}
+
+	// API permissions and module identity use the union of the existing worlds
+	// for All. Routing still uses its own bit, to invoke it only once per event.
+	static constexpr std::uint32_t ApiMask(WasmEnvironment environment) {
+		return environment == WasmEnvironment::All ? 127u :
+			(1u << static_cast<std::uint32_t>(environment));
 	}
 
 	static const WasmEnvironmentPolicy& Policy(WasmEnvironment environment);

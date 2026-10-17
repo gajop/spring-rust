@@ -253,7 +253,7 @@ inline bool ImportAllowed(std::string_view module, std::string_view name,
 	const ImportLookup import = LookupImport(module, name);
 	if (!import.found)
 		return false;
-	const std::uint32_t bit = 1u << static_cast<std::uint32_t>(environment);
+	const std::uint32_t bit = WasmEnvironmentMatrix::ApiMask(environment);
 	return (import.environmentMask & bit) != 0;
 }
 

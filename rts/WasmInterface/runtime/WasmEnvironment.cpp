@@ -20,6 +20,7 @@ namespace {
 		{WasmEnvironment::UI, "ui", false, UI_RUNTIME_ENABLED, false},
 		{WasmEnvironment::Menu, "menu", false, true, false},
 		{WasmEnvironment::Intro, "intro", false, true, false},
+		{WasmEnvironment::All, "all", false, true, true},
 	};
 	constexpr WasmEnvironmentPolicy INVALID_POLICY = {
 		WasmEnvironment::UI, "invalid", false, false, false,
@@ -62,7 +63,7 @@ bool WasmEnvironmentMatrix::HasModule(WasmEnvironment environment, std::string_v
 	if (module == "spring:jobs")
 		return true;
 	module = recoil::wasm::generated::CanonicalModule(module);
-	const std::uint32_t environmentBit = 1u << static_cast<std::uint32_t>(environment);
+	const std::uint32_t environmentBit = WasmEnvironmentMatrix::ApiMask(environment);
 	for (const auto& descriptor : recoil::wasm::generated::kCallouts) {
 		if (module == descriptor.module && (descriptor.environmentMask & environmentBit) != 0)
 			return true;

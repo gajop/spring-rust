@@ -12,7 +12,23 @@ pub use spring::{ApiError, ErrorCode, Float3, Result};
 #[cfg(not(target_arch = "wasm32"))]
 #[doc(hidden)]
 pub use spring_native_sys as __sys;
-use std::{cell::Cell, rc::Rc};
+use std::cell::Cell;
+#[cfg(target_arch = "wasm32")]
+use std::rc::Rc as Shared;
+#[cfg(not(target_arch = "wasm32"))]
+use std::sync::Arc as Shared;
+#[cfg(not(target_arch = "wasm32"))]
+mod native_thread;
+
+/// Native retained captures must survive the loading-to-game-thread handoff.
+#[cfg(not(target_arch = "wasm32"))]
+pub trait RetainedCapture: Send {}
+#[cfg(not(target_arch = "wasm32"))]
+impl<T: Send> RetainedCapture for T {}
+#[cfg(target_arch = "wasm32")]
+pub trait RetainedCapture {}
+#[cfg(target_arch = "wasm32")]
+impl<T> RetainedCapture for T {}
 
 mod sealed {
     pub trait Environment {}
@@ -37,7 +53,8 @@ environments!(
     GaiaUnsynced = 8,
     Ui = 16,
     Menu = 32,
-    Intro = 64
+    Intro = 64,
+    All = 127
 );
 
 pub mod capabilities {
@@ -46,6 +63,7 @@ pub mod capabilities {
         ($name:ident: $($environment:ident),*) => {
             pub trait $name: Environment {}
             $(impl $name for $environment {})*
+            impl $name for All {}
         };
     }
     capability!(Game: RulesSynced, RulesUnsynced, GaiaSynced, GaiaUnsynced, Ui);
@@ -97,7 +115,7 @@ pub struct Spring<'call, E: Environment> {
 /// point. Shared references allow immediate nested callins without borrowing
 /// the module's mutable game state or holding a lock across a host call.
 pub struct ModuleContext<E: Environment> {
-    owner: Rc<Authority>,
+    owner: Shared<Authority>,
     environment: PhantomData<E>,
     affinity: PhantomData<*mut ()>,
 }
@@ -113,9 +131,9 @@ impl<E: Environment> ModuleContext<E> {
             return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
         }
         Ok(Self {
-            owner: Rc::new(Authority {
+            owner: Shared::new(Authority {
                 raw,
-                thread: std::thread::current().id(),
+                gate: Shared::new(native_thread::Gate::new()),
                 alive: Cell::new(true),
                 error: Cell::new(None),
                 panic: Default::default(),
@@ -131,7 +149,7 @@ impl<E: Environment> ModuleContext<E> {
     #[cfg(target_arch = "wasm32")]
     pub unsafe fn from_wasm() -> Self {
         Self {
-            owner: Rc::new(Authority {
+            owner: Shared::new(Authority {
                 alive: Cell::new(true),
                 error: Cell::new(None),
             }),
@@ -156,12 +174,14 @@ impl<E: Environment> ModuleContext<E> {
         callin: impl for<'call> FnOnce(&mut Spring<'call, E>) -> R,
     ) -> Result<R> {
         #[cfg(not(target_arch = "wasm32"))]
-        if std::thread::current().id() != self.owner.thread {
+        let _entry = self.owner.gate.enter()?;
+        #[cfg(not(target_arch = "wasm32"))]
+        if !self.owner.gate.is_current() {
             return Err(ApiError::new(ErrorCode::InvalidState as i32));
         }
         let mut spring = Spring {
             engine: Backend {
-                owner: Rc::clone(&self.owner),
+                owner: Shared::clone(&self.owner),
                 scope: PhantomData,
             },
             environment: PhantomData,
@@ -175,6 +195,12 @@ impl<E: Environment> ModuleContext<E> {
 
 impl<E: Environment> Drop for ModuleContext<E> {
     fn drop(&mut self) {
+        #[cfg(not(target_arch = "wasm32"))]
+        let _entry = self
+            .owner
+            .gate
+            .enter()
+            .expect("module context dropped outside engine entry");
         self.owner.alive.set(false);
         callbacks::clear_owner(&self.owner);
     }
@@ -184,7 +210,7 @@ struct Authority {
     #[cfg(not(target_arch = "wasm32"))]
     raw: *const spring_native_sys::NativeInterface,
     #[cfg(not(target_arch = "wasm32"))]
-    thread: std::thread::ThreadId,
+    gate: Shared<native_thread::Gate>,
     alive: Cell<bool>,
     error: Cell<Option<ApiError>>,
     #[cfg(not(target_arch = "wasm32"))]
@@ -193,8 +219,16 @@ struct Authority {
     foreign_callback: std::sync::Arc<std::sync::atomic::AtomicBool>,
 }
 
+// Native access to Cells is serialized by gate. Authority never escapes the
+// SDK: contexts and Spring tokens are !Send/!Sync; retained handlers are Send
+// and invoke under this same gate. The host owns the interface lifetime.
+#[cfg(not(target_arch = "wasm32"))]
+unsafe impl Send for Authority {}
+#[cfg(not(target_arch = "wasm32"))]
+unsafe impl Sync for Authority {}
+
 struct Backend<'call> {
-    owner: Rc<Authority>,
+    owner: Shared<Authority>,
     // Invariant call lifetime, and !Send + !Sync on both targets.
     scope: PhantomData<(&'call mut &'call (), *mut ())>,
 }
@@ -202,7 +236,7 @@ struct Backend<'call> {
 impl Backend<'_> {
     fn reborrow(&mut self) -> Backend<'_> {
         Backend {
-            owner: Rc::clone(&self.owner),
+            owner: Shared::clone(&self.owner),
             scope: PhantomData,
         }
     }
@@ -213,7 +247,7 @@ impl Backend<'_> {
 
     fn check(&self) -> Result<()> {
         #[cfg(not(target_arch = "wasm32"))]
-        if std::thread::current().id() != self.owner.thread {
+        if !self.owner.gate.is_current() {
             return Err(ApiError::new(ErrorCode::InvalidState as i32));
         }
         if !self.owner.alive.get() {
@@ -250,7 +284,7 @@ impl Backend<'_> {
     ) -> R {
         let mut spring = Spring {
             engine: Backend {
-                owner: Rc::clone(&self.owner),
+                owner: Shared::clone(&self.owner),
                 scope: PhantomData,
             },
             environment: PhantomData,
@@ -277,6 +311,19 @@ include!(concat!(
     "/../../../rts/wasm/generated/sdk/scoped_api.rs"
 ));
 
+pub use spring::{cmd, los_state, mouse};
+pub mod log_level {
+    pub const DEBUG: i32 = 20;
+    pub const INFO: i32 = 30;
+    pub const NOTICE: i32 = 35;
+    pub const WARNING: i32 = 40;
+    pub const ERROR: i32 = 50;
+    pub const FATAL: i32 = 60;
+}
+#[doc(hidden)]
+pub use alloc::format as __format;
+mod logging;
+pub use logging::ResultExt;
 pub mod callbacks;
 mod exports;
 pub mod module;
