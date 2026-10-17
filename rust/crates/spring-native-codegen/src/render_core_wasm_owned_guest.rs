@@ -1427,7 +1427,12 @@ fn render_record(
         output.push_str(&format!("        pub use crate::{};\n\n", record.name));
         return;
     }
-    output.push_str(&record_derives(&record.fields, records, enums));
+    let derives = record_derives(&record.fields, records, enums);
+    if record.name == "CreateUnitOptions" {
+        output.push_str(&derives.replace(", Default", ""));
+    } else {
+        output.push_str(&derives);
+    }
     output.push_str(&format!("        pub struct {} {{\n", record.name));
     for field in &record.fields {
         output.push_str(&format!(
@@ -1437,6 +1442,9 @@ fn render_record(
         ));
     }
     output.push_str("        }\n\n");
+    if record.name == "CreateUnitOptions" {
+        output.push_str("        impl Default for CreateUnitOptions { fn default() -> Self { Self { build: false, flatten_ground: false, unit_id: -1, builder_id: -1 } } }\n\n");
+    }
 }
 
 fn render_output_record(

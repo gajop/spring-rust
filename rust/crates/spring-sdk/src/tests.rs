@@ -8,6 +8,55 @@ use std::{
     ptr,
 };
 
+#[test]
+fn default_unit_creation_does_not_request_an_existing_unit_id() {
+    unsafe extern "C" fn create(
+        query: *const sys::CreateUnitQuery,
+        result: *mut sys::CreateUnitResult,
+    ) {
+        let query = unsafe { &*query };
+        assert_eq!(query.options.unitID, -1);
+        assert_eq!(query.options.builderID, -1);
+        unsafe {
+            (*result).unitID = 25;
+        }
+    }
+    let unit_api = sys::UnitControlApi {
+        CreateUnit: Some(create),
+        ..Default::default()
+    };
+    let api = sys::SyncedCtrlApi {
+        unit: &unit_api,
+        ..Default::default()
+    };
+    let interface = sys::NativeInterface {
+        syncedCtrl: &api,
+        ..Default::default()
+    };
+    let context = unsafe { ModuleContext::<All>::from_native(&interface) }.unwrap();
+    context
+        .with_spring(|spring| {
+            let def = unit_control::DefRef {
+                name: String::new(),
+                id: 1,
+            };
+            assert_eq!(
+                spring
+                    .unit_control()
+                    .create_unit(
+                        &def,
+                        Float3::ZERO,
+                        0,
+                        0,
+                        unit_control::CreateUnitOptions::default()
+                    )
+                    .unwrap(),
+                25
+            );
+        })
+        .unwrap();
+}
+
 thread_local! {
     static SCRATCH:RefCell<Vec<i32>>=const {RefCell::new(Vec::new())};
     static GENERATION:Cell<i32>=const {Cell::new(0)};
