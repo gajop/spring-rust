@@ -238,6 +238,9 @@ pub(crate) mod native {
         }
     }
     impl State {
+        pub(crate) fn advancing(&self) -> bool {
+            self.in_tick
+        }
         pub(crate) fn submit(&mut self, worker: Worker, input: &[u8]) -> Result<JobId> {
             if self.next_id == 0
                 || self.pending.len() >= MAX_JOBS
@@ -438,6 +441,13 @@ mod tests {
         .unwrap();
         slot.invoke_tick_for_environment::<127, 2, _>(|app, _| {
             assert!(app.values.borrow().is_empty());
+            // Same-thread Update reentry runs immediately, without advancing
+            // the job batch or sealing it before the outer Update returns.
+            slot.invoke_tick_for_environment::<127, 2, _>(|nested, _| {
+                assert!(core::ptr::eq(app, nested));
+                assert!(nested.values.borrow().is_empty());
+                Ok(())
+            })?;
             Ok(())
         })
         .unwrap();
