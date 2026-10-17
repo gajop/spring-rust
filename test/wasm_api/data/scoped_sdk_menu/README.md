@@ -37,7 +37,7 @@ A successful run requires both transport results to have `ok: true`, the same
 pixel hash and exit code zero. This Linux fixture does not claim native Windows
 or multiplayer interoperability testing.
 
-The negative lifecycle case deliberately panics after creating its UI:
+The menu initialization failure case deliberately panics after creating its UI:
 
 ```sh
 LIBCLANG_PATH=/usr/lib/x86_64-linux-gnu \
@@ -56,6 +56,11 @@ reading the resulting height, drawing, one GameFrame invocation per frame, and
 native initialization on a different loading thread from later game callins.
 `LoadingMT=1` is explicit in the runner. Both game launches must pass, and the
 menus must still render identical pixels and quit normally.
+
+`--all-game --fail-game-init --transport native` instead returns an error from
+the game's initializer on both launches. The menu must still recover and quit
+normally. The rejected game must receive no later callins. This also catches
+unloading its library before the loading thread has run its TLS destructors.
 
 `--wine /path/to/wine64 --engine /path/to/spring.exe` builds the native fixture
 for `x86_64-pc-windows-gnu` and runs both backends with the caller's dedicated

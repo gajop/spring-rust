@@ -16,6 +16,11 @@ mod game {
     }
     impl Module<GameEnvironment> for Game {
         fn initialize(spring: &mut Spring<'_, GameEnvironment>) -> Result<Self> {
+            if cfg!(feature = "fail-init") {
+                return Err(spring_sdk::ApiError::new(
+                    spring_sdk::ErrorCode::InvalidArgument as i32,
+                ));
+            }
             let result = spring.math_extra().normalize(Float3 {
                 x: 3.0,
                 y: 4.0,
