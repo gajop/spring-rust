@@ -54,7 +54,7 @@
 	{                                                                                           \
 		m_##SymbolName##FuncPtr = m_sharedLib->FindAddressTyped<fptr::SymbolName##FuncPtr>(      \
 			#SymbolName);                                                                          \
-		if (m_##SymbolName##FuncPtr == nullptr)                                                   \
+		if (m_##SymbolName##FuncPtr == nullptr && !optionalCallins)                               \
 			LOG_L(L_ERROR, "Failed to load native module symbol " #SymbolName);                     \
 	}
 
@@ -249,9 +249,14 @@ bool NativeInterfaceEventClient::DispatchWasmIntegerCallin(WasmCoreCallin callin
 }
 
 void NativeInterfaceEventClient::LoadSymbols() {
+	// Scoped modules export only their subscribed callins. Every dispatch path
+	// already handles an absent optional callback. Keep legacy diagnostics.
+	const bool optionalCallins = m_sharedLib->FindAddress("NativeModuleEnvironment") != nullptr;
 	LOG("Loading symbols from native module...");
 
 	LOAD_SYMBOL(InitializeNativeModule);
+	if (optionalCallins && m_InitializeNativeModuleFuncPtr == nullptr)
+		LOG_L(L_ERROR, "Scoped native module is missing InitializeNativeModule");
 	LOAD_OPTIONAL_SYMBOL(ActivateMenu);
 	LOAD_OPTIONAL_SYMBOL(ActivateGame);
 	LOAD_SYMBOL(Load);

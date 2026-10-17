@@ -245,7 +245,7 @@ fn fixed_wire_type(ty: &SemanticType, records: &BTreeMap<String, RecordModel>) -
     }
 }
 
-fn fixed_wire_layout(
+pub(crate) fn fixed_wire_layout(
     ty: &SemanticType,
     records: &BTreeMap<String, RecordModel>,
 ) -> Option<(u32, u32)> {
@@ -296,14 +296,14 @@ fn layout_fields(
 }
 
 #[derive(Clone, Copy)]
-struct OutputLayout {
-    descriptor_bytes: u32,
-    fixed_offset: u32,
-    fixed_bytes: u32,
-    fixed_alignment: u32,
+pub(crate) struct OutputLayout {
+    pub(crate) descriptor_bytes: u32,
+    pub(crate) fixed_offset: u32,
+    pub(crate) fixed_bytes: u32,
+    pub(crate) fixed_alignment: u32,
 }
 
-fn output_layout(
+pub(crate) fn output_layout(
     fields: &[FieldModel],
     records: &BTreeMap<String, RecordModel>,
 ) -> Option<OutputLayout> {

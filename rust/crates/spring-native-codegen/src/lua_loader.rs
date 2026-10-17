@@ -24,6 +24,7 @@ pub struct LuaLoaderMatrix {
     provider_methods: ProviderMethods,
     provider_functions: ProviderFunctions,
     function_environments: BTreeMap<String, BTreeSet<Environment>>,
+    standalone_functions: BTreeMap<(String, String), BTreeSet<Environment>>,
 }
 
 impl Default for LuaLoaderMatrix {
@@ -56,6 +57,7 @@ impl Default for LuaLoaderMatrix {
             provider_methods: BTreeMap::new(),
             provider_functions: BTreeMap::new(),
             function_environments: BTreeMap::new(),
+            standalone_functions: BTreeMap::new(),
         }
     }
 }
@@ -89,6 +91,7 @@ impl LuaLoaderMatrix {
         matrix.provider_methods.clear();
         matrix.provider_functions.clear();
         matrix.function_environments.clear();
+        matrix.standalone_functions.clear();
 
         for (body, environments) in [
             (synced, synced_gadgets()),
@@ -157,7 +160,7 @@ impl LuaLoaderMatrix {
         // rather than via Provider::PushEntries.  Parse those method bodies and
         // register each function for the appropriate environment.
         let scoped_registration =
-            Regex::new(r"REGISTER_SCOPED_LUA_CFUNC\s*\(\s*[^,]+,\s*([A-Za-z0-9_]+)")
+            Regex::new(r"REGISTER_SCOPED_LUA_CFUNC\s*\(\s*([A-Za-z0-9_]+)\s*,\s*([A-Za-z0-9_]+)")
                 .expect("valid REGISTER_SCOPED_LUA_CFUNC pattern");
         for (source, env, methods) in [
             (
@@ -183,7 +186,12 @@ impl LuaLoaderMatrix {
                     for captures in scoped_registration.captures_iter(body) {
                         matrix
                             .function_environments
-                            .entry(captures[1].to_string())
+                            .entry(captures[2].to_string())
+                            .or_default()
+                            .insert(env);
+                        matrix
+                            .standalone_functions
+                            .entry((captures[1].to_string(), captures[2].to_string()))
                             .or_default()
                             .insert(env);
                     }
@@ -305,6 +313,17 @@ impl LuaLoaderMatrix {
         let mut matched_function = false;
         for captures in reference.captures_iter(&source) {
             let provider = &captures[1];
+            // Standalone loaders register only selected functions, rather than
+            // the provider's full PushEntries table. Merge these registrations
+            // even when the same function matched an in-game provider method.
+            // Keep the provider in the key so unrelated names cannot widen it.
+            if let Some(environments) = self
+                .standalone_functions
+                .get(&(provider.to_string(), function.to_string()))
+            {
+                result.extend(environments.iter().copied());
+                matched_function = true;
+            }
             if let Some(methods) = self.provider_methods.get(provider) {
                 let parsed_methods = self.provider_functions.get(provider);
                 for (method, environments) in methods {
@@ -572,6 +591,29 @@ mod tests {
                 "{module}::{function} must be available to LuaUI: {environments:?}"
             );
         }
+
+        let config = matrix.environments_for_function(
+            &root.join("rts/NativeInterface/api/Config.h"),
+            "config",
+            "GetConfigString",
+            false,
+            false,
+        );
+        assert!(
+            config.contains(&Environment::Menu),
+            "an in-game provider match must not erase an explicit LuaMenu registration"
+        );
+        let game_frame = matrix.environments_for_function(
+            &root.join("rts/NativeInterface/api/Game.h"),
+            "game",
+            "GetGameFrame",
+            false,
+            false,
+        );
+        assert!(
+            !game_frame.contains(&Environment::Menu),
+            "standalone registrations must stay function-specific"
+        );
 
         let create_unit = matrix.environments_for_function(
             &root.join("rts/NativeInterface/api/SyncedCtrl.h"),

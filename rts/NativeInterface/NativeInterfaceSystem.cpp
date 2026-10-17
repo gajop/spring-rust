@@ -327,6 +327,15 @@ public:
 			return;
 		}
 
+		// Scoped SDK admission is currently implemented by the standalone menu
+		// loader. Never admit a marked menu (or another not-yet-supported scoped
+		// environment) as a legacy unrestricted game module.
+		if (sharedLib->FindAddress("NativeModuleEnvironment") != nullptr) {
+			LOG_L(L_ERROR, "Scoped native SDK modules currently require the menu loader");
+			sharedLib.reset();
+			return;
+		}
+
 		// Create event client, load symbols, and register with event handler
 		eventClient = std::make_unique<NativeInterfaceEventClient>(&nativeInterface, sharedLib.get(), wasmSystem.get(), false);
 		eventClient->LoadSymbols();

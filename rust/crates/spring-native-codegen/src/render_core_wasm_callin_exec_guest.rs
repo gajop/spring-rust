@@ -33,6 +33,16 @@ pub(super) fn render_rust(model: &ApiModel) -> String {
     unsafe_export_attributes(output)
 }
 
+pub(super) fn render_scoped_rust(model: &ApiModel) -> String {
+    let records = record_index(model);
+    let source = expanded_callins(model)
+        .into_iter()
+        .filter_map(|entry| super::exec_model::scoped_executable_callin(entry, &records))
+        .map(|callin| render_rust_macro(&callin))
+        .collect::<String>();
+    unsafe_export_attributes(source)
+}
+
 fn unsafe_export_attributes(source: String) -> String {
     let mut output = String::with_capacity(source.len());
     for line in source.split_inclusive('\n') {
@@ -174,7 +184,7 @@ fn render_rust_string_macro(callin: &ExecutableCallin<'_>) -> String {
     };
 
     format!(
-        "/// Export `{native_name}` with a guest-owned string result buffer.\n/// The handler receives the flattened query arguments followed by `&mut [u8]`\n/// and returns the number of UTF-8 bytes written. The host copies those bytes\n/// immediately after the single guest call; no guest pointer is retained.\n#[macro_export]\nmacro_rules! {macro_name} {{\n    ($handler:path, $bytes:expr) => {{\n        #[repr(align(8))]\n        struct {buffer_type}([u8; $bytes]);\n        static mut {buffer_name}: {buffer_type} = {buffer_type}([0; $bytes]);\n\n        #[cfg(target_arch = \"wasm32\")]\n        #[export_name = \"{export_name}\"]\n        pub extern \"C\" fn {function_name}({params}) -> i64 {{\n            let pointer = core::ptr::addr_of_mut!({buffer_name}.0).cast::<u8>();\n            if $bytes > u32::MAX as usize || pointer as usize > u32::MAX as usize {{\n                return ((u32::MAX as u64) << 32) as i64;\n            }}\n            // SAFETY: the host rejects nested generated string-result callins,\n            // so this one export has exclusive use of its static result buffer.\n            let output = unsafe {{ core::slice::from_raw_parts_mut(pointer, $bytes) }};\n            let used = {handler_call};\n            if used > $bytes || used > u32::MAX as usize {{\n                return ((u32::MAX as u64) << 32) as i64;\n            }}\n            (((used as u64) << 32) | pointer as u32 as u64) as i64\n        }}\n    }};\n}}\n",
+        "/// Export `{native_name}` with a guest-owned string result buffer.\n/// The handler receives the flattened query arguments followed by `&mut [u8]`\n/// and returns the number of UTF-8 bytes written. The host copies those bytes\n/// immediately after the single guest call; no guest pointer is retained.\n#[macro_export]\nmacro_rules! {macro_name} {{\n    ($handler:path, $bytes:expr) => {{\n        #[repr(align(8))]\n        struct {buffer_type}([u8; $bytes]);\n        static mut {buffer_name}: {buffer_type} = {buffer_type}([0; $bytes]);\n\n        #[cfg(target_arch = \"wasm32\")]\n        #[export_name = \"{export_name}\"]\n        pub extern \"C\" fn {function_name}({params}) -> i64 {{\n            let pointer = unsafe {{ core::ptr::addr_of_mut!({buffer_name}.0).cast::<u8>() }};\n            if $bytes > u32::MAX as usize || pointer as usize > u32::MAX as usize {{\n                return ((u32::MAX as u64) << 32) as i64;\n            }}\n            // SAFETY: the host rejects nested generated string-result callins,\n            // so this one export has exclusive use of its static result buffer.\n            let output = unsafe {{ core::slice::from_raw_parts_mut(pointer, $bytes) }};\n            let used = {handler_call};\n            if used > $bytes || used > u32::MAX as usize {{\n                return ((u32::MAX as u64) << 32) as i64;\n            }}\n            (((used as u64) << 32) | pointer as u32 as u64) as i64\n        }}\n    }};\n}}\n",
         native_name = callin.entry.name,
         macro_name = macro_name,
         export_name = export_name,

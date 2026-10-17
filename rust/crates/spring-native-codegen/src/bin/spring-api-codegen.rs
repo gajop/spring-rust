@@ -60,6 +60,10 @@ mod render_core_wasm_variable_io_host;
 mod render_core_wasm_variable_output_host;
 #[path = "../render/core/shared/wire.rs"]
 mod render_core_wasm_wire;
+#[path = "../render_sdk_callins.rs"]
+mod render_sdk_callins;
+#[path = "../render_sdk_wasm.rs"]
+mod render_sdk_wasm;
 
 fn main() {
     if let Err(error) = run() {
@@ -419,6 +423,40 @@ fn run() -> Result<()> {
         &render_core_wasm_owned_guest::render_owned_footer(&model),
     )?;
     write(&sdk_dir.join("core_environments.rs"), &environment_sdk)?;
+    let wasm_extra = render_sdk_wasm::render(&model, &owned_sdk)?;
+    let scoped = spring_native_codegen::render_sdk::render(
+        &codegen,
+        &root,
+        &model,
+        &owned_sdk,
+        &wasm_extra,
+    )?;
+    if arguments.strict && !scoped.missing.is_empty() {
+        return Err(anyhow!(
+            "Scoped SDK adapters are incomplete:\n{}",
+            scoped.missing.join("\n")
+        ));
+    }
+    write(&sdk_dir.join("scoped_types.rs"), &scoped.types)?;
+    write(&sdk_dir.join("scoped_types_wasm.rs"), &scoped.wasm_types)?;
+    write(&sdk_dir.join("scoped_api.rs"), &scoped.api)?;
+    write(&sdk_dir.join("scoped_native.rs"), &scoped.native)?;
+    write(&sdk_dir.join("scoped_coverage.json"), &scoped.coverage)?;
+    write(&sdk_dir.join("scoped_wasm.rs"), &wasm_extra)?;
+    let (scoped_callins, callin_coverage, callin_smoke) = render_sdk_callins::render(&model)?;
+    write(&sdk_dir.join("scoped_callins.rs"), &scoped_callins)?;
+    write(
+        &sdk_dir.join("scoped_callin_coverage.json"),
+        &callin_coverage,
+    )?;
+    write(
+        &sdk_dir.join("scoped_callin_exports_test.rs"),
+        &callin_smoke,
+    )?;
+    write(
+        &sdk_dir.join("scoped_native_callins.rs"),
+        &spring_native_codegen::render_sdk::render_native_callins(&codegen, &root, &model)?,
+    )?;
     write(
         &sdk_dir.join("core_callins.rs"),
         &render_core_wasm_callin_exec::render_rust(&model),

@@ -56,6 +56,18 @@ pub(super) fn executable_callin<'a>(
     if SPECIALIZED_CALLINS.contains(&entry.name.as_str()) {
         return None;
     }
+    scoped_executable_callin(entry, records)
+}
+
+// The scoped SDK can also use the existing scalar ABI of specialized
+// notifications. AllowUnitCreation keeps its reviewed i32 flag projection.
+pub(super) fn scoped_executable_callin<'a>(
+    entry: ExpandedCallin<'a>,
+    records: &BTreeMap<String, RecordModel>,
+) -> Option<ExecutableCallin<'a>> {
+    if entry.name == "AllowUnitCreation" {
+        return None;
+    }
     let query = records.get(&entry.callin.query)?;
 
     let query_leaves = flatten_fields(&query.fields, records)?;

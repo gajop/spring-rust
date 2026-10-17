@@ -372,9 +372,13 @@ dependencies = [
  "anyhow",
  "clang",
  "heck",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
  "regex",
  "serde",
  "serde_json",
+ "syn 2.0.110",
 ]
 
 [[package]]
@@ -383,6 +387,14 @@ version = "0.1.0"
 dependencies = [
  "bindgen",
  "libc",
+]
+
+[[package]]
+name = "spring-sdk"
+version = "0.1.0"
+dependencies = [
+ "spring",
+ "spring-native-sys",
 ]
 
 [[package]]

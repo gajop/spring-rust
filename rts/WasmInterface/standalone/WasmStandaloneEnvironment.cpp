@@ -237,6 +237,14 @@ bool WasmStandaloneEnvironment::TryLoadNativeDLL(const std::string& pathStem)
 		return false;
 	}
 
+	// Marked SDK modules must match this standalone menu environment. Legacy
+	// modules have no marker and keep their existing loading contract.
+	if (const auto* environment = static_cast<const uint32_t*>(lib->FindAddress("NativeModuleEnvironment"));
+		environment != nullptr && *environment != (1u << 5)) {
+		LOG_L(L_ERROR, "Native module environment %u is not menu", *environment);
+		return false;
+	}
+
 	RemoveEventClient();
 	m_sharedLib = std::move(lib);
 	m_nativeModuleLoaded = true;

@@ -1,0 +1,1 @@
+module(scoped-sdk-menu, WasmMenu/scoped_sdk_menu.wasm, menu, 0, 1.0.0)
