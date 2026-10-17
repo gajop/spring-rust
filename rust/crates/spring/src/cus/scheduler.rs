@@ -1,18 +1,18 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 use super::engine::*;
+use super::shared::{Capture, Shared as Rc, SharedCell as RefCell, TaskStart, Weak};
 use super::types::*;
 use crate::UnitId;
 use alloc::boxed::Box;
 use alloc::collections::BTreeMap;
-use alloc::rc::{Rc, Weak};
 use alloc::vec::Vec;
-use core::cell::{Cell, RefCell};
+use core::cell::Cell;
 use core::future::Future;
 use core::pin::Pin;
 use core::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
-pub type TaskFuture = Pin<Box<dyn Future<Output = ()> + 'static>>;
+pub use super::shared::TaskFuture;
 
 /// A known CUS task entry point.
 ///
@@ -21,14 +21,14 @@ pub type TaskFuture = Pin<Box<dyn Future<Output = ()> + 'static>>;
 /// control and leaves room for durable generated task storage later.
 pub struct TaskDefinition {
     name: &'static str,
-    start: Box<dyn FnOnce(UnitCtx) -> TaskFuture>,
+    start: TaskStart,
 }
 
 impl TaskDefinition {
     #[inline]
     pub fn new<F>(name: &'static str, start: fn(UnitCtx) -> F) -> Self
     where
-        F: Future<Output = ()> + 'static,
+        F: Future<Output = ()> + Capture + 'static,
     {
         Self {
             name,
@@ -39,13 +39,13 @@ impl TaskDefinition {
     /// Build a named task which receives the script's shared state.  The
     /// entry point remains a known function; only its per-instance state is
     /// captured by the task definition.
-    pub fn with_state<S: 'static, F>(
+    pub fn with_state<S: Capture + 'static, F>(
         name: &'static str,
         state: Rc<RefCell<S>>,
         start: fn(Rc<RefCell<S>>, UnitCtx) -> F,
     ) -> Self
     where
-        F: Future<Output = ()> + 'static,
+        F: Future<Output = ()> + Capture + 'static,
     {
         Self {
             name,
@@ -107,7 +107,7 @@ struct TaskWaker {
 impl TaskWaker {
     fn wake(&self) {
         if let Some(scheduler) = self.scheduler.upgrade() {
-            scheduler.borrow_mut().queue_ready(self.id);
+            super::shared::wake(&scheduler, |scheduler| scheduler.queue_ready(self.id));
         }
     }
 }
@@ -615,6 +615,13 @@ pub struct CusScheduler {
     context: UnitCtx,
 }
 
+impl Drop for CusScheduler {
+    fn drop(&mut self) {
+        let tasks = core::mem::take(&mut self.context.scheduler.borrow_mut().tasks);
+        drop(tasks);
+    }
+}
+
 impl CusScheduler {
     #[inline]
     pub fn new(context: UnitCtx) -> Self {
@@ -627,7 +634,7 @@ impl CusScheduler {
     }
 
     #[inline]
-    pub fn spawn(&mut self, definition: TaskDefinition) -> TaskHandle {
+    pub fn spawn(&self, definition: TaskDefinition) -> TaskHandle {
         self.context.spawn(definition)
     }
 
@@ -636,7 +643,7 @@ impl CusScheduler {
     }
 
     /// Resume the waiters for an engine animation at the current frame.
-    pub fn animation_finished(&mut self, kind: AnimationKind, piece: Piece, axis: Option<Axis>) {
+    pub fn animation_finished(&self, kind: AnimationKind, piece: Piece, axis: Option<Axis>) {
         let waiters = self.wake_animation(AnimationKey { kind, piece, axis });
         self.resume_animation(waiters);
     }
@@ -668,7 +675,7 @@ impl CusScheduler {
     /// Advance the instance to `frame` and drain only tasks which have a
     /// timer, completion event, or explicit waker ready. Tasks are kept in
     /// stable task insertion order within the ready set.
-    pub fn tick(&mut self, frame: u64) {
+    pub fn tick(&self, frame: u64) {
         let mut scheduler = self.context.scheduler.borrow_mut();
         if frame < scheduler.frame.get() {
             return;

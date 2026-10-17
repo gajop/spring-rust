@@ -2,6 +2,7 @@
 
 use super::instance::CusInstance;
 use super::scheduler::remove_waiter;
+use super::shared::Shared;
 use crate::UnitId;
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
@@ -18,7 +19,7 @@ pub struct CusRegistry<S> {
 
 struct RegistryEntry<S> {
     generation: u32,
-    instance: CusInstance<S>,
+    instance: Shared<CusInstance<S>>,
     scheduled_frame: Option<u64>,
     queued_due: bool,
 }
@@ -57,7 +58,7 @@ impl<S> CusRegistry<S> {
         remove_waiter(&mut self.scheduled, frame, unit);
     }
 
-    fn refresh(&mut self, unit: UnitId) {
+    pub fn refresh(&mut self, unit: UnitId) {
         if unit.0 < 0 {
             return;
         }
@@ -94,7 +95,7 @@ impl<S> CusRegistry<S> {
         self.generations[index] = generation;
         self.entries[index] = Some(RegistryEntry {
             generation,
-            instance,
+            instance: Shared::new(instance),
             scheduled_frame: None,
             queued_due: false,
         });
@@ -104,7 +105,7 @@ impl<S> CusRegistry<S> {
     pub fn with<R>(
         &mut self,
         handle: CusHandle,
-        f: impl FnOnce(&mut CusInstance<S>) -> R,
+        f: impl FnOnce(&CusInstance<S>) -> R,
     ) -> Option<R> {
         if handle.unit.0 < 0 {
             return None;
@@ -114,13 +115,13 @@ impl<S> CusRegistry<S> {
             if entry.generation != handle.generation {
                 return None;
             }
-            f(&mut entry.instance)
+            f(&entry.instance)
         };
         self.refresh(handle.unit);
         Some(result)
     }
 
-    pub fn detach(&mut self, handle: CusHandle) -> Option<CusInstance<S>> {
+    pub fn detach(&mut self, handle: CusHandle) -> Option<Shared<CusInstance<S>>> {
         if handle.unit.0 < 0 {
             return None;
         }
@@ -141,8 +142,17 @@ impl<S> CusRegistry<S> {
     /// ascending unit-ID order. Idle instances do not cross the scheduler
     /// boundary on this frame.
     pub fn tick(&mut self, frame: u64) {
+        for (handle, instance) in self.due(frame) {
+            instance.tick(frame);
+            self.refresh(handle.unit);
+        }
+    }
+
+    /// Take owned references before invoking scripts, so a host need not hold
+    /// a registry borrow across engine calls that can enter another script.
+    pub fn due(&mut self, frame: u64) -> Vec<(CusHandle, Shared<CusInstance<S>>)> {
         if frame < self.frame {
-            return;
+            return Vec::new();
         }
         self.frame = frame;
         while let Some((&wake_frame, _)) = self.scheduled.first_key_value() {
@@ -173,6 +183,7 @@ impl<S> CusRegistry<S> {
 
         self.due_units.sort_unstable_by_key(|unit| unit.0);
         let initial_due = self.due_units.len();
+        let mut due = Vec::new();
         for index in 0..initial_due {
             let unit = self.due_units[index];
             let Some(entry) = self
@@ -183,12 +194,27 @@ impl<S> CusRegistry<S> {
                 continue;
             };
             entry.queued_due = false;
-            if entry.instance.is_due(frame) {
-                entry.instance.tick(frame);
+            let ready = entry.instance.is_due(frame);
+            if ready {
+                due.push((
+                    CusHandle {
+                        unit,
+                        generation: entry.generation,
+                    },
+                    Shared::clone(&entry.instance),
+                ));
             }
-            self.refresh(unit);
+            if !ready {
+                self.refresh(unit);
+            }
         }
         self.due_units.drain(..initial_due);
+        due
+    }
+
+    pub fn instance(&self, handle: CusHandle) -> Option<Shared<CusInstance<S>>> {
+        let entry = self.entries.get(handle.unit.0 as usize)?.as_ref()?;
+        (entry.generation == handle.generation).then(|| Shared::clone(&entry.instance))
     }
 
     #[inline]

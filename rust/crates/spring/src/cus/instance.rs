@@ -3,11 +3,10 @@
 use super::engine::*;
 use super::scheduler::*;
 use super::script::*;
+use super::shared::{Capture, Shared as Rc, SharedCell as RefCell};
 use super::types::*;
 use crate::{UnitId, WeaponDefId};
-use alloc::rc::Rc;
 use alloc::vec::Vec;
-use core::cell::RefCell;
 use core::future::Future;
 
 /// An attached, typed script instance with its own scheduler and generation-
@@ -63,19 +62,19 @@ impl<S> CusInstance<S> {
     }
 
     #[inline]
-    pub fn spawn(&mut self, definition: TaskDefinition) -> TaskHandle {
+    pub fn spawn(&self, definition: TaskDefinition) -> TaskHandle {
         self.scheduler.spawn(definition)
     }
 
     #[inline]
     pub fn spawn_with_state<F>(
-        &mut self,
+        &self,
         name: &'static str,
         start: fn(Rc<RefCell<S>>, UnitCtx) -> F,
     ) -> TaskHandle
     where
-        S: 'static,
-        F: Future<Output = ()> + 'static,
+        S: Capture + 'static,
+        F: Future<Output = ()> + Capture + 'static,
     {
         self.spawn(TaskDefinition::with_state(
             name,
@@ -85,7 +84,7 @@ impl<S> CusInstance<S> {
     }
 
     #[inline]
-    pub fn tick(&mut self, frame: u64) {
+    pub fn tick(&self, frame: u64) {
         self.scheduler.tick(frame);
     }
 
@@ -116,6 +115,17 @@ impl<S: UnitScript> CusInstance<S> {
         integer_arguments: &[i32],
         result: &mut UnitScriptCallResult,
     ) -> bool {
+        self.try_invoke(call, float_arguments, integer_arguments, result)
+            .expect("CUS script state is already borrowed")
+    }
+
+    pub fn try_invoke(
+        &self,
+        call: UnitScriptCall,
+        float_arguments: &[f32],
+        integer_arguments: &[i32],
+        result: &mut UnitScriptCallResult,
+    ) -> Option<bool> {
         result.int_value = -1;
         result.float_value = 1.0;
         result.bool_value = false;
@@ -125,7 +135,9 @@ impl<S: UnitScript> CusInstance<S> {
         let i = |index: usize| integer_arguments.get(index).copied().unwrap_or_default();
         let context = self.context();
         let mut animation_waiters = Vec::new();
-        let handled = self.with_state(|script| {
+        let handled = {
+            let mut state = self.state.try_borrow_mut().ok()?;
+            let script = &mut *state;
             match call {
                 UnitScriptCall::RawCall => script.raw_call(&context, i(0)),
                 UnitScriptCall::Create => script.create(&context),
@@ -240,9 +252,9 @@ impl<S: UnitScript> CusInstance<S> {
                 }
             }
             true
-        });
+        };
         self.scheduler.resume_animation(animation_waiters);
-        handled
+        Some(handled)
     }
 
     /// Dispatch a synchronous query through the typed script state.
