@@ -876,6 +876,7 @@ fn native_module_and_retained_callbacks_survive_loading_thread_handoff() {
     static CALLS: AtomicUsize = AtomicUsize::new(0);
     struct App {
         count: Cell<usize>,
+        reference: ModuleRef<All>,
     }
     impl Module<All> for App {
         fn initialize(spring: &mut Spring<'_, All>) -> Result<Self> {
@@ -889,6 +890,7 @@ fn native_module_and_retained_callbacks_survive_loading_thread_handoff() {
                 })?;
             Ok(Self {
                 count: Cell::new(0),
+                reference: spring.module_ref(),
             })
         }
     }
@@ -934,6 +936,10 @@ fn native_module_and_retained_callbacks_survive_loading_thread_handoff() {
             slot.validate_identity(identity as *mut _).unwrap();
             slot.invoke(|module, spring| {
                 module.count.set(module.count.get() + 1);
+                module.reference.with_spring(|spring| {
+                    assert_eq!(spring.units().get_all_units()?.len(), 2);
+                    Ok(())
+                })?;
                 assert_eq!(spring.units().get_all_units()?.len(), 2);
                 Ok(())
             })
@@ -958,4 +964,131 @@ fn native_module_and_retained_callbacks_survive_loading_thread_handoff() {
     fn send<T: Send>() {}
     send::<crate::rml::DataModel>();
     send::<crate::rml::Variable<String>>();
+}
+
+#[test]
+fn queued_commands_keep_fifo_continuations_and_immediate_reentry() {
+    use crate::{
+        commands::Queue,
+        module::{Module, NativeSlot},
+    };
+    static ORDER: std::sync::Mutex<Vec<&'static str>> = std::sync::Mutex::new(Vec::new());
+    struct App {
+        queue: Queue<All>,
+    }
+    impl Module<All> for App {
+        fn initialize(_: &mut Spring<'_, All>) -> Result<Self> {
+            Ok(Self {
+                queue: Queue::new(),
+            })
+        }
+    }
+    static SLOT: NativeSlot<All, App> = NativeSlot::new();
+    let interface = sys::NativeInterface::default();
+    unsafe { SLOT.with_host(|slot| slot.initialize_native(&interface).unwrap()) };
+    SLOT.with(|slot| {
+        slot.invoke(|app, spring| {
+            let mut outer = app.queue.scope(spring);
+            app.queue
+                .queue(|_| {
+                    ORDER.lock().unwrap().push("first");
+                    SLOT.with(|slot| {
+                        slot.invoke(|app, spring| {
+                            ORDER.lock().unwrap().push("nested callin");
+                            let _nested = app.queue.scope(spring);
+                            app.queue.run(|_| ORDER.lock().unwrap().push("appended"));
+                            Ok(())
+                        })
+                        .unwrap()
+                    });
+                    7
+                })
+                .then(|_, value| {
+                    assert_eq!(value, 7);
+                    ORDER.lock().unwrap().push("continuation");
+                });
+            {
+                let _nested = app.queue.scope(outer.spring());
+                app.queue.run(|_| ORDER.lock().unwrap().push("second"));
+            }
+            assert!(ORDER.lock().unwrap().is_empty());
+            ORDER.lock().unwrap().push("delayed action");
+            Ok(())
+        })
+        .unwrap()
+    });
+    assert_eq!(
+        *ORDER.lock().unwrap(),
+        [
+            "delayed action",
+            "first",
+            "nested callin",
+            "continuation",
+            "second",
+            "appended"
+        ]
+    );
+    unsafe { SLOT.with_host(|slot| slot.shutdown().unwrap()) };
+}
+
+#[test]
+fn stored_module_identity_only_opens_scopes_inside_its_own_live_callin() {
+    let (game, units, config) = tables();
+    let interface = sys::NativeInterface {
+        game: &game,
+        unitsQuery: &units,
+        config: &config,
+        ..Default::default()
+    };
+    let context = unsafe { ModuleContext::<All>::from_native(&interface) }.unwrap();
+    let reference = context.with_spring(|spring| spring.module_ref()).unwrap();
+    assert_eq!(
+        reference
+            .with_spring::<()>(|_| panic!("outside a callin"))
+            .unwrap_err()
+            .code,
+        ErrorCode::InvalidState as i32
+    );
+    context
+        .with_spring(|spring| {
+            let mut helper = spring.reborrow();
+            assert_eq!(helper.units().get_all_units()?.len(), 2);
+            reference.with_spring(|spring| {
+                assert_eq!(spring.game().get_game_frame()?.low16, 42);
+                Ok(())
+            })?;
+            std::thread::scope(|threads| {
+                let worker_reference = reference.clone();
+                let error = threads
+                    .spawn(move || worker_reference.with_spring::<()>(|_| panic!("worker scope")))
+                    .join()
+                    .unwrap()
+                    .unwrap_err();
+                assert_eq!(error.code, ErrorCode::InvalidState as i32);
+            });
+            Ok::<_, ApiError>(())
+        })
+        .unwrap()
+        .unwrap();
+    let other = unsafe { ModuleContext::<All>::from_native(&interface) }.unwrap();
+    other
+        .with_spring(|_| {
+            assert_eq!(
+                reference
+                    .with_spring::<()>(|_| panic!("different module"))
+                    .unwrap_err()
+                    .code,
+                ErrorCode::InvalidState as i32
+            );
+        })
+        .unwrap();
+    drop(other);
+    drop(context);
+    assert_eq!(
+        reference
+            .with_spring::<()>(|_| panic!("dead module"))
+            .unwrap_err()
+            .code,
+        ErrorCode::InvalidState as i32
+    );
 }

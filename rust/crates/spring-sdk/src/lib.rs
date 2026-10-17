@@ -35,7 +35,7 @@ mod sealed {
 }
 
 /// An engine execution environment. Implementations are sealed.
-pub trait Environment: sealed::Environment {
+pub trait Environment: sealed::Environment + 'static {
     const MASK: u32;
 }
 
@@ -111,9 +111,31 @@ pub struct Spring<'call, E: Environment> {
     environment: PhantomData<E>,
 }
 
-/// Admission authority owned by a module, constructed at its engine entry
-/// point. Shared references allow immediate nested callins without borrowing
-/// the module's mutable game state or holding a lock across a host call.
+impl<E: Environment> Spring<'_, E> {
+    /// Keep module identity in a long-lived model. Engine access through it
+    /// still requires an active callin of this module.
+    pub fn module_ref(&self) -> ModuleRef<E> {
+        ModuleRef {
+            owner: Shared::downgrade(&self.engine.owner),
+            environment: PhantomData,
+        }
+    }
+
+    /// Pass another scoped handle to a helper while retaining the environment.
+    /// It stays tied to this callin and cannot be stored or sent to a worker.
+    pub fn reborrow(&self) -> Spring<'_, E> {
+        Spring {
+            engine: Backend {
+                owner: Shared::clone(&self.engine.owner),
+                scope: PhantomData,
+            },
+            environment: PhantomData,
+        }
+    }
+}
+
+/// Module context created at its engine entry point. Nested callins can enter
+/// without borrowing the module's mutable application state.
 pub struct ModuleContext<E: Environment> {
     owner: Shared<Authority>,
     environment: PhantomData<E>,
@@ -134,6 +156,7 @@ impl<E: Environment> ModuleContext<E> {
             owner: Shared::new(Authority {
                 raw,
                 gate: Shared::new(native_thread::Gate::new()),
+                scopes: Cell::new(0),
                 alive: Cell::new(true),
                 error: Cell::new(None),
                 panic: Default::default(),
@@ -150,6 +173,7 @@ impl<E: Environment> ModuleContext<E> {
     pub unsafe fn from_wasm() -> Self {
         Self {
             owner: Shared::new(Authority {
+                scopes: Cell::new(0),
                 alive: Cell::new(true),
                 error: Cell::new(None),
             }),
@@ -187,6 +211,7 @@ impl<E: Environment> ModuleContext<E> {
             environment: PhantomData,
         };
         spring.engine.check()?;
+        let _scope = ActiveScope::enter(&self.owner);
         let result = callin(&mut spring);
         spring.engine.check()?;
         Ok(result)
@@ -211,6 +236,7 @@ struct Authority {
     raw: *const spring_native_sys::NativeInterface,
     #[cfg(not(target_arch = "wasm32"))]
     gate: Shared<native_thread::Gate>,
+    scopes: Cell<usize>,
     alive: Cell<bool>,
     error: Cell<Option<ApiError>>,
     #[cfg(not(target_arch = "wasm32"))]
@@ -226,6 +252,60 @@ struct Authority {
 unsafe impl Send for Authority {}
 #[cfg(not(target_arch = "wasm32"))]
 unsafe impl Sync for Authority {}
+
+struct ActiveScope<'a>(&'a Authority);
+impl<'a> ActiveScope<'a> {
+    fn enter(owner: &'a Authority) -> Self {
+        owner.scopes.set(owner.scopes.get() + 1);
+        Self(owner)
+    }
+}
+impl Drop for ActiveScope<'_> {
+    fn drop(&mut self) {
+        self.0.scopes.set(self.0.scopes.get() - 1);
+    }
+}
+
+/// A module identifier for models that outlive one callin. It contains no
+/// engine API table. Each use obtains a fresh scoped Spring reference, only
+/// while this module is already inside an engine callin. Native identifiers
+/// can move with module state; worker threads cannot obtain engine access.
+pub struct ModuleRef<E: Environment> {
+    #[cfg(not(target_arch = "wasm32"))]
+    owner: std::sync::Weak<Authority>,
+    #[cfg(target_arch = "wasm32")]
+    owner: std::rc::Weak<Authority>,
+    environment: PhantomData<fn() -> E>,
+}
+impl<E: Environment> Clone for ModuleRef<E> {
+    fn clone(&self) -> Self {
+        Self {
+            owner: self.owner.clone(),
+            environment: PhantomData,
+        }
+    }
+}
+impl<E: Environment> ModuleRef<E> {
+    pub fn with_spring<R>(
+        &self,
+        call: impl for<'call> FnOnce(&mut Spring<'call, E>) -> Result<R>,
+    ) -> Result<R> {
+        let invalid = || ApiError::new(ErrorCode::InvalidState as i32);
+        let owner = self.owner.upgrade().ok_or_else(invalid)?;
+        #[cfg(not(target_arch = "wasm32"))]
+        let _entry = owner.gate.enter_existing()?;
+        if owner.scopes.get() == 0 {
+            return Err(invalid());
+        }
+        let engine = Backend {
+            owner: Shared::clone(&owner),
+            scope: PhantomData,
+        };
+        engine.check()?;
+        let result = engine.with_nested(call);
+        engine.finish(result)
+    }
+}
 
 struct Backend<'call> {
     owner: Shared<Authority>,
@@ -289,6 +369,7 @@ impl Backend<'_> {
             },
             environment: PhantomData,
         };
+        let _scope = ActiveScope::enter(&self.owner);
         callback(&mut spring)
     }
 }
@@ -325,6 +406,7 @@ pub use alloc::format as __format;
 mod logging;
 pub use logging::ResultExt;
 pub mod callbacks;
+pub mod commands;
 mod exports;
 pub mod module;
 #[cfg(not(target_arch = "wasm32"))]

@@ -56,3 +56,8 @@ reading the resulting height, drawing, one GameFrame invocation per frame, and
 native initialization on a different loading thread from later game callins.
 `LoadingMT=1` is explicit in the runner. Both game launches must pass, and the
 menus must still render identical pixels and quit normally.
+
+`--wine /path/to/wine64 --engine /path/to/spring.exe` builds the native fixture
+for `x86_64-pc-windows-gnu` and runs both backends with the caller's dedicated
+Wine prefix. `--all-game` checks the native Windows game too. Windows and Linux
+results are compared within each platform because their font rasterizers differ.
