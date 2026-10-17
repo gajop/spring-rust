@@ -423,7 +423,7 @@ def result_trace_statements(name: str, signature: str) -> list[str]:
             ]
         return [
             "        let trace_results = match &callback_result {",
-            "            Ok(value) => vec![self.trace_optional_bool(*value)],",
+            "            Ok(value) => vec![value.map(|value| self.trace_bool(value)).unwrap_or_else(|| self.trace_nil())],",
             "            Err(_) => vec![self.trace_error()],",
             "        };",
         ]
@@ -455,6 +455,8 @@ def method_item(name: str, signature: str, params: list[tuple[str, str]], text: 
     body = text[brace + 1 : end]
     callback_name = next(symbol for symbol in native_symbols() if camel_to_snake(symbol) == name)
     trace = "\n".join(trace_statements(name, params))
+    if "trace_args.push" not in trace:
+        trace = trace.replace("let mut trace_args", "let trace_args")
     result_trace = "\n".join(result_trace_statements(name, signature))
     if name == "mouse_press":
         # The deterministic driver needs the native event client to become

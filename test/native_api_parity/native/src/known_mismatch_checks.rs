@@ -166,6 +166,9 @@ impl NativeApiParity {
         };
         self.same_bool_if_present(label, message, "wasHit", native_was_hit)?;
         if !native_was_hit && message.get("wasHit").and_then(Value::as_bool) == Some(false) {
+            if native_name != "" || native_piece_num != -1 || native_frame != -1 {
+                return Err(format!("{label}: absent hit must return empty name and -1 indices"));
+            }
             return Ok(());
         }
 

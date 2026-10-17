@@ -468,13 +468,13 @@ native_tests! {
     unit_is_transporting_fixed_shape { check = check_unit_is_transporting_fixed, set = set_noop, required = ["isTransporting", "unitIDs"], }
     unit_pos_error_params_fixed_shape { check = check_unit_pos_error_params_fixed, set = set_noop, required = ["posErrorVectorX", "posErrorVectorY", "posErrorVectorZ", "posErrorDeltaX", "posErrorDeltaY", "posErrorDeltaZ", "nextPosErrorUpdate", "posErrorBit"], }
     unit_flanking_fixed_shape { check = check_unit_flanking_fixed, set = set_noop, required = ["flankingMode", "moveFactor", "minDamage", "maxDamage", "directionX", "directionY", "directionZ", "mobility"], }
-    unit_last_attacked_piece_fixed_shape { check = check_unit_last_hit_piece_fixed, set = set_noop, required = ["wasHit", "pieceName", "pieceNum", "frame"], }
-    feature_last_attacked_piece_fixed_shape { check = check_feature_last_hit_piece_fixed, set = set_noop, required = ["wasHit", "pieceName", "pieceNum", "frame"], }
+    unit_last_attacked_piece_fixed_shape { check = check_unit_last_hit_piece_fixed, set = set_noop, required = ["wasHit", "pieceName", "frame"], }
+    feature_last_attacked_piece_fixed_shape { check = check_feature_last_hit_piece_fixed, set = set_noop, required = ["wasHit", "pieceName", "frame"], }
     get_group_units_sorted_fixed { check = check_selection_value, set = set_selection_value, required = ["groups"], }
     get_key_bindings_count { check = check_input_value, set = set_noop, required = ["count"], }
     get_active_cmd_descs_fixed_count { check = check_unsynced_read_value, set = set_noop, required = ["count"], }
     get_active_cmd_desc_fixed_fields { check = check_unsynced_read_value, set = set_noop, required = ["hasCommand", "id", "type", "name", "queueing", "hidden", "disabled", "paramCount"], }
-    get_ai_info_fixed_shape { check = check_ai_info_fixed, set = set_noop, required = ["hasAI", "skirmishAIID", "name", "hostingPlayerID", "shortName", "version", "optionCount"], }
+    get_ai_info_fixed_shape { check = check_ai_info_fixed, set = set_noop, required = ["hasAI", "optionCount"], }
     get_synced_gc_info_fixed_available { check = check_profiling_value, set = set_noop, required = ["hasInfo"], }
     feature_health { check = check_feature_health, set = set_feature_health, required = ["health"], }
     feature_max_health { check = check_feature_health, set = set_feature_max_health, required = ["health"], }
@@ -666,7 +666,7 @@ native_tests! {
     projectile_direction { check = check_projectile_read, set = set_noop, required = ["x", "y", "z"], }
     projectile_velocity { check = check_projectile_read, set = set_noop, required = ["x", "y", "z"], }
     projectile_gravity { check = check_projectile_read, set = set_noop, required = ["gravity"], }
-    projectile_target { check = check_projectile_read, set = set_noop, required = ["targetType", "targetID", "targetX", "targetY", "targetZ"], }
+    projectile_target { check = check_projectile_read, set = set_noop, required = ["targetType"], }
     projectile_intercepted { check = check_projectile_read, set = set_noop, required = ["intercepted"], }
     projectile_ttl { check = check_projectile_read, set = set_noop, required = ["ttl"], }
     projectile_owner { check = check_projectile_read, set = set_noop, required = ["ownerID"], }

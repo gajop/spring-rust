@@ -5305,14 +5305,14 @@ fn probe_projectile_damage_after_set(fixture: &super::Fixture) -> String {
 }
 
 fn probe_piece_projectile_params_after_set(fixture: &super::Fixture) -> String {
-    match crate::bindings::recoil::spring_api::projectile_control::set_piece_projectile_params((fixture.piece_projectile_id) as i32, (66i32) as i32, (0.75f32) as f32, (2.5f32) as f32, crate::bindings::recoil::spring_api::projectile_control::Float3 { x: 0.0f32, y: 1.0f32, z: 0.0f32 }) {
+    match crate::bindings::recoil::spring_api::projectile_control::set_piece_projectile_params((fixture.piece_projectile_id) as i32, (66i32) as i32, (0.75f32) as f32, (2.5f32) as f32, crate::bindings::recoil::spring_api::projectile_control::Float3 { x: 0.0f32, y: 0.0f32, z: 1.0f32 }) {
         Ok(_) => {},
         Err(error) => return format!("WASM_API|piece_projectile_params_after_set|__error|i|{}", error.code),
     }
     let result = crate::bindings::recoil::spring_api::projectiles::get_piece_projectile_params((fixture.piece_projectile_id) as i32);
     let fields = match result {
         Ok(value) => {
-            let output_fields: Vec<String> = vec![encode_i32("explFlags", value.params.expl_flags), encode_f32("spinAngle", value.params.spin_angle), encode_f32("spinSpeed", value.params.spin_speed), encode_f32("spinX", value.params.spin_vec.x), encode_f32("spinY", value.params.spin_vec.y), encode_f32("spinZ", value.params.spin_vec.z)];
+            let output_fields: Vec<String> = vec![encode_i32("explFlags", value.params.expl_flags), encode_f32("spinAngle", value.params.spin_angle), encode_f32("spinSpeed", value.params.spin_speed), encode_f32("spinX", value.params.spin_vec.x), encode_f32("spinY", value.params.spin_vec.y), encode_f32("spinZ", value.params.spin_vec.z), encode_bool("isPiece", value.is_piece_projectile)];
             output_fields.join("|")
         }
         Err(error) => format!("__error|i|{}", error.code),

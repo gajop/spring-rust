@@ -437,7 +437,7 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	RmlDataModelSetRowsQuery setFiveRows = {
 		.rowsHandle = rowsResult.rowsHandle,
 		.values = fiveRows,
-		.rowCount = 5,
+		.valueCount = std::size(fiveRows),
 	};
 	RmlElementBoolResult setFiveRowsResult = {};
 	RMLUI_API.DataModelSetRows(&setFiveRows, &setFiveRowsResult);
@@ -452,7 +452,7 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	RmlDataModelSetRowsQuery setStyledRows = {
 		.rowsHandle = styledRowsResult.rowsHandle,
 		.values = styledValues,
-		.rowCount = 1,
+		.valueCount = std::size(styledValues),
 	};
 	RmlElementBoolResult setStyledRowsResult = {};
 	RMLUI_API.DataModelSetRows(&setStyledRows, &setStyledRowsResult);
@@ -501,7 +501,7 @@ TEST_CASE("Native runtime data rows resolve fields and retain their high-water c
 	RmlDataModelSetRowsQuery setTwoRows = {
 		.rowsHandle = rowsResult.rowsHandle,
 		.values = twoRows,
-		.rowCount = 2,
+		.valueCount = std::size(twoRows),
 	};
 	RmlElementBoolResult setTwoRowsResult = {};
 	RMLUI_API.DataModelSetRows(&setTwoRows, &setTwoRowsResult);

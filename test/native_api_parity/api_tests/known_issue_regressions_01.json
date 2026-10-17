@@ -744,21 +744,71 @@
       "id": "unit_stockpile_fixed_shape",
       "context": "synced_gadget",
       "kind": "readonly",
-      "requires": ["unit"],
-      "lua": {"set": [], "get": ["Spring.GetUnitStockpile"]},
-      "native": {"set": [], "get": ["UnitsInfo.get_unit_stockpile"]},
-      "compare": {"mode": "fields", "epsilon": 0.05, "fields": ["hasStockpile", "stockpile", "stockpileQueueSize", "buildPercent"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitStockpile`", "native_getter": "`UnitsInfo.get_unit_stockpile`", "fields": "`hasStockpile`, `stockpile`, `stockpileQueueSize`, `buildPercent`"},
-      "rust": {"check": "check_unit_stockpile_fixed", "set": "set_noop"},
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitStockpile"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_stockpile"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "hasStockpile",
+          "stockpile",
+          "stockpileQueueSize",
+          "buildPercent"
+        ],
+        "missing": {
+          "stockpile": 0,
+          "stockpileQueueSize": 0,
+          "buildPercent": 0
+        }
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitStockpile`",
+        "native_getter": "`UnitsInfo.get_unit_stockpile`",
+        "fields": "`hasStockpile`, `stockpile`, `stockpileQueueSize`, `buildPercent`"
+      },
+      "rust": {
+        "check": "check_unit_stockpile_fixed",
+        "set": "set_noop"
+      },
       "params": {},
       "lua_runtime": {
         "call": "Spring.GetUnitStockpile",
-        "args": ["fixture.unitID"],
+        "args": [
+          "fixture.unitID"
+        ],
         "returns": [
-          {"field": "hasStockpile", "index": 1, "transform": "truthy"},
-          {"field": "stockpile", "index": 1},
-          {"field": "stockpileQueueSize", "index": 2},
-          {"field": "buildPercent", "index": 3}
+          {
+            "field": "hasStockpile",
+            "index": 1,
+            "transform": "truthy"
+          },
+          {
+            "field": "stockpile",
+            "index": 1
+          },
+          {
+            "field": "stockpileQueueSize",
+            "index": 2
+          },
+          {
+            "field": "buildPercent",
+            "index": 3
+          }
         ]
       }
     },
@@ -842,20 +892,62 @@
       "id": "unit_last_attacked_piece_fixed_shape",
       "context": "synced_gadget",
       "kind": "readonly",
-      "requires": ["unit"],
-      "lua": {"set": [], "get": ["Spring.GetUnitLastAttackedPiece"]},
-      "native": {"set": [], "get": ["UnitsInfo.get_unit_last_attacked_piece"]},
-      "compare": {"mode": "fields", "fields": ["wasHit", "pieceName", "pieceNum", "frame"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetUnitLastAttackedPiece`", "native_getter": "`UnitsInfo.get_unit_last_attacked_piece`", "fields": "`wasHit`, `pieceName`, `pieceNum`, `frame`"},
-      "rust": {"check": "check_unit_last_hit_piece_fixed", "set": "set_noop"},
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetUnitLastAttackedPiece"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "UnitsInfo.get_unit_last_attacked_piece"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "fields": [
+          "wasHit",
+          "pieceName",
+          "frame"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetUnitLastAttackedPiece`",
+        "native_getter": "`UnitsInfo.get_unit_last_attacked_piece`",
+        "fields": "`wasHit`, `pieceName`, `pieceNum`, `frame`"
+      },
+      "rust": {
+        "check": "check_unit_last_hit_piece_fixed",
+        "set": "set_noop"
+      },
       "params": {},
       "lua_runtime": {
         "call": "Spring.GetUnitLastAttackedPiece",
-        "args": ["fixture.unitID"],
+        "args": [
+          "fixture.unitID"
+        ],
         "returns": [
-          {"field": "wasHit", "index": 1, "transform": "truthy"},
-          {"field": "pieceName", "index": 1, "transform": "nil_to_empty"},
-          {"field": "frame", "index": 2, "transform": "nil_to_minus_one"}
+          {
+            "field": "wasHit",
+            "index": 1,
+            "transform": "truthy"
+          },
+          {
+            "field": "pieceName",
+            "index": 1,
+            "transform": "nil_to_empty"
+          },
+          {
+            "field": "frame",
+            "index": 2,
+            "transform": "nil_to_minus_one"
+          }
         ]
       }
     },
@@ -863,20 +955,62 @@
       "id": "feature_last_attacked_piece_fixed_shape",
       "context": "synced_gadget",
       "kind": "readonly",
-      "requires": ["feature"],
-      "lua": {"set": [], "get": ["Spring.GetFeatureLastAttackedPiece"]},
-      "native": {"set": [], "get": ["Features.get_feature_last_attacked_piece"]},
-      "compare": {"mode": "fields", "fields": ["wasHit", "pieceName", "pieceNum", "frame"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetFeatureLastAttackedPiece`", "native_getter": "`Features.get_feature_last_attacked_piece`", "fields": "`wasHit`, `pieceName`, `pieceNum`, `frame`"},
-      "rust": {"check": "check_feature_last_hit_piece_fixed", "set": "set_noop"},
+      "requires": [
+        "feature"
+      ],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetFeatureLastAttackedPiece"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Features.get_feature_last_attacked_piece"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "fields": [
+          "wasHit",
+          "pieceName",
+          "frame"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetFeatureLastAttackedPiece`",
+        "native_getter": "`Features.get_feature_last_attacked_piece`",
+        "fields": "`wasHit`, `pieceName`, `pieceNum`, `frame`"
+      },
+      "rust": {
+        "check": "check_feature_last_hit_piece_fixed",
+        "set": "set_noop"
+      },
       "params": {},
       "lua_runtime": {
         "call": "Spring.GetFeatureLastAttackedPiece",
-        "args": ["fixture.featureID"],
+        "args": [
+          "fixture.featureID"
+        ],
         "returns": [
-          {"field": "wasHit", "index": 1, "transform": "truthy"},
-          {"field": "pieceName", "index": 1, "transform": "nil_to_empty"},
-          {"field": "frame", "index": 2, "transform": "nil_to_minus_one"}
+          {
+            "field": "wasHit",
+            "index": 1,
+            "transform": "truthy"
+          },
+          {
+            "field": "pieceName",
+            "index": 1,
+            "transform": "nil_to_empty"
+          },
+          {
+            "field": "frame",
+            "index": 2,
+            "transform": "nil_to_minus_one"
+          }
         ]
       }
     },
@@ -966,23 +1100,110 @@
       "context": "synced_gadget",
       "kind": "readonly",
       "requires": [],
-      "lua": {"set": [], "get": ["Spring.GetAIInfo"]},
-      "native": {"set": [], "get": ["Teams.get_aiinfo"]},
-      "compare": {"mode": "fields", "fields": ["hasAI", "skirmishAIID", "name", "hostingPlayerID", "shortName", "version", "optionCount"]},
-      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetAIInfo`", "native_getter": "`Teams.get_aiinfo`", "fields": "`hasAI`, id/name/host, shortName/version, option count"},
-      "rust": {"check": "check_ai_info_fixed", "set": "set_noop"},
-      "params": {"teamID": {"type": "i32", "fixture": "teamID"}},
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetAIInfo"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Teams.get_aiinfo"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "fields": [
+          "hasAI",
+          "skirmishAIID",
+          "name",
+          "hostingPlayerID",
+          "shortName",
+          "version",
+          "optionCount"
+        ],
+        "optional_fields": {
+          "skirmishAIID": "Lua returns no AI identity fields when hasAI is false; the native checker compares hasAI first.",
+          "name": "Lua returns no AI identity fields when hasAI is false; the native checker compares hasAI first.",
+          "hostingPlayerID": "Lua returns no AI identity fields when hasAI is false; the native checker compares hasAI first.",
+          "shortName": "Lua returns no AI identity fields when hasAI is false; the native checker compares hasAI first.",
+          "version": "Lua returns no AI identity fields when hasAI is false; the native checker compares hasAI first."
+        }
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetAIInfo`",
+        "native_getter": "`Teams.get_aiinfo`",
+        "fields": "`hasAI`, id/name/host, shortName/version, option count"
+      },
+      "rust": {
+        "check": "check_ai_info_fixed",
+        "set": "set_noop"
+      },
+      "params": {
+        "teamID": {
+          "type": "i32",
+          "fixture": "teamID"
+        }
+      },
       "lua_runtime": {
         "call": "Spring.GetAIInfo",
-        "args": ["value.teamID"],
+        "args": [
+          "value.teamID"
+        ],
         "returns": [
-          {"field": "hasAI", "index": 1, "transform": "truthy"},
-          {"field": "skirmishAIID", "index": 1, "when": {"field": "hasAI", "truthy": true}},
-          {"field": "name", "index": 2, "when": {"field": "hasAI", "truthy": true}},
-          {"field": "hostingPlayerID", "index": 3, "when": {"field": "hasAI", "truthy": true}},
-          {"field": "shortName", "index": 4, "when": {"field": "hasAI", "truthy": true}},
-          {"field": "version", "index": 5, "when": {"field": "hasAI", "truthy": true}},
-          {"field": "optionCount", "index": 6, "transform": "table_count"}
+          {
+            "field": "hasAI",
+            "index": 1,
+            "transform": "truthy"
+          },
+          {
+            "field": "skirmishAIID",
+            "index": 1,
+            "when": {
+              "field": "hasAI",
+              "truthy": true
+            }
+          },
+          {
+            "field": "name",
+            "index": 2,
+            "when": {
+              "field": "hasAI",
+              "truthy": true
+            }
+          },
+          {
+            "field": "hostingPlayerID",
+            "index": 3,
+            "when": {
+              "field": "hasAI",
+              "truthy": true
+            }
+          },
+          {
+            "field": "shortName",
+            "index": 4,
+            "when": {
+              "field": "hasAI",
+              "truthy": true
+            }
+          },
+          {
+            "field": "version",
+            "index": 5,
+            "when": {
+              "field": "hasAI",
+              "truthy": true
+            }
+          },
+          {
+            "field": "optionCount",
+            "index": 6,
+            "transform": "table_count"
+          }
         ]
       }
     },

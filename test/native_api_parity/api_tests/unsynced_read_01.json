@@ -303,7 +303,7 @@
       "requires": [],
       "lua": {"set": [], "get": ["Spring.GetVisibleProjectiles"]},
       "native": {"set": [], "get": ["UnitRendering.get_visible_projectiles"]},
-      "compare": {"mode": "fields", "fields": ["projectileIDs"]},
+      "compare": {"mode": "fields", "fields": ["projectileIDs"], "normalizers": {"projectileIDs": "id_list"}},
       "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`Spring.GetVisibleProjectiles`", "native_getter": "`UnitRendering.get_visible_projectiles`", "fields": "`projectileIDs`"},
       "rust": {"check": "check_unsynced_read_value", "set": "set_noop"},
       "params": {"allyTeamID": {"type": "i32", "fixture": "allyTeamID"}, "includeSynced": {"type": "bool", "fixed": true}, "includeWeapon": {"type": "bool", "fixed": true}, "includePiece": {"type": "bool", "fixed": true}},

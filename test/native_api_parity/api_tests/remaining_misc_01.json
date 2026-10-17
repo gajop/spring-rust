@@ -37,7 +37,7 @@
       "compare": {"mode": "fields", "fields": ["returnCount"]},
       "report": {"lua_setter": "`Spring.ClearWatchDogTimer`", "native_setter": "`SystemControl.clear_watch_dog_timer`", "lua_getter": "`Spring.ClearWatchDogTimer` (return count)", "native_getter": "n/a", "fields": "`returnCount`"},
       "rust": {"check": "check_system_control_value", "set": "set_system_control_value"},
-      "params": {"threadName": {"type": "string", "fixed": ""}, "keepStopped": {"type": "bool", "fixed": false}},
+      "params": {"threadName": {"type": "string", "fixed": "main"}, "keepStopped": {"type": "bool", "fixed": false}},
       "lua_runtime": {"set": {"call": "Spring.ClearWatchDogTimer", "args": ["value.threadName", "value.keepStopped"]}, "call": "Spring.ClearWatchDogTimer", "args": ["value.threadName", "value.keepStopped"], "returns": [{"field": "returnCount", "transform": "return_count"}]}
     },
     {

@@ -197,10 +197,6 @@ impl NativeApiParity {
         value.map_or_else(|| self.trace_nil(), |value| self.trace_f32(value))
     }
 
-    pub(crate) fn trace_optional_bool(&self, value: Option<bool>) -> Value {
-        value.map_or_else(|| self.trace_nil(), |value| self.trace_bool(value))
-    }
-
     pub(crate) fn trace_error(&self) -> Value {
         serde_json::json!({"type": "error"})
     }

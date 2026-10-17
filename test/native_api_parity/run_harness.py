@@ -400,6 +400,13 @@ BUILT_PROBE_CONTEXTS: set[str] = set()
 
 
 def ensure_wasm_built(skip: bool, transport: str = "core", context: str = "synced_gadget", include_rendering: bool = False) -> None:
+    # model.json is intentionally untracked. verify_codegen generates its own
+    # temporary copy, so a clean checkout must not depend on that command
+    # having left metadata in the source tree.
+    if not BUILT_PROBE_CONTEXTS:
+        subprocess.run(["cargo", "run", "--manifest-path", str(ROOT / "rust/Cargo.toml"),
+            "-p", "spring-native-codegen", "--bin", "spring-api-codegen", "--", "--root", str(ROOT), "--output",
+            str(ROOT / "rts/wasm/generated"), "--strict"], cwd=ROOT, check=True)
     BUILT_PROBE_CONTEXTS.add(context)
     _ensure_wasm_built(skip, transport, context, include_rendering)
 
@@ -1061,9 +1068,12 @@ def compare_wasm_details(
                 continue
             api_mismatches.append({"testName": test_id, "expected": expected_row, "actual": actual_row})
             continue
-        expected_fields = expected_row.get("fields", {})
-        actual_fields = actual_row.get("fields", {})
         compare_spec = API_TEST_BY_ID.get(test_id, {}).get("compare", {})
+        # Apply only the explicit Lua-nil/native-empty mapping declared by the
+        # test, equally to both transports; undeclared missing fields still fail.
+        defaults = compare_spec.get("missing", {})
+        expected_fields = {**defaults, **expected_row.get("fields", {})}
+        actual_fields = {**defaults, **actual_row.get("fields", {})}
         compare_fields = compare_spec.get("fields", [])
         missing_required = [field for field in required_compare_fields(API_TEST_BY_ID.get(test_id, {}))
                             if field not in expected_fields or field not in actual_fields]

@@ -279,6 +279,18 @@ _G["AllowUnitCreation"] = function(...)
 	return unpackn(result)
 end
 
+local previous_AllowUnitDecloak = _G["AllowUnitDecloak"]
+_G["AllowUnitDecloak"] = function(...)
+	local result
+	if previous_AllowUnitDecloak then
+		result = pack(previous_AllowUnitDecloak(...))
+	else
+		result = pack(defaultResult("AllowUnitDecloak"))
+	end
+	trace("AllowUnitDecloak", result, ...)
+	return unpackn(result)
+end
+
 local previous_AllowUnitKamikaze = _G["AllowUnitKamikaze"]
 _G["AllowUnitKamikaze"] = function(...)
 	local result
@@ -1886,6 +1898,7 @@ for _, name in ipairs({
 	"AllowUnitCaptureStep",
 	"AllowUnitCloak",
 	"AllowUnitCreation",
+	"AllowUnitDecloak",
 	"AllowUnitKamikaze",
 	"AllowUnitTransfer",
 	"AllowUnitTransport",

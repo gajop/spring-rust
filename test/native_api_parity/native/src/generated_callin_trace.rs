@@ -203,7 +203,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn game_preload(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -221,7 +221,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn game_start(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -323,7 +323,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_genesis(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -341,7 +341,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_world(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -365,7 +365,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_world_pre_unit(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -383,7 +383,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_pre_decals(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -435,7 +435,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_water_post(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -453,7 +453,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_world_shadow(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -471,7 +471,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_shadow_pass_transparent(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -489,7 +489,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_world_reflection(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -507,7 +507,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_world_refraction(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -525,7 +525,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_ground_pre_forward(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -543,7 +543,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_ground_post_forward(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -561,7 +561,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_ground_pre_deferred(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -579,7 +579,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_ground_deferred(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -597,7 +597,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_ground_post_deferred(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -615,7 +615,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_units_post_deferred(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -633,7 +633,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_features_post_deferred(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -959,7 +959,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_shadow_units_lua(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -977,7 +977,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn draw_shadow_features_lua(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -3233,7 +3233,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn sun_changed(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -3251,7 +3251,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn fonts_changed(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -3358,7 +3358,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn camera_rotation_changed(&mut self, rot: crate::sys::Float3) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         trace_args.extend(self.trace_float3(&rot));
         }
@@ -3378,7 +3378,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn camera_position_changed(&mut self, pos: crate::sys::Float3) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         trace_args.extend(self.trace_float3(&pos));
         }
@@ -3398,7 +3398,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn key_map_changed(&mut self) -> Result<bool, Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {
@@ -3685,7 +3685,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn command_notify(&mut self, command: crate::sys::NativeCallinCommand) -> Result<bool, Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         trace_args.extend(self.trace_command_without_tag(&command));
         }
@@ -3987,7 +3987,7 @@ macro_rules! generated_callin_trace_methods {
 
     fn shutdown(&mut self) -> Result<(), Error> {
         let record_trace = record_callins_enabled();
-        let mut trace_args = Vec::new();
+        let trace_args = Vec::new();
         if record_trace {
         }
         let callback_result = {

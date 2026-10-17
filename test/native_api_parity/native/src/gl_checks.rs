@@ -555,7 +555,7 @@ impl NativeApiParity {
             gfx.get_fixed_state(name)
                 .map_err(|error| format!("GetFixedState({name}) failed: {error:?}"))
         };
-        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("blending")?;
+        let (bools, bool_count, ints, int_count, _floats, float_count) = fixed("blending")?;
         record(
             &mut actual,
             "gl.GetFixedState.blending",
@@ -571,7 +571,7 @@ impl NativeApiParity {
             return Err("GetFixedState(blending) returned unexpected slots".to_owned());
         }
 
-        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("depth")?;
+        let (bools, bool_count, ints, int_count, _floats, float_count) = fixed("depth")?;
         record(
             &mut actual,
             "gl.GetFixedState.depth",
@@ -585,7 +585,7 @@ impl NativeApiParity {
             return Err("GetFixedState(depth) returned unexpected slots".to_owned());
         }
 
-        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("culling")?;
+        let (bools, bool_count, ints, int_count, _floats, float_count) = fixed("culling")?;
         record(
             &mut actual,
             "gl.GetFixedState.culling",
@@ -595,7 +595,7 @@ impl NativeApiParity {
             return Err("GetFixedState(culling) returned unexpected slots".to_owned());
         }
 
-        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("colorMask")?;
+        let (bools, bool_count, _ints, int_count, _floats, float_count) = fixed("colorMask")?;
         record(
             &mut actual,
             "gl.GetFixedState.colorMask",
@@ -623,7 +623,7 @@ impl NativeApiParity {
             return Err("GetFixedState(alphaTest) returned unexpected slots".to_owned());
         }
 
-        let (bools, bool_count, ints, int_count, floats, float_count) = fixed("lineWidth")?;
+        let (_bools, bool_count, _ints, int_count, floats, float_count) = fixed("lineWidth")?;
         record(
             &mut actual,
             "gl.GetFixedState.lineWidth",

@@ -82,7 +82,7 @@ impl NativeApiParity {
 
         let edit_description = command_description(command_id, command_type, Some(&edited_action));
         if !unit
-            .edit_unit_cmd_desc(unit_id, index as u32, &edit_description)
+            .edit_unit_cmd_desc(unit_id, index as u32 + 1, &edit_description)
             .map_err(|err| format!("edit_unit_cmd_desc() failed: {err:?}"))?
         {
             return Err("edit_unit_cmd_desc() returned false".to_string());
@@ -100,7 +100,7 @@ impl NativeApiParity {
         }
 
         if !unit
-            .remove_unit_cmd_desc(unit_id, index as i32)
+            .remove_unit_cmd_desc(unit_id, index as i32 + 1)
             .map_err(|err| format!("remove_unit_cmd_desc() failed: {err:?}"))?
         {
             return Err("remove_unit_cmd_desc() returned false".to_string());

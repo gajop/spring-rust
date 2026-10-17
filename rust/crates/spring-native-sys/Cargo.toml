@@ -11,8 +11,5 @@ path = "src/lib.rs"
 [dependencies]
 libc = "0.2"
 
-[target.'cfg(windows)'.build-dependencies]
-bindgen = { version = "0.69", default-features = false }
-
-[target.'cfg(not(windows))'.build-dependencies]
+[build-dependencies]
 bindgen = { version = "0.69", default-features = false, features = ["runtime"] }

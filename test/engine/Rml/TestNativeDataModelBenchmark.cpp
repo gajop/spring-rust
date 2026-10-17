@@ -163,7 +163,7 @@ void SetNotificationRows(uint64_t rowsHandle, const NotificationRows& rows)
 	RmlDataModelSetRowsQuery query = {
 		.rowsHandle = rowsHandle,
 		.values = rows.values.data(),
-		.rowCount = rows.values.size() / 5,
+		.valueCount = rows.values.size(),
 	};
 	RmlElementBoolResult result = {};
 	RMLUI_API.DataModelSetRows(&query, &result);

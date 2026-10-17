@@ -412,6 +412,16 @@ if not gadgetHandler:IsSyncedCode() then
 	end
 
 	function gadget:RecvFromSynced(name, ...)
+		if name == "native_api_parity_getter_fixture" then
+			local unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, enemyLosUnitID, enemyRadarUnitID, enemyHiddenUnitID = ...
+			fixtureIDs = { unitID = unitID, featureID = featureID, unitDefID = unitDefID,
+				featureDefID = featureDefID, weaponDefID = weaponDefID,
+				weaponDefName = WeaponDefs[weaponDefID].name,
+				projectileID = projectileID, pieceProjectileID = pieceProjectileID,
+				teamID = teamID, allyTeamID = allyTeamID, groundDecalID = groundDecalID,
+				enemyLosUnitID = enemyLosUnitID, enemyRadarUnitID = enemyRadarUnitID, enemyHiddenUnitID = enemyHiddenUnitID }
+			return
+		end
 		if name == "native_api_parity_fixture" then
 			local unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, enemyLosUnitID, enemyRadarUnitID, enemyHiddenUnitID = ...
 			fixtureIDs = {
@@ -520,8 +530,10 @@ if not gadgetHandler:IsSyncedCode() then
 			Spring.SetActiveCommand(nil)
 			Spring.SetMiniMapRotation(math.pi * 0.5)
 			Spring.SendCommands("minimap minimize 1", "minimap minimize 0")
-			local hasLuaUIFixture = Script.LuaUI("NativeApiParityFixture")
-			if hasLuaUIFixture then
+			return
+		elseif name == "native_api_parity_widget_fixture" then
+			local unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, enemyLosUnitID, enemyRadarUnitID, enemyHiddenUnitID = ...
+			if Script.LuaUI("NativeApiParityFixture") then
 				Script.LuaUI.NativeApiParityFixture(unitID, featureID, unitDefID, featureDefID, weaponDefID, projectileID, pieceProjectileID, teamID, allyTeamID, groundDecalID, enemyLosUnitID, enemyRadarUnitID, enemyHiddenUnitID)
 			end
 			return
@@ -916,7 +928,7 @@ local function resolveLuaFunction(name)
 	return func
 end
 
-local function generatedParamValue(param, ids)
+local function generatedParamValue(param, ids, orientation)
 	if param.fixed ~= nil then
 		return param.fixed
 	end
@@ -948,6 +960,12 @@ local function generatedParamValue(param, ids)
 	if param.generator == "unit_orientation" then
 		return randomDirection()
 	end
+	if param.generator == "front_vector" then
+		return { x = orientation.frontX, y = orientation.frontY, z = orientation.frontZ }
+	end
+	if param.generator == "right_vector" then
+		return { x = orientation.rightX, y = orientation.rightY, z = orientation.rightZ }
+	end
 	if param.type == "bool" then
 		return randInt(0, 1) == 1
 	end
@@ -969,8 +987,15 @@ end
 local function generatedMake(test)
 	return function(ids)
 		local values = {}
+		local orientation
+		for _, param in pairs(test.params or {}) do
+			if param.generator == "front_vector" or param.generator == "right_vector" then
+				orientation = randomDirection()
+				break
+			end
+		end
 		for name, param in pairs(test.params or {}) do
-			local value = generatedParamValue(param, ids)
+			local value = generatedParamValue(param, ids, orientation)
 			if param.expands_to and type(value) == "table" then
 				for index, field in ipairs(param.expands_to) do
 					local sourceField = param.expands_from and param.expands_from[index] or field
@@ -1293,6 +1318,11 @@ local function generatedGet(test)
 		for _, postRuntime in ipairs(runtime.post or {}) do
 			appendGeneratedReadback(readback, postRuntime, invokeGeneratedRuntime(postRuntime, ids, value))
 		end
+		-- Some native records represent Lua's absent result with an explicit
+		-- empty value (for example a non-factory's empty command queue).
+		for field, missing in pairs((test.compare or {}).missing or {}) do
+			if readback[field] == nil then readback[field] = missing end
+		end
 		for _, field in ipairs(test.order_insensitive_fields or {}) do
 			if type(readback[field]) == "table" then
 				table.sort(readback[field])
@@ -1322,12 +1352,15 @@ local function generatedSet(test)
 				argCount = argCount + 1
 				args[argCount] = generatedArg(argSpec, ids, value)
 			end
-			func(unpack(args, 1, argCount))
+			local ok, err = pcall(func, unpack(args, 1, argCount))
+			assert(ok, setter.call .. ": " .. tostring(err))
 		end
 	end
 end
 
 local Fixture = {}
+local widgetFixture
+local getterFixture
 
 function Fixture.create()
 	local teamID = 0
@@ -1782,6 +1815,18 @@ function gadget:GameFrame(frame)
 			persistentFixture.enemyRadarUnitID,
 			persistentFixture.enemyHiddenUnitID
 		)
+		-- Widget/native rendering checks mutate their objects. Keep them out
+		-- of the unsynced getter fixture so one test role cannot contaminate
+		-- the other role's transform and selection-volume comparisons.
+		if Common.mode() ~= "wasm" then
+			widgetFixture = Fixture.create()
+			SendToUnsynced("native_api_parity_widget_fixture",
+			widgetFixture.unitID, widgetFixture.featureID,
+			widgetFixture.unitDefID, widgetFixture.featureDefID, widgetFixture.weaponDefID,
+			widgetFixture.projectileID, widgetFixture.pieceProjectileID,
+			widgetFixture.teamID, widgetFixture.allyTeamID,
+				widgetFixture.enemyLosUnitID, widgetFixture.enemyRadarUnitID, widgetFixture.enemyHiddenUnitID)
+		end
 	end
 	local wasmDeterminismFrame = (Common.mode() == "wasm"
 		and Common.enableRenderingTests()
@@ -1839,6 +1884,18 @@ function gadget:GameFrame(frame)
 			renderFixture.teamID
 		)
 	end
+	if frame == 3 and Common.mode() ~= "wasm" then
+		-- The synced control suite and the UI surface both mutate the frame-one
+		-- objects. Give the subsequent unsynced getters a fresh, unshared world
+		-- sample instead of comparing their aftermath across two processes.
+		getterFixture = Fixture.create()
+		SendToUnsynced("native_api_parity_getter_fixture",
+			getterFixture.unitID, getterFixture.featureID,
+			getterFixture.unitDefID, getterFixture.featureDefID, getterFixture.weaponDefID,
+			getterFixture.projectileID, getterFixture.pieceProjectileID,
+			getterFixture.teamID, getterFixture.allyTeamID,
+			getterFixture.enemyLosUnitID, getterFixture.enemyRadarUnitID, getterFixture.enemyHiddenUnitID)
+	end
 	if frame == 18 then
 		if Common.mode() ~= "wasm" then
 			runDeferredSyncedChecks()
@@ -1848,6 +1905,14 @@ function gadget:GameFrame(frame)
 		and (wasmContext == "unsynced_gadget" or wasmContext == "gaia_unsynced"))
 		and 120 or 20
 	if frame == wasmFixtureFrame and persistentFixture ~= nil then
+		if getterFixture ~= nil then
+			Fixture.destroy(getterFixture)
+			getterFixture = nil
+		end
+		if widgetFixture ~= nil then
+			Fixture.destroy(widgetFixture)
+			widgetFixture = nil
+		end
 		Fixture.destroy(persistentFixture)
 		persistentFixture = nil
 	end
