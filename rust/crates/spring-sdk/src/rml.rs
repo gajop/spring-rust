@@ -17,6 +17,37 @@ fn success(ok: bool) -> Result<()> {
     if ok { Ok(()) } else { Err(invalid()) }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PointerCaptureStatus {
+    None,
+    Active,
+    Released,
+    Cancelled,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PointerCaptureDelta {
+    pub delta_x: i32,
+    pub delta_y: i32,
+    pub status: PointerCaptureStatus,
+}
+impl<E: Session> crate::rml_ui::RmlUi<'_, E> {
+    pub fn take_pointer_capture_delta(&self, context: u64) -> Result<PointerCaptureDelta> {
+        let raw = self.context_take_pointer_capture_delta(context)?;
+        let status = match raw.status {
+            0 => PointerCaptureStatus::None,
+            1 => PointerCaptureStatus::Active,
+            2 => PointerCaptureStatus::Released,
+            3 => PointerCaptureStatus::Cancelled,
+            _ => return Err(invalid()),
+        };
+        Ok(PointerCaptureDelta {
+            delta_x: raw.delta_x,
+            delta_y: raw.delta_y,
+            status,
+        })
+    }
+}
+
 struct ModelState {
     #[cfg(target_arch = "wasm32")]
     owner: std::rc::Weak<Authority>,

@@ -3,7 +3,7 @@
 
 pub const NATIVE_API_VERSION: [u32; 3] = [1, 15, 0];
 impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-    pub fn units(&mut self) -> units_query::UnitsQuery<'_, E> {
+    pub fn units(&self) -> units_query::UnitsQuery<'_, E> {
         self.units_query()
     }
 }
@@ -16,7 +16,7 @@ pub mod units_query {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn units_query(&mut self) -> UnitsQuery<'_, E> {
+        pub fn units_query(&self) -> UnitsQuery<'_, E> {
             UnitsQuery {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -24,7 +24,7 @@ pub mod units_query {
         }
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
-        pub fn get_all_units(&mut self) -> Result<Vec<i32>> {
+        pub fn get_all_units(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -37,7 +37,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_closest_enemy_unit(
-            &mut self,
+            &self,
             pos: Float3,
             range: f32,
             ally_team_id: i32,
@@ -70,7 +70,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Local> UnitsQuery<'_, E> {
         pub fn get_render_units(
-            &mut self,
+            &self,
             draw_mask: i32,
             send_mask: bool,
         ) -> Result<Vec<i32>> {
@@ -97,7 +97,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Local> UnitsQuery<'_, E> {
         pub fn get_render_units_draw_flag_changed(
-            &mut self,
+            &self,
             send_mask: bool,
         ) -> Result<Vec<i32>> {
             self._engine.check()?;
@@ -120,7 +120,7 @@ pub mod units_query {
         }
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
-        pub fn get_team_unit_count(&mut self, team_id: i32) -> Result<u32> {
+        pub fn get_team_unit_count(&self, team_id: i32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -138,7 +138,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_team_unit_def_count(
-            &mut self,
+            &self,
             team_id: i32,
             unit_def_id: i32,
         ) -> Result<u32> {
@@ -164,7 +164,7 @@ pub mod units_query {
         }
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
-        pub fn get_team_units(&mut self, team_id: i32) -> Result<Vec<i32>> {
+        pub fn get_team_units(&self, team_id: i32) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -177,7 +177,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_team_units_by_defs(
-            &mut self,
+            &self,
             team_id: i32,
             unit_def_i_ds: &[i32],
         ) -> Result<Vec<i32>> {
@@ -203,10 +203,7 @@ pub mod units_query {
         }
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
-        pub fn get_team_units_counts(
-            &mut self,
-            team_id: i32,
-        ) -> Result<Vec<UnitDefCount>> {
+        pub fn get_team_units_counts(&self, team_id: i32) -> Result<Vec<UnitDefCount>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -224,7 +221,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_team_units_sorted(
-            &mut self,
+            &self,
             team_id: i32,
         ) -> Result<Vec<TeamUnitsByDef>> {
             self._engine.check()?;
@@ -243,7 +240,7 @@ pub mod units_query {
         }
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
-        pub fn get_unit_array_centroid(&mut self, unit_i_ds: &[i32]) -> Result<Float3> {
+        pub fn get_unit_array_centroid(&self, unit_i_ds: &[i32]) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -260,7 +257,7 @@ pub mod units_query {
         }
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
-        pub fn get_unit_map_centroid(&mut self, unit_i_ds: &[i32]) -> Result<Float3> {
+        pub fn get_unit_map_centroid(&self, unit_i_ds: &[i32]) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -277,11 +274,7 @@ pub mod units_query {
         }
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
-        pub fn get_unit_nearest_ally(
-            &mut self,
-            unit_id: i32,
-            range: f32,
-        ) -> Result<i32> {
+        pub fn get_unit_nearest_ally(&self, unit_id: i32, range: f32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -305,7 +298,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_unit_nearest_enemy(
-            &mut self,
+            &self,
             unit_id: i32,
             range: f32,
             options: GetUnitNearestEnemyOptions,
@@ -335,7 +328,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_unit_separation(
-            &mut self,
+            &self,
             unit_id1: i32,
             unit_id2: i32,
             options: GetUnitSeparationOptions,
@@ -365,7 +358,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_units_in_box(
-            &mut self,
+            &self,
             xmin: f32,
             ymin: f32,
             zmin: f32,
@@ -407,7 +400,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_units_in_cylinder(
-            &mut self,
+            &self,
             x: f32,
             z: f32,
             radius: f32,
@@ -440,7 +433,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_units_in_planes(
-            &mut self,
+            &self,
             planes: &PlanesQuery,
             allegiance: i32,
         ) -> Result<Vec<i32>> {
@@ -467,7 +460,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_units_in_rectangle(
-            &mut self,
+            &self,
             xmin: f32,
             zmin: f32,
             xmax: f32,
@@ -503,7 +496,7 @@ pub mod units_query {
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
         pub fn get_units_in_sphere(
-            &mut self,
+            &self,
             x: f32,
             y: f32,
             z: f32,
@@ -538,7 +531,7 @@ pub mod units_query {
         }
     }
     impl<E: crate::capabilities::Game> UnitsQuery<'_, E> {
-        pub fn valid_unit_id(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn valid_unit_id(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -560,7 +553,7 @@ pub mod units_info {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn units_info(&mut self) -> UnitsInfo<'_, E> {
+        pub fn units_info(&self) -> UnitsInfo<'_, E> {
             UnitsInfo {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -568,7 +561,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Local> UnitsInfo<'_, E> {
-        pub fn clear_units_previous_draw_flag(&mut self) -> Result<bool> {
+        pub fn clear_units_previous_draw_flag(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -588,7 +581,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_ally_team(&mut self, unit_id: i32) -> Result<i32> {
+        pub fn get_unit_ally_team(&self, unit_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -600,7 +593,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_armored(&mut self, unit_id: i32) -> Result<UnitArmoredState> {
+        pub fn get_unit_armored(&self, unit_id: i32) -> Result<UnitArmoredState> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -612,7 +605,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_base_position(&mut self, unit_id: i32) -> Result<Float3> {
+        pub fn get_unit_base_position(&self, unit_id: i32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -629,7 +622,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_blocking(&mut self, unit_id: i32) -> Result<UnitBlockingState> {
+        pub fn get_unit_blocking(&self, unit_id: i32) -> Result<UnitBlockingState> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -641,7 +634,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_build_facing(&mut self, unit_id: i32) -> Result<i32> {
+        pub fn get_unit_build_facing(&self, unit_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -659,7 +652,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_build_params(
-            &mut self,
+            &self,
             unit_id: i32,
             param_name: &str,
         ) -> Result<Option<NumberOrBool>> {
@@ -685,7 +678,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_buildee_radius(&mut self, unit_id: i32) -> Result<f32> {
+        pub fn get_unit_buildee_radius(&self, unit_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -707,7 +700,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_collision_volume_data(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<CollisionVolumeData> {
             self._engine.check()?;
@@ -730,7 +723,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_cost_table(&mut self, unit_id: i32) -> Result<UnitCosts> {
+        pub fn get_unit_cost_table(&self, unit_id: i32) -> Result<UnitCosts> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -747,7 +740,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_costs(&mut self, unit_id: i32) -> Result<UnitCosts> {
+        pub fn get_unit_costs(&self, unit_id: i32) -> Result<UnitCosts> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -759,10 +752,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_crashing(
-            &mut self,
-            unit_id: i32,
-        ) -> Result<GetUnitCrashingValue> {
+        pub fn get_unit_crashing(&self, unit_id: i32) -> Result<GetUnitCrashingValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -774,7 +764,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_current_build_power(&mut self, unit_id: i32) -> Result<f32> {
+        pub fn get_unit_current_build_power(&self, unit_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -795,7 +785,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_def_id(&mut self, unit_id: i32) -> Result<i32> {
+        pub fn get_unit_def_id(&self, unit_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -807,7 +797,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_direction(&mut self, unit_id: i32) -> Result<Float3> {
+        pub fn get_unit_direction(&self, unit_id: i32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -820,7 +810,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_effective_build_range(
-            &mut self,
+            &self,
             unit_id: i32,
             buildee_def_id: i32,
         ) -> Result<f32> {
@@ -846,7 +836,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_experience(&mut self, unit_id: i32) -> Result<f32> {
+        pub fn get_unit_experience(&self, unit_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -863,7 +853,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_flanking(&mut self, unit_id: i32) -> Result<UnitFlanking> {
+        pub fn get_unit_flanking(&self, unit_id: i32) -> Result<UnitFlanking> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -876,7 +866,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_harvest_storage(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<UnitHarvestStorage> {
             self._engine.check()?;
@@ -900,7 +890,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_heading(
-            &mut self,
+            &self,
             unit_id: i32,
             convert_to_radians: bool,
         ) -> Result<f32> {
@@ -926,7 +916,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_health(&mut self, unit_id: i32) -> Result<UnitHealth> {
+        pub fn get_unit_health(&self, unit_id: i32) -> Result<UnitHealth> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -938,7 +928,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_height(&mut self, unit_id: i32) -> Result<f32> {
+        pub fn get_unit_height(&self, unit_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -950,7 +940,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_in_build_stance(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_in_build_stance(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -971,7 +961,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_is_active(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_is_active(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -983,7 +973,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_is_being_built(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_is_being_built(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1004,7 +994,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_is_building(&mut self, unit_id: i32) -> Result<i32> {
+        pub fn get_unit_is_building(&self, unit_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1021,7 +1011,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_is_cloaked(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_is_cloaked(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1038,7 +1028,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_is_dead(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_is_dead(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1050,7 +1040,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_is_stunned(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_is_stunned(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1068,7 +1058,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_is_transporting(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<GetUnitIsTransportingValue> {
             self._engine.check()?;
@@ -1092,7 +1082,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_last_attacked_piece(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<LastHitPiece> {
             self._engine.check()?;
@@ -1116,7 +1106,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_last_attacker(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<Option<UnitLastAttacker>> {
             self._engine.check()?;
@@ -1136,7 +1126,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_los_state(
-            &mut self,
+            &self,
             unit_id: i32,
             ally_team_id: i32,
             raw: bool,
@@ -1165,7 +1155,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_mass(&mut self, unit_id: i32) -> Result<f32> {
+        pub fn get_unit_mass(&self, unit_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1177,7 +1167,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_metal_extraction(&mut self, unit_id: i32) -> Result<f32> {
+        pub fn get_unit_metal_extraction(&self, unit_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1198,7 +1188,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_move_def_id(&mut self, unit_id: i32) -> Result<i32> {
+        pub fn get_unit_move_def_id(&self, unit_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1215,7 +1205,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_nano_pieces(&mut self, unit_id: i32) -> Result<Vec<i32>> {
+        pub fn get_unit_nano_pieces(&self, unit_id: i32) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1232,7 +1222,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_neutral(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_neutral(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1245,7 +1235,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_piece_collision_volume_data(
-            &mut self,
+            &self,
             unit_id: i32,
             piece_num: i32,
         ) -> Result<CollisionVolumeData> {
@@ -1272,7 +1262,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_pos_error_params(
-            &mut self,
+            &self,
             unit_id: i32,
             ally_team_id: i32,
         ) -> Result<UnitPosErrorParams> {
@@ -1299,7 +1289,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_position(
-            &mut self,
+            &self,
             unit_id: i32,
             options: GetUnitPositionOptions,
         ) -> Result<Float3> {
@@ -1325,7 +1315,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_radius(&mut self, unit_id: i32) -> Result<f32> {
+        pub fn get_unit_radius(&self, unit_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1337,7 +1327,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_resources(&mut self, unit_id: i32) -> Result<UnitResources> {
+        pub fn get_unit_resources(&self, unit_id: i32) -> Result<UnitResources> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1349,7 +1339,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_rotation(&mut self, unit_id: i32) -> Result<UnitRotation> {
+        pub fn get_unit_rotation(&self, unit_id: i32) -> Result<UnitRotation> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1361,7 +1351,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_seismic_signature(&mut self, unit_id: i32) -> Result<f32> {
+        pub fn get_unit_seismic_signature(&self, unit_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1382,7 +1372,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_self_d_time(&mut self, unit_id: i32) -> Result<f32> {
+        pub fn get_unit_self_d_time(&self, unit_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1400,7 +1390,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_sensor_radius(
-            &mut self,
+            &self,
             unit_id: i32,
             type_: &str,
         ) -> Result<UnitSensorRadius> {
@@ -1432,7 +1422,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_shield_state(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
         ) -> Result<Option<UnitShieldState>> {
@@ -1459,7 +1449,7 @@ pub mod units_info {
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
         pub fn get_unit_states(
-            &mut self,
+            &self,
             unit_id: i32,
             options: UnitStatesOptions,
         ) -> Result<UnitStates> {
@@ -1485,10 +1475,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_stockpile(
-            &mut self,
-            unit_id: i32,
-        ) -> Result<Option<UnitStockpile>> {
+        pub fn get_unit_stockpile(&self, unit_id: i32) -> Result<Option<UnitStockpile>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1500,7 +1487,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_storage(&mut self, unit_id: i32) -> Result<UnitStorage> {
+        pub fn get_unit_storage(&self, unit_id: i32) -> Result<UnitStorage> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1512,7 +1499,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_team(&mut self, unit_id: i32) -> Result<i32> {
+        pub fn get_unit_team(&self, unit_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1524,7 +1511,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_tooltip(&mut self, unit_id: i32) -> Result<String> {
+        pub fn get_unit_tooltip(&self, unit_id: i32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1536,7 +1523,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_transporter(&mut self, unit_id: i32) -> Result<i32> {
+        pub fn get_unit_transporter(&self, unit_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1553,7 +1540,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_vectors(&mut self, unit_id: i32) -> Result<UnitVectors> {
+        pub fn get_unit_vectors(&self, unit_id: i32) -> Result<UnitVectors> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1565,7 +1552,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_velocity(&mut self, unit_id: i32) -> Result<Float3> {
+        pub fn get_unit_velocity(&self, unit_id: i32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1577,7 +1564,7 @@ pub mod units_info {
         }
     }
     impl<E: crate::capabilities::Game> UnitsInfo<'_, E> {
-        pub fn get_unit_worker_task(&mut self, unit_id: i32) -> Result<UnitWorkerTask> {
+        pub fn get_unit_worker_task(&self, unit_id: i32) -> Result<UnitWorkerTask> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1602,7 +1589,7 @@ pub mod units_weapons {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn units_weapons(&mut self) -> UnitsWeapons<'_, E> {
+        pub fn units_weapons(&self) -> UnitsWeapons<'_, E> {
             UnitsWeapons {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -1610,7 +1597,7 @@ pub mod units_weapons {
         }
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
-        pub fn get_unit_max_range(&mut self, unit_id: i32) -> Result<f32> {
+        pub fn get_unit_max_range(&self, unit_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1628,7 +1615,7 @@ pub mod units_weapons {
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
         pub fn get_unit_weapon_can_fire(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
         ) -> Result<bool> {
@@ -1654,7 +1641,7 @@ pub mod units_weapons {
         }
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
-        pub fn get_unit_weapon_count(&mut self, unit_id: i32) -> Result<u32> {
+        pub fn get_unit_weapon_count(&self, unit_id: i32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1676,7 +1663,7 @@ pub mod units_weapons {
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
         pub fn get_unit_weapon_damages(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
         ) -> Result<UnitWeaponDamages> {
@@ -1703,7 +1690,7 @@ pub mod units_weapons {
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
         pub fn get_unit_weapon_have_free_line_of_fire(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
             target_id: i32,
@@ -1742,7 +1729,7 @@ pub mod units_weapons {
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
         pub fn get_unit_weapon_state(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
             key: &str,
@@ -1777,7 +1764,7 @@ pub mod units_weapons {
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
         pub fn get_unit_weapon_target(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
         ) -> Result<UnitWeaponTarget> {
@@ -1804,7 +1791,7 @@ pub mod units_weapons {
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
         pub fn get_unit_weapon_test_range(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
             target_pos: Float3,
@@ -1834,7 +1821,7 @@ pub mod units_weapons {
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
         pub fn get_unit_weapon_test_target(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
             target_id: i32,
@@ -1870,7 +1857,7 @@ pub mod units_weapons {
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
         pub fn get_unit_weapon_try_target(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
             target_id: i32,
@@ -1906,7 +1893,7 @@ pub mod units_weapons {
     }
     impl<E: crate::capabilities::Game> UnitsWeapons<'_, E> {
         pub fn get_unit_weapon_vectors(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
         ) -> Result<UnitWeaponVectors> {
@@ -1941,7 +1928,7 @@ pub mod units_commands {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn units_commands(&mut self) -> UnitsCommands<'_, E> {
+        pub fn units_commands(&self) -> UnitsCommands<'_, E> {
             UnitsCommands {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -1950,7 +1937,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
         pub fn find_unit_cmd_desc(
-            &mut self,
+            &self,
             unit_id: i32,
             cmd_id: i32,
         ) -> Result<FindUnitCmdDescValue> {
@@ -1976,7 +1963,7 @@ pub mod units_commands {
         }
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
-        pub fn get_command_params(&mut self, command: &CommandFFI) -> Result<Vec<f32>> {
+        pub fn get_command_params(&self, command: &CommandFFI) -> Result<Vec<f32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -1994,7 +1981,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
         pub fn get_command_queue(
-            &mut self,
+            &self,
             unit_id: i32,
             max_commands: u32,
         ) -> Result<Vec<CommandFFI>> {
@@ -2021,7 +2008,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
         pub fn get_factory_bugger_off(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<GetFactoryBuggerOffValue> {
             self._engine.check()?;
@@ -2044,7 +2031,7 @@ pub mod units_commands {
         }
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
-        pub fn get_factory_command_count(&mut self, unit_id: i32) -> Result<u32> {
+        pub fn get_factory_command_count(&self, unit_id: i32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -2066,7 +2053,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
         pub fn get_factory_commands(
-            &mut self,
+            &self,
             unit_id: i32,
             max_commands: u32,
         ) -> Result<Vec<CommandFFI>> {
@@ -2093,7 +2080,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
         pub fn get_factory_counts(
-            &mut self,
+            &self,
             unit_id: i32,
             count: i32,
             add_cmds: bool,
@@ -2123,7 +2110,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
         pub fn get_full_build_queue(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<Vec<BuildQueueEntry>> {
             self._engine.check()?;
@@ -2142,7 +2129,7 @@ pub mod units_commands {
         }
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
-        pub fn get_real_build_queue(&mut self, unit_id: i32) -> Result<Vec<i32>> {
+        pub fn get_real_build_queue(&self, unit_id: i32) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -2164,7 +2151,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
         pub fn get_unit_cmd_descs(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<Vec<CommandDescription>> {
             self._engine.check()?;
@@ -2183,7 +2170,7 @@ pub mod units_commands {
         }
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
-        pub fn get_unit_command_count(&mut self, unit_id: i32) -> Result<u32> {
+        pub fn get_unit_command_count(&self, unit_id: i32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -2205,7 +2192,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
         pub fn get_unit_commands(
-            &mut self,
+            &self,
             unit_id: i32,
             max_commands: u32,
         ) -> Result<Vec<CommandFFI>> {
@@ -2227,7 +2214,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Game> UnitsCommands<'_, E> {
         pub fn get_unit_current_command(
-            &mut self,
+            &self,
             unit_id: i32,
             cmd_index: i32,
         ) -> Result<Option<CommandFFI>> {
@@ -2254,7 +2241,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Local> UnitsCommands<'_, E> {
         pub fn give_order(
-            &mut self,
+            &self,
             cmd_id: i32,
             params: &[f32],
             options: u32,
@@ -2287,7 +2274,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Local> UnitsCommands<'_, E> {
         pub fn give_order_array_to_unit(
-            &mut self,
+            &self,
             unit_id: i32,
             commands: &[NativeCommand],
         ) -> Result<bool> {
@@ -2314,7 +2301,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Local> UnitsCommands<'_, E> {
         pub fn give_order_array_to_unit_array(
-            &mut self,
+            &self,
             unit_i_ds: &[i32],
             commands: &[NativeCommand],
             pairwise: bool,
@@ -2344,7 +2331,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Local> UnitsCommands<'_, E> {
         pub fn give_order_array_to_unit_map(
-            &mut self,
+            &self,
             unit_i_ds: &[i32],
             commands: &[CommandFFI],
         ) -> Result<i32> {
@@ -2371,7 +2358,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Local> UnitsCommands<'_, E> {
         pub fn give_order_to_unit(
-            &mut self,
+            &self,
             unit_id: i32,
             cmd_id: i32,
             params: &[f32],
@@ -2407,7 +2394,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Local> UnitsCommands<'_, E> {
         pub fn give_order_to_unit_array(
-            &mut self,
+            &self,
             unit_i_ds: &[i32],
             cmd_id: i32,
             params: &[f32],
@@ -2443,7 +2430,7 @@ pub mod units_commands {
     }
     impl<E: crate::capabilities::Local> UnitsCommands<'_, E> {
         pub fn give_order_to_unit_map(
-            &mut self,
+            &self,
             unit_i_ds: &[i32],
             cmd_id: i32,
             params: &[f32],
@@ -2488,7 +2475,7 @@ pub mod units_pieces {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn units_pieces(&mut self) -> UnitsPieces<'_, E> {
+        pub fn units_pieces(&self) -> UnitsPieces<'_, E> {
             UnitsPieces {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -2497,7 +2484,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_feature_piece_direction(
-            &mut self,
+            &self,
             feature_id: i32,
             piece_num: i32,
         ) -> Result<Float3> {
@@ -2524,7 +2511,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_feature_piece_info(
-            &mut self,
+            &self,
             feature_id: i32,
             piece_num: i32,
         ) -> Result<GetFeaturePieceInfoValue> {
@@ -2550,10 +2537,7 @@ pub mod units_pieces {
         }
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
-        pub fn get_feature_piece_list(
-            &mut self,
-            feature_id: i32,
-        ) -> Result<Vec<String>> {
+        pub fn get_feature_piece_list(&self, feature_id: i32) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -2575,7 +2559,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_feature_piece_map(
-            &mut self,
+            &self,
             feature_id: i32,
         ) -> Result<Vec<PieceMapEntry>> {
             self._engine.check()?;
@@ -2599,7 +2583,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_feature_piece_matrix(
-            &mut self,
+            &self,
             feature_id: i32,
             piece_num: i32,
         ) -> Result<PieceMatrix> {
@@ -2626,7 +2610,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_feature_piece_pos_dir(
-            &mut self,
+            &self,
             feature_id: i32,
             piece_num: i32,
         ) -> Result<PiecePosDir> {
@@ -2653,7 +2637,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_feature_piece_position(
-            &mut self,
+            &self,
             feature_id: i32,
             piece_num: i32,
         ) -> Result<Float3> {
@@ -2679,7 +2663,7 @@ pub mod units_pieces {
         }
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
-        pub fn get_feature_root_piece(&mut self, feature_id: i32) -> Result<i32> {
+        pub fn get_feature_root_piece(&self, feature_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -2700,7 +2684,7 @@ pub mod units_pieces {
         }
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
-        pub fn get_model_piece_list(&mut self, model_name: &str) -> Result<Vec<String>> {
+        pub fn get_model_piece_list(&self, model_name: &str) -> Result<Vec<String>> {
             self._engine.check()?;
             if (model_name).as_bytes().contains(&0) {
                 return Err(
@@ -2727,7 +2711,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_model_piece_map(
-            &mut self,
+            &self,
             model_name: &str,
         ) -> Result<Vec<PieceMapEntry>> {
             self._engine.check()?;
@@ -2755,7 +2739,7 @@ pub mod units_pieces {
         }
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
-        pub fn get_model_root_piece(&mut self, model_name: &str) -> Result<i32> {
+        pub fn get_model_root_piece(&self, model_name: &str) -> Result<i32> {
             self._engine.check()?;
             if (model_name).as_bytes().contains(&0) {
                 return Err(
@@ -2782,7 +2766,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_unit_piece_direction(
-            &mut self,
+            &self,
             unit_id: i32,
             piece_num: i32,
         ) -> Result<Float3> {
@@ -2809,7 +2793,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_unit_piece_info(
-            &mut self,
+            &self,
             unit_id: i32,
             piece_num: i32,
         ) -> Result<GetUnitPieceInfoValue> {
@@ -2835,7 +2819,7 @@ pub mod units_pieces {
         }
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
-        pub fn get_unit_piece_list(&mut self, unit_id: i32) -> Result<Vec<String>> {
+        pub fn get_unit_piece_list(&self, unit_id: i32) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -2852,10 +2836,7 @@ pub mod units_pieces {
         }
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
-        pub fn get_unit_piece_map(
-            &mut self,
-            unit_id: i32,
-        ) -> Result<Vec<PieceMapEntry>> {
+        pub fn get_unit_piece_map(&self, unit_id: i32) -> Result<Vec<PieceMapEntry>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -2873,7 +2854,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_unit_piece_matrix(
-            &mut self,
+            &self,
             unit_id: i32,
             piece_num: i32,
         ) -> Result<PieceMatrix> {
@@ -2900,7 +2881,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_unit_piece_pos_dir(
-            &mut self,
+            &self,
             unit_id: i32,
             piece_num: i32,
         ) -> Result<PiecePosDir> {
@@ -2927,7 +2908,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_unit_piece_position(
-            &mut self,
+            &self,
             unit_id: i32,
             piece_num: i32,
         ) -> Result<Float3> {
@@ -2953,7 +2934,7 @@ pub mod units_pieces {
         }
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
-        pub fn get_unit_root_piece(&mut self, unit_id: i32) -> Result<i32> {
+        pub fn get_unit_root_piece(&self, unit_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -2970,7 +2951,7 @@ pub mod units_pieces {
         }
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
-        pub fn get_unit_script_names(&mut self, unit_id: i32) -> Result<Vec<String>> {
+        pub fn get_unit_script_names(&self, unit_id: i32) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -2992,7 +2973,7 @@ pub mod units_pieces {
     }
     impl<E: crate::capabilities::Game> UnitsPieces<'_, E> {
         pub fn get_unit_script_piece(
-            &mut self,
+            &self,
             unit_id: i32,
             script_num: i32,
         ) -> Result<i32> {
@@ -3028,7 +3009,7 @@ pub mod teams {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn teams(&mut self) -> Teams<'_, E> {
+        pub fn teams(&self) -> Teams<'_, E> {
             Teams {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -3037,7 +3018,7 @@ pub mod teams {
     }
     impl<E: crate::capabilities::World> Teams<'_, E> {
         pub fn are_players_allied(
-            &mut self,
+            &self,
             player_id1: i32,
             player_id2: i32,
         ) -> Result<bool> {
@@ -3063,11 +3044,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::World> Teams<'_, E> {
-        pub fn are_teams_allied(
-            &mut self,
-            team_id1: i32,
-            team_id2: i32,
-        ) -> Result<bool> {
+        pub fn are_teams_allied(&self, team_id1: i32, team_id2: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3085,7 +3062,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::World> Teams<'_, E> {
-        pub fn get_ai_info(&mut self, team_id: i32) -> Result<GetAIInfoValue> {
+        pub fn get_ai_info(&self, team_id: i32) -> Result<GetAIInfoValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3097,7 +3074,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::World> Teams<'_, E> {
-        pub fn get_ally_team_info(&mut self, ally_team_id: i32) -> Result<AllyTeamInfo> {
+        pub fn get_ally_team_info(&self, ally_team_id: i32) -> Result<AllyTeamInfo> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3109,7 +3086,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::World> Teams<'_, E> {
-        pub fn get_ally_team_list(&mut self) -> Result<Vec<i32>> {
+        pub fn get_ally_team_list(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3122,7 +3099,7 @@ pub mod teams {
     }
     impl<E: crate::capabilities::Game> Teams<'_, E> {
         pub fn get_player_controlled_unit(
-            &mut self,
+            &self,
             player_id: i32,
         ) -> Result<GetPlayerControlledUnitValue> {
             self._engine.check()?;
@@ -3146,7 +3123,7 @@ pub mod teams {
     }
     impl<E: crate::capabilities::World> Teams<'_, E> {
         pub fn get_player_info(
-            &mut self,
+            &self,
             player_id: i32,
             get_player_opts: bool,
         ) -> Result<PlayerInfo> {
@@ -3172,11 +3149,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::World> Teams<'_, E> {
-        pub fn get_player_list(
-            &mut self,
-            team_id: i32,
-            active: bool,
-        ) -> Result<Vec<i32>> {
+        pub fn get_player_list(&self, team_id: i32, active: bool) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3189,7 +3162,7 @@ pub mod teams {
     }
     impl<E: crate::capabilities::Game> Teams<'_, E> {
         pub fn get_player_list_in_ally_team(
-            &mut self,
+            &self,
             ally_team_id: i32,
         ) -> Result<Vec<i32>> {
             self._engine.check()?;
@@ -3212,7 +3185,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::Game> Teams<'_, E> {
-        pub fn get_player_list_in_team(&mut self, team_id: i32) -> Result<Vec<i32>> {
+        pub fn get_player_list_in_team(&self, team_id: i32) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3224,7 +3197,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::Game> Teams<'_, E> {
-        pub fn get_team_ally_team_id(&mut self, team_id: i32) -> Result<i32> {
+        pub fn get_team_ally_team_id(&self, team_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3237,7 +3210,7 @@ pub mod teams {
     }
     impl<E: crate::capabilities::World> Teams<'_, E> {
         pub fn get_team_info(
-            &mut self,
+            &self,
             team_id: i32,
             get_team_keys: bool,
         ) -> Result<TeamInfo> {
@@ -3263,7 +3236,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::World> Teams<'_, E> {
-        pub fn get_team_list(&mut self, ally_team_id: i32) -> Result<Vec<i32>> {
+        pub fn get_team_list(&self, ally_team_id: i32) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3275,7 +3248,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::World> Teams<'_, E> {
-        pub fn get_team_lua_ai(&mut self, team_id: i32) -> Result<String> {
+        pub fn get_team_lua_ai(&self, team_id: i32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3287,7 +3260,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::Game> Teams<'_, E> {
-        pub fn get_team_max_units(&mut self, team_id: i32) -> Result<i32> {
+        pub fn get_team_max_units(&self, team_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3300,7 +3273,7 @@ pub mod teams {
     }
     impl<E: crate::capabilities::Game> Teams<'_, E> {
         pub fn get_team_resource_stats(
-            &mut self,
+            &self,
             team_id: i32,
             resource: &str,
         ) -> Result<TeamResources> {
@@ -3332,7 +3305,7 @@ pub mod teams {
     }
     impl<E: crate::capabilities::Game> Teams<'_, E> {
         pub fn get_team_resources(
-            &mut self,
+            &self,
             team_id: i32,
             resource: &str,
         ) -> Result<TeamResources> {
@@ -3364,7 +3337,7 @@ pub mod teams {
     }
     impl<E: crate::capabilities::Game> Teams<'_, E> {
         pub fn get_team_stats_history(
-            &mut self,
+            &self,
             team_id: i32,
             start_index: i32,
             end_index: i32,
@@ -3393,7 +3366,7 @@ pub mod teams {
         }
     }
     impl<E: crate::capabilities::Game> Teams<'_, E> {
-        pub fn get_team_unit_stats(&mut self, team_id: i32) -> Result<TeamUnitStats> {
+        pub fn get_team_unit_stats(&self, team_id: i32) -> Result<TeamUnitStats> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3414,7 +3387,7 @@ pub mod features {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn features(&mut self) -> Features<'_, E> {
+        pub fn features(&self) -> Features<'_, E> {
             Features {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -3422,7 +3395,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Local> Features<'_, E> {
-        pub fn clear_features_previous_draw_flag(&mut self) -> Result<bool> {
+        pub fn clear_features_previous_draw_flag(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3442,7 +3415,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_all_features(&mut self) -> Result<Vec<i32>> {
+        pub fn get_all_features(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3454,7 +3427,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_ally_team(&mut self, feature_id: i32) -> Result<i32> {
+        pub fn get_feature_ally_team(&self, feature_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3471,10 +3444,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Local> Features<'_, E> {
-        pub fn get_feature_always_update_matrix(
-            &mut self,
-            feature_id: i32,
-        ) -> Result<bool> {
+        pub fn get_feature_always_update_matrix(&self, feature_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3496,7 +3466,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_feature_blocking(
-            &mut self,
+            &self,
             feature_id: i32,
         ) -> Result<FeatureBlockingState> {
             self._engine.check()?;
@@ -3516,7 +3486,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_feature_collision_volume_data(
-            &mut self,
+            &self,
             feature_id: i32,
         ) -> Result<CollisionVolumeData> {
             self._engine.check()?;
@@ -3539,7 +3509,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_def_id(&mut self, feature_id: i32) -> Result<i32> {
+        pub fn get_feature_def_id(&self, feature_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3556,7 +3526,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_direction(&mut self, feature_id: i32) -> Result<Float3> {
+        pub fn get_feature_direction(&self, feature_id: i32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3573,7 +3543,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Local> Features<'_, E> {
-        pub fn get_feature_draw_flag(&mut self, feature_id: i32) -> Result<u8> {
+        pub fn get_feature_draw_flag(&self, feature_id: i32) -> Result<u8> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3590,7 +3560,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Local> Features<'_, E> {
-        pub fn get_feature_engine_draw_mask(&mut self, feature_id: i32) -> Result<u32> {
+        pub fn get_feature_engine_draw_mask(&self, feature_id: i32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3611,7 +3581,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_fire_time(&mut self, feature_id: i32) -> Result<f32> {
+        pub fn get_feature_fire_time(&self, feature_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3628,7 +3598,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_heading(&mut self, feature_id: i32) -> Result<i32> {
+        pub fn get_feature_heading(&self, feature_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3645,7 +3615,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_health(&mut self, feature_id: i32) -> Result<FeatureHealth> {
+        pub fn get_feature_health(&self, feature_id: i32) -> Result<FeatureHealth> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3662,7 +3632,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_height(&mut self, feature_id: i32) -> Result<f32> {
+        pub fn get_feature_height(&self, feature_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3680,7 +3650,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_feature_last_attacked_piece(
-            &mut self,
+            &self,
             feature_id: i32,
         ) -> Result<FeatureLastHitPiece> {
             self._engine.check()?;
@@ -3703,7 +3673,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Local> Features<'_, E> {
-        pub fn get_feature_lua_draw(&mut self, feature_id: i32) -> Result<bool> {
+        pub fn get_feature_lua_draw(&self, feature_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3720,7 +3690,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_mass(&mut self, feature_id: i32) -> Result<f32> {
+        pub fn get_feature_mass(&self, feature_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3732,7 +3702,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Local> Features<'_, E> {
-        pub fn get_feature_no_draw(&mut self, feature_id: i32) -> Result<bool> {
+        pub fn get_feature_no_draw(&self, feature_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3749,7 +3719,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_no_select(&mut self, feature_id: i32) -> Result<bool> {
+        pub fn get_feature_no_select(&self, feature_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3767,7 +3737,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_feature_piece_collision_volume_data(
-            &mut self,
+            &self,
             feature_id: i32,
             piece_num: i32,
         ) -> Result<CollisionVolumeData> {
@@ -3793,7 +3763,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_position(&mut self, feature_id: i32) -> Result<Float3> {
+        pub fn get_feature_position(&self, feature_id: i32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3811,7 +3781,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_feature_position_ext(
-            &mut self,
+            &self,
             feature_id: i32,
         ) -> Result<FeaturePositionExt> {
             self._engine.check()?;
@@ -3834,7 +3804,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_radius(&mut self, feature_id: i32) -> Result<f32> {
+        pub fn get_feature_radius(&self, feature_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3852,7 +3822,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_feature_resources(
-            &mut self,
+            &self,
             feature_id: i32,
         ) -> Result<FeatureResources> {
             self._engine.check()?;
@@ -3872,7 +3842,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_feature_resurrect(
-            &mut self,
+            &self,
             feature_id: i32,
         ) -> Result<GetFeatureResurrectValue> {
             self._engine.check()?;
@@ -3891,10 +3861,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_rotation(
-            &mut self,
-            feature_id: i32,
-        ) -> Result<FeatureRotation> {
+        pub fn get_feature_rotation(&self, feature_id: i32) -> Result<FeatureRotation> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3912,7 +3879,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Local> Features<'_, E> {
         pub fn get_feature_selection_volume_data(
-            &mut self,
+            &self,
             feature_id: i32,
         ) -> Result<FeatureSelectionVolumeData> {
             self._engine.check()?;
@@ -3936,7 +3903,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_feature_separation(
-            &mut self,
+            &self,
             feature_id1: i32,
             feature_id2: i32,
             positional: bool,
@@ -3965,7 +3932,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_smoke_time(&mut self, feature_id: i32) -> Result<f32> {
+        pub fn get_feature_smoke_time(&self, feature_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3986,7 +3953,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_team(&mut self, feature_id: i32) -> Result<i32> {
+        pub fn get_feature_team(&self, feature_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -3999,7 +3966,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Local> Features<'_, E> {
         pub fn get_feature_transform_matrix(
-            &mut self,
+            &self,
             feature_id: i32,
         ) -> Result<FeatureTransformMatrix> {
             self._engine.check()?;
@@ -4022,7 +3989,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn get_feature_velocity(&mut self, feature_id: i32) -> Result<Float3> {
+        pub fn get_feature_velocity(&self, feature_id: i32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4040,7 +4007,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_features_in_cylinder(
-            &mut self,
+            &self,
             x: f32,
             z: f32,
             radius: f32,
@@ -4073,7 +4040,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_features_in_rectangle(
-            &mut self,
+            &self,
             min_x: f32,
             min_z: f32,
             max_x: f32,
@@ -4106,7 +4073,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
         pub fn get_features_in_sphere(
-            &mut self,
+            &self,
             center: Float3,
             radius: f32,
         ) -> Result<Vec<i32>> {
@@ -4128,7 +4095,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Local> Features<'_, E> {
         pub fn get_render_features(
-            &mut self,
+            &self,
             draw_mask: i32,
             send_mask: bool,
         ) -> Result<Vec<i32>> {
@@ -4155,7 +4122,7 @@ pub mod features {
     }
     impl<E: crate::capabilities::Local> Features<'_, E> {
         pub fn get_render_features_draw_flag_changed(
-            &mut self,
+            &self,
             send_mask: bool,
         ) -> Result<Vec<i32>> {
             self._engine.check()?;
@@ -4178,7 +4145,7 @@ pub mod features {
         }
     }
     impl<E: crate::capabilities::Game> Features<'_, E> {
-        pub fn valid_feature_id(&mut self, feature_id: i32) -> Result<bool> {
+        pub fn valid_feature_id(&self, feature_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4199,7 +4166,7 @@ pub mod projectiles {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn projectiles(&mut self) -> Projectiles<'_, E> {
+        pub fn projectiles(&self) -> Projectiles<'_, E> {
             Projectiles {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -4208,7 +4175,7 @@ pub mod projectiles {
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
         pub fn get_all_projectiles(
-            &mut self,
+            &self,
             options: GetAllProjectilesOptions,
         ) -> Result<Vec<i32>> {
             self._engine.check()?;
@@ -4228,7 +4195,7 @@ pub mod projectiles {
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
         pub fn get_piece_projectile_params(
-            &mut self,
+            &self,
             projectile_id: i32,
         ) -> Result<GetPieceProjectileParamsValue> {
             self._engine.check()?;
@@ -4251,10 +4218,7 @@ pub mod projectiles {
         }
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
-        pub fn get_projectile_ally_team_id(
-            &mut self,
-            projectile_id: i32,
-        ) -> Result<i32> {
+        pub fn get_projectile_ally_team_id(&self, projectile_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4276,7 +4240,7 @@ pub mod projectiles {
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
         pub fn get_projectile_damages(
-            &mut self,
+            &self,
             projectile_id: i32,
             tag: &str,
         ) -> Result<ProjectileDamages> {
@@ -4307,7 +4271,7 @@ pub mod projectiles {
         }
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
-        pub fn get_projectile_def_id(&mut self, projectile_id: i32) -> Result<i32> {
+        pub fn get_projectile_def_id(&self, projectile_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4328,10 +4292,7 @@ pub mod projectiles {
         }
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
-        pub fn get_projectile_direction(
-            &mut self,
-            projectile_id: i32,
-        ) -> Result<Float3> {
+        pub fn get_projectile_direction(&self, projectile_id: i32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4352,7 +4313,7 @@ pub mod projectiles {
         }
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
-        pub fn get_projectile_gravity(&mut self, projectile_id: i32) -> Result<Float3> {
+        pub fn get_projectile_gravity(&self, projectile_id: i32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4373,10 +4334,7 @@ pub mod projectiles {
         }
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
-        pub fn get_projectile_is_intercepted(
-            &mut self,
-            projectile_id: i32,
-        ) -> Result<bool> {
+        pub fn get_projectile_is_intercepted(&self, projectile_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4397,7 +4355,7 @@ pub mod projectiles {
         }
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
-        pub fn get_projectile_owner_id(&mut self, projectile_id: i32) -> Result<i32> {
+        pub fn get_projectile_owner_id(&self, projectile_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4418,7 +4376,7 @@ pub mod projectiles {
         }
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
-        pub fn get_projectile_position(&mut self, projectile_id: i32) -> Result<Float3> {
+        pub fn get_projectile_position(&self, projectile_id: i32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4440,7 +4398,7 @@ pub mod projectiles {
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
         pub fn get_projectile_target(
-            &mut self,
+            &self,
             projectile_id: i32,
         ) -> Result<ProjectileTarget> {
             self._engine.check()?;
@@ -4463,7 +4421,7 @@ pub mod projectiles {
         }
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
-        pub fn get_projectile_team_id(&mut self, projectile_id: i32) -> Result<i32> {
+        pub fn get_projectile_team_id(&self, projectile_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4484,10 +4442,7 @@ pub mod projectiles {
         }
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
-        pub fn get_projectile_time_to_live(
-            &mut self,
-            projectile_id: i32,
-        ) -> Result<f32> {
+        pub fn get_projectile_time_to_live(&self, projectile_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4509,7 +4464,7 @@ pub mod projectiles {
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
         pub fn get_projectile_type(
-            &mut self,
+            &self,
             projectile_id: i32,
         ) -> Result<GetProjectileTypeValue> {
             self._engine.check()?;
@@ -4532,7 +4487,7 @@ pub mod projectiles {
         }
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
-        pub fn get_projectile_velocity(&mut self, projectile_id: i32) -> Result<Float3> {
+        pub fn get_projectile_velocity(&self, projectile_id: i32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4554,7 +4509,7 @@ pub mod projectiles {
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
         pub fn get_projectiles_in_rectangle(
-            &mut self,
+            &self,
             min_x: f32,
             min_z: f32,
             max_x: f32,
@@ -4590,7 +4545,7 @@ pub mod projectiles {
     }
     impl<E: crate::capabilities::Game> Projectiles<'_, E> {
         pub fn get_projectiles_in_sphere(
-            &mut self,
+            &self,
             center: Float3,
             radius: f32,
             options: GetProjectilesInSphereOptions,
@@ -4627,7 +4582,7 @@ pub mod los {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn los(&mut self) -> Los<'_, E> {
+        pub fn los(&self) -> Los<'_, E> {
             Los {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -4636,7 +4591,7 @@ pub mod los {
     }
     impl<E: crate::capabilities::Game> Los<'_, E> {
         pub fn get_position_los_state(
-            &mut self,
+            &self,
             pos: Float3,
             ally_team_id: i32,
         ) -> Result<PositionLosState> {
@@ -4663,7 +4618,7 @@ pub mod los {
     }
     impl<E: crate::capabilities::Game> Los<'_, E> {
         pub fn get_radar_error_params(
-            &mut self,
+            &self,
             ally_team_id: i32,
         ) -> Result<RadarErrorParams> {
             self._engine.check()?;
@@ -4682,11 +4637,7 @@ pub mod los {
         }
     }
     impl<E: crate::capabilities::Game> Los<'_, E> {
-        pub fn is_pos_in_air_los(
-            &mut self,
-            pos: Float3,
-            ally_team_id: i32,
-        ) -> Result<bool> {
+        pub fn is_pos_in_air_los(&self, pos: Float3, ally_team_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4704,7 +4655,7 @@ pub mod los {
         }
     }
     impl<E: crate::capabilities::Game> Los<'_, E> {
-        pub fn is_pos_in_los(&mut self, pos: Float3, ally_team_id: i32) -> Result<bool> {
+        pub fn is_pos_in_los(&self, pos: Float3, ally_team_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4716,11 +4667,7 @@ pub mod los {
         }
     }
     impl<E: crate::capabilities::Game> Los<'_, E> {
-        pub fn is_pos_in_radar(
-            &mut self,
-            pos: Float3,
-            ally_team_id: i32,
-        ) -> Result<bool> {
+        pub fn is_pos_in_radar(&self, pos: Float3, ally_team_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4733,7 +4680,7 @@ pub mod los {
     }
     impl<E: crate::capabilities::Game> Los<'_, E> {
         pub fn is_unit_in_air_los(
-            &mut self,
+            &self,
             unit_id: i32,
             ally_team_id: i32,
         ) -> Result<bool> {
@@ -4760,7 +4707,7 @@ pub mod los {
     }
     impl<E: crate::capabilities::Game> Los<'_, E> {
         pub fn is_unit_in_jammer(
-            &mut self,
+            &self,
             unit_id: i32,
             ally_team_id: i32,
         ) -> Result<bool> {
@@ -4786,11 +4733,7 @@ pub mod los {
         }
     }
     impl<E: crate::capabilities::Game> Los<'_, E> {
-        pub fn is_unit_in_los(
-            &mut self,
-            unit_id: i32,
-            ally_team_id: i32,
-        ) -> Result<bool> {
+        pub fn is_unit_in_los(&self, unit_id: i32, ally_team_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4808,11 +4751,7 @@ pub mod los {
         }
     }
     impl<E: crate::capabilities::Game> Los<'_, E> {
-        pub fn is_unit_in_radar(
-            &mut self,
-            unit_id: i32,
-            ally_team_id: i32,
-        ) -> Result<bool> {
+        pub fn is_unit_in_radar(&self, unit_id: i32, ally_team_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4845,7 +4784,7 @@ pub mod unit_defs {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn unit_defs(&mut self) -> UnitDefs<'_, E> {
+        pub fn unit_defs(&self) -> UnitDefs<'_, E> {
             UnitDefs {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -4854,7 +4793,7 @@ pub mod unit_defs {
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
         pub fn get_unit_def_by_id(
-            &mut self,
+            &self,
             unit_def_id: i32,
         ) -> Result<GetUnitDefByIDValue> {
             self._engine.check()?;
@@ -4874,7 +4813,7 @@ pub mod unit_defs {
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
         pub fn get_unit_def_classify(
-            &mut self,
+            &self,
             unit_def_id: i32,
         ) -> Result<UnitDefClassify> {
             self._engine.check()?;
@@ -4897,7 +4836,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn get_unit_def_costs(&mut self, unit_def_id: i32) -> Result<UnitDefCosts> {
+        pub fn get_unit_def_costs(&self, unit_def_id: i32) -> Result<UnitDefCosts> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4914,7 +4853,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn get_unit_def_count(&mut self) -> Result<u32> {
+        pub fn get_unit_def_count(&self) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4927,7 +4866,7 @@ pub mod unit_defs {
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
         pub fn get_unit_def_custom_param(
-            &mut self,
+            &self,
             unit_def_id: i32,
             key: &str,
         ) -> Result<String> {
@@ -4959,7 +4898,7 @@ pub mod unit_defs {
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
         pub fn get_unit_def_custom_param_keys(
-            &mut self,
+            &self,
             unit_def_id: i32,
         ) -> Result<Vec<String>> {
             self._engine.check()?;
@@ -4982,7 +4921,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn get_unit_def_health(&mut self, unit_def_id: i32) -> Result<f32> {
+        pub fn get_unit_def_health(&self, unit_def_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -4999,7 +4938,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn get_unit_def_human_name(&mut self, unit_def_id: i32) -> Result<String> {
+        pub fn get_unit_def_human_name(&self, unit_def_id: i32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5016,7 +4955,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn get_unit_def_id_by_name(&mut self, unit_def_name: &str) -> Result<i32> {
+        pub fn get_unit_def_id_by_name(&self, unit_def_name: &str) -> Result<i32> {
             self._engine.check()?;
             if (unit_def_name).as_bytes().contains(&0) {
                 return Err(
@@ -5042,7 +4981,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn get_unit_def_i_ds(&mut self) -> Result<Vec<i32>> {
+        pub fn get_unit_def_ids(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5054,7 +4993,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn get_unit_def_name(&mut self, unit_def_id: i32) -> Result<String> {
+        pub fn get_unit_def_name(&self, unit_def_id: i32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5072,7 +5011,7 @@ pub mod unit_defs {
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
         pub fn get_unit_def_param_bool(
-            &mut self,
+            &self,
             unit_def_id: i32,
             key: &str,
         ) -> Result<bool> {
@@ -5104,7 +5043,7 @@ pub mod unit_defs {
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
         pub fn get_unit_def_param_float(
-            &mut self,
+            &self,
             unit_def_id: i32,
             key: &str,
         ) -> Result<f32> {
@@ -5136,7 +5075,7 @@ pub mod unit_defs {
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
         pub fn get_unit_def_param_int(
-            &mut self,
+            &self,
             unit_def_id: i32,
             key: &str,
         ) -> Result<i32> {
@@ -5167,7 +5106,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn get_unit_def_param_keys(&mut self) -> Result<Vec<UnitDefParamKey>> {
+        pub fn get_unit_def_param_keys(&self) -> Result<Vec<UnitDefParamKey>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5180,7 +5119,7 @@ pub mod unit_defs {
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
         pub fn get_unit_def_param_string(
-            &mut self,
+            &self,
             unit_def_id: i32,
             key: &str,
         ) -> Result<String> {
@@ -5211,7 +5150,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn get_unit_def_param_type(&mut self, key: &str) -> Result<i32> {
+        pub fn get_unit_def_param_type(&self, key: &str) -> Result<i32> {
             self._engine.check()?;
             if (key).as_bytes().contains(&0) {
                 return Err(
@@ -5228,7 +5167,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn get_unit_def_speed(&mut self, unit_def_id: i32) -> Result<f32> {
+        pub fn get_unit_def_speed(&self, unit_def_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5245,7 +5184,7 @@ pub mod unit_defs {
         }
     }
     impl<E: crate::capabilities::Game> UnitDefs<'_, E> {
-        pub fn valid_unit_def_id(&mut self, unit_def_id: i32) -> Result<bool> {
+        pub fn valid_unit_def_id(&self, unit_def_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5272,7 +5211,7 @@ pub mod feature_defs {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn feature_defs(&mut self) -> FeatureDefs<'_, E> {
+        pub fn feature_defs(&self) -> FeatureDefs<'_, E> {
             FeatureDefs {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -5281,7 +5220,7 @@ pub mod feature_defs {
     }
     impl<E: crate::capabilities::Game> FeatureDefs<'_, E> {
         pub fn get_feature_def_by_id(
-            &mut self,
+            &self,
             feature_def_id: i32,
         ) -> Result<GetFeatureDefByIDValue> {
             self._engine.check()?;
@@ -5304,7 +5243,7 @@ pub mod feature_defs {
         }
     }
     impl<E: crate::capabilities::Game> FeatureDefs<'_, E> {
-        pub fn get_feature_def_count(&mut self) -> Result<u32> {
+        pub fn get_feature_def_count(&self) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5317,7 +5256,7 @@ pub mod feature_defs {
     }
     impl<E: crate::capabilities::Game> FeatureDefs<'_, E> {
         pub fn get_feature_def_custom_param(
-            &mut self,
+            &self,
             feature_def_id: i32,
             key: &str,
         ) -> Result<String> {
@@ -5349,7 +5288,7 @@ pub mod feature_defs {
     }
     impl<E: crate::capabilities::Game> FeatureDefs<'_, E> {
         pub fn get_feature_def_custom_param_keys(
-            &mut self,
+            &self,
             feature_def_id: i32,
         ) -> Result<Vec<String>> {
             self._engine.check()?;
@@ -5372,7 +5311,7 @@ pub mod feature_defs {
         }
     }
     impl<E: crate::capabilities::Game> FeatureDefs<'_, E> {
-        pub fn get_feature_def_energy(&mut self, feature_def_id: i32) -> Result<f32> {
+        pub fn get_feature_def_energy(&self, feature_def_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5393,10 +5332,7 @@ pub mod feature_defs {
         }
     }
     impl<E: crate::capabilities::Game> FeatureDefs<'_, E> {
-        pub fn get_feature_def_id_by_name(
-            &mut self,
-            feature_def_name: &str,
-        ) -> Result<i32> {
+        pub fn get_feature_def_id_by_name(&self, feature_def_name: &str) -> Result<i32> {
             self._engine.check()?;
             if (feature_def_name).as_bytes().contains(&0) {
                 return Err(
@@ -5422,7 +5358,7 @@ pub mod feature_defs {
         }
     }
     impl<E: crate::capabilities::Game> FeatureDefs<'_, E> {
-        pub fn get_feature_def_i_ds(&mut self) -> Result<Vec<i32>> {
+        pub fn get_feature_def_ids(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5434,7 +5370,7 @@ pub mod feature_defs {
         }
     }
     impl<E: crate::capabilities::Game> FeatureDefs<'_, E> {
-        pub fn get_feature_def_metal(&mut self, feature_def_id: i32) -> Result<f32> {
+        pub fn get_feature_def_metal(&self, feature_def_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5455,7 +5391,7 @@ pub mod feature_defs {
         }
     }
     impl<E: crate::capabilities::Game> FeatureDefs<'_, E> {
-        pub fn get_feature_def_name(&mut self, feature_def_id: i32) -> Result<String> {
+        pub fn get_feature_def_name(&self, feature_def_id: i32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5476,7 +5412,7 @@ pub mod feature_defs {
         }
     }
     impl<E: crate::capabilities::Game> FeatureDefs<'_, E> {
-        pub fn valid_feature_def_id(&mut self, feature_def_id: i32) -> Result<bool> {
+        pub fn valid_feature_def_id(&self, feature_def_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5507,7 +5443,7 @@ pub mod weapon_defs {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn weapon_defs(&mut self) -> WeaponDefs<'_, E> {
+        pub fn weapon_defs(&self) -> WeaponDefs<'_, E> {
             WeaponDefs {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -5516,7 +5452,7 @@ pub mod weapon_defs {
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
         pub fn get_weapon_def_by_id(
-            &mut self,
+            &self,
             weapon_def_id: i32,
         ) -> Result<GetWeaponDefByIDValue> {
             self._engine.check()?;
@@ -5539,7 +5475,7 @@ pub mod weapon_defs {
         }
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
-        pub fn get_weapon_def_count(&mut self) -> Result<u32> {
+        pub fn get_weapon_def_count(&self) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5552,7 +5488,7 @@ pub mod weapon_defs {
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
         pub fn get_weapon_def_custom_param(
-            &mut self,
+            &self,
             weapon_def_id: i32,
             key: &str,
         ) -> Result<String> {
@@ -5584,7 +5520,7 @@ pub mod weapon_defs {
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
         pub fn get_weapon_def_custom_param_keys(
-            &mut self,
+            &self,
             weapon_def_id: i32,
         ) -> Result<Vec<String>> {
             self._engine.check()?;
@@ -5607,7 +5543,7 @@ pub mod weapon_defs {
         }
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
-        pub fn get_weapon_def_damage(&mut self, weapon_def_id: i32) -> Result<f32> {
+        pub fn get_weapon_def_damage(&self, weapon_def_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5628,7 +5564,7 @@ pub mod weapon_defs {
         }
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
-        pub fn get_weapon_def_id(&mut self, weapon_def_name: &str) -> Result<i32> {
+        pub fn get_weapon_def_id(&self, weapon_def_name: &str) -> Result<i32> {
             self._engine.check()?;
             if (weapon_def_name).as_bytes().contains(&0) {
                 return Err(
@@ -5654,7 +5590,7 @@ pub mod weapon_defs {
         }
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
-        pub fn get_weapon_def_i_ds(&mut self) -> Result<Vec<i32>> {
+        pub fn get_weapon_def_ids(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5666,7 +5602,7 @@ pub mod weapon_defs {
         }
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
-        pub fn get_weapon_def_name(&mut self, weapon_def_id: i32) -> Result<String> {
+        pub fn get_weapon_def_name(&self, weapon_def_id: i32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5688,7 +5624,7 @@ pub mod weapon_defs {
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
         pub fn get_weapon_def_projectile_params(
-            &mut self,
+            &self,
             weapon_def_id: i32,
         ) -> Result<GetWeaponDefProjectileParamsValue> {
             self._engine.check()?;
@@ -5711,7 +5647,7 @@ pub mod weapon_defs {
         }
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
-        pub fn get_weapon_def_range(&mut self, weapon_def_id: i32) -> Result<f32> {
+        pub fn get_weapon_def_range(&self, weapon_def_id: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5732,7 +5668,7 @@ pub mod weapon_defs {
         }
     }
     impl<E: crate::capabilities::Game> WeaponDefs<'_, E> {
-        pub fn valid_weapon_def_id(&mut self, weapon_def_id: i32) -> Result<bool> {
+        pub fn valid_weapon_def_id(&self, weapon_def_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5763,7 +5699,7 @@ pub mod game {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn game(&mut self) -> Game<'_, E> {
+        pub fn game(&self) -> Game<'_, E> {
             Game {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -5771,7 +5707,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::World> Game<'_, E> {
-        pub fn are_helper_a_is_enabled(&mut self) -> Result<bool> {
+        pub fn are_helper_a_is_enabled(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5783,7 +5719,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::World> Game<'_, E> {
-        pub fn fixed_allies(&mut self) -> Result<bool> {
+        pub fn fixed_allies(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5796,7 +5732,7 @@ pub mod game {
     }
     impl<E: crate::capabilities::World> Game<'_, E> {
         pub fn get_ally_team_start_box(
-            &mut self,
+            &self,
             ally_team_id: i32,
         ) -> Result<GetAllyTeamStartBoxValue> {
             self._engine.check()?;
@@ -5815,7 +5751,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_facing_from_heading(&mut self, heading: i32) -> Result<i32> {
+        pub fn get_facing_from_heading(&self, heading: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5827,7 +5763,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::World> Game<'_, E> {
-        pub fn get_gaia_team_id(&mut self) -> Result<i32> {
+        pub fn get_gaia_team_id(&self) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5839,7 +5775,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_game_frame(&mut self) -> Result<GetGameFrameValue> {
+        pub fn get_game_frame(&self) -> Result<GetGameFrameValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5851,7 +5787,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_game_map_info(&mut self) -> Result<GameMapInfo> {
+        pub fn get_game_map_info(&self) -> Result<GameMapInfo> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5863,7 +5799,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_game_mod_info(&mut self) -> Result<GameModInfo> {
+        pub fn get_game_mod_info(&self) -> Result<GameModInfo> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5875,7 +5811,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_game_rules_info(&mut self) -> Result<GameRulesInfo> {
+        pub fn get_game_rules_info(&self) -> Result<GameRulesInfo> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5887,7 +5823,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_game_rules_resource_info(&mut self) -> Result<GameRulesResourceInfo> {
+        pub fn get_game_rules_resource_info(&self) -> Result<GameRulesResourceInfo> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5899,7 +5835,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_game_seconds(&mut self) -> Result<f32> {
+        pub fn get_game_seconds(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5911,7 +5847,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_game_setup_info(&mut self) -> Result<GameSetupInfo> {
+        pub fn get_game_setup_info(&self) -> Result<GameSetupInfo> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5923,7 +5859,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_global_los(&mut self, ally_team_id: i32) -> Result<i32> {
+        pub fn get_global_los(&self, ally_team_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5935,7 +5871,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_heading_from_facing(&mut self, facing: i32) -> Result<i32> {
+        pub fn get_heading_from_facing(&self, facing: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5947,7 +5883,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_heading_from_vector(&mut self, x: f32, z: f32) -> Result<i32> {
+        pub fn get_heading_from_vector(&self, x: f32, z: f32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5959,7 +5895,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_map_option(&mut self, key: &str) -> Result<GetMapOptionValue> {
+        pub fn get_map_option(&self, key: &str) -> Result<GetMapOptionValue> {
             self._engine.check()?;
             if (key).as_bytes().contains(&0) {
                 return Err(
@@ -5975,7 +5911,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::World> Game<'_, E> {
-        pub fn get_map_options(&mut self) -> Result<Vec<String>> {
+        pub fn get_map_options(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5987,7 +5923,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_map_start_positions(&mut self) -> Result<Vec<StartPosition>> {
+        pub fn get_map_start_positions(&self) -> Result<Vec<StartPosition>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -5999,7 +5935,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_mod_option(&mut self, key: &str) -> Result<GetModOptionValue> {
+        pub fn get_mod_option(&self, key: &str) -> Result<GetModOptionValue> {
             self._engine.check()?;
             if (key).as_bytes().contains(&0) {
                 return Err(
@@ -6015,7 +5951,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::World> Game<'_, E> {
-        pub fn get_mod_options(&mut self) -> Result<Vec<String>> {
+        pub fn get_mod_options(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6027,7 +5963,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::World> Game<'_, E> {
-        pub fn get_side_data(&mut self, side_name: &str) -> Result<SideData> {
+        pub fn get_side_data(&self, side_name: &str) -> Result<SideData> {
             self._engine.check()?;
             if (side_name).as_bytes().contains(&0) {
                 return Err(
@@ -6044,7 +5980,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_side_data_by_index(&mut self, side_index: u32) -> Result<SideData> {
+        pub fn get_side_data_by_index(&self, side_index: u32) -> Result<SideData> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6061,7 +5997,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_side_data_count(&mut self) -> Result<u32> {
+        pub fn get_side_data_count(&self) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6074,7 +6010,7 @@ pub mod game {
     }
     impl<E: crate::capabilities::World> Game<'_, E> {
         pub fn get_team_start_position(
-            &mut self,
+            &self,
             team_id: i32,
         ) -> Result<GetTeamStartPositionValue> {
             self._engine.check()?;
@@ -6088,7 +6024,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_tidal(&mut self) -> Result<f32> {
+        pub fn get_tidal(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6100,7 +6036,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_vector_from_heading(&mut self, heading: i32) -> Result<Float2> {
+        pub fn get_vector_from_heading(&self, heading: i32) -> Result<Float2> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6112,7 +6048,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn get_wind(&mut self) -> Result<WindData> {
+        pub fn get_wind(&self) -> Result<WindData> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6124,7 +6060,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn is_cheating_enabled(&mut self) -> Result<bool> {
+        pub fn is_cheating_enabled(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6136,7 +6072,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn is_dev_lua_enabled(&mut self) -> Result<bool> {
+        pub fn is_dev_lua_enabled(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6148,7 +6084,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn is_edit_defs_enabled(&mut self) -> Result<bool> {
+        pub fn is_edit_defs_enabled(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6160,7 +6096,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn is_game_over(&mut self) -> Result<bool> {
+        pub fn is_game_over(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6172,7 +6108,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn is_god_mode_enabled(&mut self) -> Result<IsGodModeEnabledValue> {
+        pub fn is_god_mode_enabled(&self) -> Result<IsGodModeEnabledValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6184,7 +6120,7 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
-        pub fn is_no_cost_enabled(&mut self) -> Result<bool> {
+        pub fn is_no_cost_enabled(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6205,7 +6141,7 @@ pub mod terrain {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn terrain(&mut self) -> Terrain<'_, E> {
+        pub fn terrain(&self) -> Terrain<'_, E> {
             Terrain {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -6213,7 +6149,7 @@ pub mod terrain {
         }
     }
     impl<E: crate::capabilities::Game> Terrain<'_, E> {
-        pub fn get_grass(&mut self, x: f32, z: f32) -> Result<f32> {
+        pub fn get_grass(&self, x: f32, z: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6226,7 +6162,7 @@ pub mod terrain {
     }
     impl<E: crate::capabilities::Game> Terrain<'_, E> {
         pub fn get_ground_blocked(
-            &mut self,
+            &self,
             x1: f32,
             z1: f32,
             x2: f32,
@@ -6251,22 +6187,19 @@ pub mod terrain {
         }
     }
     impl<E: crate::capabilities::World> Terrain<'_, E> {
-        pub fn get_ground_extremes(
-            &mut self,
-            _unused: u8,
-        ) -> Result<GetGroundExtremesValue> {
+        pub fn get_ground_extremes(&self) -> Result<GetGroundExtremesValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_ground_extremes(_unused) }
+                { spring::generated::owned::terrain::get_ground_extremes(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_ground_extremes(&self._engine, _unused) }
+                { crate::native::terrain::get_ground_extremes(&self._engine) }
             };
             self._engine.finish(result)
         }
     }
     impl<E: crate::capabilities::World> Terrain<'_, E> {
-        pub fn get_ground_height(&mut self, x: f32, z: f32) -> Result<f32> {
+        pub fn get_ground_height(&self, x: f32, z: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6278,7 +6211,7 @@ pub mod terrain {
         }
     }
     impl<E: crate::capabilities::Game> Terrain<'_, E> {
-        pub fn get_ground_heights(&mut self, positions: &[f32]) -> Result<Vec<f32>> {
+        pub fn get_ground_heights(&self, positions: &[f32]) -> Result<Vec<f32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6290,7 +6223,7 @@ pub mod terrain {
         }
     }
     impl<E: crate::capabilities::World> Terrain<'_, E> {
-        pub fn get_ground_info(&mut self, x: f32, z: f32) -> Result<GetGroundInfoValue> {
+        pub fn get_ground_info(&self, x: f32, z: f32) -> Result<GetGroundInfoValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6303,7 +6236,7 @@ pub mod terrain {
     }
     impl<E: crate::capabilities::World> Terrain<'_, E> {
         pub fn get_ground_normal(
-            &mut self,
+            &self,
             x: f32,
             z: f32,
             smoothed: bool,
@@ -6326,7 +6259,7 @@ pub mod terrain {
         }
     }
     impl<E: crate::capabilities::World> Terrain<'_, E> {
-        pub fn get_ground_orig_height(&mut self, x: f32, z: f32) -> Result<f32> {
+        pub fn get_ground_orig_height(&self, x: f32, z: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6338,22 +6271,19 @@ pub mod terrain {
         }
     }
     impl<E: crate::capabilities::Game> Terrain<'_, E> {
-        pub fn get_height_map_size(
-            &mut self,
-            _unused: u8,
-        ) -> Result<GetHeightMapSizeValue> {
+        pub fn get_height_map_size(&self) -> Result<GetHeightMapSizeValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_height_map_size(_unused) }
+                { spring::generated::owned::terrain::get_height_map_size(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_height_map_size(&self._engine, _unused) }
+                { crate::native::terrain::get_height_map_size(&self._engine) }
             };
             self._engine.finish(result)
         }
     }
     impl<E: crate::capabilities::Game> Terrain<'_, E> {
-        pub fn get_smooth_mesh_height(&mut self, x: f32, z: f32) -> Result<f32> {
+        pub fn get_smooth_mesh_height(&self, x: f32, z: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6366,7 +6296,7 @@ pub mod terrain {
     }
     impl<E: crate::capabilities::Game> Terrain<'_, E> {
         pub fn get_terrain_type_data(
-            &mut self,
+            &self,
             terrain_type_index: i32,
         ) -> Result<GetTerrainTypeDataValue> {
             self._engine.check()?;
@@ -6385,7 +6315,7 @@ pub mod terrain {
         }
     }
     impl<E: crate::capabilities::Game> Terrain<'_, E> {
-        pub fn get_water_level(&mut self, x: f32, z: f32) -> Result<f32> {
+        pub fn get_water_level(&self, x: f32, z: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6397,19 +6327,19 @@ pub mod terrain {
         }
     }
     impl<E: crate::capabilities::Game> Terrain<'_, E> {
-        pub fn get_water_plane_level(&mut self, _unused: u8) -> Result<f32> {
+        pub fn get_water_plane_level(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_water_plane_level(_unused) }
+                { spring::generated::owned::terrain::get_water_plane_level(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_water_plane_level(&self._engine, _unused) }
+                { crate::native::terrain::get_water_plane_level(&self._engine) }
             };
             self._engine.finish(result)
         }
     }
     impl<E: crate::capabilities::Game> Terrain<'_, E> {
-        pub fn is_pos_in_map(&mut self, x: f32, z: f32) -> Result<IsPosInMapValue> {
+        pub fn is_pos_in_map(&self, x: f32, z: f32) -> Result<IsPosInMapValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6430,7 +6360,7 @@ pub mod player {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn player(&mut self) -> Player<'_, E> {
+        pub fn player(&self) -> Player<'_, E> {
             Player {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -6438,7 +6368,7 @@ pub mod player {
         }
     }
     impl<E: crate::capabilities::Render> Player<'_, E> {
-        pub fn get_local_ally_team_id(&mut self) -> Result<i32> {
+        pub fn get_local_ally_team_id(&self) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6450,7 +6380,7 @@ pub mod player {
         }
     }
     impl<E: crate::capabilities::Render> Player<'_, E> {
-        pub fn get_local_player_id(&mut self) -> Result<i32> {
+        pub fn get_local_player_id(&self) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6462,7 +6392,7 @@ pub mod player {
         }
     }
     impl<E: crate::capabilities::Render> Player<'_, E> {
-        pub fn get_local_team_id(&mut self) -> Result<i32> {
+        pub fn get_local_team_id(&self) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6475,7 +6405,7 @@ pub mod player {
     }
     impl<E: crate::capabilities::Local> Player<'_, E> {
         pub fn get_player_roster(
-            &mut self,
+            &self,
             sort_mode: i32,
             show_pathing_players: bool,
         ) -> Result<Vec<RosterEntry>> {
@@ -6501,7 +6431,7 @@ pub mod player {
         }
     }
     impl<E: crate::capabilities::Local> Player<'_, E> {
-        pub fn get_player_statistics(&mut self, player_id: i32) -> Result<PlayerStats> {
+        pub fn get_player_statistics(&self, player_id: i32) -> Result<PlayerStats> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6519,7 +6449,7 @@ pub mod player {
     }
     impl<E: crate::capabilities::Local> Player<'_, E> {
         pub fn get_player_traffic(
-            &mut self,
+            &self,
             player_id: i32,
             packet_id: i32,
         ) -> Result<Vec<PlayerTraffic>> {
@@ -6540,7 +6470,7 @@ pub mod player {
         }
     }
     impl<E: crate::capabilities::Render> Player<'_, E> {
-        pub fn get_spectating_state(&mut self) -> Result<bool> {
+        pub fn get_spectating_state(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6560,7 +6490,7 @@ pub mod math_extra {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn math_extra(&mut self) -> MathExtra<'_, E> {
+        pub fn math_extra(&self) -> MathExtra<'_, E> {
             MathExtra {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -6568,7 +6498,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn bit_and(&mut self, a: u32, b: u32) -> Result<u32> {
+        pub fn bit_and(&self, a: u32, b: u32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6580,7 +6510,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn bit_bits(&mut self, bits: &[u32]) -> Result<u32> {
+        pub fn bit_bits(&self, bits: &[u32]) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6592,7 +6522,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn bit_inv(&mut self, a: u32) -> Result<u32> {
+        pub fn bit_inv(&self, a: u32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6604,7 +6534,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn bit_or(&mut self, a: u32, b: u32) -> Result<u32> {
+        pub fn bit_or(&self, a: u32, b: u32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6616,7 +6546,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn bit_xor(&mut self, a: u32, b: u32) -> Result<u32> {
+        pub fn bit_xor(&self, a: u32, b: u32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6628,7 +6558,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn clamp(&mut self, value: f32, min: f32, max: f32) -> Result<f32> {
+        pub fn clamp(&self, value: f32, min: f32, max: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6640,7 +6570,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn diag(&mut self, values: &[f32]) -> Result<f32> {
+        pub fn diag(&self, values: &[f32]) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6652,7 +6582,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn erf(&mut self, value: f32) -> Result<f32> {
+        pub fn erf(&self, value: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6664,7 +6594,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn hypot(&mut self, x: f32, y: f32) -> Result<f32> {
+        pub fn hypot(&self, x: f32, y: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6676,7 +6606,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn mix(&mut self, a: f32, b: f32, t: f32) -> Result<f32> {
+        pub fn mix(&self, a: f32, b: f32, t: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6688,7 +6618,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn normalize(&mut self, vec: Float3) -> Result<NormalizeValue> {
+        pub fn normalize(&self, vec: Float3) -> Result<NormalizeValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6700,7 +6630,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn round(&mut self, value: f32) -> Result<f32> {
+        pub fn round(&self, value: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6712,7 +6642,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn sgn(&mut self, value: f32) -> Result<f32> {
+        pub fn sgn(&self, value: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6724,7 +6654,7 @@ pub mod math_extra {
         }
     }
     impl<E: crate::capabilities::Common> MathExtra<'_, E> {
-        pub fn smooth_step(&mut self, edge0: f32, edge1: f32, x: f32) -> Result<f32> {
+        pub fn smooth_step(&self, edge0: f32, edge1: f32, x: f32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6753,7 +6683,7 @@ pub mod encoding {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn encoding(&mut self) -> Encoding<'_, E> {
+        pub fn encoding(&self) -> Encoding<'_, E> {
             Encoding {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -6761,7 +6691,7 @@ pub mod encoding {
         }
     }
     impl<E: crate::capabilities::Common> Encoding<'_, E> {
-        pub fn decode_base64(&mut self, text: &str) -> Result<Vec<u8>> {
+        pub fn decode_base64(&self, text: &str) -> Result<Vec<u8>> {
             self._engine.check()?;
             if (text).as_bytes().contains(&0) {
                 return Err(
@@ -6778,7 +6708,7 @@ pub mod encoding {
         }
     }
     impl<E: crate::capabilities::Common> Encoding<'_, E> {
-        pub fn decode_base64_url(&mut self, text: &str) -> Result<Vec<u8>> {
+        pub fn decode_base64_url(&self, text: &str) -> Result<Vec<u8>> {
             self._engine.check()?;
             if (text).as_bytes().contains(&0) {
                 return Err(
@@ -6795,11 +6725,7 @@ pub mod encoding {
         }
     }
     impl<E: crate::capabilities::Common> Encoding<'_, E> {
-        pub fn encode_base64(
-            &mut self,
-            text: &[u8],
-            strip_padding: bool,
-        ) -> Result<String> {
+        pub fn encode_base64(&self, text: &[u8], strip_padding: bool) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6822,7 +6748,7 @@ pub mod encoding {
         }
     }
     impl<E: crate::capabilities::Common> Encoding<'_, E> {
-        pub fn encode_base64_url(&mut self, text: &[u8]) -> Result<String> {
+        pub fn encode_base64_url(&self, text: &[u8]) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6834,7 +6760,7 @@ pub mod encoding {
         }
     }
     impl<E: crate::capabilities::Common> Encoding<'_, E> {
-        pub fn is_valid_base64(&mut self, text: &str) -> Result<bool> {
+        pub fn is_valid_base64(&self, text: &str) -> Result<bool> {
             self._engine.check()?;
             if (text).as_bytes().contains(&0) {
                 return Err(
@@ -6851,7 +6777,7 @@ pub mod encoding {
         }
     }
     impl<E: crate::capabilities::Common> Encoding<'_, E> {
-        pub fn is_valid_base64_url(&mut self, text: &str) -> Result<bool> {
+        pub fn is_valid_base64_url(&self, text: &str) -> Result<bool> {
             self._engine.check()?;
             if (text).as_bytes().contains(&0) {
                 return Err(
@@ -6876,7 +6802,7 @@ pub mod metal_map {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn metal_map(&mut self) -> MetalMap<'_, E> {
+        pub fn metal_map(&self) -> MetalMap<'_, E> {
             MetalMap {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -6884,7 +6810,7 @@ pub mod metal_map {
         }
     }
     impl<E: crate::capabilities::Game> MetalMap<'_, E> {
-        pub fn get_metal_amount(&mut self, x: i32, z: i32) -> Result<f32> {
+        pub fn get_metal_amount(&self, x: i32, z: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6896,7 +6822,7 @@ pub mod metal_map {
         }
     }
     impl<E: crate::capabilities::Game> MetalMap<'_, E> {
-        pub fn get_metal_extraction(&mut self, x: i32, z: i32) -> Result<f32> {
+        pub fn get_metal_extraction(&self, x: i32, z: i32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6908,7 +6834,7 @@ pub mod metal_map {
         }
     }
     impl<E: crate::capabilities::Game> MetalMap<'_, E> {
-        pub fn get_metal_map_size(&mut self) -> Result<GetMetalMapSizeValue> {
+        pub fn get_metal_map_size(&self) -> Result<GetMetalMapSizeValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6920,7 +6846,7 @@ pub mod metal_map {
         }
     }
     impl<E: crate::capabilities::Synced> MetalMap<'_, E> {
-        pub fn set_metal_amount(&mut self, x: i32, z: i32, amount: f32) -> Result<()> {
+        pub fn set_metal_amount(&self, x: i32, z: i32, amount: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6948,7 +6874,7 @@ pub mod path_finder {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn path_finder(&mut self) -> PathFinder<'_, E> {
+        pub fn path_finder(&self) -> PathFinder<'_, E> {
             PathFinder {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -6956,7 +6882,7 @@ pub mod path_finder {
         }
     }
     impl<E: crate::capabilities::Synced> PathFinder<'_, E> {
-        pub fn delete_path(&mut self, path_id: u32) -> Result<bool> {
+        pub fn delete_path(&self, path_id: u32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6968,10 +6894,7 @@ pub mod path_finder {
         }
     }
     impl<E: crate::capabilities::Game> PathFinder<'_, E> {
-        pub fn free_path_node_costs_array(
-            &mut self,
-            overlay_index: u32,
-        ) -> Result<bool> {
+        pub fn free_path_node_costs_array(&self, overlay_index: u32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -6993,7 +6916,7 @@ pub mod path_finder {
     }
     impl<E: crate::capabilities::Game> PathFinder<'_, E> {
         pub fn get_next_way_point(
-            &mut self,
+            &self,
             path_id: u32,
             caller_pos: Float3,
             min_dist: f32,
@@ -7022,7 +6945,7 @@ pub mod path_finder {
         }
     }
     impl<E: crate::capabilities::Game> PathFinder<'_, E> {
-        pub fn get_path_node_cost(&mut self, x: u32, z: u32) -> Result<f32> {
+        pub fn get_path_node_cost(&self, x: u32, z: u32) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7034,7 +6957,7 @@ pub mod path_finder {
         }
     }
     impl<E: crate::capabilities::Game> PathFinder<'_, E> {
-        pub fn get_path_node_costs(&mut self, overlay_index: u32) -> Result<Vec<f32>> {
+        pub fn get_path_node_costs(&self, overlay_index: u32) -> Result<Vec<f32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7056,7 +6979,7 @@ pub mod path_finder {
     }
     impl<E: crate::capabilities::Game> PathFinder<'_, E> {
         pub fn get_path_way_points(
-            &mut self,
+            &self,
             path_id: u32,
         ) -> Result<GetPathWayPointsValue> {
             self._engine.check()?;
@@ -7076,7 +6999,7 @@ pub mod path_finder {
     }
     impl<E: crate::capabilities::Game> PathFinder<'_, E> {
         pub fn init_path_node_costs_array(
-            &mut self,
+            &self,
             overlay_index: u32,
             size_x: u32,
             size_z: u32,
@@ -7106,7 +7029,7 @@ pub mod path_finder {
     }
     impl<E: crate::capabilities::Game> PathFinder<'_, E> {
         pub fn request_path(
-            &mut self,
+            &self,
             move_def_id: u32,
             move_def_name: Option<&str>,
             start_pos: Float3,
@@ -7149,7 +7072,7 @@ pub mod path_finder {
     }
     impl<E: crate::capabilities::Synced> PathFinder<'_, E> {
         pub fn set_path_node_cost(
-            &mut self,
+            &self,
             overlay_index: u32,
             cost_index: u32,
             cost: f32,
@@ -7178,7 +7101,7 @@ pub mod path_finder {
         }
     }
     impl<E: crate::capabilities::Synced> PathFinder<'_, E> {
-        pub fn set_path_node_costs(&mut self, overlay_index: u32) -> Result<bool> {
+        pub fn set_path_node_costs(&self, overlay_index: u32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7208,7 +7131,7 @@ pub mod platform {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn platform(&mut self) -> Platform<'_, E> {
+        pub fn platform(&self) -> Platform<'_, E> {
             Platform {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -7216,7 +7139,7 @@ pub mod platform {
         }
     }
     impl<E: crate::capabilities::Common> Platform<'_, E> {
-        pub fn get_architecture(&mut self) -> Result<String> {
+        pub fn get_architecture(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7228,7 +7151,7 @@ pub mod platform {
         }
     }
     impl<E: crate::capabilities::Common> Platform<'_, E> {
-        pub fn is_headless(&mut self) -> Result<bool> {
+        pub fn is_headless(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7250,7 +7173,7 @@ pub mod rules_params {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn rules_params(&mut self) -> RulesParams<'_, E> {
+        pub fn rules_params(&self) -> RulesParams<'_, E> {
             RulesParams {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -7259,7 +7182,7 @@ pub mod rules_params {
     }
     impl<E: crate::capabilities::Game> RulesParams<'_, E> {
         pub fn get_feature_rules_param(
-            &mut self,
+            &self,
             feature_id: i32,
             param_name: &str,
         ) -> Result<RulesParamValue> {
@@ -7290,10 +7213,7 @@ pub mod rules_params {
         }
     }
     impl<E: crate::capabilities::Game> RulesParams<'_, E> {
-        pub fn get_feature_rules_params(
-            &mut self,
-            feature_id: i32,
-        ) -> Result<Vec<String>> {
+        pub fn get_feature_rules_params(&self, feature_id: i32) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7314,10 +7234,7 @@ pub mod rules_params {
         }
     }
     impl<E: crate::capabilities::Game> RulesParams<'_, E> {
-        pub fn get_game_rules_param(
-            &mut self,
-            param_name: &str,
-        ) -> Result<RulesParamValue> {
+        pub fn get_game_rules_param(&self, param_name: &str) -> Result<RulesParamValue> {
             self._engine.check()?;
             if (param_name).as_bytes().contains(&0) {
                 return Err(
@@ -7343,7 +7260,7 @@ pub mod rules_params {
         }
     }
     impl<E: crate::capabilities::Game> RulesParams<'_, E> {
-        pub fn get_game_rules_params(&mut self) -> Result<Vec<String>> {
+        pub fn get_game_rules_params(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7356,7 +7273,7 @@ pub mod rules_params {
     }
     impl<E: crate::capabilities::Game> RulesParams<'_, E> {
         pub fn get_player_rules_param(
-            &mut self,
+            &self,
             player_id: i32,
             param_name: &str,
         ) -> Result<RulesParamValue> {
@@ -7387,10 +7304,7 @@ pub mod rules_params {
         }
     }
     impl<E: crate::capabilities::Game> RulesParams<'_, E> {
-        pub fn get_player_rules_params(
-            &mut self,
-            player_id: i32,
-        ) -> Result<Vec<String>> {
+        pub fn get_player_rules_params(&self, player_id: i32) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7412,7 +7326,7 @@ pub mod rules_params {
     }
     impl<E: crate::capabilities::Game> RulesParams<'_, E> {
         pub fn get_team_rules_param(
-            &mut self,
+            &self,
             team_id: i32,
             param_name: &str,
         ) -> Result<RulesParamValue> {
@@ -7443,7 +7357,7 @@ pub mod rules_params {
         }
     }
     impl<E: crate::capabilities::Game> RulesParams<'_, E> {
-        pub fn get_team_rules_params(&mut self, team_id: i32) -> Result<Vec<String>> {
+        pub fn get_team_rules_params(&self, team_id: i32) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7465,7 +7379,7 @@ pub mod rules_params {
     }
     impl<E: crate::capabilities::Game> RulesParams<'_, E> {
         pub fn get_unit_rules_param(
-            &mut self,
+            &self,
             unit_id: i32,
             param_name: &str,
         ) -> Result<RulesParamValue> {
@@ -7496,7 +7410,7 @@ pub mod rules_params {
         }
     }
     impl<E: crate::capabilities::Game> RulesParams<'_, E> {
-        pub fn get_unit_rules_params(&mut self, unit_id: i32) -> Result<Vec<String>> {
+        pub fn get_unit_rules_params(&self, unit_id: i32) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7518,7 +7432,7 @@ pub mod rules_params {
     }
     impl<E: crate::capabilities::Synced> RulesParams<'_, E> {
         pub fn set_feature_rules_param(
-            &mut self,
+            &self,
             feature_id: i32,
             param_name: &str,
             value: &RulesParamValue,
@@ -7561,7 +7475,7 @@ pub mod rules_params {
     }
     impl<E: crate::capabilities::Synced> RulesParams<'_, E> {
         pub fn set_game_rules_param(
-            &mut self,
+            &self,
             param_name: &str,
             value: &RulesParamValue,
             los: i32,
@@ -7601,7 +7515,7 @@ pub mod rules_params {
     }
     impl<E: crate::capabilities::Synced> RulesParams<'_, E> {
         pub fn set_player_rules_param(
-            &mut self,
+            &self,
             player_id: i32,
             param_name: &str,
             value: &RulesParamValue,
@@ -7644,7 +7558,7 @@ pub mod rules_params {
     }
     impl<E: crate::capabilities::Synced> RulesParams<'_, E> {
         pub fn set_team_rules_param(
-            &mut self,
+            &self,
             team_id: i32,
             param_name: &str,
             value: &RulesParamValue,
@@ -7687,7 +7601,7 @@ pub mod rules_params {
     }
     impl<E: crate::capabilities::Synced> RulesParams<'_, E> {
         pub fn set_unit_rules_param(
-            &mut self,
+            &self,
             unit_id: i32,
             param_name: &str,
             value: &RulesParamValue,
@@ -7737,7 +7651,7 @@ pub mod move_ctrl {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn move_ctrl(&mut self) -> MoveCtrl<'_, E> {
+        pub fn move_ctrl(&self) -> MoveCtrl<'_, E> {
             MoveCtrl {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -7745,7 +7659,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn get_tag(&mut self, unit_id: i32) -> Result<i32> {
+        pub fn get_tag(&self, unit_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7758,7 +7672,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Game> MoveCtrl<'_, E> {
         pub fn get_unit_estimated_path(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<GetUnitEstimatedPathValue> {
             self._engine.check()?;
@@ -7777,7 +7691,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> MoveCtrl<'_, E> {
-        pub fn get_unit_move_type_data(&mut self, unit_id: i32) -> Result<MoveTypeData> {
+        pub fn get_unit_move_type_data(&self, unit_id: i32) -> Result<MoveTypeData> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7794,7 +7708,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn is_move_ctrl_enabled(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn is_move_ctrl_enabled(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7811,7 +7725,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn move_ctrl(&mut self, unit_id: i32, enable: bool) -> Result<bool> {
+        pub fn move_ctrl(&self, unit_id: i32, enable: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7823,7 +7737,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_collide_stop(&mut self, unit_id: i32, value: bool) -> Result<bool> {
+        pub fn set_collide_stop(&self, unit_id: i32, value: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7841,7 +7755,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_drag(&mut self, unit_id: i32, value: f32) -> Result<bool> {
+        pub fn set_drag(&self, unit_id: i32, value: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7853,7 +7767,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_extrapolate(&mut self, unit_id: i32, value: bool) -> Result<bool> {
+        pub fn set_extrapolate(&self, unit_id: i32, value: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7871,7 +7785,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_gravity(&mut self, unit_id: i32, value: f32) -> Result<bool> {
+        pub fn set_gravity(&self, unit_id: i32, value: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7884,7 +7798,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
         pub fn set_ground_move_type_max_speed(
-            &mut self,
+            &self,
             unit_id: i32,
             max_speed: f32,
         ) -> Result<bool> {
@@ -7910,7 +7824,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_ground_offset(&mut self, unit_id: i32, value: f32) -> Result<bool> {
+        pub fn set_ground_offset(&self, unit_id: i32, value: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7933,7 +7847,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_heading(&mut self, unit_id: i32, heading: i32) -> Result<bool> {
+        pub fn set_heading(&self, unit_id: i32, heading: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7952,7 +7866,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
         pub fn set_limits(
-            &mut self,
+            &self,
             unit_id: i32,
             mins: Float3,
             maxs: Float3,
@@ -7975,7 +7889,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_limits_stop(&mut self, unit_id: i32, value: bool) -> Result<bool> {
+        pub fn set_limits_stop(&self, unit_id: i32, value: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -7994,7 +7908,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
         pub fn set_move_ctrl_gravity(
-            &mut self,
+            &self,
             unit_id: i32,
             gravity_factor: f32,
         ) -> Result<bool> {
@@ -8021,7 +7935,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
         pub fn set_move_def(
-            &mut self,
+            &self,
             unit_id: i32,
             move_def_id: i32,
             move_def_name: Option<&str>,
@@ -8058,7 +7972,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
         pub fn set_move_type_boolean(
-            &mut self,
+            &self,
             unit_id: i32,
             field: MoveTypeBooleanField,
             value: bool,
@@ -8088,7 +8002,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
         pub fn set_move_type_numeric(
-            &mut self,
+            &self,
             unit_id: i32,
             field: MoveTypeNumericField,
             value: f32,
@@ -8117,11 +8031,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_no_blocking(
-            &mut self,
-            unit_id: i32,
-            no_blocking: bool,
-        ) -> Result<bool> {
+        pub fn set_no_blocking(&self, unit_id: i32, no_blocking: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8145,7 +8055,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
         pub fn set_physics(
-            &mut self,
+            &self,
             unit_id: i32,
             position: Float3,
             velocity: Float3,
@@ -8177,7 +8087,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_position(&mut self, unit_id: i32, value: Float3) -> Result<bool> {
+        pub fn set_position(&self, unit_id: i32, value: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8190,7 +8100,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
         pub fn set_progress_state(
-            &mut self,
+            &self,
             unit_id: i32,
             state: MoveCtrlProgressState,
         ) -> Result<bool> {
@@ -8217,7 +8127,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
         pub fn set_relative_velocity(
-            &mut self,
+            &self,
             unit_id: i32,
             value: Float3,
         ) -> Result<bool> {
@@ -8243,7 +8153,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_rotation(&mut self, unit_id: i32, value: Float3) -> Result<bool> {
+        pub fn set_rotation(&self, unit_id: i32, value: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8256,7 +8166,7 @@ pub mod move_ctrl {
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
         pub fn set_rotation_velocity(
-            &mut self,
+            &self,
             unit_id: i32,
             value: Float3,
         ) -> Result<bool> {
@@ -8282,7 +8192,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_tag(&mut self, unit_id: i32, tag: i32) -> Result<bool> {
+        pub fn set_tag(&self, unit_id: i32, tag: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8294,7 +8204,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_track_ground(&mut self, unit_id: i32, value: bool) -> Result<bool> {
+        pub fn set_track_ground(&self, unit_id: i32, value: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8312,7 +8222,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_track_limits(&mut self, unit_id: i32, value: bool) -> Result<bool> {
+        pub fn set_track_limits(&self, unit_id: i32, value: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8330,7 +8240,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_track_slope(&mut self, unit_id: i32, value: bool) -> Result<bool> {
+        pub fn set_track_slope(&self, unit_id: i32, value: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8348,7 +8258,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_velocity(&mut self, unit_id: i32, value: Float3) -> Result<bool> {
+        pub fn set_velocity(&self, unit_id: i32, value: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8360,7 +8270,7 @@ pub mod move_ctrl {
         }
     }
     impl<E: crate::capabilities::Synced> MoveCtrl<'_, E> {
-        pub fn set_wind_factor(&mut self, unit_id: i32, value: f32) -> Result<bool> {
+        pub fn set_wind_factor(&self, unit_id: i32, value: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8388,7 +8298,7 @@ pub mod camera {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn camera(&mut self) -> Camera<'_, E> {
+        pub fn camera(&self) -> Camera<'_, E> {
             Camera {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -8396,7 +8306,7 @@ pub mod camera {
         }
     }
     impl<E: crate::capabilities::Local> Camera<'_, E> {
-        pub fn get_camera_direction(&mut self) -> Result<Float3> {
+        pub fn get_camera_direction(&self) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8408,7 +8318,7 @@ pub mod camera {
         }
     }
     impl<E: crate::capabilities::Local> Camera<'_, E> {
-        pub fn get_camera_fov(&mut self) -> Result<f32> {
+        pub fn get_camera_fov(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8420,7 +8330,7 @@ pub mod camera {
         }
     }
     impl<E: crate::capabilities::Local> Camera<'_, E> {
-        pub fn get_camera_names(&mut self) -> Result<Vec<String>> {
+        pub fn get_camera_names(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8432,7 +8342,7 @@ pub mod camera {
         }
     }
     impl<E: crate::capabilities::Local> Camera<'_, E> {
-        pub fn get_camera_position(&mut self) -> Result<Float3> {
+        pub fn get_camera_position(&self) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8444,7 +8354,7 @@ pub mod camera {
         }
     }
     impl<E: crate::capabilities::Local> Camera<'_, E> {
-        pub fn get_camera_state(&mut self, use_table: bool) -> Result<CameraState> {
+        pub fn get_camera_state(&self, use_table: bool) -> Result<CameraState> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8456,7 +8366,7 @@ pub mod camera {
         }
     }
     impl<E: crate::capabilities::Local> Camera<'_, E> {
-        pub fn get_pixel_dir(&mut self, screen_x: f32, screen_y: f32) -> Result<Float3> {
+        pub fn get_pixel_dir(&self, screen_x: f32, screen_y: f32) -> Result<Float3> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8475,7 +8385,7 @@ pub mod camera {
     }
     impl<E: crate::capabilities::Game> Camera<'_, E> {
         pub fn set_camera_state(
-            &mut self,
+            &self,
             state: &CameraState,
             transition_time: f32,
             transition_time_factor: f32,
@@ -8513,7 +8423,7 @@ pub mod camera {
     }
     impl<E: crate::capabilities::Game> Camera<'_, E> {
         pub fn set_camera_target(
-            &mut self,
+            &self,
             target: Float3,
             options: SetCameraTargetOptions,
         ) -> Result<bool> {
@@ -8535,7 +8445,7 @@ pub mod camera {
     }
     impl<E: crate::capabilities::Local> Camera<'_, E> {
         pub fn trace_screen_ray(
-            &mut self,
+            &self,
             screen_x: f32,
             screen_y: f32,
             options: TraceScreenRayOptions,
@@ -8565,7 +8475,7 @@ pub mod camera {
     }
     impl<E: crate::capabilities::Local> Camera<'_, E> {
         pub fn world_to_screen_coords(
-            &mut self,
+            &self,
             world_pos: Float3,
         ) -> Result<WorldToScreenCoordsValue> {
             self._engine.check()?;
@@ -8594,7 +8504,7 @@ pub mod input {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn input(&mut self) -> Input<'_, E> {
+        pub fn input(&self) -> Input<'_, E> {
             Input {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -8602,7 +8512,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_action_hot_keys(&mut self, action: &str) -> Result<Vec<String>> {
+        pub fn get_action_hot_keys(&self, action: &str) -> Result<Vec<String>> {
             self._engine.check()?;
             if (action).as_bytes().contains(&0) {
                 return Err(
@@ -8619,7 +8529,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Local> Input<'_, E> {
-        pub fn get_active_command(&mut self) -> Result<GetActiveCommandValue> {
+        pub fn get_active_command(&self) -> Result<GetActiveCommandValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8631,7 +8541,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Local> Input<'_, E> {
-        pub fn get_active_page(&mut self) -> Result<GetActivePageValue> {
+        pub fn get_active_page(&self) -> Result<GetActivePageValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8643,7 +8553,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Local> Input<'_, E> {
-        pub fn get_default_command(&mut self) -> Result<GetDefaultCommandValue> {
+        pub fn get_default_command(&self) -> Result<GetDefaultCommandValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8655,7 +8565,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_invert_queue_key(&mut self) -> Result<bool> {
+        pub fn get_invert_queue_key(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8668,7 +8578,7 @@ pub mod input {
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
         pub fn get_key_bindings(
-            &mut self,
+            &self,
             key_set1: &str,
             key_set2: &str,
         ) -> Result<Vec<KeyBindingEntry>> {
@@ -8699,7 +8609,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_key_code(&mut self, key_sym: &str) -> Result<i32> {
+        pub fn get_key_code(&self, key_sym: &str) -> Result<i32> {
             self._engine.check()?;
             if (key_sym).as_bytes().contains(&0) {
                 return Err(
@@ -8716,7 +8626,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_key_from_scan_symbol(&mut self, scan_symbol: &str) -> Result<String> {
+        pub fn get_key_from_scan_symbol(&self, scan_symbol: &str) -> Result<String> {
             self._engine.check()?;
             if (scan_symbol).as_bytes().contains(&0) {
                 return Err(
@@ -8742,7 +8652,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_key_state(&mut self, key_code: i32) -> Result<bool> {
+        pub fn get_key_state(&self, key_code: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8754,7 +8664,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_key_symbol(&mut self, key_code: i32) -> Result<GetKeySymbolValue> {
+        pub fn get_key_symbol(&self, key_code: i32) -> Result<GetKeySymbolValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8766,7 +8676,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_mod_key_state(&mut self) -> Result<GetModKeyStateValue> {
+        pub fn get_mod_key_state(&self) -> Result<GetModKeyStateValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8778,10 +8688,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Local> Input<'_, E> {
-        pub fn get_mouse_buttons_pressed(
-            &mut self,
-            buttons: &[i32],
-        ) -> Result<Vec<bool>> {
+        pub fn get_mouse_buttons_pressed(&self, buttons: &[i32]) -> Result<Vec<bool>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8798,7 +8705,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_mouse_cursor(&mut self) -> Result<String> {
+        pub fn get_mouse_cursor(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8811,7 +8718,7 @@ pub mod input {
     }
     impl<E: crate::capabilities::Local> Input<'_, E> {
         pub fn get_mouse_start_position(
-            &mut self,
+            &self,
             button: i32,
         ) -> Result<GetMouseStartPositionValue> {
             self._engine.check()?;
@@ -8825,7 +8732,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_mouse_state(&mut self) -> Result<MouseState> {
+        pub fn get_mouse_state(&self) -> Result<MouseState> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8837,7 +8744,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_pressed_keys(&mut self) -> Result<Vec<i32>> {
+        pub fn get_pressed_keys(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8849,7 +8756,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_pressed_scans(&mut self) -> Result<Vec<i32>> {
+        pub fn get_pressed_scans(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8861,7 +8768,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Render> Input<'_, E> {
-        pub fn get_scan_symbol(&mut self, scan_code: i32) -> Result<GetScanSymbolValue> {
+        pub fn get_scan_symbol(&self, scan_code: i32) -> Result<GetScanSymbolValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8873,7 +8780,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Local> Input<'_, E> {
-        pub fn get_selection_box(&mut self) -> Result<SelectionBox> {
+        pub fn get_selection_box(&self) -> Result<SelectionBox> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8885,11 +8792,7 @@ pub mod input {
         }
     }
     impl<E: crate::capabilities::Local> Input<'_, E> {
-        pub fn is_above_mini_map(
-            &mut self,
-            screen_x: f32,
-            screen_y: f32,
-        ) -> Result<bool> {
+        pub fn is_above_mini_map(&self, screen_x: f32, screen_y: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8920,7 +8823,7 @@ pub mod debug_input {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn debug_input(&mut self) -> DebugInput<'_, E> {
+        pub fn debug_input(&self) -> DebugInput<'_, E> {
             DebugInput {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -8928,7 +8831,7 @@ pub mod debug_input {
         }
     }
     impl<E: crate::capabilities::Common> DebugInput<'_, E> {
-        pub fn clear_emulated_input(&mut self, fire_releases: bool) -> Result<()> {
+        pub fn clear_emulated_input(&self, fire_releases: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8949,7 +8852,7 @@ pub mod debug_input {
         }
     }
     impl<E: crate::capabilities::Common> DebugInput<'_, E> {
-        pub fn emulate_key(&mut self, key_code: i32, pressed: bool) -> Result<()> {
+        pub fn emulate_key(&self, key_code: i32, pressed: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8967,11 +8870,7 @@ pub mod debug_input {
         }
     }
     impl<E: crate::capabilities::Common> DebugInput<'_, E> {
-        pub fn emulate_mouse_button(
-            &mut self,
-            button: i32,
-            pressed: bool,
-        ) -> Result<()> {
+        pub fn emulate_mouse_button(&self, button: i32, pressed: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -8994,7 +8893,7 @@ pub mod debug_input {
         }
     }
     impl<E: crate::capabilities::Common> DebugInput<'_, E> {
-        pub fn emulate_mouse_move(&mut self, x: i32, y: i32) -> Result<()> {
+        pub fn emulate_mouse_move(&self, x: i32, y: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9006,7 +8905,7 @@ pub mod debug_input {
         }
     }
     impl<E: crate::capabilities::Common> DebugInput<'_, E> {
-        pub fn emulate_mouse_wheel(&mut self, delta: f32) -> Result<()> {
+        pub fn emulate_mouse_wheel(&self, delta: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9019,7 +8918,7 @@ pub mod debug_input {
     }
     impl<E: crate::capabilities::Common> DebugInput<'_, E> {
         pub fn emulate_text_editing(
-            &mut self,
+            &self,
             utf8_text: &str,
             start: u32,
             length: u32,
@@ -9053,7 +8952,7 @@ pub mod debug_input {
         }
     }
     impl<E: crate::capabilities::Common> DebugInput<'_, E> {
-        pub fn emulate_text_input(&mut self, utf8_text: &str) -> Result<bool> {
+        pub fn emulate_text_input(&self, utf8_text: &str) -> Result<bool> {
             self._engine.check()?;
             if (utf8_text).as_bytes().contains(&0) {
                 return Err(
@@ -9084,7 +8983,7 @@ pub mod display {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn display(&mut self) -> Display<'_, E> {
+        pub fn display(&self) -> Display<'_, E> {
             Display {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -9092,7 +8991,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Session> Display<'_, E> {
-        pub fn get_draw_frame(&mut self) -> Result<GetDrawFrameValue> {
+        pub fn get_draw_frame(&self) -> Result<GetDrawFrameValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9104,7 +9003,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_dual_view_geometry(&mut self) -> Result<ViewGeometry> {
+        pub fn get_dual_view_geometry(&self) -> Result<ViewGeometry> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9116,7 +9015,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_fps(&mut self) -> Result<u32> {
+        pub fn get_fps(&self) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9128,7 +9027,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_frame_time_offset(&mut self) -> Result<f32> {
+        pub fn get_frame_time_offset(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9140,7 +9039,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_game_speed(&mut self) -> Result<GetGameSpeedValue> {
+        pub fn get_game_speed(&self) -> Result<GetGameSpeedValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9152,7 +9051,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_last_update_seconds(&mut self) -> Result<f32> {
+        pub fn get_last_update_seconds(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9164,7 +9063,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_los_view_colors(&mut self) -> Result<GetLosViewColorsValue> {
+        pub fn get_los_view_colors(&self) -> Result<GetLosViewColorsValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9176,7 +9075,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_map_draw_mode(&mut self) -> Result<String> {
+        pub fn get_map_draw_mode(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9188,7 +9087,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Render> Display<'_, E> {
-        pub fn get_mini_map_dual_screen(&mut self) -> Result<GetMiniMapDualScreenValue> {
+        pub fn get_mini_map_dual_screen(&self) -> Result<GetMiniMapDualScreenValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9200,7 +9099,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_mini_map_geometry(&mut self) -> Result<MinimapGeometry> {
+        pub fn get_mini_map_geometry(&self) -> Result<MinimapGeometry> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9212,7 +9111,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_mini_map_rotation(&mut self) -> Result<f32> {
+        pub fn get_mini_map_rotation(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9224,7 +9123,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_num_displays(&mut self) -> Result<u32> {
+        pub fn get_num_displays(&self) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9237,7 +9136,7 @@ pub mod display {
     }
     impl<E: crate::capabilities::Render> Display<'_, E> {
         pub fn get_screen_geometry(
-            &mut self,
+            &self,
             screen_num: i32,
             query_usable: bool,
         ) -> Result<ViewGeometry> {
@@ -9264,7 +9163,7 @@ pub mod display {
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
         pub fn get_screen_geometry_full(
-            &mut self,
+            &self,
             screen_num: i32,
             query_usable: bool,
         ) -> Result<GetScreenGeometryFullValue> {
@@ -9290,7 +9189,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Render> Display<'_, E> {
-        pub fn get_team_color(&mut self, team_id: i32) -> Result<TeamColor> {
+        pub fn get_team_color(&self, team_id: i32) -> Result<TeamColor> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9302,7 +9201,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Render> Display<'_, E> {
-        pub fn get_team_orig_color(&mut self, team_id: i32) -> Result<TeamColor> {
+        pub fn get_team_orig_color(&self, team_id: i32) -> Result<TeamColor> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9314,7 +9213,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Render> Display<'_, E> {
-        pub fn get_view_geometry(&mut self) -> Result<ViewGeometry> {
+        pub fn get_view_geometry(&self) -> Result<ViewGeometry> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9326,7 +9225,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn get_water_mode(&mut self) -> Result<GetWaterModeValue> {
+        pub fn get_water_mode(&self) -> Result<GetWaterModeValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9338,7 +9237,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Render> Display<'_, E> {
-        pub fn get_window_geometry(&mut self) -> Result<ViewGeometry> {
+        pub fn get_window_geometry(&self) -> Result<ViewGeometry> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9350,7 +9249,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn have_adv_shading(&mut self) -> Result<bool> {
+        pub fn have_adv_shading(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9362,7 +9261,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn have_adv_shading_full(&mut self) -> Result<HaveAdvShadingFullValue> {
+        pub fn have_adv_shading_full(&self) -> Result<HaveAdvShadingFullValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9374,7 +9273,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn have_shadows(&mut self) -> Result<bool> {
+        pub fn have_shadows(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9386,7 +9285,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn is_aabb_in_view(&mut self, mins: Float3, maxs: Float3) -> Result<bool> {
+        pub fn is_aabb_in_view(&self, mins: Float3, maxs: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9398,7 +9297,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Session> Display<'_, E> {
-        pub fn is_gui_hidden(&mut self) -> Result<bool> {
+        pub fn is_gui_hidden(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9410,11 +9309,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Local> Display<'_, E> {
-        pub fn is_sphere_in_view(
-            &mut self,
-            center: Float3,
-            radius: f32,
-        ) -> Result<bool> {
+        pub fn is_sphere_in_view(&self, center: Float3, radius: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9432,11 +9327,7 @@ pub mod display {
         }
     }
     impl<E: crate::capabilities::Common> Display<'_, E> {
-        pub fn set_team_color(
-            &mut self,
-            team_id: i32,
-            color: TeamColor,
-        ) -> Result<bool> {
+        pub fn set_team_color(&self, team_id: i32, color: TeamColor) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9457,7 +9348,7 @@ pub mod selection {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn selection(&mut self) -> Selection<'_, E> {
+        pub fn selection(&self) -> Selection<'_, E> {
             Selection {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -9465,7 +9356,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Game> Selection<'_, E> {
-        pub fn deselect_unit(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn deselect_unit(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9477,7 +9368,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Game> Selection<'_, E> {
-        pub fn deselect_unit_array(&mut self, unit_i_ds: &[i32]) -> Result<bool> {
+        pub fn deselect_unit_array(&self, unit_i_ds: &[i32]) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9494,7 +9385,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
-        pub fn get_group_list(&mut self) -> Result<Vec<i32>> {
+        pub fn get_group_list(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9506,7 +9397,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
-        pub fn get_group_units(&mut self, group_id: i32) -> Result<Vec<i32>> {
+        pub fn get_group_units(&self, group_id: i32) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9518,7 +9409,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
-        pub fn get_group_units_count(&mut self, group_id: i32) -> Result<u32> {
+        pub fn get_group_units_count(&self, group_id: i32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9535,10 +9426,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
-        pub fn get_group_units_counts(
-            &mut self,
-            group_id: i32,
-        ) -> Result<SelectionCounts> {
+        pub fn get_group_units_counts(&self, group_id: i32) -> Result<SelectionCounts> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9556,7 +9444,7 @@ pub mod selection {
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
         pub fn get_group_units_sorted(
-            &mut self,
+            &self,
             group_id: i32,
         ) -> Result<Vec<TeamUnitsByDef>> {
             self._engine.check()?;
@@ -9575,7 +9463,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
-        pub fn get_selected_group(&mut self) -> Result<i32> {
+        pub fn get_selected_group(&self) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9587,7 +9475,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
-        pub fn get_selected_units(&mut self) -> Result<Vec<i32>> {
+        pub fn get_selected_units(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9599,7 +9487,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
-        pub fn get_selected_units_count(&mut self) -> Result<u32> {
+        pub fn get_selected_units_count(&self) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9611,7 +9499,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
-        pub fn get_selected_units_counts(&mut self) -> Result<SelectionCounts> {
+        pub fn get_selected_units_counts(&self) -> Result<SelectionCounts> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9623,7 +9511,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
-        pub fn get_selected_units_sorted(&mut self) -> Result<Vec<i32>> {
+        pub fn get_selected_units_sorted(&self) -> Result<Vec<i32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9635,7 +9523,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Local> Selection<'_, E> {
-        pub fn get_unit_group(&mut self, unit_id: i32) -> Result<GetUnitGroupValue> {
+        pub fn get_unit_group(&self, unit_id: i32) -> Result<GetUnitGroupValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9647,7 +9535,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Game> Selection<'_, E> {
-        pub fn select_unit(&mut self, unit_id: i32, append: bool) -> Result<bool> {
+        pub fn select_unit(&self, unit_id: i32, append: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9660,7 +9548,7 @@ pub mod selection {
     }
     impl<E: crate::capabilities::Game> Selection<'_, E> {
         pub fn select_unit_array(
-            &mut self,
+            &self,
             unit_i_ds: &[i32],
             append: bool,
         ) -> Result<bool> {
@@ -9686,7 +9574,7 @@ pub mod selection {
         }
     }
     impl<E: crate::capabilities::Game> Selection<'_, E> {
-        pub fn set_unit_group(&mut self, unit_id: i32, group_id: i32) -> Result<bool> {
+        pub fn set_unit_group(&self, unit_id: i32, group_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9719,7 +9607,7 @@ pub mod sound {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn sound(&mut self) -> Sound<'_, E> {
+        pub fn sound(&self) -> Sound<'_, E> {
             Sound {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -9727,7 +9615,7 @@ pub mod sound {
         }
     }
     impl<E: crate::capabilities::Local> Sound<'_, E> {
-        pub fn get_sound_devices(&mut self) -> Result<Vec<String>> {
+        pub fn get_sound_devices(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9739,7 +9627,7 @@ pub mod sound {
         }
     }
     impl<E: crate::capabilities::Render> Sound<'_, E> {
-        pub fn get_sound_effect_params(&mut self) -> Result<bool> {
+        pub fn get_sound_effect_params(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9751,7 +9639,7 @@ pub mod sound {
         }
     }
     impl<E: crate::capabilities::Game> Sound<'_, E> {
-        pub fn get_sound_stream_play_time(&mut self) -> Result<f32> {
+        pub fn get_sound_stream_play_time(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9763,7 +9651,7 @@ pub mod sound {
         }
     }
     impl<E: crate::capabilities::Render> Sound<'_, E> {
-        pub fn get_sound_stream_time(&mut self) -> Result<f32> {
+        pub fn get_sound_stream_time(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9775,7 +9663,7 @@ pub mod sound {
         }
     }
     impl<E: crate::capabilities::Common> Sound<'_, E> {
-        pub fn load_sound_def(&mut self, sound_name: &str) -> Result<bool> {
+        pub fn load_sound_def(&self, sound_name: &str) -> Result<bool> {
             self._engine.check()?;
             if (sound_name).as_bytes().contains(&0) {
                 return Err(
@@ -9792,7 +9680,7 @@ pub mod sound {
         }
     }
     impl<E: crate::capabilities::Common> Sound<'_, E> {
-        pub fn pause_sound_stream(&mut self) -> Result<bool> {
+        pub fn pause_sound_stream(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9805,7 +9693,7 @@ pub mod sound {
     }
     impl<E: crate::capabilities::Common> Sound<'_, E> {
         pub fn play_sound_file(
-            &mut self,
+            &self,
             sound_file: &str,
             volume: f32,
             pos: Float3,
@@ -9846,7 +9734,7 @@ pub mod sound {
     }
     impl<E: crate::capabilities::Common> Sound<'_, E> {
         pub fn play_sound_stream(
-            &mut self,
+            &self,
             ogg_file: &str,
             volume: f32,
             enqueue: bool,
@@ -9880,7 +9768,7 @@ pub mod sound {
         }
     }
     impl<E: crate::capabilities::Game> Sound<'_, E> {
-        pub fn preload_sound_item(&mut self, sound_name: &str) -> Result<bool> {
+        pub fn preload_sound_item(&self, sound_name: &str) -> Result<bool> {
             self._engine.check()?;
             if (sound_name).as_bytes().contains(&0) {
                 return Err(
@@ -9898,7 +9786,7 @@ pub mod sound {
     }
     impl<E: crate::capabilities::Common> Sound<'_, E> {
         pub fn set_sound_effect_params(
-            &mut self,
+            &self,
             params: &SoundEffectParams,
         ) -> Result<bool> {
             self._engine.check()?;
@@ -9917,7 +9805,7 @@ pub mod sound {
         }
     }
     impl<E: crate::capabilities::Common> Sound<'_, E> {
-        pub fn set_sound_stream_volume(&mut self, volume: f32) -> Result<bool> {
+        pub fn set_sound_stream_volume(&self, volume: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9929,7 +9817,7 @@ pub mod sound {
         }
     }
     impl<E: crate::capabilities::Common> Sound<'_, E> {
-        pub fn stop_sound_stream(&mut self) -> Result<bool> {
+        pub fn stop_sound_stream(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9951,7 +9839,7 @@ pub mod messages {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn messages(&mut self) -> Messages<'_, E> {
+        pub fn messages(&self) -> Messages<'_, E> {
             Messages {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -9959,7 +9847,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Common> Messages<'_, E> {
-        pub fn echo(&mut self, message: &str, rest: &str) -> Result<bool> {
+        pub fn echo(&self, message: &str, rest: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -9981,10 +9869,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Local> Messages<'_, E> {
-        pub fn get_console_buffer(
-            &mut self,
-            max_lines: u32,
-        ) -> Result<Vec<ConsoleEntry>> {
+        pub fn get_console_buffer(&self, max_lines: u32) -> Result<Vec<ConsoleEntry>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -9996,7 +9881,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Local> Messages<'_, E> {
-        pub fn get_current_tooltip(&mut self) -> Result<String> {
+        pub fn get_current_tooltip(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -10008,7 +9893,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Local> Messages<'_, E> {
-        pub fn is_user_writing(&mut self) -> Result<bool> {
+        pub fn is_user_writing(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -10020,7 +9905,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Common> Messages<'_, E> {
-        pub fn log(&mut self, section: &str, level: i32, message: &str) -> Result<bool> {
+        pub fn log(&self, section: &str, level: i32, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (section).as_bytes().contains(&0) {
                 return Err(
@@ -10042,7 +9927,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_ally_chat(&mut self, message: &str) -> Result<bool> {
+        pub fn send_ally_chat(&self, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10059,7 +9944,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_commands(&mut self, command: &str, rest: &str) -> Result<bool> {
+        pub fn send_commands(&self, command: &str, rest: &str) -> Result<bool> {
             self._engine.check()?;
             if (command).as_bytes().contains(&0) {
                 return Err(
@@ -10081,7 +9966,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_lua_gaia_msg(&mut self, message: &str) -> Result<bool> {
+        pub fn send_lua_gaia_msg(&self, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10098,7 +9983,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_lua_menu_msg(&mut self, message: &str) -> Result<bool> {
+        pub fn send_lua_menu_msg(&self, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10115,7 +10000,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_lua_rules_msg(&mut self, message: &str) -> Result<bool> {
+        pub fn send_lua_rules_msg(&self, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10132,7 +10017,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_lua_ui_msg(&mut self, message: &str, mode: &str) -> Result<bool> {
+        pub fn send_lua_ui_msg(&self, message: &str, mode: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10160,7 +10045,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_message(&mut self, message: &str) -> Result<bool> {
+        pub fn send_message(&self, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10178,7 +10063,7 @@ pub mod messages {
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
         pub fn send_message_to_ally_team(
-            &mut self,
+            &self,
             ally_team_id: i32,
             message: &str,
         ) -> Result<bool> {
@@ -10210,7 +10095,7 @@ pub mod messages {
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
         pub fn send_message_to_player(
-            &mut self,
+            &self,
             player_id: i32,
             message: &str,
         ) -> Result<bool> {
@@ -10241,7 +10126,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_message_to_spectators(&mut self, message: &str) -> Result<bool> {
+        pub fn send_message_to_spectators(&self, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10267,11 +10152,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_message_to_team(
-            &mut self,
-            team_id: i32,
-            message: &str,
-        ) -> Result<bool> {
+        pub fn send_message_to_team(&self, team_id: i32, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10294,11 +10175,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_private_chat(
-            &mut self,
-            message: &str,
-            player_id: i32,
-        ) -> Result<bool> {
+        pub fn send_private_chat(&self, message: &str, player_id: i32) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10326,7 +10203,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_public_chat(&mut self, message: &str) -> Result<bool> {
+        pub fn send_public_chat(&self, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10344,7 +10221,7 @@ pub mod messages {
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
         pub fn send_skirmish_ai_message(
-            &mut self,
+            &self,
             ai_id: i32,
             message: &str,
         ) -> Result<bool> {
@@ -10375,7 +10252,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Game> Messages<'_, E> {
-        pub fn send_spectator_chat(&mut self, message: &str) -> Result<bool> {
+        pub fn send_spectator_chat(&self, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10392,7 +10269,7 @@ pub mod messages {
         }
     }
     impl<E: crate::capabilities::Synced> Messages<'_, E> {
-        pub fn send_to_unsynced(&mut self, message: &str) -> Result<bool> {
+        pub fn send_to_unsynced(&self, message: &str) -> Result<bool> {
             self._engine.check()?;
             if (message).as_bytes().contains(&0) {
                 return Err(
@@ -10419,7 +10296,7 @@ pub mod config {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn config(&mut self) -> Config<'_, E> {
+        pub fn config(&self) -> Config<'_, E> {
             Config {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -10428,7 +10305,7 @@ pub mod config {
     }
     impl<E: crate::capabilities::Render> Config<'_, E> {
         pub fn get_config_float(
-            &mut self,
+            &self,
             key: &str,
             default_value: Option<f32>,
         ) -> Result<GetConfigFloatValue> {
@@ -10455,7 +10332,7 @@ pub mod config {
     }
     impl<E: crate::capabilities::Render> Config<'_, E> {
         pub fn get_config_int(
-            &mut self,
+            &self,
             key: &str,
             default_value: Option<i32>,
         ) -> Result<GetConfigIntValue> {
@@ -10481,7 +10358,7 @@ pub mod config {
         }
     }
     impl<E: crate::capabilities::Session> Config<'_, E> {
-        pub fn get_config_params(&mut self) -> Result<Vec<ConfigParam>> {
+        pub fn get_config_params(&self) -> Result<Vec<ConfigParam>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -10494,7 +10371,7 @@ pub mod config {
     }
     impl<E: crate::capabilities::Render> Config<'_, E> {
         pub fn get_config_string(
-            &mut self,
+            &self,
             key: &str,
             default_value: Option<&str>,
         ) -> Result<GetConfigStringValue> {
@@ -10527,7 +10404,7 @@ pub mod config {
         }
     }
     impl<E: crate::capabilities::Render> Config<'_, E> {
-        pub fn get_log_sections(&mut self) -> Result<Vec<String>> {
+        pub fn get_log_sections(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -10540,7 +10417,7 @@ pub mod config {
     }
     impl<E: crate::capabilities::Common> Config<'_, E> {
         pub fn set_config_float(
-            &mut self,
+            &self,
             key: &str,
             value: f32,
             use_overlay: bool,
@@ -10575,7 +10452,7 @@ pub mod config {
     }
     impl<E: crate::capabilities::Common> Config<'_, E> {
         pub fn set_config_int(
-            &mut self,
+            &self,
             key: &str,
             value: i32,
             use_overlay: bool,
@@ -10610,7 +10487,7 @@ pub mod config {
     }
     impl<E: crate::capabilities::Common> Config<'_, E> {
         pub fn set_config_string(
-            &mut self,
+            &self,
             key: &str,
             value: &str,
             use_overlay: bool,
@@ -10650,7 +10527,7 @@ pub mod config {
     }
     impl<E: crate::capabilities::Common> Config<'_, E> {
         pub fn set_log_section_filter_level(
-            &mut self,
+            &self,
             section: &str,
             level: i32,
         ) -> Result<bool> {
@@ -10690,7 +10567,7 @@ pub mod tracing {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn tracing(&mut self) -> Tracing<'_, E> {
+        pub fn tracing(&self) -> Tracing<'_, E> {
             Tracing {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -10698,7 +10575,7 @@ pub mod tracing {
         }
     }
     impl<E: crate::capabilities::Game> Tracing<'_, E> {
-        pub fn trace_ray(&mut self, ray: Ray) -> Result<TraceRayValue> {
+        pub fn trace_ray(&self, ray: Ray) -> Result<TraceRayValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -10711,7 +10588,7 @@ pub mod tracing {
     }
     impl<E: crate::capabilities::Game> Tracing<'_, E> {
         pub fn trace_ray_between_positions(
-            &mut self,
+            &self,
             start: Float3,
             end: Float3,
             type_: &str,
@@ -10745,7 +10622,7 @@ pub mod tracing {
         }
     }
     impl<E: crate::capabilities::Game> Tracing<'_, E> {
-        pub fn trace_ray_features(&mut self, ray: Ray) -> Result<TraceRayFeaturesValue> {
+        pub fn trace_ray_features(&self, ray: Ray) -> Result<TraceRayFeaturesValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -10758,7 +10635,7 @@ pub mod tracing {
     }
     impl<E: crate::capabilities::Game> Tracing<'_, E> {
         pub fn trace_ray_ground_between_positions(
-            &mut self,
+            &self,
             start: Float3,
             end: Float3,
             options: TraceRayGroundBetweenPositionsOptions,
@@ -10788,7 +10665,7 @@ pub mod tracing {
     }
     impl<E: crate::capabilities::Game> Tracing<'_, E> {
         pub fn trace_ray_ground_in_direction(
-            &mut self,
+            &self,
             start: Float3,
             dir: Float3,
             options: TraceRayGroundInDirectionOptions,
@@ -10818,7 +10695,7 @@ pub mod tracing {
     }
     impl<E: crate::capabilities::Game> Tracing<'_, E> {
         pub fn trace_ray_in_direction(
-            &mut self,
+            &self,
             pos: Float3,
             dir: Float3,
             options: TraceRayInDirectionOptions,
@@ -10855,7 +10732,7 @@ pub mod tracing {
         }
     }
     impl<E: crate::capabilities::Game> Tracing<'_, E> {
-        pub fn trace_ray_units(&mut self, ray: Ray) -> Result<TraceRayUnitsValue> {
+        pub fn trace_ray_units(&self, ray: Ray) -> Result<TraceRayUnitsValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -10875,7 +10752,7 @@ pub mod utils {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn utils(&mut self) -> Utils<'_, E> {
+        pub fn utils(&self) -> Utils<'_, E> {
             Utils {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -10884,7 +10761,7 @@ pub mod utils {
     }
     impl<E: crate::capabilities::Game> Utils<'_, E> {
         pub fn closest_build_pos(
-            &mut self,
+            &self,
             team_id: i32,
             unit_def_id: i32,
             pos: Float3,
@@ -10922,7 +10799,7 @@ pub mod utils {
         }
     }
     impl<E: crate::capabilities::Game> Utils<'_, E> {
-        pub fn get_cegid(&mut self, ceg_name: &str) -> Result<i32> {
+        pub fn get_cegid(&self, ceg_name: &str) -> Result<i32> {
             self._engine.check()?;
             if (ceg_name).as_bytes().contains(&0) {
                 return Err(
@@ -10940,7 +10817,7 @@ pub mod utils {
     }
     impl<E: crate::capabilities::Common> Utils<'_, E> {
         pub fn get_feature_def_dimensions(
-            &mut self,
+            &self,
             feature_def_id: i32,
         ) -> Result<UnitDefDimensions> {
             self._engine.check()?;
@@ -10964,7 +10841,7 @@ pub mod utils {
     }
     impl<E: crate::capabilities::Game> Utils<'_, E> {
         pub fn get_unit_def_dimensions(
-            &mut self,
+            &self,
             unit_def_id: i32,
         ) -> Result<UnitDefDimensions> {
             self._engine.check()?;
@@ -10984,7 +10861,7 @@ pub mod utils {
     }
     impl<E: crate::capabilities::Game> Utils<'_, E> {
         pub fn pos2_build_pos(
-            &mut self,
+            &self,
             unit_def_id: i32,
             pos: Float3,
             facing: i32,
@@ -11014,7 +10891,7 @@ pub mod utils {
     }
     impl<E: crate::capabilities::Game> Utils<'_, E> {
         pub fn test_build_order(
-            &mut self,
+            &self,
             unit_def_id: i32,
             pos: Float3,
             facing: i32,
@@ -11044,7 +10921,7 @@ pub mod utils {
     }
     impl<E: crate::capabilities::Game> Utils<'_, E> {
         pub fn test_move_order(
-            &mut self,
+            &self,
             unit_def_id: i32,
             pos: Float3,
             dir: Float3,
@@ -11085,7 +10962,7 @@ pub mod unsynced_ctrl {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn unsynced_ctrl(&mut self) -> UnsyncedCtrl<'_, E> {
+        pub fn unsynced_ctrl(&self) -> UnsyncedCtrl<'_, E> {
             UnsyncedCtrl {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -11094,7 +10971,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Common> UnsyncedCtrl<'_, E> {
         pub fn assign_mouse_cursor(
-            &mut self,
+            &self,
             command_name: &str,
             cursor_file_name: &str,
             overwrite: bool,
@@ -11136,7 +11013,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn deselect_unit_map(&mut self, unit_i_ds: &[i32]) -> Result<bool> {
+        pub fn deselect_unit_map(&self, unit_i_ds: &[i32]) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11154,7 +11031,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn draw_unit_commands(
-            &mut self,
+            &self,
             unit_i_ds: &[i32],
             table_or_array: bool,
             queue_draw_depth: i32,
@@ -11183,7 +11060,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn force_layout_update(&mut self) -> Result<bool> {
+        pub fn force_layout_update(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11196,7 +11073,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn force_tesselation_update(
-            &mut self,
+            &self,
             normal: bool,
             shadow: bool,
         ) -> Result<bool> {
@@ -11222,7 +11099,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn get_water_texture(&mut self, tex_type: &str) -> Result<String> {
+        pub fn get_water_texture(&self, tex_type: &str) -> Result<String> {
             self._engine.check()?;
             if (tex_type).as_bytes().contains(&0) {
                 return Err(
@@ -11244,7 +11121,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn load_cmd_colors_config(&mut self, filename: &str) -> Result<bool> {
+        pub fn load_cmd_colors_config(&self, filename: &str) -> Result<bool> {
             self._engine.check()?;
             if (filename).as_bytes().contains(&0) {
                 return Err(
@@ -11270,7 +11147,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn load_ctrl_panel_config(&mut self, filename: &str) -> Result<bool> {
+        pub fn load_ctrl_panel_config(&self, filename: &str) -> Result<bool> {
             self._engine.check()?;
             if (filename).as_bytes().contains(&0) {
                 return Err(
@@ -11296,7 +11173,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn load_model_textures(&mut self, model_name: &str) -> Result<bool> {
+        pub fn load_model_textures(&self, model_name: &str) -> Result<bool> {
             self._engine.check()?;
             if (model_name).as_bytes().contains(&0) {
                 return Err(
@@ -11322,7 +11199,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn pause_dolly_camera(&mut self, percent: f32) -> Result<bool> {
+        pub fn pause_dolly_camera(&self, percent: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11339,7 +11216,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn preload_feature_def_model(&mut self, def_id: i32) -> Result<bool> {
+        pub fn preload_feature_def_model(&self, def_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11360,7 +11237,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn preload_unit_def_model(&mut self, def_id: i32) -> Result<bool> {
+        pub fn preload_unit_def_model(&self, def_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11382,7 +11259,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Common> UnsyncedCtrl<'_, E> {
         pub fn replace_mouse_cursor(
-            &mut self,
+            &self,
             old_cursor_file_name: &str,
             new_cursor_file_name: &str,
             hot_spot_top_left: bool,
@@ -11421,7 +11298,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn resume_dolly_camera(&mut self) -> Result<bool> {
+        pub fn resume_dolly_camera(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11433,7 +11310,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn run_dolly_camera(&mut self, runtime_ms: f32) -> Result<bool> {
+        pub fn run_dolly_camera(&self, runtime_ms: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11451,7 +11328,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Launch> UnsyncedCtrl<'_, E> {
         pub fn sdl_set_text_input_rect(
-            &mut self,
+            &self,
             x: i32,
             y: i32,
             w: i32,
@@ -11483,7 +11360,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Launch> UnsyncedCtrl<'_, E> {
-        pub fn sdl_start_text_input(&mut self) -> Result<bool> {
+        pub fn sdl_start_text_input(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11495,7 +11372,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Launch> UnsyncedCtrl<'_, E> {
-        pub fn sdl_stop_text_input(&mut self) -> Result<bool> {
+        pub fn sdl_stop_text_input(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11507,11 +11384,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn select_unit_map(
-            &mut self,
-            unit_i_ds: &[i32],
-            append: bool,
-        ) -> Result<bool> {
+        pub fn select_unit_map(&self, unit_i_ds: &[i32], append: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11535,7 +11408,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_active_command(
-            &mut self,
+            &self,
             cmd_index: i32,
             button: i32,
             options: SetActiveCommandOptions,
@@ -11564,7 +11437,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_atmosphere(&mut self, params: AtmosphereParams) -> Result<bool> {
+        pub fn set_atmosphere(&self, params: AtmosphereParams) -> Result<bool> {
             self._engine.check()?;
             if let Some(input_option1) = ((params).fog_color).as_ref()
                 && (input_option1).len() != 4
@@ -11611,7 +11484,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_auto_show_metal(&mut self, enable: bool) -> Result<bool> {
+        pub fn set_auto_show_metal(&self, enable: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11628,7 +11501,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_box_selection_by_engine(&mut self, state: bool) -> Result<bool> {
+        pub fn set_box_selection_by_engine(&self, state: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11649,7 +11522,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_build_facing(&mut self, facing: i32) -> Result<bool> {
+        pub fn set_build_facing(&self, facing: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11661,7 +11534,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_build_spacing(&mut self, spacing: i32) -> Result<bool> {
+        pub fn set_build_spacing(&self, spacing: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11679,7 +11552,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_camera_offset(
-            &mut self,
+            &self,
             pos_offset: Float3,
             tilt_offset: Float3,
         ) -> Result<bool> {
@@ -11705,7 +11578,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Launch> UnsyncedCtrl<'_, E> {
-        pub fn set_clipboard(&mut self, text: &str) -> Result<bool> {
+        pub fn set_clipboard(&self, text: &str) -> Result<bool> {
             self._engine.check()?;
             if (text).as_bytes().contains(&0) {
                 return Err(
@@ -11723,7 +11596,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_custom_command_draw_data(
-            &mut self,
+            &self,
             cmd_id: i32,
             cmd_reference: &DefRef,
             color: Float4,
@@ -11761,7 +11634,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_custom_palette_color(
-            &mut self,
+            &self,
             index: i32,
             r: f32,
             g: f32,
@@ -11794,7 +11667,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_default_interface_visible(
-            &mut self,
+            &self,
             parts: u32,
             visible: bool,
         ) -> Result<u32> {
@@ -11821,7 +11694,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_dolly_camera_curve(
-            &mut self,
+            &self,
             degree: i32,
             control_points: &[Float4],
             knots: &[f32],
@@ -11851,7 +11724,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_dolly_camera_look_curve(
-            &mut self,
+            &self,
             degree: i32,
             control_points: &[Float4],
             knots: &[f32],
@@ -11880,10 +11753,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_dolly_camera_look_position(
-            &mut self,
-            position: Float3,
-        ) -> Result<bool> {
+        pub fn set_dolly_camera_look_position(&self, position: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11904,7 +11774,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_dolly_camera_look_unit(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn set_dolly_camera_look_unit(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11925,7 +11795,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_dolly_camera_mode(&mut self, mode: i32) -> Result<bool> {
+        pub fn set_dolly_camera_mode(&self, mode: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11942,7 +11812,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_dolly_camera_position(&mut self, position: Float3) -> Result<bool> {
+        pub fn set_dolly_camera_position(&self, position: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11963,7 +11833,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_dolly_camera_relative_mode(&mut self, mode: i32) -> Result<bool> {
+        pub fn set_dolly_camera_relative_mode(&self, mode: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -11984,7 +11854,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_draw_ground(&mut self, draw_ground: bool) -> Result<bool> {
+        pub fn set_draw_ground(&self, draw_ground: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12002,7 +11872,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_draw_ground_deferred(
-            &mut self,
+            &self,
             draw_deferred: bool,
             draw_forward: bool,
         ) -> Result<SetDrawGroundDeferredValue> {
@@ -12029,7 +11899,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_draw_models_deferred(
-            &mut self,
+            &self,
             draw_units_deferred: bool,
             draw_features_deferred: bool,
             draw_units_forward: bool,
@@ -12061,7 +11931,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_draw_selection_info(&mut self, draw: bool) -> Result<bool> {
+        pub fn set_draw_selection_info(&self, draw: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12082,7 +11952,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_draw_sky(&mut self, draw_sky: bool) -> Result<bool> {
+        pub fn set_draw_sky(&self, draw_sky: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12094,7 +11964,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_draw_water(&mut self, draw_water: bool) -> Result<bool> {
+        pub fn set_draw_water(&self, draw_water: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12111,10 +11981,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_engine_build_square_rendering(
-            &mut self,
-            enabled: bool,
-        ) -> Result<bool> {
+        pub fn set_engine_build_square_rendering(&self, enabled: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12136,7 +12003,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_feature_always_update_matrix(
-            &mut self,
+            &self,
             feature_id: i32,
             enable: bool,
         ) -> Result<bool> {
@@ -12163,7 +12030,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_feature_engine_draw_mask(
-            &mut self,
+            &self,
             feature_id: i32,
             mask: u32,
         ) -> Result<bool> {
@@ -12189,11 +12056,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_feature_fade(
-            &mut self,
-            feature_id: i32,
-            allow: bool,
-        ) -> Result<bool> {
+        pub fn set_feature_fade(&self, feature_id: i32, allow: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12217,7 +12080,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_feature_lua_draw(
-            &mut self,
+            &self,
             feature_id: i32,
             lua_draw: bool,
         ) -> Result<bool> {
@@ -12244,7 +12107,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_feature_no_draw(
-            &mut self,
+            &self,
             feature_id: i32,
             no_draw: bool,
         ) -> Result<bool> {
@@ -12271,7 +12134,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_feature_palette_index(
-            &mut self,
+            &self,
             feature_id: i32,
             custom_index: i32,
         ) -> Result<bool> {
@@ -12297,7 +12160,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_last_message_position(&mut self, pos: Float3) -> Result<bool> {
+        pub fn set_last_message_position(&self, pos: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12319,7 +12182,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_los_view_colors(
-            &mut self,
+            &self,
             always: RgbColor,
             los: RgbColor,
             radar: RgbColor,
@@ -12355,7 +12218,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_map_rendering_params(
-            &mut self,
+            &self,
             params: MapRenderingParams,
         ) -> Result<bool> {
             self._engine.check()?;
@@ -12393,7 +12256,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_map_shader(
-            &mut self,
+            &self,
             standard_shader_id: i32,
             deferred_shader_id: i32,
         ) -> Result<bool> {
@@ -12420,7 +12283,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_map_shading_texture(
-            &mut self,
+            &self,
             tex_type: &str,
             tex_name: &str,
             num: i32,
@@ -12460,7 +12323,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_mini_map_rotation(
-            &mut self,
+            &self,
             radians: f32,
         ) -> Result<SetMiniMapRotationValue> {
             self._engine.check()?;
@@ -12483,11 +12346,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Common> UnsyncedCtrl<'_, E> {
-        pub fn set_mouse_cursor(
-            &mut self,
-            cursor_name: &str,
-            scale: f32,
-        ) -> Result<bool> {
+        pub fn set_mouse_cursor(&self, cursor_name: &str, scale: f32) -> Result<bool> {
             self._engine.check()?;
             if (cursor_name).as_bytes().contains(&0) {
                 return Err(
@@ -12516,7 +12375,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_nano_projectile_params(
-            &mut self,
+            &self,
             r: f32,
             v: f32,
             a: f32,
@@ -12555,7 +12414,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_projectile_lua_draw(
-            &mut self,
+            &self,
             projectile_id: i32,
             lua_draw: bool,
         ) -> Result<bool> {
@@ -12582,7 +12441,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_shock_front_factors(
-            &mut self,
+            &self,
             options: SetShockFrontFactorsOptions,
         ) -> Result<bool> {
             self._engine.check()?;
@@ -12605,7 +12464,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_sky_box_texture(&mut self, tex_name: &str) -> Result<bool> {
+        pub fn set_sky_box_texture(&self, tex_name: &str) -> Result<bool> {
             self._engine.check()?;
             if (tex_name).as_bytes().contains(&0) {
                 return Err(
@@ -12631,11 +12490,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_sun_direction(
-            &mut self,
-            dir: Float3,
-            intensity: f32,
-        ) -> Result<bool> {
+        pub fn set_sun_direction(&self, dir: Float3, intensity: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12658,7 +12513,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_sun_lighting(&mut self, params: SunLightingParams) -> Result<bool> {
+        pub fn set_sun_lighting(&self, params: SunLightingParams) -> Result<bool> {
             self._engine.check()?;
             if let Some(input_option1) = ((params).ground_ambient_color).as_ref()
                 && (input_option1).len() != 4
@@ -12713,7 +12568,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_unit_always_update_matrix(
-            &mut self,
+            &self,
             unit_id: i32,
             always_update_matrix: bool,
         ) -> Result<bool> {
@@ -12740,7 +12595,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_unit_def_icon(
-            &mut self,
+            &self,
             unit_def_id: i32,
             icon_name: &str,
         ) -> Result<bool> {
@@ -12771,11 +12626,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_unit_def_image(
-            &mut self,
-            unit_def_id: i32,
-            image: &str,
-        ) -> Result<bool> {
+        pub fn set_unit_def_image(&self, unit_def_id: i32, image: &str) -> Result<bool> {
             self._engine.check()?;
             if (image).as_bytes().contains(&0) {
                 return Err(
@@ -12804,7 +12655,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_unit_engine_draw_mask(
-            &mut self,
+            &self,
             unit_id: i32,
             draw_mask: u32,
         ) -> Result<bool> {
@@ -12830,7 +12681,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_unit_icon(&mut self, unit_id: i32, icon_name: &str) -> Result<bool> {
+        pub fn set_unit_icon(&self, unit_id: i32, icon_name: &str) -> Result<bool> {
             self._engine.check()?;
             if (icon_name).as_bytes().contains(&0) {
                 return Err(
@@ -12858,11 +12709,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_unit_icon_draw(
-            &mut self,
-            unit_id: i32,
-            draw_icon: bool,
-        ) -> Result<bool> {
+        pub fn set_unit_icon_draw(&self, unit_id: i32, draw_icon: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12886,7 +12733,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_unit_leave_tracks(
-            &mut self,
+            &self,
             unit_id: i32,
             leave_tracks: bool,
         ) -> Result<bool> {
@@ -12912,11 +12759,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_unit_lua_draw(
-            &mut self,
-            unit_id: i32,
-            lua_draw: bool,
-        ) -> Result<bool> {
+        pub fn set_unit_lua_draw(&self, unit_id: i32, lua_draw: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12939,7 +12782,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_unit_no_draw(&mut self, unit_id: i32, no_draw: bool) -> Result<bool> {
+        pub fn set_unit_no_draw(&self, unit_id: i32, no_draw: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12962,11 +12805,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_unit_no_group(
-            &mut self,
-            unit_id: i32,
-            no_group: bool,
-        ) -> Result<bool> {
+        pub fn set_unit_no_group(&self, unit_id: i32, no_group: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -12990,7 +12829,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_unit_no_minimap(
-            &mut self,
+            &self,
             unit_id: i32,
             no_minimap: bool,
         ) -> Result<bool> {
@@ -13016,11 +12855,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_unit_no_select(
-            &mut self,
-            unit_id: i32,
-            no_select: bool,
-        ) -> Result<bool> {
+        pub fn set_unit_no_select(&self, unit_id: i32, no_select: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13044,7 +12879,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_unit_palette_index(
-            &mut self,
+            &self,
             unit_id: i32,
             custom_index: i32,
         ) -> Result<bool> {
@@ -13071,7 +12906,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn set_video_capturing_mode(
-            &mut self,
+            &self,
             allow_capture_mode: bool,
         ) -> Result<bool> {
             self._engine.check()?;
@@ -13094,10 +12929,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_video_capturing_time_offset(
-            &mut self,
-            time_offset: f32,
-        ) -> Result<bool> {
+        pub fn set_video_capturing_time_offset(&self, time_offset: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13118,11 +12950,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Common> UnsyncedCtrl<'_, E> {
-        pub fn set_wm_caption(
-            &mut self,
-            title: &str,
-            title_short: &str,
-        ) -> Result<bool> {
+        pub fn set_wm_caption(&self, title: &str, title_short: &str) -> Result<bool> {
             self._engine.check()?;
             if (title).as_bytes().contains(&0) {
                 return Err(
@@ -13156,7 +12984,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Common> UnsyncedCtrl<'_, E> {
         pub fn set_wm_icon(
-            &mut self,
+            &self,
             icon_file_name: &str,
             force_resolution: bool,
         ) -> Result<bool> {
@@ -13187,7 +13015,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_water_params(&mut self, params: WaterParams) -> Result<bool> {
+        pub fn set_water_params(&self, params: WaterParams) -> Result<bool> {
             self._engine.check()?;
             if let Some(input_option1) = ((params).absorb).as_ref()
                 && (input_option1).len() != 3
@@ -13248,11 +13076,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn set_water_texture(
-            &mut self,
-            tex_type: &str,
-            tex_name: &str,
-        ) -> Result<bool> {
+        pub fn set_water_texture(&self, tex_type: &str, tex_name: &str) -> Result<bool> {
             self._engine.check()?;
             if (tex_type).as_bytes().contains(&0) {
                 return Err(
@@ -13286,7 +13110,7 @@ pub mod unsynced_ctrl {
     }
     impl<E: crate::capabilities::Common> UnsyncedCtrl<'_, E> {
         pub fn set_window_geometry(
-            &mut self,
+            &self,
             display_index: i32,
             window_pos_x: i32,
             window_pos_y: i32,
@@ -13324,7 +13148,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::World> UnsyncedCtrl<'_, E> {
-        pub fn set_window_maximized(&mut self) -> Result<bool> {
+        pub fn set_window_maximized(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13336,7 +13160,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::World> UnsyncedCtrl<'_, E> {
-        pub fn set_window_minimized(&mut self) -> Result<bool> {
+        pub fn set_window_minimized(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13348,7 +13172,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn stop_tracking_units(&mut self) -> Result<bool> {
+        pub fn stop_tracking_units(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13360,7 +13184,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
-        pub fn track_units(&mut self, unit_i_ds: &[i32], mode: i32) -> Result<bool> {
+        pub fn track_units(&self, unit_i_ds: &[i32], mode: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13378,7 +13202,7 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Common> UnsyncedCtrl<'_, E> {
-        pub fn warp_mouse(&mut self, x: i32, y: i32) -> Result<bool> {
+        pub fn warp_mouse(&self, x: i32, y: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13400,7 +13224,7 @@ pub mod gfx {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn gfx(&mut self) -> Gfx<'_, E> {
+        pub fn gfx(&self) -> Gfx<'_, E> {
             Gfx {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -13409,7 +13233,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn active_fbo<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             fbo_id: u32,
             target: u32,
             identities: bool,
@@ -13437,7 +13261,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn active_shader<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             shader_id: u32,
             callback: F,
         ) -> Result<()> {
@@ -13462,7 +13286,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn active_texture(&mut self, tex_num: i32) -> Result<()> {
+        pub fn active_texture(&self, tex_num: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13475,7 +13299,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn add_atlas_texture(
-            &mut self,
+            &self,
             atlas_name: &str,
             texture_name: &str,
         ) -> Result<()> {
@@ -13511,7 +13335,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn add_fallback_font(&mut self, value: &str) -> Result<bool> {
+        pub fn add_fallback_font(&self, value: &str) -> Result<bool> {
             self._engine.check()?;
             if (value).as_bytes().contains(&0) {
                 return Err(
@@ -13529,7 +13353,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn add_feature_defs_to_submission_vao(
-            &mut self,
+            &self,
             vao_id: u32,
             ids: &[u32],
         ) -> Result<u32> {
@@ -13556,7 +13380,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn add_features_to_submission_vao(
-            &mut self,
+            &self,
             vao_id: u32,
             ids: &[u32],
         ) -> Result<u32> {
@@ -13583,7 +13407,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn add_unit_defs_to_submission_vao(
-            &mut self,
+            &self,
             vao_id: u32,
             ids: &[u32],
         ) -> Result<u32> {
@@ -13610,7 +13434,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn add_units_to_submission_vao(
-            &mut self,
+            &self,
             vao_id: u32,
             ids: &[u32],
         ) -> Result<u32> {
@@ -13636,7 +13460,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn alpha_test(&mut self, enable: bool, func: u32, ref_: f32) -> Result<()> {
+        pub fn alpha_test(&self, enable: bool, func: u32, ref_: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13648,7 +13472,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn alpha_to_coverage(&mut self, value: bool) -> Result<()> {
+        pub fn alpha_to_coverage(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13660,11 +13484,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn attach_index_buffer_vao(
-            &mut self,
-            vao_id: u32,
-            vbo_id: u32,
-        ) -> Result<()> {
+        pub fn attach_index_buffer_vao(&self, vao_id: u32, vbo_id: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13688,7 +13508,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn attach_instance_buffer_vao(
-            &mut self,
+            &self,
             vao_id: u32,
             vbo_id: u32,
         ) -> Result<()> {
@@ -13714,11 +13534,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn attach_vertex_buffer_vao(
-            &mut self,
-            vao_id: u32,
-            vbo_id: u32,
-        ) -> Result<()> {
+        pub fn attach_vertex_buffer_vao(&self, vao_id: u32, vbo_id: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13742,7 +13558,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn begin_end<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             primitive: u32,
             callback: F,
         ) -> Result<()> {
@@ -13767,7 +13583,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn begin_text(&mut self, value: bool) -> Result<()> {
+        pub fn begin_text(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13779,7 +13595,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn billboard(&mut self) -> Result<()> {
+        pub fn billboard(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13792,7 +13608,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn bind_buffer_range_vbo(
-            &mut self,
+            &self,
             vbo_id: u32,
             binding_index: u32,
             element_offset: i32,
@@ -13831,7 +13647,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn bind_image_texture(
-            &mut self,
+            &self,
             unit: u32,
             name: &str,
             level: i32,
@@ -13878,7 +13694,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn bind_texture(
-            &mut self,
+            &self,
             name: &str,
             tex_num: i32,
             enable: bool,
@@ -13906,7 +13722,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn blend_equation(&mut self, mode: u32) -> Result<()> {
+        pub fn blend_equation(&self, mode: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13919,7 +13735,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn blend_equation_separate(
-            &mut self,
+            &self,
             mode_rgb: u32,
             mode_alpha: u32,
         ) -> Result<()> {
@@ -13945,7 +13761,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn blend_func(&mut self, src: u32, dst: u32) -> Result<()> {
+        pub fn blend_func(&self, src: u32, dst: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -13958,7 +13774,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn blend_func_separate(
-            &mut self,
+            &self,
             src_rgb: u32,
             dst_rgb: u32,
             src_alpha: u32,
@@ -13990,7 +13806,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn blending(&mut self, value: bool) -> Result<()> {
+        pub fn blending(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14003,7 +13819,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn blit_fbo(
-            &mut self,
+            &self,
             src_fboid: u32,
             dst_fboid: u32,
             x0_src: i32,
@@ -14059,7 +13875,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn call_list(&mut self, value: u32) -> Result<()> {
+        pub fn call_list(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14072,7 +13888,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn change_texture_params(
-            &mut self,
+            &self,
             name: &str,
             params: GfxTextureParams,
         ) -> Result<()> {
@@ -14098,7 +13914,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn clear(&mut self, bits: u32, values: &[f32], count: u32) -> Result<()> {
+        pub fn clear(&self, bits: u32, values: &[f32], count: u32) -> Result<()> {
             self._engine.check()?;
             if (values).len() != 4 {
                 return Err(
@@ -14116,7 +13932,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn clear_attachment_fbo(
-            &mut self,
+            &self,
             target: u32,
             attachment: u32,
             values: &[f32],
@@ -14153,7 +13969,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn clear_fallback_fonts(&mut self) -> Result<()> {
+        pub fn clear_fallback_fonts(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14165,7 +13981,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn clear_submission_vao(&mut self, value: u32) -> Result<()> {
+        pub fn clear_submission_vao(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14177,7 +13993,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn clear_vbo(&mut self, value: u32) -> Result<()> {
+        pub fn clear_vbo(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14189,7 +14005,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn clip_distance(&mut self, index: u32, enable: bool) -> Result<()> {
+        pub fn clip_distance(&self, index: u32, enable: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14201,7 +14017,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn clip_plane(&mut self, plane: u32, equation: &[f32]) -> Result<()> {
+        pub fn clip_plane(&self, plane: u32, equation: &[f32]) -> Result<()> {
             self._engine.check()?;
             if (equation).len() != 4 {
                 return Err(
@@ -14218,7 +14034,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn color(&mut self, r: f32, g: f32, b: f32, a: f32) -> Result<()> {
+        pub fn color(&self, r: f32, g: f32, b: f32, a: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14230,7 +14046,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn color_mask(&mut self, options: GfxColorMaskOptions) -> Result<()> {
+        pub fn color_mask(&self, options: GfxColorMaskOptions) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14242,13 +14058,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn config_mini_map(
-            &mut self,
-            px: i32,
-            py: i32,
-            sx: i32,
-            sy: i32,
-        ) -> Result<()> {
+        pub fn config_mini_map(&self, px: i32, py: i32, sx: i32, sy: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14261,7 +14071,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn copy_to_texture(
-            &mut self,
+            &self,
             name: &str,
             xoff: i32,
             yoff: i32,
@@ -14314,7 +14124,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn copy_to_vbo(
-            &mut self,
+            &self,
             source_vboid: u32,
             destination_vboid: u32,
             copy_size_in_bytes: i32,
@@ -14344,7 +14154,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn copy_vbo_to_readback(
-            &mut self,
+            &self,
             readback_id: u32,
             vbo_id: u32,
             src_offset: u32,
@@ -14380,7 +14190,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn create_fbo(
-            &mut self,
+            &self,
             target: u32,
             attachments: &[GfxFBOAttachment],
             draw_buffers: &[u32],
@@ -14419,7 +14229,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn create_fence(&mut self) -> Result<u32> {
+        pub fn create_fence(&self) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14432,7 +14242,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn create_list<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             callback: F,
         ) -> Result<u32> {
             self._engine.check()?;
@@ -14446,7 +14256,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn create_query(&mut self, target: Option<u32>) -> Result<u32> {
+        pub fn create_query(&self, target: Option<u32>) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14459,7 +14269,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn create_rbo(
-            &mut self,
+            &self,
             xsize: i32,
             ysize: i32,
             target: u32,
@@ -14494,7 +14304,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn create_readback(&mut self, value: u32) -> Result<u32> {
+        pub fn create_readback(&self, value: u32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14507,7 +14317,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn create_shader(
-            &mut self,
+            &self,
             definitions: &str,
             vertex: &str,
             tcs: &str,
@@ -14587,7 +14397,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn create_texture(
-            &mut self,
+            &self,
             xsize: i32,
             ysize: i32,
             zsize: i32,
@@ -14613,7 +14423,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn create_texture_atlas(
-            &mut self,
+            &self,
             xsize: i32,
             ysize: i32,
             alloc_type: i32,
@@ -14636,7 +14446,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn cull_face(&mut self, face: GfxCullFace) -> Result<()> {
+        pub fn cull_face(&self, face: GfxCullFace) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14648,7 +14458,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn culling(&mut self, value: bool) -> Result<()> {
+        pub fn culling(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14661,7 +14471,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn define_vbo(
-            &mut self,
+            &self,
             vbo_id: u32,
             elements_count: i32,
             element_array: bool,
@@ -14702,7 +14512,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_fbo(&mut self, value: u32) -> Result<()> {
+        pub fn delete_fbo(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14714,7 +14524,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_fence(&mut self, value: u32) -> Result<()> {
+        pub fn delete_fence(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14726,7 +14536,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_font(&mut self, font_id: u32) -> Result<()> {
+        pub fn delete_font(&self, font_id: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14738,7 +14548,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_list(&mut self, value: u32) -> Result<()> {
+        pub fn delete_list(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14750,7 +14560,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_query(&mut self, value: u32) -> Result<()> {
+        pub fn delete_query(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14762,7 +14572,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_rbo(&mut self, value: u32) -> Result<()> {
+        pub fn delete_rbo(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14774,7 +14584,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_readback(&mut self, value: u32) -> Result<()> {
+        pub fn delete_readback(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14786,7 +14596,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_shader(&mut self, shader_id: u32) -> Result<bool> {
+        pub fn delete_shader(&self, shader_id: u32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14798,7 +14608,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_texture(&mut self, name: &str) -> Result<bool> {
+        pub fn delete_texture(&self, name: &str) -> Result<bool> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -14815,7 +14625,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_texture_atlas(&mut self, name: &str) -> Result<bool> {
+        pub fn delete_texture_atlas(&self, name: &str) -> Result<bool> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -14832,7 +14642,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_texture_fbo(&mut self, name: &str) -> Result<bool> {
+        pub fn delete_texture_fbo(&self, name: &str) -> Result<bool> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -14849,7 +14659,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_vao(&mut self, value: u32) -> Result<()> {
+        pub fn delete_vao(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14861,7 +14671,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn delete_vbo(&mut self, value: u32) -> Result<()> {
+        pub fn delete_vbo(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14873,7 +14683,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn depth_clamp(&mut self, value: bool) -> Result<()> {
+        pub fn depth_clamp(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14885,7 +14695,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn depth_mask(&mut self, value: bool) -> Result<()> {
+        pub fn depth_mask(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14897,7 +14707,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn depth_test(&mut self, options: GfxDepthTestOptions) -> Result<()> {
+        pub fn depth_test(&self, options: GfxDepthTestOptions) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -14910,7 +14720,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn dispatch_compute(
-            &mut self,
+            &self,
             num_group_x: u32,
             num_group_y: u32,
             num_group_z: u32,
@@ -14943,7 +14753,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn download_vbo(
-            &mut self,
+            &self,
             vbo_id: u32,
             attribute_index: i32,
             element_offset: i32,
@@ -14979,7 +14789,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn draw_arrays_vao(
-            &mut self,
+            &self,
             vao_id: u32,
             mode: u32,
             vertex_count: i32,
@@ -15018,7 +14828,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn draw_elements_vao(
-            &mut self,
+            &self,
             vao_id: u32,
             mode: u32,
             draw_count: i32,
@@ -15060,7 +14870,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn draw_func_at_unit<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             unit_id: i32,
             use_mid_pos: bool,
             callback: F,
@@ -15087,7 +14897,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn draw_ground_circle(
-            &mut self,
+            &self,
             pos: Float3,
             radius: f32,
             resolution: i32,
@@ -15129,7 +14939,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn draw_ground_quad(
-            &mut self,
+            &self,
             x0: f32,
             z0: f32,
             x1: f32,
@@ -15177,7 +14987,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn draw_list_at_unit(
-            &mut self,
+            &self,
             unit_id: i32,
             list_id: u32,
             use_mid_pos: bool,
@@ -15215,7 +15025,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn draw_mini_map(&mut self, value: bool) -> Result<()> {
+        pub fn draw_mini_map(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15227,7 +15037,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn dump_definition_vbo(&mut self, value: u32) -> Result<()> {
+        pub fn dump_definition_vbo(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15239,7 +15049,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn edge_flag(&mut self, value: bool) -> Result<()> {
+        pub fn edge_flag(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15251,7 +15061,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn end_text(&mut self) -> Result<()> {
+        pub fn end_text(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15264,7 +15074,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn feature(
-            &mut self,
+            &self,
             feature_id: i32,
             options: GfxFeatureDrawOptions,
         ) -> Result<()> {
@@ -15279,7 +15089,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn feature_mult_matrix(&mut self, value: i32) -> Result<()> {
+        pub fn feature_mult_matrix(&self, value: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15291,7 +15101,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn feature_piece(&mut self, object_id: i32, piece_id: i32) -> Result<()> {
+        pub fn feature_piece(&self, object_id: i32, piece_id: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15303,11 +15113,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn feature_piece_matrix(
-            &mut self,
-            object_id: i32,
-            piece_id: i32,
-        ) -> Result<()> {
+        pub fn feature_piece_matrix(&self, object_id: i32, piece_id: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15331,7 +15137,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn feature_piece_mult_matrix(
-            &mut self,
+            &self,
             object_id: i32,
             piece_id: i32,
         ) -> Result<()> {
@@ -15358,7 +15164,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn feature_raw(
-            &mut self,
+            &self,
             feature_id: i32,
             options: GfxFeatureDrawOptions,
         ) -> Result<()> {
@@ -15374,7 +15180,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn feature_shape(
-            &mut self,
+            &self,
             def_id: i32,
             team_id: i32,
             options: GfxObjectShapeOptions,
@@ -15403,11 +15209,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn feature_shape_textures(
-            &mut self,
-            object_id: i32,
-            push: bool,
-        ) -> Result<()> {
+        pub fn feature_shape_textures(&self, object_id: i32, push: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15430,7 +15232,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn feature_textures(&mut self, object_id: i32, push: bool) -> Result<()> {
+        pub fn feature_textures(&self, object_id: i32, push: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15442,7 +15244,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn finalize_texture_atlas(&mut self, name: &str) -> Result<bool> {
+        pub fn finalize_texture_atlas(&self, name: &str) -> Result<bool> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -15459,7 +15261,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn finish(&mut self) -> Result<()> {
+        pub fn finish(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15471,7 +15273,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn flush(&mut self) -> Result<()> {
+        pub fn flush(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15483,7 +15285,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn fog(&mut self, value: bool) -> Result<()> {
+        pub fn fog(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15495,7 +15297,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn fog_coord(&mut self, value: f32) -> Result<()> {
+        pub fn fog_coord(&self, value: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15508,7 +15310,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn font_begin(
-            &mut self,
+            &self,
             font_id: u32,
             user_defined_blending: bool,
         ) -> Result<()> {
@@ -15534,7 +15336,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn font_bind_texture(&mut self, font_id: u32) -> Result<()> {
+        pub fn font_bind_texture(&self, font_id: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15546,7 +15348,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn font_end(&mut self, font_id: u32) -> Result<()> {
+        pub fn font_end(&self, font_id: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -15559,7 +15361,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn font_get_text_height(
-            &mut self,
+            &self,
             font_id: u32,
             text: &str,
             x: f32,
@@ -15608,7 +15410,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn font_get_text_width(
-            &mut self,
+            &self,
             font_id: u32,
             text: &str,
             x: f32,
@@ -15657,7 +15459,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn font_print(
-            &mut self,
+            &self,
             font_id: u32,
             text: &str,
             x: f32,
@@ -15706,7 +15508,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn font_print_world(
-            &mut self,
+            &self,
             font_id: u32,
             text: &str,
             pos: Float3,
@@ -15752,7 +15554,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn font_set_auto_outline_color(
-            &mut self,
+            &self,
             font_id: u32,
             enable: bool,
         ) -> Result<()> {
@@ -15779,7 +15581,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn font_set_outline_color(
-            &mut self,
+            &self,
             font_id: u32,
             r: f32,
             g: f32,
@@ -15815,7 +15617,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn font_set_text_color(
-            &mut self,
+            &self,
             font_id: u32,
             r: f32,
             g: f32,
@@ -15851,7 +15653,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn font_submit_buffered(
-            &mut self,
+            &self,
             font_id: u32,
             options: GfxFontSubmitBufferedOptions,
         ) -> Result<()> {
@@ -15873,7 +15675,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn font_wrap_text(
-            &mut self,
+            &self,
             font_id: u32,
             text: &str,
             max_width: f32,
@@ -15914,7 +15716,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn frustum(
-            &mut self,
+            &self,
             left: f32,
             right: f32,
             bottom: f32,
@@ -15952,7 +15754,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn generate_mipmap(&mut self, name: &str) -> Result<()> {
+        pub fn generate_mipmap(&self, name: &str) -> Result<()> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -15970,7 +15772,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn get_active_uniforms(
-            &mut self,
+            &self,
             shader_id: u32,
         ) -> Result<Vec<GfxActiveUniformEntry>> {
             self._engine.check()?;
@@ -15985,7 +15787,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn get_atlas_texture(
-            &mut self,
+            &self,
             atlas_name: &str,
             texture_name: &str,
         ) -> Result<GetAtlasTextureValue> {
@@ -16022,7 +15824,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn get_atmosphere(
-            &mut self,
+            &self,
             key: &str,
             mode: &str,
         ) -> Result<GetAtmosphereValue> {
@@ -16047,7 +15849,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_console_commands(&mut self) -> Result<Vec<GfxConsoleCommandEntry>> {
+        pub fn get_console_commands(&self) -> Result<Vec<GfxConsoleCommandEntry>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16060,7 +15862,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn get_engine_atlas_textures(
-            &mut self,
+            &self,
             name: &str,
         ) -> Result<Vec<GfxAtlasTextureEntry>> {
             self._engine.check()?;
@@ -16079,7 +15881,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_engine_model_uniform_data_def(&mut self) -> Result<String> {
+        pub fn get_engine_model_uniform_data_def(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16092,7 +15894,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn get_engine_model_uniform_data_size(
-            &mut self,
+            &self,
         ) -> Result<GetEngineModelUniformDataSizeValue> {
             self._engine.check()?;
             let result = {
@@ -16105,7 +15907,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_engine_texture_names(&mut self) -> Result<Vec<String>> {
+        pub fn get_engine_texture_names(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16117,7 +15919,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_engine_uniform_buffer_def(&mut self, index: i32) -> Result<String> {
+        pub fn get_engine_uniform_buffer_def(&self, index: i32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16134,7 +15936,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_fixed_state(&mut self, param: &str) -> Result<GetFixedStateValue> {
+        pub fn get_fixed_state(&self, param: &str) -> Result<GetFixedStateValue> {
             self._engine.check()?;
             if (param).as_bytes().contains(&0) {
                 return Err(
@@ -16151,7 +15953,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_font_info(&mut self, font_id: u32) -> Result<GetFontInfoValue> {
+        pub fn get_font_info(&self, font_id: u32) -> Result<GetFontInfoValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16164,7 +15966,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn get_global_tex_coords(
-            &mut self,
+            &self,
             value: &str,
         ) -> Result<GetGlobalTexCoordsValue> {
             self._engine.check()?;
@@ -16183,7 +15985,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_global_tex_names(&mut self) -> Result<Vec<GfxAtlasTextureEntry>> {
+        pub fn get_global_tex_names(&self) -> Result<Vec<GfxAtlasTextureEntry>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16195,7 +15997,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_idvbo(&mut self, value: u32) -> Result<u32> {
+        pub fn get_idvbo(&self, value: u32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16208,7 +16010,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn get_map_rendering(
-            &mut self,
+            &self,
             key: &str,
             mode: &str,
         ) -> Result<GetMapRenderingValue> {
@@ -16233,7 +16035,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_matrix_data(&mut self, mode: u32) -> Result<[f32; 16]> {
+        pub fn get_matrix_data(&self, mode: u32) -> Result<[f32; 16]> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16245,11 +16047,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_number(
-            &mut self,
-            pname: u32,
-            max_values: u32,
-        ) -> Result<GetNumberValue> {
+        pub fn get_number(&self, pname: u32, max_values: u32) -> Result<GetNumberValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16261,7 +16059,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_query(&mut self, value: u32) -> Result<u64> {
+        pub fn get_query(&self, value: u32) -> Result<u64> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16273,7 +16071,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_rbo_info(&mut self, rbo_id: u32) -> Result<GetRBOInfoValue> {
+        pub fn get_rbo_info(&self, rbo_id: u32) -> Result<GetRBOInfoValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16285,7 +16083,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_screen_view_trans(&mut self) -> Result<GetScreenViewTransValue> {
+        pub fn get_screen_view_trans(&self) -> Result<GetScreenViewTransValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16297,7 +16095,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_shader_log(&mut self) -> Result<String> {
+        pub fn get_shader_log(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16309,7 +16107,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_shadow_map_params(&mut self) -> Result<Float4> {
+        pub fn get_shadow_map_params(&self) -> Result<Float4> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16321,7 +16119,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_string(&mut self, pname: u32) -> Result<String> {
+        pub fn get_string(&self, pname: u32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16334,7 +16132,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn get_subroutine_index(
-            &mut self,
+            &self,
             shader_id: u32,
             shader_type: u32,
             name: &str,
@@ -16368,7 +16166,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_sun(&mut self, key: &str, mode: &str) -> Result<GetSunValue> {
+        pub fn get_sun(&self, key: &str, mode: &str) -> Result<GetSunValue> {
             self._engine.check()?;
             if (key).as_bytes().contains(&0) {
                 return Err(
@@ -16389,7 +16187,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_text_height(&mut self, value: &str) -> Result<GetTextHeightValue> {
+        pub fn get_text_height(&self, value: &str) -> Result<GetTextHeightValue> {
             self._engine.check()?;
             if (value).as_bytes().contains(&0) {
                 return Err(
@@ -16406,7 +16204,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_text_width(&mut self, value: &str) -> Result<f32> {
+        pub fn get_text_width(&self, value: &str) -> Result<f32> {
             self._engine.check()?;
             if (value).as_bytes().contains(&0) {
                 return Err(
@@ -16423,11 +16221,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_uniform_location(
-            &mut self,
-            shader_id: u32,
-            name: &str,
-        ) -> Result<i32> {
+        pub fn get_uniform_location(&self, shader_id: u32, name: &str) -> Result<i32> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -16450,7 +16244,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_vao(&mut self) -> Result<GetVAOValue> {
+        pub fn get_vao(&self) -> Result<GetVAOValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16462,11 +16256,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_vbo(
-            &mut self,
-            target: u32,
-            freq_updated: bool,
-        ) -> Result<GetVBOValue> {
+        pub fn get_vbo(&self, target: u32, freq_updated: bool) -> Result<GetVBOValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16478,7 +16268,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_vbo_info(&mut self, vbo_id: u32) -> Result<GetVBOInfoValue> {
+        pub fn get_vbo_info(&self, vbo_id: u32) -> Result<GetVBOInfoValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16490,7 +16280,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_view_range(&mut self, camera_type: i32) -> Result<GetViewRangeValue> {
+        pub fn get_view_range(&self, camera_type: i32) -> Result<GetViewRangeValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16502,7 +16292,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn get_view_sizes(&mut self) -> Result<GetViewSizesValue> {
+        pub fn get_view_sizes(&self) -> Result<GetViewSizesValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16515,7 +16305,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn get_water_rendering(
-            &mut self,
+            &self,
             key: &str,
             mode: &str,
         ) -> Result<GetWaterRenderingValue> {
@@ -16540,7 +16330,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn has_extension(&mut self, value: &str) -> Result<bool> {
+        pub fn has_extension(&self, value: &str) -> Result<bool> {
             self._engine.check()?;
             if (value).as_bytes().contains(&0) {
                 return Err(
@@ -16558,7 +16348,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn instance_data_from_feature_defs_vbo(
-            &mut self,
+            &self,
             vbo_id: u32,
             ids: &[u32],
             attribute_index: i32,
@@ -16594,7 +16384,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn instance_data_from_features_vbo(
-            &mut self,
+            &self,
             vbo_id: u32,
             ids: &[u32],
             attribute_index: i32,
@@ -16630,7 +16420,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn instance_data_from_unit_defs_vbo(
-            &mut self,
+            &self,
             vbo_id: u32,
             ids: &[u32],
             attribute_index: i32,
@@ -16666,7 +16456,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn instance_data_from_units_vbo(
-            &mut self,
+            &self,
             vbo_id: u32,
             ids: &[u32],
             attribute_index: i32,
@@ -16701,7 +16491,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn is_fence_signaled(&mut self, value: u32) -> Result<bool> {
+        pub fn is_fence_signaled(&self, value: u32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16713,7 +16503,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn is_query_available(&mut self, value: u32) -> Result<bool> {
+        pub fn is_query_available(&self, value: u32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16725,11 +16515,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn is_valid_fbo(
-            &mut self,
-            fbo_id: u32,
-            target: u32,
-        ) -> Result<IsValidFBOValue> {
+        pub fn is_valid_fbo(&self, fbo_id: u32, target: u32) -> Result<IsValidFBOValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16742,7 +16528,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn light(
-            &mut self,
+            &self,
             light: i32,
             options: GfxLightOptions,
             pname: u32,
@@ -16782,7 +16568,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn lighting(&mut self, value: bool) -> Result<()> {
+        pub fn lighting(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16794,7 +16580,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn line_stipple(&mut self, factor: i32, pattern: u16) -> Result<()> {
+        pub fn line_stipple(&self, factor: i32, pattern: u16) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16806,7 +16592,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn line_width(&mut self, value: f32) -> Result<()> {
+        pub fn line_width(&self, value: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16819,7 +16605,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn load_font(
-            &mut self,
+            &self,
             path: &str,
             size: i32,
             outline_width: i32,
@@ -16856,7 +16642,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn load_identity(&mut self) -> Result<()> {
+        pub fn load_identity(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16868,7 +16654,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn load_matrix(&mut self, values: &[f32]) -> Result<()> {
+        pub fn load_matrix(&self, values: &[f32]) -> Result<()> {
             self._engine.check()?;
             if (values).len() != 16 {
                 return Err(
@@ -16885,7 +16671,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn logic_op(&mut self, enable: bool, opcode: u32) -> Result<()> {
+        pub fn logic_op(&self, enable: bool, opcode: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16897,12 +16683,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn material(
-            &mut self,
-            pname: u32,
-            values: &[f32],
-            count: u32,
-        ) -> Result<()> {
+        pub fn material(&self, pname: u32, values: &[f32], count: u32) -> Result<()> {
             self._engine.check()?;
             if (values).len() != 4 {
                 return Err(
@@ -16920,7 +16701,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn matrix_data_from_projectiles_vbo(
-            &mut self,
+            &self,
             vbo_id: u32,
             ids: &[u32],
             attribute_index: i32,
@@ -16955,7 +16736,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn matrix_mode(&mut self, mode: u32) -> Result<()> {
+        pub fn matrix_mode(&self, mode: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16967,7 +16748,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn memory_barrier(&mut self, barriers: u32) -> Result<()> {
+        pub fn memory_barrier(&self, barriers: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16979,7 +16760,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn models_vbo(&mut self, value: u32) -> Result<u32> {
+        pub fn models_vbo(&self, value: u32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -16991,7 +16772,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn mult_matrix(&mut self, values: &[f32]) -> Result<()> {
+        pub fn mult_matrix(&self, values: &[f32]) -> Result<()> {
             self._engine.check()?;
             if (values).len() != 16 {
                 return Err(
@@ -17009,7 +16790,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn multi_tex_coord(
-            &mut self,
+            &self,
             tex_num: i32,
             s: f32,
             t: f32,
@@ -17048,7 +16829,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn multi_tex_env(
-            &mut self,
+            &self,
             tex_num: i32,
             target: u32,
             pname: u32,
@@ -17089,7 +16870,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn multi_tex_gen(
-            &mut self,
+            &self,
             tex_num: i32,
             target: u32,
             options: GfxMultiTexGenOptions,
@@ -17132,7 +16913,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn normal(&mut self, x: f32, y: f32, z: f32) -> Result<()> {
+        pub fn normal(&self, x: f32, y: f32, z: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17145,7 +16926,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn object_label(
-            &mut self,
+            &self,
             identifier: u32,
             object_id: u32,
             label: &str,
@@ -17180,7 +16961,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn ortho(
-            &mut self,
+            &self,
             left: f32,
             right: f32,
             bottom: f32,
@@ -17219,7 +17000,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn point_parameter(
-            &mut self,
+            &self,
             pname: u32,
             value: f32,
             values: &[f32],
@@ -17256,7 +17037,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn point_size(&mut self, value: f32) -> Result<()> {
+        pub fn point_size(&self, value: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17268,7 +17049,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn point_sprite(&mut self, value: bool) -> Result<()> {
+        pub fn point_sprite(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17280,7 +17061,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn polygon_mode(&mut self, face: u32, mode: u32) -> Result<()> {
+        pub fn polygon_mode(&self, face: u32, mode: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17292,7 +17073,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn polygon_offset(&mut self, factor: f32, units: f32) -> Result<()> {
+        pub fn polygon_offset(&self, factor: f32, units: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17304,7 +17085,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn pop_attrib(&mut self) -> Result<()> {
+        pub fn pop_attrib(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17316,7 +17097,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn pop_debug_group(&mut self) -> Result<()> {
+        pub fn pop_debug_group(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17328,7 +17109,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn pop_matrix(&mut self) -> Result<()> {
+        pub fn pop_matrix(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17340,7 +17121,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn push_attrib(&mut self, value: u32) -> Result<()> {
+        pub fn push_attrib(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17353,7 +17134,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn push_debug_group(
-            &mut self,
+            &self,
             id: u32,
             message: &str,
             source_is_third_party: bool,
@@ -17387,7 +17168,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn push_matrix(&mut self) -> Result<()> {
+        pub fn push_matrix(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17400,7 +17181,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn push_pop_matrix<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             callback: F,
         ) -> Result<()> {
             self._engine.check()?;
@@ -17415,7 +17196,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn raw_bind_fbo(
-            &mut self,
+            &self,
             bind_default: bool,
             fbo_id: u32,
             target: u32,
@@ -17448,7 +17229,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn read_pixels(
-            &mut self,
+            &self,
             x: i32,
             y: i32,
             width: i32,
@@ -17484,7 +17265,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn read_readback(
-            &mut self,
+            &self,
             readback_id: u32,
             offset: u32,
             count: u32,
@@ -17513,7 +17294,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn rect(&mut self, x1: f32, y1: f32, x2: f32, y2: f32) -> Result<()> {
+        pub fn rect(&self, x1: f32, y1: f32, x2: f32, y2: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17525,11 +17306,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn remove_from_submission_vao(
-            &mut self,
-            vao_id: u32,
-            index: i32,
-        ) -> Result<()> {
+        pub fn remove_from_submission_vao(&self, vao_id: u32, index: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17553,7 +17330,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn render_to_texture<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             name: &str,
             callback: F,
         ) -> Result<()> {
@@ -17583,7 +17360,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn reset_matrices(&mut self) -> Result<()> {
+        pub fn reset_matrices(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17595,7 +17372,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn reset_state(&mut self) -> Result<()> {
+        pub fn reset_state(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17607,7 +17384,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn rotate(&mut self, degrees: f32, x: f32, y: f32, z: f32) -> Result<()> {
+        pub fn rotate(&self, degrees: f32, x: f32, y: f32, z: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17620,7 +17397,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn run_query<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             id: u32,
             callback: F,
         ) -> Result<()> {
@@ -17636,7 +17413,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn save_image(
-            &mut self,
+            &self,
             x: i32,
             y: i32,
             width: i32,
@@ -17682,7 +17459,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn scale(&mut self, x: f32, y: f32, z: f32) -> Result<()> {
+        pub fn scale(&self, x: f32, y: f32, z: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17694,13 +17471,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn scissor(
-            &mut self,
-            x: i32,
-            y: i32,
-            width: i32,
-            height: i32,
-        ) -> Result<()> {
+        pub fn scissor(&self, x: i32, y: i32, width: i32, height: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17712,7 +17483,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn secondary_color(&mut self, x: f32, y: f32, z: f32) -> Result<()> {
+        pub fn secondary_color(&self, x: f32, y: f32, z: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17725,7 +17496,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn set_fbo_attachment(
-            &mut self,
+            &self,
             fbo_id: u32,
             attachment: u32,
             texture_name: &str,
@@ -17771,11 +17542,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn set_fbo_draw_buffers(
-            &mut self,
-            fbo_id: u32,
-            buffers: &[u32],
-        ) -> Result<()> {
+        pub fn set_fbo_draw_buffers(&self, fbo_id: u32, buffers: &[u32]) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17793,7 +17560,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn set_fbo_read_buffer(&mut self, fbo_id: u32, buffer: u32) -> Result<()> {
+        pub fn set_fbo_read_buffer(&self, fbo_id: u32, buffer: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17812,7 +17579,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn set_feature_buffer_uniforms(
-            &mut self,
+            &self,
             object_id: i32,
             values: &[f32],
             offset: u32,
@@ -17842,7 +17609,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn set_geometry_shader_parameter(
-            &mut self,
+            &self,
             shader_id: u32,
             param: u32,
             value: i32,
@@ -17872,7 +17639,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn set_tesselation_shader_parameter(
-            &mut self,
+            &self,
             param: u32,
             value: i32,
             values: &[f32],
@@ -17913,7 +17680,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn set_unit_buffer_uniforms(
-            &mut self,
+            &self,
             object_id: i32,
             values: &[f32],
             offset: u32,
@@ -17942,7 +17709,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn shade_model(&mut self, mode: u32) -> Result<()> {
+        pub fn shade_model(&self, mode: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -17954,11 +17721,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn shape(
-            &mut self,
-            primitive: u32,
-            vertices: &[GfxVertexData],
-        ) -> Result<()> {
+        pub fn shape(&self, primitive: u32, vertices: &[GfxVertexData]) -> Result<()> {
             self._engine.check()?;
             for input_item0 in (vertices).iter() {
                 if ((input_item0).vertex).len() != 3 {
@@ -17992,7 +17755,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn slave_mini_map(&mut self, value: bool) -> Result<()> {
+        pub fn slave_mini_map(&self, value: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18004,7 +17767,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn stencil_func(&mut self, func: u32, ref_: i32, mask: u32) -> Result<()> {
+        pub fn stencil_func(&self, func: u32, ref_: i32, mask: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18017,7 +17780,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn stencil_func_separate(
-            &mut self,
+            &self,
             face: u32,
             func: u32,
             ref_: i32,
@@ -18049,7 +17812,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn stencil_mask(&mut self, mask: u32) -> Result<()> {
+        pub fn stencil_mask(&self, mask: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18061,7 +17824,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn stencil_mask_separate(&mut self, face: u32, mask: u32) -> Result<()> {
+        pub fn stencil_mask_separate(&self, face: u32, mask: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18073,7 +17836,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn stencil_op(&mut self, fail: u32, zfail: u32, zpass: u32) -> Result<()> {
+        pub fn stencil_op(&self, fail: u32, zfail: u32, zpass: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18086,7 +17849,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn stencil_op_separate(
-            &mut self,
+            &self,
             face: u32,
             fail: u32,
             zfail: u32,
@@ -18118,7 +17881,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn stencil_test(&mut self, enable: bool) -> Result<()> {
+        pub fn stencil_test(&self, enable: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18130,7 +17893,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn submit_vao(&mut self, value: u32) -> Result<()> {
+        pub fn submit_vao(&self, value: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18142,7 +17905,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn swap_buffers(&mut self) -> Result<()> {
+        pub fn swap_buffers(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18155,7 +17918,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn tex_coord(
-            &mut self,
+            &self,
             x: f32,
             y: f32,
             z: f32,
@@ -18174,7 +17937,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn tex_env(
-            &mut self,
+            &self,
             target: u32,
             pname: u32,
             values: &[f32],
@@ -18205,7 +17968,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn tex_gen(
-            &mut self,
+            &self,
             target: u32,
             options: GfxTexGenOptions,
             pname: u32,
@@ -18246,7 +18009,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn tex_rect(
-            &mut self,
+            &self,
             x1: f32,
             y1: f32,
             x2: f32,
@@ -18291,7 +18054,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn text(
-            &mut self,
+            &self,
             text: &str,
             x: f32,
             y: f32,
@@ -18320,7 +18083,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn text_env(
-            &mut self,
+            &self,
             target: u32,
             pname: u32,
             values: &[f32],
@@ -18350,7 +18113,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn texture_info(&mut self, name: &str) -> Result<TextureInfoValue> {
+        pub fn texture_info(&self, name: &str) -> Result<TextureInfoValue> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -18367,7 +18130,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn translate(&mut self, x: f32, y: f32, z: f32) -> Result<()> {
+        pub fn translate(&self, x: f32, y: f32, z: f32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18380,7 +18143,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn unbind_buffer_range_vbo(
-            &mut self,
+            &self,
             vbo_id: u32,
             binding_index: u32,
             element_offset: i32,
@@ -18418,12 +18181,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn uniform(
-            &mut self,
-            location: i32,
-            values: &[f32],
-            count: u32,
-        ) -> Result<()> {
+        pub fn uniform(&self, location: i32, values: &[f32], count: u32) -> Result<()> {
             self._engine.check()?;
             if (values).len() != 4 {
                 return Err(
@@ -18441,7 +18199,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn uniform_array_float(
-            &mut self,
+            &self,
             location: i32,
             values: &[f32],
             components: u32,
@@ -18471,7 +18229,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn uniform_array_int(
-            &mut self,
+            &self,
             location: i32,
             values: &[i32],
             components: u32,
@@ -18501,7 +18259,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn uniform_int(
-            &mut self,
+            &self,
             location: i32,
             values: &[i32],
             count: u32,
@@ -18530,7 +18288,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn uniform_matrix(
-            &mut self,
+            &self,
             location: i32,
             values: &[f32],
             transpose: bool,
@@ -18559,11 +18317,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn uniform_subroutine(
-            &mut self,
-            shader_type: u32,
-            index: u32,
-        ) -> Result<()> {
+        pub fn uniform_subroutine(&self, shader_type: u32, index: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18581,7 +18335,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn unit(&mut self, unit_id: i32, options: GfxUnitDrawOptions) -> Result<()> {
+        pub fn unit(&self, unit_id: i32, options: GfxUnitDrawOptions) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18593,7 +18347,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn unit_mult_matrix(&mut self, value: i32) -> Result<()> {
+        pub fn unit_mult_matrix(&self, value: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18605,7 +18359,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn unit_piece(&mut self, object_id: i32, piece_id: i32) -> Result<()> {
+        pub fn unit_piece(&self, object_id: i32, piece_id: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18617,11 +18371,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn unit_piece_matrix(
-            &mut self,
-            object_id: i32,
-            piece_id: i32,
-        ) -> Result<()> {
+        pub fn unit_piece_matrix(&self, object_id: i32, piece_id: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18640,7 +18390,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn unit_piece_mult_matrix(
-            &mut self,
+            &self,
             object_id: i32,
             piece_id: i32,
         ) -> Result<()> {
@@ -18666,11 +18416,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn unit_raw(
-            &mut self,
-            unit_id: i32,
-            options: GfxUnitDrawOptions,
-        ) -> Result<()> {
+        pub fn unit_raw(&self, unit_id: i32, options: GfxUnitDrawOptions) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18683,7 +18429,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn unit_shape(
-            &mut self,
+            &self,
             def_id: i32,
             team_id: i32,
             options: GfxObjectShapeOptions,
@@ -18706,7 +18452,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn unit_shape_textures(&mut self, object_id: i32, push: bool) -> Result<()> {
+        pub fn unit_shape_textures(&self, object_id: i32, push: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18724,7 +18470,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn unit_textures(&mut self, object_id: i32, push: bool) -> Result<()> {
+        pub fn unit_textures(&self, object_id: i32, push: bool) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18737,7 +18483,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn unsafe_state<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             state: u32,
             reverse: bool,
             callback: F,
@@ -18764,7 +18510,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn upload_texture(
-            &mut self,
+            &self,
             name: &str,
             target: u32,
             level: i32,
@@ -18826,7 +18572,7 @@ pub mod gfx {
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn upload_vbo(
-            &mut self,
+            &self,
             vbo_id: u32,
             data: &[f32],
             attribute_index: i32,
@@ -18864,7 +18610,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn use_shader(&mut self, shader_id: u32) -> Result<bool> {
+        pub fn use_shader(&self, shader_id: u32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18876,14 +18622,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn vertex(
-            &mut self,
-            x: f32,
-            y: f32,
-            z: f32,
-            w: f32,
-            count: u32,
-        ) -> Result<()> {
+        pub fn vertex(&self, x: f32, y: f32, z: f32, w: f32, count: u32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18895,13 +18634,7 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
-        pub fn viewport(
-            &mut self,
-            x: i32,
-            y: i32,
-            width: i32,
-            height: i32,
-        ) -> Result<()> {
+        pub fn viewport(&self, x: i32, y: i32, width: i32, height: i32) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -18921,7 +18654,7 @@ pub mod lights {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn lights(&mut self) -> Lights<'_, E> {
+        pub fn lights(&self) -> Lights<'_, E> {
             Lights {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -18930,7 +18663,7 @@ pub mod lights {
     }
     impl<E: crate::capabilities::Game> Lights<'_, E> {
         pub fn add_light_tracking_target(
-            &mut self,
+            &self,
             light_handle: u32,
             object_id: i32,
             track_unit: bool,
@@ -18962,7 +18695,7 @@ pub mod lights {
         }
     }
     impl<E: crate::capabilities::Game> Lights<'_, E> {
-        pub fn add_map_light(&mut self, params: &LightParams) -> Result<u32> {
+        pub fn add_map_light(&self, params: &LightParams) -> Result<u32> {
             self._engine.check()?;
             if ((params).position).len() != 3 {
                 return Err(
@@ -19029,7 +18762,7 @@ pub mod lights {
         }
     }
     impl<E: crate::capabilities::Game> Lights<'_, E> {
-        pub fn add_model_light(&mut self, params: &LightParams) -> Result<u32> {
+        pub fn add_model_light(&self, params: &LightParams) -> Result<u32> {
             self._engine.check()?;
             if ((params).position).len() != 3 {
                 return Err(
@@ -19097,7 +18830,7 @@ pub mod lights {
     }
     impl<E: crate::capabilities::Game> Lights<'_, E> {
         pub fn set_map_light_tracking_state(
-            &mut self,
+            &self,
             light_handle: u32,
             object_id: i32,
             enable_tracking: bool,
@@ -19130,7 +18863,7 @@ pub mod lights {
     }
     impl<E: crate::capabilities::Game> Lights<'_, E> {
         pub fn set_model_light_tracking_state(
-            &mut self,
+            &self,
             light_handle: u32,
             object_id: i32,
             enable_tracking: bool,
@@ -19163,7 +18896,7 @@ pub mod lights {
     }
     impl<E: crate::capabilities::Game> Lights<'_, E> {
         pub fn update_map_light(
-            &mut self,
+            &self,
             light_handle: u32,
             params: &LightParams,
         ) -> Result<bool> {
@@ -19245,7 +18978,7 @@ pub mod lights {
     }
     impl<E: crate::capabilities::Game> Lights<'_, E> {
         pub fn update_model_light(
-            &mut self,
+            &self,
             light_handle: u32,
             params: &LightParams,
         ) -> Result<bool> {
@@ -19335,7 +19068,7 @@ pub mod icons {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn icons(&mut self) -> Icons<'_, E> {
+        pub fn icons(&self) -> Icons<'_, E> {
             Icons {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -19344,7 +19077,7 @@ pub mod icons {
     }
     impl<E: crate::capabilities::Game> Icons<'_, E> {
         pub fn add_unit_icon(
-            &mut self,
+            &self,
             icon_name: &str,
             tex_file: &str,
             size: f32,
@@ -19401,7 +19134,7 @@ pub mod icons {
         }
     }
     impl<E: crate::capabilities::Game> Icons<'_, E> {
-        pub fn free_unit_icon(&mut self, icon_name: &str) -> Result<bool> {
+        pub fn free_unit_icon(&self, icon_name: &str) -> Result<bool> {
             self._engine.check()?;
             if (icon_name).as_bytes().contains(&0) {
                 return Err(
@@ -19419,7 +19152,7 @@ pub mod icons {
     }
     impl<E: crate::capabilities::Local> Icons<'_, E> {
         pub fn get_all_icon_data_array(
-            &mut self,
+            &self,
             full_data: bool,
         ) -> Result<Vec<IconDataEntry>> {
             self._engine.check()?;
@@ -19439,7 +19172,7 @@ pub mod icons {
     }
     impl<E: crate::capabilities::Local> Icons<'_, E> {
         pub fn get_icon_data(
-            &mut self,
+            &self,
             icon_name: &str,
             full_data: bool,
         ) -> Result<IconDataEntry> {
@@ -19465,7 +19198,7 @@ pub mod icons {
         }
     }
     impl<E: crate::capabilities::Local> Icons<'_, E> {
-        pub fn unit_icon_get_draw(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn unit_icon_get_draw(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -19477,11 +19210,7 @@ pub mod icons {
         }
     }
     impl<E: crate::capabilities::Game> Icons<'_, E> {
-        pub fn unit_icon_set_draw(
-            &mut self,
-            unit_id: i32,
-            draw_icon: bool,
-        ) -> Result<bool> {
+        pub fn unit_icon_set_draw(&self, unit_id: i32, draw_icon: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -19512,7 +19241,7 @@ pub mod markers {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn markers(&mut self) -> Markers<'_, E> {
+        pub fn markers(&self) -> Markers<'_, E> {
             Markers {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -19520,7 +19249,7 @@ pub mod markers {
         }
     }
     impl<E: crate::capabilities::Game> Markers<'_, E> {
-        pub fn add_world_icon(&mut self, cmd_id: i32, pos: Float3) -> Result<bool> {
+        pub fn add_world_icon(&self, cmd_id: i32, pos: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -19532,7 +19261,7 @@ pub mod markers {
         }
     }
     impl<E: crate::capabilities::Game> Markers<'_, E> {
-        pub fn add_world_text(&mut self, text: &str, pos: Float3) -> Result<bool> {
+        pub fn add_world_text(&self, text: &str, pos: Float3) -> Result<bool> {
             self._engine.check()?;
             if (text).as_bytes().contains(&0) {
                 return Err(
@@ -19550,7 +19279,7 @@ pub mod markers {
     }
     impl<E: crate::capabilities::Game> Markers<'_, E> {
         pub fn add_world_unit(
-            &mut self,
+            &self,
             unit_def_id: i32,
             pos: Float3,
             team_id: i32,
@@ -19583,7 +19312,7 @@ pub mod markers {
     }
     impl<E: crate::capabilities::Game> Markers<'_, E> {
         pub fn marker_add_line(
-            &mut self,
+            &self,
             from: Float3,
             to: Float3,
             local_only: bool,
@@ -19616,7 +19345,7 @@ pub mod markers {
     }
     impl<E: crate::capabilities::Game> Markers<'_, E> {
         pub fn marker_add_point(
-            &mut self,
+            &self,
             pos: Float3,
             text: &str,
             local_only: bool,
@@ -19654,7 +19383,7 @@ pub mod markers {
     }
     impl<E: crate::capabilities::Game> Markers<'_, E> {
         pub fn marker_erase_position(
-            &mut self,
+            &self,
             pos: Float3,
             unused: f32,
             options: MarkerErasePositionOptions,
@@ -19696,7 +19425,7 @@ pub mod ground_decals {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn ground_decals(&mut self) -> GroundDecals<'_, E> {
+        pub fn ground_decals(&self) -> GroundDecals<'_, E> {
             GroundDecals {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -19704,7 +19433,7 @@ pub mod ground_decals {
         }
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
-        pub fn create_ground_decal(&mut self) -> Result<CreateGroundDecalValue> {
+        pub fn create_ground_decal(&self) -> Result<CreateGroundDecalValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -19716,7 +19445,7 @@ pub mod ground_decals {
         }
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
-        pub fn destroy_ground_decal(&mut self, decal_id: u32) -> Result<bool> {
+        pub fn destroy_ground_decal(&self, decal_id: u32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -19737,7 +19466,7 @@ pub mod ground_decals {
         }
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
-        pub fn get_all_ground_decals(&mut self) -> Result<Vec<u32>> {
+        pub fn get_all_ground_decals(&self) -> Result<Vec<u32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -19750,7 +19479,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_alpha(
-            &mut self,
+            &self,
             decal_id: u32,
         ) -> Result<GetGroundDecalAlphaValue> {
             self._engine.check()?;
@@ -19774,7 +19503,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_creation_frame(
-            &mut self,
+            &self,
             decal_id: u32,
         ) -> Result<GetGroundDecalCreationFrameValue> {
             self._engine.check()?;
@@ -19798,7 +19527,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_glow_params(
-            &mut self,
+            &self,
             decal_id: u32,
         ) -> Result<GetGroundDecalGlowParamsValue> {
             self._engine.check()?;
@@ -19822,7 +19551,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_middle_pos(
-            &mut self,
+            &self,
             decal_id: u32,
         ) -> Result<GetGroundDecalMiddlePosValue> {
             self._engine.check()?;
@@ -19846,7 +19575,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_misc(
-            &mut self,
+            &self,
             decal_id: u32,
         ) -> Result<GetGroundDecalMiscValue> {
             self._engine.check()?;
@@ -19869,7 +19598,7 @@ pub mod ground_decals {
         }
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
-        pub fn get_ground_decal_normal(&mut self, decal_id: u32) -> Result<Vec<f32>> {
+        pub fn get_ground_decal_normal(&self, decal_id: u32) -> Result<Vec<f32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -19891,7 +19620,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_owner(
-            &mut self,
+            &self,
             decal_id: u32,
         ) -> Result<GetGroundDecalOwnerValue> {
             self._engine.check()?;
@@ -19915,7 +19644,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_quad_pos(
-            &mut self,
+            &self,
             decal_id: u32,
         ) -> Result<GetGroundDecalQuadPosValue> {
             self._engine.check()?;
@@ -19939,7 +19668,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_rotation(
-            &mut self,
+            &self,
             decal_id: u32,
         ) -> Result<GetGroundDecalRotationValue> {
             self._engine.check()?;
@@ -19963,7 +19692,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_size_and_height(
-            &mut self,
+            &self,
             decal_id: u32,
         ) -> Result<GetGroundDecalSizeAndHeightValue> {
             self._engine.check()?;
@@ -19987,7 +19716,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_texture(
-            &mut self,
+            &self,
             decal_id: u32,
             main_tex: bool,
         ) -> Result<String> {
@@ -20014,7 +19743,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_texture_params(
-            &mut self,
+            &self,
             decal_id: u32,
         ) -> Result<GetGroundDecalTextureParamsValue> {
             self._engine.check()?;
@@ -20038,7 +19767,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_textures(
-            &mut self,
+            &self,
             options: GetGroundDecalTexturesOptions,
         ) -> Result<GetGroundDecalTexturesValue> {
             self._engine.check()?;
@@ -20057,7 +19786,7 @@ pub mod ground_decals {
         }
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
-        pub fn get_ground_decal_tint(&mut self, decal_id: u32) -> Result<Vec<f32>> {
+        pub fn get_ground_decal_tint(&self, decal_id: u32) -> Result<Vec<f32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20078,7 +19807,7 @@ pub mod ground_decals {
         }
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
-        pub fn get_ground_decal_type(&mut self, decal_id: u32) -> Result<String> {
+        pub fn get_ground_decal_type(&self, decal_id: u32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20100,7 +19829,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Local> GroundDecals<'_, E> {
         pub fn get_ground_decal_user_data(
-            &mut self,
+            &self,
             decal_id: u32,
             quad_index: u32,
         ) -> Result<GetGroundDecalUserDataValue> {
@@ -20127,7 +19856,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_alpha(
-            &mut self,
+            &self,
             decal_id: u32,
             alpha: f32,
             alpha_falloff: f32,
@@ -20157,7 +19886,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_creation_frame(
-            &mut self,
+            &self,
             decal_id: u32,
             creation_frame_min: f32,
             creation_frame_max: f32,
@@ -20187,7 +19916,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_glow_params(
-            &mut self,
+            &self,
             decal_id: u32,
             glow: f32,
             glow_falloff: f32,
@@ -20217,7 +19946,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_misc(
-            &mut self,
+            &self,
             decal_id: u32,
             dot_elim_exp: f32,
             ref_height: f32,
@@ -20256,7 +19985,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_normal(
-            &mut self,
+            &self,
             decal_id: u32,
             normal_x: f32,
             normal_y: f32,
@@ -20289,7 +20018,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_pos_and_dims(
-            &mut self,
+            &self,
             decal_id: u32,
             mid_pos_x: f32,
             mid_pos_z: f32,
@@ -20328,7 +20057,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_quad_pos_and_height(
-            &mut self,
+            &self,
             decal_id: u32,
             pos_tlx: f32,
             pos_tly: f32,
@@ -20379,7 +20108,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_rotation(
-            &mut self,
+            &self,
             decal_id: u32,
             rotation: f32,
         ) -> Result<bool> {
@@ -20406,7 +20135,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_texture(
-            &mut self,
+            &self,
             decal_id: u32,
             texture_name: &str,
             main_tex: bool,
@@ -20441,7 +20170,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_texture_params(
-            &mut self,
+            &self,
             decal_id: u32,
             tex_wrap_distance: f32,
             tex_traveled_distance: f32,
@@ -20471,7 +20200,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_tint(
-            &mut self,
+            &self,
             decal_id: u32,
             tint_r: f32,
             tint_g: f32,
@@ -20507,7 +20236,7 @@ pub mod ground_decals {
     }
     impl<E: crate::capabilities::Game> GroundDecals<'_, E> {
         pub fn set_ground_decal_user_data(
-            &mut self,
+            &self,
             decal_id: u32,
             quad_index: u32,
             value_x: f32,
@@ -20554,7 +20283,7 @@ pub mod system_control {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn system_control(&mut self) -> SystemControl<'_, E> {
+        pub fn system_control(&self) -> SystemControl<'_, E> {
             SystemControl {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -20563,7 +20292,7 @@ pub mod system_control {
     }
     impl<E: crate::capabilities::Common> SystemControl<'_, E> {
         pub fn call_as_team<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             team_id: i32,
             callback: F,
         ) -> Result<bool> {
@@ -20589,7 +20318,7 @@ pub mod system_control {
     }
     impl<E: crate::capabilities::Game> SystemControl<'_, E> {
         pub fn clear_watch_dog_timer(
-            &mut self,
+            &self,
             thread_name: &str,
             keep_stopped: bool,
         ) -> Result<bool> {
@@ -20621,7 +20350,7 @@ pub mod system_control {
     }
     impl<E: crate::capabilities::Game> SystemControl<'_, E> {
         pub fn garbage_collect_ctrl(
-            &mut self,
+            &self,
             iters_per_batch: i32,
             num_steps_per_iter: i32,
             min_steps_per_iter: i32,
@@ -20665,7 +20394,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Session> SystemControl<'_, E> {
-        pub fn get_game_name(&mut self) -> Result<String> {
+        pub fn get_game_name(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20677,7 +20406,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Local> SystemControl<'_, E> {
-        pub fn get_game_state(&mut self, max_latency: f32) -> Result<GetGameStateValue> {
+        pub fn get_game_state(&self, max_latency: f32) -> Result<GetGameStateValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20694,7 +20423,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Local> SystemControl<'_, E> {
-        pub fn get_gather_mode(&mut self) -> Result<i32> {
+        pub fn get_gather_mode(&self) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20706,7 +20435,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Local> SystemControl<'_, E> {
-        pub fn get_menu_name(&mut self) -> Result<String> {
+        pub fn get_menu_name(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20718,7 +20447,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Session> SystemControl<'_, E> {
-        pub fn get_replay_file_path(&mut self) -> Result<GetReplayFilePathValue> {
+        pub fn get_replay_file_path(&self) -> Result<GetReplayFilePathValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20730,7 +20459,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Local> SystemControl<'_, E> {
-        pub fn get_replay_length(&mut self) -> Result<GetReplayLengthValue> {
+        pub fn get_replay_length(&self) -> Result<GetReplayLengthValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20743,7 +20472,7 @@ pub mod system_control {
     }
     impl<E: crate::capabilities::Session> SystemControl<'_, E> {
         pub fn get_replay_recording_file_path(
-            &mut self,
+            &self,
         ) -> Result<GetReplayRecordingFilePathValue> {
             self._engine.check()?;
             let result = {
@@ -20760,7 +20489,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Local> SystemControl<'_, E> {
-        pub fn get_video_capturing_mode(&mut self) -> Result<bool> {
+        pub fn get_video_capturing_mode(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20776,7 +20505,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Local> SystemControl<'_, E> {
-        pub fn get_window_display_mode(&mut self) -> Result<GetWindowDisplayModeValue> {
+        pub fn get_window_display_mode(&self) -> Result<GetWindowDisplayModeValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20788,7 +20517,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Replay> SystemControl<'_, E> {
-        pub fn is_replay(&mut self) -> Result<bool> {
+        pub fn is_replay(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20800,7 +20529,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Game> SystemControl<'_, E> {
-        pub fn ping(&mut self, tag: u32) -> Result<bool> {
+        pub fn ping(&self, tag: u32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20812,7 +20541,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Launch> SystemControl<'_, E> {
-        pub fn quit(&mut self) -> Result<bool> {
+        pub fn quit(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20824,7 +20553,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Launch> SystemControl<'_, E> {
-        pub fn reload(&mut self, start_script: &str) -> Result<bool> {
+        pub fn reload(&self, start_script: &str) -> Result<bool> {
             self._engine.check()?;
             if (start_script).as_bytes().contains(&0) {
                 return Err(
@@ -20841,11 +20570,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Game> SystemControl<'_, E> {
-        pub fn request_start_position(
-            &mut self,
-            pos: Float3,
-            ready: bool,
-        ) -> Result<bool> {
+        pub fn request_start_position(&self, pos: Float3, ready: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -20868,7 +20593,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Common> SystemControl<'_, E> {
-        pub fn restart(&mut self, cmd_args: &str, start_script: &str) -> Result<bool> {
+        pub fn restart(&self, cmd_args: &str, start_script: &str) -> Result<bool> {
             self._engine.check()?;
             if (cmd_args).as_bytes().contains(&0) {
                 return Err(
@@ -20901,7 +20626,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Game> SystemControl<'_, E> {
-        pub fn set_share_level(&mut self, resource: &str, level: f32) -> Result<bool> {
+        pub fn set_share_level(&self, resource: &str, level: f32) -> Result<bool> {
             self._engine.check()?;
             if (resource).as_bytes().contains(&0) {
                 return Err(
@@ -20930,7 +20655,7 @@ pub mod system_control {
     }
     impl<E: crate::capabilities::Game> SystemControl<'_, E> {
         pub fn share_resources(
-            &mut self,
+            &self,
             team_id: i32,
             resource: &str,
             amount: f32,
@@ -20964,7 +20689,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Launch> SystemControl<'_, E> {
-        pub fn start(&mut self, cmd_args: &str, start_script: &str) -> Result<bool> {
+        pub fn start(&self, cmd_args: &str, start_script: &str) -> Result<bool> {
             self._engine.check()?;
             if (cmd_args).as_bytes().contains(&0) {
                 return Err(
@@ -20997,7 +20722,7 @@ pub mod system_control {
         }
     }
     impl<E: crate::capabilities::Game> SystemControl<'_, E> {
-        pub fn yield_(&mut self) -> Result<bool> {
+        pub fn yield_(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21019,7 +20744,7 @@ pub mod profiling {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn profiling(&mut self) -> Profiling<'_, E> {
+        pub fn profiling(&self) -> Profiling<'_, E> {
             Profiling {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -21028,7 +20753,7 @@ pub mod profiling {
     }
     impl<E: crate::capabilities::Render> Profiling<'_, E> {
         pub fn diff_timers(
-            &mut self,
+            &self,
             end_timer: u64,
             start_timer: u64,
             options: DiffTimersOptions,
@@ -21057,7 +20782,7 @@ pub mod profiling {
         }
     }
     impl<E: crate::capabilities::Local> Profiling<'_, E> {
-        pub fn get_draw_seconds(&mut self) -> Result<f32> {
+        pub fn get_draw_seconds(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21069,7 +20794,7 @@ pub mod profiling {
         }
     }
     impl<E: crate::capabilities::Local> Profiling<'_, E> {
-        pub fn get_frame_timer(&mut self, last_frame_time: bool) -> Result<u64> {
+        pub fn get_frame_timer(&self, last_frame_time: bool) -> Result<u64> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21086,7 +20811,7 @@ pub mod profiling {
         }
     }
     impl<E: crate::capabilities::Session> Profiling<'_, E> {
-        pub fn get_lua_mem_usage(&mut self) -> Result<GetLuaMemUsageValue> {
+        pub fn get_lua_mem_usage(&self) -> Result<GetLuaMemUsageValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21098,7 +20823,7 @@ pub mod profiling {
         }
     }
     impl<E: crate::capabilities::Local> Profiling<'_, E> {
-        pub fn get_profiler_record_names(&mut self) -> Result<Vec<String>> {
+        pub fn get_profiler_record_names(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21111,7 +20836,7 @@ pub mod profiling {
     }
     impl<E: crate::capabilities::Local> Profiling<'_, E> {
         pub fn get_profiler_time_record(
-            &mut self,
+            &self,
             name: &str,
             include_frame_data: bool,
         ) -> Result<GetProfilerTimeRecordValue> {
@@ -21142,7 +20867,7 @@ pub mod profiling {
         }
     }
     impl<E: crate::capabilities::Local> Profiling<'_, E> {
-        pub fn get_synced_gc_info(&mut self, collect: bool) -> Result<f32> {
+        pub fn get_synced_gc_info(&self, collect: bool) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21154,7 +20879,7 @@ pub mod profiling {
         }
     }
     impl<E: crate::capabilities::Render> Profiling<'_, E> {
-        pub fn get_timer(&mut self) -> Result<u64> {
+        pub fn get_timer(&self) -> Result<u64> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21166,7 +20891,7 @@ pub mod profiling {
         }
     }
     impl<E: crate::capabilities::Game> Profiling<'_, E> {
-        pub fn get_timer_micros(&mut self) -> Result<u64> {
+        pub fn get_timer_micros(&self) -> Result<u64> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21178,7 +20903,7 @@ pub mod profiling {
         }
     }
     impl<E: crate::capabilities::Local> Profiling<'_, E> {
-        pub fn get_vid_mem_usage(&mut self) -> Result<GetVidMemUsageValue> {
+        pub fn get_vid_mem_usage(&self) -> Result<GetVidMemUsageValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21200,7 +20925,7 @@ pub mod rml_ui {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn rml_ui(&mut self) -> RmlUi<'_, E> {
+        pub fn rml_ui(&self) -> RmlUi<'_, E> {
             RmlUi {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -21209,7 +20934,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn add_translation_string(
-            &mut self,
+            &self,
             key: &str,
             translation: &str,
         ) -> Result<bool> {
@@ -21245,10 +20970,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn clear_document_path_requests(
-            &mut self,
-            document_path: &str,
-        ) -> Result<bool> {
+        pub fn clear_document_path_requests(&self, document_path: &str) -> Result<bool> {
             self._engine.check()?;
             if (document_path).as_bytes().contains(&0) {
                 return Err(
@@ -21274,7 +20996,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn clear_translations(&mut self) -> Result<bool> {
+        pub fn clear_translations(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21287,7 +21009,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_activate_theme(
-            &mut self,
+            &self,
             context_handle: u64,
             name: &str,
             value: bool,
@@ -21327,7 +21049,7 @@ pub mod rml_ui {
                     crate::callbacks::Event,
                 ) -> Result<()> + 'static + crate::RetainedCapture,
         >(
-            &mut self,
+            &self,
             context_handle: u64,
             event: &str,
             in_capture_phase: bool,
@@ -21360,7 +21082,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_create_data_model(
-            &mut self,
+            &self,
             context_handle: u64,
             name: &str,
         ) -> Result<ContextCreateDataModelValue> {
@@ -21392,7 +21114,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_create_document(
-            &mut self,
+            &self,
             context_handle: u64,
             tag: &str,
         ) -> Result<ContextCreateDocumentValue> {
@@ -21424,7 +21146,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_enable_mouse_cursor(
-            &mut self,
+            &self,
             context_handle: u64,
             value: bool,
         ) -> Result<bool> {
@@ -21451,7 +21173,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_get_density_independent_pixel_ratio(
-            &mut self,
+            &self,
             context_handle: u64,
         ) -> Result<f32> {
             self._engine.check()?;
@@ -21475,7 +21197,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_get_dimensions(
-            &mut self,
+            &self,
             context_handle: u64,
         ) -> Result<ContextGetDimensionsValue> {
             self._engine.check()?;
@@ -21499,7 +21221,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_get_document(
-            &mut self,
+            &self,
             context_handle: u64,
             name: &str,
         ) -> Result<ContextGetDocumentValue> {
@@ -21531,7 +21253,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_get_element_at_point(
-            &mut self,
+            &self,
             context_handle: u64,
             x: f32,
             y: f32,
@@ -21564,7 +21286,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_get_focus_element(
-            &mut self,
+            &self,
             context_handle: u64,
         ) -> Result<ContextGetFocusElementValue> {
             self._engine.check()?;
@@ -21588,7 +21310,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_get_hover_element(
-            &mut self,
+            &self,
             context_handle: u64,
         ) -> Result<ContextGetHoverElementValue> {
             self._engine.check()?;
@@ -21611,7 +21333,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn context_get_name(&mut self, context_handle: u64) -> Result<String> {
+        pub fn context_get_name(&self, context_handle: u64) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21629,7 +21351,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_get_root_element(
-            &mut self,
+            &self,
             context_handle: u64,
         ) -> Result<ContextGetRootElementValue> {
             self._engine.check()?;
@@ -21652,10 +21374,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn context_is_mouse_interacting(
-            &mut self,
-            context_handle: u64,
-        ) -> Result<bool> {
+        pub fn context_is_mouse_interacting(&self, context_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21677,7 +21396,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_is_theme_active(
-            &mut self,
+            &self,
             context_handle: u64,
             name: &str,
         ) -> Result<bool> {
@@ -21709,7 +21428,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_load_document(
-            &mut self,
+            &self,
             context_handle: u64,
             document_path: &str,
         ) -> Result<ContextLoadDocumentValue> {
@@ -21741,7 +21460,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_open_data_model(
-            &mut self,
+            &self,
             context_handle: u64,
             name: &str,
         ) -> Result<ContextOpenDataModelValue> {
@@ -21773,7 +21492,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_process_key_down(
-            &mut self,
+            &self,
             context_handle: u64,
             key: i32,
             key_modifier_state: i32,
@@ -21803,7 +21522,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_process_key_up(
-            &mut self,
+            &self,
             context_handle: u64,
             key: i32,
             key_modifier_state: i32,
@@ -21833,7 +21552,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_process_mouse_button_down(
-            &mut self,
+            &self,
             context_handle: u64,
             button: i32,
             key_modifier_state: i32,
@@ -21863,7 +21582,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_process_mouse_button_up(
-            &mut self,
+            &self,
             context_handle: u64,
             button: i32,
             key_modifier_state: i32,
@@ -21892,10 +21611,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn context_process_mouse_leave(
-            &mut self,
-            context_handle: u64,
-        ) -> Result<bool> {
+        pub fn context_process_mouse_leave(&self, context_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -21917,7 +21633,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_process_mouse_move(
-            &mut self,
+            &self,
             context_handle: u64,
             x: f32,
             y: f32,
@@ -21950,7 +21666,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_process_mouse_wheel(
-            &mut self,
+            &self,
             context_handle: u64,
             x: f32,
             y: f32,
@@ -21983,7 +21699,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_process_text_input(
-            &mut self,
+            &self,
             context_handle: u64,
             text: &str,
         ) -> Result<bool> {
@@ -22015,7 +21731,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_pull_document_to_front(
-            &mut self,
+            &self,
             context_handle: u64,
             document_handle: u64,
         ) -> Result<bool> {
@@ -22041,7 +21757,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn context_pull_to_front(&mut self, context_handle: u64) -> Result<bool> {
+        pub fn context_pull_to_front(&self, context_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -22063,7 +21779,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_push_document_to_back(
-            &mut self,
+            &self,
             context_handle: u64,
             document_handle: u64,
         ) -> Result<bool> {
@@ -22090,7 +21806,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_remove_data_model(
-            &mut self,
+            &self,
             context_handle: u64,
             name: &str,
         ) -> Result<bool> {
@@ -22122,7 +21838,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_remove_event_listener(
-            &mut self,
+            &self,
             context_handle: u64,
             event_listener_handle: u64,
             event: &str,
@@ -22159,7 +21875,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn context_render(&mut self, context_handle: u64) -> Result<bool> {
+        pub fn context_render(&self, context_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -22172,7 +21888,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_set_density_independent_pixel_ratio(
-            &mut self,
+            &self,
             context_handle: u64,
             value: f32,
         ) -> Result<bool> {
@@ -22199,7 +21915,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_set_dimensions(
-            &mut self,
+            &self,
             context_handle: u64,
             x: i32,
             y: i32,
@@ -22229,7 +21945,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_set_pointer_capture(
-            &mut self,
+            &self,
             context_handle: u64,
             anchor_x: i32,
             anchor_y: i32,
@@ -22262,7 +21978,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_take_pointer_capture_delta(
-            &mut self,
+            &self,
             context_handle: u64,
         ) -> Result<ContextTakePointerCaptureDeltaValue> {
             self._engine.check()?;
@@ -22285,10 +22001,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn context_unload_all_documents(
-            &mut self,
-            context_handle: u64,
-        ) -> Result<bool> {
+        pub fn context_unload_all_documents(&self, context_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -22310,7 +22023,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn context_unload_document(
-            &mut self,
+            &self,
             context_handle: u64,
             document_handle: u64,
         ) -> Result<bool> {
@@ -22336,7 +22049,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn context_update(&mut self, context_handle: u64) -> Result<bool> {
+        pub fn context_update(&self, context_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -22348,7 +22061,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn create_context(&mut self, name: &str) -> Result<CreateContextValue> {
+        pub fn create_context(&self, name: &str) -> Result<CreateContextValue> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -22366,7 +22079,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_bind_bool(
-            &mut self,
+            &self,
             data_model_handle: u64,
             name: &str,
             initial_value: bool,
@@ -22401,7 +22114,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_bind_color(
-            &mut self,
+            &self,
             data_model_handle: u64,
             name: &str,
             red: u8,
@@ -22450,7 +22163,7 @@ pub mod rml_ui {
                     crate::callbacks::Event,
                 ) -> Result<()> + 'static + crate::RetainedCapture,
         >(
-            &mut self,
+            &self,
             data_model_handle: u64,
             name: &str,
             field_types: &[u8],
@@ -22483,7 +22196,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_bind_float(
-            &mut self,
+            &self,
             data_model_handle: u64,
             name: &str,
             initial_value: f32,
@@ -22518,7 +22231,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_bind_int(
-            &mut self,
+            &self,
             data_model_handle: u64,
             name: &str,
             initial_value: i32,
@@ -22553,7 +22266,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_bind_percent(
-            &mut self,
+            &self,
             data_model_handle: u64,
             name: &str,
             initial_value: f32,
@@ -22588,7 +22301,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_bind_pixels(
-            &mut self,
+            &self,
             data_model_handle: u64,
             name: &str,
             initial_value: f32,
@@ -22623,7 +22336,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_bind_rows(
-            &mut self,
+            &self,
             data_model_handle: u64,
             name: &str,
             fields: &[RmlDataFieldDef],
@@ -22665,7 +22378,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_bind_string(
-            &mut self,
+            &self,
             data_model_handle: u64,
             name: &str,
             initial_value: &str,
@@ -22705,7 +22418,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_get_bool(
-            &mut self,
+            &self,
             variable_handle: u64,
         ) -> Result<DataModelGetBoolValue> {
             self._engine.check()?;
@@ -22729,7 +22442,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_get_color(
-            &mut self,
+            &self,
             variable_handle: u64,
         ) -> Result<DataModelGetColorValue> {
             self._engine.check()?;
@@ -22753,7 +22466,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_get_float(
-            &mut self,
+            &self,
             variable_handle: u64,
         ) -> Result<DataModelGetFloatValue> {
             self._engine.check()?;
@@ -22777,7 +22490,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_get_int(
-            &mut self,
+            &self,
             variable_handle: u64,
         ) -> Result<DataModelGetIntValue> {
             self._engine.check()?;
@@ -22797,7 +22510,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_get_percent(
-            &mut self,
+            &self,
             variable_handle: u64,
         ) -> Result<DataModelGetPercentValue> {
             self._engine.check()?;
@@ -22821,7 +22534,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_get_pixels(
-            &mut self,
+            &self,
             variable_handle: u64,
         ) -> Result<DataModelGetPixelsValue> {
             self._engine.check()?;
@@ -22845,7 +22558,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_get_string(
-            &mut self,
+            &self,
             variable_handle: u64,
         ) -> Result<DataModelGetStringValue> {
             self._engine.check()?;
@@ -22865,7 +22578,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_set_bool(
-            &mut self,
+            &self,
             variable_handle: u64,
             value: bool,
         ) -> Result<bool> {
@@ -22892,7 +22605,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_set_color(
-            &mut self,
+            &self,
             variable_handle: u64,
             red: u8,
             green: u8,
@@ -22928,7 +22641,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_set_float(
-            &mut self,
+            &self,
             variable_handle: u64,
             value: f32,
         ) -> Result<bool> {
@@ -22955,7 +22668,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_set_int(
-            &mut self,
+            &self,
             variable_handle: u64,
             value: i32,
         ) -> Result<bool> {
@@ -22982,7 +22695,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_set_percent(
-            &mut self,
+            &self,
             variable_handle: u64,
             value: f32,
         ) -> Result<bool> {
@@ -23009,7 +22722,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_set_pixels(
-            &mut self,
+            &self,
             variable_handle: u64,
             value: f32,
         ) -> Result<bool> {
@@ -23036,7 +22749,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_set_rows(
-            &mut self,
+            &self,
             rows_handle: u64,
             values: &[RmlDataValue],
         ) -> Result<bool> {
@@ -23070,7 +22783,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn data_model_set_string(
-            &mut self,
+            &self,
             variable_handle: u64,
             value: &str,
         ) -> Result<bool> {
@@ -23101,7 +22814,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn data_model_unbind_event(&mut self, event_handle: u64) -> Result<bool> {
+        pub fn data_model_unbind_event(&self, event_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23119,7 +22832,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn document_append_to_style_sheet(
-            &mut self,
+            &self,
             document_handle: u64,
             value: &str,
         ) -> Result<bool> {
@@ -23150,7 +22863,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn document_close(&mut self, document_handle: u64) -> Result<bool> {
+        pub fn document_close(&self, document_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23163,7 +22876,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn document_create_element(
-            &mut self,
+            &self,
             document_handle: u64,
             tag_name: &str,
         ) -> Result<DocumentCreateElementValue> {
@@ -23195,7 +22908,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn document_create_text_node(
-            &mut self,
+            &self,
             document_handle: u64,
             value: &str,
         ) -> Result<DocumentCreateTextNodeValue> {
@@ -23227,7 +22940,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn document_get_context(
-            &mut self,
+            &self,
             document_handle: u64,
         ) -> Result<DocumentGetContextValue> {
             self._engine.check()?;
@@ -23250,7 +22963,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn document_get_title(&mut self, document_handle: u64) -> Result<String> {
+        pub fn document_get_title(&self, document_handle: u64) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23267,7 +22980,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn document_get_url(&mut self, document_handle: u64) -> Result<String> {
+        pub fn document_get_url(&self, document_handle: u64) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23284,7 +22997,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn document_hide(&mut self, document_handle: u64) -> Result<bool> {
+        pub fn document_hide(&self, document_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23296,7 +23009,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn document_is_modal(&mut self, document_handle: u64) -> Result<bool> {
+        pub fn document_is_modal(&self, document_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23314,7 +23027,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn document_load_external_script(
-            &mut self,
+            &self,
             document_handle: u64,
             value: &str,
         ) -> Result<bool> {
@@ -23346,7 +23059,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn document_load_inline_script(
-            &mut self,
+            &self,
             document_handle: u64,
             content: &str,
             source_path: &str,
@@ -23388,7 +23101,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn document_pull_to_front(&mut self, document_handle: u64) -> Result<bool> {
+        pub fn document_pull_to_front(&self, document_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23409,7 +23122,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn document_push_to_back(&mut self, document_handle: u64) -> Result<bool> {
+        pub fn document_push_to_back(&self, document_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23430,10 +23143,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn document_reload_style_sheet(
-            &mut self,
-            document_handle: u64,
-        ) -> Result<bool> {
+        pub fn document_reload_style_sheet(&self, document_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23455,7 +23165,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn document_set_title(
-            &mut self,
+            &self,
             document_handle: u64,
             title: &str,
         ) -> Result<bool> {
@@ -23487,7 +23197,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn document_show(
-            &mut self,
+            &self,
             document_handle: u64,
             options: RmlDocumentShowOptions,
         ) -> Result<bool> {
@@ -23513,10 +23223,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn document_update_document(
-            &mut self,
-            document_handle: u64,
-        ) -> Result<bool> {
+        pub fn document_update_document(&self, document_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23543,7 +23250,7 @@ pub mod rml_ui {
                     crate::callbacks::Event,
                 ) -> Result<()> + 'static + crate::RetainedCapture,
         >(
-            &mut self,
+            &self,
             element_handle: u64,
             event: &str,
             in_capture_phase: bool,
@@ -23576,7 +23283,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_append_child(
-            &mut self,
+            &self,
             element_handle: u64,
             element_ptr_handle: u64,
         ) -> Result<ElementAppendChildValue> {
@@ -23603,7 +23310,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_are_pseudo_classes_set(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<bool> {
@@ -23634,7 +23341,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_blur(&mut self, element_handle: u64) -> Result<bool> {
+        pub fn element_blur(&self, element_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23646,7 +23353,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_click(&mut self, element_handle: u64) -> Result<bool> {
+        pub fn element_click(&self, element_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23658,10 +23365,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_clone(
-            &mut self,
-            element_handle: u64,
-        ) -> Result<ElementCloneValue> {
+        pub fn element_clone(&self, element_handle: u64) -> Result<ElementCloneValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23674,7 +23378,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_closest(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<ElementClosestValue> {
@@ -23706,7 +23410,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_dispatch_event(
-            &mut self,
+            &self,
             element_handle: u64,
             event: &str,
         ) -> Result<bool> {
@@ -23737,7 +23441,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_focus(&mut self, element_handle: u64) -> Result<bool> {
+        pub fn element_focus(&self, element_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -23750,7 +23454,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_form_control_input_get_selection(
-            &mut self,
+            &self,
             element_handle: u64,
         ) -> Result<ElementFormControlInputGetSelectionValue> {
             self._engine.check()?;
@@ -23774,7 +23478,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_form_control_input_select(
-            &mut self,
+            &self,
             element_handle: u64,
         ) -> Result<bool> {
             self._engine.check()?;
@@ -23798,7 +23502,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_form_control_input_set_selection(
-            &mut self,
+            &self,
             element_handle: u64,
             start: i32,
             end: i32,
@@ -23828,7 +23532,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_form_control_select_add(
-            &mut self,
+            &self,
             element_handle: u64,
             element_ptr_handle: u64,
             before: i32,
@@ -23858,7 +23562,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_form_control_select_remove(
-            &mut self,
+            &self,
             element_handle: u64,
             index: i32,
         ) -> Result<bool> {
@@ -23885,7 +23589,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_form_control_select_remove_all(
-            &mut self,
+            &self,
             element_handle: u64,
         ) -> Result<bool> {
             self._engine.check()?;
@@ -23909,7 +23613,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_form_control_text_area_get_selection(
-            &mut self,
+            &self,
             element_handle: u64,
         ) -> Result<ElementFormControlTextAreaGetSelectionValue> {
             self._engine.check()?;
@@ -23933,7 +23637,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_form_control_text_area_select(
-            &mut self,
+            &self,
             element_handle: u64,
         ) -> Result<bool> {
             self._engine.check()?;
@@ -23957,7 +23661,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_form_control_text_area_set_selection(
-            &mut self,
+            &self,
             element_handle: u64,
             start: i32,
             end: i32,
@@ -23987,7 +23691,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_form_submit(
-            &mut self,
+            &self,
             element_handle: u64,
             name: &str,
             value: &str,
@@ -24027,7 +23731,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_get_active_pseudo_classes(
-            &mut self,
+            &self,
             element_handle: u64,
         ) -> Result<Vec<String>> {
             self._engine.check()?;
@@ -24051,7 +23755,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_get_attribute(
-            &mut self,
+            &self,
             element_handle: u64,
             name: &str,
         ) -> Result<ElementGetAttributeValue> {
@@ -24078,7 +23782,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_get_child(
-            &mut self,
+            &self,
             element_handle: u64,
             index: i32,
         ) -> Result<ElementGetChildValue> {
@@ -24104,7 +23808,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_get_class_name(&mut self, element_handle: u64) -> Result<String> {
+        pub fn element_get_class_name(&self, element_handle: u64) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -24126,7 +23830,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_get_element_by_id(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<ElementGetElementByIdValue> {
@@ -24158,7 +23862,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_get_elements_by_class_name(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<Vec<u64>> {
@@ -24190,7 +23894,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_get_elements_by_class_name_count(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<i32> {
@@ -24222,7 +23926,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_get_elements_by_tag_name(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<Vec<u64>> {
@@ -24254,7 +23958,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_get_elements_by_tag_name_count(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<i32> {
@@ -24285,7 +23989,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_get_id(&mut self, element_handle: u64) -> Result<String> {
+        pub fn element_get_id(&self, element_handle: u64) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -24297,7 +24001,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_get_inner_rml(&mut self, element_handle: u64) -> Result<String> {
+        pub fn element_get_inner_rml(&self, element_handle: u64) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -24319,7 +24023,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_get_rect(
-            &mut self,
+            &self,
             element_handle: u64,
         ) -> Result<ElementGetRectValue> {
             self._engine.check()?;
@@ -24338,7 +24042,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_get_scroll_left(&mut self, element_handle: u64) -> Result<i32> {
+        pub fn element_get_scroll_left(&self, element_handle: u64) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -24359,7 +24063,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_get_scroll_top(&mut self, element_handle: u64) -> Result<i32> {
+        pub fn element_get_scroll_top(&self, element_handle: u64) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -24380,7 +24084,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_get_tag_name(&mut self, element_handle: u64) -> Result<String> {
+        pub fn element_get_tag_name(&self, element_handle: u64) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -24401,7 +24105,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_get_value(&mut self, element_handle: u64) -> Result<String> {
+        pub fn element_get_value(&self, element_handle: u64) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -24419,7 +24123,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_has_attribute(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<bool> {
@@ -24450,7 +24154,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_has_child_nodes(&mut self, element_handle: u64) -> Result<bool> {
+        pub fn element_has_child_nodes(&self, element_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -24472,7 +24176,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_insert_before(
-            &mut self,
+            &self,
             element_handle: u64,
             element_ptr_handle: u64,
             adjacent_element_handle: u64,
@@ -24502,7 +24206,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_is_class_set(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<bool> {
@@ -24534,7 +24238,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_is_point_within_element(
-            &mut self,
+            &self,
             element_handle: u64,
             x: f32,
             y: f32,
@@ -24564,7 +24268,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_is_pseudo_class_set(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<bool> {
@@ -24595,7 +24299,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_is_visible(&mut self, element_handle: u64) -> Result<bool> {
+        pub fn element_is_visible(&self, element_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -24612,11 +24316,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_matches(
-            &mut self,
-            element_handle: u64,
-            value: &str,
-        ) -> Result<bool> {
+        pub fn element_matches(&self, element_handle: u64, value: &str) -> Result<bool> {
             self._engine.check()?;
             if (value).as_bytes().contains(&0) {
                 return Err(
@@ -24645,7 +24345,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_process_default_action(
-            &mut self,
+            &self,
             element_handle: u64,
             event_handle: u64,
         ) -> Result<bool> {
@@ -24672,7 +24372,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_query_selector(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<ElementQuerySelectorValue> {
@@ -24704,7 +24404,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_query_selector_all(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<Vec<u64>> {
@@ -24736,7 +24436,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_query_selector_all_count(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<i32> {
@@ -24768,7 +24468,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_remove_attribute(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<bool> {
@@ -24800,7 +24500,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_remove_child(
-            &mut self,
+            &self,
             element_handle: u64,
             child_element_handle: u64,
         ) -> Result<ElementRemoveChildValue> {
@@ -24827,7 +24527,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_remove_event_listener(
-            &mut self,
+            &self,
             element_handle: u64,
             event_listener_handle: u64,
             event: &str,
@@ -24865,7 +24565,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_replace_child(
-            &mut self,
+            &self,
             element_handle: u64,
             element_ptr_handle: u64,
             replaced_element_handle: u64,
@@ -24895,7 +24595,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_scroll_into_view(
-            &mut self,
+            &self,
             element_handle: u64,
             align_with_top: bool,
         ) -> Result<bool> {
@@ -24922,7 +24622,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_set_attribute(
-            &mut self,
+            &self,
             element_handle: u64,
             name: &str,
             value: &str,
@@ -24962,7 +24662,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_set_class(
-            &mut self,
+            &self,
             element_handle: u64,
             name: &str,
             value: bool,
@@ -24997,7 +24697,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_set_class_name(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<bool> {
@@ -25028,11 +24728,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn element_set_id(
-            &mut self,
-            element_handle: u64,
-            value: &str,
-        ) -> Result<bool> {
+        pub fn element_set_id(&self, element_handle: u64, value: &str) -> Result<bool> {
             self._engine.check()?;
             if (value).as_bytes().contains(&0) {
                 return Err(
@@ -25061,7 +24757,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_set_inner_rml(
-            &mut self,
+            &self,
             element_handle: u64,
             value: &str,
         ) -> Result<bool> {
@@ -25093,7 +24789,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_set_pseudo_class(
-            &mut self,
+            &self,
             element_handle: u64,
             name: &str,
             value: bool,
@@ -25128,7 +24824,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_set_scroll_left(
-            &mut self,
+            &self,
             element_handle: u64,
             value: i32,
         ) -> Result<bool> {
@@ -25155,7 +24851,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_set_scroll_top(
-            &mut self,
+            &self,
             element_handle: u64,
             value: i32,
         ) -> Result<bool> {
@@ -25182,7 +24878,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_tab_set_remove_tab(
-            &mut self,
+            &self,
             element_handle: u64,
             index: i32,
         ) -> Result<bool> {
@@ -25209,7 +24905,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_tab_set_set_panel(
-            &mut self,
+            &self,
             element_handle: u64,
             index: i32,
             rml: &str,
@@ -25244,7 +24940,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn element_tab_set_set_tab(
-            &mut self,
+            &self,
             element_handle: u64,
             index: i32,
             rml: &str,
@@ -25278,7 +24974,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn event_get_current(&mut self) -> Result<EventGetCurrentValue> {
+        pub fn event_get_current(&self) -> Result<EventGetCurrentValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -25291,7 +24987,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_get_current_element(
-            &mut self,
+            &self,
             event_handle: u64,
         ) -> Result<EventGetCurrentElementValue> {
             self._engine.check()?;
@@ -25315,7 +25011,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_get_parameter_bool(
-            &mut self,
+            &self,
             event_handle: u64,
             name: &str,
         ) -> Result<EventGetParameterBoolValue> {
@@ -25347,7 +25043,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_get_parameter_float(
-            &mut self,
+            &self,
             event_handle: u64,
             name: &str,
         ) -> Result<EventGetParameterFloatValue> {
@@ -25379,7 +25075,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_get_parameter_int(
-            &mut self,
+            &self,
             event_handle: u64,
             name: &str,
         ) -> Result<EventGetParameterIntValue> {
@@ -25411,7 +25107,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_get_parameter_string(
-            &mut self,
+            &self,
             event_handle: u64,
             name: &str,
         ) -> Result<EventGetParameterStringValue> {
@@ -25438,7 +25134,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_get_parameter_type(
-            &mut self,
+            &self,
             event_handle: u64,
             name: &str,
         ) -> Result<EventGetParameterTypeValue> {
@@ -25469,10 +25165,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn event_get_phase(
-            &mut self,
-            event_handle: u64,
-        ) -> Result<EventGetPhaseValue> {
+        pub fn event_get_phase(&self, event_handle: u64) -> Result<EventGetPhaseValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -25485,7 +25178,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_get_target_element(
-            &mut self,
+            &self,
             event_handle: u64,
         ) -> Result<EventGetTargetElementValue> {
             self._engine.check()?;
@@ -25508,10 +25201,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn event_get_type(
-            &mut self,
-            event_handle: u64,
-        ) -> Result<EventGetTypeValue> {
+        pub fn event_get_type(&self, event_handle: u64) -> Result<EventGetTypeValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -25524,7 +25214,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_is_immediate_propagating(
-            &mut self,
+            &self,
             event_handle: u64,
         ) -> Result<EventIsImmediatePropagatingValue> {
             self._engine.check()?;
@@ -25548,7 +25238,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_is_interruptible(
-            &mut self,
+            &self,
             event_handle: u64,
         ) -> Result<EventIsInterruptibleValue> {
             self._engine.check()?;
@@ -25572,7 +25262,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_is_propagating(
-            &mut self,
+            &self,
             event_handle: u64,
         ) -> Result<EventIsPropagatingValue> {
             self._engine.check()?;
@@ -25592,7 +25282,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_listener_on_attach(
-            &mut self,
+            &self,
             event_listener_handle: u64,
             element_handle: u64,
         ) -> Result<bool> {
@@ -25619,7 +25309,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_listener_on_detach(
-            &mut self,
+            &self,
             event_listener_handle: u64,
             element_handle: u64,
         ) -> Result<bool> {
@@ -25646,7 +25336,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_listener_process_event(
-            &mut self,
+            &self,
             event_listener_handle: u64,
             event_handle: u64,
         ) -> Result<bool> {
@@ -25673,7 +25363,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn event_stop_immediate_propagation(
-            &mut self,
+            &self,
             event_handle: u64,
         ) -> Result<bool> {
             self._engine.check()?;
@@ -25696,7 +25386,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn event_stop_propagation(&mut self, event_handle: u64) -> Result<bool> {
+        pub fn event_stop_propagation(&self, event_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -25717,7 +25407,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn get_context(&mut self, name: &str) -> Result<GetContextValue> {
+        pub fn get_context(&self, name: &str) -> Result<GetContextValue> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -25735,7 +25425,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn get_document_path_requests(
-            &mut self,
+            &self,
             document_path: &str,
         ) -> Result<Vec<String>> {
             self._engine.check()?;
@@ -25763,7 +25453,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn get_version(&mut self) -> Result<String> {
+        pub fn get_version(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -25775,7 +25465,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn is_ready(&mut self) -> Result<bool> {
+        pub fn is_ready(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -25788,7 +25478,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn load_font_face(
-            &mut self,
+            &self,
             file_path: &str,
             fallback: bool,
             weight: Option<i32>,
@@ -25817,7 +25507,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn regiser_event_type(
-            &mut self,
+            &self,
             event_type: &str,
             options: RmlRegisterEventTypeOptions,
         ) -> Result<i32> {
@@ -25844,7 +25534,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn register_event_type(
-            &mut self,
+            &self,
             event_type: &str,
             options: RmlRegisterEventTypeOptions,
         ) -> Result<i32> {
@@ -25870,7 +25560,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn remove_context(&mut self, context_handle: u64) -> Result<bool> {
+        pub fn remove_context(&self, context_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -25882,7 +25572,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn remove_context_by_name(&mut self, name: &str) -> Result<bool> {
+        pub fn remove_context_by_name(&self, name: &str) -> Result<bool> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -25899,7 +25589,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn set_debug_context(&mut self, context_handle: u64) -> Result<bool> {
+        pub fn set_debug_context(&self, context_handle: u64) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -25916,7 +25606,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn set_debug_context_by_name(&mut self, name: &str) -> Result<bool> {
+        pub fn set_debug_context_by_name(&self, name: &str) -> Result<bool> {
             self._engine.check()?;
             if (name).as_bytes().contains(&0) {
                 return Err(
@@ -25934,7 +25624,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn set_mouse_cursor_alias(
-            &mut self,
+            &self,
             rml_name: &str,
             recoil_name: &str,
         ) -> Result<bool> {
@@ -25971,7 +25661,7 @@ pub mod rml_ui {
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
         pub fn sol_lua_data_model_set_dirty(
-            &mut self,
+            &self,
             data_model_handle: u64,
             property: &str,
         ) -> Result<bool> {
@@ -26002,7 +25692,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn vector2f_new(&mut self, x: f32, y: f32) -> Result<Vector2fNewValue> {
+        pub fn vector2f_new(&self, x: f32, y: f32) -> Result<Vector2fNewValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26014,7 +25704,7 @@ pub mod rml_ui {
         }
     }
     impl<E: crate::capabilities::Session> RmlUi<'_, E> {
-        pub fn vector2i_new(&mut self, x: i32, y: i32) -> Result<Vector2iNewValue> {
+        pub fn vector2i_new(&self, x: i32, y: i32) -> Result<Vector2iNewValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26036,7 +25726,7 @@ pub mod vfs {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn vfs(&mut self) -> Vfs<'_, E> {
+        pub fn vfs(&self) -> Vfs<'_, E> {
             Vfs {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -26044,7 +25734,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Downloads> Vfs<'_, E> {
-        pub fn abort_download(&mut self, id: i32) -> Result<bool> {
+        pub fn abort_download(&self, id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26056,7 +25746,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn calculate_hash(&mut self, data: &[u8], hash_type: i32) -> Result<String> {
+        pub fn calculate_hash(&self, data: &[u8], hash_type: i32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26069,7 +25759,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
         pub fn compress_folder(
-            &mut self,
+            &self,
             folder_path: &str,
             archive_type: &str,
             compressed_file_path: &str,
@@ -26124,7 +25814,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn create_dir(&mut self, path: &str) -> Result<bool> {
+        pub fn create_dir(&self, path: &str) -> Result<bool> {
             self._engine.check()?;
             if (path).as_bytes().contains(&0) {
                 return Err(
@@ -26142,7 +25832,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn dir_list(
-            &mut self,
+            &self,
             path: &str,
             pattern: &str,
             mode: &str,
@@ -26189,11 +25879,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Downloads> Vfs<'_, E> {
-        pub fn download_archive(
-            &mut self,
-            filename: &str,
-            category: &str,
-        ) -> Result<()> {
+        pub fn download_archive(&self, filename: &str, category: &str) -> Result<()> {
             self._engine.check()?;
             if (filename).as_bytes().contains(&0) {
                 return Err(
@@ -26221,7 +25907,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn extract_mod_archive_file(&mut self, path: &str) -> Result<bool> {
+        pub fn extract_mod_archive_file(&self, path: &str) -> Result<bool> {
             self._engine.check()?;
             if (path).as_bytes().contains(&0) {
                 return Err(
@@ -26238,7 +25924,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn file_exists(&mut self, path: &str) -> Result<bool> {
+        pub fn file_exists(&self, path: &str) -> Result<bool> {
             self._engine.check()?;
             if (path).as_bytes().contains(&0) {
                 return Err(
@@ -26255,7 +25941,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
-        pub fn get_all_archives(&mut self) -> Result<Vec<String>> {
+        pub fn get_all_archives(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26268,7 +25954,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
         pub fn get_archive_checksum(
-            &mut self,
+            &self,
             archive_name: &str,
         ) -> Result<GetArchiveChecksumValue> {
             self._engine.check()?;
@@ -26288,7 +25974,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
         pub fn get_archive_containing_file(
-            &mut self,
+            &self,
             path: &str,
             mode: &str,
         ) -> Result<String> {
@@ -26325,7 +26011,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
         pub fn get_archive_dependencies(
-            &mut self,
+            &self,
             archive_name: &str,
         ) -> Result<Vec<String>> {
             self._engine.check()?;
@@ -26350,7 +26036,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
         pub fn get_archive_info(
-            &mut self,
+            &self,
             archive_name: &str,
         ) -> Result<Vec<ArchiveInfoEntry>> {
             self._engine.check()?;
@@ -26369,7 +26055,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
-        pub fn get_archive_path(&mut self, archive_name: &str) -> Result<String> {
+        pub fn get_archive_path(&self, archive_name: &str) -> Result<String> {
             self._engine.check()?;
             if (archive_name).as_bytes().contains(&0) {
                 return Err(
@@ -26386,10 +26072,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
-        pub fn get_archive_replaces(
-            &mut self,
-            archive_name: &str,
-        ) -> Result<Vec<String>> {
+        pub fn get_archive_replaces(&self, archive_name: &str) -> Result<Vec<String>> {
             self._engine.check()?;
             if (archive_name).as_bytes().contains(&0) {
                 return Err(
@@ -26406,7 +26089,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn get_archives(&mut self) -> Result<Vec<String>> {
+        pub fn get_archives(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26419,7 +26102,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
         pub fn get_available_a_is(
-            &mut self,
+            &self,
             game_archive_name: &str,
             map_archive_name: &str,
         ) -> Result<Vec<AIInfoEntry>> {
@@ -26455,11 +26138,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
-        pub fn get_file_absolute_path(
-            &mut self,
-            path: &str,
-            mode: &str,
-        ) -> Result<String> {
+        pub fn get_file_absolute_path(&self, path: &str, mode: &str) -> Result<String> {
             self._engine.check()?;
             if (path).as_bytes().contains(&0) {
                 return Err(
@@ -26481,7 +26160,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn get_file_info(&mut self, path: &str) -> Result<GetFileInfoValue> {
+        pub fn get_file_info(&self, path: &str) -> Result<GetFileInfoValue> {
             self._engine.check()?;
             if (path).as_bytes().contains(&0) {
                 return Err(
@@ -26498,7 +26177,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn get_file_size(&mut self, path: &str) -> Result<u32> {
+        pub fn get_file_size(&self, path: &str) -> Result<u32> {
             self._engine.check()?;
             if (path).as_bytes().contains(&0) {
                 return Err(
@@ -26515,7 +26194,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
-        pub fn get_games(&mut self) -> Result<Vec<String>> {
+        pub fn get_games(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26527,7 +26206,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
-        pub fn get_loaded_archives(&mut self) -> Result<Vec<String>> {
+        pub fn get_loaded_archives(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26540,7 +26219,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Local> Vfs<'_, E> {
         pub fn get_map_square_texture(
-            &mut self,
+            &self,
             tex_square_x: i32,
             tex_square_y: i32,
             lod_min: i32,
@@ -26581,7 +26260,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn get_map_square_texture_info(
-            &mut self,
+            &self,
         ) -> Result<GetMapSquareTextureInfoValue> {
             self._engine.check()?;
             let result = {
@@ -26594,7 +26273,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
-        pub fn get_maps(&mut self) -> Result<Vec<String>> {
+        pub fn get_maps(&self) -> Result<Vec<String>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26606,7 +26285,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
-        pub fn get_name_from_rapid_tag(&mut self, rapid_tag: &str) -> Result<String> {
+        pub fn get_name_from_rapid_tag(&self, rapid_tag: &str) -> Result<String> {
             self._engine.check()?;
             if (rapid_tag).as_bytes().contains(&0) {
                 return Err(
@@ -26623,7 +26302,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
-        pub fn has_archive(&mut self, archive_name: &str) -> Result<bool> {
+        pub fn has_archive(&self, archive_name: &str) -> Result<bool> {
             self._engine.check()?;
             if (archive_name).as_bytes().contains(&0) {
                 return Err(
@@ -26640,7 +26319,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn is_directory(&mut self, path: &str) -> Result<bool> {
+        pub fn is_directory(&self, path: &str) -> Result<bool> {
             self._engine.check()?;
             if (path).as_bytes().contains(&0) {
                 return Err(
@@ -26658,7 +26337,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn list_dir(
-            &mut self,
+            &self,
             path: &str,
             pattern: &str,
             mode: &str,
@@ -26705,7 +26384,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn load_file(&mut self, path: &str, mode: &str) -> Result<Vec<u8>> {
+        pub fn load_file(&self, path: &str, mode: &str) -> Result<Vec<u8>> {
             self._engine.check()?;
             if (path).as_bytes().contains(&0) {
                 return Err(
@@ -26728,7 +26407,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn load_file_range(
-            &mut self,
+            &self,
             path: &str,
             mode: &str,
             offset: u32,
@@ -26770,7 +26449,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn pack_f32(&mut self, values: &[f32]) -> Result<Vec<u8>> {
+        pub fn pack_f32(&self, values: &[f32]) -> Result<Vec<u8>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26782,7 +26461,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn pack_s16(&mut self, values: &[i16]) -> Result<Vec<u8>> {
+        pub fn pack_s16(&self, values: &[i16]) -> Result<Vec<u8>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26794,7 +26473,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn pack_s32(&mut self, values: &[i32]) -> Result<Vec<u8>> {
+        pub fn pack_s32(&self, values: &[i32]) -> Result<Vec<u8>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26806,7 +26485,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn pack_s8(&mut self, values: &[i8]) -> Result<Vec<u8>> {
+        pub fn pack_s8(&self, values: &[i8]) -> Result<Vec<u8>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26818,7 +26497,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn pack_u16(&mut self, values: &[u16]) -> Result<Vec<u8>> {
+        pub fn pack_u16(&self, values: &[u16]) -> Result<Vec<u8>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26830,7 +26509,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn pack_u32(&mut self, values: &[u32]) -> Result<Vec<u8>> {
+        pub fn pack_u32(&self, values: &[u32]) -> Result<Vec<u8>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26842,7 +26521,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn pack_u8(&mut self, values: &[u8]) -> Result<Vec<u8>> {
+        pub fn pack_u8(&self, values: &[u8]) -> Result<Vec<u8>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26854,7 +26533,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn read_file(&mut self, path: &str) -> Result<Vec<u8>> {
+        pub fn read_file(&self, path: &str) -> Result<Vec<u8>> {
             self._engine.check()?;
             if (path).as_bytes().contains(&0) {
                 return Err(
@@ -26871,7 +26550,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn read_file_as_string(&mut self, path: &str) -> Result<String> {
+        pub fn read_file_as_string(&self, path: &str) -> Result<String> {
             self._engine.check()?;
             if (path).as_bytes().contains(&0) {
                 return Err(
@@ -26888,7 +26567,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Downloads> Vfs<'_, E> {
-        pub fn scan_all_dirs(&mut self) -> Result<()> {
+        pub fn scan_all_dirs(&self) -> Result<()> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -26901,7 +26580,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Game> Vfs<'_, E> {
         pub fn set_map_square_texture(
-            &mut self,
+            &self,
             tex_square_x: i32,
             tex_square_y: i32,
             texture_name: &str,
@@ -26936,7 +26615,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn sub_dirs(
-            &mut self,
+            &self,
             path: &str,
             pattern: &str,
             mode: &str,
@@ -26984,7 +26663,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn unpack_f32(
-            &mut self,
+            &self,
             data: &[u8],
             byte_offset: u32,
             count: u32,
@@ -27008,7 +26687,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn unpack_s16(
-            &mut self,
+            &self,
             data: &[u8],
             byte_offset: u32,
             count: u32,
@@ -27032,7 +26711,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn unpack_s32(
-            &mut self,
+            &self,
             data: &[u8],
             byte_offset: u32,
             count: u32,
@@ -27056,7 +26735,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn unpack_s8(
-            &mut self,
+            &self,
             data: &[u8],
             byte_offset: u32,
             count: u32,
@@ -27080,7 +26759,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn unpack_u16(
-            &mut self,
+            &self,
             data: &[u8],
             byte_offset: u32,
             count: u32,
@@ -27104,7 +26783,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn unpack_u32(
-            &mut self,
+            &self,
             data: &[u8],
             byte_offset: u32,
             count: u32,
@@ -27128,7 +26807,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
         pub fn unpack_u8(
-            &mut self,
+            &self,
             data: &[u8],
             byte_offset: u32,
             count: u32,
@@ -27152,7 +26831,7 @@ pub mod vfs {
     }
     impl<E: crate::capabilities::Render> Vfs<'_, E> {
         pub fn use_archive<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             archive_name: &str,
             callback: F,
         ) -> Result<bool> {
@@ -27182,7 +26861,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn zlib_compress(&mut self, data: &[u8]) -> Result<Vec<u8>> {
+        pub fn zlib_compress(&self, data: &[u8]) -> Result<Vec<u8>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27194,7 +26873,7 @@ pub mod vfs {
         }
     }
     impl<E: crate::capabilities::Common> Vfs<'_, E> {
-        pub fn zlib_decompress(&mut self, data: &[u8]) -> Result<Vec<u8>> {
+        pub fn zlib_decompress(&self, data: &[u8]) -> Result<Vec<u8>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27216,7 +26895,7 @@ pub mod unsynced_read {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn unsynced_read(&mut self) -> UnsyncedRead<'_, E> {
+        pub fn unsynced_read(&self) -> UnsyncedRead<'_, E> {
             UnsyncedRead {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -27225,7 +26904,7 @@ pub mod unsynced_read {
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
         pub fn get_active_cmd_desc(
-            &mut self,
+            &self,
             cmd_index: i32,
         ) -> Result<GetActiveCmdDescValue> {
             self._engine.check()?;
@@ -27248,7 +26927,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn get_active_cmd_descs(&mut self) -> Result<Vec<ActiveCommandDescription>> {
+        pub fn get_active_cmd_descs(&self) -> Result<Vec<ActiveCommandDescription>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27260,7 +26939,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn get_box_selection_by_engine(&mut self) -> Result<bool> {
+        pub fn get_box_selection_by_engine(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27280,7 +26959,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn get_build_facing(&mut self) -> Result<i32> {
+        pub fn get_build_facing(&self) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27292,7 +26971,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn get_build_spacing(&mut self) -> Result<i32> {
+        pub fn get_build_spacing(&self) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27304,7 +26983,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Session> UnsyncedRead<'_, E> {
-        pub fn get_clipboard(&mut self) -> Result<String> {
+        pub fn get_clipboard(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27316,7 +26995,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn get_cmd_desc_index(&mut self, cmd_id: i32) -> Result<i32> {
+        pub fn get_cmd_desc_index(&self, cmd_id: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27334,7 +27013,7 @@ pub mod unsynced_read {
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
         pub fn get_custom_palette_color(
-            &mut self,
+            &self,
             index: i32,
         ) -> Result<GetCustomPaletteColorValue> {
             self._engine.check()?;
@@ -27357,7 +27036,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn get_draw_selection_info(&mut self) -> Result<bool> {
+        pub fn get_draw_selection_info(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27370,7 +27049,7 @@ pub mod unsynced_read {
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
         pub fn get_feature_palette_index(
-            &mut self,
+            &self,
             feature_id: i32,
         ) -> Result<GetFeaturePaletteIndexValue> {
             self._engine.check()?;
@@ -27393,7 +27072,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn get_game_seconds_interpolated(&mut self) -> Result<f32> {
+        pub fn get_game_seconds_interpolated(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27413,7 +27092,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn get_last_message_positions(&mut self) -> Result<Vec<Float3>> {
+        pub fn get_last_message_positions(&self) -> Result<Vec<Float3>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27430,7 +27109,7 @@ pub mod unsynced_read {
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
         pub fn get_nano_projectile_params(
-            &mut self,
+            &self,
         ) -> Result<GetNanoProjectileParamsValue> {
             self._engine.check()?;
             let result = {
@@ -27451,10 +27130,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedRead<'_, E> {
-        pub fn get_piece_projectile_name(
-            &mut self,
-            projectile_id: i32,
-        ) -> Result<String> {
+        pub fn get_piece_projectile_name(&self, projectile_id: i32) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27475,7 +27151,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn get_prev_frame_sync_checksum(&mut self) -> Result<String> {
+        pub fn get_prev_frame_sync_checksum(&self) -> Result<String> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27496,7 +27172,7 @@ pub mod unsynced_read {
     }
     impl<E: crate::capabilities::Game> UnsyncedRead<'_, E> {
         pub fn get_team_damage_stats(
-            &mut self,
+            &self,
             team_id: i32,
         ) -> Result<GetTeamDamageStatsValue> {
             self._engine.check()?;
@@ -27520,7 +27196,7 @@ pub mod unsynced_read {
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
         pub fn get_unit_palette_index(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<GetUnitPaletteIndexValue> {
             self._engine.check()?;
@@ -27543,7 +27219,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn is_unit_allied(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn is_unit_allied(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27555,7 +27231,7 @@ pub mod unsynced_read {
         }
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
-        pub fn is_unit_selected(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn is_unit_selected(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27573,7 +27249,7 @@ pub mod unsynced_read {
     }
     impl<E: crate::capabilities::Local> UnsyncedRead<'_, E> {
         pub fn solve_nurbs_curve(
-            &mut self,
+            &self,
             degree: i32,
             points: &[Float4],
             knots: &[f32],
@@ -27613,7 +27289,7 @@ pub mod team_control {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn team_control(&mut self) -> TeamControl<'_, E> {
+        pub fn team_control(&self) -> TeamControl<'_, E> {
             TeamControl {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -27622,7 +27298,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn add_team_resource(
-            &mut self,
+            &self,
             team_id: i32,
             resource_type: &str,
             amount: f32,
@@ -27657,7 +27333,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn add_team_resource_excess_stats(
-            &mut self,
+            &self,
             team_id: i32,
             resource_type: &str,
             amount: f32,
@@ -27692,7 +27368,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn assign_player_to_team(
-            &mut self,
+            &self,
             player_id: i32,
             team_id: i32,
         ) -> Result<bool> {
@@ -27718,7 +27394,7 @@ pub mod team_control {
         }
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
-        pub fn game_over(&mut self, winning_ally_teams: &[i32]) -> Result<bool> {
+        pub fn game_over(&self, winning_ally_teams: &[i32]) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27735,7 +27411,7 @@ pub mod team_control {
         }
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
-        pub fn kill_team(&mut self, team_id: i32) -> Result<bool> {
+        pub fn kill_team(&self, team_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27748,7 +27424,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn set_ally(
-            &mut self,
+            &self,
             first_ally_team_id: i32,
             second_ally_team_id: i32,
             allied: bool,
@@ -27778,7 +27454,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn set_ally_team_start_box(
-            &mut self,
+            &self,
             ally_team_id: i32,
             min_x: f32,
             min_z: f32,
@@ -27813,11 +27489,7 @@ pub mod team_control {
         }
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
-        pub fn set_global_los(
-            &mut self,
-            ally_team_id: i32,
-            enabled: bool,
-        ) -> Result<bool> {
+        pub fn set_global_los(&self, ally_team_id: i32, enabled: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -27841,7 +27513,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn set_player_ready_state(
-            &mut self,
+            &self,
             player_id: i32,
             ready: bool,
         ) -> Result<bool> {
@@ -27868,7 +27540,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn set_team_resource(
-            &mut self,
+            &self,
             team_id: i32,
             resource_type: &str,
             amount: f32,
@@ -27903,7 +27575,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn set_team_share_level(
-            &mut self,
+            &self,
             team_id: i32,
             resource_type: &str,
             share_level: f32,
@@ -27938,7 +27610,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn set_team_start_position(
-            &mut self,
+            &self,
             team_id: i32,
             pos: Float3,
         ) -> Result<bool> {
@@ -27965,7 +27637,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn share_team_resource(
-            &mut self,
+            &self,
             team_id: i32,
             target_team_id: i32,
             resource_type: &str,
@@ -28003,7 +27675,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn transfer_team_max_units(
-            &mut self,
+            &self,
             from_team_id: i32,
             to_team_id: i32,
             amount: i32,
@@ -28033,7 +27705,7 @@ pub mod team_control {
     }
     impl<E: crate::capabilities::Synced> TeamControl<'_, E> {
         pub fn use_team_resource(
-            &mut self,
+            &self,
             team_id: i32,
             resource_type: &str,
             amount: f32,
@@ -28075,7 +27747,7 @@ pub mod unit_control {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn unit_control(&mut self) -> UnitControl<'_, E> {
+        pub fn unit_control(&self) -> UnitControl<'_, E> {
             UnitControl {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -28083,7 +27755,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn add_object_decal(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn add_object_decal(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -28096,7 +27768,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn add_unit_damage(
-            &mut self,
+            &self,
             unit_id: i32,
             damage: f32,
             paralyze_time: f32,
@@ -28135,7 +27807,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn add_unit_experience(
-            &mut self,
+            &self,
             unit_id: i32,
             experience: f32,
         ) -> Result<bool> {
@@ -28162,7 +27834,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn add_unit_impulse(
-            &mut self,
+            &self,
             unit_id: i32,
             impulse: Float3,
             decay_rate: f32,
@@ -28192,7 +27864,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn add_unit_resource(
-            &mut self,
+            &self,
             unit_id: i32,
             resource_type: &str,
             amount: f32,
@@ -28227,7 +27899,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn add_unit_seismic_ping(
-            &mut self,
+            &self,
             unit_id: i32,
             ping_size: f32,
         ) -> Result<bool> {
@@ -28254,7 +27926,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn bugger_off(
-            &mut self,
+            &self,
             pos: Float3,
             radius: f32,
             team_id: i32,
@@ -28289,11 +27961,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn clear_unit_goal(
-            &mut self,
-            unit_id: i32,
-            cancel_raw: bool,
-        ) -> Result<bool> {
+        pub fn clear_unit_goal(&self, unit_id: i32, cancel_raw: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -28317,7 +27985,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn create_unit(
-            &mut self,
+            &self,
             unit_def: &DefRef,
             pos: Float3,
             facing: i32,
@@ -28358,7 +28026,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn destroy_unit(
-            &mut self,
+            &self,
             unit_id: i32,
             options: DestroyUnitOptions,
         ) -> Result<bool> {
@@ -28385,7 +28053,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn edit_unit_cmd_desc(
-            &mut self,
+            &self,
             unit_id: i32,
             cmd_desc_index: u32,
             cmd_desc: &NativeCommandDescription,
@@ -28446,7 +28114,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn force_unit_collision_update(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn force_unit_collision_update(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -28468,7 +28136,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Game> UnitControl<'_, E> {
         pub fn get_unit_feature_separation(
-            &mut self,
+            &self,
             unit_id: i32,
             feature_id: i32,
             ignore_y: bool,
@@ -28497,7 +28165,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Game> UnitControl<'_, E> {
-        pub fn get_unit_leaves_ghost(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_leaves_ghost(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -28518,7 +28186,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn get_unit_physical_state(&mut self, unit_id: i32) -> Result<u32> {
+        pub fn get_unit_physical_state(&self, unit_id: i32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -28540,7 +28208,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn give_order_array_to_unit(
-            &mut self,
+            &self,
             unit_id: i32,
             commands: &[NativeCommand],
         ) -> Result<bool> {
@@ -28567,7 +28235,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn give_order_array_to_unit_array(
-            &mut self,
+            &self,
             unit_i_ds: &[i32],
             commands: &[NativeCommand],
             pairwise: bool,
@@ -28597,7 +28265,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn give_order_to_unit(
-            &mut self,
+            &self,
             unit_id: i32,
             cmd_id: i32,
             params: &[f32],
@@ -28633,7 +28301,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn give_order_to_unit_array(
-            &mut self,
+            &self,
             unit_i_ds: &[i32],
             cmd_id: i32,
             params: &[f32],
@@ -28669,7 +28337,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn insert_unit_cmd_desc(
-            &mut self,
+            &self,
             unit_id: i32,
             cmd_desc_index: i32,
             cmd_desc: &NativeCommandDescription,
@@ -28730,7 +28398,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn remove_object_decal(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn remove_object_decal(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -28748,7 +28416,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn remove_unit_cmd_desc(
-            &mut self,
+            &self,
             unit_id: i32,
             cmd_desc_index: i32,
         ) -> Result<bool> {
@@ -28775,7 +28443,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_factory_bugger_off(
-            &mut self,
+            &self,
             unit_id: i32,
             options: SetFactoryBuggerOffOptions,
         ) -> Result<bool> {
@@ -28802,7 +28470,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_always_visible(
-            &mut self,
+            &self,
             unit_id: i32,
             always_visible: bool,
         ) -> Result<bool> {
@@ -28829,7 +28497,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_armored(
-            &mut self,
+            &self,
             unit_id: i32,
             armored_state: bool,
             armored_multiple: f32,
@@ -28859,7 +28527,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_blocking(
-            &mut self,
+            &self,
             unit_id: i32,
             options: SetUnitBlockingOptions,
         ) -> Result<bool> {
@@ -28886,7 +28554,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_build_params(
-            &mut self,
+            &self,
             unit_id: i32,
             param_name: &str,
             value: NumberOrBool,
@@ -28921,7 +28589,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_build_speed(
-            &mut self,
+            &self,
             unit_id: i32,
             build_speed: f32,
             repair_speed: f32,
@@ -28963,7 +28631,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_buildee_radius(
-            &mut self,
+            &self,
             unit_id: i32,
             radius: f32,
         ) -> Result<bool> {
@@ -28990,7 +28658,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_cloak(
-            &mut self,
+            &self,
             unit_id: i32,
             cloak: NumberOrBool,
             cloak_arg: NumberOrBool,
@@ -29020,7 +28688,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_collision_volume_data(
-            &mut self,
+            &self,
             unit_id: i32,
             scales: Float3,
             offsets: Float3,
@@ -29059,7 +28727,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_costs(
-            &mut self,
+            &self,
             unit_id: i32,
             costs: UnitCostOverrides,
         ) -> Result<bool> {
@@ -29085,11 +28753,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn set_unit_crashing(
-            &mut self,
-            unit_id: i32,
-            want_crash: bool,
-        ) -> Result<bool> {
+        pub fn set_unit_crashing(&self, unit_id: i32, want_crash: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -29113,7 +28777,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_direction(
-            &mut self,
+            &self,
             unit_id: i32,
             front_dir: Float3,
             right_dir: Float3,
@@ -29143,7 +28807,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_experience(
-            &mut self,
+            &self,
             unit_id: i32,
             experience: f32,
         ) -> Result<bool> {
@@ -29170,7 +28834,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_flanking(
-            &mut self,
+            &self,
             unit_id: i32,
             type_: &str,
             args: Float3,
@@ -29205,7 +28869,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_harvest_storage(
-            &mut self,
+            &self,
             unit_id: i32,
             stored_metal: f32,
             max_stored_metal: f32,
@@ -29241,7 +28905,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_heading(
-            &mut self,
+            &self,
             unit_id: i32,
             heading: i32,
             use_smoothing: bool,
@@ -29271,7 +28935,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_heading_and_up_dir(
-            &mut self,
+            &self,
             unit_id: i32,
             heading: i32,
             up_dir: Float3,
@@ -29301,7 +28965,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_health(
-            &mut self,
+            &self,
             unit_id: i32,
             value: UnitHealthValue,
         ) -> Result<bool> {
@@ -29328,7 +28992,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_land_goal(
-            &mut self,
+            &self,
             unit_id: i32,
             pos: Float3,
             radius_sq: f32,
@@ -29358,7 +29022,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_leaves_ghost(
-            &mut self,
+            &self,
             unit_id: i32,
             options: SetUnitLeavesGhostOptions,
         ) -> Result<bool> {
@@ -29385,7 +29049,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_loading_transport(
-            &mut self,
+            &self,
             unit_id: i32,
             transport_id: i32,
         ) -> Result<bool> {
@@ -29412,7 +29076,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_los_mask(
-            &mut self,
+            &self,
             unit_id: i32,
             ally_team_id: i32,
             los_mask: u8,
@@ -29442,7 +29106,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_los_state(
-            &mut self,
+            &self,
             unit_id: i32,
             ally_team_id: i32,
             los_state: u8,
@@ -29471,7 +29135,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn set_unit_mass(&mut self, unit_id: i32, mass: f32) -> Result<bool> {
+        pub fn set_unit_mass(&self, unit_id: i32, mass: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -29490,7 +29154,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_max_health(
-            &mut self,
+            &self,
             unit_id: i32,
             max_health: f32,
         ) -> Result<bool> {
@@ -29516,11 +29180,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn set_unit_max_range(
-            &mut self,
-            unit_id: i32,
-            max_range: f32,
-        ) -> Result<bool> {
+        pub fn set_unit_max_range(&self, unit_id: i32, max_range: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -29544,7 +29204,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_metal_extraction(
-            &mut self,
+            &self,
             unit_id: i32,
             depth: f32,
             range: f32,
@@ -29574,7 +29234,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_mid_and_aim_pos(
-            &mut self,
+            &self,
             unit_id: i32,
             mid_pos: Float3,
             aim_pos: Float3,
@@ -29607,7 +29267,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_move_goal(
-            &mut self,
+            &self,
             unit_id: i32,
             pos: Float3,
             radius: f32,
@@ -29643,7 +29303,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_nano_pieces(
-            &mut self,
+            &self,
             unit_id: i32,
             piece_indices: &[i32],
         ) -> Result<bool> {
@@ -29669,7 +29329,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn set_unit_neutral(&mut self, unit_id: i32, neutral: bool) -> Result<bool> {
+        pub fn set_unit_neutral(&self, unit_id: i32, neutral: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -29693,7 +29353,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_physical_state_bit(
-            &mut self,
+            &self,
             unit_id: i32,
             state_bit: i32,
         ) -> Result<bool> {
@@ -29720,7 +29380,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_physics(
-            &mut self,
+            &self,
             unit_id: i32,
             pos: Float3,
             velocity: Float3,
@@ -29756,7 +29416,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_piece_collision_volume_data(
-            &mut self,
+            &self,
             unit_id: i32,
             piece_index: i32,
             enable: bool,
@@ -29798,7 +29458,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_piece_matrix(
-            &mut self,
+            &self,
             unit_id: i32,
             piece_index: i32,
             matrix: &[f32],
@@ -29833,7 +29493,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_piece_parent(
-            &mut self,
+            &self,
             unit_id: i32,
             child_piece_index: i32,
             parent_piece_index: i32,
@@ -29863,7 +29523,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_piece_visible(
-            &mut self,
+            &self,
             unit_id: i32,
             piece_index: i32,
             visible: bool,
@@ -29893,7 +29553,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_pos_error_params(
-            &mut self,
+            &self,
             unit_id: i32,
             pos_error_vector: Float3,
             pos_error_delta: Float3,
@@ -29931,7 +29591,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn set_unit_position(&mut self, unit_id: i32, pos: Float3) -> Result<bool> {
+        pub fn set_unit_position(&self, unit_id: i32, pos: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -29955,7 +29615,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_radius_and_height(
-            &mut self,
+            &self,
             unit_id: i32,
             radius: f32,
             height: f32,
@@ -29985,7 +29645,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_resourcing(
-            &mut self,
+            &self,
             unit_id: i32,
             type_: &str,
             amount: f32,
@@ -30019,11 +29679,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn set_unit_rotation(
-            &mut self,
-            unit_id: i32,
-            rotation: Float3,
-        ) -> Result<bool> {
+        pub fn set_unit_rotation(&self, unit_id: i32, rotation: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -30047,7 +29703,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_seismic_signature(
-            &mut self,
+            &self,
             unit_id: i32,
             seismic_signature: f32,
         ) -> Result<bool> {
@@ -30074,7 +29730,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_selection_volume_data(
-            &mut self,
+            &self,
             unit_id: i32,
             scales: Float3,
             offsets: Float3,
@@ -30113,7 +29769,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_sensor_radius(
-            &mut self,
+            &self,
             unit_id: i32,
             sensor_type: &str,
             radius: i32,
@@ -30148,7 +29804,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_shield_recharge_delay(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
             recharge_delay: f32,
@@ -30178,7 +29834,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_shield_state(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
             enabled: bool,
@@ -30211,7 +29867,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_sonar_stealth(
-            &mut self,
+            &self,
             unit_id: i32,
             sonar_stealth: bool,
         ) -> Result<bool> {
@@ -30237,7 +29893,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn set_unit_stealth(&mut self, unit_id: i32, stealth: bool) -> Result<bool> {
+        pub fn set_unit_stealth(&self, unit_id: i32, stealth: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -30261,7 +29917,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_stockpile(
-            &mut self,
+            &self,
             unit_id: i32,
             stockpile: i32,
             build_percent: f32,
@@ -30291,7 +29947,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_storage(
-            &mut self,
+            &self,
             unit_id: i32,
             resource: &str,
             amount: f32,
@@ -30326,7 +29982,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_target(
-            &mut self,
+            &self,
             unit_id: i32,
             target: UnitTargetRef,
             options: SetUnitTargetOptions,
@@ -30358,7 +30014,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn set_unit_tooltip(&mut self, unit_id: i32, tooltip: &str) -> Result<bool> {
+        pub fn set_unit_tooltip(&self, unit_id: i32, tooltip: &str) -> Result<bool> {
             self._engine.check()?;
             if (tooltip).as_bytes().contains(&0) {
                 return Err(
@@ -30387,7 +30043,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_use_air_los(
-            &mut self,
+            &self,
             unit_id: i32,
             use_air_los: bool,
         ) -> Result<bool> {
@@ -30414,7 +30070,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_use_weapons(
-            &mut self,
+            &self,
             unit_id: i32,
             options: SetUnitUseWeaponsOptions,
         ) -> Result<bool> {
@@ -30440,11 +30096,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn set_unit_velocity(
-            &mut self,
-            unit_id: i32,
-            velocity: Float3,
-        ) -> Result<bool> {
+        pub fn set_unit_velocity(&self, unit_id: i32, velocity: Float3) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -30468,7 +30120,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_weapon_damages(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
             damage_key: &str,
@@ -30506,7 +30158,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_weapon_state(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
             key: &str,
@@ -30544,7 +30196,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn transfer_unit(
-            &mut self,
+            &self,
             unit_id: i32,
             new_team_id: i32,
             given: bool,
@@ -30577,7 +30229,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn unit_attach(
-            &mut self,
+            &self,
             transporter_id: i32,
             transportee_id: i32,
             piece_num: i32,
@@ -30606,7 +30258,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn unit_detach(&mut self, transportee_id: i32) -> Result<bool> {
+        pub fn unit_detach(&self, transportee_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -30624,7 +30276,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn unit_detach_from_air(
-            &mut self,
+            &self,
             transportee_id: i32,
             pos: Float3,
         ) -> Result<bool> {
@@ -30650,7 +30302,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn unit_finish_command(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn unit_finish_command(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -30667,11 +30319,7 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
-        pub fn unit_weapon_fire(
-            &mut self,
-            unit_id: i32,
-            weapon_num: i32,
-        ) -> Result<bool> {
+        pub fn unit_weapon_fire(&self, unit_id: i32, weapon_num: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -30695,7 +30343,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn unit_weapon_hold_fire(
-            &mut self,
+            &self,
             unit_id: i32,
             weapon_num: i32,
         ) -> Result<bool> {
@@ -30722,7 +30370,7 @@ pub mod unit_control {
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn use_unit_resource(
-            &mut self,
+            &self,
             unit_id: i32,
             resource_type: &str,
             amount: f32,
@@ -30764,7 +30412,7 @@ pub mod feature_control {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn feature_control(&mut self) -> FeatureControl<'_, E> {
+        pub fn feature_control(&self) -> FeatureControl<'_, E> {
             FeatureControl {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -30773,7 +30421,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn add_feature_damage(
-            &mut self,
+            &self,
             feature_id: i32,
             damage: f32,
             paralyze_time: f32,
@@ -30812,7 +30460,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn create_feature(
-            &mut self,
+            &self,
             feature_def: &DefRef,
             pos: Float3,
             heading: i32,
@@ -30853,7 +30501,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn create_feature_wreck(
-            &mut self,
+            &self,
             feature_id: i32,
             wreck_level: i32,
             do_smoke: bool,
@@ -30883,7 +30531,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn create_unit_wreck(
-            &mut self,
+            &self,
             unit_id: i32,
             wreck_level: i32,
             do_smoke: bool,
@@ -30912,7 +30560,7 @@ pub mod feature_control {
         }
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
-        pub fn destroy_feature(&mut self, feature_id: i32) -> Result<bool> {
+        pub fn destroy_feature(&self, feature_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -30934,7 +30582,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_always_visible(
-            &mut self,
+            &self,
             feature_id: i32,
             always_visible: bool,
         ) -> Result<bool> {
@@ -30961,7 +30609,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_blocking(
-            &mut self,
+            &self,
             feature_id: i32,
             options: SetFeatureBlockingOptions,
         ) -> Result<bool> {
@@ -30988,7 +30636,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_collision_volume_data(
-            &mut self,
+            &self,
             feature_id: i32,
             scales: Float3,
             offsets: Float3,
@@ -31027,7 +30675,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_direction(
-            &mut self,
+            &self,
             feature_id: i32,
             front_dir: Float3,
             right_dir: Float3,
@@ -31057,7 +30705,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_fire_time(
-            &mut self,
+            &self,
             feature_id: i32,
             fire_time: f32,
         ) -> Result<bool> {
@@ -31084,7 +30732,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_heading_and_up_dir(
-            &mut self,
+            &self,
             feature_id: i32,
             heading: i32,
             up_dir: Float3,
@@ -31114,7 +30762,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_health(
-            &mut self,
+            &self,
             feature_id: i32,
             health: f32,
             check_destruction: bool,
@@ -31143,7 +30791,7 @@ pub mod feature_control {
         }
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
-        pub fn set_feature_mass(&mut self, feature_id: i32, mass: f32) -> Result<bool> {
+        pub fn set_feature_mass(&self, feature_id: i32, mass: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -31167,7 +30815,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_max_health(
-            &mut self,
+            &self,
             feature_id: i32,
             max_health: f32,
         ) -> Result<bool> {
@@ -31194,7 +30842,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_mid_and_aim_pos(
-            &mut self,
+            &self,
             feature_id: i32,
             mid_pos: Float3,
             aim_pos: Float3,
@@ -31227,7 +30875,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_move_ctrl(
-            &mut self,
+            &self,
             feature_id: i32,
             enable: bool,
             velocity_or_mask: Float3,
@@ -31263,7 +30911,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_no_select(
-            &mut self,
+            &self,
             feature_id: i32,
             no_select: bool,
         ) -> Result<bool> {
@@ -31290,7 +30938,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_physics(
-            &mut self,
+            &self,
             feature_id: i32,
             pos: Float3,
             velocity: Float3,
@@ -31326,7 +30974,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_piece_collision_volume_data(
-            &mut self,
+            &self,
             feature_id: i32,
             piece_index: i32,
             enable: bool,
@@ -31368,7 +31016,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_piece_matrix(
-            &mut self,
+            &self,
             feature_id: i32,
             piece_index: i32,
             matrix: &[f32],
@@ -31403,7 +31051,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_piece_visible(
-            &mut self,
+            &self,
             feature_id: i32,
             piece_index: i32,
             visible: bool,
@@ -31433,7 +31081,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_position(
-            &mut self,
+            &self,
             feature_id: i32,
             pos: Float3,
             snap_to_ground: bool,
@@ -31463,7 +31111,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_radius_and_height(
-            &mut self,
+            &self,
             feature_id: i32,
             radius: f32,
             height: f32,
@@ -31493,7 +31141,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_reclaim(
-            &mut self,
+            &self,
             feature_id: i32,
             reclaim_left: f32,
         ) -> Result<bool> {
@@ -31520,7 +31168,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_resources(
-            &mut self,
+            &self,
             feature_id: i32,
             metal: f32,
             energy: f32,
@@ -31562,7 +31210,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_resurrect(
-            &mut self,
+            &self,
             feature_id: i32,
             unit_def: &DefRef,
             facing: i32,
@@ -31600,7 +31248,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_rotation(
-            &mut self,
+            &self,
             feature_id: i32,
             rotation: Float3,
         ) -> Result<bool> {
@@ -31627,7 +31275,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_selection_volume_data(
-            &mut self,
+            &self,
             feature_id: i32,
             scales: Float3,
             offsets: Float3,
@@ -31666,7 +31314,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_smoke_time(
-            &mut self,
+            &self,
             feature_id: i32,
             smoke_time: f32,
         ) -> Result<bool> {
@@ -31693,7 +31341,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_use_air_los(
-            &mut self,
+            &self,
             feature_id: i32,
             use_air_los: bool,
         ) -> Result<bool> {
@@ -31720,7 +31368,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn set_feature_velocity(
-            &mut self,
+            &self,
             feature_id: i32,
             velocity: Float3,
         ) -> Result<bool> {
@@ -31747,7 +31395,7 @@ pub mod feature_control {
     }
     impl<E: crate::capabilities::Synced> FeatureControl<'_, E> {
         pub fn transfer_feature(
-            &mut self,
+            &self,
             feature_id: i32,
             new_team_id: i32,
         ) -> Result<bool> {
@@ -31781,7 +31429,7 @@ pub mod terrain_control {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn terrain_control(&mut self) -> TerrainControl<'_, E> {
+        pub fn terrain_control(&self) -> TerrainControl<'_, E> {
             TerrainControl {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -31789,7 +31437,7 @@ pub mod terrain_control {
         }
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
-        pub fn add_grass(&mut self, x: f32, z: f32, grass_value: u8) -> Result<bool> {
+        pub fn add_grass(&self, x: f32, z: f32, grass_value: u8) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -31814,7 +31462,7 @@ pub mod terrain_control {
         }
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
-        pub fn add_height_map(&mut self, x: f32, z: f32, height: f32) -> Result<bool> {
+        pub fn add_height_map(&self, x: f32, z: f32, height: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -31840,7 +31488,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn add_original_height_map(
-            &mut self,
+            &self,
             x: f32,
             z: f32,
             height: f32,
@@ -31869,7 +31517,7 @@ pub mod terrain_control {
         }
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
-        pub fn add_smooth_mesh(&mut self, x: f32, z: f32, height: f32) -> Result<bool> {
+        pub fn add_smooth_mesh(&self, x: f32, z: f32, height: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -31895,7 +31543,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn adjust_height_map(
-            &mut self,
+            &self,
             x1: f32,
             z1: f32,
             x2: f32,
@@ -31931,7 +31579,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn adjust_original_height_map(
-            &mut self,
+            &self,
             x1: f32,
             z1: f32,
             x2: f32,
@@ -31967,7 +31615,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn adjust_smooth_mesh(
-            &mut self,
+            &self,
             x1: f32,
             z1: f32,
             x2: f32,
@@ -32003,7 +31651,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn level_height_map(
-            &mut self,
+            &self,
             x1: f32,
             z1: f32,
             x2: f32,
@@ -32039,7 +31687,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn level_original_height_map(
-            &mut self,
+            &self,
             x1: f32,
             z1: f32,
             x2: f32,
@@ -32075,7 +31723,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn level_smooth_mesh(
-            &mut self,
+            &self,
             x1: f32,
             z1: f32,
             x2: f32,
@@ -32110,7 +31758,7 @@ pub mod terrain_control {
         }
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
-        pub fn rebuild_smooth_mesh(&mut self) -> Result<bool> {
+        pub fn rebuild_smooth_mesh(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -32122,7 +31770,7 @@ pub mod terrain_control {
         }
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
-        pub fn remove_grass(&mut self, x: f32, z: f32) -> Result<bool> {
+        pub fn remove_grass(&self, x: f32, z: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -32135,7 +31783,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn revert_height_map(
-            &mut self,
+            &self,
             x1: f32,
             z1: f32,
             x2: f32,
@@ -32171,7 +31819,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn revert_original_height_map(
-            &mut self,
+            &self,
             x1: f32,
             z1: f32,
             x2: f32,
@@ -32207,7 +31855,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn revert_smooth_mesh(
-            &mut self,
+            &self,
             x1: f32,
             z1: f32,
             x2: f32,
@@ -32243,7 +31891,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn set_height_map(
-            &mut self,
+            &self,
             x: f32,
             z: f32,
             height: f32,
@@ -32276,7 +31924,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn set_height_map_func<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             callback: F,
         ) -> Result<bool> {
             self._engine.check()?;
@@ -32301,7 +31949,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn set_map_square_terrain_type(
-            &mut self,
+            &self,
             x: i32,
             z: i32,
             terrain_type: i32,
@@ -32331,7 +31979,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn set_original_height_map(
-            &mut self,
+            &self,
             x: f32,
             z: f32,
             height: f32,
@@ -32365,7 +32013,7 @@ pub mod terrain_control {
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn set_original_height_map_func<
             F: for<'call> FnMut(&mut crate::Spring<'call, E>),
-        >(&mut self, callback: F) -> Result<bool> {
+        >(&self, callback: F) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -32388,7 +32036,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn set_smooth_mesh(
-            &mut self,
+            &self,
             x: f32,
             z: f32,
             height: f32,
@@ -32421,7 +32069,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn set_smooth_mesh_func<F: for<'call> FnMut(&mut crate::Spring<'call, E>)>(
-            &mut self,
+            &self,
             callback: F,
         ) -> Result<bool> {
             self._engine.check()?;
@@ -32446,7 +32094,7 @@ pub mod terrain_control {
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
         pub fn set_terrain_type_data(
-            &mut self,
+            &self,
             type_index: i32,
             tank_speed: f32,
             kbot_speed: f32,
@@ -32495,7 +32143,7 @@ pub mod terrain_control {
         }
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
-        pub fn set_tidal(&mut self, tidal: f32) -> Result<bool> {
+        pub fn set_tidal(&self, tidal: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -32507,7 +32155,7 @@ pub mod terrain_control {
         }
     }
     impl<E: crate::capabilities::Synced> TerrainControl<'_, E> {
-        pub fn set_wind(&mut self, min_wind: f32, max_wind: f32) -> Result<bool> {
+        pub fn set_wind(&self, min_wind: f32, max_wind: f32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -32538,7 +32186,7 @@ pub mod projectile_control {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn projectile_control(&mut self) -> ProjectileControl<'_, E> {
+        pub fn projectile_control(&self) -> ProjectileControl<'_, E> {
             ProjectileControl {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -32546,7 +32194,7 @@ pub mod projectile_control {
         }
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
-        pub fn delete_projectile(&mut self, projectile_id: i32) -> Result<bool> {
+        pub fn delete_projectile(&self, projectile_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -32568,7 +32216,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_piece_projectile_params(
-            &mut self,
+            &self,
             projectile_id: i32,
             expl_flags: i32,
             spin_angle: f32,
@@ -32604,7 +32252,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_always_visible(
-            &mut self,
+            &self,
             projectile_id: i32,
             always_visible: bool,
         ) -> Result<bool> {
@@ -32631,7 +32279,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_ceg(
-            &mut self,
+            &self,
             projectile_id: i32,
             ceg_name: &str,
         ) -> Result<i32> {
@@ -32662,7 +32310,7 @@ pub mod projectile_control {
         }
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
-        pub fn set_projectile_collision(&mut self, projectile_id: i32) -> Result<bool> {
+        pub fn set_projectile_collision(&self, projectile_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -32684,7 +32332,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_damages(
-            &mut self,
+            &self,
             projectile_id: i32,
             unused: i32,
             damage_key: &str,
@@ -32722,7 +32370,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_gravity(
-            &mut self,
+            &self,
             projectile_id: i32,
             gravity: f32,
         ) -> Result<bool> {
@@ -32749,7 +32397,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_ignore_tracking_error(
-            &mut self,
+            &self,
             projectile_id: i32,
             ignore: bool,
         ) -> Result<bool> {
@@ -32776,7 +32424,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_is_intercepted(
-            &mut self,
+            &self,
             projectile_id: i32,
             intercepted: bool,
         ) -> Result<bool> {
@@ -32803,7 +32451,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_move_control(
-            &mut self,
+            &self,
             projectile_id: i32,
             enable: bool,
         ) -> Result<bool> {
@@ -32830,7 +32478,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_position(
-            &mut self,
+            &self,
             projectile_id: i32,
             pos: Float3,
         ) -> Result<bool> {
@@ -32857,7 +32505,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_target(
-            &mut self,
+            &self,
             projectile_id: i32,
             target: ProjectileTargetRef,
         ) -> Result<bool> {
@@ -32884,7 +32532,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_time_to_live(
-            &mut self,
+            &self,
             projectile_id: i32,
             time_to_live: i32,
         ) -> Result<bool> {
@@ -32911,7 +32559,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_use_air_los(
-            &mut self,
+            &self,
             projectile_id: i32,
             use_air_los: bool,
         ) -> Result<bool> {
@@ -32938,7 +32586,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn set_projectile_velocity(
-            &mut self,
+            &self,
             projectile_id: i32,
             velocity: Float3,
         ) -> Result<bool> {
@@ -32965,7 +32613,7 @@ pub mod projectile_control {
     }
     impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
         pub fn spawn_projectile(
-            &mut self,
+            &self,
             weapon_def_id: i32,
             projectile_params: &NativeProjectileParams,
         ) -> Result<i32> {
@@ -33009,7 +32657,7 @@ pub mod effects_control {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn effects_control(&mut self) -> EffectsControl<'_, E> {
+        pub fn effects_control(&self) -> EffectsControl<'_, E> {
             EffectsControl {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -33018,7 +32666,7 @@ pub mod effects_control {
     }
     impl<E: crate::capabilities::Synced> EffectsControl<'_, E> {
         pub fn spawn_ceg(
-            &mut self,
+            &self,
             ceg: &DefRef,
             pos: Float3,
             dir: Float3,
@@ -33062,7 +32710,7 @@ pub mod effects_control {
     }
     impl<E: crate::capabilities::Synced> EffectsControl<'_, E> {
         pub fn spawn_explosion(
-            &mut self,
+            &self,
             pos: Float3,
             dir: Float3,
             explosion_params: NativeExplosionParams,
@@ -33092,7 +32740,7 @@ pub mod effects_control {
     }
     impl<E: crate::capabilities::Synced> EffectsControl<'_, E> {
         pub fn spawn_sfx(
-            &mut self,
+            &self,
             unit_id: i32,
             sfx_id: i32,
             pos: Float3,
@@ -33141,7 +32789,7 @@ pub mod game_config {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn game_config(&mut self) -> GameConfig<'_, E> {
+        pub fn game_config(&self) -> GameConfig<'_, E> {
             GameConfig {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -33149,7 +32797,7 @@ pub mod game_config {
         }
     }
     impl<E: crate::capabilities::Synced> GameConfig<'_, E> {
-        pub fn set_cheating_enabled(&mut self, enabled: bool) -> Result<bool> {
+        pub fn set_cheating_enabled(&self, enabled: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33167,7 +32815,7 @@ pub mod game_config {
     }
     impl<E: crate::capabilities::Synced> GameConfig<'_, E> {
         pub fn set_experience_grade(
-            &mut self,
+            &self,
             exp_grade: f32,
             exp_power_scale: f32,
             exp_health_scale: f32,
@@ -33199,7 +32847,7 @@ pub mod game_config {
         }
     }
     impl<E: crate::capabilities::Synced> GameConfig<'_, E> {
-        pub fn set_god_mode(&mut self, options: SetGodModeOptions) -> Result<bool> {
+        pub fn set_god_mode(&self, options: SetGodModeOptions) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33211,7 +32859,7 @@ pub mod game_config {
         }
     }
     impl<E: crate::capabilities::Synced> GameConfig<'_, E> {
-        pub fn set_no_pause(&mut self, no_pause: bool) -> Result<bool> {
+        pub fn set_no_pause(&self, no_pause: bool) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33224,7 +32872,7 @@ pub mod game_config {
     }
     impl<E: crate::capabilities::Synced> GameConfig<'_, E> {
         pub fn set_radar_error_params(
-            &mut self,
+            &self,
             ally_team_id: i32,
             ally_team_error_size: f32,
             base_error_size: f32,
@@ -33257,7 +32905,7 @@ pub mod game_config {
     }
     impl<E: crate::capabilities::Synced> GameConfig<'_, E> {
         pub fn set_square_building_mask(
-            &mut self,
+            &self,
             x: i32,
             z: i32,
             mask: u16,
@@ -33294,7 +32942,7 @@ pub mod cob_script {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn cob_script(&mut self) -> CobScript<'_, E> {
+        pub fn cob_script(&self) -> CobScript<'_, E> {
             CobScript {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -33303,7 +32951,7 @@ pub mod cob_script {
     }
     impl<E: crate::capabilities::Synced> CobScript<'_, E> {
         pub fn call_cob_script(
-            &mut self,
+            &self,
             unit_id: i32,
             func: &CobFunctionRef,
             ret_args: u32,
@@ -33340,11 +32988,7 @@ pub mod cob_script {
         }
     }
     impl<E: crate::capabilities::Synced> CobScript<'_, E> {
-        pub fn get_cob_script_id(
-            &mut self,
-            unit_id: i32,
-            func_name: &str,
-        ) -> Result<i32> {
+        pub fn get_cob_script_id(&self, unit_id: i32, func_name: &str) -> Result<i32> {
             self._engine.check()?;
             if (func_name).as_bytes().contains(&0) {
                 return Err(
@@ -33380,7 +33024,7 @@ pub mod unit_script {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn unit_script(&mut self) -> UnitScript<'_, E> {
+        pub fn unit_script(&self) -> UnitScript<'_, E> {
             UnitScript {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -33389,7 +33033,7 @@ pub mod unit_script {
     }
     impl<E: crate::capabilities::Synced> UnitScript<'_, E> {
         pub fn call_unit_script(
-            &mut self,
+            &self,
             unit_id: i32,
             function_name: &str,
             args: &[f32],
@@ -33434,7 +33078,7 @@ pub mod synced_random {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn synced_random(&mut self) -> SyncedRandom<'_, E> {
+        pub fn synced_random(&self) -> SyncedRandom<'_, E> {
             SyncedRandom {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -33442,7 +33086,7 @@ pub mod synced_random {
         }
     }
     impl<E: crate::capabilities::Synced> SyncedRandom<'_, E> {
-        pub fn next_float(&mut self) -> Result<f32> {
+        pub fn next_float(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33454,7 +33098,7 @@ pub mod synced_random {
         }
     }
     impl<E: crate::capabilities::Synced> SyncedRandom<'_, E> {
-        pub fn next_int(&mut self, lower: i32, upper: i32) -> Result<i32> {
+        pub fn next_int(&self, lower: i32, upper: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33466,7 +33110,7 @@ pub mod synced_random {
         }
     }
     impl<E: crate::capabilities::Synced> SyncedRandom<'_, E> {
-        pub fn next_int_up_to(&mut self, upper: i32) -> Result<i32> {
+        pub fn next_int_up_to(&self, upper: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33478,7 +33122,7 @@ pub mod synced_random {
         }
     }
     impl<E: crate::capabilities::Synced> SyncedRandom<'_, E> {
-        pub fn set_seed(&mut self, seed: i32) -> Result<bool> {
+        pub fn set_seed(&self, seed: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33498,7 +33142,7 @@ pub mod unsynced_random {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn unsynced_random(&mut self) -> UnsyncedRandom<'_, E> {
+        pub fn unsynced_random(&self) -> UnsyncedRandom<'_, E> {
             UnsyncedRandom {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -33506,7 +33150,7 @@ pub mod unsynced_random {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedRandom<'_, E> {
-        pub fn next_float(&mut self) -> Result<f32> {
+        pub fn next_float(&self) -> Result<f32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33518,7 +33162,7 @@ pub mod unsynced_random {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedRandom<'_, E> {
-        pub fn next_int(&mut self, lower: i32, upper: i32) -> Result<i32> {
+        pub fn next_int(&self, lower: i32, upper: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33530,7 +33174,7 @@ pub mod unsynced_random {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedRandom<'_, E> {
-        pub fn next_int_up_to(&mut self, upper: i32) -> Result<i32> {
+        pub fn next_int_up_to(&self, upper: i32) -> Result<i32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33542,7 +33186,7 @@ pub mod unsynced_random {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedRandom<'_, E> {
-        pub fn set_seed(&mut self, seed: i32) -> Result<bool> {
+        pub fn set_seed(&self, seed: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33563,7 +33207,7 @@ pub mod unit_rendering {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn unit_rendering(&mut self) -> UnitRendering<'_, E> {
+        pub fn unit_rendering(&self) -> UnitRendering<'_, E> {
             UnitRendering {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -33571,7 +33215,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_camera_rotation(&mut self) -> Result<GetCameraRotationValue> {
+        pub fn get_camera_rotation(&self) -> Result<GetCameraRotationValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33583,7 +33227,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_camera_vectors(&mut self) -> Result<GetCameraVectorsValue> {
+        pub fn get_camera_vectors(&self) -> Result<GetCameraVectorsValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33596,7 +33240,7 @@ pub mod unit_rendering {
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
         pub fn get_features_in_screen_rectangle(
-            &mut self,
+            &self,
             left: f32,
             top: f32,
             right: f32,
@@ -33628,7 +33272,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_frustum_planes(&mut self) -> Result<Vec<f32>> {
+        pub fn get_frustum_planes(&self) -> Result<Vec<f32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33640,7 +33284,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_unit_always_update_matrix(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_always_update_matrix(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33661,7 +33305,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_unit_draw_flag(&mut self, unit_id: i32) -> Result<u8> {
+        pub fn get_unit_draw_flag(&self, unit_id: i32) -> Result<u8> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33678,7 +33322,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_unit_engine_draw_mask(&mut self, unit_id: i32) -> Result<u32> {
+        pub fn get_unit_engine_draw_mask(&self, unit_id: i32) -> Result<u32> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33699,7 +33343,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_unit_icon(&mut self, unit_id: i32) -> Result<GetUnitIconValue> {
+        pub fn get_unit_icon(&self, unit_id: i32) -> Result<GetUnitIconValue> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33712,7 +33356,7 @@ pub mod unit_rendering {
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
         pub fn get_unit_icon_data(
-            &mut self,
+            &self,
             unit_id: i32,
             full_data: bool,
         ) -> Result<GetUnitIconDataValue> {
@@ -33733,7 +33377,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_unit_lua_draw(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_lua_draw(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33750,7 +33394,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_unit_no_draw(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_no_draw(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33767,7 +33411,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_unit_no_group(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_no_group(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33784,7 +33428,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_unit_no_minimap(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_no_minimap(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33805,7 +33449,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_unit_no_select(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn get_unit_no_select(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33823,7 +33467,7 @@ pub mod unit_rendering {
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
         pub fn get_unit_selection_volume_data(
-            &mut self,
+            &self,
             unit_id: i32,
         ) -> Result<GetUnitSelectionVolumeDataValue> {
             self._engine.check()?;
@@ -33846,7 +33490,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn get_unit_transform_matrix(&mut self, unit_id: i32) -> Result<Vec<f32>> {
+        pub fn get_unit_transform_matrix(&self, unit_id: i32) -> Result<Vec<f32>> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -33868,7 +33512,7 @@ pub mod unit_rendering {
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
         pub fn get_unit_view_position(
-            &mut self,
+            &self,
             unit_id: i32,
             use_mid_pos: bool,
         ) -> Result<Float3> {
@@ -33895,7 +33539,7 @@ pub mod unit_rendering {
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
         pub fn get_units_in_screen_rectangle(
-            &mut self,
+            &self,
             left: f32,
             top: f32,
             right: f32,
@@ -33931,7 +33575,7 @@ pub mod unit_rendering {
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
         pub fn get_visible_features(
-            &mut self,
+            &self,
             ally_team_id: i32,
             radius: f32,
             options: GetVisibleFeaturesOptions,
@@ -33961,7 +33605,7 @@ pub mod unit_rendering {
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
         pub fn get_visible_projectiles(
-            &mut self,
+            &self,
             ally_team_id: i32,
             options: GetVisibleProjectilesOptions,
         ) -> Result<Vec<i32>> {
@@ -33988,7 +33632,7 @@ pub mod unit_rendering {
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
         pub fn get_visible_units(
-            &mut self,
+            &self,
             team_id: i32,
             radius: f32,
             include_icons: bool,
@@ -34017,7 +33661,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn is_unit_icon(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn is_unit_icon(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -34029,7 +33673,7 @@ pub mod unit_rendering {
         }
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
-        pub fn is_unit_in_view(&mut self, unit_id: i32) -> Result<bool> {
+        pub fn is_unit_in_view(&self, unit_id: i32) -> Result<bool> {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
@@ -34047,7 +33691,7 @@ pub mod unit_rendering {
     }
     impl<E: crate::capabilities::Local> UnitRendering<'_, E> {
         pub fn is_unit_visible(
-            &mut self,
+            &self,
             unit_id: i32,
             radius: f32,
             check_icon: bool,
@@ -34084,7 +33728,7 @@ pub mod object_rendering {
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
-        pub fn object_rendering(&mut self) -> ObjectRendering<'_, E> {
+        pub fn object_rendering(&self) -> ObjectRendering<'_, E> {
             ObjectRendering {
                 _engine: self.engine.reborrow(),
                 environment: core::marker::PhantomData,
@@ -34093,7 +33737,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn clear_deferred_material_uniform(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             material_type: ObjectRenderingMaterialType,
@@ -34134,7 +33778,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn clear_forward_material_uniform(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             material_type: ObjectRenderingMaterialType,
@@ -34175,7 +33819,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn get_lod(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
         ) -> Result<GetLODValue> {
@@ -34202,7 +33846,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn set_deferred_material_uniform(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             material_type: ObjectRenderingMaterialType,
@@ -34253,7 +33897,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn set_forward_material_uniform(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             material_type: ObjectRenderingMaterialType,
@@ -34304,7 +33948,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn set_lod_count(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             lod_count: u32,
@@ -34334,7 +33978,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn set_lod_distance(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             lod_level: u32,
@@ -34367,7 +34011,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn set_lod_length(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             lod_level: u32,
@@ -34400,7 +34044,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn set_material(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             lod_level: u32,
@@ -34448,7 +34092,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn set_material_display_lists(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             lod_level: u32,
@@ -34487,7 +34131,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn set_material_last_lod(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             material_type: ObjectRenderingMaterialType,
@@ -34520,7 +34164,7 @@ pub mod object_rendering {
     }
     impl<E: crate::capabilities::Local> ObjectRendering<'_, E> {
         pub fn set_piece_list(
-            &mut self,
+            &self,
             object_type: ObjectRenderingObjectType,
             object_id: i32,
             lod_level: u32,

@@ -314,7 +314,7 @@ struct Backend<'call> {
 }
 
 impl Backend<'_> {
-    fn reborrow(&mut self) -> Backend<'_> {
+    fn reborrow(&self) -> Backend<'_> {
         Backend {
             owner: Shared::clone(&self.owner),
             scope: PhantomData,
@@ -392,7 +392,7 @@ include!(concat!(
     "/../../../rts/wasm/generated/sdk/scoped_api.rs"
 ));
 
-pub use spring::{cmd, los_state, mouse};
+pub use spring::{cmd, consts, gl, los_state, mouse};
 pub mod log_level {
     pub const DEBUG: i32 = 20;
     pub const INFO: i32 = 30;

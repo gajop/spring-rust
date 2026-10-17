@@ -355,7 +355,23 @@ pub fn render(
                     .inputs
                     .iter()
                     .find(|field| field.name == "_unused")
-                    .map(|field| ident(&field.name));
+                    .map(|field| {
+                        sig.inputs
+                            .iter()
+                            .find_map(|arg| match arg {
+                                FnArg::Typed(p) => match p.pat.as_ref() {
+                                    Pat::Ident(i)
+                                        if i.ident.to_string().trim_start_matches('_')
+                                            == ident(&field.name).trim_start_matches('_') =>
+                                    {
+                                        Some(i.ident.to_string())
+                                    }
+                                    _ => None,
+                                },
+                                _ => None,
+                            })
+                            .unwrap_or_else(|| ident(&field.name))
+                    });
                 let wasm_arguments = sig
                     .inputs
                     .iter()
@@ -425,7 +441,14 @@ pub fn render(
                         p.mutability = None;
                     }
                 }
-                method.inputs.insert(0, syn::parse_quote!(&mut self));
+                method.inputs.insert(0, syn::parse_quote!(&self));
+                let public_name = method
+                    .ident
+                    .to_string()
+                    .replace("_i_ds", "_ids")
+                    .replace("sdlstart_", "sdl_start_")
+                    .replace("sdlstop_", "sdl_stop_");
+                method.ident = syn::Ident::new(&public_name, method.ident.span());
                 let call = arguments.join(", ");
                 let generics = if scoped_callback { "::<E,_>" } else { "" };
                 let wasm_call = wasm_arguments.join(",");
@@ -492,13 +515,13 @@ pub fn render(
         // converters propagate a generation error instead of becoming stubs.
         let converters = renderer.converters()?;
         if name == "units_query" {
-            api.push_str("impl<'a, E: crate::Environment> crate::Spring<'a, E> { pub fn units(&mut self) -> units_query::UnitsQuery<'_, E> { self.units_query() } }\n");
+            api.push_str("impl<'a, E: crate::Environment> crate::Spring<'a, E> { pub fn units(&self) -> units_query::UnitsQuery<'_, E> { self.units_query() } }\n");
         }
         if family_methods.is_empty() {
             continue;
         }
         let alloc_api = alloc_imports(&family_methods);
-        api.push_str(&format!("pub mod {name} {{ pub use crate::types::{name}::*; use crate::Result; {alloc_api} pub struct {family}<'a,E> {{ pub(crate) _engine: crate::Backend<'a>, pub(crate) environment: core::marker::PhantomData<E> }} impl<'a,E: crate::Environment> crate::Spring<'a,E> {{ pub fn {name}(&mut self) -> {family}<'_,E> {{ {family} {{ _engine: self.engine.reborrow(), environment: core::marker::PhantomData }} }} }} {family_methods} }}\n"));
+        api.push_str(&format!("pub mod {name} {{ pub use crate::types::{name}::*; use crate::Result; {alloc_api} pub struct {family}<'a,E> {{ pub(crate) _engine: crate::Backend<'a>, pub(crate) environment: core::marker::PhantomData<E> }} impl<'a,E: crate::Environment> crate::Spring<'a,E> {{ pub fn {name}(&self) -> {family}<'_,E> {{ {family} {{ _engine: self.engine.reborrow(), environment: core::marker::PhantomData }} }} }} {family_methods} }}\n"));
         let native_source = format!("{native_methods}{converters}");
         let imports = type_imports(&native_source, semantic) + &alloc_imports(&native_source);
         let helpers = ["Inputs", "read_string", "read_slice", "check_error"]

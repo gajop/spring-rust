@@ -9734,7 +9734,6 @@ pub(crate) mod terrain {
     }
     pub(crate) fn get_ground_extremes(
         engine: &crate::Backend<'_>,
-        _unused: u8,
     ) -> Result<GetGroundExtremesValue> {
         let native_unused = 0 as _;
         let query = sys::GetGroundExtremesQuery {
@@ -9935,7 +9934,6 @@ pub(crate) mod terrain {
     }
     pub(crate) fn get_height_map_size(
         engine: &crate::Backend<'_>,
-        _unused: u8,
     ) -> Result<GetHeightMapSizeValue> {
         let native_unused = 0 as _;
         let query = sys::GetHeightMapSizeQuery {
@@ -10055,10 +10053,7 @@ pub(crate) mod terrain {
         }
         Ok((result.level) as _)
     }
-    pub(crate) fn get_water_plane_level(
-        engine: &crate::Backend<'_>,
-        _unused: u8,
-    ) -> Result<f32> {
+    pub(crate) fn get_water_plane_level(engine: &crate::Backend<'_>) -> Result<f32> {
         let native_unused = 0 as _;
         let query = sys::GetWaterPlaneLevelQuery {
             _unused: native_unused,
