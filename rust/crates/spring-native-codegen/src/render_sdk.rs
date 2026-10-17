@@ -332,7 +332,16 @@ pub fn render(
                 }),
                 _ => None,
             });
-            let wasm_path = if extra_fn.is_some() {
+            // The normal loader deliberately exposes the optional diagnostic
+            // clock through spring:desync. spring:profiling/get-timer-micros is
+            // a benchmark-only import with a different wire signature.
+            let diagnostic_clock = name == "profiling" && function.name == "GetTimerMicros";
+            let timer_difference = name == "profiling" && function.name == "DiffTimers";
+            let wasm_path = if diagnostic_clock {
+                "spring::desync".to_string()
+            } else if timer_difference {
+                "spring::profiling".to_string()
+            } else if extra_fn.is_some() {
                 format!("crate::wasm::{name}")
             } else {
                 format!("spring::generated::owned::{name}")
@@ -384,7 +393,7 @@ pub fn render(
                             })
                             .unwrap_or_else(|| ident(&field.name))
                     });
-                let wasm_arguments = sig
+                let mut wasm_arguments = sig
                     .inputs
                     .iter()
                     .map(|a| match a {
@@ -396,6 +405,16 @@ pub fn render(
                         _ => Err(anyhow!("unexpected receiver")),
                     })
                     .collect::<Result<Vec<_>>>()?;
+                if diagnostic_clock {
+                    wasm_arguments.clear();
+                } else if timer_difference {
+                    wasm_arguments = vec![
+                        "end_timer".into(),
+                        "start_timer".into(),
+                        "options.return_ms".into(),
+                        "options.from_micro_secs".into(),
+                    ];
+                }
                 if let Some(dummy) = &dummy {
                     sig.inputs=sig.inputs.into_iter().filter(|a|!matches!(a,FnArg::Typed(p) if matches!(p.pat.as_ref(),Pat::Ident(i) if i.ident==dummy))).collect();
                 }
