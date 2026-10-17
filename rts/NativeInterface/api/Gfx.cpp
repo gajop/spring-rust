@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "Gfx.h"
+#include "NativeInterface/GfxLifecycle.h"
 
 #include <algorithm>
 #include <cmath>
@@ -5654,6 +5655,46 @@ static void Billboard(const GfxEmptyQuery*, GfxEmptyResult* result)
 }
 
 } // namespace
+
+void CleanupNativeGfxResources()
+{
+	// VAOs reference VBOs; neither may survive the context. Model VBO wrappers
+	// borrow their buffer and destroy only the buffers they actually own.
+	nativeVAOs.clear();
+	nativeVBOs.clear();
+	nativeFonts.clear();
+	nativeAtlases.clear();
+	nativeAtlasMap.clear();
+	for (auto& [name, texture]: nativeTextures)
+		DeleteNativeTexture(texture);
+	nativeTextures.clear();
+	for (auto& [id, program]: nativeShaders)
+		DeleteShaderProgram(program);
+	nativeShaders.clear();
+	activeNativeShader = 0;
+	for (auto& [id, object]: nativeRBOs)
+		glDeleteRenderbuffersEXT(1, &object.id);
+	nativeRBOs.clear();
+	for (auto& [id, object]: nativeFBOs)
+		glDeleteFramebuffersEXT(1, &object.id);
+	nativeFBOs.clear();
+	for (auto& [id, list]: nativeDisplayLists)
+		glDeleteLists(list, 1);
+	nativeDisplayLists.clear();
+	for (auto& [id, query]: nativeQueries)
+		glDeleteQueries(1, &query.id);
+	nativeQueries.clear();
+	for (auto& [id, fence]: nativeFences)
+		glDeleteSync(fence.sync);
+	nativeFences.clear();
+	for (auto& [id, readback]: nativeReadbacks) {
+		glBindBuffer(GL_COPY_WRITE_BUFFER, readback.id);
+		glUnmapBuffer(GL_COPY_WRITE_BUFFER);
+		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+		glDeleteBuffers(1, &readback.id);
+	}
+	nativeReadbacks.clear();
+}
 
 const GfxApi GFX_API = {
 	.HasExtension = HasExtension,

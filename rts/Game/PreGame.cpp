@@ -616,6 +616,13 @@ void CPreGame::GameDataReceived(std::shared_ptr<const netcode::RawPacket> packet
 
 	archiveScanner->ResetNumFilesHashed();
 
+	// Generated maps exist only in the process that generated them. Remote clients
+	// must recreate the host's archive from the received map options before mounting it.
+	if (gameSetup->initBlank && !clientSetup->isHost) {
+		CBlankMapGenerator gen(gameSetup);
+		gen.Generate();
+	}
+
 	// load archives into VFS
 	AddMapArchivesToVFS(gameSetup);
 	AddModArchivesToVFS(gameSetup);
@@ -644,11 +651,15 @@ void CPreGame::GameDataReceived(std::shared_ptr<const netcode::RawPacket> packet
 			// gameSetup->MapFileName()
 			archiveScanner->CheckArchive(gameSetup->mapName, gdMapChecksum, asMapChecksum);
 		} catch (const content_error& ex) {
+			if (gameSetup->enforceArchiveChecks)
+				throw;
 			LOG_L(L_WARNING, "[PreGame::%s] %s", __func__, ex.what());
 		}
 		try {
 			archiveScanner->CheckArchive(modFileName, gdModChecksum, asModChecksum);
 		} catch (const content_error& ex) {
+			if (gameSetup->enforceArchiveChecks)
+				throw;
 			LOG_L(L_WARNING, "[PreGame::%s] %s", __func__, ex.what());
 		}
 

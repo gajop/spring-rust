@@ -7,6 +7,7 @@
 #include <SDL.h>
 
 #include "GlobalRendering.h"
+#include "NativeInterface/GfxLifecycle.h"
 #include "Rendering/GL/glDebugGroup.hpp"
 #include "GlobalRenderingInfo.h"
 #include "Rendering/VerticalSync.h"
@@ -390,6 +391,7 @@ CGlobalRendering::~CGlobalRendering()
 
 void CGlobalRendering::PreKill()
 {
+	CleanupNativeGfxResources();
 	UniformConstants::GetInstance().Kill(); //unsafe to kill in ~CGlobalRendering()
 	RenderBuffer::KillStatic();
 	GL::shapes.Kill();

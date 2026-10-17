@@ -40,6 +40,7 @@ public:
 		disableMapDamage = gs.disableMapDamage;
 
 		onlyLocal = gs.onlyLocal;
+		enforceArchiveChecks = gs.enforceArchiveChecks;
 		hostDemo = gs.hostDemo;
 		recordDemo = gs.recordDemo;
 
@@ -193,6 +194,8 @@ public:
 
 	/** if true, this is a non-network game (one local client, eg. when watching a demo) */
 	bool onlyLocal;
+	// Refuse mismatched content before simulation, opt-in for multiplayer launchers.
+	bool enforceArchiveChecks;
 	bool hostDemo;
 	bool recordDemo;
 

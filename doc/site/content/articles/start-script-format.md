@@ -40,6 +40,7 @@ draft = false
 
 	DemoFile=demo.sdfz; // if set this game is a multiplayer demo replay
 	SaveFile=save.ssf;  // if set this game is a continuation of a saved game
+	EnforceArchiveChecks=0; // set to 1 to refuse mismatched map/game archives before loading
 	RecordDemo=1;       // set to 0 to disable demo file recording
 
 	HostIP=xxx.xxx.xxx.xxx; // (optional) which IP to host on. omit or use an empty value to host on any local IP. see "IP Support" at the start of this document.

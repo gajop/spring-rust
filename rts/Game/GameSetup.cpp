@@ -35,6 +35,7 @@ CR_REG_METADATA(CGameSetup, (
 	CR_IGNORED(disableMapDamage),
 
 	CR_IGNORED(onlyLocal),
+	CR_IGNORED(enforceArchiveChecks),
 	CR_IGNORED(hostDemo),
 	CR_IGNORED(recordDemo),
 
@@ -189,6 +190,7 @@ void CGameSetup::ResetState()
 	disableMapDamage = false;
 
 	onlyLocal = false;
+	enforceArchiveChecks = false;
 	hostDemo = false;
 	recordDemo = true;
 
@@ -628,6 +630,7 @@ bool CGameSetup::Init(const std::string& buf)
 
 	file.GetTDef(gameStartDelay, 4u, "GAME\\GameStartDelay");
 
+	file.GetDef(enforceArchiveChecks, "0", "GAME\\EnforceArchiveChecks");
 	file.GetDef(recordDemo,          "1", "GAME\\RecordDemo");
 	file.GetDef(useLuaGaia,          "1", "GAME\\ModOptions\\LuaGaia");
 	file.GetDef(luaDevMode,          "0", "GAME\\ModOptions\\LuaDevMode");

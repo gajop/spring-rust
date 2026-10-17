@@ -13,6 +13,7 @@
 #include "Game/GameData.h"
 #include "Game/GameVersion.h"
 #include "Net/GameServer.h"
+#include "Map/Generation/BlankMapGenerator.h"
 #include "System/Exceptions.h"
 #include "System/GlobalConfig.h"
 #include "System/GlobalRNG.h"
@@ -164,6 +165,11 @@ int main(int argc, char* argv[])
 			// read the script provided by cmdline
 			LOG_L(L_ERROR, "failed to load script %s", scriptName.c_str());
 			return 1;
+		}
+
+		if (dsGameSetup->initBlank) {
+			CBlankMapGenerator gen(dsGameSetup.get());
+			gen.Generate();
 		}
 
 		// create the server, it will run in a separate thread

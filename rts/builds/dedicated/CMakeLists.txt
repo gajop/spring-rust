@@ -23,7 +23,7 @@ set(ENGINE_SRC_ROOT_DIR "${CMAKE_SOURCE_DIR}/rts")
 list(APPEND engineDedicatedLibraries ${Boost_REGEX_LIBRARY})
 list(APPEND engineDedicatedLibraries lua archives_nothreadpool 7zip prd::jsoncpp
 	${SPRING_MINIZIP_LIBRARY} ZLIB::ZLIB gflags_nothreads_static Tracy::TracyClient)
-list(APPEND engineDedicatedLibraries headlessStubs engineSystemNet)
+list(APPEND engineDedicatedLibraries headlessStubs engineSystemNet squish)
 if(UNIX AND NOT (CMAKE_SYSTEM_NAME MATCHES "OpenBSD"))
 	list(APPEND engineDedicatedLibraries libunwind::libunwind)
 endif()
@@ -174,6 +174,7 @@ set(engineDedicatedSources
 	${ENGINE_SRC_ROOT_DIR}/Lua/LuaParser.cpp
 	${ENGINE_SRC_ROOT_DIR}/Lua/LuaUtils.cpp
 	${ENGINE_SRC_ROOT_DIR}/Map/MapParser.cpp
+	${ENGINE_SRC_ROOT_DIR}/Map/Generation/BlankMapGenerator.cpp
 	)
 
 
