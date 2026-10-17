@@ -33,11 +33,22 @@ use `()`, a single value such as `bool`/`String`, or a tuple for multiple values
 ABI query/result envelopes, dummy parameters and redundant lengths stay in
 adapters.
 
+`Result` reports whether the callback completed. A normal veto is `Ok(false)`.
+`Err` rejects initialization or stops further use of a failed module.
+`spring.units().get_all_units()` is the short form for unit queries.
+
 Release state borrows before reentrant callouts. Send owned snapshots to
 workers; Spring references cannot cross threads. Native module state and
 retained captures must be Send for loading-thread handoff. Rml binding
 identifiers can move with that state, but every operation needs Spring.
 The SDK does not queue immediate calls automatically.
+
+Long-lived models can store `ModuleRef<E>` and obtain Spring during their
+module's active callbacks. They cannot use it to call the engine from workers.
+`All` gives native tools both simulation and UI access; SpringBoard needs no
+separate tools API. Environment restrictions and Spring lifetimes are checked
+at compile time. Loaded DLL versions and incoming C callbacks still need
+runtime checks, because the host is outside Rust's type system.
 
 `rml::DataModel` and its typed bindings work on both targets. Every binding
 operation takes a fresh Spring reference. Call `close` / `unbind` explicitly;
@@ -52,3 +63,28 @@ ordered results with Spring. Export Update for local modules or GameFrame for
 synced Wasm. Native uses a bounded thread pool; Wasm uses fresh private worker
 instances. Workers take owned input snapshots and must not access mutable
 globals or engine functions. See the design notes for limits and delivery timing.
+Nested native Update calls run immediately; only the outer call advances jobs.
+
+## Port status
+
+All consumer edits are in dedicated worktrees. The SDK remains separate from
+`rust-wip`; it has not been merged or published.
+
+| Consumer | Change |
+| --- | --- |
+| SpringBoard | Native `All`; stored engine access becomes `ModuleRef<All>`. Terrain, units and UI remain available together. |
+| Seven Cabal games | Wasm modules use scoped Spring calls; their synced/unsynced split remains. Shared helpers, addons and CUS are ported. |
+| Cabal menu | One Rust implementation builds as native or Wasm. |
+| Other downstream game/menu | Three Wasm game modules, rendering, custom CUS and HUD ported; menu builds as native or Wasm. |
+
+SpringBoard passes 110 Rust tests and its full 85-case integration suite plus
+eight smoke checks on Linux; the Windows DLL passes the integration and smoke
+suites under Wine. All seven Cabal gameplay suites pass on Linux and Wine.
+The other game's full Linux HUD checks, both menus' launch/return checks,
+and two 901-frame Linux/Wine matches with real player orders and shared HUD
+pause/speed controls pass.
+
+SDK tests, addon tests and the same-source native/Wasm CUS/job fixture also
+pass on Linux and Wine. Visual suites still have failures reproduced before
+the port; no golden images or tolerances have been changed. Native Windows
+hardware and discovery/rooms/reconnect UI remain separate work.

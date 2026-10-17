@@ -72,6 +72,12 @@ on its thread pool. The runner requires the job success marker and shutdown
 asserts that every result arrived. The default RulesSynced run checks the
 existing engine's next-frame job path; `--all-game` checks local Update delivery.
 
+Successful runs also require valid path-cache ZIPs and verify their CRCs with
+Python's independent ZIP reader. This empty-move-def fixture exposed a Windows
+cache writer bug: passing a null, zero-length buffer to classic minizip reset
+the checksum after writing the cache header. Empty arrays now write no bytes.
+Warnings and errors fail normal runs, including before the engine log opens.
+
 `--all-game --fail-game-init --transport native` instead returns an error from
 the game's initializer on both launches. The menu must still recover and quit
 normally. The rejected game must receive no later callins. This also catches

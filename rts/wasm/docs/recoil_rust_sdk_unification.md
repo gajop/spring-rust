@@ -1,8 +1,8 @@
 # One Rust SDK for native and Wasm
 
 The optional `spring-sdk` crate lives on `sdk-unification`, separate from
-`rust-wip`. Existing games, SpringBoard and both existing menus keep their
-current APIs until ported in their dedicated worktrees. Native loading supports
+`rust-wip`. Consumer ports live in dedicated worktrees. Original game,
+SpringBoard and menu checkouts retain their current APIs. Native loading supports
 menus and in-game `All` modules, including initialization on the loading thread.
 
 ## Using it
@@ -100,6 +100,35 @@ Native panics are caught before crossing the C ABI; native builds require
 `panic=unwind`. Failed handlers stop subsequent use of the module. Wasm failures
 trap and follow the engine's module-fault handling.
 
+## Background jobs
+
+Workers are ordinary `fn(&[u8]) -> Vec<u8>` functions. Declare them once with
+`export_jobs!`, submit with `spring.jobs().submit(WORKER, &input)`, and consume
+the result in `Module::job_result`. Widget, gadget, and unsynced addon traits
+also have `job_result`; `spring_addons::export_jobs!` declares their workers.
+Addon results use the normal context and command queue.
+
+Pass all inputs explicitly. Workers must not use mutable globals or engine
+calls. Native uses up to four background threads per module, created on first
+use. Wasm uses the existing engine job scheduler and a fresh private instance
+for each job. `WORKER.in_wasm_module("navigation-worker")` selects a separately
+loaded small Wasm module; native still calls the same linked Rust function.
+
+Native Menu and All jobs submitted before or during Update are sealed after
+that Update. Results arrive in submission order before the following Update,
+even when workers finish in a different order. Synced Wasm jobs retain the
+engine's global ordering and next-GameFrame delivery. Native synced module
+loading is not supported. Jobs receive copied input and return owned output;
+the result callback gets a fresh Spring reference and may submit more jobs.
+Shutdown joins native workers before releasing module state or code.
+
+Each input/output is limited to 1 MiB. Native queues allow 256 jobs and 16 MiB
+of input per module per Update, matching local Wasm limits. Synced Wasm limits
+are shared across synced modules, as before. Worker panics/traps and oversized
+outputs become job errors; host resource failures stop the module. The live
+fixture checks ordered output, an empty result, an oversized output, work
+submitted from a result callback, and a separate Wasm worker module.
+
 ## Rml and loading
 
 Typed Rml variables, rows and events share one implementation. Their operations
@@ -132,8 +161,8 @@ game launches and failed-initialization cleanup. Both render identical pixels:
 
 Both production menus have native/Wasm ports. The Cabal menu launches and
 returns from Lua Gravitas on Linux and Wine. The other menu completes its
-interaction tour on Linux and Wine, with matching rendered screens. Its
-actual game launch/return test is still pending the game-code port.
+interaction tour and actual game launch/return on Linux and Wine, with
+matching rendered screens.
 
 SpringBoard uses `All` and keeps `ModuleRef<All>` in its existing models. Its
 background I/O workers still receive data rather than Spring references.
@@ -148,7 +177,8 @@ tested with the same renderer and driver, reproduces those visual failures
 and additionally fails the brush, project-info, and numeric-drag assertions
 fixed in the port. Checked paired screenshots match within the existing
 tolerance. Expected screenshots and tolerances were not changed. The visual
-suite is still failing. SpringBoard's Wine editor execution remains untested.
+suite is still failing. The Windows editor DLL also passes all 85 integration
+tests and eight smoke checks under Wine, including compilation and export.
 
 The addon handlers and shared Cabal libraries now use the SDK on native and
 Wasm. The shared library's 44 unit tests pass. Widgets and helpers receive
@@ -157,10 +187,12 @@ use the same scheduler source on both backends, and native task captures must
 be `Send`. Their host belongs to the addon module and permits callbacks during
 attachment without borrowing the entire host. Engine operations resolve a
 fresh scope through the owning module. Missing or rejected CUS operations
-produce errors. The new host and dispatch tests are not yet full game tests.
-The 11 addon tests pass on Linux and Wine, including native CUS reentry during
-attachment, named results, task wakeups, unit-ID reuse, and shutdown. The SDK
-has 45 unit tests, an export test, and 8 compile-fail checks. These checks do
+produce errors. The same-source native/Wasm fixture also tests a real unit,
+piece animation, a suspended task and a named engine-to-CUS call on Linux and
+Wine. Addon tests cover native CUS reentry during
+attachment, named results, task wakeups, unit-ID reuse, addon job results and
+shutdown. All 12 addon tests pass on Linux and Wine. The SDK
+has 51 unit tests, an export test, and 8 compile-fail checks. These checks do
 not replace actual game execution.
 
 `UnitCtx::with_spring` gives a unit-script task a fresh synced Spring reference
@@ -255,14 +287,32 @@ invoke and named calls. Addons can optionally use `create: make_state` when
 state construction needs engine resources. It receives Spring and returns
 `Result<State>`; existing addons can keep `Default` construction.
 
-All seven Cabal game-code ports are locally committed. The remaining game-code
-port and job helpers are unfinished. Discovery, rooms, and reconnect UI remain
-separate work. No private game content has been uploaded or released.
+All seven Cabal game-code ports are locally committed. The other game-code
+port passes Linux gameplay, rendering and full HUD controls, plus actual
+menu launch/return on both platforms. Its Linux/Wine match passes 901 frames
+with movement, production, formations and ownership checks, comparing engine
+and full Wasm memory checksums on every frame. A second 901-frame run passes
+the actual HUD pause/speed controls and host exit confirmation, with the same
+sync checks. Discovery, rooms, and reconnect UI remain separate work.
+No private game content has been uploaded or released.
 A live native/Wasm `All` fixture also tests terrain mutation and drawing in one
 module, two launches, shutdown, and native loading-thread handoff
 ([results](data/scoped-sdk-2026-10-17/all-results.json)). Consumer ports
 are still in progress; the fixture is not a claim that every game has migrated.
 The Windows engine and same-source menu/game fixture pass under Wine,
-including `All` and loading-thread handoff. This is not native Windows or
-multiplayer gameplay verification. Packaging keeps using independently
-built engine releases.
+including `All`, loading-thread handoff, live CUS, ordered job results and a
+separate Wasm worker module. Native Windows hardware remains untested.
+Packaging keeps using independently built engine releases.
+
+The ordinary engine fixes are also prepared on `ship-game-multiplayer`, without
+the new SDK: worktree version tracking, optional Windows storage diagnostics,
+rules-param visibility outside UI, shutdown before host services disappear,
+strict-Clippy fixes in the legacy Wasm adapters and command helper, and valid
+path-cache ZIP checksums when movement data is empty. The live fixture checks
+those archives with an independent ZIP reader and rejects warnings/errors.
+Its 38 engine suites, strict generation and legacy Wasm Clippy pass.
+
+An isolated copy of the recorded Mesa `.2` renderer removes the Cabal renderer
+mismatch without changing system packages or expectations. Flove still fails
+four of nine comparisons (5.1–5.7%, limit 5%), consistent with the pre-port
+results. The matching-renderer experiment is not a visual-suite pass.
