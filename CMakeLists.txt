@@ -636,13 +636,27 @@ set_source_files_properties(
 )
 
 # Find git metadata files to depend on, so version regenerates when commits change
-if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
-	if(EXISTS "${CMAKE_SOURCE_DIR}/.git/index")
-		list(APPEND VERSION_GIT_DEPS "${CMAKE_SOURCE_DIR}/.git/index")
+if(GIT_EXECUTABLE AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
+	# A linked worktree has a .git file, with HEAD/index in its per-worktree
+	# directory and branch refs in the common directory. Track the branch tip
+	# as well: committing does not change a symbolic HEAD's contents.
+	execute_process(COMMAND "${GIT_EXECUTABLE}" -C "${CMAKE_SOURCE_DIR}" symbolic-ref -q HEAD
+		OUTPUT_VARIABLE VERSION_GIT_BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE)
+	set(VERSION_GIT_PATHS HEAD index packed-refs)
+	if(VERSION_GIT_BRANCH)
+		list(APPEND VERSION_GIT_PATHS "${VERSION_GIT_BRANCH}")
 	endif()
-	if(EXISTS "${CMAKE_SOURCE_DIR}/.git/HEAD")
-		list(APPEND VERSION_GIT_DEPS "${CMAKE_SOURCE_DIR}/.git/HEAD")
-	endif()
+	foreach(VERSION_GIT_PATH IN LISTS VERSION_GIT_PATHS)
+		execute_process(COMMAND "${GIT_EXECUTABLE}" -C "${CMAKE_SOURCE_DIR}"
+			rev-parse --git-path "${VERSION_GIT_PATH}"
+			OUTPUT_VARIABLE VERSION_GIT_FILE OUTPUT_STRIP_TRAILING_WHITESPACE)
+		get_filename_component(VERSION_GIT_FILE "${VERSION_GIT_FILE}" ABSOLUTE BASE_DIR "${CMAKE_SOURCE_DIR}")
+		if(EXISTS "${VERSION_GIT_FILE}")
+			list(APPEND VERSION_GIT_DEPS "${VERSION_GIT_FILE}")
+			# Refresh the dependency list when switching branches or packing refs.
+			set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${VERSION_GIT_FILE}")
+		endif()
+	endforeach()
 endif()
 
 # Declare template files as inputs (for proper dependency tracking)
