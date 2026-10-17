@@ -2,21 +2,30 @@
 
 // Compile every generated callin macro on both targets. Tests below exercise
 // the actual C exports and module boundary, not just the Rust slot methods.
-use spring_sdk::{Menu, Result, Spring, module::Module};
-use std::cell::Cell;
+use spring_sdk::{Environment, Menu, Result, Spring, module::Module};
+use std::cell::{Cell, RefCell};
 struct Fixture {
     calls: Cell<u32>,
+    delta: Cell<f32>,
+    message: RefCell<String>,
 }
-impl Module<Menu> for Fixture {
-    fn initialize(_: &mut Spring<'_, Menu>) -> Result<Self> {
+impl<E: Environment> Module<E> for Fixture {
+    fn initialize(_: &mut Spring<'_, E>) -> Result<Self> {
         Ok(Self {
             calls: Cell::new(0),
+            delta: Cell::new(0.0),
+            message: RefCell::new(String::new()),
         })
     }
 }
-fn handler<Q, R: Default>(module: &Fixture, _: &mut Spring<'_, Menu>, _: &Q) -> Result<R> {
+fn record_call(module: &Fixture) {
     module.calls.set(module.calls.get() + 1);
-    Ok(R::default())
+}
+fn record_update(module: &Fixture, delta: f32) {
+    module.delta.set(delta);
+}
+fn record_message(module: &Fixture, message: &str) {
+    *module.message.borrow_mut() = message.to_owned();
 }
 spring_sdk::export_module!(MODULE, Menu, Fixture);
 #[cfg(target_arch = "wasm32")]
@@ -53,10 +62,55 @@ fn native_exports_validate_identity_and_dispatch() {
     MODULE.with(|slot| {
         slot.invoke(|module, _| {
             assert_eq!(module.calls.get(), 1);
+            assert_eq!(module.delta.get(), 0.02);
             Ok(())
         })
         .unwrap()
     });
+    let text = c"message 日本語";
+    let query = sys::ActivateMenuQuery {
+        message: text.as_ptr(),
+        messageLength: text.to_bytes().len() as u32,
+    };
+    let mut activated = sys::ActivateMenuResult::default();
+    unsafe {
+        ActivateMenu(&interface, initialized.moduleData, &query, &mut activated);
+    }
+    assert!(activated.error.is_null());
+    MODULE.with(|slot| {
+        slot.invoke(|module, _| {
+            assert_eq!(&*module.message.borrow(), "message 日本語");
+            Ok(())
+        })
+        .unwrap()
+    });
+    let mut allowed = sys::BoolCallinResult::default();
+    unsafe {
+        AllowDraw(
+            &interface,
+            initialized.moduleData,
+            &sys::SimpleCallinQuery::default(),
+            &mut allowed,
+        );
+    }
+    assert!(allowed.error.is_null());
+    assert!(allowed.value);
+    let mut tooltip = sys::StringCallinResult::default();
+    unsafe {
+        GetTooltip(
+            &interface,
+            initialized.moduleData,
+            &sys::ScreenPositionQuery::default(),
+            &mut tooltip,
+        );
+    }
+    assert!(tooltip.error.is_null());
+    assert_eq!(
+        unsafe { std::ffi::CStr::from_ptr(tooltip.value) }
+            .to_str()
+            .unwrap(),
+        "tooltip 日本語"
+    );
     unsafe {
         Update(&interface, core::ptr::null_mut(), &update, &mut result);
     }

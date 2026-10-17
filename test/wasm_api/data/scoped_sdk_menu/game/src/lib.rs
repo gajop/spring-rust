@@ -1,7 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 #[cfg(target_arch = "wasm32")]
 mod game {
-    use spring_sdk::{Float3, Result, RulesSynced, Spring, module::Module, types::callins::*};
+    use spring_sdk::{Float3, Result, RulesSynced, Spring, module::Module};
     use std::cell::Cell;
     struct Game {
         seen: Cell<bool>,
@@ -32,21 +32,17 @@ mod game {
             Ok(())
         }
     }
-    fn frame(
-        game: &Game,
-        spring: &mut Spring<'_, RulesSynced>,
-        query: &GameFrameQuery,
-    ) -> Result<GameFrameResult> {
+    fn frame(game: &Game, spring: &mut Spring<'_, RulesSynced>, game_frame: i32) -> Result<()> {
         if !game.seen.replace(true) {
             let frame = spring.game().get_game_frame()?;
             assert_eq!(
                 ((frame.high16 << 16) | (frame.low16 & 0xffff)) as i32,
-                query.game_frame
+                game_frame
             );
             assert!(spring.units_query().get_all_units()?.is_empty());
             assert!(spring.messages().echo("[ScopedSdkGame] callin", "")?);
         }
-        Ok(GameFrameResult::default())
+        Ok(())
     }
     spring_sdk::export_module!(GAME, RulesSynced, Game);
     spring_sdk::export_game_frame!(GAME, frame);

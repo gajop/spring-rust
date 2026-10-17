@@ -1,217 +1,112 @@
-# Scoped Rust SDK: native and Wasm
+# One Rust SDK for native and Wasm
 
-Status: opt-in implementation on `sdk-unification`, separate from `rust-wip`.
-Production games and menus have not been migrated. The shared API is the new
-`spring-sdk` crate; existing `spring`, `spring-addons` and `spring-native` users
-keep their APIs.
+The optional `spring-sdk` crate lives on `sdk-unification`, separate from
+`rust-wip`. Existing games, SpringBoard and both existing menus keep their
+current APIs. Native automatic loading currently supports **menus only**.
 
-## What is unified
-
-The generator emits one public callout surface from the normalized API model:
-**1,425 methods**, with real native and Wasm adapters. Strict generation fails
-if a method needs an adapter. It also generates shared owned query/result
-handlers for every canonical callin and its aliases. Initialization and shutdown
-are provided by the module entry wrapper. This coverage describes executable
-adapters, not exhaustive behavioural verification of 1,425 engine functions.
+## Using it
 
 ```rust
 fn update(
     app: &App,
     spring: &mut Spring<'_, Menu>,
-    query: &UpdateQuery,
-) -> Result<UpdateResult> {
-    app.update(spring, query.delta_seconds)?;
-    Ok(UpdateResult::default())
+    delta_seconds: f32,
+) -> Result<()> {
+    app.update(spring, delta_seconds)
 }
+spring_sdk::export_update!(APP, update);
 ```
 
-Native code calls the actual `NativeInterface` tables with native C query/result
-structures. It does not emulate Wasm memory, pointers or import trampolines.
-Wasm uses the existing Core imports and reviewed typed projections. Missing
-native tables/functions return `NotAvailable`; adapters do not fabricate
-successful engine results.
+Handlers take ordinary arguments: `&str` for strings, slices for lists,
+`Float3` for positions and a command struct for commands. They return
+`Result<()>`, a value such as `Result<bool>`/`Result<String>`, or a tuple for
+multiple answers. ABI query/result structs, dummy arguments and redundant
+lengths stay inside the adapters.
 
-Public values use semantic Rust records, strings and vectors on both targets.
-Native output strings/lists are copied before another host call can reuse its
-scratch storage. Native input arenas keep nested strings, records and buffers
-alive through the complete synchronous call. Callin queries and retained event
-arguments are copied before user code runs, including before reentry.
+`spring` gives the handler access to engine calls, such as
+`spring.units_query().get_all_units()`. Native code calls the C API tables;
+Wasm code uses Core-Wasm imports. Both expose the same Rust-facing API.
 
-The flat generated surface retains existing semantic conventions, including
-code-only `ApiError` and some redundant count fields in callin records. It is
-not a claim that every historical engine API now has ideal ergonomics.
+## Compile time or runtime?
 
-## Spring references and admission
-
-`Spring<'call, E>` is an explicit scoped engine reference. API families are
-obtained from it, for example `spring.units_query()` and `spring.rml_ui()`.
-Neither it nor an API-family handle can escape its callin or be sent/shared
-with a worker thread. A higher-ranked scope lifetime and invariant lifetime
-marker enforce this; compile-fail tests cover both escape and worker access.
-
-Environment markers are sealed: rules synced/unsynced, gaia synced/unsynced,
-UI, menu and intro. Generated capability bounds follow the audited loader
-matrix. A synced handle cannot draw; a UI handle cannot call synced unit
-mutation functions. Capability groups represent sets of environments, rather
-than a guarantee that every method in a group performs the same kind of work.
-Callin entry additionally checks the handler's environment mask.
-
-The module owns admission authority and passes a fresh Spring reference into
-each handler and retained callback. Native authority records the initialization
-thread, interface pointer and liveness. Each operation checks them. A foreign
-retained callback executes no user handler and reports an error back to the
-originating module's next scope boundary.
-
-`ModuleContext::from_native` / `from_wasm` are unsafe admission boundaries for
-integration code, not an ambient escape hatch for applications. Their caller
-must establish the actual host environment and interface lifetime.
-
-The native module factory currently admits **Menu only**. The standalone loader
-checks `NativeModuleEnvironment`; the legacy in-game loader rejects marked SDK
-modules. Unmarked legacy modules retain their loading contract. Native rules/UI
-and a mixed tools environment require an explicit host dispatch and visibility
-contract before admission is enabled. Native synced gameplay is not being
-introduced or claimed deterministic by this change.
-
-## Lifecycle and reentry
-
-The factory exports native initialization/shutdown, the environment marker,
-Wasm callback dispatch and shared callin wrappers. New Wasm modules opt into
-`spring:module/initialize()`. The host invokes it once after validation, binding
-and dispatch-plan construction, before the first callin. It applies the normal
-execution budget, UI visibility and Rml owner scope. Initialization retains the
-engine's existing recursive registry lock so another loading/frontend thread
-cannot destroy the host during entry; same-thread callbacks reenter immediately.
-Normal cached callin dispatch does not acquire that startup lock.
-Legacy modules without this export keep their
-lifecycle. Initialization failure clears that host's Rml contexts and rejects
-the module.
-
-Module handlers take `&Module`, not a module-wide `&mut Module`. The runtime
-clones an `Rc` before entry and holds no slot/registry borrow across user code
-or a callout. Nested callins therefore enter immediately, with their own Spring
-scope. The SDK does not automatically queue mutations or replace immediate
-answers with neutral defaults.
-
-Application state still needs ordinary Rust borrowing discipline. Use separate
-`Resource`s, `RefCell`s, `Cell`s or immutable snapshots, and end conflicting
-borrows before callouts which can reenter that state. Passing Spring does not
-make overlapping mutable game-state borrows valid. The retained callback API
-uses `Fn`; the same listener can reenter itself when its explicitly borrowed
-state permits it. A conflicting borrow fails visibly. Synchronous batch APIs
-accept `FnMut`; recursively invoking that same active closure is rejected,
-while nested independent callbacks remain supported.
-
-Native panics are caught before crossing C ABI boundaries. A panic in a
-synchronous host callback is resumed only after host cleanup returns, then
-contained by the module boundary. Retained callback errors/panics are surfaced
-at the next API/scope boundary. An unhandled callin failure poisons the module
-and rejects subsequent handlers. Native builds require `panic=unwind`;
-`panic=abort` is rejected. Wasm entry failures trap and the engine's normal
-fault handling removes the module.
-
-## Threads and rendering
-
-A mutable Spring reference controls use of that token; it is not an exclusive
-Rust borrow of all engine state. A Spring reference is admission authority, **not a mutex and not permission to
-call the engine from arbitrary threads**. Current native SDK access stays on
-the admitting engine thread. Workers can receive owned snapshots and return
-owned results through ordinary Rust channels. Engine references, API-family
-handles and Rml binding identities stay on the engine thread.
-
-Rendering still has an engine draw-phase contract. Environment bounds do not
-prove that a particular callin is inside the appropriate GL pass. Use the
-render callins for drawing/readback. The fixture captures its image from
-`DrawScreenPost`, after Rml rendering.
-
-Legacy `NativeInterfaceRef` threading assumptions are unchanged. This SDK does
-not retroactively make existing native modules or SpringBoard thread-safe.
-A future tools/native-game admission design must specify thread ownership,
-visibility, per-thread host state and which callouts can run concurrently.
-In particular, native game loading and later simulation/render entries may use
-different engine threads; merely remembering the initialization thread would
-be insufficient for that future factory.
-
-## Shared Rml layer
-
-`spring_sdk::rml` provides one implementation of `DataModel`, `Variable<T>`,
-`Rows`, `EventBinding`, `Color`, `Pixels` and `Percent`. Scalars include bool,
-i32, f32 and String. Bindings own identities and values rather than Spring
-references; every operation requires a fresh scoped reference from the same
-module. Rows validate schema and complete row width before mutation.
-
-Closing a model invalidates its typed bindings before a host call can reenter
-one of them. Cleanup requiring engine access is explicit (`close` / `unbind`);
-Rust `Drop` does not call the engine through a stale reference. Module teardown
-cancels Rust callbacks, and the engine clears owner contexts/listeners before
-unloading the native library or Wasm instance. Low-level generated handle APIs
-remain available; callers using them directly must manage their own logical
-binding lifetime.
-
-Rml numeric expression literals arrive as floating-point values. Event schemas
-must match actual argument types; the fixture checks a UTF-8 string and f32
-argument rather than silently coercing a mismatched integer schema.
-
-## Compatibility and scope
-
-| Consumer | Current impact |
+| Mistake or condition | Check |
 | --- | --- |
-| Seven SpringCabal Wasm games | Keep `spring` / `spring-addons`; no source migration |
-| SpringCabal menu | Keeps its existing SDK and RML; no native conversion |
-| Other downstream game and menu | Keep existing SDK and RML; no source migration |
-| SpringBoard | Keeps `spring-native`; its god-mode tuple compile repair is independent |
-| New SDK menu fixture | One Rust/RML source builds as native and Wasm |
+| Synced code tries to draw | Compile time |
+| UI code tries to change synced unit state | Compile time |
+| Handler exported for the wrong environment | Compile time |
+| Engine reference saved past its callin or sent to a worker | Compile time |
+| Wrong native interface version | Runtime, during initialization |
+| Native callback on the wrong thread | Runtime, before user code runs |
+| Use after shutdown or typed Rml model close | Runtime |
+| Team permissions, LOS and engine state | Existing engine runtime checks |
 
-The loader audit also fixes missing menu/intro registrations when a function
-already matched an in-game provider. Registrations are merged by provider and
-function, so unrelated functions do not gain standalone access. For example,
-menu config reads become available, while `GetGameFrame` stays excluded from
-Menu. Existing wire routes remain unchanged. Eight previously unregistered
-borrowed transports are added; a regression test protects the existing
-length-prefixed string route from replacement by the NUL-terminated route.
-The legacy generated string-result macros also receive a Rust 2024 unsafe
-pointer-expression fix.
+Rust types distinguish rules synced/unsynced, gaia synced/unsynced, UI, menu
+and intro. The engine still validates a compiled module's declared environment
+when loading it; a loaded file need not have been written using this SDK.
 
-This is the shared **core SDK**, not automatic migration of every convenience
-layer. Existing addons, command queues, CUS and job-extension helpers remain
-on their legacy integrations. A native tools/game factory and migration of
-those helpers need follow-up design/work. The existing menus are not converted,
-and room discovery, readiness/reconnect UX and production native-menu packaging
-are separate work.
+The native adapter checks for null API tables/function pointers. This covers
+incomplete test interfaces and invalid integrations. No adapter is intentionally
+unimplemented. A matching, fully initialized engine should provide the required
+entries. A missing entry returns `NotAvailable` and should be investigated.
 
-## Verification and trying it
+## Reentry and threads
 
-The crate tests cover scratch ownership, thread rejection, immediate reentry,
-borrow conflicts, panic cleanup, callback cancellation and typed Rml lifetime/
-schema checks. A generated fixture expands every callin export on native and
-Wasm, including strings, records and lists. Native tests also run as Windows
-GNU executables under Wine; this does not replace a native Windows test.
+Engine calls can immediately call back into the module. The SDK preserves
+that behavior, without queuing calls or returning invented default answers.
 
-The repository-owned [menu fixture](../../../test/wasm_api/data/scoped_sdk_menu/README.md)
-checks real Rml rendering, typed values/events, same-listener reentry,
-two generated-map game launches/returns, and teardown on both transports.
-Its native and Wasm screenshots must have visible panel/title colors and
-identical pixels. A separate RulesSynced guest verifies initialization, a real
-game-frame handler and shutdown during those launches. Callback readers are
-linked only when registered, so the generic dispatcher does not introduce
-frontend Rml imports into a synced module. A negative run deliberately fails
-initialization; an independent probe checks that the failed owner's context
-is gone and its name can be reused. Both transports must reject the module
-before activation and exit normally. The fixtures contain no downstream game
-assets or source.
+Handlers receive `&App` rather than one `&mut App` covering the entire module.
+Otherwise a nested callin could create a second mutable reference to the same
+state. Use separate state fields with `Cell`, `RefCell` or existing resource
+helpers, and release conflicting borrows before reentrant engine calls.
 
-Recorded fixture results and rendered screenshots are retained in
-[data/scoped-sdk-2026-10-17](data/scoped-sdk-2026-10-17/results.json)
-([native](data/scoped-sdk-2026-10-17/native.png),
-[Wasm](data/scoped-sdk-2026-10-17/wasm.png)). Both positive and failed-initialization
-runs exit zero. Legacy compatibility checks pass for all seven Cabal games,
-both existing menus, the downstream game workspace and SpringBoard; its native
-plugin also builds. These are compile/build checks, not full gameplay tests for
-every downstream game. The SDK engine passes all 38 CTest suites. Legacy
-native parity and all 429 selected synced Wasm probes match their Lua reference;
-render-only and other excluded probes are not counted. Workspace tests, the
-all-crate native/Wasm build check, SDK Clippy on both targets and generated
-artifact reproducibility checks pass.
+Arguments and engine results are copied before user code runs or another call
+can overwrite engine scratch storage. No SDK module/callback-registry borrow
+is held across user code. The same Rml listener can reenter if its application
+state allows it; a synchronous `FnMut` callback rejects recursion into itself.
 
-Use a locally tested SDK engine for this fixture. Packaging downstream games
-continues to consume independently built engine releases.
+Spring references stay on the engine thread. Workers receive copied data and
+send results back. This does not enable arbitrary worker-thread engine calls
+or change SpringBoard's existing threading assumptions. Drawing still belongs
+in the appropriate draw callin.
+
+Native panics are caught before crossing the C ABI; native builds require
+`panic=unwind`. Failed handlers stop subsequent use of the module. Wasm failures
+trap and follow the engine's module-fault handling.
+
+## Rml and loading
+
+Typed Rml variables, rows and events share one implementation. Their operations
+take the current Spring reference. Closing a model invalidates its bindings.
+Use explicit `close`/`unbind`; Rust `Drop` makes no engine calls. Unloading a
+module also removes its remaining UI resources.
+
+New Wasm modules initialize before normal callins, with the engine's Rml
+ownership and execution limits set. Initialization retains the existing
+recursive loader lock to prevent concurrent unload; same-thread callbacks can
+reenter. Failure rejects the module and removes its UI. Existing Wasm modules
+keep their startup path.
+
+## Compatibility and remaining work
+
+All seven Cabal games, both existing menus, the other game workspace and
+SpringBoard compile against the branch's existing crates. SpringBoard's native
+plugin builds too. Its god-mode compile fix is separate. These are build
+checks, not full gameplay testing of every game.
+
+The SDK has adapters for all 1,425 callouts; this is not exhaustive behavioral
+testing. All 38 engine suites and legacy native/Wasm parity checks pass,
+including 429 selected synced Wasm probes. SDK tests also run under Wine.
+
+The [menu fixture](../../../test/wasm_api/data/scoped_sdk_menu/README.md) uses
+one Rust/RML source for native and Wasm. It tests typed events, reentry, two
+game launches and failed-initialization cleanup. Both render identical pixels:
+[results](data/scoped-sdk-2026-10-17/results.json),
+[native](data/scoped-sdk-2026-10-17/native.png),
+[Wasm](data/scoped-sdk-2026-10-17/wasm.png).
+
+Still separate: production native-menu conversion, discovery/rooms/reconnect
+UI, and porting the remaining addons, command queues, CUS and job helpers.
+Native game/tools loading needs an explicit simulation/render-thread design;
+the initialization thread alone cannot determine where later callins may run.
+Native Windows gameplay remains untested. Packaging keeps using independently
+built engine releases.
