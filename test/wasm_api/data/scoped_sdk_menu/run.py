@@ -204,7 +204,8 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
                 os.killpg(process.pid, signal.SIGKILL)
                 process.wait()
             exit_code = 124
-    log = (write / "infolog.txt").read_text(errors="replace")
+    log = (output / "stdout.log").read_text(errors="replace") + "\n"
+    log += (write / "infolog.txt").read_text(errors="replace")
     marker = (
         ("Successfully loaded native module WasmMenu/NativeMenu.dll" if wine else "Successfully loaded native module WasmMenu/libNativeMenu.so")
         if transport == "native"
@@ -289,6 +290,9 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
     if fail_game_init:
         failures = [line for line in failures if "failed to initialize" not in line.lower()
                     and "core wasm sdk initialization failed" not in line.lower()]
+        for forbidden in ["[ScopedSdkGame] initialized", "[ScopedSdkGame] callin", "[ScopedSdkGame] draw", "[ScopedSdkGame] shutdown"]:
+            if forbidden in log:
+                failures.append(f"failed game module received user code: {forbidden}")
     else:
         caches = sorted((write / "cache/paths").glob("*.zip"))
         if not caches:
@@ -301,9 +305,6 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
                         failures.append(f"invalid path-cache CRC: {cache.name}/{bad}")
             except (OSError, zipfile.BadZipFile) as error:
                 failures.append(f"invalid path cache {cache.name}: {error}")
-        for forbidden in ["[ScopedSdkGame] initialized", "[ScopedSdkGame] callin", "[ScopedSdkGame] draw", "[ScopedSdkGame] shutdown"]:
-            if forbidden in log:
-                failures.append(f"failed game module received user code: {forbidden}")
     result = {
         "transport": transport,
         "exit": exit_code,
@@ -332,11 +333,13 @@ def main() -> int:
     )
     parser.add_argument("--wine", type=Path, help="Wine loader for a Windows engine; uses the caller's dedicated Wine environment")
     parser.add_argument("--all-game", action="store_true", help="test All native/Wasm game loading, terrain edits and rendering")
-    parser.add_argument("--fail-game-init", action="store_true", help="verify an All game module returning an initialization error receives no later callins")
+    parser.add_argument("--fail-game-init", action="store_true", help="verify a native All game returning an initialization error receives no later callins")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.fail_game_init and (not args.all_game or args.fail_init):
         parser.error("--fail-game-init requires --all-game and a successful menu")
+    if args.fail_game_init and args.transport != "native":
+        parser.error("--fail-game-init requires --transport native; Wasm game initialization errors abort loading")
     transports = ["native", "wasm"] if args.transport == "both" else [args.transport]
     # Cargo switches the same artifact between normal and fail-init features.
     # Hold the fixture lock through staging so concurrent invocations cannot

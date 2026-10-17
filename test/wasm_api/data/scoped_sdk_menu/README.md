@@ -82,6 +82,8 @@ Warnings and errors fail normal runs, including before the engine log opens.
 the game's initializer on both launches. The menu must still recover and quit
 normally. The rejected game must receive no later callins. This also catches
 unloading its library before the loading thread has run its TLS destructors.
+This recovery check is native-only: a Wasm game initialization error aborts game
+loading under the existing engine policy.
 
 `--wine /path/to/wine64 --engine /path/to/spring.exe` builds the native fixture
 for `x86_64-pc-windows-gnu` and runs both backends with the caller's dedicated
