@@ -176,7 +176,8 @@ impl<E: Environment, T: Module<E>> ModuleSlot<E, T> {
     ) -> Result<R> {
         self.invoke_for_environment::<MASK, _>(|module, spring| {
             #[cfg(not(target_arch = "wasm32"))]
-            let advance = crate::jobs::native::is_phase::<E>(PHASE);
+            let advance = crate::jobs::native::is_phase::<E>(PHASE)
+                && !spring.engine.owner.jobs.borrow().advancing();
             #[cfg(not(target_arch = "wasm32"))]
             if advance {
                 let deliveries = spring.engine.owner.jobs.borrow_mut().begin()?;
