@@ -1015,6 +1015,11 @@ void CGame::KillLua(bool dtor)
 	LOG("[Game::%s][0] dtor=%d loadscreen=%p", __func__, dtor, loadscreen);
 	CLoadScreen::DeleteInstance();
 
+	// Module shutdown restores UI state and releases sound/Rml resources. Do it
+	// before their host services disappear, rather than in member destruction.
+	if (nativeInterfaceSystem != nullptr)
+		nativeInterfaceSystem->ShutdownModules();
+
 	// kill LuaUI here, various handler pointers are invalid in ~GuiHandler
 	LOG("[Game::%s][1] dtor=%d luaUI=%p", __func__, dtor, luaUI);
 	CLuaUI::FreeHandler();
