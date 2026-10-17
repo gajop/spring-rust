@@ -202,6 +202,7 @@ pub fn wasm_boundary<R>(result: Result<R>) -> R {
 #[cfg(not(target_arch = "wasm32"))]
 thread_local! {
     static ERROR:RefCell<crate::__sys::Error>=const {RefCell::new(crate::__sys::Error {code:0,message:core::ptr::null()})};
+    static ERROR_MESSAGE:RefCell<std::ffi::CString>=RefCell::new(std::ffi::CString::default());
 }
 /// Error storage belongs to this thread and remains valid until the next
 /// callin error is returned. The host reads it immediately at the boundary.
@@ -213,7 +214,15 @@ pub fn error_pointer(result: Result<()>) -> *const crate::__sys::Error {
         Err(error) => ERROR.with(|slot| {
             let mut slot = slot.borrow_mut();
             slot.code = error.code;
-            slot.message = c"spring-sdk module callin failed".as_ptr();
+            ERROR_MESSAGE.with(|message| {
+                let mut message = message.borrow_mut();
+                *message = std::ffi::CString::new(format!(
+                    "spring-sdk module callin failed (error code {})",
+                    error.code
+                ))
+                .unwrap();
+                slot.message = message.as_ptr();
+            });
             &*slot as *const _
         }),
     }
