@@ -18,6 +18,13 @@ pub trait Widget<G = (), E: spring::capabilities::Common = spring::Ui>:
     fn shutdown(&self, _ctx: &AddonContext<'_, G, E>) {}
 
     fn update(&self, _ctx: &AddonContext<'_, G, E>, _dt: f32) {}
+    fn job_result(
+        &self,
+        _ctx: &AddonContext<'_, G, E>,
+        _id: spring::jobs::JobId,
+        _result: spring::jobs::JobResult<'_>,
+    ) {
+    }
     fn unit_created(
         &self,
         _ctx: &AddonContext<'_, G, E>,
@@ -259,6 +266,21 @@ impl<G, E: spring::capabilities::Common> WidgetHandler<G, E> {
             for (i, widget) in self.widgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     widget.update(ctx, dt);
+                }
+            }
+        });
+    }
+
+    pub fn job_result(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        id: spring::jobs::JobId,
+        result: spring::jobs::JobResult<'_>,
+    ) {
+        self.dispatch(spring, "JobResult", |ctx| {
+            for (i, widget) in self.widgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    widget.job_result(ctx, id, result);
                 }
             }
         });

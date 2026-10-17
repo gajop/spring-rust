@@ -45,3 +45,10 @@ engine cleanup handles resources still owned by an unloaded module.
 
 Run the [same-source live menu proof](../../../test/wasm_api/data/scoped_sdk_menu/README.md)
 for a working integration, including the optional native/Wasm All game test.
+
+Pure workers use `export_jobs!(APP, { DOUBLE => ("double", double) })` and
+`spring.jobs().submit(DOUBLE, &input)`. Implement `Module::job_result` to receive
+ordered results with Spring. Export Update for local modules or GameFrame for
+synced Wasm. Native uses a bounded thread pool; Wasm uses fresh private worker
+instances. Workers take owned input snapshots and must not access mutable
+globals or engine functions. See the design notes for limits and delivery timing.

@@ -383,6 +383,11 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
             let result_type = builder.public_result(result_record)?;
             let pack_result = builder.pack_result(result_record);
             let query_name = if arguments.is_empty() { "_" } else { "query" };
+            let entry = match native_name {
+                "GameFrame" => format!("invoke_tick_for_environment::<{environment_mask},1,_>"),
+                "Update" => format!("invoke_tick_for_environment::<{environment_mask},2,_>"),
+                _ => format!("invoke_for_environment::<{environment_mask},_>"),
+            };
             let mut replace = |tokens: TokenStream| -> Result<TokenStream> {
                 let args =
                     syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated
@@ -402,7 +407,7 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
                     bail!("{native_name}: {} leftover query args", args.len());
                 }
                 let invoke = format!(
-                    "let value:$crate::types::callins::{result_type}=$crate::module::wasm_boundary($slot.with(|slot|slot.invoke_for_environment::<{environment_mask},_>(|module,spring| {{let {query_name}={query}; let returned=$handler(module,spring{invoke_args})?; Ok({pack_result})}}))); ",
+                    "let value:$crate::types::callins::{result_type}=$crate::module::wasm_boundary($slot.with(|slot|slot.{entry}(|module,spring| {{let {query_name}={query}; let returned=$handler(module,spring{invoke_args})?; Ok({pack_result})}}))); ",
                     result_type = callin.result
                 );
                 let expr = if let Some(buffer) = buffer {
@@ -445,7 +450,7 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
             // Add native C exports to the same macro expansion. String-buffer
             // capacity is only a Wasm transport concern.
             let native = format!(
-                "#[cfg(not(target_arch=\"wasm32\"))] #[unsafe(no_mangle)] pub unsafe extern \"C\" fn {native_name}(_interface:*const $crate::__sys::NativeInterface,data:*mut core::ffi::c_void,query:*const $crate::__sys::{query},result:*mut $crate::__sys::{result}) {{ let Some(result)=(unsafe {{result.as_mut()}}) else {{return;}}; *result=Default::default(); result.error=$crate::module::error_pointer(unsafe {{$slot.with_host(|slot| {{slot.validate_identity(data)?; slot.invoke_for_environment::<{environment_mask},_>(|module,spring| {{let {query_name}=unsafe {{$crate::__native_callins::decode_{decode}(query)}}?;let returned=$handler(module,spring{invoke_args})?;let value={pack_result};$crate::__native_callins::encode_{encode}(&value,result)}})}})}}); }}",
+                "#[cfg(not(target_arch=\"wasm32\"))] #[unsafe(no_mangle)] pub unsafe extern \"C\" fn {native_name}(_interface:*const $crate::__sys::NativeInterface,data:*mut core::ffi::c_void,query:*const $crate::__sys::{query},result:*mut $crate::__sys::{result}) {{ let Some(result)=(unsafe {{result.as_mut()}}) else {{return;}}; *result=Default::default(); result.error=$crate::module::error_pointer(unsafe {{$slot.with_host(|slot| {{slot.validate_identity(data)?; slot.{entry}(|module,spring| {{let {query_name}=unsafe {{$crate::__native_callins::decode_{decode}(query)}}?;let returned=$handler(module,spring{invoke_args})?;let value={pack_result};$crate::__native_callins::encode_{encode}(&value,result)}})}})}}); }}",
                 query = callin.query,
                 result = callin.result,
                 decode = ident(&callin.query),

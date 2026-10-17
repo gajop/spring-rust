@@ -26,7 +26,13 @@ def stage_cus_unit(game: Path) -> None:
     (game / "gamedata/unitdefs.lua").write_text(
         '-- This file is part of the Spring engine (GPL v2 or later), see LICENSE.html\n'
         'return {sdk_probe = {name="SDK probe", objectName="sdk_probe.s3o", '
-        'script="sdk_probe.lua", footprintX=1, footprintZ=1, maxDamage=100}}\n'
+        'script="sdk_probe.lua", footprintX=1, footprintZ=1, maxDamage=100, '
+        'power=1, explodeAs="sdk_probe_death", selfDestructAs="sdk_probe_death"}}\n'
+    )
+    (game / "gamedata/weapondefs.lua").write_text(
+        '-- This file is part of the Spring engine (GPL v2 or later), see LICENSE.html\n'
+        'return {sdk_probe_death={name="SDK probe death", weaponType="Cannon", '
+        'range=1, reloadtime=1, weaponVelocity=1, damage={default=0}}}\n'
     )
     objects = game / "objects3d"
     objects.mkdir()
@@ -62,6 +68,13 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
         cwd=ROOT,
         check=True,
     )
+    if not fail_init and not fail_game_init:
+        subprocess.run(
+            ["cargo", "build", "--manifest-path", str(FIXTURE / "worker/Cargo.toml"),
+             "--release", "--target", "wasm32-unknown-unknown",
+             *(["--features", "all"] if all_game else [])],
+            cwd=ROOT, check=True,
+        )
     helper = "probe" if fail_init else "game"
     subprocess.run(
         [
@@ -109,6 +122,14 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
             (wasm / "manifest.txt").write_text(
                 f"module(scoped-sdk-game, LuaRules/wasm/scoped_sdk_game.wasm, {environment}, 0, 1.0.0)\n"
             )
+    if not fail_init and not fail_game_init:
+        wasm = game / "LuaRules/wasm"
+        wasm.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(FIXTURE / "worker/target/wasm32-unknown-unknown/release/scoped_sdk_worker.wasm",
+                     wasm / "scoped_sdk_worker.wasm")
+        with (wasm / "manifest.txt").open("a") as manifest:
+            environment = "all" if all_game else "rules-synced"
+            manifest.write(f"module(scoped-sdk-worker, LuaRules/wasm/scoped_sdk_worker.wasm, {environment}, 0, 1.0.0)\n")
     for name in ["base", "fonts"]:
         shutil.copytree(engine.parent / name, output / name)
     if transport == "native":
@@ -196,6 +217,7 @@ def run(engine: Path, transport: str, output: Path, fail_init: bool = False, all
         "[RmlUiMenuTransitionGame] returning to menu",
         "[ScopedSdkGame] initialized",
         "[ScopedSdkGame] callin",
+        "[ScopedSdkGame] jobs passed",
         "[ScopedSdkGame] shutdown",
     ]
     if fail_game_init:

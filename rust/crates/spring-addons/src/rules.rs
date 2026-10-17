@@ -24,6 +24,13 @@ pub trait Gadget<G = (), E: spring::capabilities::Common = spring::RulesSynced>:
     fn shutdown(&self, _ctx: &AddonContext<'_, G, E>) {}
 
     fn game_frame(&self, _ctx: &AddonContext<'_, G, E>, _frame: i32) {}
+    fn job_result(
+        &self,
+        _ctx: &AddonContext<'_, G, E>,
+        _id: spring::jobs::JobId,
+        _result: spring::jobs::JobResult<'_>,
+    ) {
+    }
     fn handle_lua_msg(
         &self,
         _ctx: &AddonContext<'_, G, E>,
@@ -191,6 +198,21 @@ impl<G, E: spring::capabilities::Common> GadgetHandler<G, E> {
             for (i, gadget) in self.gadgets.iter().enumerate() {
                 if self.enabled[i].get() {
                     gadget.game_frame(ctx, frame);
+                }
+            }
+        });
+    }
+
+    pub fn job_result(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        id: spring::jobs::JobId,
+        result: spring::jobs::JobResult<'_>,
+    ) {
+        self.dispatch(spring, "JobResult", |ctx| {
+            for (i, gadget) in self.gadgets.iter().enumerate() {
+                if self.enabled[i].get() {
+                    gadget.job_result(ctx, id, result);
                 }
             }
         });

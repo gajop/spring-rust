@@ -164,6 +164,7 @@ impl<E: Environment> ModuleContext<E> {
                 unsynced_rng: Cell::new(None),
                 panic: Default::default(),
                 foreign_callback: Default::default(),
+                jobs: Default::default(),
             }),
             environment: PhantomData,
             affinity: PhantomData,
@@ -232,6 +233,8 @@ impl<E: Environment> Drop for ModuleContext<E> {
             .expect("module context dropped outside engine entry");
         self.owner.alive.set(false);
         callbacks::clear_owner(&self.owner);
+        #[cfg(not(target_arch = "wasm32"))]
+        self.owner.jobs.borrow_mut().shutdown();
     }
 }
 
@@ -248,6 +251,8 @@ struct Authority {
     panic: std::cell::RefCell<Option<Box<dyn core::any::Any + Send>>>,
     #[cfg(not(target_arch = "wasm32"))]
     foreign_callback: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    #[cfg(not(target_arch = "wasm32"))]
+    jobs: std::cell::RefCell<jobs::native::State>,
 }
 
 // Native access to Cells is serialized by gate. Authority never escapes the
@@ -420,6 +425,7 @@ pub mod commands;
 pub mod cus;
 pub mod default_interface;
 mod exports;
+pub mod jobs;
 pub mod module;
 #[cfg(not(target_arch = "wasm32"))]
 mod native;

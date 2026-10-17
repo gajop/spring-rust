@@ -1,4 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+#[path = "../../workers.rs"]
+mod workers;
 mod game {
     #[cfg(feature = "all")]
     use spring_sdk::All as GameEnvironment;
@@ -51,6 +53,7 @@ mod game {
     struct Game {
         seen: Cell<bool>,
         last_frame: Cell<i32>,
+        job_results: Cell<u32>,
         #[cfg(feature = "all")]
         drawn: Cell<bool>,
         #[cfg(not(target_arch = "wasm32"))]
@@ -109,6 +112,7 @@ mod game {
             Ok(Self {
                 seen: Cell::new(false),
                 last_frame: Cell::new(-1),
+                job_results: Cell::new(0),
                 #[cfg(feature = "all")]
                 drawn: Cell::new(false),
                 #[cfg(not(target_arch = "wasm32"))]
@@ -122,9 +126,35 @@ mod game {
             })
         }
         fn shutdown(&self, spring: &mut Spring<'_, GameEnvironment>) -> Result<()> {
+            assert_eq!(self.job_results.get(), 5, "job checks did not finish");
             #[cfg(feature = "all")]
             assert!(self.cus_checked.get(), "CUS live checks did not finish");
             assert!(spring.messages().echo("[ScopedSdkGame] shutdown", "")?);
+            Ok(())
+        }
+        fn job_result(
+            &self,
+            spring: &mut Spring<'_, GameEnvironment>,
+            id: spring_sdk::jobs::JobId,
+            result: core::result::Result<&[u8], spring_sdk::jobs::JobError>,
+        ) -> Result<()> {
+            let count = self.job_results.get() + 1;
+            assert_eq!(id.0, count, "jobs delivered out of submission order");
+            match count {
+                1 => {
+                    assert_eq!(result, Ok(&[6, 8][..]));
+                    spring.jobs().submit(DOUBLE, &[7])?;
+                }
+                2 => assert_eq!(result, Ok(&[10][..])),
+                3 => assert_eq!(result, Ok(&[][..])),
+                4 => assert_eq!(result, Err(spring_sdk::jobs::JobError(4))),
+                5 => {
+                    assert_eq!(result, Ok(&[14][..]));
+                    assert!(spring.messages().echo("[ScopedSdkGame] jobs passed", "")?);
+                }
+                _ => panic!("unexpected job result"),
+            }
+            self.job_results.set(count);
             Ok(())
         }
     }
@@ -134,6 +164,12 @@ mod game {
             "duplicate or out-of-order GameFrame"
         );
         if !game.seen.replace(true) {
+            spring.jobs().submit(DOUBLE, &[3, 4])?;
+            spring
+                .jobs()
+                .submit(DOUBLE.in_wasm_module("scoped-sdk-worker"), &[5])?;
+            spring.jobs().submit(DOUBLE, &[])?;
+            spring.jobs().submit(OVERSIZED, &[])?;
             let frame = spring.game().get_game_frame()?;
             assert_eq!(
                 ((frame.high16 << 16) | (frame.low16 & 0xffff)) as i32,
@@ -240,6 +276,13 @@ mod game {
     spring_sdk::export_draw_screen!(GAME, draw);
     spring_sdk::export_module!(GAME, GameEnvironment, Game);
     spring_sdk::export_game_frame!(GAME, frame);
+    #[cfg(feature = "all")]
+    fn update(_: &Game, _: &mut Spring<'_, GameEnvironment>, _: f32) -> Result<()> {
+        Ok(())
+    }
+    #[cfg(feature = "all")]
+    spring_sdk::export_update!(GAME, update);
+    spring_sdk::export_jobs!(GAME, { DOUBLE => ("double", crate::workers::double), OVERSIZED => ("oversized", crate::workers::oversized) });
     #[cfg(feature = "all")]
     fn scripts(game: &Game) -> &CusHost<ProbeScript, (), GameEnvironment> {
         &game.scripts
