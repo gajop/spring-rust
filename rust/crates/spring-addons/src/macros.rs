@@ -27,8 +27,19 @@ macro_rules! register_unsynced_addons {
 
 #[macro_export]
 #[doc(hidden)]
+macro_rules! __addon_state {
+    ($state_type:ty, $spring:expr) => {
+        Ok::<_, $crate::reexports::ApiError>(<$state_type>::default())
+    };
+    ($state_type:ty, $spring:expr, $create:path) => {
+        $create($spring)
+    };
+}
+
+#[macro_export]
+#[doc(hidden)]
 macro_rules! __addon_module {
-    ($state_type:ty, $setup_fn:path, $environment:ty, $handler:ident, $with_handler:ident $(, $cus:ty)?) => {
+    ($state_type:ty, $setup_fn:path, $environment:ty, $handler:ident, $with_handler:ident $(, $cus:ty)? $(; $create:path)?) => {
         struct __SpringAddonModule {
             handler: $crate::$handler<$state_type, $environment>,
             initialized: ::core::cell::Cell<bool>,
@@ -46,7 +57,8 @@ macro_rules! __addon_module {
                 spring: &mut $crate::reexports::Spring<'_, $environment>,
             ) -> $crate::reexports::Result<Self> {
                 $crate::install_panic_hook();
-                let mut handler = $crate::$handler::new(<$state_type>::default());
+                let state = $crate::__addon_state!($state_type, spring $(, $create)?)?;
+                let mut handler = $crate::$handler::new(state);
                 $setup_fn(&mut handler, spring);
                 Ok(Self {
                     handler,
@@ -94,20 +106,22 @@ macro_rules! __addon_module {
     };
 }
 
+/// Export UI addons. Optional `create: make_state` constructs state with Spring
+/// and returns `Result<State>`. Without it, state uses `Default`.
 #[macro_export]
 macro_rules! export_ui_widgets {
-    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr $(,)?) => {
-        $crate::__impl_ui_exports!($state_type, $setup_fn, $scratch_size, $crate::reexports::Ui);
+    (state: $state_type:ty, $(create: $create:path,)? setup: $setup_fn:path, scratch: $scratch_size:expr $(,)?) => {
+        $crate::__impl_ui_exports!($state_type, $setup_fn, $scratch_size, $crate::reexports::Ui $(; $create)?);
     };
-    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty $(,)?) => {
-        $crate::__impl_ui_exports!($state_type, $setup_fn, $scratch_size, $environment);
+    (state: $state_type:ty, $(create: $create:path,)? setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty $(,)?) => {
+        $crate::__impl_ui_exports!($state_type, $setup_fn, $scratch_size, $environment $(; $create)?);
     };
 }
 
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __impl_ui_exports {
-    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty) => {
+    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty $(; $create:path)?) => {
         #[cfg(target_arch = "wasm32")]
         $crate::reexports::export_callin_scratch!($scratch_size);
         $crate::__addon_module!(
@@ -115,7 +129,7 @@ macro_rules! __impl_ui_exports {
             $setup_fn,
             $environment,
             WidgetHandler,
-            with_widget_handler
+            with_widget_handler $(; $create)?
         );
         fn __spring_addon_update(
             module: &__SpringAddonModule,
@@ -573,37 +587,39 @@ macro_rules! __impl_ui_exports {
     };
 }
 
+/// Export synced addons. Optional `create: make_state` receives Spring and
+/// returns `Result<State>`; otherwise state uses `Default`.
 #[macro_export]
 macro_rules! export_rules_gadgets {
-    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr, cus: $cus:ty $(,)?) => {
+    (state: $state_type:ty, $(create: $create:path,)? setup: $setup_fn:path, scratch: $scratch_size:expr, cus: $cus:ty $(,)?) => {
         $crate::__impl_rules_exports!(
             $state_type,
             $setup_fn,
             $scratch_size,
             $crate::reexports::RulesSynced,
-            $cus
+            $cus $(; $create)?
         );
     };
-    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty, cus: $cus:ty $(,)?) => {
-        $crate::__impl_rules_exports!($state_type, $setup_fn, $scratch_size, $environment, $cus);
+    (state: $state_type:ty, $(create: $create:path,)? setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty, cus: $cus:ty $(,)?) => {
+        $crate::__impl_rules_exports!($state_type, $setup_fn, $scratch_size, $environment, $cus $(; $create)?);
     };
-    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr $(,)?) => {
+    (state: $state_type:ty, $(create: $create:path,)? setup: $setup_fn:path, scratch: $scratch_size:expr $(,)?) => {
         $crate::__impl_rules_exports!(
             $state_type,
             $setup_fn,
             $scratch_size,
-            $crate::reexports::RulesSynced
+            $crate::reexports::RulesSynced $(; $create)?
         );
     };
-    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty $(,)?) => {
-        $crate::__impl_rules_exports!($state_type, $setup_fn, $scratch_size, $environment);
+    (state: $state_type:ty, $(create: $create:path,)? setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty $(,)?) => {
+        $crate::__impl_rules_exports!($state_type, $setup_fn, $scratch_size, $environment $(; $create)?);
     };
 }
 
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __impl_rules_exports {
-    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty $(, $cus:ty)?) => {
+    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty $(, $cus:ty)? $(; $create:path)?) => {
         #[cfg(target_arch = "wasm32")]
         $crate::reexports::export_callin_scratch!($scratch_size);
         $crate::__addon_module!(
@@ -612,7 +628,7 @@ macro_rules! __impl_rules_exports {
             $environment,
             GadgetHandler,
             with_gadget_handler
-            $(, $cus)?
+            $(, $cus)? $(; $create)?
         );
         $(
             fn __spring_addon_cus(module: &__SpringAddonModule) -> &$cus { &module.cus }
@@ -873,25 +889,27 @@ macro_rules! __impl_rules_exports {
     };
 }
 
+/// Export unsynced addons. Optional `create: make_state` receives Spring and
+/// returns `Result<State>`; otherwise state uses `Default`.
 #[macro_export]
 macro_rules! export_rules_unsynced_addons {
-    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr $(,)?) => {
+    (state: $state_type:ty, $(create: $create:path,)? setup: $setup_fn:path, scratch: $scratch_size:expr $(,)?) => {
         $crate::__impl_unsynced_exports!(
             $state_type,
             $setup_fn,
             $scratch_size,
-            $crate::reexports::RulesUnsynced
+            $crate::reexports::RulesUnsynced $(; $create)?
         );
     };
-    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty $(,)?) => {
-        $crate::__impl_unsynced_exports!($state_type, $setup_fn, $scratch_size, $environment);
+    (state: $state_type:ty, $(create: $create:path,)? setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty $(,)?) => {
+        $crate::__impl_unsynced_exports!($state_type, $setup_fn, $scratch_size, $environment $(; $create)?);
     };
 }
 
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __impl_unsynced_exports {
-    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty) => {
+    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty $(; $create:path)?) => {
         #[cfg(target_arch = "wasm32")]
         $crate::reexports::export_callin_scratch!($scratch_size);
         $crate::__addon_module!(
@@ -899,7 +917,7 @@ macro_rules! __impl_unsynced_exports {
             $setup_fn,
             $environment,
             UnsyncedHandler,
-            with_unsynced_handler
+            with_unsynced_handler $(; $create)?
         );
 
         fn __spring_addon_unsynced_game_frame(
