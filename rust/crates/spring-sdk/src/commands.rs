@@ -10,6 +10,8 @@ use std::{
     sync::Mutex,
 };
 
+mod calls;
+
 #[cfg(not(target_arch = "wasm32"))]
 type Action<E> = Box<dyn for<'call> FnOnce(&mut Spring<'call, E>) + Send>;
 #[cfg(target_arch = "wasm32")]
