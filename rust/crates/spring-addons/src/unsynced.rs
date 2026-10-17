@@ -7,20 +7,22 @@ use core::cell::Cell;
 use crate::event::{EventResult, UnitDestroyedEvent, ViewGeometry};
 use crate::runtime::{AddonContext, AddonRuntime};
 
-pub trait UnsyncedAddon<G = ()> {
+pub trait UnsyncedAddon<G = (), E: spring::capabilities::Common = spring::RulesUnsynced>:
+    spring::RetainedCapture
+{
     fn name(&self) -> &'static str;
 
     fn is_enabled(&self) -> bool {
         true
     }
 
-    fn init(&self, _ctx: &AddonContext<'_, G>) {}
-    fn shutdown(&self, _ctx: &AddonContext<'_, G>) {}
-    fn update(&self, _ctx: &AddonContext<'_, G>, _dt: f32) {}
-    fn game_frame(&self, _ctx: &AddonContext<'_, G>, _frame: i32) {}
+    fn init(&self, _ctx: &AddonContext<'_, G, E>) {}
+    fn shutdown(&self, _ctx: &AddonContext<'_, G, E>) {}
+    fn update(&self, _ctx: &AddonContext<'_, G, E>, _dt: f32) {}
+    fn game_frame(&self, _ctx: &AddonContext<'_, G, E>, _frame: i32) {}
     fn unit_created(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _unit_team: i32,
@@ -29,16 +31,16 @@ pub trait UnsyncedAddon<G = ()> {
     }
     fn unit_finished(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _unit_team: i32,
     ) {
     }
-    fn unit_destroyed(&self, _ctx: &AddonContext<'_, G>, _event: &UnitDestroyedEvent) {}
+    fn unit_destroyed(&self, _ctx: &AddonContext<'_, G, E>, _event: &UnitDestroyedEvent) {}
     fn unit_given(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _old_team: i32,
@@ -47,18 +49,25 @@ pub trait UnsyncedAddon<G = ()> {
     }
     fn unit_taken(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _unit_id: i32,
         _unit_def_id: i32,
         _old_team: i32,
         _new_team: i32,
     ) {
     }
-    fn feature_created(&self, _ctx: &AddonContext<'_, G>, _feature_id: i32, _ally_team_id: i32) {}
-    fn feature_destroyed(&self, _ctx: &AddonContext<'_, G>, _feature_id: i32, _ally_team_id: i32) {}
+    fn feature_created(&self, _ctx: &AddonContext<'_, G, E>, _feature_id: i32, _ally_team_id: i32) {
+    }
+    fn feature_destroyed(
+        &self,
+        _ctx: &AddonContext<'_, G, E>,
+        _feature_id: i32,
+        _ally_team_id: i32,
+    ) {
+    }
     fn projectile_created(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _projectile_id: i32,
         _owner_id: i32,
         _weapon_def_id: i32,
@@ -66,49 +75,54 @@ pub trait UnsyncedAddon<G = ()> {
     }
     fn projectile_destroyed(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _projectile_id: i32,
         _owner_id: i32,
         _weapon_def_id: i32,
     ) {
     }
-    fn recv_from_synced(&self, _ctx: &AddonContext<'_, G>, _message: &[u8]) {}
-    fn draw_screen(&self, _ctx: &AddonContext<'_, G>, _width: i32, _height: i32) {}
-    fn draw_genesis(&self, _ctx: &AddonContext<'_, G>) {}
-    fn draw_world(&self, _ctx: &AddonContext<'_, G>) {}
-    fn draw_world_pre_unit(&self, _ctx: &AddonContext<'_, G>) {}
+    fn recv_from_synced(&self, _ctx: &AddonContext<'_, G, E>, _message: &[u8]) {}
+    fn draw_screen(&self, _ctx: &AddonContext<'_, G, E>, _width: i32, _height: i32) {}
+    fn draw_genesis(&self, _ctx: &AddonContext<'_, G, E>) {}
+    fn draw_world(&self, _ctx: &AddonContext<'_, G, E>) {}
+    fn draw_world_pre_unit(&self, _ctx: &AddonContext<'_, G, E>) {}
     fn draw_world_pre_particles(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _draw_above_water: bool,
         _draw_below_water: bool,
         _draw_reflection: bool,
         _draw_refraction: bool,
     ) {
     }
-    fn draw_screen_effects(&self, _ctx: &AddonContext<'_, G>, _width: i32, _height: i32) {}
-    fn draw_unit(&self, _ctx: &AddonContext<'_, G>, _unit_id: i32, _draw_mode: i32) -> EventResult {
+    fn draw_screen_effects(&self, _ctx: &AddonContext<'_, G, E>, _width: i32, _height: i32) {}
+    fn draw_unit(
+        &self,
+        _ctx: &AddonContext<'_, G, E>,
+        _unit_id: i32,
+        _draw_mode: i32,
+    ) -> EventResult {
         EventResult::Ignored
     }
     fn draw_feature(
         &self,
-        _ctx: &AddonContext<'_, G>,
+        _ctx: &AddonContext<'_, G, E>,
         _feature_id: i32,
         _draw_mode: i32,
     ) -> EventResult {
         EventResult::Ignored
     }
-    fn view_resize(&self, _ctx: &AddonContext<'_, G>, _geometry: &ViewGeometry) {}
+    fn view_resize(&self, _ctx: &AddonContext<'_, G, E>, _geometry: &ViewGeometry) {}
 }
 
-pub struct UnsyncedHandler<G> {
+pub struct UnsyncedHandler<G, E: spring::capabilities::Common = spring::RulesUnsynced> {
     pub global: G,
-    addons: Vec<Box<dyn UnsyncedAddon<G>>>,
+    addons: Vec<Box<dyn UnsyncedAddon<G, E>>>,
     enabled: Vec<Cell<bool>>,
-    runtime: AddonRuntime<G>,
+    runtime: AddonRuntime<G, E>,
 }
 
-impl<G> UnsyncedHandler<G> {
+impl<G, E: spring::capabilities::Common> UnsyncedHandler<G, E> {
     pub fn new(global: G) -> Self {
         Self {
             global,
@@ -118,7 +132,7 @@ impl<G> UnsyncedHandler<G> {
         }
     }
 
-    pub fn add(&mut self, addon: Box<dyn UnsyncedAddon<G>>) {
+    pub fn add(&mut self, addon: Box<dyn UnsyncedAddon<G, E>>) {
         let is_enabled = addon.is_enabled();
         self.addons.push(addon);
         self.enabled.push(Cell::new(is_enabled));
@@ -128,16 +142,25 @@ impl<G> UnsyncedHandler<G> {
         &self.global
     }
 
-    pub fn with_context<R>(&self, f: impl FnOnce(&AddonContext<'_, G>) -> R) -> R {
-        self.runtime.callin("external", &self.global, f)
+    pub fn with_context<R>(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        f: impl FnOnce(&AddonContext<'_, G, E>) -> R,
+    ) -> R {
+        self.runtime.callin("external", &self.global, spring, f)
     }
 
-    fn dispatch<R>(&self, callin: &'static str, f: impl FnOnce(&AddonContext<'_, G>) -> R) -> R {
-        self.runtime.callin(callin, &self.global, f)
+    fn dispatch<R>(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        callin: &'static str,
+        f: impl FnOnce(&AddonContext<'_, G, E>) -> R,
+    ) -> R {
+        self.runtime.callin(callin, &self.global, spring, f)
     }
 
-    pub fn init(&self) {
-        self.dispatch("Init", |ctx| {
+    pub fn init(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "Init", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.init(ctx);
@@ -146,8 +169,18 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn set_enabled(&self, name: &str, enabled: bool) {
-        self.dispatch("SetEnabled", |ctx| {
+    pub fn shutdown(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "Shutdown", |ctx| {
+            for (i, addon) in self.addons.iter().enumerate() {
+                if self.enabled[i].get() {
+                    addon.shutdown(ctx);
+                }
+            }
+        });
+    }
+
+    pub fn set_enabled(&self, spring: &spring::Spring<'_, E>, name: &str, enabled: bool) {
+        self.dispatch(spring, "SetEnabled", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if addon.name() == name {
                     if self.enabled[i].replace(enabled) != enabled {
@@ -163,8 +196,8 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn game_frame(&self, frame: i32) {
-        self.dispatch("GameFrame", |ctx| {
+    pub fn game_frame(&self, spring: &spring::Spring<'_, E>, frame: i32) {
+        self.dispatch(spring, "GameFrame", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.game_frame(ctx, frame);
@@ -173,8 +206,8 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn update(&self, dt: f32) {
-        self.dispatch("Update", |ctx| {
+    pub fn update(&self, spring: &spring::Spring<'_, E>, dt: f32) {
+        self.dispatch(spring, "Update", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.update(ctx, dt);
@@ -183,8 +216,15 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn unit_created(&self, unit_id: i32, unit_def_id: i32, unit_team: i32, builder_id: i32) {
-        self.dispatch("UnitCreated", |ctx| {
+    pub fn unit_created(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+        builder_id: i32,
+    ) {
+        self.dispatch(spring, "UnitCreated", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.unit_created(ctx, unit_id, unit_def_id, unit_team, builder_id);
@@ -193,8 +233,14 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn unit_finished(&self, unit_id: i32, unit_def_id: i32, unit_team: i32) {
-        self.dispatch("UnitFinished", |ctx| {
+    pub fn unit_finished(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        unit_id: i32,
+        unit_def_id: i32,
+        unit_team: i32,
+    ) {
+        self.dispatch(spring, "UnitFinished", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.unit_finished(ctx, unit_id, unit_def_id, unit_team);
@@ -203,8 +249,8 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn unit_destroyed(&self, event: &UnitDestroyedEvent) {
-        self.dispatch("UnitDestroyed", |ctx| {
+    pub fn unit_destroyed(&self, spring: &spring::Spring<'_, E>, event: &UnitDestroyedEvent) {
+        self.dispatch(spring, "UnitDestroyed", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.unit_destroyed(ctx, event);
@@ -213,8 +259,15 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn unit_given(&self, unit_id: i32, unit_def_id: i32, old_team: i32, new_team: i32) {
-        self.dispatch("UnitGiven", |ctx| {
+    pub fn unit_given(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        unit_id: i32,
+        unit_def_id: i32,
+        old_team: i32,
+        new_team: i32,
+    ) {
+        self.dispatch(spring, "UnitGiven", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.unit_given(ctx, unit_id, unit_def_id, old_team, new_team);
@@ -223,8 +276,15 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn unit_taken(&self, unit_id: i32, unit_def_id: i32, old_team: i32, new_team: i32) {
-        self.dispatch("UnitTaken", |ctx| {
+    pub fn unit_taken(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        unit_id: i32,
+        unit_def_id: i32,
+        old_team: i32,
+        new_team: i32,
+    ) {
+        self.dispatch(spring, "UnitTaken", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.unit_taken(ctx, unit_id, unit_def_id, old_team, new_team);
@@ -233,8 +293,13 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn feature_created(&self, feature_id: i32, ally_team_id: i32) {
-        self.dispatch("FeatureCreated", |ctx| {
+    pub fn feature_created(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        feature_id: i32,
+        ally_team_id: i32,
+    ) {
+        self.dispatch(spring, "FeatureCreated", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.feature_created(ctx, feature_id, ally_team_id);
@@ -243,8 +308,13 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn feature_destroyed(&self, feature_id: i32, ally_team_id: i32) {
-        self.dispatch("FeatureDestroyed", |ctx| {
+    pub fn feature_destroyed(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        feature_id: i32,
+        ally_team_id: i32,
+    ) {
+        self.dispatch(spring, "FeatureDestroyed", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.feature_destroyed(ctx, feature_id, ally_team_id);
@@ -253,8 +323,14 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn projectile_created(&self, projectile_id: i32, owner_id: i32, weapon_def_id: i32) {
-        self.dispatch("ProjectileCreated", |ctx| {
+    pub fn projectile_created(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        projectile_id: i32,
+        owner_id: i32,
+        weapon_def_id: i32,
+    ) {
+        self.dispatch(spring, "ProjectileCreated", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.projectile_created(ctx, projectile_id, owner_id, weapon_def_id);
@@ -263,8 +339,14 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn projectile_destroyed(&self, projectile_id: i32, owner_id: i32, weapon_def_id: i32) {
-        self.dispatch("ProjectileDestroyed", |ctx| {
+    pub fn projectile_destroyed(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        projectile_id: i32,
+        owner_id: i32,
+        weapon_def_id: i32,
+    ) {
+        self.dispatch(spring, "ProjectileDestroyed", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.projectile_destroyed(ctx, projectile_id, owner_id, weapon_def_id);
@@ -273,8 +355,8 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn recv_from_synced(&self, message: &[u8]) {
-        self.dispatch("RecvFromSynced", |ctx| {
+    pub fn recv_from_synced(&self, spring: &spring::Spring<'_, E>, message: &[u8]) {
+        self.dispatch(spring, "RecvFromSynced", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.recv_from_synced(ctx, message);
@@ -283,8 +365,8 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn draw_screen(&self, width: i32, height: i32) {
-        self.dispatch("DrawScreen", |ctx| {
+    pub fn draw_screen(&self, spring: &spring::Spring<'_, E>, width: i32, height: i32) {
+        self.dispatch(spring, "DrawScreen", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.draw_screen(ctx, width, height);
@@ -293,8 +375,8 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn draw_world(&self) {
-        self.dispatch("DrawWorld", |ctx| {
+    pub fn draw_world(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "DrawWorld", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.draw_world(ctx);
@@ -305,12 +387,13 @@ impl<G> UnsyncedHandler<G> {
 
     pub fn draw_world_pre_particles(
         &self,
+        spring: &spring::Spring<'_, E>,
         draw_above_water: bool,
         draw_below_water: bool,
         draw_reflection: bool,
         draw_refraction: bool,
     ) {
-        self.dispatch("DrawWorldPreParticles", |ctx| {
+        self.dispatch(spring, "DrawWorldPreParticles", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.draw_world_pre_particles(
@@ -325,8 +408,8 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn draw_screen_effects(&self, width: i32, height: i32) {
-        self.dispatch("DrawScreenEffects", |ctx| {
+    pub fn draw_screen_effects(&self, spring: &spring::Spring<'_, E>, width: i32, height: i32) {
+        self.dispatch(spring, "DrawScreenEffects", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.draw_screen_effects(ctx, width, height);
@@ -335,8 +418,8 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn draw_unit(&self, unit_id: i32, draw_mode: i32) -> bool {
-        self.dispatch("DrawUnit", |ctx| {
+    pub fn draw_unit(&self, spring: &spring::Spring<'_, E>, unit_id: i32, draw_mode: i32) -> bool {
+        self.dispatch(spring, "DrawUnit", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() && addon.draw_unit(ctx, unit_id, draw_mode).is_handled() {
                     return true;
@@ -346,8 +429,13 @@ impl<G> UnsyncedHandler<G> {
         })
     }
 
-    pub fn draw_feature(&self, feature_id: i32, draw_mode: i32) -> bool {
-        self.dispatch("DrawFeature", |ctx| {
+    pub fn draw_feature(
+        &self,
+        spring: &spring::Spring<'_, E>,
+        feature_id: i32,
+        draw_mode: i32,
+    ) -> bool {
+        self.dispatch(spring, "DrawFeature", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get()
                     && addon.draw_feature(ctx, feature_id, draw_mode).is_handled()
@@ -359,8 +447,8 @@ impl<G> UnsyncedHandler<G> {
         })
     }
 
-    pub fn draw_world_pre_unit(&self) {
-        self.dispatch("DrawWorldPreUnit", |ctx| {
+    pub fn draw_world_pre_unit(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "DrawWorldPreUnit", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.draw_world_pre_unit(ctx);
@@ -369,8 +457,8 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn draw_genesis(&self) {
-        self.dispatch("DrawGenesis", |ctx| {
+    pub fn draw_genesis(&self, spring: &spring::Spring<'_, E>) {
+        self.dispatch(spring, "DrawGenesis", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.draw_genesis(ctx);
@@ -379,8 +467,8 @@ impl<G> UnsyncedHandler<G> {
         });
     }
 
-    pub fn view_resize(&self, geometry: &ViewGeometry) {
-        self.dispatch("ViewResize", |ctx| {
+    pub fn view_resize(&self, spring: &spring::Spring<'_, E>, geometry: &ViewGeometry) {
+        self.dispatch(spring, "ViewResize", |ctx| {
             for (i, addon) in self.addons.iter().enumerate() {
                 if self.enabled[i].get() {
                     addon.view_resize(ctx, geometry);

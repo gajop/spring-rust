@@ -26,288 +26,521 @@ macro_rules! register_unsynced_addons {
 }
 
 #[macro_export]
-macro_rules! export_ui_widgets {
-    (
-        state: $state_type:ty,
-        setup: $setup_fn:path,
-        scratch: $scratch_size:expr $(,)?
-    ) => {
-        $crate::reexports::export_callin_scratch!($scratch_size);
-        $crate::reexports::export_environment_mask!($crate::reexports::ui::ENVIRONMENT_MASK);
-        $crate::reexports::export_callback_dispatch!(__spring_addon_callback_dispatch);
+#[doc(hidden)]
+macro_rules! __addon_module {
+    ($state_type:ty, $setup_fn:path, $environment:ty, $handler:ident, $with_handler:ident) => {
+        struct __SpringAddonModule {
+            handler: $crate::$handler<$state_type, $environment>,
+            initialized: ::core::cell::Cell<bool>,
+        }
+        impl __SpringAddonModule {
+            fn ensure_initialized(&self, spring: &$crate::reexports::Spring<'_, $environment>) {
+                if !self.initialized.replace(true) {
+                    self.handler.init(spring);
+                }
+            }
+        }
+        impl $crate::reexports::module::Module<$environment> for __SpringAddonModule {
+            fn initialize(
+                spring: &mut $crate::reexports::Spring<'_, $environment>,
+            ) -> $crate::reexports::Result<Self> {
+                $crate::install_panic_hook();
+                let mut handler = $crate::$handler::new(<$state_type>::default());
+                $setup_fn(&mut handler, spring);
+                Ok(Self {
+                    handler,
+                    initialized: ::core::cell::Cell::new(false),
+                })
+            }
+            fn shutdown(
+                &self,
+                spring: &mut $crate::reexports::Spring<'_, $environment>,
+            ) -> $crate::reexports::Result<()> {
+                if self.initialized.get() {
+                    self.handler.shutdown(spring);
+                }
+                Ok(())
+            }
+        }
+        $crate::reexports::export_module!(HANDLER, $environment, __SpringAddonModule);
+        #[allow(dead_code)]
+        pub fn $with_handler<R>(
+            f: impl FnOnce(
+                &$crate::$handler<$state_type, $environment>,
+                &$crate::reexports::Spring<'_, $environment>,
+            ) -> R,
+        ) -> R {
+            HANDLER
+                .with(|slot| {
+                    slot.invoke(|module, spring| {
+                        module.ensure_initialized(spring);
+                        Ok(f(&module.handler, spring))
+                    })
+                })
+                .expect("addon handler is not available")
+        }
+        #[allow(dead_code)]
+        pub fn with_addon_context<R>(
+            f: impl FnOnce(&$crate::AddonContext<'_, $state_type, $environment>) -> R,
+        ) -> R {
+            $with_handler(|handler, spring| handler.with_context(spring, f))
+        }
+        #[allow(dead_code)]
+        pub fn with_global<R>(f: impl FnOnce(&$state_type) -> R) -> R {
+            with_addon_context(|ctx| f(ctx.global()))
+        }
+    };
+}
 
-        $crate::__impl_ui_exports!($state_type, $setup_fn);
+#[macro_export]
+macro_rules! export_ui_widgets {
+    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr $(,)?) => {
+        $crate::__impl_ui_exports!($state_type, $setup_fn, $scratch_size, $crate::reexports::Ui);
+    };
+    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty $(,)?) => {
+        $crate::__impl_ui_exports!($state_type, $setup_fn, $scratch_size, $environment);
     };
 }
 
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __impl_ui_exports {
-    ($state_type:ty, $setup_fn:path) => {
-        $crate::reexports::thread_local! {
-            static HANDLER: ::core::cell::OnceCell<$crate::ui::WidgetHandler<$state_type>> = const {
-                ::core::cell::OnceCell::new()
-            };
-            static CALLBACK_REGISTRY: $crate::ui::UiCallbackRegistry<$state_type> = const {
-                $crate::ui::UiCallbackRegistry::new()
-            };
-        }
-
-        fn __with_widget_handler<R>(
-            f: impl FnOnce(&$crate::ui::WidgetHandler<$state_type>) -> R,
-        ) -> R {
-            HANDLER.with(|cell| {
-                if cell.get().is_none() {
-                    $crate::panic::install_panic_hook();
-                    let mut handler = $crate::ui::WidgetHandler::new(<$state_type>::default());
-                    $setup_fn(&mut handler);
-                    assert!(
-                        cell.set(handler).is_ok(),
-                        "spring-addons widget handler initialized twice"
-                    );
-                    cell.get().unwrap().init();
-                }
-                f(cell.get().unwrap())
+    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty) => {
+        #[cfg(target_arch = "wasm32")]
+        $crate::reexports::export_callin_scratch!($scratch_size);
+        $crate::__addon_module!(
+            $state_type,
+            $setup_fn,
+            $environment,
+            WidgetHandler,
+            with_widget_handler
+        );
+        fn __spring_addon_update(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            dt: f32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.update(spring, dt);
             })
         }
-
-        #[allow(dead_code)]
-        pub fn register_callback(
-            f: impl FnMut(&$state_type) + 'static,
-        ) -> $crate::reexports::callback::RetainedCallback {
-            CALLBACK_REGISTRY.with(|registry| registry.register(f))
+        $crate::reexports::export_update!(HANDLER, __spring_addon_update);
+        fn __spring_addon_unit_created(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            u: i32,
+            d: i32,
+            t: i32,
+            b: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_created(spring, u, d, t, b);
+            })
         }
-
-        #[allow(dead_code)]
-        pub fn unregister_callback(callback: $crate::reexports::callback::RetainedCallback) {
-            CALLBACK_REGISTRY.with(|registry| registry.unregister(callback));
+        $crate::reexports::export_unit_created!(HANDLER, __spring_addon_unit_created);
+        fn __spring_addon_feature_created(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            feature_id: i32,
+            ally_team_id: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.feature_created(spring, feature_id, ally_team_id);
+            })
         }
-
-        #[allow(dead_code)]
-        fn __spring_addon_callback_dispatch(callback_id: u32, user_data: u32) {
-            __with_widget_handler(|handler| {
-                handler.with_context(|ctx| {
-                    let handled = CALLBACK_REGISTRY
-                        .with(|registry| registry.dispatch(ctx.global(), callback_id, user_data));
-                    if !handled {
-                        $crate::log::warn_unhandled_callback(callback_id);
-                    }
-                });
-            });
+        $crate::reexports::export_feature_created!(HANDLER, __spring_addon_feature_created);
+        fn __spring_addon_feature_destroyed(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            feature_id: i32,
+            ally_team_id: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.feature_destroyed(spring, feature_id, ally_team_id);
+            })
         }
-
-        #[allow(dead_code)]
-        pub fn with_widget_handler<R>(
-            f: impl FnOnce(&$crate::ui::WidgetHandler<$state_type>) -> R,
-        ) -> R {
-            __with_widget_handler(f)
+        $crate::reexports::export_feature_destroyed!(HANDLER, __spring_addon_feature_destroyed);
+        fn __spring_addon_unit_destroyed(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            u: i32,
+            d: i32,
+            t: i32,
+            a: i32,
+            ad: i32,
+            at: i32,
+            w: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                let event = $crate::event::UnitDestroyedEvent {
+                    unit_id: u,
+                    unit_def_id: d,
+                    unit_team: t,
+                    attacker_id: a,
+                    attacker_def_id: ad,
+                    attacker_team: at,
+                    weapon_def_id: w,
+                };
+                handler.unit_destroyed(spring, &event);
+            })
         }
-
-        #[allow(dead_code)]
-        pub fn with_global<R>(f: impl FnOnce(&$state_type) -> R) -> R {
-            __with_widget_handler(|handler| handler.with_context(|ctx| f(ctx.global())))
+        $crate::reexports::export_unit_destroyed!(HANDLER, __spring_addon_unit_destroyed);
+        fn __spring_addon_unit_given(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            u: i32,
+            d: i32,
+            old_team: i32,
+            new_team: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_given(spring, u, d, old_team, new_team);
+            })
         }
-
-        #[allow(dead_code)]
-        pub fn with_addon_context<R>(
-            f: impl FnOnce(&$crate::AddonContext<'_, $state_type>) -> R,
-        ) -> R {
-            __with_widget_handler(|handler| handler.with_context(f))
+        $crate::reexports::export_unit_given!(HANDLER, __spring_addon_unit_given);
+        fn __spring_addon_unit_taken(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            u: i32,
+            d: i32,
+            old_team: i32,
+            new_team: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_taken(spring, u, d, old_team, new_team);
+            })
         }
-
-        fn __spring_addon_update(dt: f32) {
-            __with_widget_handler(|handler| handler.update(dt));
+        $crate::reexports::export_unit_taken!(HANDLER, __spring_addon_unit_taken);
+        fn __spring_addon_unit_entered_los(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            u: i32,
+            d: i32,
+            t: i32,
+            a: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_entered_los(spring, u, d, t, a);
+            })
         }
-        $crate::reexports::export_update!(__spring_addon_update);
-
-        fn __spring_addon_unit_created(u: i32, d: i32, t: i32, b: i32) {
-            __with_widget_handler(|handler| handler.unit_created(u, d, t, b));
+        $crate::reexports::export_unit_entered_los!(HANDLER, __spring_addon_unit_entered_los);
+        fn __spring_addon_unit_left_los(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            u: i32,
+            d: i32,
+            t: i32,
+            a: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_left_los(spring, u, d, t, a);
+            })
         }
-        $crate::reexports::export_unit_created_raw!(__spring_addon_unit_created);
-
-        fn __spring_addon_feature_created(feature_id: i32, ally_team_id: i32) {
-            __with_widget_handler(|handler| handler.feature_created(feature_id, ally_team_id));
+        $crate::reexports::export_unit_left_los!(HANDLER, __spring_addon_unit_left_los);
+        fn __spring_addon_unit_entered_radar(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            u: i32,
+            d: i32,
+            t: i32,
+            a: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_entered_radar(spring, u, d, t, a);
+            })
         }
-        $crate::reexports::export_feature_created!(__spring_addon_feature_created);
-
-        fn __spring_addon_feature_destroyed(feature_id: i32, ally_team_id: i32) {
-            __with_widget_handler(|handler| handler.feature_destroyed(feature_id, ally_team_id));
+        $crate::reexports::export_unit_entered_radar!(HANDLER, __spring_addon_unit_entered_radar);
+        fn __spring_addon_unit_left_radar(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            u: i32,
+            d: i32,
+            t: i32,
+            a: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_left_radar(spring, u, d, t, a);
+            })
         }
-        $crate::reexports::export_feature_destroyed!(__spring_addon_feature_destroyed);
-
-        fn __spring_addon_unit_destroyed(u: i32, d: i32, t: i32, a: i32, ad: i32, at: i32, w: i32) {
-            let event = $crate::event::UnitDestroyedEvent {
-                unit_id: u,
-                unit_def_id: d,
-                unit_team: t,
-                attacker_id: a,
-                attacker_def_id: ad,
-                attacker_team: at,
-                weapon_def_id: w,
-            };
-            __with_widget_handler(|handler| handler.unit_destroyed(&event));
+        $crate::reexports::export_unit_left_radar!(HANDLER, __spring_addon_unit_left_radar);
+        fn __spring_addon_projectile_created(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            p: i32,
+            o: i32,
+            w: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.projectile_created(spring, p, o, w);
+            })
         }
-        $crate::reexports::export_unit_destroyed!(__spring_addon_unit_destroyed);
-
-        fn __spring_addon_unit_given(u: i32, d: i32, old_team: i32, new_team: i32) {
-            __with_widget_handler(|handler| handler.unit_given(u, d, old_team, new_team));
+        $crate::reexports::export_projectile_created!(HANDLER, __spring_addon_projectile_created);
+        fn __spring_addon_projectile_destroyed(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            p: i32,
+            o: i32,
+            w: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.projectile_destroyed(spring, p, o, w);
+            })
         }
-        $crate::reexports::export_unit_given!(__spring_addon_unit_given);
-
-        fn __spring_addon_unit_taken(u: i32, d: i32, old_team: i32, new_team: i32) {
-            __with_widget_handler(|handler| handler.unit_taken(u, d, old_team, new_team));
+        $crate::reexports::export_projectile_destroyed!(
+            HANDLER,
+            __spring_addon_projectile_destroyed
+        );
+        fn __spring_addon_recv_from_synced(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            msg: &[u8],
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.recv_from_synced(spring, msg);
+            })
         }
-        $crate::reexports::export_unit_taken!(__spring_addon_unit_taken);
-
-        fn __spring_addon_unit_entered_los(u: i32, d: i32, t: i32, a: i32) {
-            __with_widget_handler(|handler| handler.unit_entered_los(u, d, t, a));
+        $crate::reexports::export_recv_from_synced!(HANDLER, __spring_addon_recv_from_synced);
+        fn __spring_addon_mouse_move(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            x: i32,
+            y: i32,
+            dx: i32,
+            dy: i32,
+            button: i32,
+        ) -> $crate::reexports::Result<bool> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({ handler.mouse_move(spring, x, y, dx, dy, button) })
         }
-        $crate::reexports::export_unit_entered_los!(__spring_addon_unit_entered_los);
-
-        fn __spring_addon_unit_left_los(u: i32, d: i32, t: i32, a: i32) {
-            __with_widget_handler(|handler| handler.unit_left_los(u, d, t, a));
+        $crate::reexports::export_mouse_move!(HANDLER, __spring_addon_mouse_move);
+        fn __spring_addon_mouse_press(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            x: i32,
+            y: i32,
+            button: i32,
+        ) -> $crate::reexports::Result<bool> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({ handler.mouse_press(spring, x, y, button) })
         }
-        $crate::reexports::export_unit_left_los!(__spring_addon_unit_left_los);
-
-        fn __spring_addon_unit_entered_radar(u: i32, d: i32, t: i32, a: i32) {
-            __with_widget_handler(|handler| handler.unit_entered_radar(u, d, t, a));
+        $crate::reexports::export_mouse_press!(HANDLER, __spring_addon_mouse_press);
+        fn __spring_addon_mouse_release(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            x: i32,
+            y: i32,
+            button: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.mouse_release(spring, x, y, button);
+            })
         }
-        $crate::reexports::export_unit_entered_radar!(__spring_addon_unit_entered_radar);
-
-        fn __spring_addon_unit_left_radar(u: i32, d: i32, t: i32, a: i32) {
-            __with_widget_handler(|handler| handler.unit_left_radar(u, d, t, a));
+        $crate::reexports::export_mouse_release!(HANDLER, __spring_addon_mouse_release);
+        fn __spring_addon_mouse_wheel(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            up: bool,
+            value: f32,
+        ) -> $crate::reexports::Result<bool> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({ handler.mouse_wheel(spring, up, value) })
         }
-        $crate::reexports::export_unit_left_radar!(__spring_addon_unit_left_radar);
-
-        fn __spring_addon_projectile_created(p: i32, o: i32, w: i32) {
-            __with_widget_handler(|handler| handler.projectile_created(p, o, w));
-        }
-        $crate::reexports::export_projectile_created!(__spring_addon_projectile_created);
-
-        fn __spring_addon_projectile_destroyed(p: i32, o: i32, w: i32) {
-            __with_widget_handler(|handler| handler.projectile_destroyed(p, o, w));
-        }
-        $crate::reexports::export_projectile_destroyed!(__spring_addon_projectile_destroyed);
-
-        fn __spring_addon_recv_from_synced(msg: &[u8]) {
-            __with_widget_handler(|handler| handler.recv_from_synced(msg));
-        }
-        $crate::reexports::export_recv_from_synced!(__spring_addon_recv_from_synced);
-
-        fn __spring_addon_mouse_move(x: i32, y: i32, dx: i32, dy: i32, button: i32) -> bool {
-            __with_widget_handler(|handler| handler.mouse_move(x, y, dx, dy, button))
-        }
-        $crate::reexports::export_mouse_move!(__spring_addon_mouse_move);
-
-        fn __spring_addon_mouse_press(x: i32, y: i32, button: i32) -> bool {
-            __with_widget_handler(|handler| handler.mouse_press(x, y, button))
-        }
-        $crate::reexports::export_mouse_press!(__spring_addon_mouse_press);
-
-        fn __spring_addon_mouse_release(x: i32, y: i32, button: i32) {
-            __with_widget_handler(|handler| handler.mouse_release(x, y, button));
-        }
-        $crate::reexports::export_mouse_release!(__spring_addon_mouse_release);
-
-        fn __spring_addon_mouse_wheel(up: bool, value: f32) -> bool {
-            __with_widget_handler(|handler| handler.mouse_wheel(up, value))
-        }
-        $crate::reexports::export_mouse_wheel!(__spring_addon_mouse_wheel);
-
-        fn __spring_addon_key_press<'a>(
+        $crate::reexports::export_mouse_wheel!(HANDLER, __spring_addon_mouse_wheel);
+        fn __spring_addon_key_press(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             key_code: i32,
             alt: bool,
             ctrl: bool,
             meta: bool,
             shift: bool,
             is_repeat: bool,
-            label: &[u8],
+            label: &str,
             utf32_char: i32,
             scan_code: i32,
-            _action_list: impl Iterator<Item = (&'a [u8], &'a [u8], &'a [u8])>,
-        ) -> bool {
-            let event = $crate::event::KeyEvent {
-                key_code,
-                alt,
-                ctrl,
-                meta,
-                shift,
-                is_repeat,
-                label,
-                utf32_char,
-                scan_code,
-            };
-            __with_widget_handler(|handler| handler.key_press(&event))
+            _action_list: &[$crate::reexports::types::callins::KeyAction],
+        ) -> $crate::reexports::Result<bool> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                let event = $crate::event::KeyEvent {
+                    key_code,
+                    alt,
+                    ctrl,
+                    meta,
+                    shift,
+                    is_repeat,
+                    label: label.as_bytes(),
+                    utf32_char,
+                    scan_code,
+                };
+                handler.key_press(spring, &event)
+            })
         }
-        $crate::reexports::export_key_press!(__spring_addon_key_press);
-
-        fn __spring_addon_key_release<'a>(
+        $crate::reexports::export_key_press!(HANDLER, __spring_addon_key_press);
+        fn __spring_addon_key_release(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             key_code: i32,
             alt: bool,
             ctrl: bool,
             meta: bool,
             shift: bool,
-            label: &[u8],
+            label: &str,
             utf32_char: i32,
             scan_code: i32,
-            _action_list: impl Iterator<Item = (&'a [u8], &'a [u8], &'a [u8])>,
-        ) -> bool {
-            let event = $crate::event::KeyEvent {
-                key_code,
-                alt,
-                ctrl,
-                meta,
-                shift,
-                is_repeat: false,
-                label,
-                utf32_char,
-                scan_code,
-            };
-            __with_widget_handler(|handler| handler.key_release(&event))
+            _action_list: &[$crate::reexports::types::callins::KeyAction],
+        ) -> $crate::reexports::Result<bool> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                let event = $crate::event::KeyEvent {
+                    key_code,
+                    alt,
+                    ctrl,
+                    meta,
+                    shift,
+                    is_repeat: false,
+                    label: label.as_bytes(),
+                    utf32_char,
+                    scan_code,
+                };
+                handler.key_release(spring, &event)
+            })
         }
-        $crate::reexports::export_key_release!(__spring_addon_key_release);
-
-        fn __spring_addon_draw_world() {
-            __with_widget_handler(|handler| handler.draw_world());
+        $crate::reexports::export_key_release!(HANDLER, __spring_addon_key_release);
+        fn __spring_addon_draw_world(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_world(spring);
+            })
         }
-        $crate::reexports::export_draw_world!(__spring_addon_draw_world);
-
-        fn __spring_addon_draw_genesis(_unused: u8) {
-            __with_widget_handler(|handler| handler.draw_genesis());
+        $crate::reexports::export_draw_world!(HANDLER, __spring_addon_draw_world);
+        fn __spring_addon_draw_genesis(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_genesis(spring);
+            })
         }
-        $crate::reexports::export_draw_genesis!(__spring_addon_draw_genesis);
-
-        fn __spring_addon_draw_screen(w: i32, h: i32) {
-            __with_widget_handler(|handler| handler.draw_screen(w, h));
+        $crate::reexports::export_draw_genesis!(HANDLER, __spring_addon_draw_genesis);
+        fn __spring_addon_draw_screen(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            w: i32,
+            h: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_screen(spring, w, h);
+            })
         }
-        $crate::reexports::export_draw_screen!(__spring_addon_draw_screen);
-
-        fn __spring_addon_draw_world_pre_unit(_unused: u8) {
-            __with_widget_handler(|handler| handler.draw_world_pre_unit());
+        $crate::reexports::export_draw_screen!(HANDLER, __spring_addon_draw_screen);
+        fn __spring_addon_draw_world_pre_unit(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_world_pre_unit(spring);
+            })
         }
-        $crate::reexports::export_draw_world_pre_unit!(__spring_addon_draw_world_pre_unit);
-
-        fn __spring_addon_draw_world_refraction(_unused: u8) {
-            __with_widget_handler(|handler| handler.draw_world_refraction());
+        $crate::reexports::export_draw_world_pre_unit!(HANDLER, __spring_addon_draw_world_pre_unit);
+        fn __spring_addon_draw_world_refraction(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_world_refraction(spring);
+            })
         }
-        $crate::reexports::export_draw_world_refraction!(__spring_addon_draw_world_refraction);
-
-        fn __spring_addon_draw_screen_effects(w: i32, h: i32) {
-            __with_widget_handler(|handler| handler.draw_screen_effects(w, h));
+        $crate::reexports::export_draw_world_refraction!(
+            HANDLER,
+            __spring_addon_draw_world_refraction
+        );
+        fn __spring_addon_draw_screen_effects(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            w: i32,
+            h: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_screen_effects(spring, w, h);
+            })
         }
-        $crate::reexports::export_draw_screen_effects!(__spring_addon_draw_screen_effects);
-
-        fn __spring_addon_draw_unit(unit_id: i32, draw_mode: i32) -> bool {
-            __with_widget_handler(|handler| handler.draw_unit(unit_id, draw_mode))
+        $crate::reexports::export_draw_screen_effects!(HANDLER, __spring_addon_draw_screen_effects);
+        fn __spring_addon_draw_unit(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            unit_id: i32,
+            draw_mode: i32,
+        ) -> $crate::reexports::Result<bool> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({ handler.draw_unit(spring, unit_id, draw_mode) })
         }
-        $crate::reexports::export_draw_unit!(__spring_addon_draw_unit);
-
-        fn __spring_addon_widget_game_over(winning_ally_teams: &[u8]) {
-            __with_widget_handler(|handler| handler.game_over(winning_ally_teams));
+        $crate::reexports::export_draw_unit!(HANDLER, __spring_addon_draw_unit);
+        fn __spring_addon_widget_game_over(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            winning_ally_teams: &[u8],
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.game_over(spring, winning_ally_teams);
+            })
         }
-        $crate::reexports::export_game_over!(__spring_addon_widget_game_over);
-
+        $crate::reexports::export_game_over!(HANDLER, __spring_addon_widget_game_over);
         fn __spring_addon_view_resize(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             screen_size_x: i32,
             screen_size_y: i32,
             screen_pos_x: i32,
@@ -324,127 +557,132 @@ macro_rules! __impl_ui_exports {
             view_size_y: i32,
             view_pos_x: i32,
             view_pos_y: i32,
-        ) {
-            let geometry = $crate::event::ViewGeometry {
-                screen_size: (screen_size_x, screen_size_y),
-                screen_pos: (screen_pos_x, screen_pos_y),
-                window_size: (window_size_x, window_size_y),
-                window_pos: (window_pos_x, window_pos_y),
-                window_border: (
-                    window_border_top,
-                    window_border_left,
-                    window_border_bottom,
-                    window_border_right,
-                ),
-                view_size: (view_size_x, view_size_y),
-                view_pos: (view_pos_x, view_pos_y),
-            };
-            __with_widget_handler(|handler| handler.view_resize(&geometry));
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                let geometry = $crate::event::ViewGeometry {
+                    screen_size: (screen_size_x, screen_size_y),
+                    screen_pos: (screen_pos_x, screen_pos_y),
+                    window_size: (window_size_x, window_size_y),
+                    window_pos: (window_pos_x, window_pos_y),
+                    window_border: (
+                        window_border_top,
+                        window_border_left,
+                        window_border_bottom,
+                        window_border_right,
+                    ),
+                    view_size: (view_size_x, view_size_y),
+                    view_pos: (view_pos_x, view_pos_y),
+                };
+                handler.view_resize(spring, &geometry);
+            })
         }
-        $crate::reexports::export_view_resize!(__spring_addon_view_resize);
+        $crate::reexports::export_view_resize!(HANDLER, __spring_addon_view_resize);
     };
 }
 
 #[macro_export]
 macro_rules! export_rules_gadgets {
-    (
-        state: $state_type:ty,
-        setup: $setup_fn:path,
-        scratch: $scratch_size:expr $(,)?
-    ) => {
-        $crate::reexports::export_callin_scratch!($scratch_size);
-        $crate::reexports::export_environment_mask!(
-            $crate::reexports::rules_synced::ENVIRONMENT_MASK
+    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr $(,)?) => {
+        $crate::__impl_rules_exports!(
+            $state_type,
+            $setup_fn,
+            $scratch_size,
+            $crate::reexports::RulesSynced
         );
-
-        // Core rules callouts use synchronous closures directly.  A retained
-        // callback registry is only needed by unsynced rendering environments.
-        #[allow(dead_code)]
-        fn __spring_addon_callback_dispatch(callback_id: u32, _user_data: u32) {
-            $crate::log::warn_unhandled_callback(callback_id);
-        }
-        $crate::reexports::export_callback_dispatch!(__spring_addon_callback_dispatch);
-        $crate::__impl_rules_exports!($state_type, $setup_fn);
+    };
+    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty $(,)?) => {
+        $crate::__impl_rules_exports!($state_type, $setup_fn, $scratch_size, $environment);
     };
 }
 
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __impl_rules_exports {
-    ($state_type:ty, $setup_fn:path) => {
-        $crate::reexports::thread_local! {
-            static HANDLER: ::core::cell::OnceCell<$crate::rules::GadgetHandler<$state_type>> = const {
-                ::core::cell::OnceCell::new()
-            };
-        }
-
-        fn __with_gadget_handler<R>(
-            f: impl FnOnce(&$crate::rules::GadgetHandler<$state_type>) -> R,
-        ) -> R {
-            HANDLER.with(|cell| {
-                if cell.get().is_none() {
-                    $crate::panic::install_panic_hook();
-                    let mut handler = $crate::rules::GadgetHandler::new(<$state_type>::default());
-                    $setup_fn(&mut handler);
-                    assert!(cell.set(handler).is_ok(), "spring-addons gadget handler initialized twice");
-                    cell.get().unwrap().init();
-                }
-                f(cell.get().unwrap())
+    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty) => {
+        #[cfg(target_arch = "wasm32")]
+        $crate::reexports::export_callin_scratch!($scratch_size);
+        $crate::__addon_module!(
+            $state_type,
+            $setup_fn,
+            $environment,
+            GadgetHandler,
+            with_gadget_handler
+        );
+        fn __spring_addon_game_frame(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            frame: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.game_frame(spring, frame);
             })
         }
-
-        #[allow(dead_code)]
-        pub fn with_gadget_handler<R>(
-            f: impl FnOnce(&$crate::rules::GadgetHandler<$state_type>) -> R,
-        ) -> R {
-            __with_gadget_handler(f)
+        $crate::reexports::export_game_frame!(HANDLER, __spring_addon_game_frame);
+        fn __spring_addon_handle_lua_msg(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            p: i32,
+            s: i32,
+            m: i32,
+            data: &[u8],
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.handle_lua_msg(spring, p, s, m, data);
+            })
         }
-
-        #[allow(dead_code)]
-        pub fn with_global<R>(f: impl FnOnce(&$state_type) -> R) -> R {
-            __with_gadget_handler(|handler| handler.with_context(|ctx| f(ctx.global())))
-        }
-
-        #[allow(dead_code)]
-        pub fn with_addon_context<R>(
-            f: impl FnOnce(&$crate::AddonContext<'_, $state_type>) -> R,
-        ) -> R {
-            __with_gadget_handler(|handler| handler.with_context(f))
-        }
-
-        fn __spring_addon_game_frame(frame: i32) {
-            __with_gadget_handler(|handler| handler.game_frame(frame));
-        }
-        $crate::reexports::export_game_frame!(__spring_addon_game_frame);
-
-        fn __spring_addon_handle_lua_msg(p: i32, s: i32, m: i32, data: &[u8]) {
-            __with_gadget_handler(|handler| handler.handle_lua_msg(p, s, m, data));
-        }
-        $crate::reexports::export_handle_lua_msg!(__spring_addon_handle_lua_msg);
-
+        $crate::reexports::export_handle_lua_msg!(HANDLER, __spring_addon_handle_lua_msg);
         fn __spring_addon_unit_created(
-            u: $crate::reexports::UnitId,
-            d: $crate::reexports::DefId,
-            t: $crate::reexports::TeamId,
-            b: $crate::reexports::UnitId,
-        ) {
-            __with_gadget_handler(|handler| {
-                handler.unit_created(u.into(), d.into(), t.into(), b.into());
-            });
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            u: i32,
+            d: i32,
+            t: i32,
+            b: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                {
+                    handler.unit_created(spring, u, d, t, b);
+                };
+            })
         }
-        $crate::reexports::export_unit_created!(__spring_addon_unit_created);
-
-        fn __spring_addon_feature_created(feature_id: i32, ally_team_id: i32) {
-            __with_gadget_handler(|handler| handler.feature_created(feature_id, ally_team_id));
+        $crate::reexports::export_unit_created!(HANDLER, __spring_addon_unit_created);
+        fn __spring_addon_feature_created(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            feature_id: i32,
+            ally_team_id: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.feature_created(spring, feature_id, ally_team_id);
+            })
         }
-        $crate::reexports::export_feature_created!(__spring_addon_feature_created);
-
-        fn __spring_addon_feature_destroyed(feature_id: i32, ally_team_id: i32) {
-            __with_gadget_handler(|handler| handler.feature_destroyed(feature_id, ally_team_id));
+        $crate::reexports::export_feature_created!(HANDLER, __spring_addon_feature_created);
+        fn __spring_addon_feature_destroyed(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            feature_id: i32,
+            ally_team_id: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.feature_destroyed(spring, feature_id, ally_team_id);
+            })
         }
-        $crate::reexports::export_feature_destroyed!(__spring_addon_feature_destroyed);
-
+        $crate::reexports::export_feature_destroyed!(HANDLER, __spring_addon_feature_destroyed);
         fn __spring_addon_unit_destroyed(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             u: i32,
             d: i32,
             t: i32,
@@ -452,31 +690,54 @@ macro_rules! __impl_rules_exports {
             ad: i32,
             at: i32,
             w: i32,
-        ) {
-            let event = $crate::rules::UnitDestroyedEvent {
-                unit_id: u,
-                unit_def_id: d,
-                unit_team: t,
-                attacker_id: a,
-                attacker_def_id: ad,
-                attacker_team: at,
-                weapon_def_id: w,
-            };
-            __with_gadget_handler(|handler| handler.unit_destroyed(&event));
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                let event = $crate::rules::UnitDestroyedEvent {
+                    unit_id: u,
+                    unit_def_id: d,
+                    unit_team: t,
+                    attacker_id: a,
+                    attacker_def_id: ad,
+                    attacker_team: at,
+                    weapon_def_id: w,
+                };
+                handler.unit_destroyed(spring, &event);
+            })
         }
-        $crate::reexports::export_unit_destroyed!(__spring_addon_unit_destroyed);
-
-        fn __spring_addon_unit_idle(u: i32, d: i32, t: i32) {
-            __with_gadget_handler(|handler| handler.unit_idle(u, d, t));
+        $crate::reexports::export_unit_destroyed!(HANDLER, __spring_addon_unit_destroyed);
+        fn __spring_addon_unit_idle(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            u: i32,
+            d: i32,
+            t: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_idle(spring, u, d, t);
+            })
         }
-        $crate::reexports::export_unit_idle!(__spring_addon_unit_idle);
-
-        fn __spring_addon_projectile_created(p: i32, o: i32, w: i32) {
-            __with_gadget_handler(|handler| handler.projectile_created(p, o, w));
+        $crate::reexports::export_unit_idle!(HANDLER, __spring_addon_unit_idle);
+        fn __spring_addon_projectile_created(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            p: i32,
+            o: i32,
+            w: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.projectile_created(spring, p, o, w);
+            })
         }
-        $crate::reexports::export_projectile_created!(__spring_addon_projectile_created);
-
+        $crate::reexports::export_projectile_created!(HANDLER, __spring_addon_projectile_created);
         fn __spring_addon_unit_pre_damaged(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             u: i32,
             ud: i32,
             ut: i32,
@@ -487,213 +748,207 @@ macro_rules! __impl_rules_exports {
             a: i32,
             ad: i32,
             at: i32,
-        ) -> $crate::reexports::DamageResult {
-            __with_gadget_handler(|handler| {
-                handler.unit_pre_damaged(u, ud, ut, d, p, w, pr, a, ad, at)
+        ) -> $crate::reexports::Result<(f32, f32)> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            let result =
+                { { handler.unit_pre_damaged(spring, u, ud, ut, d, p, w, pr, a, ad, at) } };
+            Ok((result.new_damage, result.impulse_mult))
+        }
+        $crate::reexports::export_unit_pre_damaged!(HANDLER, __spring_addon_unit_pre_damaged);
+        fn __spring_addon_explosion(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            w: i32,
+            pos: $crate::reexports::Float3,
+            o: i32,
+            p: i32,
+        ) -> $crate::reexports::Result<bool> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({ handler.explosion(spring, w, (pos.x, pos.y, pos.z), o, p) })
+        }
+        $crate::reexports::export_explosion!(HANDLER, __spring_addon_explosion);
+        fn __spring_addon_projectile_destroyed(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            p: i32,
+            o: i32,
+            w: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.projectile_destroyed(spring, p, o, w);
             })
         }
-        $crate::reexports::export_unit_pre_damaged!(__spring_addon_unit_pre_damaged);
-
-        fn __spring_addon_explosion(w: i32, x: f32, y: f32, z: f32, o: i32, p: i32) -> bool {
-            __with_gadget_handler(|handler| handler.explosion(w, (x, y, z), o, p))
+        $crate::reexports::export_projectile_destroyed!(
+            HANDLER,
+            __spring_addon_projectile_destroyed
+        );
+        fn __spring_addon_game_over(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            winning_ally_teams: &[u8],
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.game_over(spring, winning_ally_teams);
+            })
         }
-        $crate::reexports::export_explosion!(__spring_addon_explosion);
-
-        fn __spring_addon_projectile_destroyed(p: i32, o: i32, w: i32) {
-            __with_gadget_handler(|handler| handler.projectile_destroyed(p, o, w));
-        }
-        $crate::reexports::export_projectile_destroyed!(__spring_addon_projectile_destroyed);
-
-        fn __spring_addon_game_over(winning_ally_teams: &[u8]) {
-            __with_gadget_handler(|handler| handler.game_over(winning_ally_teams));
-        }
-        $crate::reexports::export_game_over!(__spring_addon_game_over);
-
+        $crate::reexports::export_game_over!(HANDLER, __spring_addon_game_over);
         fn __spring_addon_unit_cmd_done(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             unit_id: i32,
             unit_def_id: i32,
             unit_team: i32,
-            command_id: i32,
-            command_time_out: i32,
-            command_page_index: u32,
-            command_tag: u32,
-            command_options: u8,
-            command_params: &[f32],
-        ) {
-            let event = $crate::event::CommandEvent {
-                unit_id,
-                unit_def_id,
-                unit_team,
-                command_id,
-                command_time_out,
-                command_page_index,
-                command_tag,
-                command_options,
-                command_params,
-                player_num: None,
-                from_synced: true,
-                from_lua: false,
-            };
-            __with_gadget_handler(|handler| handler.unit_cmd_done(&event));
+            command: &$crate::reexports::types::callins::NativeCallinCommand,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                let event = $crate::event::CommandEvent {
+                    unit_id,
+                    unit_def_id,
+                    unit_team,
+                    command_id: command.id,
+                    command_time_out: command.time_out,
+                    command_page_index: command.page_index,
+                    command_tag: command.tag,
+                    command_options: command.options,
+                    command_params: command.params.as_slice(),
+                    player_num: None,
+                    from_synced: true,
+                    from_lua: false,
+                };
+                handler.unit_cmd_done(spring, &event);
+            })
         }
-        $crate::reexports::export_unit_cmd_done!(__spring_addon_unit_cmd_done);
-
+        $crate::reexports::export_unit_cmd_done!(HANDLER, __spring_addon_unit_cmd_done);
         fn __spring_addon_allow_command(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             unit_id: i32,
             unit_def_id: i32,
             unit_team: i32,
-            command_id: i32,
-            command_time_out: i32,
-            command_page_index: u32,
-            command_tag: u32,
-            command_options: u8,
-            command_params: &[f32],
+            command: &$crate::reexports::types::callins::NativeCallinCommand,
             player_num: i32,
             from_synced: bool,
             from_lua: bool,
-        ) -> bool {
-            let event = $crate::event::CommandEvent {
-                unit_id,
-                unit_def_id,
-                unit_team,
-                command_id,
-                command_time_out,
-                command_page_index,
-                command_tag,
-                command_options,
-                command_params,
-                player_num: Some(player_num),
-                from_synced,
-                from_lua,
-            };
-            __with_gadget_handler(|handler| handler.allow_command(&event))
+        ) -> $crate::reexports::Result<bool> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                let event = $crate::event::CommandEvent {
+                    unit_id,
+                    unit_def_id,
+                    unit_team,
+                    command_id: command.id,
+                    command_time_out: command.time_out,
+                    command_page_index: command.page_index,
+                    command_tag: command.tag,
+                    command_options: command.options,
+                    command_params: command.params.as_slice(),
+                    player_num: Some(player_num),
+                    from_synced,
+                    from_lua,
+                };
+                handler.allow_command(spring, &event)
+            })
         }
-        $crate::reexports::export_allow_command!(__spring_addon_allow_command);
+        $crate::reexports::export_allow_command!(HANDLER, __spring_addon_allow_command);
     };
 }
 
 #[macro_export]
 macro_rules! export_rules_unsynced_addons {
-    (
-        state: $state_type:ty,
-        setup: $setup_fn:path,
-        scratch: $scratch_size:expr $(,) ?
-    ) => {
-        $crate::__impl_unsynced_exports!($state_type, $setup_fn, $scratch_size);
+    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr $(,)?) => {
+        $crate::__impl_unsynced_exports!(
+            $state_type,
+            $setup_fn,
+            $scratch_size,
+            $crate::reexports::RulesUnsynced
+        );
+    };
+    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty $(,)?) => {
+        $crate::__impl_unsynced_exports!($state_type, $setup_fn, $scratch_size, $environment);
     };
 }
 
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __impl_unsynced_exports {
-    ($state_type:ty, $setup_fn:path, $scratch_size:expr) => {
+    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty) => {
+        #[cfg(target_arch = "wasm32")]
         $crate::reexports::export_callin_scratch!($scratch_size);
-        $crate::reexports::export_environment_mask!(
-            $crate::reexports::rules_unsynced::ENVIRONMENT_MASK
+        $crate::__addon_module!(
+            $state_type,
+            $setup_fn,
+            $environment,
+            UnsyncedHandler,
+            with_unsynced_handler
         );
 
-        $crate::reexports::thread_local! {
-            static CALLBACK_REGISTRY: $crate::ui::UiCallbackRegistry<$state_type> = const {
-                $crate::ui::UiCallbackRegistry::new()
-            };
-        }
-
-        #[allow(dead_code)]
-        pub fn register_callback(
-            f: impl FnMut(&$state_type) + 'static,
-        ) -> $crate::reexports::callback::RetainedCallback {
-            CALLBACK_REGISTRY.with(|registry| registry.register(f))
-        }
-
-        #[allow(dead_code)]
-        pub fn unregister_callback(callback: $crate::reexports::callback::RetainedCallback) {
-            CALLBACK_REGISTRY.with(|registry| registry.unregister(callback));
-        }
-
-        fn __spring_addon_callback_dispatch(callback_id: u32, user_data: u32) {
-            __with_unsynced_handler(|handler| {
-                handler.with_context(|ctx| {
-                    let handled = CALLBACK_REGISTRY
-                        .with(|registry| registry.dispatch(ctx.global(), callback_id, user_data));
-                    if !handled {
-                        $crate::log::warn_unhandled_callback(callback_id);
-                    }
-                });
-            });
-        }
-        $crate::reexports::export_callback_dispatch!(__spring_addon_callback_dispatch);
-        $crate::reexports::thread_local! {
-            static HANDLER: ::core::cell::OnceCell<$crate::unsynced::UnsyncedHandler<$state_type>> = const {
-                ::core::cell::OnceCell::new()
-            };
-        }
-
-        fn __with_unsynced_handler<R>(
-            f: impl FnOnce(&$crate::unsynced::UnsyncedHandler<$state_type>) -> R,
-        ) -> R {
-            HANDLER.with(|cell| {
-                if cell.get().is_none() {
-                    $crate::panic::install_panic_hook();
-                    let mut handler = $crate::unsynced::UnsyncedHandler::new(<$state_type>::default());
-                    $setup_fn(&mut handler);
-                    assert!(cell.set(handler).is_ok(), "spring-addons unsynced handler initialized twice");
-                    cell.get().unwrap().init();
-                }
-                f(cell.get().unwrap())
+        fn __spring_addon_unsynced_game_frame(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            frame: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.game_frame(spring, frame);
             })
         }
-
-        #[allow(dead_code)]
-        pub fn with_unsynced_handler<R>(
-            f: impl FnOnce(&$crate::unsynced::UnsyncedHandler<$state_type>) -> R,
-        ) -> R {
-            __with_unsynced_handler(f)
+        $crate::reexports::export_game_frame!(HANDLER, __spring_addon_unsynced_game_frame);
+        fn __spring_addon_unsynced_update(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            delta_seconds: f32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.update(spring, delta_seconds);
+            })
         }
-
-        #[allow(dead_code)]
-        pub fn with_global<R>(f: impl FnOnce(&$state_type) -> R) -> R {
-            __with_unsynced_handler(|handler| handler.with_context(|ctx| f(ctx.global())))
-        }
-
-        #[allow(dead_code)]
-        pub fn with_addon_context<R>(
-            f: impl FnOnce(&$crate::AddonContext<'_, $state_type>) -> R,
-        ) -> R {
-            __with_unsynced_handler(|handler| handler.with_context(f))
-        }
-
-        fn __spring_addon_unsynced_game_frame(frame: i32) {
-            __with_unsynced_handler(|handler| handler.game_frame(frame));
-        }
-        $crate::reexports::export_game_frame!(__spring_addon_unsynced_game_frame);
-
-        fn __spring_addon_unsynced_update(delta_seconds: f32) {
-            __with_unsynced_handler(|handler| handler.update(delta_seconds));
-        }
-        $crate::reexports::export_update!(__spring_addon_unsynced_update);
-
+        $crate::reexports::export_update!(HANDLER, __spring_addon_unsynced_update);
         fn __spring_addon_unsynced_unit_created(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             unit_id: i32,
             unit_def_id: i32,
             unit_team: i32,
             builder_id: i32,
-        ) {
-            __with_unsynced_handler(|handler| {
-                handler.unit_created(unit_id, unit_def_id, unit_team, builder_id)
-            });
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                {
+                    handler.unit_created(spring, unit_id, unit_def_id, unit_team, builder_id)
+                };
+            })
         }
-        $crate::reexports::export_unit_created_raw!(__spring_addon_unsynced_unit_created);
-
+        $crate::reexports::export_unit_created!(HANDLER, __spring_addon_unsynced_unit_created);
         fn __spring_addon_unsynced_unit_finished(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             unit_id: i32,
             unit_def_id: i32,
             unit_team: i32,
-        ) {
-            __with_unsynced_handler(|handler| handler.unit_finished(unit_id, unit_def_id, unit_team));
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_finished(spring, unit_id, unit_def_id, unit_team);
+            })
         }
-        $crate::reexports::export_unit_finished!(__spring_addon_unsynced_unit_finished);
-
+        $crate::reexports::export_unit_finished!(HANDLER, __spring_addon_unsynced_unit_finished);
         fn __spring_addon_unsynced_unit_destroyed(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             unit_id: i32,
             unit_def_id: i32,
             unit_team: i32,
@@ -701,134 +956,254 @@ macro_rules! __impl_unsynced_exports {
             attacker_def_id: i32,
             attacker_team: i32,
             weapon_def_id: i32,
-        ) {
-            let event = $crate::event::UnitDestroyedEvent {
-                unit_id,
-                unit_def_id,
-                unit_team,
-                attacker_id,
-                attacker_def_id,
-                attacker_team,
-                weapon_def_id,
-            };
-            __with_unsynced_handler(|handler| handler.unit_destroyed(&event));
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                let event = $crate::event::UnitDestroyedEvent {
+                    unit_id,
+                    unit_def_id,
+                    unit_team,
+                    attacker_id,
+                    attacker_def_id,
+                    attacker_team,
+                    weapon_def_id,
+                };
+                handler.unit_destroyed(spring, &event);
+            })
         }
-        $crate::reexports::export_unit_destroyed!(__spring_addon_unsynced_unit_destroyed);
-
+        $crate::reexports::export_unit_destroyed!(HANDLER, __spring_addon_unsynced_unit_destroyed);
         fn __spring_addon_unsynced_unit_given(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             unit_id: i32,
             unit_def_id: i32,
             old_team: i32,
             new_team: i32,
-        ) {
-            __with_unsynced_handler(|handler| handler.unit_given(unit_id, unit_def_id, old_team, new_team));
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_given(spring, unit_id, unit_def_id, old_team, new_team);
+            })
         }
-        $crate::reexports::export_unit_given!(__spring_addon_unsynced_unit_given);
-
+        $crate::reexports::export_unit_given!(HANDLER, __spring_addon_unsynced_unit_given);
         fn __spring_addon_unsynced_unit_taken(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             unit_id: i32,
             unit_def_id: i32,
             old_team: i32,
             new_team: i32,
-        ) {
-            __with_unsynced_handler(|handler| handler.unit_taken(unit_id, unit_def_id, old_team, new_team));
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.unit_taken(spring, unit_id, unit_def_id, old_team, new_team);
+            })
         }
-        $crate::reexports::export_unit_taken!(__spring_addon_unsynced_unit_taken);
-
-        fn __spring_addon_unsynced_feature_created(feature_id: i32, ally_team_id: i32) {
-            __with_unsynced_handler(|handler| handler.feature_created(feature_id, ally_team_id));
+        $crate::reexports::export_unit_taken!(HANDLER, __spring_addon_unsynced_unit_taken);
+        fn __spring_addon_unsynced_feature_created(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            feature_id: i32,
+            ally_team_id: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.feature_created(spring, feature_id, ally_team_id);
+            })
         }
-        $crate::reexports::export_feature_created!(__spring_addon_unsynced_feature_created);
-
-        fn __spring_addon_unsynced_feature_destroyed(feature_id: i32, ally_team_id: i32) {
-            __with_unsynced_handler(|handler| handler.feature_destroyed(feature_id, ally_team_id));
+        $crate::reexports::export_feature_created!(
+            HANDLER,
+            __spring_addon_unsynced_feature_created
+        );
+        fn __spring_addon_unsynced_feature_destroyed(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            feature_id: i32,
+            ally_team_id: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.feature_destroyed(spring, feature_id, ally_team_id);
+            })
         }
-        $crate::reexports::export_feature_destroyed!(__spring_addon_unsynced_feature_destroyed);
-
+        $crate::reexports::export_feature_destroyed!(
+            HANDLER,
+            __spring_addon_unsynced_feature_destroyed
+        );
         fn __spring_addon_unsynced_projectile_created(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             projectile_id: i32,
             owner_id: i32,
             weapon_def_id: i32,
-        ) {
-            __with_unsynced_handler(|handler| {
-                handler.projectile_created(projectile_id, owner_id, weapon_def_id)
-            });
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                {
+                    handler.projectile_created(spring, projectile_id, owner_id, weapon_def_id)
+                };
+            })
         }
-        $crate::reexports::export_projectile_created!(__spring_addon_unsynced_projectile_created);
-
+        $crate::reexports::export_projectile_created!(
+            HANDLER,
+            __spring_addon_unsynced_projectile_created
+        );
         fn __spring_addon_unsynced_projectile_destroyed(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             projectile_id: i32,
             owner_id: i32,
             weapon_def_id: i32,
-        ) {
-            __with_unsynced_handler(|handler| {
-                handler.projectile_destroyed(projectile_id, owner_id, weapon_def_id)
-            });
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                {
+                    handler.projectile_destroyed(spring, projectile_id, owner_id, weapon_def_id)
+                };
+            })
         }
-        $crate::reexports::export_projectile_destroyed!(__spring_addon_unsynced_projectile_destroyed);
-
-        fn __spring_addon_unsynced_recv_from_synced(message: &[u8]) {
-            __with_unsynced_handler(|handler| handler.recv_from_synced(message));
+        $crate::reexports::export_projectile_destroyed!(
+            HANDLER,
+            __spring_addon_unsynced_projectile_destroyed
+        );
+        fn __spring_addon_unsynced_recv_from_synced(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            message: &[u8],
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.recv_from_synced(spring, message);
+            })
         }
-        $crate::reexports::export_recv_from_synced!(__spring_addon_unsynced_recv_from_synced);
-
-        fn __spring_addon_unsynced_draw_screen(width: i32, height: i32) {
-            __with_unsynced_handler(|handler| handler.draw_screen(width, height));
+        $crate::reexports::export_recv_from_synced!(
+            HANDLER,
+            __spring_addon_unsynced_recv_from_synced
+        );
+        fn __spring_addon_unsynced_draw_screen(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            width: i32,
+            height: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_screen(spring, width, height);
+            })
         }
-        $crate::reexports::export_draw_screen!(__spring_addon_unsynced_draw_screen);
-
-        fn __spring_addon_unsynced_draw_world() {
-            __with_unsynced_handler(|handler| handler.draw_world());
+        $crate::reexports::export_draw_screen!(HANDLER, __spring_addon_unsynced_draw_screen);
+        fn __spring_addon_unsynced_draw_world(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_world(spring);
+            })
         }
-        $crate::reexports::export_draw_world!(__spring_addon_unsynced_draw_world);
-
+        $crate::reexports::export_draw_world!(HANDLER, __spring_addon_unsynced_draw_world);
         fn __spring_addon_unsynced_draw_world_pre_particles(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             draw_above_water: bool,
             draw_below_water: bool,
             draw_reflection: bool,
             draw_refraction: bool,
-        ) {
-            __with_unsynced_handler(|handler| {
-                handler.draw_world_pre_particles(
-                    draw_above_water,
-                    draw_below_water,
-                    draw_reflection,
-                    draw_refraction,
-                )
-            });
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                {
+                    handler.draw_world_pre_particles(
+                        spring,
+                        draw_above_water,
+                        draw_below_water,
+                        draw_reflection,
+                        draw_refraction,
+                    )
+                };
+            })
         }
         $crate::reexports::export_draw_world_pre_particles!(
+            HANDLER,
             __spring_addon_unsynced_draw_world_pre_particles
         );
-
-        fn __spring_addon_unsynced_draw_screen_effects(width: i32, height: i32) {
-            __with_unsynced_handler(|handler| handler.draw_screen_effects(width, height));
+        fn __spring_addon_unsynced_draw_screen_effects(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            width: i32,
+            height: i32,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_screen_effects(spring, width, height);
+            })
         }
-        $crate::reexports::export_draw_screen_effects!(__spring_addon_unsynced_draw_screen_effects);
-
-        fn __spring_addon_unsynced_draw_unit(unit_id: i32, draw_mode: i32) -> bool {
-            __with_unsynced_handler(|handler| handler.draw_unit(unit_id, draw_mode))
+        $crate::reexports::export_draw_screen_effects!(
+            HANDLER,
+            __spring_addon_unsynced_draw_screen_effects
+        );
+        fn __spring_addon_unsynced_draw_unit(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            unit_id: i32,
+            draw_mode: i32,
+        ) -> $crate::reexports::Result<bool> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({ handler.draw_unit(spring, unit_id, draw_mode) })
         }
-        $crate::reexports::export_draw_unit!(__spring_addon_unsynced_draw_unit);
-
-        fn __spring_addon_unsynced_draw_feature(feature_id: i32, draw_mode: i32) -> bool {
-            __with_unsynced_handler(|handler| handler.draw_feature(feature_id, draw_mode))
+        $crate::reexports::export_draw_unit!(HANDLER, __spring_addon_unsynced_draw_unit);
+        fn __spring_addon_unsynced_draw_feature(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+            feature_id: i32,
+            draw_mode: i32,
+        ) -> $crate::reexports::Result<bool> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({ handler.draw_feature(spring, feature_id, draw_mode) })
         }
-        $crate::reexports::export_draw_feature!(__spring_addon_unsynced_draw_feature);
-
-        fn __spring_addon_unsynced_draw_world_pre_unit(_unused: u8) {
-            __with_unsynced_handler(|handler| handler.draw_world_pre_unit());
+        $crate::reexports::export_draw_feature!(HANDLER, __spring_addon_unsynced_draw_feature);
+        fn __spring_addon_unsynced_draw_world_pre_unit(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_world_pre_unit(spring);
+            })
         }
         $crate::reexports::export_draw_world_pre_unit!(
+            HANDLER,
             __spring_addon_unsynced_draw_world_pre_unit
         );
-
-        fn __spring_addon_unsynced_draw_genesis(_unused: u8) {
-            __with_unsynced_handler(|handler| handler.draw_genesis());
+        fn __spring_addon_unsynced_draw_genesis(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                handler.draw_genesis(spring);
+            })
         }
-        $crate::reexports::export_draw_genesis!(__spring_addon_unsynced_draw_genesis);
-
+        $crate::reexports::export_draw_genesis!(HANDLER, __spring_addon_unsynced_draw_genesis);
         fn __spring_addon_unsynced_view_resize(
+            module: &__SpringAddonModule,
+            spring: &mut $crate::reexports::Spring<'_, $environment>,
             screen_size_x: i32,
             screen_size_y: i32,
             screen_pos_x: i32,
@@ -845,23 +1220,27 @@ macro_rules! __impl_unsynced_exports {
             view_size_y: i32,
             view_pos_x: i32,
             view_pos_y: i32,
-        ) {
-            let geometry = $crate::event::ViewGeometry {
-                screen_size: (screen_size_x, screen_size_y),
-                screen_pos: (screen_pos_x, screen_pos_y),
-                window_size: (window_size_x, window_size_y),
-                window_pos: (window_pos_x, window_pos_y),
-                window_border: (
-                    window_border_top,
-                    window_border_left,
-                    window_border_bottom,
-                    window_border_right,
-                ),
-                view_size: (view_size_x, view_size_y),
-                view_pos: (view_pos_x, view_pos_y),
-            };
-            __with_unsynced_handler(|handler| handler.view_resize(&geometry));
+        ) -> $crate::reexports::Result<()> {
+            module.ensure_initialized(spring);
+            let handler = &module.handler;
+            Ok({
+                let geometry = $crate::event::ViewGeometry {
+                    screen_size: (screen_size_x, screen_size_y),
+                    screen_pos: (screen_pos_x, screen_pos_y),
+                    window_size: (window_size_x, window_size_y),
+                    window_pos: (window_pos_x, window_pos_y),
+                    window_border: (
+                        window_border_top,
+                        window_border_left,
+                        window_border_bottom,
+                        window_border_right,
+                    ),
+                    view_size: (view_size_x, view_size_y),
+                    view_pos: (view_pos_x, view_pos_y),
+                };
+                handler.view_resize(spring, &geometry);
+            })
         }
-        $crate::reexports::export_view_resize!(__spring_addon_unsynced_view_resize);
+        $crate::reexports::export_view_resize!(HANDLER, __spring_addon_unsynced_view_resize);
     };
 }
