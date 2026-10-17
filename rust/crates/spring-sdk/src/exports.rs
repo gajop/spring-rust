@@ -4,6 +4,18 @@
 /// and retained callbacks. Native automatic admission currently supports Menu;
 /// other native environments need a host dispatch/visibility contract first.
 /// Add the lifecycle exports your module uses with the individual macros.
+/// Exporting a callin outside its engine environment is a compile-time error:
+/// ```compile_fail
+/// use spring_sdk::{Menu,Spring,Result,module::Module};
+/// struct App;
+/// impl Module<Menu> for App {
+///     fn initialize(_: &mut Spring<'_,Menu>)->Result<Self> {Ok(Self)}
+/// }
+/// fn frame(_: &App,_: &mut Spring<'_,Menu>,_:i32)->Result<()> {Ok(())}
+/// spring_sdk::export_module!(APP,Menu,App);
+/// spring_sdk::export_game_frame!(APP,frame);
+/// fn main() {}
+/// ```
 #[macro_export]
 macro_rules! export_module {
     ($slot:ident, $environment:ty, $module:ty) => {

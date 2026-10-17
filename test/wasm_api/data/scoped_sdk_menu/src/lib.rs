@@ -4,7 +4,7 @@ use spring_sdk::{
     Menu, Result, Spring,
     module::Module,
     rml::{Color, DataModel, Percent, Pixels, Value, ValueType, Variable},
-    types::{callins::*, gfx::GfxSaveImageOptions, rml_ui::RmlDocumentShowOptions},
+    types::{gfx::GfxSaveImageOptions, rml_ui::RmlDocumentShowOptions},
 };
 use std::{cell::Cell, rc::Rc};
 
@@ -168,11 +168,7 @@ impl Module<Menu> for MenuFixture {
         checkpoint(spring, "shutdown:bindings-invalidated")
     }
 }
-fn activate(
-    module: &MenuFixture,
-    spring: &mut Spring<'_, Menu>,
-    _: &ActivateMenuQuery,
-) -> Result<ActivateMenuResult> {
+fn activate(module: &MenuFixture, spring: &mut Spring<'_, Menu>, _message: &str) -> Result<()> {
     module.activations.set(module.activations.get() + 1);
     assert!(spring.config().set_config_string(
         "ScopedSdkActivations",
@@ -181,21 +177,13 @@ fn activate(
     )?);
     module.frames.set(0);
     checkpoint(spring, &format!("activation:{}", module.activations.get()))?;
-    Ok(ActivateMenuResult::default())
+    Ok(())
 }
-fn game(
-    _: &MenuFixture,
-    spring: &mut Spring<'_, Menu>,
-    _: &SimpleCallinQuery,
-) -> Result<SimpleCallinResult> {
+fn game(_: &MenuFixture, spring: &mut Spring<'_, Menu>) -> Result<()> {
     checkpoint(spring, "game-transition")?;
-    Ok(SimpleCallinResult::default())
+    Ok(())
 }
-fn update(
-    module: &MenuFixture,
-    spring: &mut Spring<'_, Menu>,
-    _: &UpdateQuery,
-) -> Result<UpdateResult> {
+fn update(module: &MenuFixture, spring: &mut Spring<'_, Menu>, _delta_seconds: f32) -> Result<()> {
     let frame = module.frames.get() + 1;
     module.frames.set(frame);
     if frame == 30 {
@@ -217,7 +205,7 @@ fn update(
             assert!(spring.system_control().quit()?);
         }
     }
-    Ok(UpdateResult::default())
+    Ok(())
 }
 spring_sdk::export_module!(MODULE, Menu, MenuFixture);
 #[cfg(target_arch = "wasm32")]
@@ -229,14 +217,15 @@ spring_sdk::export_update!(MODULE, update);
 fn draw(
     module: &MenuFixture,
     spring: &mut Spring<'_, Menu>,
-    query: &DrawScreenQuery,
-) -> Result<DrawScreenResult> {
+    view_size_x: i32,
+    view_size_y: i32,
+) -> Result<()> {
     if module.frames.get() >= 60 && !module.captured.replace(true) {
         assert!(spring.gfx().save_image(
             0,
             0,
-            query.view_size_x,
-            query.view_size_y,
+            view_size_x,
+            view_size_y,
             "scoped-sdk-menu.png",
             GfxSaveImageOptions {
                 yflip: true,
@@ -245,6 +234,6 @@ fn draw(
             0x0405
         )?);
     }
-    Ok(DrawScreenResult::default())
+    Ok(())
 }
 spring_sdk::export_draw_screen_post!(MODULE, draw);

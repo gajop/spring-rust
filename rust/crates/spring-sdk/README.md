@@ -5,7 +5,7 @@ keeps existing SDK consumers unchanged. See the
 [design and compatibility notes](../../../rts/wasm/docs/recoil_rust_sdk_unification.md).
 
 ```rust
-use spring_sdk::{Menu, Spring, Result, module::Module, types::callins::*};
+use spring_sdk::{Menu, Spring, Result, module::Module};
 
 struct App;
 impl Module<Menu> for App {
@@ -14,8 +14,8 @@ impl Module<Menu> for App {
         Ok(Self)
     }
 }
-fn update(_: &App, _: &mut Spring<'_, Menu>, _: &UpdateQuery) -> Result<UpdateResult> {
-    Ok(UpdateResult::default())
+fn update(_: &App, _: &mut Spring<'_, Menu>, _delta_seconds: f32) -> Result<()> {
+    Ok(())
 }
 spring_sdk::export_module!(APP, Menu, App);
 spring_sdk::export_update!(APP, update);
@@ -27,6 +27,12 @@ the safe native factory currently supports Menu. Variable-size callins also
 require one `export_callin_scratch!(BYTES)` declaration on Wasm.
 
 Handlers receive shared module state and a fresh `&mut Spring<'_, E>`.
+Callin handlers take ordinary arguments: scalars/vectors by value, strings as
+`&str`, lists as slices and structured commands by shared reference. Returns
+use `()`, a single value such as `bool`/`String`, or a tuple for multiple values.
+ABI query/result envelopes, dummy parameters and redundant lengths stay in
+adapters.
+
 Release state borrows before reentrant callouts. Send owned snapshots to
 workers; Spring references and Rml binding identities cannot cross threads.
 The SDK does not queue immediate calls automatically.

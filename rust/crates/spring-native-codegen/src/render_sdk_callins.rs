@@ -1,7 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
-//! Reuse the tested Core callin codecs while presenting owned query/result
-//! records and a fresh Spring scope on both targets.
+//! Reuse the tested Core callin codecs behind ordinary Rust handler arguments
+//! and return values, with a fresh Spring scope on both targets.
 use crate::model::{ApiModel, FieldModel, RecordModel, SemanticType};
 use anyhow::{Context, Result, bail};
 use heck::ToSnakeCase;
@@ -161,6 +161,108 @@ impl Builder<'_> {
             }
         })
     }
+    /// Hide transport-only envelope/count fields; retain semantic records such
+    /// as commands and vectors. Nested query envelopes are flattened too.
+    fn arguments<'a>(&'a self, record: &str, prefix: &str) -> Vec<(String, &'a SemanticType)> {
+        let record = self.records[record];
+        let counts = record
+            .fields
+            .iter()
+            .flat_map(|f| {
+                f.metadata
+                    .iter()
+                    .filter_map(|m| m.strip_prefix("count-field:"))
+            })
+            .collect::<BTreeSet<_>>();
+        record
+            .fields
+            .iter()
+            .filter(|f| {
+                f.name != "_unused" && !counts.contains(f.name.as_str())
+                // These two legacy string queries carry an unannotated byte
+                // length. Rust strings already preserve their exact length.
+                && !(f.name == "messageLength" && record.fields.iter()
+                    .any(|f| f.name == "message" && matches!(f.ty, SemanticType::String)))
+            })
+            .flat_map(|f| {
+                let access = format!("{prefix}.{}", ident(&f.name));
+                if let SemanticType::Record { name } = &f.ty
+                    && name.ends_with("Query")
+                {
+                    return self.arguments(name, &access);
+                }
+                vec![(access, &f.ty)]
+            })
+            .collect()
+    }
+    fn public_type(&self, ty: &SemanticType) -> Result<String> {
+        Ok(match ty {
+            SemanticType::Scalar { name } if name == "char" => "u8".into(),
+            SemanticType::Scalar { name } => name.clone(),
+            SemanticType::Handle { .. } => "u64".into(),
+            SemanticType::Record { name } if name == "Float3" => "$crate::Float3".into(),
+            SemanticType::Record { name } | SemanticType::Enum { name } => {
+                format!("$crate::types::callins::{name}")
+            }
+            SemanticType::String => "String".into(),
+            SemanticType::Bytes => "Vec<u8>".into(),
+            SemanticType::List { element } | SemanticType::FixedArray { element, .. } => {
+                format!("Vec<{}>", self.public_type(element)?)
+            }
+            _ => bail!("public callin type {ty:?}"),
+        })
+    }
+    fn parameter(&self, access: &str, ty: &SemanticType) -> Result<(String, String)> {
+        Ok(match ty {
+            SemanticType::String => ("&str".into(), format!("{access}.as_str()")),
+            SemanticType::Bytes => ("&[u8]".into(), format!("{access}.as_slice()")),
+            SemanticType::List { element } | SemanticType::FixedArray { element, .. } => (
+                format!("&[{}]", self.public_type(element)?),
+                format!("{access}.as_slice()"),
+            ),
+            SemanticType::Record { name } if name != "Float3" => {
+                (format!("&{}", self.public_type(ty)?), format!("&{access}"))
+            }
+            _ => (self.public_type(ty)?, access.into()),
+        })
+    }
+    fn public_result(&self, record: &RecordModel) -> Result<String> {
+        let types = record
+            .fields
+            .iter()
+            .map(|f| self.public_type(&f.ty))
+            .collect::<Result<Vec<_>>>()?;
+        Ok(match types.as_slice() {
+            [] => "()".into(),
+            [only] => only.clone(),
+            _ => format!("({})", types.join(", ")),
+        })
+    }
+    fn pack_result(&self, record: &RecordModel) -> String {
+        let fields = record
+            .fields
+            .iter()
+            .enumerate()
+            .map(|(i, f)| {
+                let access = if record.fields.len() == 1 {
+                    "returned".into()
+                } else {
+                    format!("returned.{i}")
+                };
+                format!("{}:{access}", ident(&f.name))
+            })
+            .collect::<Vec<_>>()
+            .join(",");
+        let unit = if record.fields.is_empty() {
+            "let ()=returned;"
+        } else {
+            ""
+        };
+        format!(
+            "{{{unit}$crate::types::callins::{}{{{fields}}}}}",
+            record.name
+        )
+    }
     fn result_leaves(&self, ty: &SemanticType, access: &str) -> Result<Vec<String>> {
         Ok(match ty {
             SemanticType::Record { name } => self.records[name]
@@ -265,6 +367,22 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
                 .iter()
                 .map(|e| 1u32 << (*e as u32))
                 .sum::<u32>();
+            let arguments = builder
+                .arguments(&callin.query, "query")
+                .iter()
+                .map(|(access, ty)| builder.parameter(access, ty))
+                .collect::<Result<Vec<_>>>()?;
+            let parameters = arguments
+                .iter()
+                .map(|(ty, _)| ty.clone())
+                .collect::<Vec<_>>();
+            let invoke_args = arguments
+                .iter()
+                .map(|(_, value)| format!(",{value}"))
+                .collect::<String>();
+            let result_type = builder.public_result(result_record)?;
+            let pack_result = builder.pack_result(result_record);
+            let query_name = if arguments.is_empty() { "_" } else { "query" };
             let mut replace = |tokens: TokenStream| -> Result<TokenStream> {
                 let args =
                     syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated
@@ -284,7 +402,7 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
                     bail!("{native_name}: {} leftover query args", args.len());
                 }
                 let invoke = format!(
-                    "let value:$crate::types::callins::{result_type}=$crate::module::wasm_boundary($slot.with(|slot|slot.invoke_for_environment({environment_mask},|module,spring| {{let query={query}; $handler(module,spring,&query)}}))); ",
+                    "let value:$crate::types::callins::{result_type}=$crate::module::wasm_boundary($slot.with(|slot|slot.invoke_for_environment::<{environment_mask},_>(|module,spring| {{let {query_name}={query}; let returned=$handler(module,spring{invoke_args})?; Ok({pack_result})}}))); ",
                     result_type = callin.result
                 );
                 let expr = if let Some(buffer) = buffer {
@@ -327,7 +445,7 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
             // Add native C exports to the same macro expansion. String-buffer
             // capacity is only a Wasm transport concern.
             let native = format!(
-                "#[cfg(not(target_arch=\"wasm32\"))] #[unsafe(no_mangle)] pub unsafe extern \"C\" fn {native_name}(_interface:*const $crate::__sys::NativeInterface,data:*mut core::ffi::c_void,query:*const $crate::__sys::{query},result:*mut $crate::__sys::{result}) {{ let Some(result)=(unsafe {{result.as_mut()}}) else {{return;}}; *result=Default::default(); result.error=$crate::module::error_pointer($slot.with(|slot| {{slot.validate_identity(data)?; slot.invoke_for_environment({environment_mask},|module,spring| {{let query=unsafe {{$crate::__native_callins::decode_{decode}(query)}}?;let value=$handler(module,spring,&query)?;$crate::__native_callins::encode_{encode}(&value,result)}})}})); }}",
+                "#[cfg(not(target_arch=\"wasm32\"))] #[unsafe(no_mangle)] pub unsafe extern \"C\" fn {native_name}(_interface:*const $crate::__sys::NativeInterface,data:*mut core::ffi::c_void,query:*const $crate::__sys::{query},result:*mut $crate::__sys::{result}) {{ let Some(result)=(unsafe {{result.as_mut()}}) else {{return;}}; *result=Default::default(); result.error=$crate::module::error_pointer($slot.with(|slot| {{slot.validate_identity(data)?; slot.invoke_for_environment::<{environment_mask},_>(|module,spring| {{let {query_name}=unsafe {{$crate::__native_callins::decode_{decode}(query)}}?;let returned=$handler(module,spring{invoke_args})?;let value={pack_result};$crate::__native_callins::encode_{encode}(&value,result)}})}})); }}",
                 query = callin.query,
                 result = callin.result,
                 decode = ident(&callin.query),
@@ -350,7 +468,11 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
                     .map_err(|error| anyhow::anyhow!("native callin tokens: {error}"))?,
             );
             *expansion = Group::new(Delimiter::Brace, body);
-            output.push_str(&format!("/// Shared scoped `{native_name}` handler: `(&Module, &mut Spring, &{query}) -> Result<{result}>`.\n#[macro_export]\nmacro_rules! {macro_name} {{ {tokens} }}\n",query=callin.query,result=callin.result,tokens=tokens.into_iter().collect::<TokenStream>()));
+            let signature = parameters
+                .iter()
+                .map(|p| format!(", {p}"))
+                .collect::<String>();
+            output.push_str(&format!("/// Shared scoped `{native_name}` handler: `(&Module, &mut Spring{signature}) -> Result<{result_type}>`.\n#[macro_export]\nmacro_rules! {macro_name} {{ {tokens} }}\n",tokens=tokens.into_iter().collect::<TokenStream>()));
             emitted.insert(native_name.to_owned());
         }
     }
@@ -369,6 +491,14 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
     let mut smoke = String::from(
         "/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */\n// @generated by spring-api-codegen; do not edit.\n",
     );
+    for environment in crate::model::Environment::ALL {
+        if environment == crate::model::Environment::Menu {
+            continue;
+        }
+        let ty = format!("{environment:?}");
+        let slot = format!("MODULE_{}", ty.to_snake_case().to_uppercase());
+        smoke.push_str(&format!("std::thread_local!{{static {slot}:spring_sdk::module::ModuleSlot<spring_sdk::{ty},Fixture>=const{{spring_sdk::module::ModuleSlot::new()}};}}\n"));
+    }
     for name in &emitted {
         let callin = model
             .callins
@@ -380,8 +510,48 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
         } else {
             ""
         };
+        let arguments = builder
+            .arguments(&callin.query, "query")
+            .iter()
+            .map(|(access, ty)| builder.parameter(access, ty))
+            .collect::<Result<Vec<_>>>()?;
+        let parameters = arguments
+            .iter()
+            .enumerate()
+            .map(|(i, (ty, _))| format!(",_arg{i}:{}", ty.replace("$crate", "spring_sdk")))
+            .collect::<String>();
+        let result = builder
+            .public_result(builder.records[&callin.result])?
+            .replace("$crate", "spring_sdk");
+        let environment = if callin
+            .environments
+            .contains(&crate::model::Environment::Menu)
+        {
+            crate::model::Environment::Menu
+        } else {
+            *callin.environments.first().context("callin environment")?
+        };
+        let environment = format!("{environment:?}");
+        let slot = if environment == "Menu" {
+            "MODULE".into()
+        } else {
+            format!("MODULE_{}", environment.to_snake_case().to_uppercase())
+        };
+        let handler = format!("handler_{}", name.to_snake_case());
+        let hook = match callin.name.as_str() {
+            "Update" => "record_update(module,_arg0);",
+            "ActivateMenu" => "record_message(module,_arg0);",
+            _ => "",
+        };
+        let value = match callin.name.as_str() {
+            "AllowDraw" => "true",
+            "ScreenTooltip" => "String::from(\"tooltip 日本語\")",
+            _ if result == "()" => "()",
+            _ => "Default::default()",
+        };
         smoke.push_str(&format!(
-            "spring_sdk::export_{}!(MODULE,handler{capacity});\n",
+            "fn {handler}(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::{environment}>{parameters})->spring_sdk::Result<{result}> {{record_call(module);{hook}Ok({value})}}\n\
+             spring_sdk::export_{}!({slot},{handler}{capacity});\n",
             name.to_snake_case()
         ));
     }

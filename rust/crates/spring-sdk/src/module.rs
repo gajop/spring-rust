@@ -113,13 +113,15 @@ impl<E: Environment, T: Module<E>> ModuleSlot<E, T> {
     }
 
     #[doc(hidden)]
-    pub fn invoke_for_environment<R>(
+    pub fn invoke_for_environment<const MASK: u32, R>(
         &self,
-        mask: u32,
         handler: impl for<'call> FnOnce(&T, &mut Spring<'call, E>) -> Result<R>,
     ) -> Result<R> {
-        if mask & E::MASK == 0 {
-            return Err(invalid());
+        const {
+            assert!(
+                MASK & E::MASK != 0,
+                "callin is not available in this module environment"
+            );
         }
         self.invoke(handler)
     }
