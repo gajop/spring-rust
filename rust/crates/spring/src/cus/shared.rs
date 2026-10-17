@@ -10,6 +10,8 @@ impl<T: ?Sized> Capture for T {}
 
 pub type TaskFuture = Pin<Box<dyn Future<Output = ()> + 'static>>;
 pub type TaskStart = Box<dyn FnOnce(super::UnitCtx) -> TaskFuture>;
+#[derive(Clone, Default)]
+pub struct EngineScope;
 
 pub fn wake<T>(state: &SharedCell<T>, f: impl FnOnce(&mut T)) {
     f(&mut state.borrow_mut());

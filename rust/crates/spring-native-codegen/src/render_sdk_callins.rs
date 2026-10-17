@@ -566,6 +566,16 @@ pub fn render(model: &ApiModel) -> Result<(String, String, String)> {
 fn specialized_macros() -> &'static str {
     r#"
 #[macro_export]
+macro_rules! export_draw_world {
+    ($handler:path)=>{
+        #[cfg(target_arch="wasm32")]
+        #[unsafe(export_name="spring:callin/draw-world")]
+        pub extern "C" fn __spring_wasm_core_callin_draw_world() {
+            $handler(0u8);
+        }
+    };
+}
+#[macro_export]
 macro_rules! export_allow_unit_creation {
     ($handler:path)=>{
         #[cfg(target_arch="wasm32")]

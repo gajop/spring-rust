@@ -206,16 +206,27 @@ pub mod wire {
     }
 }
 
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __cus_enter {
+    ($module:expr, $spring:expr, $accessor:path, $call:expr) => {
+        ($call)($accessor($module), $spring)
+    };
+    ($module:expr, $spring:expr, $accessor:path, $call:expr, $entry:path) => {
+        $entry($module, $spring, $call)
+    };
+}
+
 /// Export a CUS host owned by an existing module. The accessor returns a
 /// shared host reference; no whole-host borrow crosses a script or engine call.
 #[macro_export]
 macro_rules! export_core_cus {
-    ($slot:ident, $host:ty, $accessor:path, $environment:ty) => {
+    ($slot:ident, $host:ty, $accessor:path, $environment:ty $(, $entry:path)?) => {
         #[allow(dead_code)]
         pub fn with_cus_module<R>(
             f: impl FnOnce(&$host, &mut $crate::Spring<'_, $environment>) -> $crate::Result<R>,
         ) -> $crate::Result<R> {
-            $slot.with(|slot| slot.invoke(|module, spring| f($accessor(module), spring)))
+            $slot.with(|slot| slot.invoke(|module, spring| $crate::__cus_enter!(module, spring, $accessor, f $(, $entry)?)))
         }
 
         #[cfg(not(target_arch = "wasm32"))]
@@ -234,14 +245,14 @@ macro_rules! export_core_cus {
             result.error = $crate::module::error_pointer(unsafe {
                 $slot.with_host(|slot| {
                     slot.validate_identity(data)?;
-                    slot.invoke(|module, spring| unsafe {
+                    slot.invoke(|module, spring| $crate::__cus_enter!(module, spring, $accessor, |host, spring| unsafe {
                         $crate::cus::exports::native_invoke(
-                            $accessor(module),
+                            host,
                             spring,
                             query,
                             result,
                         )
-                    })
+                    } $(, $entry)?))
                 })
             });
         }
@@ -262,9 +273,9 @@ macro_rules! export_core_cus {
             result.error = $crate::module::error_pointer(unsafe {
                 $slot.with_host(|slot| {
                     slot.validate_identity(data)?;
-                    slot.invoke(|module, spring| unsafe {
-                        $crate::cus::exports::native_named($accessor(module), spring, query, result)
-                    })
+                    slot.invoke(|module, spring| $crate::__cus_enter!(module, spring, $accessor, |host, spring| unsafe {
+                        $crate::cus::exports::native_named(host, spring, query, result)
+                    } $(, $entry)?))
                 })
             });
         }
@@ -286,10 +297,10 @@ macro_rules! export_core_cus {
                     let query = unsafe { query.as_ref() }.ok_or($crate::ApiError::new(
                         $crate::ErrorCode::InvalidArgument as i32,
                     ))?;
-                    slot.invoke(|module, _| {
-                        $accessor(module).cus_tick(query.frame);
+                    slot.invoke(|module, spring| $crate::__cus_enter!(module, spring, $accessor, |host: &$host, _| {
+                        host.cus_tick(query.frame);
                         Ok(())
-                    })
+                    } $(, $entry)?))
                 })
             });
         }
@@ -311,10 +322,10 @@ macro_rules! export_core_cus {
                     let query = unsafe { query.as_ref() }.ok_or($crate::ApiError::new(
                         $crate::ErrorCode::InvalidArgument as i32,
                     ))?;
-                    slot.invoke(|module, _| {
-                        $accessor(module).cus_detach(query.instanceID);
+                    slot.invoke(|module, spring| $crate::__cus_enter!(module, spring, $accessor, |host: &$host, _| {
+                        host.cus_detach(query.instanceID);
                         Ok(())
-                    })
+                    } $(, $entry)?))
                 })
             });
         }

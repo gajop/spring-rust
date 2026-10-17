@@ -350,6 +350,12 @@ mod tests {
 }
 
 impl<E: Synced> UnitEngine for CusEngine<E> {
+    fn engine_scope(&self) -> super::shared::EngineScope {
+        Some(crate::ModuleRef {
+            owner: self.module.owner.clone(),
+            environment: core::marker::PhantomData,
+        })
+    }
     fn turn(
         &mut self,
         _: UnitId,

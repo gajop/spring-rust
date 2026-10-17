@@ -60,12 +60,13 @@ pub(super) fn executable_callin<'a>(
 }
 
 // The scoped SDK can also use the existing scalar ABI of specialized
-// notifications. AllowUnitCreation keeps its reviewed i32 flag projection.
+// notifications. AllowUnitCreation keeps its i32 flag projection; DrawWorld
+// has no Wasm arguments despite the native empty-query padding byte.
 pub(super) fn scoped_executable_callin<'a>(
     entry: ExpandedCallin<'a>,
     records: &BTreeMap<String, RecordModel>,
 ) -> Option<ExecutableCallin<'a>> {
-    if entry.name == "AllowUnitCreation" {
+    if matches!(entry.name.as_str(), "AllowUnitCreation" | "DrawWorld") {
         return None;
     }
     let query = records.get(&entry.callin.query)?;

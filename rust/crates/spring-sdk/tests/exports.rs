@@ -36,6 +36,11 @@ include!(concat!(
     "/../../../rts/wasm/generated/sdk/scoped_callin_exports_test.rs"
 ));
 
+// WasmCoreBindings resolves DrawWorld as () -> (). The native query has a
+// padding byte, which must never become an extra Wasm callback argument.
+#[cfg(target_arch = "wasm32")]
+const _: extern "C" fn() = __spring_wasm_core_callin_draw_world;
+
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn native_exports_validate_identity_and_dispatch() {

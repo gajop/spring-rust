@@ -159,14 +159,6 @@ pub trait Widget<G = (), E: spring::capabilities::Common = spring::Ui>:
         _view_height: i32,
     ) {
     }
-    fn draw_unit(
-        &self,
-        _ctx: &AddonContext<'_, G, E>,
-        _unit_id: i32,
-        _draw_mode: i32,
-    ) -> EventResult {
-        EventResult::Ignored
-    }
     fn view_resize(&self, _ctx: &AddonContext<'_, G, E>, _geometry: &ViewGeometry) {}
     fn game_over(&self, _ctx: &AddonContext<'_, G, E>, _winning_ally_teams: &[u8]) {}
     fn recv_from_synced(&self, _ctx: &AddonContext<'_, G, E>, _message: &[u8]) {}
@@ -601,17 +593,6 @@ impl<G, E: spring::capabilities::Common> WidgetHandler<G, E> {
                 }
             }
         });
-    }
-
-    pub fn draw_unit(&self, spring: &spring::Spring<'_, E>, unit_id: i32, draw_mode: i32) -> bool {
-        self.dispatch(spring, "DrawUnit", |ctx| {
-            for (i, widget) in self.widgets.iter().enumerate() {
-                if self.enabled[i].get() && widget.draw_unit(ctx, unit_id, draw_mode).is_handled() {
-                    return true;
-                }
-            }
-            false
-        })
     }
 
     pub fn view_resize(&self, spring: &spring::Spring<'_, E>, geometry: &ViewGeometry) {

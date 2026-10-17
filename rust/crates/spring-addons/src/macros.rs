@@ -517,17 +517,6 @@ macro_rules! __impl_ui_exports {
             })
         }
         $crate::reexports::export_draw_screen_effects!(HANDLER, __spring_addon_draw_screen_effects);
-        fn __spring_addon_draw_unit(
-            module: &__SpringAddonModule,
-            spring: &mut $crate::reexports::Spring<'_, $environment>,
-            unit_id: i32,
-            draw_mode: i32,
-        ) -> $crate::reexports::Result<bool> {
-            module.ensure_initialized(spring);
-            let handler = &module.handler;
-            Ok({ handler.draw_unit(spring, unit_id, draw_mode) })
-        }
-        $crate::reexports::export_draw_unit!(HANDLER, __spring_addon_draw_unit);
         fn __spring_addon_widget_game_over(
             module: &__SpringAddonModule,
             spring: &mut $crate::reexports::Spring<'_, $environment>,
@@ -627,7 +616,10 @@ macro_rules! __impl_rules_exports {
         );
         $(
             fn __spring_addon_cus(module: &__SpringAddonModule) -> &$cus { &module.cus }
-            $crate::reexports::export_core_cus!(HANDLER, $cus, __spring_addon_cus, $environment);
+            fn __spring_addon_cus_entry<R>(module: &__SpringAddonModule, spring: &mut $crate::reexports::Spring<'_, $environment>, call: impl FnOnce(&$cus, &mut $crate::reexports::Spring<'_, $environment>) -> $crate::reexports::Result<R>) -> $crate::reexports::Result<R> {
+                module.handler.with_context(spring, |ctx| call(&module.cus, &mut ctx.spring().reborrow()))
+            }
+            $crate::reexports::export_core_cus!(HANDLER, $cus, __spring_addon_cus, $environment, __spring_addon_cus_entry);
         )?
         fn __spring_addon_game_frame(
             module: &__SpringAddonModule,

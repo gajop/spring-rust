@@ -21,3 +21,8 @@ too_many_arguments = "allow"
 
 [lib]
 path = "src/lib.rs"
+
+[[example]]
+name = "ui-module"
+path = "examples/ui_module.rs"
+crate-type = ["cdylib"]
