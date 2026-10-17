@@ -830,7 +830,7 @@ impl NativeRenderer<'_> {
                 if padded_numeric_array(element) {
                     let raw_ty = native_type(raw_element)?;
                     format!(
-                        "{{ if ({value}).len() > {length} {{ return Err(ApiError::new(ErrorCode::InvalidArgument as i32)); }} let mut converted = [0 as {raw_ty}; {length}]; for (slot, item) in converted.iter_mut().zip(({value}).iter()) {{ *slot = {converted}; }} converted }}"
+                        "{{ if ({value}).len() > {length} {{ return Err(ApiError::new(ErrorCode::InvalidArgument as i32)); }} let mut converted: [{raw_ty}; {length}] = [Default::default(); {length}]; for (slot, item) in converted.iter_mut().zip(({value}).iter()) {{ *slot = {converted}; }} converted }}"
                     )
                 } else {
                     format!(

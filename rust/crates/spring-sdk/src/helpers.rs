@@ -159,3 +159,18 @@ impl<E: Local> crate::camera::Camera<'_, E> {
         )
     }
 }
+
+impl<E: Game> crate::units_pieces::UnitsPieces<'_, E> {
+    /// Model-space position of a named piece; `None` when the model has no such piece.
+    pub fn position_by_name(&self, unit: i32, name: &str) -> Result<Option<crate::Float3>> {
+        let Some(piece) = self
+            .get_unit_piece_map(unit)?
+            .into_iter()
+            .find(|piece| piece.name == name)
+        else {
+            return Ok(None);
+        };
+        self.get_unit_piece_position(unit, piece.piece_num)
+            .map(Some)
+    }
+}

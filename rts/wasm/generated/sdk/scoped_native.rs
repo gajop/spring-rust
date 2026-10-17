@@ -19877,7 +19877,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -19890,7 +19890,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -19903,7 +19903,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -19916,7 +19916,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -19929,7 +19929,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20001,7 +20001,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20014,7 +20014,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20125,7 +20125,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20138,7 +20138,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20151,7 +20151,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20164,7 +20164,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20177,7 +20177,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20190,7 +20190,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 4 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 4];
+                let mut converted: [f32; 4] = [Default::default(); 4];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20240,7 +20240,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 3];
+                let mut converted: [f32; 3] = [Default::default(); 3];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20253,7 +20253,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 3];
+                let mut converted: [f32; 3] = [Default::default(); 3];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20266,7 +20266,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 3];
+                let mut converted: [f32; 3] = [Default::default(); 3];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20279,7 +20279,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 3];
+                let mut converted: [f32; 3] = [Default::default(); 3];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20292,7 +20292,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 3];
+                let mut converted: [f32; 3] = [Default::default(); 3];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20305,7 +20305,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 3];
+                let mut converted: [f32; 3] = [Default::default(); 3];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -20318,7 +20318,7 @@ pub(crate) mod unsynced_ctrl {
                 if (value).len() > 3 {
                     return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
                 }
-                let mut converted = [0 as f32; 3];
+                let mut converted: [f32; 3] = [Default::default(); 3];
                 for (slot, item) in converted.iter_mut().zip((value).iter()) {
                     *slot = *(item) as _;
                 }
@@ -21425,7 +21425,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -21465,7 +21465,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -21600,7 +21600,7 @@ pub(crate) mod gfx {
             if (equation).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((equation).iter()) {
                 *slot = *(item) as _;
             }
@@ -25197,7 +25197,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -25357,7 +25357,7 @@ pub(crate) mod gfx {
             if (values).len() > 16 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 16];
+            let mut converted: [f32; 16] = [Default::default(); 16];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -25420,7 +25420,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -25570,7 +25570,7 @@ pub(crate) mod gfx {
             if (values).len() > 16 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 16];
+            let mut converted: [f32; 16] = [Default::default(); 16];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -25651,7 +25651,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -25700,7 +25700,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -25844,7 +25844,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -26804,7 +26804,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -27256,7 +27256,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -27300,7 +27300,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -27422,7 +27422,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -27563,7 +27563,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -27685,7 +27685,7 @@ pub(crate) mod gfx {
             if (values).len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as i32; 4];
+            let mut converted: [i32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip((values).iter()) {
                 *slot = *(item) as _;
             }
@@ -28523,7 +28523,7 @@ pub(crate) mod gfx {
             if value.vertex.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.vertex.iter()) {
                 *slot = *(item) as _;
             }
@@ -28533,7 +28533,7 @@ pub(crate) mod gfx {
             if value.normal.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.normal.iter()) {
                 *slot = *(item) as _;
             }
@@ -28543,7 +28543,7 @@ pub(crate) mod gfx {
             if value.tex_coord.len() > 2 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 2];
+            let mut converted: [f32; 2] = [Default::default(); 2];
             for (slot, item) in converted.iter_mut().zip(value.tex_coord.iter()) {
                 *slot = *(item) as _;
             }
@@ -28553,7 +28553,7 @@ pub(crate) mod gfx {
             if value.color.len() > 4 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 4];
+            let mut converted: [f32; 4] = [Default::default(); 4];
             for (slot, item) in converted.iter_mut().zip(value.color.iter()) {
                 *slot = *(item) as _;
             }
@@ -28848,7 +28848,7 @@ pub(crate) mod lights {
             if value.position.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.position.iter()) {
                 *slot = *(item) as _;
             }
@@ -28858,7 +28858,7 @@ pub(crate) mod lights {
             if value.direction.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.direction.iter()) {
                 *slot = *(item) as _;
             }
@@ -28868,7 +28868,7 @@ pub(crate) mod lights {
             if value.ambient_color.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.ambient_color.iter()) {
                 *slot = *(item) as _;
             }
@@ -28878,7 +28878,7 @@ pub(crate) mod lights {
             if value.diffuse_color.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.diffuse_color.iter()) {
                 *slot = *(item) as _;
             }
@@ -28888,7 +28888,7 @@ pub(crate) mod lights {
             if value.specular_color.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.specular_color.iter()) {
                 *slot = *(item) as _;
             }
@@ -28898,7 +28898,7 @@ pub(crate) mod lights {
             if value.intensity_weight.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.intensity_weight.iter()) {
                 *slot = *(item) as _;
             }
@@ -28908,7 +28908,7 @@ pub(crate) mod lights {
             if value.attenuation.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.attenuation.iter()) {
                 *slot = *(item) as _;
             }
@@ -28918,7 +28918,7 @@ pub(crate) mod lights {
             if value.ambient_decay_rate.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.ambient_decay_rate.iter())
             {
                 *slot = *(item) as _;
@@ -28929,7 +28929,7 @@ pub(crate) mod lights {
             if value.diffuse_decay_rate.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted.iter_mut().zip(value.diffuse_decay_rate.iter())
             {
                 *slot = *(item) as _;
@@ -28940,7 +28940,7 @@ pub(crate) mod lights {
             if value.specular_decay_rate.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted
                 .iter_mut()
                 .zip(value.specular_decay_rate.iter())
@@ -28953,7 +28953,7 @@ pub(crate) mod lights {
             if value.decay_function_type.len() > 3 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 3];
+            let mut converted: [f32; 3] = [Default::default(); 3];
             for (slot, item) in converted
                 .iter_mut()
                 .zip(value.decay_function_type.iter())
@@ -41960,7 +41960,7 @@ pub(crate) mod unit_control {
             if (matrix).len() > 16 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 16];
+            let mut converted: [f32; 16] = [Default::default(); 16];
             for (slot, item) in converted.iter_mut().zip((matrix).iter()) {
                 *slot = *(item) as _;
             }
@@ -44020,7 +44020,7 @@ pub(crate) mod feature_control {
             if (matrix).len() > 16 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 16];
+            let mut converted: [f32; 16] = [Default::default(); 16];
             for (slot, item) in converted.iter_mut().zip((matrix).iter()) {
                 *slot = *(item) as _;
             }
@@ -48110,7 +48110,7 @@ pub(crate) mod object_rendering {
             if value.float_values.len() > 32 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as f32; 32];
+            let mut converted: [f32; 32] = [Default::default(); 32];
             for (slot, item) in converted.iter_mut().zip(value.float_values.iter()) {
                 *slot = *(item) as _;
             }
@@ -48120,7 +48120,7 @@ pub(crate) mod object_rendering {
             if value.int_values.len() > 32 {
                 return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
             }
-            let mut converted = [0 as i32; 32];
+            let mut converted: [i32; 32] = [Default::default(); 32];
             for (slot, item) in converted.iter_mut().zip(value.int_values.iter()) {
                 *slot = *(item) as _;
             }

@@ -214,7 +214,15 @@ Its visual scenario and HUD/restart checks complete, with all eight measured
 images/crops within their existing tolerances. The Mesa revision gate is
 still red.
 
-The other four Cabal game-code ports, the other game-code port, and job helpers
+Area 17's Wasm port passes 22 Rust and six Lua gameplay checks on Linux and
+Wine, its technology UI fixture, strict default/all-feature Clippy, six shared
+unit tests and installed-module/static verification. The visual scenario
+checks the Rml callbacks, four weapons/abilities and crater, and all three
+measured images meet the existing 8% limit. Its renderer revision gate is
+still red. Diagnostic builds now explicitly enable their INFO sections so
+verification markers remain visible with the engine's default NOTICE filter.
+
+The other three Cabal game-code ports, the other game-code port, and job helpers
 remain unfinished. Discovery, rooms, and reconnect UI are also still separate
 work. No private game content has been uploaded or released.
 A live native/Wasm `All` fixture also tests terrain mutation and drawing in one
