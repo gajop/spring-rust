@@ -297,9 +297,8 @@ macro_rules! export_core_cus {
                     let query = unsafe { query.as_ref() }.ok_or($crate::ApiError::new(
                         $crate::ErrorCode::InvalidArgument as i32,
                     ))?;
-                    slot.invoke(|module, spring| $crate::__cus_enter!(module, spring, $accessor, |host: &$host, _| {
-                        host.cus_tick(query.frame);
-                        Ok(())
+                    slot.invoke(|module, spring| $crate::__cus_enter!(module, spring, $accessor, |host: &$host, spring| {
+                        host.cus_tick(spring, query.frame)
                     } $(, $entry)?))
                 })
             });
@@ -322,9 +321,8 @@ macro_rules! export_core_cus {
                     let query = unsafe { query.as_ref() }.ok_or($crate::ApiError::new(
                         $crate::ErrorCode::InvalidArgument as i32,
                     ))?;
-                    slot.invoke(|module, spring| $crate::__cus_enter!(module, spring, $accessor, |host: &$host, _| {
-                        host.cus_detach(query.instanceID);
-                        Ok(())
+                    slot.invoke(|module, spring| $crate::__cus_enter!(module, spring, $accessor, |host: &$host, spring| {
+                        host.cus_detach(spring, query.instanceID)
                     } $(, $entry)?))
                 })
             });
@@ -404,18 +402,16 @@ macro_rules! export_core_cus {
         #[unsafe(no_mangle)]
         pub extern "C" fn SPRING_CUS_TICK(frame: i32) {
             use $crate::cus::host::CusModule as _;
-            $crate::module::wasm_boundary(with_cus_module(|host, _| {
-                host.cus_tick(frame as u32);
-                Ok(())
+            $crate::module::wasm_boundary(with_cus_module(|host, spring| {
+                host.cus_tick(spring, frame as u32)
             }));
         }
         #[cfg(target_arch = "wasm32")]
         #[unsafe(no_mangle)]
         pub extern "C" fn SPRING_CUS_DETACH(instance: i32) {
             use $crate::cus::host::CusModule as _;
-            $crate::module::wasm_boundary(with_cus_module(|host, _| {
-                host.cus_detach(instance as u32);
-                Ok(())
+            $crate::module::wasm_boundary(with_cus_module(|host, spring| {
+                host.cus_detach(spring, instance as u32)
             }));
         }
     };
