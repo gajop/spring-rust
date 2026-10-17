@@ -9,6 +9,20 @@ use std::{
 };
 
 #[test]
+fn native_callin_errors_include_the_code_in_the_message() {
+    assert!(module::error_pointer(Ok(())).is_null());
+    for code in [4, 5, 999, -7] {
+        let pointer = module::error_pointer(Err(ApiError::new(code)));
+        let error = unsafe { &*pointer };
+        assert_eq!(error.code, code);
+        assert_eq!(
+            unsafe { CStr::from_ptr(error.message) }.to_str().unwrap(),
+            format!("spring-sdk module callin failed (error code {code})")
+        );
+    }
+}
+
+#[test]
 fn shader_params_preserve_stage_options_and_initialize_uniforms_on_native() {
     thread_local! { static BOUND: RefCell<Vec<u32>> = const { RefCell::new(Vec::new()) }; }
     unsafe extern "C" fn create(
