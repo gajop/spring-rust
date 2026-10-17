@@ -2,6 +2,11 @@ name: Wasm API
 
 on:
   workflow_dispatch:
+    inputs:
+      performance:
+        description: Also build a release engine and run performance benchmarks
+        type: boolean
+        default: false
   pull_request:
     paths:
       - ".github/workflows/wasm.yml"
@@ -43,6 +48,7 @@ permissions:
   contents: read
 
 jobs:
+  # Automatic pushes/PRs run only source generation and Rust checks.
   check:
     runs-on: ubuntu-24.04
     steps:
@@ -57,8 +63,8 @@ jobs:
       - name: Install Wasm target
         run: rustup target add wasm32-unknown-unknown
 
-      - name: Install libclang and native regression dependencies
-        run: sudo apt-get update && sudo apt-get install --yes libclang-18-dev libsdl2-dev libjsoncpp-dev libgl-dev libgl1-mesa-dri python3-clang-18 libopenal-dev libfreetype-dev libfontconfig-dev libogg-dev libvorbis-dev libopus-dev libminizip-dev libunwind-dev
+      - name: Install libclang
+        run: sudo apt-get update && sudo apt-get install --yes libclang-18-dev
 
       - name: Locate libclang
         run: echo "LIBCLANG_PATH=/usr/lib/llvm-18/lib" >> "$GITHUB_ENV"
@@ -88,6 +94,30 @@ jobs:
           git diff --exit-code -- \
             test/native_api_parity/native/src/generated_tests.rs \
             test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/generated_api_tests.lua
+
+  # Full engine builds are expensive and consume Actions minutes. Opt in
+  # through workflow_dispatch; a push never starts these jobs.
+  integration:
+    if: github.event_name == 'workflow_dispatch'
+    needs: check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Install Wasm target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Install libclang and native regression dependencies
+        run: sudo apt-get update && sudo apt-get install --yes libclang-18-dev libsdl2-dev libjsoncpp-dev libgl-dev libgl1-mesa-dri python3-clang-18 libopenal-dev libfreetype-dev libfontconfig-dev libogg-dev libvorbis-dev libopus-dev libminizip-dev libunwind-dev
+
+      - name: Locate libclang
+        run: echo "LIBCLANG_PATH=/usr/lib/llvm-18/lib" >> "$GITHUB_ENV"
 
       # The snapshot verifier generates into a temporary tree. The native
       # implementation audit and mutant generator below require fresh metadata
@@ -136,8 +166,9 @@ jobs:
             --output-dir test/native_api_parity/out-ci-wasm
 
   performance:
+    if: github.event_name == 'workflow_dispatch' && inputs.performance
     runs-on: ubuntu-24.04
-    needs: check
+    needs: integration
     steps:
       - uses: actions/checkout@v6
         with:

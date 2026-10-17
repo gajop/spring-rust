@@ -53,6 +53,7 @@ def main():
     args=argparse.Namespace(blank_map_x=8,blank_map_y=8,blank_map_height=96,blank_map_terrain='blank',
         blank_map_seed=424242,cases=1,tests=None,test_prefix=None,enable_rendering_tests=True,
         process_test=None,spring=options.spring.resolve(),spring_headless=options.spring.resolve())
+    timed_out=False
     with tempfile.TemporaryDirectory(prefix='native-stub-audit-') as directory:
         datadir,_=prepare_datadir(Path(directory),None)
         game=datadir/'games/native_api_parity.sdd'
@@ -83,14 +84,20 @@ def main():
             process=subprocess.Popen([str(args.spring),'--window','--nocolor','--config',str(settings),
                 '--write-dir',str(settings.parent),str(script)],cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT)
             try:code=process.wait(timeout=30)
-            except (KeyboardInterrupt,subprocess.TimeoutExpired):
+            except (KeyboardInterrupt,subprocess.TimeoutExpired) as error:
                 process.terminate()
                 try:process.wait(timeout=5)
                 except subprocess.TimeoutExpired:process.kill();process.wait()
-                raise
+                if isinstance(error, KeyboardInterrupt): raise
+                code=process.returncode
+                timed_out=True
     log=(output/'spring.log').read_text(errors='replace')
-    if code or 'NO_STUBS_PASS' not in log or 'NO_STUBS_FAIL' in log:
-        raise SystemExit(f'Native audit failed (exit {code}): {output/"spring.log"}')
+    if timed_out or code or 'NO_STUBS_PASS' not in log or 'NO_STUBS_FAIL' in log:
+        # The runner's working directory is discarded after CI. Keep the
+        # engine failure in the job log, not just a path on that lost runner.
+        print("\n".join(log.splitlines()[-120:]), file=sys.stderr)
+        reason='timeout' if timed_out else f'exit {code}'
+        raise SystemExit(f'Native audit failed ({reason}): {output/"spring.log"}')
     assert re.search(r'\[NativeStubAudit\].*Warning:.*audit section/level 100%',log), 'Log section/level lost'
     print('PASS: non-default native API values, movement rejection/options, shield selection and framebuffer readback')
 
