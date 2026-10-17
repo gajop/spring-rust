@@ -158,9 +158,9 @@ be `Send`. Their host belongs to the addon module and permits callbacks during
 attachment without borrowing the entire host. Engine operations resolve a
 fresh scope through the owning module. Missing or rejected CUS operations
 produce errors. The new host and dispatch tests are not yet full game tests.
-The 10 addon tests pass on Linux and Wine, including native CUS reentry during
+The 11 addon tests pass on Linux and Wine, including native CUS reentry during
 attachment, named results, task wakeups, unit-ID reuse, and shutdown. The SDK
-has 44 unit tests, an export test, and 8 compile-fail checks. These checks do
+has 45 unit tests, an export test, and 8 compile-fail checks. These checks do
 not replace actual game execution.
 
 `UnitCtx::with_spring` gives a unit-script task a fresh synced Spring reference
@@ -206,13 +206,14 @@ measured differences against the pre-port code on the same renderer are
 the renderer revision gate remains red. No expected images or limits changed.
 
 Hunted's Wasm port passes strict default/all-feature Clippy and 30 common unit
-tests. All 35 integration assertions have passed on Linux and Wine, but Linux
-runs remain intermittent: the moving rabbit in the nearby-shot fear test can
-disappear before the assertion. Initial UI response timing differs between
-runs. A pre-port baseline run passed; this failure still needs resolving.
-Its visual scenario and HUD/restart checks complete, with all eight measured
-images/crops within their existing tolerances. The Mesa revision gate is
-still red.
+tests. All 35 integration assertions pass on Linux and Wine. The nearby-shot
+fear test sometimes killed its subject before checking fear; the same failure
+reproduced in the pre-port build. The fixture now chooses among the same nearby
+aim offsets using the actual muzzle position. All fear, ammunition and damage
+assertions remain unchanged. It passes at three different Linux run speeds and
+under Wine. The visual scenario and HUD/restart checks complete, with all eight
+measured images/crops within their existing limits. The Mesa revision gate
+remains red.
 
 Area 17's Wasm port passes 22 Rust and six Lua gameplay checks on Linux and
 Wine, its technology UI fixture, strict default/all-feature Clippy, six shared
@@ -230,9 +231,33 @@ the source/keyframe comparison. All six visual captures complete, including
 the non-black and settled-camera checks; every manually measured image/crop
 meets its existing limit. The Mesa package revision gate remains red.
 
-The other two Cabal game-code ports, the other game-code port, and job helpers
-remain unfinished. Discovery, rooms, and reconnect UI are also still separate
-work. No private game content has been uploaded or released.
+Gravitas's Wasm port passes all 19 in-game cases on Linux and Wine, nine shared
+unit tests and strict default/all-feature Clippy. Its normal build completes
+the real level with no test cases or runtime warnings. Real input verifies
+movement, four jump controls, push, pull, shooting just beyond weapon range,
+and return to the menu on both platforms. The last case exposed a pre-port
+Rust aiming bug: clamping a distant target dropped its height and used only a
+horizontal range check. The fix restores the Lua gun's 3D aim and weapon range
+query. The existing test is unchanged. Manually measured arena/HUD images meet
+their limits; the Mesa revision gate remains red. Wine control testing passes
+with software OpenGL; Zink crashes before gameplay and remains unresolved.
+
+To the Last Drop's Wasm port passes all 54 gameplay assertions on Linux and
+Wine, ten shared unit tests and strict default/all-feature Clippy. Live Lua/Rust
+animation comparison is exact across 105 samples. All three visual captures
+complete, and both boss models render. The first two images are pixel-identical
+to the pre-port build on the same renderer; both versions slightly exceed the
+old 1% limit. The third image meets its 3% limit. No goldens or limits changed;
+the renderer gate and visual suite remain red.
+
+Custom CUS tick and detach callbacks receive Spring explicitly, just like
+invoke and named calls. Addons can optionally use `create: make_state` when
+state construction needs engine resources. It receives Spring and returns
+`Result<State>`; existing addons can keep `Default` construction.
+
+All seven Cabal game-code ports are locally committed. The remaining game-code
+port and job helpers are unfinished. Discovery, rooms, and reconnect UI remain
+separate work. No private game content has been uploaded or released.
 A live native/Wasm `All` fixture also tests terrain mutation and drawing in one
 module, two launches, shutdown, and native loading-thread handoff
 ([results](data/scoped-sdk-2026-10-17/all-results.json)). Consumer ports
