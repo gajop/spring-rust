@@ -57,7 +57,7 @@ unsafe fn read_string(ptr: *const c_char, length: Option<usize>) -> Result<Strin
     })
 }
 
-unsafe fn check_error(error: *const spring_native_sys::Error) -> Result<()> {
+pub(crate) unsafe fn check_error(error: *const spring_native_sys::Error) -> Result<()> {
     if let Some(error) = unsafe { error.as_ref() } {
         Err(ApiError::new(error.code))
     } else {

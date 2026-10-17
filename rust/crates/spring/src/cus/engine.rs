@@ -8,7 +8,7 @@ use alloc::vec::Vec;
 ///
 /// Both the native adapter and the Core-Wasm host implement this trait. The
 /// defaults make small tests and game-owned mock backends easy to write.
-pub trait UnitEngine {
+pub trait UnitEngine: super::shared::Capture {
     fn turn(
         &mut self,
         _unit: UnitId,

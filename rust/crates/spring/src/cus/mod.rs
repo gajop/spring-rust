@@ -11,6 +11,7 @@ mod instance;
 mod registry;
 mod scheduler;
 mod script;
+mod shared;
 mod types;
 
 pub mod prelude;

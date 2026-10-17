@@ -1,15 +1,36 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+use super::shared::{Shared as Rc, SharedCell as RefCell};
 use super::*;
 use crate::{UnitId, WeaponDefId};
 use alloc::boxed::Box;
-use alloc::rc::Rc;
 use alloc::vec;
 use alloc::vec::Vec;
-use core::cell::{Cell, RefCell};
+use core::cell::Cell;
 use core::future::Future;
 use core::pin::Pin;
 use core::task::{Context, Poll};
+
+#[test]
+fn dropping_a_scheduler_releases_pending_task_captures() {
+    async fn suspended(state: Rc<RefCell<u32>>, context: UnitCtx) {
+        context.sleep_frames(100).await;
+        *state.borrow_mut() += 1;
+    }
+    let state = Rc::new(RefCell::new(0));
+    let scheduler = CusScheduler::new(UnitCtx::new(
+        UnitId(1),
+        Rc::new(RefCell::new(TestEngine::default())),
+    ));
+    scheduler.spawn(TaskDefinition::with_state(
+        "suspended",
+        Rc::clone(&state),
+        suspended,
+    ));
+    assert_eq!(Rc::strong_count(&state), 2);
+    drop(scheduler);
+    assert_eq!(Rc::strong_count(&state), 1);
+}
 
 #[derive(Default)]
 struct TestEngine {
@@ -173,7 +194,7 @@ fn lus_sleep_conversion_is_literal_and_has_a_minimum() {
 fn spawn_polls_child_before_parent_continues() {
     let engine = Rc::new(RefCell::new(TestEngine::default()));
     let context = UnitCtx::new(UnitId(7), Rc::clone(&engine));
-    let mut scheduler = CusScheduler::new(context);
+    let scheduler = CusScheduler::new(context);
     scheduler.spawn(TaskDefinition::new("parent", parent));
     assert_eq!(engine.borrow().events, vec![1, 2]);
 }
@@ -190,7 +211,7 @@ fn parent_then_sleeps(ctx: UnitCtx) -> TaskFuture {
 fn parent_keeps_running_after_spawning_a_child_and_sleeping() {
     let engine = Rc::new(RefCell::new(TestEngine::default()));
     let context = UnitCtx::new(UnitId(7), Rc::clone(&engine));
-    let mut scheduler = CusScheduler::new(context);
+    let scheduler = CusScheduler::new(context);
     scheduler.spawn(TaskDefinition::new("parent", parent_then_sleeps));
     assert_eq!(engine.borrow().events, vec![1]);
 
@@ -204,7 +225,7 @@ fn scheduler_does_not_drain_a_frame_twice() {
     let engine = Rc::new(RefCell::new(TestEngine::default()));
     let polls = Rc::new(RefCell::new(0));
     let context = UnitCtx::new(UnitId(7), Rc::clone(&engine));
-    let mut scheduler = CusScheduler::new(context);
+    let scheduler = CusScheduler::new(context);
     scheduler.spawn(TaskDefinition::with_state(
         "self-waking",
         Rc::clone(&polls),
@@ -226,7 +247,7 @@ fn animation_wait_yields_until_the_engine_reports_completion() {
         ..TestEngine::default()
     }));
     let context = UnitCtx::new(UnitId(7), Rc::clone(&engine));
-    let mut scheduler = CusScheduler::new(context);
+    let scheduler = CusScheduler::new(context);
     let task = scheduler.spawn(TaskDefinition::new("animating", animating));
     assert_eq!(engine.borrow().events, vec![3]);
     assert_eq!(engine.borrow().animation_queries.get(), 1);
@@ -248,7 +269,7 @@ fn animation_completion_after_the_frame_drain_only_resumes_its_waiters() {
     }));
     let polls = Rc::new(RefCell::new(0));
     let context = UnitCtx::new(UnitId(7), Rc::clone(&engine));
-    let mut scheduler = CusScheduler::new(context);
+    let scheduler = CusScheduler::new(context);
     scheduler.spawn(TaskDefinition::new("animating", animating));
     scheduler.spawn(TaskDefinition::with_state(
         "self-waking",
@@ -293,7 +314,7 @@ fn animation_completion_resumes_all_waiters_in_task_order() {
         ..TestEngine::default()
     }));
     let context = UnitCtx::new(UnitId(7), Rc::clone(&engine));
-    let mut scheduler = CusScheduler::new(context);
+    let scheduler = CusScheduler::new(context);
     for marker in [9, 4, 6] {
         scheduler.spawn(TaskDefinition::with_state(
             "waiter",
@@ -351,7 +372,7 @@ fn instance_completion_releases_state_and_starts_sleep_on_the_completion_frame()
         active: true,
         ..TestEngine::default()
     }));
-    let mut instance = CusInstance::attach(UnitId(7), CompletionScript::default(), engine);
+    let instance = CusInstance::attach(UnitId(7), CompletionScript::default(), engine);
     instance.spawn_with_state("wait-sleep-wait", animation_then_sleep_then_animation);
     instance.tick(10);
     let mut result = UnitScriptCallResult::default();
@@ -377,7 +398,7 @@ fn completion_callback_can_cancel_a_waiter_before_it_resumes() {
         cancel_waiters: true,
         ..CompletionScript::default()
     };
-    let mut instance = CusInstance::attach(UnitId(7), script, engine);
+    let instance = CusInstance::attach(UnitId(7), script, engine);
     instance.spawn_with_state("cancelled-waiter", animation_then_sleep_then_animation);
     instance.tick(10);
     let mut result = UnitScriptCallResult::default();
@@ -391,7 +412,7 @@ fn completion_callback_can_cancel_a_waiter_before_it_resumes() {
 #[test]
 fn named_tasks_can_access_the_attached_script_state() {
     let engine = Rc::new(RefCell::new(TestEngine::default()));
-    let mut instance = CusInstance::attach(UnitId(7), 5i32, Rc::clone(&engine));
+    let instance = CusInstance::attach(UnitId(7), 5i32, Rc::clone(&engine));
     instance.spawn_with_state("stateful", stateful);
     assert_eq!(engine.borrow().events, vec![5]);
 }
@@ -416,7 +437,7 @@ fn standard_queries_have_typed_neutral_defaults() {
 fn signal_uses_intersection_and_inherited_masks() {
     let engine = Rc::new(RefCell::new(TestEngine::default()));
     let context = UnitCtx::new(UnitId(7), Rc::clone(&engine));
-    let mut scheduler = CusScheduler::new(context.clone());
+    let scheduler = CusScheduler::new(context.clone());
     let parent = scheduler.spawn(TaskDefinition::new("parent", |ctx| {
         Box::pin(async move {
             ctx.set_signal_mask(SignalMask::new(0b0110));

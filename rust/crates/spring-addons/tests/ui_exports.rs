@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 use spring_addons::reexports::{All, Spring};
 use spring_addons::{AddonContext, EventResult, KeyEvent, Widget, WidgetHandler};
 use std::cell::Cell;

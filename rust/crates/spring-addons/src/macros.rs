@@ -28,10 +28,11 @@ macro_rules! register_unsynced_addons {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __addon_module {
-    ($state_type:ty, $setup_fn:path, $environment:ty, $handler:ident, $with_handler:ident) => {
+    ($state_type:ty, $setup_fn:path, $environment:ty, $handler:ident, $with_handler:ident $(, $cus:ty)?) => {
         struct __SpringAddonModule {
             handler: $crate::$handler<$state_type, $environment>,
             initialized: ::core::cell::Cell<bool>,
+            $(cus: $cus,)?
         }
         impl __SpringAddonModule {
             fn ensure_initialized(&self, spring: &$crate::reexports::Spring<'_, $environment>) {
@@ -50,6 +51,7 @@ macro_rules! __addon_module {
                 Ok(Self {
                     handler,
                     initialized: ::core::cell::Cell::new(false),
+                    $(cus: <$cus>::default(),)?
                 })
             }
             fn shutdown(
@@ -584,6 +586,18 @@ macro_rules! __impl_ui_exports {
 
 #[macro_export]
 macro_rules! export_rules_gadgets {
+    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr, cus: $cus:ty $(,)?) => {
+        $crate::__impl_rules_exports!(
+            $state_type,
+            $setup_fn,
+            $scratch_size,
+            $crate::reexports::RulesSynced,
+            $cus
+        );
+    };
+    (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr, environment: $environment:ty, cus: $cus:ty $(,)?) => {
+        $crate::__impl_rules_exports!($state_type, $setup_fn, $scratch_size, $environment, $cus);
+    };
     (state: $state_type:ty, setup: $setup_fn:path, scratch: $scratch_size:expr $(,)?) => {
         $crate::__impl_rules_exports!(
             $state_type,
@@ -600,7 +614,7 @@ macro_rules! export_rules_gadgets {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __impl_rules_exports {
-    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty) => {
+    ($state_type:ty, $setup_fn:path, $scratch_size:expr, $environment:ty $(, $cus:ty)?) => {
         #[cfg(target_arch = "wasm32")]
         $crate::reexports::export_callin_scratch!($scratch_size);
         $crate::__addon_module!(
@@ -609,7 +623,12 @@ macro_rules! __impl_rules_exports {
             $environment,
             GadgetHandler,
             with_gadget_handler
+            $(, $cus)?
         );
+        $(
+            fn __spring_addon_cus(module: &__SpringAddonModule) -> &$cus { &module.cus }
+            $crate::reexports::export_core_cus!(HANDLER, $cus, __spring_addon_cus, $environment);
+        )?
         fn __spring_addon_game_frame(
             module: &__SpringAddonModule,
             spring: &mut $crate::reexports::Spring<'_, $environment>,

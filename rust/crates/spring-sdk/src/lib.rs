@@ -8,7 +8,7 @@ compile_error!(
     "native spring-sdk modules require panic=unwind to contain panics at C ABI boundaries"
 );
 use core::marker::PhantomData;
-pub use spring::{ApiError, DamageResult, ErrorCode, Float3, Result};
+pub use spring::{ApiError, DamageResult, ErrorCode, Float3, Result, UnitId, WeaponDefId};
 #[cfg(not(target_arch = "wasm32"))]
 #[doc(hidden)]
 pub use spring_native_sys as __sys;
@@ -407,6 +407,7 @@ mod logging;
 pub use logging::ResultExt;
 pub mod callbacks;
 pub mod commands;
+pub mod cus;
 pub mod default_interface;
 mod exports;
 pub mod module;
