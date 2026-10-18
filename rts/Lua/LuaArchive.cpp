@@ -10,6 +10,7 @@
 #include "ExternalAI/AILibraryManager.h"
 #include "ExternalAI/Interface/SSkirmishAILibrary.h"
 #include "System/FileSystem/ArchiveScanner.h"
+#include "System/FileSystem/FileSystem.h"
 #include "System/FileSystem/RapidHandler.h"
 #include "System/FileSystem/VFSHandler.h"
 #include "System/Log/ILog.h"
@@ -255,17 +256,23 @@ int LuaArchive::GetArchiveReplaces(lua_State* L)
 /***
  * @function VFS.GetArchiveChecksum
  * @param archiveName string
- * @return string singleArchiveChecksum
- * @return string completeArchiveChecksum
+ * @return string? singleArchiveChecksum nil if the archive is unknown
+ * @return string? completeArchiveChecksum
  */
 int LuaArchive::GetArchiveChecksum(lua_State* L)
 {
-	const std::string archiveName = luaL_checksstring(L, 1);
+	const std::string requestedName = luaL_checksstring(L, 1);
+	const std::string archiveName = FileSystem::GetFilename(archiveScanner->ArchiveFromName(requestedName));
+	if (archiveName.empty() || archiveScanner->GetArchiveDataByArchive(archiveName).IsEmpty())
+		return 0;
+	const std::string archivePath = archiveScanner->GetArchivePath(archiveName) + archiveName;
 
 	sha512::hex_digest asChecksumHexDigest;
 	sha512::hex_digest acChecksumHexDigest;
 
-	sha512::dump_digest(archiveScanner->GetArchiveSingleChecksumBytes(archiveName), asChecksumHexDigest);
+	// The single-archive scanner needs a filesystem path; the dependency
+	// checksum uses the resolved archive name, as in the native VFS interface.
+	sha512::dump_digest(archiveScanner->GetArchiveSingleChecksumBytes(archivePath), asChecksumHexDigest);
 	sha512::dump_digest(archiveScanner->GetArchiveCompleteChecksumBytes(archiveName), acChecksumHexDigest);
 
 	lua_pushsstring(L, asChecksumHexDigest.data());
