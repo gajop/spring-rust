@@ -63,10 +63,9 @@ impl<E: Environment, T: Module<E>> ModuleSlot<E, T> {
         &self,
         interface: *const crate::__sys::NativeInterface,
     ) -> Result<*mut core::ffi::c_void> {
-        let mut context = unsafe { ModuleContext::<E>::from_native(interface)? };
-        if let Some(gate) = self.native_gate.borrow().as_ref() {
-            std::sync::Arc::get_mut(&mut context.owner).unwrap().gate = gate.clone();
-        }
+        let context = unsafe {
+            ModuleContext::<E>::from_native_with_gate(interface, self.native_gate.borrow().clone())?
+        };
         self.initialize(context)?;
         Ok(self.identity())
     }
@@ -214,6 +213,8 @@ impl<E: Environment, T: Module<E>> ModuleSlot<E, T> {
         }
     }
 
+    #[cold]
+    #[inline(never)]
     fn fail(&self) {
         self.poisoned.set(true);
         if let Some(instance) = self.instance.borrow().as_ref() {
@@ -254,24 +255,31 @@ thread_local! {
 /// callin error is returned. The host reads it immediately at the boundary.
 #[cfg(not(target_arch = "wasm32"))]
 #[doc(hidden)]
+#[inline]
 pub fn error_pointer(result: Result<()>) -> *const crate::__sys::Error {
     match result {
         Ok(()) => core::ptr::null(),
-        Err(error) => ERROR.with(|slot| {
-            let mut slot = slot.borrow_mut();
-            slot.code = error.code;
-            ERROR_MESSAGE.with(|message| {
-                let mut message = message.borrow_mut();
-                *message = std::ffi::CString::new(format!(
-                    "spring-sdk module callin failed (error code {})",
-                    error.code
-                ))
-                .unwrap();
-                slot.message = message.as_ptr();
-            });
-            &*slot as *const _
-        }),
+        Err(error) => native_error(error),
     }
+}
+#[cfg(not(target_arch = "wasm32"))]
+#[cold]
+#[inline(never)]
+fn native_error(error: ApiError) -> *const crate::__sys::Error {
+    ERROR.with(|slot| {
+        let mut slot = slot.borrow_mut();
+        slot.code = error.code;
+        ERROR_MESSAGE.with(|message| {
+            let mut message = message.borrow_mut();
+            *message = std::ffi::CString::new(format!(
+                "spring-sdk module callin failed (error code {})",
+                error.code
+            ))
+            .unwrap();
+            slot.message = message.as_ptr();
+        });
+        &*slot as *const _
+    })
 }
 
 /// # Safety
@@ -383,14 +391,18 @@ impl<E: Environment, T: Module<E> + Send> NativeSlot<E, T> {
     /// arguments. The host must finish all entries before unloading the DLL.
     #[doc(hidden)]
     pub unsafe fn with_host<R>(&self, call: impl for<'a> FnOnce(&'a ModuleSlot<E, T>) -> R) -> R {
-        let gate = self
-            .gate
-            .get_or_init(|| std::sync::Arc::new(crate::native_thread::Gate::new()));
+        let gate = self.gate.get_or_init(|| {
+            let gate = std::sync::Arc::new(crate::native_thread::Gate::new());
+            // OnceLock excludes all slot access until publication. Bind
+            // the context gate once, rather than borrowing this RefCell
+            // on every subsequent engine entry.
+            unsafe { &*self.slot.get() }
+                .native_gate
+                .replace(Some(gate.clone()));
+            gate
+        });
         let _entry = unsafe { gate.enter_host() };
         let slot = unsafe { &*self.slot.get() };
-        if slot.native_gate.borrow().is_none() {
-            *slot.native_gate.borrow_mut() = Some(gate.clone());
-        }
         call(slot)
     }
 }

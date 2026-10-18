@@ -850,7 +850,7 @@ macro_rules! __impl_rules_exports {
             unit_id: i32,
             unit_def_id: i32,
             unit_team: i32,
-            command: &$crate::reexports::types::callins::NativeCallinCommand,
+            command: &$crate::reexports::CallinCommand<'_>,
         ) -> $crate::reexports::Result<()> {
             module.ensure_initialized(spring);
             let handler = &module.handler;
@@ -864,7 +864,7 @@ macro_rules! __impl_rules_exports {
                     command_page_index: command.page_index,
                     command_tag: command.tag,
                     command_options: command.options,
-                    command_params: command.params.as_slice(),
+                    command_params: command.params,
                     player_num: None,
                     from_synced: true,
                     from_lua: false,
@@ -879,7 +879,7 @@ macro_rules! __impl_rules_exports {
             unit_id: i32,
             unit_def_id: i32,
             unit_team: i32,
-            command: &$crate::reexports::types::callins::NativeCallinCommand,
+            command: &$crate::reexports::CallinCommand<'_>,
             player_num: i32,
             from_synced: bool,
             from_lua: bool,
@@ -896,7 +896,7 @@ macro_rules! __impl_rules_exports {
                     command_page_index: command.page_index,
                     command_tag: command.tag,
                     command_options: command.options,
-                    command_params: command.params.as_slice(),
+                    command_params: command.params,
                     player_num: Some(player_num),
                     from_synced,
                     from_lua,

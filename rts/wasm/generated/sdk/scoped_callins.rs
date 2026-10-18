@@ -4959,7 +4959,7 @@ macro_rules! export_activate_menu {
         message =$crate::module::decode_string((message).to_vec()); let message_length =
         message_length as u32; $crate::types::callins::ActivateMenuQuery { message,
         message_length } }; let returned =$handler (module, spring, query.message
-        .as_str()) ?; Ok({ let () = returned;$crate::types::callins::ActivateMenuResult
+        .as_ref()) ?; Ok({ let () = returned;$crate::types::callins::ActivateMenuResult
         {} }) }))); { let _ = value; } }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe
         (no_mangle)] pub unsafe extern "C" fn ActivateMenu(_interface:* const
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
@@ -4969,7 +4969,7 @@ macro_rules! export_activate_menu {
         .with_host(| slot | { slot.validate_identity(data) ?; slot
         .invoke_for_environment::< 32, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_activate_menu_query(query) } ?; let returned
-        =$handler (module, spring, query.message.as_str()) ?; let value = { let () =
+        =$handler (module, spring, query.message.as_ref()) ?; let value = { let () =
         returned;$crate::types::callins::ActivateMenuResult {}
         };$crate::__native_callins::encode_activate_menu_result(& value, result) }) })
         }); }
@@ -5001,7 +5001,7 @@ macro_rules! export_active_command_changed {
         tooltip =$crate::module::decode_string((tooltip).to_vec());
         $crate::types::callins::ActiveCommandChangedQuery { cmd_id, cmd_type, name,
         action, tooltip } }; let returned =$handler (module, spring, query.cmd_id, query
-        .cmd_type, query.name.as_str(), query.action.as_str(), query.tooltip.as_str()) ?;
+        .cmd_type, query.name.as_ref(), query.action.as_ref(), query.tooltip.as_ref()) ?;
         Ok({ let () = returned;$crate::types::callins::ActiveCommandChangedResult {} })
         }))); { let _ = value; } }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe
         (no_mangle)] pub unsafe extern "C" fn ActiveCommandChanged(_interface:* const
@@ -5014,13 +5014,13 @@ macro_rules! export_active_command_changed {
         spring | { let query = unsafe {
         $crate::__native_callins::decode_active_command_changed_query(query) } ?; let
         returned =$handler (module, spring, query.cmd_id, query.cmd_type, query.name
-        .as_str(), query.action.as_str(), query.tooltip.as_str()) ?; let value = { let ()
+        .as_ref(), query.action.as_ref(), query.tooltip.as_ref()) ?; let value = { let ()
         = returned;$crate::types::callins::ActiveCommandChangedResult {}
         };$crate::__native_callins::encode_active_command_changed_result(& value, result)
         }) }) }); }
     };
 }
-/// Shared scoped `AllowCommand` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::types::callins::NativeCallinCommand, i32, bool, bool) -> Result<bool>`.
+/// Shared scoped `AllowCommand` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::CallinCommand<'_>, i32, bool, bool) -> Result<bool>`.
 #[macro_export]
 macro_rules! export_allow_command {
     ($slot:ident, $handler:path) => {
@@ -5063,20 +5063,22 @@ macro_rules! export_allow_command {
         from_synced; let from_lua = from_lua; $crate::types::callins::UnitCommandQuery {
         unit_id, unit_def_id, unit_team, command, player_num, from_synced, from_lua } };
         let returned =$handler (module, spring, query.unit_id, query.unit_def_id, query
-        .unit_team,& query.command, query.player_num, query.from_synced, query.from_lua)
-        ?; Ok({ $crate::types::callins::BoolCallinResult { value : returned } }) })));
-        value.value } { 1 } else { 0 } } #[cfg(not(target_arch = "wasm32"))] #[unsafe
-        (no_mangle)] pub unsafe extern "C" fn AllowCommand(_interface:* const
-        $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
-        $crate::__sys::UnitCommandQuery, result:* mut $crate::__sys::BoolCallinResult) {
-        let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
-        .with_host(| slot | { slot.validate_identity(data) ?; slot
-        .invoke_for_environment::< 5, _ > (| module, spring | { let query = unsafe {
+        .unit_team,&$crate::CallinCommand::from(& query.command), query.player_num, query
+        .from_synced, query.from_lua) ?; Ok({ $crate::types::callins::BoolCallinResult {
+        value : returned } }) }))); value.value } { 1 } else { 0 } }
+        #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub unsafe extern "C"
+        fn AllowCommand(_interface:* const $crate::__sys::NativeInterface, data:* mut
+        core::ffi::c_void, query:* const $crate::__sys::UnitCommandQuery, result:* mut
+        $crate::__sys::BoolCallinResult) { let Some(result) = (unsafe { result.as_mut()
+        }) else { return; }; * result = Default::default(); result.error
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
+        .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
+        spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_command_query(query) } ?; let returned
-        =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,&
-        query.command, query.player_num, query.from_synced, query.from_lua) ?; let value
-        = { $crate::types::callins::BoolCallinResult { value : returned }
+        =$handler (module, spring, query.unit_id, query.unit_def_id, query
+        .unit_team,&$crate::CallinCommand::from(& query.command), query.player_num, query
+        .from_synced, query.from_lua) ?; let value = {
+        $crate::types::callins::BoolCallinResult { value : returned }
         };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
         }
     };
@@ -5101,7 +5103,7 @@ macro_rules! export_allow_resource_level {
         .invoke_for_environment::< 5, _ > (| module, spring | { let query = { let team_id
         = team_id; let type_ =$crate::module::decode_string((type_).to_vec()); let level
         = level; $crate::types::callins::AllowResourceLevelQuery { team_id, type_, level
-        } }; let returned =$handler (module, spring, query.team_id, query.type_.as_str(),
+        } }; let returned =$handler (module, spring, query.team_id, query.type_.as_ref(),
         query.level) ?; Ok({ $crate::types::callins::BoolCallinResult { value : returned
         } }) }))); value.value } { 1 } else { 0 } } #[cfg(not(target_arch = "wasm32"))]
         #[unsafe (no_mangle)] pub unsafe extern "C" fn AllowResourceLevel(_interface:*
@@ -5113,7 +5115,7 @@ macro_rules! export_allow_resource_level {
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_resource_level_query(query) } ?; let
-        returned =$handler (module, spring, query.team_id, query.type_.as_str(), query
+        returned =$handler (module, spring, query.team_id, query.type_.as_ref(), query
         .level) ?; let value = { $crate::types::callins::BoolCallinResult { value :
         returned } };$crate::__native_callins::encode_bool_callin_result(& value, result)
         }) }) }); }
@@ -5143,7 +5145,7 @@ macro_rules! export_allow_resource_transfer {
         =$crate::module::decode_string((type_).to_vec()); let amount = amount;
         $crate::types::callins::AllowResourceTransferQuery { old_team, new_team, type_,
         amount } }; let returned =$handler (module, spring, query.old_team, query
-        .new_team, query.type_.as_str(), query.amount) ?; Ok({
+        .new_team, query.type_.as_ref(), query.amount) ?; Ok({
         $crate::types::callins::BoolCallinResult { value : returned } }) }))); value
         .value } { 1 } else { 0 } } #[cfg(not(target_arch = "wasm32"))] #[unsafe
         (no_mangle)] pub unsafe extern "C" fn AllowResourceTransfer(_interface:* const
@@ -5156,13 +5158,13 @@ macro_rules! export_allow_resource_transfer {
         spring | { let query = unsafe {
         $crate::__native_callins::decode_allow_resource_transfer_query(query) } ?; let
         returned =$handler (module, spring, query.old_team, query.new_team, query.type_
-        .as_str(), query.amount) ?; let value = {
+        .as_ref(), query.amount) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
         };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
         }
     };
 }
-/// Shared scoped `CommandFallback` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::types::callins::NativeCallinCommand) -> Result<bool>`.
+/// Shared scoped `CommandFallback` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::CallinCommand<'_>) -> Result<bool>`.
 #[macro_export]
 macro_rules! export_command_fallback {
     ($slot:ident, $handler:path) => {
@@ -5199,8 +5201,9 @@ macro_rules! export_command_fallback {
         $crate::types::callins::NativeCallinCommand { id, time_out, page_index, tag,
         options, params, num_params } }; $crate::types::callins::CommandFallbackQuery {
         unit_id, unit_def_id, unit_team, command } }; let returned =$handler (module,
-        spring, query.unit_id, query.unit_def_id, query.unit_team,& query.command) ?;
-        Ok({ $crate::types::callins::BoolCallinResult { value : returned } }) }))); value
+        spring, query.unit_id, query.unit_def_id, query
+        .unit_team,&$crate::CallinCommand::from(& query.command)) ?; Ok({
+        $crate::types::callins::BoolCallinResult { value : returned } }) }))); value
         .value } { 1 } else { 0 } } #[cfg(not(target_arch = "wasm32"))] #[unsafe
         (no_mangle)] pub unsafe extern "C" fn CommandFallback(_interface:* const
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
@@ -5211,10 +5214,11 @@ macro_rules! export_command_fallback {
         .validate_identity(data) ?; slot.invoke_for_environment::< 5, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_command_fallback_query(query) } ?; let returned
-        =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,&
-        query.command) ?; let value = { $crate::types::callins::BoolCallinResult { value
-        : returned } };$crate::__native_callins::encode_bool_callin_result(& value,
-        result) }) }) }); }
+        =$handler (module, spring, query.unit_id, query.unit_def_id, query
+        .unit_team,&$crate::CallinCommand::from(& query.command)) ?; let value = {
+        $crate::types::callins::BoolCallinResult { value : returned }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
     };
 }
 /// Shared scoped `DownloadQueued` handler: `(&Module, &mut Spring, i32, &str, &str) -> Result<()>`.
@@ -5240,7 +5244,7 @@ macro_rules! export_download_queued {
         =$crate::module::decode_string((archive_type).to_vec());
         $crate::types::callins::DownloadQueuedQuery { download_id, archive_name,
         archive_type } }; let returned =$handler (module, spring, query.download_id,
-        query.archive_name.as_str(), query.archive_type.as_str()) ?; Ok({ let () =
+        query.archive_name.as_ref(), query.archive_type.as_ref()) ?; Ok({ let () =
         returned;$crate::types::callins::DownloadQueuedResult {} }) }))); { let _ =
         value; } }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub
         unsafe extern "C" fn DownloadQueued(_interface:* const
@@ -5252,8 +5256,8 @@ macro_rules! export_download_queued {
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_download_queued_query(query) } ?; let returned
-        =$handler (module, spring, query.download_id, query.archive_name.as_str(), query
-        .archive_type.as_str()) ?; let value = { let () =
+        =$handler (module, spring, query.download_id, query.archive_name.as_ref(), query
+        .archive_type.as_ref()) ?; let value = { let () =
         returned;$crate::types::callins::DownloadQueuedResult {}
         };$crate::__native_callins::encode_download_queued_result(& value, result) }) })
         }); }
@@ -5402,7 +5406,7 @@ macro_rules! export_game_setup {
         .to_vec()); $crate::types::callins::GameSetupPlayerState { player_id, state } })
         }).collect::<$crate::Result < Vec < _ >>> () ?;
         $crate::types::callins::GameSetupQuery { state, ready, player_states } }; let
-        returned =$handler (module, spring, query.state.as_str(), query.ready, query
+        returned =$handler (module, spring, query.state.as_ref(), query.ready, query
         .player_states.as_slice()) ?; Ok({ $crate::types::callins::GameSetupResult {
         handled : returned.0, ready : returned.1 } }) }))); { let _ = value; } }; }
         #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub unsafe extern "C"
@@ -5414,7 +5418,7 @@ macro_rules! export_game_setup {
         .validate_identity(data) ?; slot.invoke_for_environment::< 26, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_game_setup_query(query) } ?; let returned
-        =$handler (module, spring, query.state.as_str(), query.ready, query.player_states
+        =$handler (module, spring, query.state.as_ref(), query.ready, query.player_states
         .as_slice()) ?; let value = { $crate::types::callins::GameSetupResult { handled :
         returned.0, ready : returned.1 }
         };$crate::__native_callins::encode_game_setup_result(& value, result) }) }) }); }
@@ -5549,7 +5553,7 @@ macro_rules! export_key_press {
         $crate::types::callins::KeyPressQuery { key_code, alt, ctrl, meta, shift,
         is_repeat, label, utf32_char, scan_code, action_list } }; let returned =$handler
         (module, spring, query.key_code, query.alt, query.ctrl, query.meta, query.shift,
-        query.is_repeat, query.label.as_str(), query.utf32_char, query.scan_code, query
+        query.is_repeat, query.label.as_ref(), query.utf32_char, query.scan_code, query
         .action_list.as_slice()) ?; Ok({ $crate::types::callins::BoolCallinResult { value
         : returned } }) }))); value.value } { 1 } else { 0 } } #[cfg(not(target_arch =
         "wasm32"))] #[unsafe (no_mangle)] pub unsafe extern "C" fn KeyPress(_interface:*
@@ -5561,7 +5565,7 @@ macro_rules! export_key_press {
         .invoke_for_environment::< 127, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_key_press_query(query) } ?; let returned
         =$handler (module, spring, query.key_code, query.alt, query.ctrl, query.meta,
-        query.shift, query.is_repeat, query.label.as_str(), query.utf32_char, query
+        query.shift, query.is_repeat, query.label.as_ref(), query.utf32_char, query
         .scan_code, query.action_list.as_slice()) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
         };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
@@ -5619,7 +5623,7 @@ macro_rules! export_key_release {
         $crate::types::callins::KeyReleaseQuery { key_code, alt, ctrl, meta, shift,
         label, utf32_char, scan_code, action_list } }; let returned =$handler (module,
         spring, query.key_code, query.alt, query.ctrl, query.meta, query.shift, query
-        .label.as_str(), query.utf32_char, query.scan_code, query.action_list.as_slice())
+        .label.as_ref(), query.utf32_char, query.scan_code, query.action_list.as_slice())
         ?; Ok({ $crate::types::callins::BoolCallinResult { value : returned } }) })));
         value.value } { 1 } else { 0 } } #[cfg(not(target_arch = "wasm32"))] #[unsafe
         (no_mangle)] pub unsafe extern "C" fn KeyRelease(_interface:* const
@@ -5631,7 +5635,7 @@ macro_rules! export_key_release {
         .invoke_for_environment::< 127, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_key_release_query(query) } ?; let returned
         =$handler (module, spring, query.key_code, query.alt, query.ctrl, query.meta,
-        query.shift, query.label.as_str(), query.utf32_char, query.scan_code, query
+        query.shift, query.label.as_ref(), query.utf32_char, query.scan_code, query
         .action_list.as_slice()) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
         };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
@@ -5660,7 +5664,7 @@ macro_rules! export_load_progress {
         message_length as u32; let replace_last_line = replace_last_line as u8;
         $crate::types::callins::LoadProgressQuery { message, message_length,
         replace_last_line } }; let returned =$handler (module, spring, query.message
-        .as_str(), query.replace_last_line) ?; Ok({ let () =
+        .as_ref(), query.replace_last_line) ?; Ok({ let () =
         returned;$crate::types::callins::LoadProgressResult {} }) }))); { let _ = value;
         } }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub unsafe
         extern "C" fn LoadProgress(_interface:* const $crate::__sys::NativeInterface,
@@ -5671,7 +5675,7 @@ macro_rules! export_load_progress {
         .validate_identity(data) ?; slot.invoke_for_environment::< 64, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_load_progress_query(query) } ?; let returned
-        =$handler (module, spring, query.message.as_str(), query.replace_last_line) ?;
+        =$handler (module, spring, query.message.as_ref(), query.replace_last_line) ?;
         let value = { let () = returned;$crate::types::callins::LoadProgressResult {}
         };$crate::__native_callins::encode_load_progress_result(& value, result) }) })
         }); }
@@ -5717,7 +5721,7 @@ macro_rules! export_map_draw_cmd {
         .to_vec()); $crate::types::callins::MapDrawCmdQuery { player_id, type_, has_pos0,
         pos0, has_pos1, pos1, has_label, label } }; let returned =$handler (module,
         spring, query.player_id, query.type_, query.has_pos0, query.pos0, query.has_pos1,
-        query.pos1, query.has_label, query.label.as_str()) ?; Ok({
+        query.pos1, query.has_label, query.label.as_ref()) ?; Ok({
         $crate::types::callins::BoolCallinResult { value : returned } }) }))); value
         .value } { 1 } else { 0 } } #[cfg(not(target_arch = "wasm32"))] #[unsafe
         (no_mangle)] pub unsafe extern "C" fn MapDrawCmd(_interface:* const
@@ -5729,7 +5733,7 @@ macro_rules! export_map_draw_cmd {
         .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_map_draw_cmd_query(query) } ?; let returned
         =$handler (module, spring, query.player_id, query.type_, query.has_pos0, query
-        .pos0, query.has_pos1, query.pos1, query.has_label, query.label.as_str()) ?; let
+        .pos0, query.has_pos1, query.pos1, query.has_label, query.label.as_ref()) ?; let
         value = { $crate::types::callins::BoolCallinResult { value : returned }
         };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
         }
@@ -5838,7 +5842,7 @@ macro_rules! export_text_editing {
         .invoke_for_environment::< 63, _ > (| module, spring | { let query = { let utf8
         =$crate::module::decode_string((utf8).to_vec()); let start = start as u32; let
         length = length as u32; $crate::types::callins::TextEditingQuery { utf8, start,
-        length } }; let returned =$handler (module, spring, query.utf8.as_str(), query
+        length } }; let returned =$handler (module, spring, query.utf8.as_ref(), query
         .start, query.length) ?; Ok({ $crate::types::callins::BoolCallinResult { value :
         returned } }) }))); value.value } { 1 } else { 0 } } #[cfg(not(target_arch =
         "wasm32"))] #[unsafe (no_mangle)] pub unsafe extern "C" fn
@@ -5850,7 +5854,7 @@ macro_rules! export_text_editing {
         .validate_identity(data) ?; slot.invoke_for_environment::< 63, _ > (| module,
         spring | { let query = unsafe {
         $crate::__native_callins::decode_text_editing_query(query) } ?; let returned
-        =$handler (module, spring, query.utf8.as_str(), query.start, query.length) ?; let
+        =$handler (module, spring, query.utf8.as_ref(), query.start, query.length) ?; let
         value = { $crate::types::callins::BoolCallinResult { value : returned }
         };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
         }
@@ -5873,7 +5877,7 @@ macro_rules! export_text_input {
         .invoke_for_environment::< 63, _ > (| module, spring | { let query = { let utf8
         =$crate::module::decode_string((utf8).to_vec());
         $crate::types::callins::TextInputQuery { utf8 } }; let returned =$handler
-        (module, spring, query.utf8.as_str()) ?; Ok({
+        (module, spring, query.utf8.as_ref()) ?; Ok({
         $crate::types::callins::BoolCallinResult { value : returned } }) }))); value
         .value } { 1 } else { 0 } } #[cfg(not(target_arch = "wasm32"))] #[unsafe
         (no_mangle)] pub unsafe extern "C" fn TextInput(_interface:* const
@@ -5884,13 +5888,13 @@ macro_rules! export_text_input {
         .with_host(| slot | { slot.validate_identity(data) ?; slot
         .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_text_input_query(query) } ?; let returned
-        =$handler (module, spring, query.utf8.as_str()) ?; let value = {
+        =$handler (module, spring, query.utf8.as_ref()) ?; let value = {
         $crate::types::callins::BoolCallinResult { value : returned }
         };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
         }
     };
 }
-/// Shared scoped `UnitCmdDone` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::types::callins::NativeCallinCommand) -> Result<()>`.
+/// Shared scoped `UnitCmdDone` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::CallinCommand<'_>) -> Result<()>`.
 #[macro_export]
 macro_rules! export_unit_cmd_done {
     ($slot:ident, $handler:path) => {
@@ -5927,25 +5931,26 @@ macro_rules! export_unit_cmd_done {
         $crate::types::callins::NativeCallinCommand { id, time_out, page_index, tag,
         options, params, num_params } }; $crate::types::callins::UnitCmdDoneQuery {
         unit_id, unit_def_id, unit_team, command } }; let returned =$handler (module,
-        spring, query.unit_id, query.unit_def_id, query.unit_team,& query.command) ?;
-        Ok({ let () = returned;$crate::types::callins::UnitCmdDoneResult {} }) }))); {
-        let _ = value; } }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)]
-        pub unsafe extern "C" fn UnitCmdDone(_interface:* const
-        $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
-        $crate::__sys::UnitCmdDoneQuery, result:* mut $crate::__sys::UnitCmdDoneResult) {
-        let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
-        .with_host(| slot | { slot.validate_identity(data) ?; slot
-        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
+        spring, query.unit_id, query.unit_def_id, query
+        .unit_team,&$crate::CallinCommand::from(& query.command)) ?; Ok({ let () =
+        returned;$crate::types::callins::UnitCmdDoneResult {} }) }))); { let _ = value; }
+        }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub unsafe extern
+        "C" fn UnitCmdDone(_interface:* const $crate::__sys::NativeInterface, data:* mut
+        core::ffi::c_void, query:* const $crate::__sys::UnitCmdDoneQuery, result:* mut
+        $crate::__sys::UnitCmdDoneResult) { let Some(result) = (unsafe { result.as_mut()
+        }) else { return; }; * result = Default::default(); result.error
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
+        .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
+        spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_cmd_done_query(query) } ?; let returned
-        =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,&
-        query.command) ?; let value = { let () =
-        returned;$crate::types::callins::UnitCmdDoneResult {}
+        =$handler (module, spring, query.unit_id, query.unit_def_id, query
+        .unit_team,&$crate::CallinCommand::from(& query.command)) ?; let value = { let ()
+        = returned;$crate::types::callins::UnitCmdDoneResult {}
         };$crate::__native_callins::encode_unit_cmd_done_result(& value, result) }) })
         }); }
     };
 }
-/// Shared scoped `UnitCommand` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::types::callins::NativeCallinCommand, i32, bool, bool) -> Result<()>`.
+/// Shared scoped `UnitCommand` handler: `(&Module, &mut Spring, i32, i32, i32, &$crate::CallinCommand<'_>, i32, bool, bool) -> Result<()>`.
 #[macro_export]
 macro_rules! export_unit_command {
     ($slot:ident, $handler:path) => {
@@ -5988,20 +5993,22 @@ macro_rules! export_unit_command {
         from_synced; let from_lua = from_lua; $crate::types::callins::UnitCommandQuery {
         unit_id, unit_def_id, unit_team, command, player_num, from_synced, from_lua } };
         let returned =$handler (module, spring, query.unit_id, query.unit_def_id, query
-        .unit_team,& query.command, query.player_num, query.from_synced, query.from_lua)
-        ?; Ok({ let () = returned;$crate::types::callins::UnitCommandResult {} }) }))); {
-        let _ = value; } }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)]
-        pub unsafe extern "C" fn UnitCommand(_interface:* const
-        $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
-        $crate::__sys::UnitCommandQuery, result:* mut $crate::__sys::UnitCommandResult) {
-        let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
-        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
-        .with_host(| slot | { slot.validate_identity(data) ?; slot
-        .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
+        .unit_team,&$crate::CallinCommand::from(& query.command), query.player_num, query
+        .from_synced, query.from_lua) ?; Ok({ let () =
+        returned;$crate::types::callins::UnitCommandResult {} }) }))); { let _ = value; }
+        }; } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub unsafe extern
+        "C" fn UnitCommand(_interface:* const $crate::__sys::NativeInterface, data:* mut
+        core::ffi::c_void, query:* const $crate::__sys::UnitCommandQuery, result:* mut
+        $crate::__sys::UnitCommandResult) { let Some(result) = (unsafe { result.as_mut()
+        }) else { return; }; * result = Default::default(); result.error
+        =$crate::module::error_pointer(unsafe { $slot .with_host(| slot | { slot
+        .validate_identity(data) ?; slot.invoke_for_environment::< 31, _ > (| module,
+        spring | { let query = unsafe {
         $crate::__native_callins::decode_unit_command_query(query) } ?; let returned
-        =$handler (module, spring, query.unit_id, query.unit_def_id, query.unit_team,&
-        query.command, query.player_num, query.from_synced, query.from_lua) ?; let value
-        = { let () = returned;$crate::types::callins::UnitCommandResult {}
+        =$handler (module, spring, query.unit_id, query.unit_def_id, query
+        .unit_team,&$crate::CallinCommand::from(& query.command), query.player_num, query
+        .from_synced, query.from_lua) ?; let value = { let () =
+        returned;$crate::types::callins::UnitCommandResult {}
         };$crate::__native_callins::encode_unit_command_result(& value, result) }) }) });
         }
     };
@@ -6091,8 +6098,8 @@ macro_rules! export_add_console_line {
         message =$crate::module::decode_string((message).to_vec()); let section
         =$crate::module::decode_string((section).to_vec()); let level = level;
         $crate::types::callins::AddConsoleLineQuery { message, section, level } }; let
-        returned =$handler (module, spring, query.message.as_str(), query.section
-        .as_str(), query.level) ?; Ok({ $crate::types::callins::BoolCallinResult { value
+        returned =$handler (module, spring, query.message.as_ref(), query.section
+        .as_ref(), query.level) ?; Ok({ $crate::types::callins::BoolCallinResult { value
         : returned } }) }))); value.value }) as i64 } #[cfg(not(target_arch = "wasm32"))]
         #[unsafe (no_mangle)] pub unsafe extern "C" fn AddConsoleLine(_interface:* const
         $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
@@ -6102,13 +6109,13 @@ macro_rules! export_add_console_line {
         .with_host(| slot | { slot.validate_identity(data) ?; slot
         .invoke_for_environment::< 63, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_add_console_line_query(query) } ?; let returned
-        =$handler (module, spring, query.message.as_str(), query.section.as_str(), query
+        =$handler (module, spring, query.message.as_ref(), query.section.as_ref(), query
         .level) ?; let value = { $crate::types::callins::BoolCallinResult { value :
         returned } };$crate::__native_callins::encode_bool_callin_result(& value, result)
         }) }) }); }
     };
 }
-/// Shared scoped `CommandNotify` handler: `(&Module, &mut Spring, &$crate::types::callins::NativeCallinCommand) -> Result<bool>`.
+/// Shared scoped `CommandNotify` handler: `(&Module, &mut Spring, &$crate::CallinCommand<'_>) -> Result<bool>`.
 #[macro_export]
 macro_rules! export_command_notify {
     ($slot:ident, $handler:path) => {
@@ -6128,7 +6135,8 @@ macro_rules! export_command_notify {
         |$crate::ApiError::new($crate::ErrorCode::OutOfBounds as i32)) ?;
         $crate::types::callins::NativeCallinCommand { id, time_out, page_index, tag,
         options, params, num_params } }; $crate::types::callins::CommandNotifyQuery {
-        command } }; let returned =$handler (module, spring,& query.command) ?; Ok({
+        command } }; let returned =$handler (module,
+        spring,&$crate::CallinCommand::from(& query.command)) ?; Ok({
         $crate::types::callins::BoolCallinResult { value : returned } }) }))); value
         .value }) as i64 } #[cfg(not(target_arch = "wasm32"))] #[unsafe (no_mangle)] pub
         unsafe extern "C" fn CommandNotify(_interface:* const
@@ -6139,8 +6147,8 @@ macro_rules! export_command_notify {
         .with_host(| slot | { slot.validate_identity(data) ?; slot
         .invoke_for_environment::< 31, _ > (| module, spring | { let query = unsafe {
         $crate::__native_callins::decode_command_notify_query(query) } ?; let returned
-        =$handler (module, spring,& query.command) ?; let value = {
-        $crate::types::callins::BoolCallinResult { value : returned }
+        =$handler (module, spring,&$crate::CallinCommand::from(& query.command)) ?; let
+        value = { $crate::types::callins::BoolCallinResult { value : returned }
         };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
         }
     };

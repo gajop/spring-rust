@@ -1,0 +1,17 @@
+[package]
+name = "native-dispatch-worker"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+legacy = ["dep:spring-native"]
+unified = ["dep:spring-sdk"]
+borrowed-command = ["unified"]
+
+[dependencies]
+spring-native = { path = "../../../../rust/crates/spring-native", optional = true }
+spring-sdk = { path = "../../../../rust/crates/spring-sdk", optional = true }

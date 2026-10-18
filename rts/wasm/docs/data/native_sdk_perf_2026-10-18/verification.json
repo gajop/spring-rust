@@ -1,0 +1,15 @@
+{
+  "sdkLinuxWine": "56 native unit tests, 1 export test and 9 compile-fail tests on each platform",
+  "generator": "36 tests; strict generation: 59 modules / 1425 functions / 0 unsupported; all 171 output files reproduced byte-for-byte",
+  "clippy": "SDK native/Wasm; addons native/Wasm; benchmark legacy/unified; SpringBoard; all consumer release builds",
+  "addonsLinuxWine": "12 tests on each platform",
+  "springboard": "110 Linux unit tests; 85 engine integration cases and 8 smoke tests on Linux and Wine",
+  "menus": "Same-source native/Wasm All fixture passes on Linux/Wine, with identical menu pixels within each platform; both downstream native menus build for Linux and Windows",
+  "downstreamMatch": "901 Linux/Wine frame comparisons pass with player movement/production/orders; both clients exit normally",
+  "benchmark": "21 paired cases; three 101-sample warm runs, one 65-sample cold run; separate 11-case native engine callout matrix passes for both SDKs; finalized harness smoke verifies mutation state",
+  "nativeWindowsHardwareTested": false,
+  "engineRebuilt": false,
+  "uploadedOrReleased": false,
+  "visualBaselinesChanged": false,
+  "cabalAggregate": "all 21 just verify-all runs passed; seven release game builds and native/Wasm menus pass"
+}

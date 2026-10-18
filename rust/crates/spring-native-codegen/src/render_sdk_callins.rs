@@ -214,7 +214,11 @@ impl Builder<'_> {
     }
     fn parameter(&self, access: &str, ty: &SemanticType) -> Result<(String, String)> {
         Ok(match ty {
-            SemanticType::String => ("&str".into(), format!("{access}.as_str()")),
+            SemanticType::String => ("&str".into(), format!("{access}.as_ref()")),
+            SemanticType::Record { name } if name == "NativeCallinCommand" => (
+                "&$crate::CallinCommand<'_>".into(),
+                format!("&$crate::CallinCommand::from(&{access})"),
+            ),
             SemanticType::Bytes => ("&[u8]".into(), format!("{access}.as_slice()")),
             SemanticType::List { element } | SemanticType::FixedArray { element, .. } => (
                 format!("&[{}]", self.public_type(element)?),

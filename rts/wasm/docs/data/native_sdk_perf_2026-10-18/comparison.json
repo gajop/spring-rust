@@ -1,0 +1,569 @@
+[
+  {
+    "test": "gameframe_0_queries",
+    "legacy": {
+      "medianNs": 6.0277,
+      "runMediansNs": [
+        10.4683,
+        4.0495,
+        6.0277
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 214.5328,
+      "runMediansNs": [
+        219.71535,
+        179.3999,
+        214.5328
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 28.10335,
+      "runMediansNs": [
+        35.59625,
+        24.65905,
+        28.10335
+      ]
+    }
+  },
+  {
+    "test": "gameframe_1_queries",
+    "legacy": {
+      "medianNs": 13.33495,
+      "runMediansNs": [
+        18.94115,
+        8.31755,
+        13.33495
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 229.98825,
+      "runMediansNs": [
+        234.947,
+        186.2726,
+        229.98825
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 32.16845,
+      "runMediansNs": [
+        41.18665,
+        27.3709,
+        32.16845
+      ]
+    }
+  },
+  {
+    "test": "gameframe_16_queries",
+    "legacy": {
+      "medianNs": 113.80215,
+      "runMediansNs": [
+        134.2782,
+        113.80215,
+        91.20705
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 445.52945,
+      "runMediansNs": [
+        445.52945,
+        449.9581,
+        331.28265
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 126.2384,
+      "runMediansNs": [
+        131.17555,
+        126.2384,
+        96.0405
+      ]
+    }
+  },
+  {
+    "test": "update",
+    "legacy": {
+      "medianNs": 2.56055,
+      "runMediansNs": [
+        4.9769,
+        2.56055,
+        2.46195
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 187.44555,
+      "runMediansNs": [
+        232.6245,
+        187.44555,
+        177.30565
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 31.0381,
+      "runMediansNs": [
+        47.0757,
+        31.0381,
+        30.4673
+      ]
+    }
+  },
+  {
+    "test": "unitcreated",
+    "legacy": {
+      "medianNs": 2.5489,
+      "runMediansNs": [
+        5.09925,
+        2.5489,
+        2.4685
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 179.86665,
+      "runMediansNs": [
+        212.5038,
+        179.86665,
+        168.5201
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 23.6413,
+      "runMediansNs": [
+        30.6805,
+        23.6413,
+        23.01105
+      ]
+    }
+  },
+  {
+    "test": "creation",
+    "legacy": {
+      "medianNs": 2.47105,
+      "runMediansNs": [
+        4.34735,
+        2.47105,
+        2.13875
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 183.746,
+      "runMediansNs": [
+        214.0161,
+        183.746,
+        169.7058
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 24.0372,
+      "runMediansNs": [
+        33.10605,
+        23.64385,
+        24.0372
+      ]
+    }
+  },
+  {
+    "test": "predamaged",
+    "legacy": {
+      "medianNs": 3.251,
+      "runMediansNs": [
+        5.04145,
+        3.251,
+        2.61855
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 182.55735,
+      "runMediansNs": [
+        220.1126,
+        182.55735,
+        170.39645
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 25.1354,
+      "runMediansNs": [
+        29.8294,
+        25.1354,
+        25.0776
+      ]
+    }
+  },
+  {
+    "test": "command_0",
+    "legacy": {
+      "medianNs": 2.11445,
+      "runMediansNs": [
+        3.71835,
+        2.11445,
+        2.02635
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 181.7644,
+      "runMediansNs": [
+        221.15715,
+        181.7644,
+        171.51545
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 50.00355,
+      "runMediansNs": [
+        52.37935,
+        43.33395,
+        50.00355
+      ]
+    }
+  },
+  {
+    "test": "command_4",
+    "legacy": {
+      "medianNs": 2.1298,
+      "runMediansNs": [
+        3.7375,
+        2.1298,
+        2.027
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 187.224,
+      "runMediansNs": [
+        238.36725,
+        187.224,
+        176.9387
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 50.36005,
+      "runMediansNs": [
+        54.40235,
+        43.9861,
+        50.36005
+      ]
+    }
+  },
+  {
+    "test": "command_64",
+    "legacy": {
+      "medianNs": 2.12015,
+      "runMediansNs": [
+        3.4033,
+        2.12015,
+        2.0233
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 189.9913,
+      "runMediansNs": [
+        227.02545,
+        189.9913,
+        179.52375
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 60.57595,
+      "runMediansNs": [
+        65.3299,
+        53.9936,
+        60.57595
+      ]
+    }
+  },
+  {
+    "test": "command_1024",
+    "legacy": {
+      "medianNs": 2.11685,
+      "runMediansNs": [
+        3.7478,
+        2.11685,
+        2.02705
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 243.7416,
+      "runMediansNs": [
+        325.8789,
+        243.7416,
+        234.72675
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 92.6002,
+      "runMediansNs": [
+        103.066,
+        85.76665,
+        92.6002
+      ]
+    }
+  },
+  {
+    "test": "console_0",
+    "legacy": {
+      "medianNs": 15.2946,
+      "runMediansNs": [
+        17.82015,
+        15.2946,
+        14.313
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 208.56105,
+      "runMediansNs": [
+        249.6651,
+        208.56105,
+        200.2374
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 62.0556,
+      "runMediansNs": [
+        76.66765,
+        61.97115,
+        62.0556
+      ]
+    }
+  },
+  {
+    "test": "console_16",
+    "legacy": {
+      "medianNs": 17.01945,
+      "runMediansNs": [
+        16.21305,
+        17.1932,
+        17.01945
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 206.2962,
+      "runMediansNs": [
+        203.4531,
+        214.3223,
+        206.2962
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 62.25155,
+      "runMediansNs": [
+        62.493,
+        62.19805,
+        62.25155
+      ]
+    }
+  },
+  {
+    "test": "console_1024",
+    "legacy": {
+      "medianNs": 41.406,
+      "runMediansNs": [
+        40.2409,
+        43.904,
+        41.406
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 232.4906,
+      "runMediansNs": [
+        230.0573,
+        246.41275,
+        232.4906
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 95.15205,
+      "runMediansNs": [
+        95.15205,
+        97.3908,
+        94.3792
+      ]
+    }
+  },
+  {
+    "test": "callout_scalar",
+    "legacy": {
+      "medianNs": 5.0373,
+      "runMediansNs": [
+        5.0205,
+        5.0373,
+        5.0717
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 10.2487,
+      "runMediansNs": [
+        10.2487,
+        11.0333,
+        10.1692
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 4.9637,
+      "runMediansNs": [
+        4.9637,
+        4.9202,
+        5.0857
+      ]
+    }
+  },
+  {
+    "test": "callout_vec3",
+    "legacy": {
+      "medianNs": 5.9469,
+      "runMediansNs": [
+        5.971,
+        5.8643,
+        5.9469
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 12.5949,
+      "runMediansNs": [
+        12.5949,
+        13.4395,
+        12.5382
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 8.1954,
+      "runMediansNs": [
+        8.1954,
+        8.6199,
+        7.9779
+      ]
+    }
+  },
+  {
+    "test": "callout_string",
+    "legacy": {
+      "medianNs": 28.2971,
+      "runMediansNs": [
+        28.177,
+        29.8468,
+        28.2971
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 39.9441,
+      "runMediansNs": [
+        38.9837,
+        39.9441,
+        41.651
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 31.8987,
+      "runMediansNs": [
+        31.8987,
+        31.3283,
+        32.6697
+      ]
+    }
+  },
+  {
+    "test": "callout_smalllist",
+    "legacy": {
+      "medianNs": 25.5088,
+      "runMediansNs": [
+        25.3819,
+        27.9026,
+        25.5088
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 42.0165,
+      "runMediansNs": [
+        41.1354,
+        43.197,
+        42.0165
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 37.8771,
+      "runMediansNs": [
+        37.4785,
+        39.5493,
+        37.8771
+      ]
+    }
+  },
+  {
+    "test": "callout_biglist",
+    "legacy": {
+      "medianNs": 590.715,
+      "runMediansNs": [
+        583.911,
+        905.909,
+        590.715
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 605.726,
+      "runMediansNs": [
+        599.068,
+        949.947,
+        605.726
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 601.242,
+      "runMediansNs": [
+        595.252,
+        962.353,
+        601.242
+      ]
+    }
+  },
+  {
+    "test": "callout_spatial",
+    "legacy": {
+      "medianNs": 291.0445,
+      "runMediansNs": [
+        286.3099,
+        426.7967,
+        291.0445
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 301.8693,
+      "runMediansNs": [
+        298.5976,
+        445.469,
+        301.8693
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 295.4105,
+      "runMediansNs": [
+        293.4405,
+        438.5612,
+        295.4105
+      ]
+    }
+  },
+  {
+    "test": "callout_mutate",
+    "legacy": {
+      "medianNs": 32.5115,
+      "runMediansNs": [
+        30.2624,
+        35.86,
+        32.5115
+      ]
+    },
+    "sdk-before": {
+      "medianNs": 36.5943,
+      "runMediansNs": [
+        36.5943,
+        47.1206,
+        36.5752
+      ]
+    },
+    "sdk-current": {
+      "medianNs": 32.9154,
+      "runMediansNs": [
+        32.9154,
+        40.4158,
+        32.741
+      ]
+    }
+  }
+]

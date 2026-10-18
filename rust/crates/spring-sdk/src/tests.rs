@@ -1421,6 +1421,39 @@ fn stored_module_identity_only_opens_scopes_inside_its_own_live_callin() {
     );
 }
 
+#[test]
+fn stored_identity_survives_nested_different_module_scopes() {
+    let (game, units, config) = tables();
+    let interface = sys::NativeInterface {
+        game: &game,
+        unitsQuery: &units,
+        config: &config,
+        ..Default::default()
+    };
+    let a = unsafe { ModuleContext::<All>::from_native(&interface) }.unwrap();
+    let b = unsafe { ModuleContext::<All>::from_native(&interface) }.unwrap();
+    let ar = a.with_spring(|spring| spring.module_ref()).unwrap();
+    let br = b.with_spring(|spring| spring.module_ref()).unwrap();
+    a.with_spring(|_| {
+        b.with_spring(|_| {
+            ar.with_spring(|spring| {
+                assert_eq!(spring.game().get_game_frame()?.low16, 42);
+                br.with_spring(|spring| {
+                    assert_eq!(spring.units().get_all_units()?.len(), 2);
+                    Ok(())
+                })
+            })
+            .unwrap();
+        })
+        .unwrap();
+        ar.with_spring(|_| Ok(())).unwrap();
+        assert!(br.with_spring(|_| Ok(())).is_err());
+    })
+    .unwrap();
+    assert!(ar.with_spring(|_| Ok(())).is_err());
+    assert!(br.with_spring(|_| Ok(())).is_err());
+}
+
 unsafe extern "C" fn pointer_delta(
     query: *const sys::RmlContextHandleQuery,
     result: *mut sys::RmlContextPointerDeltaResult,

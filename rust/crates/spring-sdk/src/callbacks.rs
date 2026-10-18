@@ -92,7 +92,11 @@ where
     let id = NEXT_ID
         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
         .map_err(|_| ApiError::new(ErrorCode::OutOfBounds as i32))?;
-    let owner = crate::Shared::clone(engine.owner);
+    let owner = engine
+        .owner
+        .identity
+        .upgrade()
+        .ok_or(ApiError::new(ErrorCode::InvalidState as i32))?;
     let callback_owner = crate::Shared::clone(&owner);
     let schema = schema.map(<[u8]>::to_vec);
     // Keep the Rml reader in the registered closure. The common dispatcher
@@ -254,7 +258,7 @@ fn native_boundary(id: u32, event: impl FnOnce(&Backend<'_>) -> Result<Event>) {
         return;
     };
     let Ok(_entry) = node.owner.gate.enter() else {
-        node.owner.foreign_callback.store(true, Ordering::Relaxed);
+        node.owner.callback_failed.store(true, Ordering::Relaxed);
         return;
     };
     let engine = Backend {
@@ -267,15 +271,23 @@ fn native_boundary(id: u32, event: impl FnOnce(&Backend<'_>) -> Result<Event>) {
     }));
     match result {
         Ok(Ok(())) => {}
-        Ok(Err(error)) => node.owner.error.set(Some(error)),
-        Err(panic) => *node.owner.panic.borrow_mut() = Some(panic),
+        Ok(Err(error)) => {
+            node.owner.error.set(Some(error));
+            node.owner.callback_failed.store(true, Ordering::Relaxed);
+        }
+        Err(panic) => {
+            *node.owner.panic.borrow_mut() = Some(panic);
+            node.owner.callback_failed.store(true, Ordering::Relaxed);
+        }
     }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) unsafe extern "C" fn native_event(data: *mut core::ffi::c_void) {
     native_boundary(data as usize as u32, |engine| {
-        let event = crate::native::rml_ui::event_get_current(engine)?;
+        let event = crate::native::rml_ui::event_get_current(engine, unsafe {
+            engine.owner.native_tables.rml_ui.as_ref()
+        })?;
         if !event.exists {
             return Err(ApiError::new(ErrorCode::NotFound as i32));
         }
@@ -338,11 +350,12 @@ pub(crate) unsafe extern "C" fn native_destroy(data: *mut core::ffi::c_void) {
     };
     let owner = crate::Shared::clone(&node.owner);
     let Ok(_entry) = owner.gate.enter() else {
-        owner.foreign_callback.store(true, Ordering::Relaxed);
+        owner.callback_failed.store(true, Ordering::Relaxed);
         return;
     };
     drop(node);
     if let Err(panic) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| remove(id))) {
         *owner.panic.borrow_mut() = Some(panic);
+        owner.callback_failed.store(true, Ordering::Relaxed);
     }
 }
