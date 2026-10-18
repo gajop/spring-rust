@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-18",
+  "cpu": "Intel Core i7-12700",
+  "host": "Linux workstation; sequential benchmark processes, other host activity not excluded",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+  "historicalSdkCommit": "1972d78d36",
+  "historicalBenchmarkSource": "same sdk_benchmark_suite_guest source as current SDK measurements",
+  "engineVersion": "2026.10.16-44-g4c5a86c",
+  "engineSourceCommitPrefix": "4c5a86c",
+  "engineRebuiltForThisCleanup": false,
+  "profile": "release",
+  "profiles": {
+    "callouts": {
+      "scale": 1.0,
+      "cases": 11,
+      "requestedRepeats": 10
+    },
+    "heightmap": {
+      "scale": 1.0,
+      "cases": 5,
+      "requestedRepeats": 10
+    },
+    "workloads": {
+      "scale": 1.0,
+      "cases": 5,
+      "requestedRepeats": 10
+    },
+    "callins": {
+      "scale": 0.1,
+      "cases": 8,
+      "requestedRepeats": 10
+    },
+    "memory": {
+      "scale": 1.0,
+      "cases": 5,
+      "requestedRepeats": 10
+    },
+    "draw": {
+      "scale": 0.01,
+      "cases": 3,
+      "requestedRepeats": 10
+    }
+  },
+  "totalComparableCases": 37,
+  "scalarComparison": {
+    "iterations": 1000000,
+    "repeats": 50,
+    "files": [
+      "legacy.json",
+      "before-direct.json",
+      "after-direct.json",
+      "before-ref.json",
+      "after-ref.json"
+    ]
+  },
+  "dispatchComparison": "cold-cache engine boundary samples at scale 0.1, SDK and legacy runners",
+  "legacyCalloutComparison": "11 callout cases at nominal counts, 10 repeats, legacy-callouts.json",
+  "memoryLimit": "engine/Lua profiling counters; not Rust allocator instrumentation",
+  "scopeLimit": "variable-shape callin runner and direct transport ceiling probes still use legacy SDK",
+  "baselineChanges": false,
+  "rendering": "Xvfb, llvmpipe, LP_NUM_THREADS=4",
+  "commands": {
+    "sdkProfile": "python3 test/native_api_parity/run_benchmarks_sdk.py --<profile> --scale <scale> --repeats 10 --no-report --output-root <dir> --summary-json <file>",
+    "legacyCallouts": "python3 test/native_api_parity/run_benchmarks_core.py --callouts --scale 1 --repeats 10 --no-report --output-root <dir> --summary-json <file>",
+    "legacyDispatch": "python3 test/native_api_parity/run_benchmarks_core.py --callins --scale 0.1 --repeats 10 --no-report --output-root <dir> --summary-json <file>",
+    "scalar": "python3 test/native_api_parity/run_benchmarks_sdk.py --quick --iterations 1000000 --repeats 50 --no-report --output-root <dir> --summary-json <file> [--module-ref]; select historical library with RECOIL_SDK_BENCHMARK_NATIVE_ARTIFACT"
+  }
+}

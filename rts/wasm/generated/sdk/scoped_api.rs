@@ -28,7 +28,7 @@ pub mod units_query {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_query::get_all_units(0) }
+                { spring_sdk_internal::generated::owned::units_query::get_all_units(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_query::get_all_units(&self._engine) }
             };
@@ -47,7 +47,7 @@ pub mod units_query {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_query::get_closest_enemy_unit(
+                    spring_sdk_internal::generated::owned::units_query::get_closest_enemy_unit(
                         pos,
                         range,
                         ally_team_id,
@@ -78,7 +78,7 @@ pub mod units_query {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_query::get_render_units(
+                    spring_sdk_internal::generated::owned::units_query::get_render_units(
                         draw_mask,
                         send_mask,
                     )
@@ -104,7 +104,7 @@ pub mod units_query {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_query::get_render_units_draw_flag_changed(
+                    spring_sdk_internal::generated::owned::units_query::get_render_units_draw_flag_changed(
                         send_mask,
                     )
                 }
@@ -124,7 +124,11 @@ pub mod units_query {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_query::get_team_unit_count(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_query::get_team_unit_count(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_query::get_team_unit_count(
@@ -146,7 +150,7 @@ pub mod units_query {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_query::get_team_unit_def_count(
+                    spring_sdk_internal::generated::owned::units_query::get_team_unit_def_count(
                         team_id,
                         unit_def_id,
                     )
@@ -168,7 +172,11 @@ pub mod units_query {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_query::get_team_units(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_query::get_team_units(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_query::get_team_units(&self._engine, team_id) }
             };
@@ -227,7 +235,11 @@ pub mod units_query {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_query::get_team_units_sorted(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_query::get_team_units_sorted(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_query::get_team_units_sorted(
@@ -279,7 +291,7 @@ pub mod units_query {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_query::get_unit_nearest_ally(
+                    spring_sdk_internal::generated::owned::units_query::get_unit_nearest_ally(
                         unit_id,
                         range,
                     )
@@ -307,7 +319,7 @@ pub mod units_query {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_query::get_unit_nearest_enemy(
+                    spring_sdk_internal::generated::owned::units_query::get_unit_nearest_enemy(
                         unit_id,
                         range,
                         options,
@@ -337,7 +349,7 @@ pub mod units_query {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_query::get_unit_separation(
+                    spring_sdk_internal::generated::owned::units_query::get_unit_separation(
                         unit_id1,
                         unit_id2,
                         options,
@@ -535,7 +547,11 @@ pub mod units_query {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_query::valid_unit_id(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_query::valid_unit_id(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_query::valid_unit_id(&self._engine, unit_id) }
             };
@@ -566,7 +582,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::clear_units_previous_draw_flag(
+                    spring_sdk_internal::generated::owned::units_info::clear_units_previous_draw_flag(
                         0,
                     )
                 }
@@ -585,7 +601,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_ally_team(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_ally_team(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_ally_team(&self._engine, unit_id) }
             };
@@ -597,7 +617,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_armored(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_armored(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_armored(&self._engine, unit_id) }
             };
@@ -609,7 +633,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_base_position(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_base_position(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_base_position(
@@ -626,7 +654,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_blocking(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_blocking(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_blocking(&self._engine, unit_id) }
             };
@@ -638,7 +670,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_build_facing(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_build_facing(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_build_facing(
@@ -683,7 +719,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_buildee_radius(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_buildee_radius(
                         unit_id,
                     )
                 }
@@ -707,7 +743,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_collision_volume_data(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_collision_volume_data(
                         unit_id,
                     )
                 }
@@ -727,7 +763,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_cost_table(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_cost_table(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_cost_table(
@@ -744,7 +784,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_costs(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_costs(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_costs(&self._engine, unit_id) }
             };
@@ -756,7 +800,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_crashing(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_crashing(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_crashing(&self._engine, unit_id) }
             };
@@ -769,7 +817,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_current_build_power(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_current_build_power(
                         unit_id,
                     )
                 }
@@ -789,7 +837,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_def_id(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_def_id(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_def_id(&self._engine, unit_id) }
             };
@@ -801,7 +853,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_direction(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_direction(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_direction(&self._engine, unit_id) }
             };
@@ -818,7 +874,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_effective_build_range(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_effective_build_range(
                         unit_id,
                         buildee_def_id,
                     )
@@ -840,7 +896,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_experience(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_experience(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_experience(
@@ -857,7 +917,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_flanking(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_flanking(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_flanking(&self._engine, unit_id) }
             };
@@ -873,7 +937,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_harvest_storage(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_harvest_storage(
                         unit_id,
                     )
                 }
@@ -898,7 +962,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_heading(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_heading(
                         unit_id,
                         convert_to_radians,
                     )
@@ -920,7 +984,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_health(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_health(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_health(&self._engine, unit_id) }
             };
@@ -932,7 +1000,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_height(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_height(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_height(&self._engine, unit_id) }
             };
@@ -945,7 +1017,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_in_build_stance(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_in_build_stance(
                         unit_id,
                     )
                 }
@@ -965,7 +1037,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_is_active(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_is_active(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_is_active(&self._engine, unit_id) }
             };
@@ -978,7 +1054,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_is_being_built(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_is_being_built(
                         unit_id,
                     )
                 }
@@ -998,7 +1074,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_is_building(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_is_building(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_is_building(
@@ -1015,7 +1095,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_is_cloaked(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_is_cloaked(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_is_cloaked(
@@ -1032,7 +1116,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_is_dead(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_is_dead(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_is_dead(&self._engine, unit_id) }
             };
@@ -1044,7 +1132,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_is_stunned(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_is_stunned(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_is_stunned(
@@ -1065,7 +1157,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_is_transporting(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_is_transporting(
                         unit_id,
                     )
                 }
@@ -1089,7 +1181,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_last_attacked_piece(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_last_attacked_piece(
                         unit_id,
                     )
                 }
@@ -1112,7 +1204,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_last_attacker(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_last_attacker(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_last_attacker(
@@ -1135,7 +1231,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_los_state(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_los_state(
                         unit_id,
                         ally_team_id,
                         raw,
@@ -1159,7 +1255,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_mass(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_mass(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_mass(&self._engine, unit_id) }
             };
@@ -1172,7 +1272,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_metal_extraction(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_metal_extraction(
                         unit_id,
                     )
                 }
@@ -1192,7 +1292,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_move_def_id(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_move_def_id(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_move_def_id(
@@ -1209,7 +1313,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_nano_pieces(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_nano_pieces(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_nano_pieces(
@@ -1226,7 +1334,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_neutral(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_neutral(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_neutral(&self._engine, unit_id) }
             };
@@ -1243,7 +1355,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_piece_collision_volume_data(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_piece_collision_volume_data(
                         unit_id,
                         piece_num,
                     )
@@ -1270,7 +1382,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_pos_error_params(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_pos_error_params(
                         unit_id,
                         ally_team_id,
                     )
@@ -1297,7 +1409,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_position(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_position(
                         unit_id,
                         options,
                     )
@@ -1319,7 +1431,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_radius(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_radius(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_radius(&self._engine, unit_id) }
             };
@@ -1331,7 +1447,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_resources(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_resources(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_resources(&self._engine, unit_id) }
             };
@@ -1343,7 +1463,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_rotation(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_rotation(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_rotation(&self._engine, unit_id) }
             };
@@ -1356,7 +1480,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_seismic_signature(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_seismic_signature(
                         unit_id,
                     )
                 }
@@ -1376,7 +1500,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_self_d_time(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_self_d_time(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_self_d_time(
@@ -1403,7 +1531,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_sensor_radius(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_sensor_radius(
                         unit_id,
                         type_,
                     )
@@ -1430,7 +1558,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_shield_state(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_shield_state(
                         unit_id,
                         weapon_num,
                     )
@@ -1457,7 +1585,7 @@ pub mod units_info {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_info::get_unit_states(
+                    spring_sdk_internal::generated::owned::units_info::get_unit_states(
                         unit_id,
                         options,
                     )
@@ -1479,7 +1607,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_stockpile(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_stockpile(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_stockpile(&self._engine, unit_id) }
             };
@@ -1491,7 +1623,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_storage(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_storage(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_storage(&self._engine, unit_id) }
             };
@@ -1503,7 +1639,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_team(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_team(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_team(&self._engine, unit_id) }
             };
@@ -1515,7 +1655,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_tooltip(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_tooltip(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_tooltip(&self._engine, unit_id) }
             };
@@ -1527,7 +1671,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_transporter(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_transporter(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_transporter(
@@ -1544,7 +1692,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_vectors(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_vectors(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_vectors(&self._engine, unit_id) }
             };
@@ -1556,7 +1708,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_velocity(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_velocity(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::units_info::get_unit_velocity(&self._engine, unit_id) }
             };
@@ -1568,7 +1724,11 @@ pub mod units_info {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_info::get_unit_worker_task(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_info::get_unit_worker_task(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_info::get_unit_worker_task(
@@ -1601,7 +1761,11 @@ pub mod units_weapons {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_weapons::get_unit_max_range(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_max_range(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_weapons::get_unit_max_range(
@@ -1623,7 +1787,7 @@ pub mod units_weapons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_weapons::get_unit_weapon_can_fire(
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_weapon_can_fire(
                         unit_id,
                         weapon_num,
                     )
@@ -1646,7 +1810,7 @@ pub mod units_weapons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_weapons::get_unit_weapon_count(
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_weapon_count(
                         unit_id,
                     )
                 }
@@ -1671,7 +1835,7 @@ pub mod units_weapons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_weapons::get_unit_weapon_damages(
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_weapon_damages(
                         unit_id,
                         weapon_num,
                     )
@@ -1702,7 +1866,7 @@ pub mod units_weapons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_weapons::get_unit_weapon_have_free_line_of_fire(
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_weapon_have_free_line_of_fire(
                         unit_id,
                         weapon_num,
                         target_id,
@@ -1743,7 +1907,7 @@ pub mod units_weapons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_weapons::get_unit_weapon_state(
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_weapon_state(
                         unit_id,
                         weapon_num,
                         key,
@@ -1772,7 +1936,7 @@ pub mod units_weapons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_weapons::get_unit_weapon_target(
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_weapon_target(
                         unit_id,
                         weapon_num,
                     )
@@ -1800,7 +1964,7 @@ pub mod units_weapons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_weapons::get_unit_weapon_test_range(
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_weapon_test_range(
                         unit_id,
                         weapon_num,
                         target_pos,
@@ -1832,7 +1996,7 @@ pub mod units_weapons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_weapons::get_unit_weapon_test_target(
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_weapon_test_target(
                         unit_id,
                         weapon_num,
                         target_id,
@@ -1868,7 +2032,7 @@ pub mod units_weapons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_weapons::get_unit_weapon_try_target(
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_weapon_try_target(
                         unit_id,
                         weapon_num,
                         target_id,
@@ -1901,7 +2065,7 @@ pub mod units_weapons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_weapons::get_unit_weapon_vectors(
+                    spring_sdk_internal::generated::owned::units_weapons::get_unit_weapon_vectors(
                         unit_id,
                         weapon_num,
                     )
@@ -1945,7 +2109,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::find_unit_cmd_desc(
+                    spring_sdk_internal::generated::owned::units_commands::find_unit_cmd_desc(
                         unit_id,
                         cmd_id,
                     )
@@ -1967,7 +2131,11 @@ pub mod units_commands {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_commands::get_command_params(command) }
+                {
+                    spring_sdk_internal::generated::owned::units_commands::get_command_params(
+                        command,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_commands::get_command_params(
@@ -1989,7 +2157,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::get_command_queue(
+                    spring_sdk_internal::generated::owned::units_commands::get_command_queue(
                         unit_id,
                         max_commands,
                     )
@@ -2015,7 +2183,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::get_factory_bugger_off(
+                    spring_sdk_internal::generated::owned::units_commands::get_factory_bugger_off(
                         unit_id,
                     )
                 }
@@ -2036,7 +2204,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::get_factory_command_count(
+                    spring_sdk_internal::generated::owned::units_commands::get_factory_command_count(
                         unit_id,
                     )
                 }
@@ -2061,7 +2229,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::get_factory_commands(
+                    spring_sdk_internal::generated::owned::units_commands::get_factory_commands(
                         unit_id,
                         max_commands,
                     )
@@ -2089,7 +2257,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::get_factory_counts(
+                    spring_sdk_internal::generated::owned::units_commands::get_factory_counts(
                         unit_id,
                         count,
                         add_cmds,
@@ -2134,7 +2302,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::get_real_build_queue(
+                    spring_sdk_internal::generated::owned::units_commands::get_real_build_queue(
                         unit_id,
                     )
                 }
@@ -2157,7 +2325,11 @@ pub mod units_commands {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_commands::get_unit_cmd_descs(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_commands::get_unit_cmd_descs(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_commands::get_unit_cmd_descs(
@@ -2175,7 +2347,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::get_unit_command_count(
+                    spring_sdk_internal::generated::owned::units_commands::get_unit_command_count(
                         unit_id,
                     )
                 }
@@ -2222,7 +2394,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::get_unit_current_command(
+                    spring_sdk_internal::generated::owned::units_commands::get_unit_current_command(
                         unit_id,
                         cmd_index,
                     )
@@ -2282,7 +2454,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::give_order_array_to_unit(
+                    spring_sdk_internal::generated::owned::units_commands::give_order_array_to_unit(
                         unit_id,
                         commands,
                     )
@@ -2310,7 +2482,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::give_order_array_to_unit_array(
+                    spring_sdk_internal::generated::owned::units_commands::give_order_array_to_unit_array(
                         unit_i_ds,
                         commands,
                         pairwise,
@@ -2339,7 +2511,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::give_order_array_to_unit_map(
+                    spring_sdk_internal::generated::owned::units_commands::give_order_array_to_unit_map(
                         unit_i_ds,
                         commands,
                     )
@@ -2369,7 +2541,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::give_order_to_unit(
+                    spring_sdk_internal::generated::owned::units_commands::give_order_to_unit(
                         unit_id,
                         cmd_id,
                         params,
@@ -2405,7 +2577,7 @@ pub mod units_commands {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_commands::give_order_to_unit_array(
+                    spring_sdk_internal::generated::owned::units_commands::give_order_to_unit_array(
                         unit_i_ds,
                         cmd_id,
                         params,
@@ -2492,7 +2664,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_feature_piece_direction(
+                    spring_sdk_internal::generated::owned::units_pieces::get_feature_piece_direction(
                         feature_id,
                         piece_num,
                     )
@@ -2519,7 +2691,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_feature_piece_info(
+                    spring_sdk_internal::generated::owned::units_pieces::get_feature_piece_info(
                         feature_id,
                         piece_num,
                     )
@@ -2542,7 +2714,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_feature_piece_list(
+                    spring_sdk_internal::generated::owned::units_pieces::get_feature_piece_list(
                         feature_id,
                     )
                 }
@@ -2566,7 +2738,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_feature_piece_map(
+                    spring_sdk_internal::generated::owned::units_pieces::get_feature_piece_map(
                         feature_id,
                     )
                 }
@@ -2591,7 +2763,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_feature_piece_matrix(
+                    spring_sdk_internal::generated::owned::units_pieces::get_feature_piece_matrix(
                         feature_id,
                         piece_num,
                     )
@@ -2618,7 +2790,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_feature_piece_pos_dir(
+                    spring_sdk_internal::generated::owned::units_pieces::get_feature_piece_pos_dir(
                         feature_id,
                         piece_num,
                     )
@@ -2645,7 +2817,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_feature_piece_position(
+                    spring_sdk_internal::generated::owned::units_pieces::get_feature_piece_position(
                         feature_id,
                         piece_num,
                     )
@@ -2668,7 +2840,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_feature_root_piece(
+                    spring_sdk_internal::generated::owned::units_pieces::get_feature_root_piece(
                         feature_id,
                     )
                 }
@@ -2694,7 +2866,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_model_piece_list(
+                    spring_sdk_internal::generated::owned::units_pieces::get_model_piece_list(
                         model_name,
                     )
                 }
@@ -2723,7 +2895,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_model_piece_map(
+                    spring_sdk_internal::generated::owned::units_pieces::get_model_piece_map(
                         model_name,
                     )
                 }
@@ -2749,7 +2921,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_model_root_piece(
+                    spring_sdk_internal::generated::owned::units_pieces::get_model_root_piece(
                         model_name,
                     )
                 }
@@ -2774,7 +2946,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_unit_piece_direction(
+                    spring_sdk_internal::generated::owned::units_pieces::get_unit_piece_direction(
                         unit_id,
                         piece_num,
                     )
@@ -2801,7 +2973,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_unit_piece_info(
+                    spring_sdk_internal::generated::owned::units_pieces::get_unit_piece_info(
                         unit_id,
                         piece_num,
                     )
@@ -2823,7 +2995,11 @@ pub mod units_pieces {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_pieces::get_unit_piece_list(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_pieces::get_unit_piece_list(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_pieces::get_unit_piece_list(
@@ -2840,7 +3016,11 @@ pub mod units_pieces {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_pieces::get_unit_piece_map(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_pieces::get_unit_piece_map(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_pieces::get_unit_piece_map(
@@ -2862,7 +3042,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_unit_piece_matrix(
+                    spring_sdk_internal::generated::owned::units_pieces::get_unit_piece_matrix(
                         unit_id,
                         piece_num,
                     )
@@ -2889,7 +3069,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_unit_piece_pos_dir(
+                    spring_sdk_internal::generated::owned::units_pieces::get_unit_piece_pos_dir(
                         unit_id,
                         piece_num,
                     )
@@ -2916,7 +3096,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_unit_piece_position(
+                    spring_sdk_internal::generated::owned::units_pieces::get_unit_piece_position(
                         unit_id,
                         piece_num,
                     )
@@ -2938,7 +3118,11 @@ pub mod units_pieces {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::units_pieces::get_unit_root_piece(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::units_pieces::get_unit_root_piece(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::units_pieces::get_unit_root_piece(
@@ -2956,7 +3140,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_unit_script_names(
+                    spring_sdk_internal::generated::owned::units_pieces::get_unit_script_names(
                         unit_id,
                     )
                 }
@@ -2981,7 +3165,7 @@ pub mod units_pieces {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::units_pieces::get_unit_script_piece(
+                    spring_sdk_internal::generated::owned::units_pieces::get_unit_script_piece(
                         unit_id,
                         script_num,
                     )
@@ -3026,7 +3210,7 @@ pub mod teams {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::teams::are_players_allied(
+                    spring_sdk_internal::generated::owned::teams::are_players_allied(
                         player_id1,
                         player_id2,
                     )
@@ -3048,7 +3232,12 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::are_teams_allied(team_id1, team_id2) }
+                {
+                    spring_sdk_internal::generated::owned::teams::are_teams_allied(
+                        team_id1,
+                        team_id2,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::teams::are_teams_allied(
@@ -3066,7 +3255,7 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::get_ai_info(team_id) }
+                { spring_sdk_internal::generated::owned::teams::get_ai_info(team_id) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::teams::get_ai_info(&self._engine, team_id) }
             };
@@ -3078,7 +3267,11 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::get_ally_team_info(ally_team_id) }
+                {
+                    spring_sdk_internal::generated::owned::teams::get_ally_team_info(
+                        ally_team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::teams::get_ally_team_info(&self._engine, ally_team_id) }
             };
@@ -3090,7 +3283,7 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::get_ally_team_list(0) }
+                { spring_sdk_internal::generated::owned::teams::get_ally_team_list(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::teams::get_ally_team_list(&self._engine) }
             };
@@ -3106,7 +3299,7 @@ pub mod teams {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::teams::get_player_controlled_unit(
+                    spring_sdk_internal::generated::owned::teams::get_player_controlled_unit(
                         player_id,
                     )
                 }
@@ -3131,7 +3324,7 @@ pub mod teams {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::teams::get_player_info(
+                    spring_sdk_internal::generated::owned::teams::get_player_info(
                         player_id,
                         get_player_opts,
                     )
@@ -3153,7 +3346,12 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::get_player_list(team_id, active) }
+                {
+                    spring_sdk_internal::generated::owned::teams::get_player_list(
+                        team_id,
+                        active,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::teams::get_player_list(&self._engine, team_id, active) }
             };
@@ -3169,7 +3367,7 @@ pub mod teams {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::teams::get_player_list_in_ally_team(
+                    spring_sdk_internal::generated::owned::teams::get_player_list_in_ally_team(
                         ally_team_id,
                     )
                 }
@@ -3189,7 +3387,11 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::get_player_list_in_team(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::teams::get_player_list_in_team(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::teams::get_player_list_in_team(&self._engine, team_id) }
             };
@@ -3201,7 +3403,11 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::get_team_ally_team_id(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::teams::get_team_ally_team_id(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::teams::get_team_ally_team_id(&self._engine, team_id) }
             };
@@ -3218,7 +3424,7 @@ pub mod teams {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::teams::get_team_info(
+                    spring_sdk_internal::generated::owned::teams::get_team_info(
                         team_id,
                         get_team_keys,
                     )
@@ -3240,7 +3446,11 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::get_team_list(ally_team_id) }
+                {
+                    spring_sdk_internal::generated::owned::teams::get_team_list(
+                        ally_team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::teams::get_team_list(&self._engine, ally_team_id) }
             };
@@ -3252,7 +3462,11 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::get_team_lua_ai(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::teams::get_team_lua_ai(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::teams::get_team_lua_ai(&self._engine, team_id) }
             };
@@ -3264,7 +3478,11 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::get_team_max_units(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::teams::get_team_max_units(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::teams::get_team_max_units(&self._engine, team_id) }
             };
@@ -3286,7 +3504,7 @@ pub mod teams {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::teams::get_team_resource_stats(
+                    spring_sdk_internal::generated::owned::teams::get_team_resource_stats(
                         team_id,
                         resource,
                     )
@@ -3318,7 +3536,7 @@ pub mod teams {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::teams::get_team_resources(
+                    spring_sdk_internal::generated::owned::teams::get_team_resources(
                         team_id,
                         resource,
                     )
@@ -3370,7 +3588,11 @@ pub mod teams {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::teams::get_team_unit_stats(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::teams::get_team_unit_stats(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::teams::get_team_unit_stats(&self._engine, team_id) }
             };
@@ -3400,7 +3622,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::clear_features_previous_draw_flag(
+                    spring_sdk_internal::generated::owned::features::clear_features_previous_draw_flag(
                         0,
                     )
                 }
@@ -3419,7 +3641,7 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_all_features(0) }
+                { spring_sdk_internal::generated::owned::features::get_all_features(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::features::get_all_features(&self._engine) }
             };
@@ -3431,7 +3653,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_ally_team(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_ally_team(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_ally_team(
@@ -3449,7 +3675,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_feature_always_update_matrix(
+                    spring_sdk_internal::generated::owned::features::get_feature_always_update_matrix(
                         feature_id,
                     )
                 }
@@ -3472,7 +3698,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_blocking(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_blocking(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_blocking(
@@ -3493,7 +3723,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_feature_collision_volume_data(
+                    spring_sdk_internal::generated::owned::features::get_feature_collision_volume_data(
                         feature_id,
                     )
                 }
@@ -3513,7 +3743,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_def_id(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_def_id(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_def_id(
@@ -3530,7 +3764,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_direction(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_direction(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_direction(
@@ -3547,7 +3785,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_draw_flag(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_draw_flag(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_draw_flag(
@@ -3565,7 +3807,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_feature_engine_draw_mask(
+                    spring_sdk_internal::generated::owned::features::get_feature_engine_draw_mask(
                         feature_id,
                     )
                 }
@@ -3585,7 +3827,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_fire_time(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_fire_time(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_fire_time(
@@ -3602,7 +3848,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_heading(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_heading(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_heading(
@@ -3619,7 +3869,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_health(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_health(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_health(
@@ -3636,7 +3890,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_height(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_height(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_height(
@@ -3657,7 +3915,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_feature_last_attacked_piece(
+                    spring_sdk_internal::generated::owned::features::get_feature_last_attacked_piece(
                         feature_id,
                     )
                 }
@@ -3677,7 +3935,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_lua_draw(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_lua_draw(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_lua_draw(
@@ -3694,7 +3956,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_mass(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_mass(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::features::get_feature_mass(&self._engine, feature_id) }
             };
@@ -3706,7 +3972,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_no_draw(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_no_draw(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_no_draw(
@@ -3723,7 +3993,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_no_select(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_no_select(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_no_select(
@@ -3745,7 +4019,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_feature_piece_collision_volume_data(
+                    spring_sdk_internal::generated::owned::features::get_feature_piece_collision_volume_data(
                         feature_id,
                         piece_num,
                     )
@@ -3767,7 +4041,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_position(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_position(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_position(
@@ -3788,7 +4066,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_feature_position_ext(
+                    spring_sdk_internal::generated::owned::features::get_feature_position_ext(
                         feature_id,
                     )
                 }
@@ -3808,7 +4086,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_radius(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_radius(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_radius(
@@ -3828,7 +4110,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_resources(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_resources(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_resources(
@@ -3848,7 +4134,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_resurrect(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_resurrect(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_resurrect(
@@ -3865,7 +4155,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_rotation(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_rotation(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_rotation(
@@ -3886,7 +4180,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_feature_selection_volume_data(
+                    spring_sdk_internal::generated::owned::features::get_feature_selection_volume_data(
                         feature_id,
                     )
                 }
@@ -3912,7 +4206,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_feature_separation(
+                    spring_sdk_internal::generated::owned::features::get_feature_separation(
                         feature_id1,
                         feature_id2,
                         positional,
@@ -3937,7 +4231,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_feature_smoke_time(
+                    spring_sdk_internal::generated::owned::features::get_feature_smoke_time(
                         feature_id,
                     )
                 }
@@ -3957,7 +4251,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_team(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_team(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::features::get_feature_team(&self._engine, feature_id) }
             };
@@ -3973,7 +4271,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_feature_transform_matrix(
+                    spring_sdk_internal::generated::owned::features::get_feature_transform_matrix(
                         feature_id,
                     )
                 }
@@ -3993,7 +4291,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::get_feature_velocity(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::get_feature_velocity(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::features::get_feature_velocity(
@@ -4017,7 +4319,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_features_in_cylinder(
+                    spring_sdk_internal::generated::owned::features::get_features_in_cylinder(
                         x,
                         z,
                         radius,
@@ -4050,7 +4352,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_features_in_rectangle(
+                    spring_sdk_internal::generated::owned::features::get_features_in_rectangle(
                         min_x,
                         min_z,
                         max_x,
@@ -4103,7 +4405,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_render_features(
+                    spring_sdk_internal::generated::owned::features::get_render_features(
                         draw_mask,
                         send_mask,
                     )
@@ -4129,7 +4431,7 @@ pub mod features {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::features::get_render_features_draw_flag_changed(
+                    spring_sdk_internal::generated::owned::features::get_render_features_draw_flag_changed(
                         send_mask,
                     )
                 }
@@ -4149,7 +4451,11 @@ pub mod features {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::features::valid_feature_id(feature_id) }
+                {
+                    spring_sdk_internal::generated::owned::features::valid_feature_id(
+                        feature_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::features::valid_feature_id(&self._engine, feature_id) }
             };
@@ -4181,7 +4487,11 @@ pub mod projectiles {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::projectiles::get_all_projectiles(options) }
+                {
+                    spring_sdk_internal::generated::owned::projectiles::get_all_projectiles(
+                        options,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::projectiles::get_all_projectiles(
@@ -4202,7 +4512,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_piece_projectile_params(
+                    spring_sdk_internal::generated::owned::projectiles::get_piece_projectile_params(
                         projectile_id,
                     )
                 }
@@ -4223,7 +4533,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_ally_team_id(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_ally_team_id(
                         projectile_id,
                     )
                 }
@@ -4253,7 +4563,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_damages(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_damages(
                         projectile_id,
                         tag,
                     )
@@ -4276,7 +4586,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_def_id(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_def_id(
                         projectile_id,
                     )
                 }
@@ -4297,7 +4607,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_direction(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_direction(
                         projectile_id,
                     )
                 }
@@ -4318,7 +4628,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_gravity(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_gravity(
                         projectile_id,
                     )
                 }
@@ -4339,7 +4649,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_is_intercepted(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_is_intercepted(
                         projectile_id,
                     )
                 }
@@ -4360,7 +4670,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_owner_id(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_owner_id(
                         projectile_id,
                     )
                 }
@@ -4381,7 +4691,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_position(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_position(
                         projectile_id,
                     )
                 }
@@ -4405,7 +4715,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_target(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_target(
                         projectile_id,
                     )
                 }
@@ -4426,7 +4736,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_team_id(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_team_id(
                         projectile_id,
                     )
                 }
@@ -4447,7 +4757,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_time_to_live(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_time_to_live(
                         projectile_id,
                     )
                 }
@@ -4471,7 +4781,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_type(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_type(
                         projectile_id,
                     )
                 }
@@ -4492,7 +4802,7 @@ pub mod projectiles {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectiles::get_projectile_velocity(
+                    spring_sdk_internal::generated::owned::projectiles::get_projectile_velocity(
                         projectile_id,
                     )
                 }
@@ -4599,7 +4909,7 @@ pub mod los {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::los::get_position_los_state(
+                    spring_sdk_internal::generated::owned::los::get_position_los_state(
                         pos,
                         ally_team_id,
                     )
@@ -4624,7 +4934,11 @@ pub mod los {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::los::get_radar_error_params(ally_team_id) }
+                {
+                    spring_sdk_internal::generated::owned::los::get_radar_error_params(
+                        ally_team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::los::get_radar_error_params(
@@ -4641,7 +4955,12 @@ pub mod los {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::los::is_pos_in_air_los(pos, ally_team_id) }
+                {
+                    spring_sdk_internal::generated::owned::los::is_pos_in_air_los(
+                        pos,
+                        ally_team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::los::is_pos_in_air_los(
@@ -4659,7 +4978,12 @@ pub mod los {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::los::is_pos_in_los(pos, ally_team_id) }
+                {
+                    spring_sdk_internal::generated::owned::los::is_pos_in_los(
+                        pos,
+                        ally_team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::los::is_pos_in_los(&self._engine, pos, ally_team_id) }
             };
@@ -4671,7 +4995,12 @@ pub mod los {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::los::is_pos_in_radar(pos, ally_team_id) }
+                {
+                    spring_sdk_internal::generated::owned::los::is_pos_in_radar(
+                        pos,
+                        ally_team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::los::is_pos_in_radar(&self._engine, pos, ally_team_id) }
             };
@@ -4688,7 +5017,7 @@ pub mod los {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::los::is_unit_in_air_los(
+                    spring_sdk_internal::generated::owned::los::is_unit_in_air_los(
                         unit_id,
                         ally_team_id,
                     )
@@ -4715,7 +5044,7 @@ pub mod los {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::los::is_unit_in_jammer(
+                    spring_sdk_internal::generated::owned::los::is_unit_in_jammer(
                         unit_id,
                         ally_team_id,
                     )
@@ -4737,7 +5066,12 @@ pub mod los {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::los::is_unit_in_los(unit_id, ally_team_id) }
+                {
+                    spring_sdk_internal::generated::owned::los::is_unit_in_los(
+                        unit_id,
+                        ally_team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::los::is_unit_in_los(
@@ -4756,7 +5090,7 @@ pub mod los {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::los::is_unit_in_radar(
+                    spring_sdk_internal::generated::owned::los::is_unit_in_radar(
                         unit_id,
                         ally_team_id,
                     )
@@ -4799,7 +5133,11 @@ pub mod unit_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_defs::get_unit_def_by_id(unit_def_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_by_id(
+                        unit_def_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_defs::get_unit_def_by_id(
@@ -4820,7 +5158,7 @@ pub mod unit_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_defs::get_unit_def_classify(
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_classify(
                         unit_def_id,
                     )
                 }
@@ -4840,7 +5178,11 @@ pub mod unit_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_defs::get_unit_def_costs(unit_def_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_costs(
+                        unit_def_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_defs::get_unit_def_costs(
@@ -4857,7 +5199,11 @@ pub mod unit_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_defs::get_unit_def_count(0) }
+                {
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_count(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unit_defs::get_unit_def_count(&self._engine) }
             };
@@ -4879,7 +5225,7 @@ pub mod unit_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_defs::get_unit_def_custom_param(
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_custom_param(
                         unit_def_id,
                         key,
                     )
@@ -4905,7 +5251,7 @@ pub mod unit_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_defs::get_unit_def_custom_param_keys(
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_custom_param_keys(
                         unit_def_id,
                     )
                 }
@@ -4925,7 +5271,11 @@ pub mod unit_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_defs::get_unit_def_health(unit_def_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_health(
+                        unit_def_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_defs::get_unit_def_health(
@@ -4965,7 +5315,7 @@ pub mod unit_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_defs::get_unit_def_id_by_name(
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_id_by_name(
                         unit_def_name,
                     )
                 }
@@ -4985,7 +5335,11 @@ pub mod unit_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_defs::get_unit_def_i_ds(0) }
+                {
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_i_ds(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unit_defs::get_unit_def_i_ds(&self._engine) }
             };
@@ -5024,7 +5378,7 @@ pub mod unit_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_defs::get_unit_def_param_bool(
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_param_bool(
                         unit_def_id,
                         key,
                     )
@@ -5056,7 +5410,7 @@ pub mod unit_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_defs::get_unit_def_param_float(
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_param_float(
                         unit_def_id,
                         key,
                     )
@@ -5088,7 +5442,7 @@ pub mod unit_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_defs::get_unit_def_param_int(
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_param_int(
                         unit_def_id,
                         key,
                     )
@@ -5110,7 +5464,11 @@ pub mod unit_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_defs::get_unit_def_param_keys(0) }
+                {
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_param_keys(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unit_defs::get_unit_def_param_keys(&self._engine) }
             };
@@ -5132,7 +5490,7 @@ pub mod unit_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_defs::get_unit_def_param_string(
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_param_string(
                         unit_def_id,
                         key,
                     )
@@ -5159,7 +5517,11 @@ pub mod unit_defs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_defs::get_unit_def_param_type(key) }
+                {
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_param_type(
+                        key,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unit_defs::get_unit_def_param_type(&self._engine, key) }
             };
@@ -5171,7 +5533,11 @@ pub mod unit_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_defs::get_unit_def_speed(unit_def_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_defs::get_unit_def_speed(
+                        unit_def_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_defs::get_unit_def_speed(
@@ -5188,7 +5554,11 @@ pub mod unit_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_defs::valid_unit_def_id(unit_def_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_defs::valid_unit_def_id(
+                        unit_def_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_defs::valid_unit_def_id(
@@ -5227,7 +5597,7 @@ pub mod feature_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_defs::get_feature_def_by_id(
+                    spring_sdk_internal::generated::owned::feature_defs::get_feature_def_by_id(
                         feature_def_id,
                     )
                 }
@@ -5247,7 +5617,11 @@ pub mod feature_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::feature_defs::get_feature_def_count(0) }
+                {
+                    spring_sdk_internal::generated::owned::feature_defs::get_feature_def_count(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::feature_defs::get_feature_def_count(&self._engine) }
             };
@@ -5269,7 +5643,7 @@ pub mod feature_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_defs::get_feature_def_custom_param(
+                    spring_sdk_internal::generated::owned::feature_defs::get_feature_def_custom_param(
                         feature_def_id,
                         key,
                     )
@@ -5295,7 +5669,7 @@ pub mod feature_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_defs::get_feature_def_custom_param_keys(
+                    spring_sdk_internal::generated::owned::feature_defs::get_feature_def_custom_param_keys(
                         feature_def_id,
                     )
                 }
@@ -5316,7 +5690,7 @@ pub mod feature_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_defs::get_feature_def_energy(
+                    spring_sdk_internal::generated::owned::feature_defs::get_feature_def_energy(
                         feature_def_id,
                     )
                 }
@@ -5342,7 +5716,7 @@ pub mod feature_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_defs::get_feature_def_id_by_name(
+                    spring_sdk_internal::generated::owned::feature_defs::get_feature_def_id_by_name(
                         feature_def_name,
                     )
                 }
@@ -5362,7 +5736,11 @@ pub mod feature_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::feature_defs::get_feature_def_i_ds(0) }
+                {
+                    spring_sdk_internal::generated::owned::feature_defs::get_feature_def_i_ds(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::feature_defs::get_feature_def_i_ds(&self._engine) }
             };
@@ -5375,7 +5753,7 @@ pub mod feature_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_defs::get_feature_def_metal(
+                    spring_sdk_internal::generated::owned::feature_defs::get_feature_def_metal(
                         feature_def_id,
                     )
                 }
@@ -5396,7 +5774,7 @@ pub mod feature_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_defs::get_feature_def_name(
+                    spring_sdk_internal::generated::owned::feature_defs::get_feature_def_name(
                         feature_def_id,
                     )
                 }
@@ -5417,7 +5795,7 @@ pub mod feature_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_defs::valid_feature_def_id(
+                    spring_sdk_internal::generated::owned::feature_defs::valid_feature_def_id(
                         feature_def_id,
                     )
                 }
@@ -5459,7 +5837,7 @@ pub mod weapon_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::weapon_defs::get_weapon_def_by_id(
+                    spring_sdk_internal::generated::owned::weapon_defs::get_weapon_def_by_id(
                         weapon_def_id,
                     )
                 }
@@ -5479,7 +5857,11 @@ pub mod weapon_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::weapon_defs::get_weapon_def_count(0) }
+                {
+                    spring_sdk_internal::generated::owned::weapon_defs::get_weapon_def_count(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::weapon_defs::get_weapon_def_count(&self._engine) }
             };
@@ -5501,7 +5883,7 @@ pub mod weapon_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::weapon_defs::get_weapon_def_custom_param(
+                    spring_sdk_internal::generated::owned::weapon_defs::get_weapon_def_custom_param(
                         weapon_def_id,
                         key,
                     )
@@ -5527,7 +5909,7 @@ pub mod weapon_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::weapon_defs::get_weapon_def_custom_param_keys(
+                    spring_sdk_internal::generated::owned::weapon_defs::get_weapon_def_custom_param_keys(
                         weapon_def_id,
                     )
                 }
@@ -5548,7 +5930,7 @@ pub mod weapon_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::weapon_defs::get_weapon_def_damage(
+                    spring_sdk_internal::generated::owned::weapon_defs::get_weapon_def_damage(
                         weapon_def_id,
                     )
                 }
@@ -5574,7 +5956,7 @@ pub mod weapon_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::weapon_defs::get_weapon_def_id(
+                    spring_sdk_internal::generated::owned::weapon_defs::get_weapon_def_id(
                         weapon_def_name,
                     )
                 }
@@ -5594,7 +5976,11 @@ pub mod weapon_defs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::weapon_defs::get_weapon_def_i_ds(0) }
+                {
+                    spring_sdk_internal::generated::owned::weapon_defs::get_weapon_def_i_ds(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::weapon_defs::get_weapon_def_i_ds(&self._engine) }
             };
@@ -5607,7 +5993,7 @@ pub mod weapon_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::weapon_defs::get_weapon_def_name(
+                    spring_sdk_internal::generated::owned::weapon_defs::get_weapon_def_name(
                         weapon_def_id,
                     )
                 }
@@ -5631,7 +6017,7 @@ pub mod weapon_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::weapon_defs::get_weapon_def_projectile_params(
+                    spring_sdk_internal::generated::owned::weapon_defs::get_weapon_def_projectile_params(
                         weapon_def_id,
                     )
                 }
@@ -5652,7 +6038,7 @@ pub mod weapon_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::weapon_defs::get_weapon_def_range(
+                    spring_sdk_internal::generated::owned::weapon_defs::get_weapon_def_range(
                         weapon_def_id,
                     )
                 }
@@ -5673,7 +6059,7 @@ pub mod weapon_defs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::weapon_defs::valid_weapon_def_id(
+                    spring_sdk_internal::generated::owned::weapon_defs::valid_weapon_def_id(
                         weapon_def_id,
                     )
                 }
@@ -5711,7 +6097,11 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::are_helper_a_is_enabled(0) }
+                {
+                    spring_sdk_internal::generated::owned::game::are_helper_a_is_enabled(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::are_helper_a_is_enabled(&self._engine) }
             };
@@ -5723,7 +6113,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::fixed_allies(0) }
+                { spring_sdk_internal::generated::owned::game::fixed_allies(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::fixed_allies(&self._engine) }
             };
@@ -5738,7 +6128,11 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_ally_team_start_box(ally_team_id) }
+                {
+                    spring_sdk_internal::generated::owned::game::get_ally_team_start_box(
+                        ally_team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::game::get_ally_team_start_box(
@@ -5755,7 +6149,11 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_facing_from_heading(heading) }
+                {
+                    spring_sdk_internal::generated::owned::game::get_facing_from_heading(
+                        heading,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_facing_from_heading(&self._engine, heading) }
             };
@@ -5767,7 +6165,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_gaia_team_id(0) }
+                { spring_sdk_internal::generated::owned::game::get_gaia_team_id(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_gaia_team_id(&self._engine) }
             };
@@ -5779,7 +6177,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_game_frame(0) }
+                { spring_sdk_internal::generated::owned::game::get_game_frame(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_game_frame(&self._engine) }
             };
@@ -5791,7 +6189,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_game_map_info(0) }
+                { spring_sdk_internal::generated::owned::game::get_game_map_info(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_game_map_info(&self._engine) }
             };
@@ -5803,7 +6201,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_game_mod_info(0) }
+                { spring_sdk_internal::generated::owned::game::get_game_mod_info(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_game_mod_info(&self._engine) }
             };
@@ -5815,7 +6213,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_game_rules_info(0) }
+                { spring_sdk_internal::generated::owned::game::get_game_rules_info(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_game_rules_info(&self._engine) }
             };
@@ -5827,7 +6225,11 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_game_rules_resource_info(0) }
+                {
+                    spring_sdk_internal::generated::owned::game::get_game_rules_resource_info(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_game_rules_resource_info(&self._engine) }
             };
@@ -5839,7 +6241,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_game_seconds(0) }
+                { spring_sdk_internal::generated::owned::game::get_game_seconds(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_game_seconds(&self._engine) }
             };
@@ -5851,7 +6253,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_game_setup_info(0) }
+                { spring_sdk_internal::generated::owned::game::get_game_setup_info(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_game_setup_info(&self._engine) }
             };
@@ -5863,7 +6265,11 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_global_los(ally_team_id) }
+                {
+                    spring_sdk_internal::generated::owned::game::get_global_los(
+                        ally_team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_global_los(&self._engine, ally_team_id) }
             };
@@ -5875,7 +6281,11 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_heading_from_facing(facing) }
+                {
+                    spring_sdk_internal::generated::owned::game::get_heading_from_facing(
+                        facing,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_heading_from_facing(&self._engine, facing) }
             };
@@ -5887,7 +6297,12 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_heading_from_vector(x, z) }
+                {
+                    spring_sdk_internal::generated::owned::game::get_heading_from_vector(
+                        x,
+                        z,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_heading_from_vector(&self._engine, x, z) }
             };
@@ -5915,7 +6330,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_map_options(0) }
+                { spring_sdk_internal::generated::owned::game::get_map_options(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_map_options(&self._engine) }
             };
@@ -5955,7 +6370,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_mod_options(0) }
+                { spring_sdk_internal::generated::owned::game::get_mod_options(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_mod_options(&self._engine) }
             };
@@ -5972,7 +6387,7 @@ pub mod game {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_side_data(side_name) }
+                { spring_sdk_internal::generated::owned::game::get_side_data(side_name) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_side_data(&self._engine, side_name) }
             };
@@ -5984,7 +6399,11 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_side_data_by_index(side_index) }
+                {
+                    spring_sdk_internal::generated::owned::game::get_side_data_by_index(
+                        side_index,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::game::get_side_data_by_index(
@@ -6001,7 +6420,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_side_data_count(0) }
+                { spring_sdk_internal::generated::owned::game::get_side_data_count(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_side_data_count(&self._engine) }
             };
@@ -6016,7 +6435,11 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_team_start_position(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::game::get_team_start_position(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_team_start_position(&self._engine, team_id) }
             };
@@ -6028,7 +6451,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_tidal(0) }
+                { spring_sdk_internal::generated::owned::game::get_tidal(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_tidal(&self._engine) }
             };
@@ -6040,7 +6463,11 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_vector_from_heading(heading) }
+                {
+                    spring_sdk_internal::generated::owned::game::get_vector_from_heading(
+                        heading,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_vector_from_heading(&self._engine, heading) }
             };
@@ -6052,7 +6479,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::get_wind(0) }
+                { spring_sdk_internal::generated::owned::game::get_wind(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::get_wind(&self._engine) }
             };
@@ -6064,7 +6491,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::is_cheating_enabled(0) }
+                { spring_sdk_internal::generated::owned::game::is_cheating_enabled(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::is_cheating_enabled(&self._engine) }
             };
@@ -6076,7 +6503,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::is_dev_lua_enabled(0) }
+                { spring_sdk_internal::generated::owned::game::is_dev_lua_enabled(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::is_dev_lua_enabled(&self._engine) }
             };
@@ -6088,7 +6515,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::is_edit_defs_enabled(0) }
+                { spring_sdk_internal::generated::owned::game::is_edit_defs_enabled(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::is_edit_defs_enabled(&self._engine) }
             };
@@ -6100,7 +6527,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::is_game_over(0) }
+                { spring_sdk_internal::generated::owned::game::is_game_over(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::is_game_over(&self._engine) }
             };
@@ -6112,7 +6539,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::is_god_mode_enabled(0) }
+                { spring_sdk_internal::generated::owned::game::is_god_mode_enabled(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::is_god_mode_enabled(&self._engine) }
             };
@@ -6124,7 +6551,7 @@ pub mod game {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game::is_no_cost_enabled(0) }
+                { spring_sdk_internal::generated::owned::game::is_no_cost_enabled(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game::is_no_cost_enabled(&self._engine) }
             };
@@ -6153,7 +6580,7 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_grass(x, z) }
+                { spring_sdk_internal::generated::owned::terrain::get_grass(x, z) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain::get_grass(&self._engine, x, z) }
             };
@@ -6171,7 +6598,14 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_ground_blocked(x1, z1, x2, z2) }
+                {
+                    spring_sdk_internal::generated::owned::terrain::get_ground_blocked(
+                        x1,
+                        z1,
+                        x2,
+                        z2,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::terrain::get_ground_blocked(
@@ -6191,7 +6625,11 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_ground_extremes(0) }
+                {
+                    spring_sdk_internal::generated::owned::terrain::get_ground_extremes(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain::get_ground_extremes(&self._engine) }
             };
@@ -6203,7 +6641,12 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_ground_height(x, z) }
+                {
+                    spring_sdk_internal::generated::owned::terrain::get_ground_height(
+                        x,
+                        z,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain::get_ground_height(&self._engine, x, z) }
             };
@@ -6215,7 +6658,11 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_ground_heights(positions) }
+                {
+                    spring_sdk_internal::generated::owned::terrain::get_ground_heights(
+                        positions,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain::get_ground_heights(&self._engine, positions) }
             };
@@ -6244,7 +6691,13 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_ground_normal(x, z, smoothed) }
+                {
+                    spring_sdk_internal::generated::owned::terrain::get_ground_normal(
+                        x,
+                        z,
+                        smoothed,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::terrain::get_ground_normal(
@@ -6263,7 +6716,12 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_ground_orig_height(x, z) }
+                {
+                    spring_sdk_internal::generated::owned::terrain::get_ground_orig_height(
+                        x,
+                        z,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain::get_ground_orig_height(&self._engine, x, z) }
             };
@@ -6275,7 +6733,11 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_height_map_size(0) }
+                {
+                    spring_sdk_internal::generated::owned::terrain::get_height_map_size(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain::get_height_map_size(&self._engine) }
             };
@@ -6287,7 +6749,12 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_smooth_mesh_height(x, z) }
+                {
+                    spring_sdk_internal::generated::owned::terrain::get_smooth_mesh_height(
+                        x,
+                        z,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain::get_smooth_mesh_height(&self._engine, x, z) }
             };
@@ -6319,7 +6786,7 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_water_level(x, z) }
+                { spring_sdk_internal::generated::owned::terrain::get_water_level(x, z) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain::get_water_level(&self._engine, x, z) }
             };
@@ -6331,7 +6798,11 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::get_water_plane_level(0) }
+                {
+                    spring_sdk_internal::generated::owned::terrain::get_water_plane_level(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain::get_water_plane_level(&self._engine) }
             };
@@ -6343,7 +6814,7 @@ pub mod terrain {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain::is_pos_in_map(x, z) }
+                { spring_sdk_internal::generated::owned::terrain::is_pos_in_map(x, z) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain::is_pos_in_map(&self._engine, x, z) }
             };
@@ -6372,7 +6843,11 @@ pub mod player {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::player::get_local_ally_team_id(0) }
+                {
+                    spring_sdk_internal::generated::owned::player::get_local_ally_team_id(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::player::get_local_ally_team_id(&self._engine) }
             };
@@ -6384,7 +6859,7 @@ pub mod player {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::player::get_local_player_id(0) }
+                { spring_sdk_internal::generated::owned::player::get_local_player_id(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::player::get_local_player_id(&self._engine) }
             };
@@ -6396,7 +6871,7 @@ pub mod player {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::player::get_local_team_id(0) }
+                { spring_sdk_internal::generated::owned::player::get_local_team_id(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::player::get_local_team_id(&self._engine) }
             };
@@ -6413,7 +6888,7 @@ pub mod player {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::player::get_player_roster(
+                    spring_sdk_internal::generated::owned::player::get_player_roster(
                         sort_mode,
                         show_pathing_players,
                     )
@@ -6435,7 +6910,11 @@ pub mod player {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::player::get_player_statistics(player_id) }
+                {
+                    spring_sdk_internal::generated::owned::player::get_player_statistics(
+                        player_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::player::get_player_statistics(
@@ -6474,7 +6953,11 @@ pub mod player {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::player::get_spectating_state(0) }
+                {
+                    spring_sdk_internal::generated::owned::player::get_spectating_state(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::player::get_spectating_state(&self._engine) }
             };
@@ -6502,7 +6985,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::bit_and(a, b) }
+                { spring_sdk_internal::generated::owned::math_extra::bit_and(a, b) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::bit_and(&self._engine, a, b) }
             };
@@ -6514,7 +6997,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::bit_bits(bits) }
+                { spring_sdk_internal::generated::owned::math_extra::bit_bits(bits) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::bit_bits(&self._engine, bits) }
             };
@@ -6526,7 +7009,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::bit_inv(a) }
+                { spring_sdk_internal::generated::owned::math_extra::bit_inv(a) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::bit_inv(&self._engine, a) }
             };
@@ -6538,7 +7021,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::bit_or(a, b) }
+                { spring_sdk_internal::generated::owned::math_extra::bit_or(a, b) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::bit_or(&self._engine, a, b) }
             };
@@ -6550,7 +7033,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::bit_xor(a, b) }
+                { spring_sdk_internal::generated::owned::math_extra::bit_xor(a, b) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::bit_xor(&self._engine, a, b) }
             };
@@ -6562,7 +7045,13 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::clamp(value, min, max) }
+                {
+                    spring_sdk_internal::generated::owned::math_extra::clamp(
+                        value,
+                        min,
+                        max,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::clamp(&self._engine, value, min, max) }
             };
@@ -6574,7 +7063,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::diag(values) }
+                { spring_sdk_internal::generated::owned::math_extra::diag(values) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::diag(&self._engine, values) }
             };
@@ -6586,7 +7075,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::erf(value) }
+                { spring_sdk_internal::generated::owned::math_extra::erf(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::erf(&self._engine, value) }
             };
@@ -6598,7 +7087,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::hypot(x, y) }
+                { spring_sdk_internal::generated::owned::math_extra::hypot(x, y) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::hypot(&self._engine, x, y) }
             };
@@ -6610,7 +7099,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::mix(a, b, t) }
+                { spring_sdk_internal::generated::owned::math_extra::mix(a, b, t) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::mix(&self._engine, a, b, t) }
             };
@@ -6622,7 +7111,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::normalize(vec) }
+                { spring_sdk_internal::generated::owned::math_extra::normalize(vec) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::normalize(&self._engine, vec) }
             };
@@ -6634,7 +7123,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::round(value) }
+                { spring_sdk_internal::generated::owned::math_extra::round(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::round(&self._engine, value) }
             };
@@ -6646,7 +7135,7 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::sgn(value) }
+                { spring_sdk_internal::generated::owned::math_extra::sgn(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::math_extra::sgn(&self._engine, value) }
             };
@@ -6658,7 +7147,13 @@ pub mod math_extra {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::math_extra::smooth_step(edge0, edge1, x) }
+                {
+                    spring_sdk_internal::generated::owned::math_extra::smooth_step(
+                        edge0,
+                        edge1,
+                        x,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::math_extra::smooth_step(
@@ -6700,7 +7195,7 @@ pub mod encoding {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::encoding::decode_base64(text) }
+                { spring_sdk_internal::generated::owned::encoding::decode_base64(text) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::encoding::decode_base64(&self._engine, text) }
             };
@@ -6717,7 +7212,11 @@ pub mod encoding {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::encoding::decode_base64_url(text) }
+                {
+                    spring_sdk_internal::generated::owned::encoding::decode_base64_url(
+                        text,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::encoding::decode_base64_url(&self._engine, text) }
             };
@@ -6730,7 +7229,7 @@ pub mod encoding {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::encoding::encode_base64(
+                    spring_sdk_internal::generated::owned::encoding::encode_base64(
                         text,
                         strip_padding,
                     )
@@ -6752,7 +7251,11 @@ pub mod encoding {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::encoding::encode_base64_url(text) }
+                {
+                    spring_sdk_internal::generated::owned::encoding::encode_base64_url(
+                        text,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::encoding::encode_base64_url(&self._engine, text) }
             };
@@ -6769,7 +7272,11 @@ pub mod encoding {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::encoding::is_valid_base64(text) }
+                {
+                    spring_sdk_internal::generated::owned::encoding::is_valid_base64(
+                        text,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::encoding::is_valid_base64(&self._engine, text) }
             };
@@ -6786,7 +7293,11 @@ pub mod encoding {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::encoding::is_valid_base64_url(text) }
+                {
+                    spring_sdk_internal::generated::owned::encoding::is_valid_base64_url(
+                        text,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::encoding::is_valid_base64_url(&self._engine, text) }
             };
@@ -6814,7 +7325,12 @@ pub mod metal_map {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::metal_map::get_metal_amount(x, z) }
+                {
+                    spring_sdk_internal::generated::owned::metal_map::get_metal_amount(
+                        x,
+                        z,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::metal_map::get_metal_amount(&self._engine, x, z) }
             };
@@ -6826,7 +7342,12 @@ pub mod metal_map {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::metal_map::get_metal_extraction(x, z) }
+                {
+                    spring_sdk_internal::generated::owned::metal_map::get_metal_extraction(
+                        x,
+                        z,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::metal_map::get_metal_extraction(&self._engine, x, z) }
             };
@@ -6838,7 +7359,11 @@ pub mod metal_map {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::metal_map::get_metal_map_size(0) }
+                {
+                    spring_sdk_internal::generated::owned::metal_map::get_metal_map_size(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::metal_map::get_metal_map_size(&self._engine) }
             };
@@ -6850,7 +7375,13 @@ pub mod metal_map {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::metal_map::set_metal_amount(x, z, amount) }
+                {
+                    spring_sdk_internal::generated::owned::metal_map::set_metal_amount(
+                        x,
+                        z,
+                        amount,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::metal_map::set_metal_amount(
@@ -6886,7 +7417,11 @@ pub mod path_finder {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::path_finder::delete_path(path_id) }
+                {
+                    spring_sdk_internal::generated::owned::path_finder::delete_path(
+                        path_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::path_finder::delete_path(&self._engine, path_id) }
             };
@@ -6899,7 +7434,7 @@ pub mod path_finder {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::path_finder::free_path_node_costs_array(
+                    spring_sdk_internal::generated::owned::path_finder::free_path_node_costs_array(
                         overlay_index,
                     )
                 }
@@ -6925,7 +7460,7 @@ pub mod path_finder {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::path_finder::get_next_way_point(
+                    spring_sdk_internal::generated::owned::path_finder::get_next_way_point(
                         path_id,
                         caller_pos,
                         min_dist,
@@ -6949,7 +7484,12 @@ pub mod path_finder {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::path_finder::get_path_node_cost(x, z) }
+                {
+                    spring_sdk_internal::generated::owned::path_finder::get_path_node_cost(
+                        x,
+                        z,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::path_finder::get_path_node_cost(&self._engine, x, z) }
             };
@@ -6962,7 +7502,7 @@ pub mod path_finder {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::path_finder::get_path_node_costs(
+                    spring_sdk_internal::generated::owned::path_finder::get_path_node_costs(
                         overlay_index,
                     )
                 }
@@ -7008,7 +7548,7 @@ pub mod path_finder {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::path_finder::init_path_node_costs_array(
+                    spring_sdk_internal::generated::owned::path_finder::init_path_node_costs_array(
                         overlay_index,
                         size_x,
                         size_z,
@@ -7081,7 +7621,7 @@ pub mod path_finder {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::path_finder::set_path_node_cost(
+                    spring_sdk_internal::generated::owned::path_finder::set_path_node_cost(
                         overlay_index,
                         cost_index,
                         cost,
@@ -7106,7 +7646,7 @@ pub mod path_finder {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::path_finder::set_path_node_costs(
+                    spring_sdk_internal::generated::owned::path_finder::set_path_node_costs(
                         overlay_index,
                     )
                 }
@@ -7143,7 +7683,7 @@ pub mod platform {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::platform::get_architecture(0) }
+                { spring_sdk_internal::generated::owned::platform::get_architecture(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::platform::get_architecture(&self._engine) }
             };
@@ -7155,7 +7695,7 @@ pub mod platform {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::platform::is_headless(0) }
+                { spring_sdk_internal::generated::owned::platform::is_headless(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::platform::is_headless(&self._engine) }
             };
@@ -7165,7 +7705,7 @@ pub mod platform {
 }
 pub mod rules_params {
     pub use crate::types::rules_params::*;
-    pub use spring::rules_param_los as los;
+    pub use spring_sdk_internal::rules_param_los as los;
     use crate::Result;
     use alloc::vec::Vec;
     use alloc::string::String;
@@ -7196,7 +7736,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::get_feature_rules_param(
+                    spring_sdk_internal::generated::owned::rules_params::get_feature_rules_param(
                         feature_id,
                         param_name,
                     )
@@ -7219,7 +7759,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::get_feature_rules_params(
+                    spring_sdk_internal::generated::owned::rules_params::get_feature_rules_params(
                         feature_id,
                     )
                 }
@@ -7245,7 +7785,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::get_game_rules_param(
+                    spring_sdk_internal::generated::owned::rules_params::get_game_rules_param(
                         param_name,
                     )
                 }
@@ -7265,7 +7805,11 @@ pub mod rules_params {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rules_params::get_game_rules_params(0) }
+                {
+                    spring_sdk_internal::generated::owned::rules_params::get_game_rules_params(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rules_params::get_game_rules_params(&self._engine) }
             };
@@ -7287,7 +7831,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::get_player_rules_param(
+                    spring_sdk_internal::generated::owned::rules_params::get_player_rules_param(
                         player_id,
                         param_name,
                     )
@@ -7310,7 +7854,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::get_player_rules_params(
+                    spring_sdk_internal::generated::owned::rules_params::get_player_rules_params(
                         player_id,
                     )
                 }
@@ -7340,7 +7884,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::get_team_rules_param(
+                    spring_sdk_internal::generated::owned::rules_params::get_team_rules_param(
                         team_id,
                         param_name,
                     )
@@ -7363,7 +7907,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::get_team_rules_params(
+                    spring_sdk_internal::generated::owned::rules_params::get_team_rules_params(
                         team_id,
                     )
                 }
@@ -7393,7 +7937,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::get_unit_rules_param(
+                    spring_sdk_internal::generated::owned::rules_params::get_unit_rules_param(
                         unit_id,
                         param_name,
                     )
@@ -7416,7 +7960,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::get_unit_rules_params(
+                    spring_sdk_internal::generated::owned::rules_params::get_unit_rules_params(
                         unit_id,
                     )
                 }
@@ -7453,7 +7997,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::set_feature_rules_param(
+                    spring_sdk_internal::generated::owned::rules_params::set_feature_rules_param(
                         feature_id,
                         param_name,
                         value,
@@ -7495,7 +8039,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::set_game_rules_param(
+                    spring_sdk_internal::generated::owned::rules_params::set_game_rules_param(
                         param_name,
                         value,
                         los,
@@ -7536,7 +8080,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::set_player_rules_param(
+                    spring_sdk_internal::generated::owned::rules_params::set_player_rules_param(
                         player_id,
                         param_name,
                         value,
@@ -7579,7 +8123,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::set_team_rules_param(
+                    spring_sdk_internal::generated::owned::rules_params::set_team_rules_param(
                         team_id,
                         param_name,
                         value,
@@ -7622,7 +8166,7 @@ pub mod rules_params {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rules_params::set_unit_rules_param(
+                    spring_sdk_internal::generated::owned::rules_params::set_unit_rules_param(
                         unit_id,
                         param_name,
                         value,
@@ -7664,7 +8208,7 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::get_tag(unit_id) }
+                { spring_sdk_internal::generated::owned::move_ctrl::get_tag(unit_id) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::move_ctrl::get_tag(&self._engine, unit_id) }
             };
@@ -7696,7 +8240,11 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::get_unit_move_type_data(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::get_unit_move_type_data(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::get_unit_move_type_data(
@@ -7713,7 +8261,11 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::is_move_ctrl_enabled(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::is_move_ctrl_enabled(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::is_move_ctrl_enabled(
@@ -7730,7 +8282,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::move_ctrl(unit_id, enable) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::move_ctrl(
+                        unit_id,
+                        enable,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::move_ctrl::move_ctrl(&self._engine, unit_id, enable) }
             };
@@ -7742,7 +8299,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_collide_stop(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_collide_stop(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::set_collide_stop(
@@ -7760,7 +8322,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_drag(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_drag(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::move_ctrl::set_drag(&self._engine, unit_id, value) }
             };
@@ -7772,7 +8339,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_extrapolate(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_extrapolate(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::set_extrapolate(
@@ -7790,7 +8362,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_gravity(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_gravity(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::move_ctrl::set_gravity(&self._engine, unit_id, value) }
             };
@@ -7807,7 +8384,7 @@ pub mod move_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::move_ctrl::set_ground_move_type_max_speed(
+                    spring_sdk_internal::generated::owned::move_ctrl::set_ground_move_type_max_speed(
                         unit_id,
                         max_speed,
                     )
@@ -7830,7 +8407,7 @@ pub mod move_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::move_ctrl::set_ground_offset(
+                    spring_sdk_internal::generated::owned::move_ctrl::set_ground_offset(
                         unit_id,
                         value,
                     )
@@ -7852,7 +8429,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_heading(unit_id, heading) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_heading(
+                        unit_id,
+                        heading,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::set_heading(
@@ -7875,7 +8457,13 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_limits(unit_id, mins, maxs) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_limits(
+                        unit_id,
+                        mins,
+                        maxs,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::set_limits(
@@ -7894,7 +8482,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_limits_stop(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_limits_stop(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::set_limits_stop(
@@ -7917,7 +8510,7 @@ pub mod move_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::move_ctrl::set_move_ctrl_gravity(
+                    spring_sdk_internal::generated::owned::move_ctrl::set_move_ctrl_gravity(
                         unit_id,
                         gravity_factor,
                     )
@@ -7982,7 +8575,7 @@ pub mod move_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::move_ctrl::set_move_type_boolean(
+                    spring_sdk_internal::generated::owned::move_ctrl::set_move_type_boolean(
                         unit_id,
                         field,
                         value,
@@ -8012,7 +8605,7 @@ pub mod move_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::move_ctrl::set_move_type_numeric(
+                    spring_sdk_internal::generated::owned::move_ctrl::set_move_type_numeric(
                         unit_id,
                         field,
                         value,
@@ -8037,7 +8630,7 @@ pub mod move_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::move_ctrl::set_no_blocking(
+                    spring_sdk_internal::generated::owned::move_ctrl::set_no_blocking(
                         unit_id,
                         no_blocking,
                     )
@@ -8066,7 +8659,7 @@ pub mod move_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::move_ctrl::set_physics(
+                    spring_sdk_internal::generated::owned::move_ctrl::set_physics(
                         unit_id,
                         position,
                         velocity,
@@ -8092,7 +8685,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_position(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_position(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::move_ctrl::set_position(&self._engine, unit_id, value) }
             };
@@ -8109,7 +8707,7 @@ pub mod move_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::move_ctrl::set_progress_state(
+                    spring_sdk_internal::generated::owned::move_ctrl::set_progress_state(
                         unit_id,
                         state,
                     )
@@ -8136,7 +8734,7 @@ pub mod move_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::move_ctrl::set_relative_velocity(
+                    spring_sdk_internal::generated::owned::move_ctrl::set_relative_velocity(
                         unit_id,
                         value,
                     )
@@ -8158,7 +8756,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_rotation(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_rotation(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::move_ctrl::set_rotation(&self._engine, unit_id, value) }
             };
@@ -8175,7 +8778,7 @@ pub mod move_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::move_ctrl::set_rotation_velocity(
+                    spring_sdk_internal::generated::owned::move_ctrl::set_rotation_velocity(
                         unit_id,
                         value,
                     )
@@ -8197,7 +8800,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_tag(unit_id, tag) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_tag(
+                        unit_id,
+                        tag,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::move_ctrl::set_tag(&self._engine, unit_id, tag) }
             };
@@ -8209,7 +8817,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_track_ground(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_track_ground(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::set_track_ground(
@@ -8227,7 +8840,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_track_limits(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_track_limits(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::set_track_limits(
@@ -8245,7 +8863,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_track_slope(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_track_slope(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::set_track_slope(
@@ -8263,7 +8886,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_velocity(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_velocity(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::move_ctrl::set_velocity(&self._engine, unit_id, value) }
             };
@@ -8275,7 +8903,12 @@ pub mod move_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::move_ctrl::set_wind_factor(unit_id, value) }
+                {
+                    spring_sdk_internal::generated::owned::move_ctrl::set_wind_factor(
+                        unit_id,
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::move_ctrl::set_wind_factor(
@@ -8311,7 +8944,11 @@ pub mod camera {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::camera::get_camera_direction(0) }
+                {
+                    spring_sdk_internal::generated::owned::camera::get_camera_direction(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::camera::get_camera_direction(&self._engine) }
             };
@@ -8323,7 +8960,7 @@ pub mod camera {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::camera::get_camera_fov(0) }
+                { spring_sdk_internal::generated::owned::camera::get_camera_fov(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::camera::get_camera_fov(&self._engine) }
             };
@@ -8335,7 +8972,7 @@ pub mod camera {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::camera::get_camera_names(0) }
+                { spring_sdk_internal::generated::owned::camera::get_camera_names(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::camera::get_camera_names(&self._engine) }
             };
@@ -8347,7 +8984,7 @@ pub mod camera {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::camera::get_camera_position(0) }
+                { spring_sdk_internal::generated::owned::camera::get_camera_position(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::camera::get_camera_position(&self._engine) }
             };
@@ -8359,7 +8996,11 @@ pub mod camera {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::camera::get_camera_state(use_table) }
+                {
+                    spring_sdk_internal::generated::owned::camera::get_camera_state(
+                        use_table,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::camera::get_camera_state(&self._engine, use_table) }
             };
@@ -8371,7 +9012,12 @@ pub mod camera {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::camera::get_pixel_dir(screen_x, screen_y) }
+                {
+                    spring_sdk_internal::generated::owned::camera::get_pixel_dir(
+                        screen_x,
+                        screen_y,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::camera::get_pixel_dir(
@@ -8401,7 +9047,7 @@ pub mod camera {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::camera::set_camera_state(
+                    spring_sdk_internal::generated::owned::camera::set_camera_state(
                         state,
                         transition_time,
                         transition_time_factor,
@@ -8431,7 +9077,12 @@ pub mod camera {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::camera::set_camera_target(target, options) }
+                {
+                    spring_sdk_internal::generated::owned::camera::set_camera_target(
+                        target,
+                        options,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::camera::set_camera_target(
@@ -8455,7 +9106,7 @@ pub mod camera {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::camera::trace_screen_ray(
+                    spring_sdk_internal::generated::owned::camera::trace_screen_ray(
                         screen_x,
                         screen_y,
                         options,
@@ -8482,7 +9133,11 @@ pub mod camera {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::camera::world_to_screen_coords(world_pos) }
+                {
+                    spring_sdk_internal::generated::owned::camera::world_to_screen_coords(
+                        world_pos,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::camera::world_to_screen_coords(
@@ -8522,7 +9177,11 @@ pub mod input {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_action_hot_keys(action) }
+                {
+                    spring_sdk_internal::generated::owned::input::get_action_hot_keys(
+                        action,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_action_hot_keys(&self._engine, action) }
             };
@@ -8546,7 +9205,7 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_active_page(0) }
+                { spring_sdk_internal::generated::owned::input::get_active_page(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_active_page(&self._engine) }
             };
@@ -8570,7 +9229,7 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_invert_queue_key(0) }
+                { spring_sdk_internal::generated::owned::input::get_invert_queue_key(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_invert_queue_key(&self._engine) }
             };
@@ -8596,7 +9255,12 @@ pub mod input {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_key_bindings(key_set1, key_set2) }
+                {
+                    spring_sdk_internal::generated::owned::input::get_key_bindings(
+                        key_set1,
+                        key_set2,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::input::get_key_bindings(
@@ -8619,7 +9283,7 @@ pub mod input {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_key_code(key_sym) }
+                { spring_sdk_internal::generated::owned::input::get_key_code(key_sym) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_key_code(&self._engine, key_sym) }
             };
@@ -8637,7 +9301,7 @@ pub mod input {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::input::get_key_from_scan_symbol(
+                    spring_sdk_internal::generated::owned::input::get_key_from_scan_symbol(
                         scan_symbol,
                     )
                 }
@@ -8657,7 +9321,7 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_key_state(key_code) }
+                { spring_sdk_internal::generated::owned::input::get_key_state(key_code) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_key_state(&self._engine, key_code) }
             };
@@ -8681,7 +9345,7 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_mod_key_state(0) }
+                { spring_sdk_internal::generated::owned::input::get_mod_key_state(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_mod_key_state(&self._engine) }
             };
@@ -8693,7 +9357,11 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_mouse_buttons_pressed(buttons) }
+                {
+                    spring_sdk_internal::generated::owned::input::get_mouse_buttons_pressed(
+                        buttons,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::input::get_mouse_buttons_pressed(
@@ -8710,7 +9378,7 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_mouse_cursor(0) }
+                { spring_sdk_internal::generated::owned::input::get_mouse_cursor(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_mouse_cursor(&self._engine) }
             };
@@ -8725,7 +9393,11 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_mouse_start_position(button) }
+                {
+                    spring_sdk_internal::generated::owned::input::get_mouse_start_position(
+                        button,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_mouse_start_position(&self._engine, button) }
             };
@@ -8737,7 +9409,7 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_mouse_state(0) }
+                { spring_sdk_internal::generated::owned::input::get_mouse_state(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_mouse_state(&self._engine) }
             };
@@ -8749,7 +9421,7 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_pressed_keys(0) }
+                { spring_sdk_internal::generated::owned::input::get_pressed_keys(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_pressed_keys(&self._engine) }
             };
@@ -8761,7 +9433,7 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_pressed_scans(0) }
+                { spring_sdk_internal::generated::owned::input::get_pressed_scans(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_pressed_scans(&self._engine) }
             };
@@ -8785,7 +9457,7 @@ pub mod input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::input::get_selection_box(0) }
+                { spring_sdk_internal::generated::owned::input::get_selection_box(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::input::get_selection_box(&self._engine) }
             };
@@ -8798,7 +9470,7 @@ pub mod input {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::input::is_above_mini_map(
+                    spring_sdk_internal::generated::owned::input::is_above_mini_map(
                         screen_x,
                         screen_y,
                     )
@@ -8837,7 +9509,7 @@ pub mod debug_input {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::debug_input::clear_emulated_input(
+                    spring_sdk_internal::generated::owned::debug_input::clear_emulated_input(
                         fire_releases,
                     )
                 }
@@ -8857,7 +9529,12 @@ pub mod debug_input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::debug_input::emulate_key(key_code, pressed) }
+                {
+                    spring_sdk_internal::generated::owned::debug_input::emulate_key(
+                        key_code,
+                        pressed,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::debug_input::emulate_key(
@@ -8876,7 +9553,7 @@ pub mod debug_input {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::debug_input::emulate_mouse_button(
+                    spring_sdk_internal::generated::owned::debug_input::emulate_mouse_button(
                         button,
                         pressed,
                     )
@@ -8898,7 +9575,12 @@ pub mod debug_input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::debug_input::emulate_mouse_move(x, y) }
+                {
+                    spring_sdk_internal::generated::owned::debug_input::emulate_mouse_move(
+                        x,
+                        y,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::debug_input::emulate_mouse_move(&self._engine, x, y) }
             };
@@ -8910,7 +9592,11 @@ pub mod debug_input {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::debug_input::emulate_mouse_wheel(delta) }
+                {
+                    spring_sdk_internal::generated::owned::debug_input::emulate_mouse_wheel(
+                        delta,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::debug_input::emulate_mouse_wheel(&self._engine, delta) }
             };
@@ -8933,7 +9619,7 @@ pub mod debug_input {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::debug_input::emulate_text_editing(
+                    spring_sdk_internal::generated::owned::debug_input::emulate_text_editing(
                         utf8_text,
                         start,
                         length,
@@ -8962,7 +9648,11 @@ pub mod debug_input {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::debug_input::emulate_text_input(utf8_text) }
+                {
+                    spring_sdk_internal::generated::owned::debug_input::emulate_text_input(
+                        utf8_text,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::debug_input::emulate_text_input(
@@ -8996,7 +9686,7 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_draw_frame(0) }
+                { spring_sdk_internal::generated::owned::display::get_draw_frame(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_draw_frame(&self._engine) }
             };
@@ -9008,7 +9698,11 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_dual_view_geometry(0) }
+                {
+                    spring_sdk_internal::generated::owned::display::get_dual_view_geometry(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_dual_view_geometry(&self._engine) }
             };
@@ -9020,7 +9714,7 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_fps(0) }
+                { spring_sdk_internal::generated::owned::display::get_fps(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_fps(&self._engine) }
             };
@@ -9032,7 +9726,11 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_frame_time_offset(0) }
+                {
+                    spring_sdk_internal::generated::owned::display::get_frame_time_offset(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_frame_time_offset(&self._engine) }
             };
@@ -9044,7 +9742,7 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_game_speed(0) }
+                { spring_sdk_internal::generated::owned::display::get_game_speed(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_game_speed(&self._engine) }
             };
@@ -9056,7 +9754,11 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_last_update_seconds(0) }
+                {
+                    spring_sdk_internal::generated::owned::display::get_last_update_seconds(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_last_update_seconds(&self._engine) }
             };
@@ -9068,7 +9770,11 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_los_view_colors(0) }
+                {
+                    spring_sdk_internal::generated::owned::display::get_los_view_colors(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_los_view_colors(&self._engine) }
             };
@@ -9080,7 +9786,7 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_map_draw_mode(0) }
+                { spring_sdk_internal::generated::owned::display::get_map_draw_mode(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_map_draw_mode(&self._engine) }
             };
@@ -9104,7 +9810,11 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_mini_map_geometry(0) }
+                {
+                    spring_sdk_internal::generated::owned::display::get_mini_map_geometry(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_mini_map_geometry(&self._engine) }
             };
@@ -9116,7 +9826,11 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_mini_map_rotation(0) }
+                {
+                    spring_sdk_internal::generated::owned::display::get_mini_map_rotation(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_mini_map_rotation(&self._engine) }
             };
@@ -9128,7 +9842,7 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_num_displays(0) }
+                { spring_sdk_internal::generated::owned::display::get_num_displays(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_num_displays(&self._engine) }
             };
@@ -9145,7 +9859,7 @@ pub mod display {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::display::get_screen_geometry(
+                    spring_sdk_internal::generated::owned::display::get_screen_geometry(
                         screen_num,
                         query_usable,
                     )
@@ -9172,7 +9886,7 @@ pub mod display {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::display::get_screen_geometry_full(
+                    spring_sdk_internal::generated::owned::display::get_screen_geometry_full(
                         screen_num,
                         query_usable,
                     )
@@ -9194,7 +9908,11 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_team_color(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::display::get_team_color(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_team_color(&self._engine, team_id) }
             };
@@ -9206,7 +9924,11 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_team_orig_color(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::display::get_team_orig_color(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_team_orig_color(&self._engine, team_id) }
             };
@@ -9218,7 +9940,7 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_view_geometry(0) }
+                { spring_sdk_internal::generated::owned::display::get_view_geometry(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_view_geometry(&self._engine) }
             };
@@ -9242,7 +9964,11 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::get_window_geometry(0) }
+                {
+                    spring_sdk_internal::generated::owned::display::get_window_geometry(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::get_window_geometry(&self._engine) }
             };
@@ -9254,7 +9980,7 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::have_adv_shading(0) }
+                { spring_sdk_internal::generated::owned::display::have_adv_shading(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::have_adv_shading(&self._engine) }
             };
@@ -9266,7 +9992,11 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::have_adv_shading_full(0) }
+                {
+                    spring_sdk_internal::generated::owned::display::have_adv_shading_full(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::have_adv_shading_full(&self._engine) }
             };
@@ -9278,7 +10008,7 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::have_shadows(0) }
+                { spring_sdk_internal::generated::owned::display::have_shadows(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::have_shadows(&self._engine) }
             };
@@ -9290,7 +10020,12 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::is_aabb_in_view(mins, maxs) }
+                {
+                    spring_sdk_internal::generated::owned::display::is_aabb_in_view(
+                        mins,
+                        maxs,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::is_aabb_in_view(&self._engine, mins, maxs) }
             };
@@ -9302,7 +10037,7 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::is_gui_hidden(0) }
+                { spring_sdk_internal::generated::owned::display::is_gui_hidden(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::is_gui_hidden(&self._engine) }
             };
@@ -9314,7 +10049,12 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::is_sphere_in_view(center, radius) }
+                {
+                    spring_sdk_internal::generated::owned::display::is_sphere_in_view(
+                        center,
+                        radius,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::display::is_sphere_in_view(
@@ -9332,7 +10072,12 @@ pub mod display {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::display::set_team_color(team_id, color) }
+                {
+                    spring_sdk_internal::generated::owned::display::set_team_color(
+                        team_id,
+                        color,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::display::set_team_color(&self._engine, team_id, color) }
             };
@@ -9361,7 +10106,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::deselect_unit(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::selection::deselect_unit(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::selection::deselect_unit(&self._engine, unit_id) }
             };
@@ -9373,7 +10122,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::deselect_unit_array(unit_i_ds) }
+                {
+                    spring_sdk_internal::generated::owned::selection::deselect_unit_array(
+                        unit_i_ds,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::selection::deselect_unit_array(
@@ -9390,7 +10143,7 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_group_list(0) }
+                { spring_sdk_internal::generated::owned::selection::get_group_list(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::selection::get_group_list(&self._engine) }
             };
@@ -9402,7 +10155,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_group_units(group_id) }
+                {
+                    spring_sdk_internal::generated::owned::selection::get_group_units(
+                        group_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::selection::get_group_units(&self._engine, group_id) }
             };
@@ -9414,7 +10171,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_group_units_count(group_id) }
+                {
+                    spring_sdk_internal::generated::owned::selection::get_group_units_count(
+                        group_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::selection::get_group_units_count(
@@ -9431,7 +10192,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_group_units_counts(group_id) }
+                {
+                    spring_sdk_internal::generated::owned::selection::get_group_units_counts(
+                        group_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::selection::get_group_units_counts(
@@ -9451,7 +10216,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_group_units_sorted(group_id) }
+                {
+                    spring_sdk_internal::generated::owned::selection::get_group_units_sorted(
+                        group_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::selection::get_group_units_sorted(
@@ -9468,7 +10237,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_selected_group(0) }
+                {
+                    spring_sdk_internal::generated::owned::selection::get_selected_group(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::selection::get_selected_group(&self._engine) }
             };
@@ -9480,7 +10253,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_selected_units(0) }
+                {
+                    spring_sdk_internal::generated::owned::selection::get_selected_units(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::selection::get_selected_units(&self._engine) }
             };
@@ -9492,7 +10269,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_selected_units_count(0) }
+                {
+                    spring_sdk_internal::generated::owned::selection::get_selected_units_count(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::selection::get_selected_units_count(&self._engine) }
             };
@@ -9504,7 +10285,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_selected_units_counts(0) }
+                {
+                    spring_sdk_internal::generated::owned::selection::get_selected_units_counts(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::selection::get_selected_units_counts(&self._engine) }
             };
@@ -9516,7 +10301,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_selected_units_sorted(0) }
+                {
+                    spring_sdk_internal::generated::owned::selection::get_selected_units_sorted(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::selection::get_selected_units_sorted(&self._engine) }
             };
@@ -9528,7 +10317,11 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::get_unit_group(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::selection::get_unit_group(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::selection::get_unit_group(&self._engine, unit_id) }
             };
@@ -9540,7 +10333,12 @@ pub mod selection {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::selection::select_unit(unit_id, append) }
+                {
+                    spring_sdk_internal::generated::owned::selection::select_unit(
+                        unit_id,
+                        append,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::selection::select_unit(&self._engine, unit_id, append) }
             };
@@ -9557,7 +10355,7 @@ pub mod selection {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::selection::select_unit_array(
+                    spring_sdk_internal::generated::owned::selection::select_unit_array(
                         unit_i_ds,
                         append,
                     )
@@ -9580,7 +10378,7 @@ pub mod selection {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::selection::set_unit_group(
+                    spring_sdk_internal::generated::owned::selection::set_unit_group(
                         unit_id,
                         group_id,
                     )
@@ -9620,7 +10418,7 @@ pub mod sound {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::sound::get_sound_devices(0) }
+                { spring_sdk_internal::generated::owned::sound::get_sound_devices(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::sound::get_sound_devices(&self._engine) }
             };
@@ -9632,7 +10430,11 @@ pub mod sound {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::sound::get_sound_effect_params(0) }
+                {
+                    spring_sdk_internal::generated::owned::sound::get_sound_effect_params(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::sound::get_sound_effect_params(&self._engine) }
             };
@@ -9644,7 +10446,11 @@ pub mod sound {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::sound::get_sound_stream_play_time(0) }
+                {
+                    spring_sdk_internal::generated::owned::sound::get_sound_stream_play_time(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::sound::get_sound_stream_play_time(&self._engine) }
             };
@@ -9656,7 +10462,11 @@ pub mod sound {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::sound::get_sound_stream_time(0) }
+                {
+                    spring_sdk_internal::generated::owned::sound::get_sound_stream_time(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::sound::get_sound_stream_time(&self._engine) }
             };
@@ -9673,7 +10483,11 @@ pub mod sound {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::sound::load_sound_def(sound_name) }
+                {
+                    spring_sdk_internal::generated::owned::sound::load_sound_def(
+                        sound_name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::sound::load_sound_def(&self._engine, sound_name) }
             };
@@ -9685,7 +10499,7 @@ pub mod sound {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::sound::pause_sound_stream(0) }
+                { spring_sdk_internal::generated::owned::sound::pause_sound_stream(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::sound::pause_sound_stream(&self._engine) }
             };
@@ -9710,7 +10524,7 @@ pub mod sound {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::sound::play_sound_file(
+                    spring_sdk_internal::generated::owned::sound::play_sound_file(
                         sound_file,
                         volume,
                         pos,
@@ -9749,7 +10563,7 @@ pub mod sound {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::sound::play_sound_stream(
+                    spring_sdk_internal::generated::owned::sound::play_sound_stream(
                         ogg_file,
                         volume,
                         enqueue,
@@ -9778,7 +10592,11 @@ pub mod sound {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::sound::preload_sound_item(sound_name) }
+                {
+                    spring_sdk_internal::generated::owned::sound::preload_sound_item(
+                        sound_name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::sound::preload_sound_item(&self._engine, sound_name) }
             };
@@ -9798,7 +10616,11 @@ pub mod sound {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::sound::set_sound_effect_params(params) }
+                {
+                    spring_sdk_internal::generated::owned::sound::set_sound_effect_params(
+                        params,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::sound::set_sound_effect_params(&self._engine, params) }
             };
@@ -9810,7 +10632,11 @@ pub mod sound {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::sound::set_sound_stream_volume(volume) }
+                {
+                    spring_sdk_internal::generated::owned::sound::set_sound_stream_volume(
+                        volume,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::sound::set_sound_stream_volume(&self._engine, volume) }
             };
@@ -9822,7 +10648,7 @@ pub mod sound {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::sound::stop_sound_stream(0) }
+                { spring_sdk_internal::generated::owned::sound::stop_sound_stream(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::sound::stop_sound_stream(&self._engine) }
             };
@@ -9862,7 +10688,7 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::echo(message, rest) }
+                { spring_sdk_internal::generated::owned::messages::echo(message, rest) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::echo(&self._engine, message, rest) }
             };
@@ -9874,7 +10700,11 @@ pub mod messages {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::get_console_buffer(max_lines) }
+                {
+                    spring_sdk_internal::generated::owned::messages::get_console_buffer(
+                        max_lines,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::get_console_buffer(&self._engine, max_lines) }
             };
@@ -9886,7 +10716,11 @@ pub mod messages {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::get_current_tooltip(0) }
+                {
+                    spring_sdk_internal::generated::owned::messages::get_current_tooltip(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::get_current_tooltip(&self._engine) }
             };
@@ -9898,7 +10732,7 @@ pub mod messages {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::is_user_writing(0) }
+                { spring_sdk_internal::generated::owned::messages::is_user_writing(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::is_user_writing(&self._engine) }
             };
@@ -9920,7 +10754,13 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::log(section, level, message) }
+                {
+                    spring_sdk_internal::generated::owned::messages::log(
+                        section,
+                        level,
+                        message,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::log(&self._engine, section, level, message) }
             };
@@ -9937,7 +10777,11 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::send_ally_chat(message) }
+                {
+                    spring_sdk_internal::generated::owned::messages::send_ally_chat(
+                        message,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::send_ally_chat(&self._engine, message) }
             };
@@ -9959,7 +10803,12 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::send_commands(command, rest) }
+                {
+                    spring_sdk_internal::generated::owned::messages::send_commands(
+                        command,
+                        rest,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::send_commands(&self._engine, command, rest) }
             };
@@ -9976,7 +10825,11 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::send_lua_gaia_msg(message) }
+                {
+                    spring_sdk_internal::generated::owned::messages::send_lua_gaia_msg(
+                        message,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::send_lua_gaia_msg(&self._engine, message) }
             };
@@ -9993,7 +10846,11 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::send_lua_menu_msg(message) }
+                {
+                    spring_sdk_internal::generated::owned::messages::send_lua_menu_msg(
+                        message,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::send_lua_menu_msg(&self._engine, message) }
             };
@@ -10010,7 +10867,11 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::send_lua_rules_msg(message) }
+                {
+                    spring_sdk_internal::generated::owned::messages::send_lua_rules_msg(
+                        message,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::send_lua_rules_msg(&self._engine, message) }
             };
@@ -10032,7 +10893,12 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::send_lua_ui_msg(message, mode) }
+                {
+                    spring_sdk_internal::generated::owned::messages::send_lua_ui_msg(
+                        message,
+                        mode,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::messages::send_lua_ui_msg(
@@ -10055,7 +10921,11 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::send_message(message) }
+                {
+                    spring_sdk_internal::generated::owned::messages::send_message(
+                        message,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::send_message(&self._engine, message) }
             };
@@ -10077,7 +10947,7 @@ pub mod messages {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::messages::send_message_to_ally_team(
+                    spring_sdk_internal::generated::owned::messages::send_message_to_ally_team(
                         ally_team_id,
                         message,
                     )
@@ -10109,7 +10979,7 @@ pub mod messages {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::messages::send_message_to_player(
+                    spring_sdk_internal::generated::owned::messages::send_message_to_player(
                         player_id,
                         message,
                     )
@@ -10137,7 +11007,7 @@ pub mod messages {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::messages::send_message_to_spectators(
+                    spring_sdk_internal::generated::owned::messages::send_message_to_spectators(
                         message,
                     )
                 }
@@ -10186,7 +11056,7 @@ pub mod messages {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::messages::send_private_chat(
+                    spring_sdk_internal::generated::owned::messages::send_private_chat(
                         message,
                         player_id,
                     )
@@ -10213,7 +11083,11 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::send_public_chat(message) }
+                {
+                    spring_sdk_internal::generated::owned::messages::send_public_chat(
+                        message,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::send_public_chat(&self._engine, message) }
             };
@@ -10235,7 +11109,7 @@ pub mod messages {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::messages::send_skirmish_ai_message(
+                    spring_sdk_internal::generated::owned::messages::send_skirmish_ai_message(
                         ai_id,
                         message,
                     )
@@ -10262,7 +11136,11 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::send_spectator_chat(message) }
+                {
+                    spring_sdk_internal::generated::owned::messages::send_spectator_chat(
+                        message,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::send_spectator_chat(&self._engine, message) }
             };
@@ -10279,7 +11157,11 @@ pub mod messages {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::messages::send_to_unsynced(message) }
+                {
+                    spring_sdk_internal::generated::owned::messages::send_to_unsynced(
+                        message,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::messages::send_to_unsynced(&self._engine, message) }
             };
@@ -10363,7 +11245,7 @@ pub mod config {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::config::get_config_params(0) }
+                { spring_sdk_internal::generated::owned::config::get_config_params(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::config::get_config_params(&self._engine) }
             };
@@ -10409,7 +11291,7 @@ pub mod config {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::config::get_log_sections(0) }
+                { spring_sdk_internal::generated::owned::config::get_log_sections(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::config::get_log_sections(&self._engine) }
             };
@@ -10432,7 +11314,7 @@ pub mod config {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::config::set_config_float(
+                    spring_sdk_internal::generated::owned::config::set_config_float(
                         key,
                         value,
                         use_overlay,
@@ -10467,7 +11349,7 @@ pub mod config {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::config::set_config_int(
+                    spring_sdk_internal::generated::owned::config::set_config_int(
                         key,
                         value,
                         use_overlay,
@@ -10507,7 +11389,7 @@ pub mod config {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::config::set_config_string(
+                    spring_sdk_internal::generated::owned::config::set_config_string(
                         key,
                         value,
                         use_overlay,
@@ -10541,7 +11423,7 @@ pub mod config {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::config::set_log_section_filter_level(
+                    spring_sdk_internal::generated::owned::config::set_log_section_filter_level(
                         section,
                         level,
                     )
@@ -10580,7 +11462,7 @@ pub mod tracing {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::tracing::trace_ray(ray) }
+                { spring_sdk_internal::generated::owned::tracing::trace_ray(ray) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::tracing::trace_ray(&self._engine, ray) }
             };
@@ -10603,7 +11485,7 @@ pub mod tracing {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::tracing::trace_ray_between_positions(
+                    spring_sdk_internal::generated::owned::tracing::trace_ray_between_positions(
                         start,
                         end,
                         type_,
@@ -10627,7 +11509,11 @@ pub mod tracing {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::tracing::trace_ray_features(ray) }
+                {
+                    spring_sdk_internal::generated::owned::tracing::trace_ray_features(
+                        ray,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::tracing::trace_ray_features(&self._engine, ray) }
             };
@@ -10645,7 +11531,7 @@ pub mod tracing {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::tracing::trace_ray_ground_between_positions(
+                    spring_sdk_internal::generated::owned::tracing::trace_ray_ground_between_positions(
                         start,
                         end,
                         options,
@@ -10675,7 +11561,7 @@ pub mod tracing {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::tracing::trace_ray_ground_in_direction(
+                    spring_sdk_internal::generated::owned::tracing::trace_ray_ground_in_direction(
                         start,
                         dir,
                         options,
@@ -10737,7 +11623,7 @@ pub mod tracing {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::tracing::trace_ray_units(ray) }
+                { spring_sdk_internal::generated::owned::tracing::trace_ray_units(ray) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::tracing::trace_ray_units(&self._engine, ray) }
             };
@@ -10774,7 +11660,7 @@ pub mod utils {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::utils::closest_build_pos(
+                    spring_sdk_internal::generated::owned::utils::closest_build_pos(
                         team_id,
                         unit_def_id,
                         pos,
@@ -10809,7 +11695,7 @@ pub mod utils {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::utils::get_cegid(ceg_name) }
+                { spring_sdk_internal::generated::owned::utils::get_cegid(ceg_name) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::utils::get_cegid(&self._engine, ceg_name) }
             };
@@ -10825,7 +11711,7 @@ pub mod utils {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::utils::get_feature_def_dimensions(
+                    spring_sdk_internal::generated::owned::utils::get_feature_def_dimensions(
                         feature_def_id,
                     )
                 }
@@ -10848,7 +11734,11 @@ pub mod utils {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::utils::get_unit_def_dimensions(unit_def_id) }
+                {
+                    spring_sdk_internal::generated::owned::utils::get_unit_def_dimensions(
+                        unit_def_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::utils::get_unit_def_dimensions(
@@ -10871,7 +11761,7 @@ pub mod utils {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::utils::pos2_build_pos(
+                    spring_sdk_internal::generated::owned::utils::pos2_build_pos(
                         unit_def_id,
                         pos,
                         facing,
@@ -10901,7 +11791,7 @@ pub mod utils {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::utils::test_build_order(
+                    spring_sdk_internal::generated::owned::utils::test_build_order(
                         unit_def_id,
                         pos,
                         facing,
@@ -10932,7 +11822,7 @@ pub mod utils {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::utils::test_move_order(
+                    spring_sdk_internal::generated::owned::utils::test_move_order(
                         unit_def_id,
                         pos,
                         dir,
@@ -10992,7 +11882,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::assign_mouse_cursor(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::assign_mouse_cursor(
                         command_name,
                         cursor_file_name,
                         overwrite,
@@ -11018,7 +11908,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::deselect_unit_map(unit_i_ds) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::deselect_unit_map(
+                        unit_i_ds,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_ctrl::deselect_unit_map(
@@ -11041,7 +11935,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::draw_unit_commands(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::draw_unit_commands(
                         unit_i_ds,
                         table_or_array,
                         queue_draw_depth,
@@ -11065,7 +11959,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::force_layout_update(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::force_layout_update(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::force_layout_update(&self._engine) }
             };
@@ -11082,7 +11980,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::force_tesselation_update(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::force_tesselation_update(
                         normal,
                         shadow,
                     )
@@ -11109,7 +12007,11 @@ pub mod unsynced_ctrl {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::get_water_texture(tex_type) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::get_water_texture(
+                        tex_type,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_ctrl::get_water_texture(
@@ -11132,7 +12034,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::load_cmd_colors_config(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::load_cmd_colors_config(
                         filename,
                     )
                 }
@@ -11158,7 +12060,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::load_ctrl_panel_config(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::load_ctrl_panel_config(
                         filename,
                     )
                 }
@@ -11184,7 +12086,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::load_model_textures(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::load_model_textures(
                         model_name,
                     )
                 }
@@ -11204,7 +12106,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::pause_dolly_camera(percent) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::pause_dolly_camera(
+                        percent,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_ctrl::pause_dolly_camera(
@@ -11222,7 +12128,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::preload_feature_def_model(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::preload_feature_def_model(
                         def_id,
                     )
                 }
@@ -11243,7 +12149,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::preload_unit_def_model(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::preload_unit_def_model(
                         def_id,
                     )
                 }
@@ -11279,7 +12185,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::replace_mouse_cursor(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::replace_mouse_cursor(
                         old_cursor_file_name,
                         new_cursor_file_name,
                         hot_spot_top_left,
@@ -11303,7 +12209,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::resume_dolly_camera(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::resume_dolly_camera(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::resume_dolly_camera(&self._engine) }
             };
@@ -11315,7 +12225,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::run_dolly_camera(runtime_ms) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::run_dolly_camera(
+                        runtime_ms,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_ctrl::run_dolly_camera(
@@ -11339,7 +12253,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::sdl_set_text_input_rect(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::sdl_set_text_input_rect(
                         x,
                         y,
                         w,
@@ -11365,7 +12279,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::sdl_start_text_input(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::sdl_start_text_input(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::sdl_start_text_input(&self._engine) }
             };
@@ -11377,7 +12295,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::sdl_stop_text_input(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::sdl_stop_text_input(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::sdl_stop_text_input(&self._engine) }
             };
@@ -11390,7 +12312,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::select_unit_map(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::select_unit_map(
                         unit_i_ds,
                         append,
                     )
@@ -11418,7 +12340,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_active_command(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_active_command(
                         cmd_index,
                         button,
                         options,
@@ -11477,7 +12399,11 @@ pub mod unsynced_ctrl {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_atmosphere(params) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_atmosphere(
+                        params,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::set_atmosphere(&self._engine, params) }
             };
@@ -11489,7 +12415,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_auto_show_metal(enable) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_auto_show_metal(
+                        enable,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_ctrl::set_auto_show_metal(
@@ -11507,7 +12437,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_box_selection_by_engine(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_box_selection_by_engine(
                         state,
                     )
                 }
@@ -11527,7 +12457,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_build_facing(facing) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_build_facing(
+                        facing,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::set_build_facing(&self._engine, facing) }
             };
@@ -11539,7 +12473,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_build_spacing(spacing) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_build_spacing(
+                        spacing,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_ctrl::set_build_spacing(
@@ -11561,7 +12499,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_camera_offset(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_camera_offset(
                         pos_offset,
                         tilt_offset,
                     )
@@ -11588,7 +12526,11 @@ pub mod unsynced_ctrl {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_clipboard(text) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_clipboard(
+                        text,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::set_clipboard(&self._engine, text) }
             };
@@ -11612,7 +12554,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_custom_command_draw_data(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_custom_command_draw_data(
                         cmd_id,
                         cmd_reference,
                         color,
@@ -11645,7 +12587,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_custom_palette_color(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_custom_palette_color(
                         index,
                         r,
                         g,
@@ -11676,7 +12618,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_default_interface_visible(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_default_interface_visible(
                         parts,
                         visible,
                     )
@@ -11704,7 +12646,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_dolly_camera_curve(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_dolly_camera_curve(
                         degree,
                         control_points,
                         knots,
@@ -11734,7 +12676,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_dolly_camera_look_curve(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_dolly_camera_look_curve(
                         degree,
                         control_points,
                         knots,
@@ -11759,7 +12701,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_dolly_camera_look_position(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_dolly_camera_look_position(
                         position,
                     )
                 }
@@ -11780,7 +12722,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_dolly_camera_look_unit(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_dolly_camera_look_unit(
                         unit_id,
                     )
                 }
@@ -11800,7 +12742,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_dolly_camera_mode(mode) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_dolly_camera_mode(
+                        mode,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_ctrl::set_dolly_camera_mode(
@@ -11818,7 +12764,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_dolly_camera_position(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_dolly_camera_position(
                         position,
                     )
                 }
@@ -11839,7 +12785,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_dolly_camera_relative_mode(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_dolly_camera_relative_mode(
                         mode,
                     )
                 }
@@ -11859,7 +12805,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_draw_ground(draw_ground) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_draw_ground(
+                        draw_ground,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_ctrl::set_draw_ground(
@@ -11881,7 +12831,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_draw_ground_deferred(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_draw_ground_deferred(
                         draw_deferred,
                         draw_forward,
                     )
@@ -11910,7 +12860,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_draw_models_deferred(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_draw_models_deferred(
                         draw_units_deferred,
                         draw_features_deferred,
                         draw_units_forward,
@@ -11937,7 +12887,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_draw_selection_info(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_draw_selection_info(
                         draw,
                     )
                 }
@@ -11957,7 +12907,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_draw_sky(draw_sky) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_draw_sky(
+                        draw_sky,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::set_draw_sky(&self._engine, draw_sky) }
             };
@@ -11969,7 +12923,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_draw_water(draw_water) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_draw_water(
+                        draw_water,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_ctrl::set_draw_water(
@@ -11987,7 +12945,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_engine_build_square_rendering(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_engine_build_square_rendering(
                         enabled,
                     )
                 }
@@ -12012,7 +12970,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_feature_always_update_matrix(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_feature_always_update_matrix(
                         feature_id,
                         enable,
                     )
@@ -12039,7 +12997,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_feature_engine_draw_mask(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_feature_engine_draw_mask(
                         feature_id,
                         mask,
                     )
@@ -12062,7 +13020,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_feature_fade(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_feature_fade(
                         feature_id,
                         allow,
                     )
@@ -12089,7 +13047,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_feature_lua_draw(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_feature_lua_draw(
                         feature_id,
                         lua_draw,
                     )
@@ -12116,7 +13074,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_feature_no_draw(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_feature_no_draw(
                         feature_id,
                         no_draw,
                     )
@@ -12143,7 +13101,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_feature_palette_index(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_feature_palette_index(
                         feature_id,
                         custom_index,
                     )
@@ -12166,7 +13124,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_last_message_position(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_last_message_position(
                         pos,
                     )
                 }
@@ -12194,7 +13152,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_los_view_colors(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_los_view_colors(
                         always,
                         los,
                         radar,
@@ -12240,7 +13198,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_map_rendering_params(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_map_rendering_params(
                         params,
                     )
                 }
@@ -12265,7 +13223,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_map_shader(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_map_shader(
                         standard_shader_id,
                         deferred_shader_id,
                     )
@@ -12303,7 +13261,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_map_shading_texture(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_map_shading_texture(
                         tex_type,
                         tex_name,
                         num,
@@ -12331,7 +13289,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_mini_map_rotation(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_mini_map_rotation(
                         radians,
                     )
                 }
@@ -12357,7 +13315,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_mouse_cursor(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_mouse_cursor(
                         cursor_name,
                         scale,
                     )
@@ -12388,7 +13346,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_nano_projectile_params(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_nano_projectile_params(
                         r,
                         v,
                         a,
@@ -12423,7 +13381,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_projectile_lua_draw(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_projectile_lua_draw(
                         projectile_id,
                         lua_draw,
                     )
@@ -12449,7 +13407,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_shock_front_factors(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_shock_front_factors(
                         options,
                     )
                 }
@@ -12475,7 +13433,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_sky_box_texture(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_sky_box_texture(
                         tex_name,
                     )
                 }
@@ -12496,7 +13454,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_sun_direction(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_sun_direction(
                         dir,
                         intensity,
                     )
@@ -12560,7 +13518,11 @@ pub mod unsynced_ctrl {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_sun_lighting(params) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_sun_lighting(
+                        params,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::set_sun_lighting(&self._engine, params) }
             };
@@ -12577,7 +13539,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_always_update_matrix(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_always_update_matrix(
                         unit_id,
                         always_update_matrix,
                     )
@@ -12609,7 +13571,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_def_icon(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_def_icon(
                         unit_def_id,
                         icon_name,
                     )
@@ -12637,7 +13599,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_def_image(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_def_image(
                         unit_def_id,
                         image,
                     )
@@ -12664,7 +13626,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_engine_draw_mask(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_engine_draw_mask(
                         unit_id,
                         draw_mask,
                     )
@@ -12692,7 +13654,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_icon(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_icon(
                         unit_id,
                         icon_name,
                     )
@@ -12715,7 +13677,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_icon_draw(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_icon_draw(
                         unit_id,
                         draw_icon,
                     )
@@ -12742,7 +13704,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_leave_tracks(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_leave_tracks(
                         unit_id,
                         leave_tracks,
                     )
@@ -12765,7 +13727,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_lua_draw(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_lua_draw(
                         unit_id,
                         lua_draw,
                     )
@@ -12788,7 +13750,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_no_draw(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_no_draw(
                         unit_id,
                         no_draw,
                     )
@@ -12811,7 +13773,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_no_group(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_no_group(
                         unit_id,
                         no_group,
                     )
@@ -12838,7 +13800,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_no_minimap(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_no_minimap(
                         unit_id,
                         no_minimap,
                     )
@@ -12861,7 +13823,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_no_select(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_no_select(
                         unit_id,
                         no_select,
                     )
@@ -12888,7 +13850,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_unit_palette_index(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_unit_palette_index(
                         unit_id,
                         custom_index,
                     )
@@ -12914,7 +13876,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_video_capturing_mode(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_video_capturing_mode(
                         allow_capture_mode,
                     )
                 }
@@ -12935,7 +13897,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_video_capturing_time_offset(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_video_capturing_time_offset(
                         time_offset,
                     )
                 }
@@ -12966,7 +13928,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_wm_caption(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_wm_caption(
                         title,
                         title_short,
                     )
@@ -12998,7 +13960,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_wm_icon(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_wm_icon(
                         icon_file_name,
                         force_resolution,
                     )
@@ -13069,7 +14031,11 @@ pub mod unsynced_ctrl {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_water_params(params) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_water_params(
+                        params,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::set_water_params(&self._engine, params) }
             };
@@ -13092,7 +14058,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_water_texture(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_water_texture(
                         tex_type,
                         tex_name,
                     )
@@ -13123,7 +14089,7 @@ pub mod unsynced_ctrl {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_ctrl::set_window_geometry(
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_window_geometry(
                         display_index,
                         window_pos_x,
                         window_pos_y,
@@ -13153,7 +14119,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_window_maximized(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_window_maximized(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::set_window_maximized(&self._engine) }
             };
@@ -13165,7 +14135,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::set_window_minimized(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::set_window_minimized(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::set_window_minimized(&self._engine) }
             };
@@ -13177,7 +14151,11 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::stop_tracking_units(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::stop_tracking_units(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::stop_tracking_units(&self._engine) }
             };
@@ -13189,7 +14167,12 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::track_units(unit_i_ds, mode) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::track_units(
+                        unit_i_ds,
+                        mode,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_ctrl::track_units(
@@ -13207,7 +14190,12 @@ pub mod unsynced_ctrl {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_ctrl::warp_mouse(x, y) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::warp_mouse(
+                        x,
+                        y,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_ctrl::warp_mouse(&self._engine, x, y) }
             };
@@ -13291,7 +14279,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::active_texture(tex_num) }
+                { spring_sdk_internal::generated::owned::gfx::active_texture(tex_num) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::active_texture(&self._engine, tex_num) }
             };
@@ -13318,7 +14306,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::add_atlas_texture(
+                    spring_sdk_internal::generated::owned::gfx::add_atlas_texture(
                         atlas_name,
                         texture_name,
                     )
@@ -13345,7 +14333,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::add_fallback_font(value) }
+                { spring_sdk_internal::generated::owned::gfx::add_fallback_font(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::add_fallback_font(&self._engine, value) }
             };
@@ -13362,7 +14350,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::add_feature_defs_to_submission_vao(
+                    spring_sdk_internal::generated::owned::gfx::add_feature_defs_to_submission_vao(
                         vao_id,
                         ids,
                     )
@@ -13389,7 +14377,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::add_features_to_submission_vao(
+                    spring_sdk_internal::generated::owned::gfx::add_features_to_submission_vao(
                         vao_id,
                         ids,
                     )
@@ -13416,7 +14404,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::add_unit_defs_to_submission_vao(
+                    spring_sdk_internal::generated::owned::gfx::add_unit_defs_to_submission_vao(
                         vao_id,
                         ids,
                     )
@@ -13443,7 +14431,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::add_units_to_submission_vao(
+                    spring_sdk_internal::generated::owned::gfx::add_units_to_submission_vao(
                         vao_id,
                         ids,
                     )
@@ -13465,7 +14453,13 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::alpha_test(enable, func, ref_) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::alpha_test(
+                        enable,
+                        func,
+                        ref_,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::alpha_test(&self._engine, enable, func, ref_) }
             };
@@ -13477,7 +14471,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::alpha_to_coverage(value) }
+                { spring_sdk_internal::generated::owned::gfx::alpha_to_coverage(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::alpha_to_coverage(&self._engine, value) }
             };
@@ -13490,7 +14484,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::attach_index_buffer_vao(
+                    spring_sdk_internal::generated::owned::gfx::attach_index_buffer_vao(
                         vao_id,
                         vbo_id,
                     )
@@ -13517,7 +14511,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::attach_instance_buffer_vao(
+                    spring_sdk_internal::generated::owned::gfx::attach_instance_buffer_vao(
                         vao_id,
                         vbo_id,
                     )
@@ -13540,7 +14534,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::attach_vertex_buffer_vao(
+                    spring_sdk_internal::generated::owned::gfx::attach_vertex_buffer_vao(
                         vao_id,
                         vbo_id,
                     )
@@ -13588,7 +14582,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::begin_text(value) }
+                { spring_sdk_internal::generated::owned::gfx::begin_text(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::begin_text(&self._engine, value) }
             };
@@ -13600,7 +14594,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::billboard(0) }
+                { spring_sdk_internal::generated::owned::gfx::billboard(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::billboard(&self._engine) }
             };
@@ -13621,7 +14615,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::bind_buffer_range_vbo(
+                    spring_sdk_internal::generated::owned::gfx::bind_buffer_range_vbo(
                         vbo_id,
                         binding_index,
                         element_offset,
@@ -13666,7 +14660,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::bind_image_texture(
+                    spring_sdk_internal::generated::owned::gfx::bind_image_texture(
                         unit,
                         name,
                         level,
@@ -13708,7 +14702,13 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::bind_texture(name, tex_num, enable) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::bind_texture(
+                        name,
+                        tex_num,
+                        enable,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::bind_texture(
@@ -13727,7 +14727,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::blend_equation(mode) }
+                { spring_sdk_internal::generated::owned::gfx::blend_equation(mode) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::blend_equation(&self._engine, mode) }
             };
@@ -13744,7 +14744,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::blend_equation_separate(
+                    spring_sdk_internal::generated::owned::gfx::blend_equation_separate(
                         mode_rgb,
                         mode_alpha,
                     )
@@ -13766,7 +14766,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::blend_func(src, dst) }
+                { spring_sdk_internal::generated::owned::gfx::blend_func(src, dst) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::blend_func(&self._engine, src, dst) }
             };
@@ -13785,7 +14785,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::blend_func_separate(
+                    spring_sdk_internal::generated::owned::gfx::blend_func_separate(
                         src_rgb,
                         dst_rgb,
                         src_alpha,
@@ -13811,7 +14811,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::blending(value) }
+                { spring_sdk_internal::generated::owned::gfx::blending(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::blending(&self._engine, value) }
             };
@@ -13838,7 +14838,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::blit_fbo(
+                    spring_sdk_internal::generated::owned::gfx::blit_fbo(
                         src_fboid,
                         dst_fboid,
                         x0_src,
@@ -13880,7 +14880,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::call_list(value) }
+                { spring_sdk_internal::generated::owned::gfx::call_list(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::call_list(&self._engine, value) }
             };
@@ -13901,7 +14901,12 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::change_texture_params(name, params) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::change_texture_params(
+                        name,
+                        params,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::change_texture_params(
@@ -13924,7 +14929,13 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::clear(bits, values, count) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::clear(
+                        bits,
+                        values,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::clear(&self._engine, bits, values, count) }
             };
@@ -13948,7 +14959,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::clear_attachment_fbo(
+                    spring_sdk_internal::generated::owned::gfx::clear_attachment_fbo(
                         target,
                         attachment,
                         values,
@@ -13974,7 +14985,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::clear_fallback_fonts(0) }
+                { spring_sdk_internal::generated::owned::gfx::clear_fallback_fonts(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::clear_fallback_fonts(&self._engine) }
             };
@@ -13986,7 +14997,11 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::clear_submission_vao(value) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::clear_submission_vao(
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::clear_submission_vao(&self._engine, value) }
             };
@@ -13998,7 +15013,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::clear_vbo(value) }
+                { spring_sdk_internal::generated::owned::gfx::clear_vbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::clear_vbo(&self._engine, value) }
             };
@@ -14010,7 +15025,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::clip_distance(index, enable) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::clip_distance(
+                        index,
+                        enable,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::clip_distance(&self._engine, index, enable) }
             };
@@ -14027,7 +15047,12 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::clip_plane(plane, equation) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::clip_plane(
+                        plane,
+                        equation,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::clip_plane(&self._engine, plane, equation) }
             };
@@ -14039,7 +15064,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::color(r, g, b, a) }
+                { spring_sdk_internal::generated::owned::gfx::color(r, g, b, a) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::color(&self._engine, r, g, b, a) }
             };
@@ -14051,7 +15076,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::color_mask(options) }
+                { spring_sdk_internal::generated::owned::gfx::color_mask(options) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::color_mask(&self._engine, options) }
             };
@@ -14063,7 +15088,14 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::config_mini_map(px, py, sx, sy) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::config_mini_map(
+                        px,
+                        py,
+                        sx,
+                        sy,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::config_mini_map(&self._engine, px, py, sx, sy) }
             };
@@ -14092,7 +15124,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::copy_to_texture(
+                    spring_sdk_internal::generated::owned::gfx::copy_to_texture(
                         name,
                         xoff,
                         yoff,
@@ -14134,7 +15166,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::copy_to_vbo(
+                    spring_sdk_internal::generated::owned::gfx::copy_to_vbo(
                         source_vboid,
                         destination_vboid,
                         copy_size_in_bytes,
@@ -14166,7 +15198,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::copy_vbo_to_readback(
+                    spring_sdk_internal::generated::owned::gfx::copy_vbo_to_readback(
                         readback_id,
                         vbo_id,
                         src_offset,
@@ -14208,7 +15240,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::create_fbo(
+                    spring_sdk_internal::generated::owned::gfx::create_fbo(
                         target,
                         attachments,
                         draw_buffers,
@@ -14234,7 +15266,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::create_fence(0) }
+                { spring_sdk_internal::generated::owned::gfx::create_fence(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::create_fence(&self._engine) }
             };
@@ -14261,7 +15293,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::create_query(target) }
+                { spring_sdk_internal::generated::owned::gfx::create_query(target) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::create_query(&self._engine, target) }
             };
@@ -14281,7 +15313,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::create_rbo(
+                    spring_sdk_internal::generated::owned::gfx::create_rbo(
                         xsize,
                         ysize,
                         target,
@@ -14309,7 +15341,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::create_readback(value) }
+                { spring_sdk_internal::generated::owned::gfx::create_readback(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::create_readback(&self._engine, value) }
             };
@@ -14367,7 +15399,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::create_shader(
+                    spring_sdk_internal::generated::owned::gfx::create_shader(
                         definitions,
                         vertex,
                         tcs,
@@ -14451,7 +15483,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::cull_face(face) }
+                { spring_sdk_internal::generated::owned::gfx::cull_face(face) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::cull_face(&self._engine, face) }
             };
@@ -14463,7 +15495,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::culling(value) }
+                { spring_sdk_internal::generated::owned::gfx::culling(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::culling(&self._engine, value) }
             };
@@ -14485,7 +15517,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::define_vbo(
+                    spring_sdk_internal::generated::owned::gfx::define_vbo(
                         vbo_id,
                         elements_count,
                         element_array,
@@ -14517,7 +15549,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_fbo(value) }
+                { spring_sdk_internal::generated::owned::gfx::delete_fbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_fbo(&self._engine, value) }
             };
@@ -14529,7 +15561,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_fence(value) }
+                { spring_sdk_internal::generated::owned::gfx::delete_fence(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_fence(&self._engine, value) }
             };
@@ -14541,7 +15573,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_font(font_id) }
+                { spring_sdk_internal::generated::owned::gfx::delete_font(font_id) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_font(&self._engine, font_id) }
             };
@@ -14553,7 +15585,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_list(value) }
+                { spring_sdk_internal::generated::owned::gfx::delete_list(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_list(&self._engine, value) }
             };
@@ -14565,7 +15597,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_query(value) }
+                { spring_sdk_internal::generated::owned::gfx::delete_query(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_query(&self._engine, value) }
             };
@@ -14577,7 +15609,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_rbo(value) }
+                { spring_sdk_internal::generated::owned::gfx::delete_rbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_rbo(&self._engine, value) }
             };
@@ -14589,7 +15621,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_readback(value) }
+                { spring_sdk_internal::generated::owned::gfx::delete_readback(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_readback(&self._engine, value) }
             };
@@ -14601,7 +15633,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_shader(shader_id) }
+                { spring_sdk_internal::generated::owned::gfx::delete_shader(shader_id) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_shader(&self._engine, shader_id) }
             };
@@ -14618,7 +15650,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_texture(name) }
+                { spring_sdk_internal::generated::owned::gfx::delete_texture(name) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_texture(&self._engine, name) }
             };
@@ -14635,7 +15667,11 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_texture_atlas(name) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::delete_texture_atlas(
+                        name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_texture_atlas(&self._engine, name) }
             };
@@ -14652,7 +15688,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_texture_fbo(name) }
+                { spring_sdk_internal::generated::owned::gfx::delete_texture_fbo(name) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_texture_fbo(&self._engine, name) }
             };
@@ -14664,7 +15700,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_vao(value) }
+                { spring_sdk_internal::generated::owned::gfx::delete_vao(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_vao(&self._engine, value) }
             };
@@ -14676,7 +15712,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::delete_vbo(value) }
+                { spring_sdk_internal::generated::owned::gfx::delete_vbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::delete_vbo(&self._engine, value) }
             };
@@ -14688,7 +15724,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::depth_clamp(value) }
+                { spring_sdk_internal::generated::owned::gfx::depth_clamp(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::depth_clamp(&self._engine, value) }
             };
@@ -14700,7 +15736,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::depth_mask(value) }
+                { spring_sdk_internal::generated::owned::gfx::depth_mask(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::depth_mask(&self._engine, value) }
             };
@@ -14712,7 +15748,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::depth_test(options) }
+                { spring_sdk_internal::generated::owned::gfx::depth_test(options) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::depth_test(&self._engine, options) }
             };
@@ -14731,7 +15767,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::dispatch_compute(
+                    spring_sdk_internal::generated::owned::gfx::dispatch_compute(
                         num_group_x,
                         num_group_y,
                         num_group_z,
@@ -14765,7 +15801,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::download_vbo(
+                    spring_sdk_internal::generated::owned::gfx::download_vbo(
                         vbo_id,
                         attribute_index,
                         element_offset,
@@ -14802,7 +15838,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::draw_arrays_vao(
+                    spring_sdk_internal::generated::owned::gfx::draw_arrays_vao(
                         vao_id,
                         mode,
                         vertex_count,
@@ -14842,7 +15878,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::draw_elements_vao(
+                    spring_sdk_internal::generated::owned::gfx::draw_elements_vao(
                         vao_id,
                         mode,
                         draw_count,
@@ -14911,7 +15947,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::draw_ground_circle(
+                    spring_sdk_internal::generated::owned::gfx::draw_ground_circle(
                         pos,
                         radius,
                         resolution,
@@ -14955,7 +15991,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::draw_ground_quad(
+                    spring_sdk_internal::generated::owned::gfx::draw_ground_quad(
                         x0,
                         z0,
                         x1,
@@ -15000,7 +16036,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::draw_list_at_unit(
+                    spring_sdk_internal::generated::owned::gfx::draw_list_at_unit(
                         unit_id,
                         list_id,
                         use_mid_pos,
@@ -15030,7 +16066,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::draw_mini_map(value) }
+                { spring_sdk_internal::generated::owned::gfx::draw_mini_map(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::draw_mini_map(&self._engine, value) }
             };
@@ -15042,7 +16078,11 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::dump_definition_vbo(value) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::dump_definition_vbo(
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::dump_definition_vbo(&self._engine, value) }
             };
@@ -15054,7 +16094,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::edge_flag(value) }
+                { spring_sdk_internal::generated::owned::gfx::edge_flag(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::edge_flag(&self._engine, value) }
             };
@@ -15066,7 +16106,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::end_text(0) }
+                { spring_sdk_internal::generated::owned::gfx::end_text(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::end_text(&self._engine) }
             };
@@ -15082,7 +16122,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::feature(feature_id, options) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::feature(
+                        feature_id,
+                        options,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::feature(&self._engine, feature_id, options) }
             };
@@ -15094,7 +16139,11 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::feature_mult_matrix(value) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::feature_mult_matrix(
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::feature_mult_matrix(&self._engine, value) }
             };
@@ -15106,7 +16155,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::feature_piece(object_id, piece_id) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::feature_piece(
+                        object_id,
+                        piece_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::feature_piece(&self._engine, object_id, piece_id) }
             };
@@ -15119,7 +16173,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::feature_piece_matrix(
+                    spring_sdk_internal::generated::owned::gfx::feature_piece_matrix(
                         object_id,
                         piece_id,
                     )
@@ -15146,7 +16200,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::feature_piece_mult_matrix(
+                    spring_sdk_internal::generated::owned::gfx::feature_piece_mult_matrix(
                         object_id,
                         piece_id,
                     )
@@ -15172,7 +16226,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::feature_raw(feature_id, options) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::feature_raw(
+                        feature_id,
+                        options,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::feature_raw(&self._engine, feature_id, options) }
             };
@@ -15190,7 +16249,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::feature_shape(
+                    spring_sdk_internal::generated::owned::gfx::feature_shape(
                         def_id,
                         team_id,
                         options,
@@ -15215,7 +16274,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::feature_shape_textures(
+                    spring_sdk_internal::generated::owned::gfx::feature_shape_textures(
                         object_id,
                         push,
                     )
@@ -15237,7 +16296,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::feature_textures(object_id, push) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::feature_textures(
+                        object_id,
+                        push,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::feature_textures(&self._engine, object_id, push) }
             };
@@ -15254,7 +16318,11 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::finalize_texture_atlas(name) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::finalize_texture_atlas(
+                        name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::finalize_texture_atlas(&self._engine, name) }
             };
@@ -15266,7 +16334,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::finish(0) }
+                { spring_sdk_internal::generated::owned::gfx::finish(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::finish(&self._engine) }
             };
@@ -15278,7 +16346,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::flush(0) }
+                { spring_sdk_internal::generated::owned::gfx::flush(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::flush(&self._engine) }
             };
@@ -15290,7 +16358,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::fog(value) }
+                { spring_sdk_internal::generated::owned::gfx::fog(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::fog(&self._engine, value) }
             };
@@ -15302,7 +16370,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::fog_coord(value) }
+                { spring_sdk_internal::generated::owned::gfx::fog_coord(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::fog_coord(&self._engine, value) }
             };
@@ -15319,7 +16387,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::font_begin(
+                    spring_sdk_internal::generated::owned::gfx::font_begin(
                         font_id,
                         user_defined_blending,
                     )
@@ -15341,7 +16409,11 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::font_bind_texture(font_id) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::font_bind_texture(
+                        font_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::font_bind_texture(&self._engine, font_id) }
             };
@@ -15353,7 +16425,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::font_end(font_id) }
+                { spring_sdk_internal::generated::owned::gfx::font_end(font_id) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::font_end(&self._engine, font_id) }
             };
@@ -15384,7 +16456,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::font_get_text_height(
+                    spring_sdk_internal::generated::owned::gfx::font_get_text_height(
                         font_id,
                         text,
                         x,
@@ -15433,7 +16505,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::font_get_text_width(
+                    spring_sdk_internal::generated::owned::gfx::font_get_text_width(
                         font_id,
                         text,
                         x,
@@ -15482,7 +16554,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::font_print(
+                    spring_sdk_internal::generated::owned::gfx::font_print(
                         font_id,
                         text,
                         x,
@@ -15530,7 +16602,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::font_print_world(
+                    spring_sdk_internal::generated::owned::gfx::font_print_world(
                         font_id,
                         text,
                         pos,
@@ -15563,7 +16635,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::font_set_auto_outline_color(
+                    spring_sdk_internal::generated::owned::gfx::font_set_auto_outline_color(
                         font_id,
                         enable,
                     )
@@ -15593,7 +16665,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::font_set_outline_color(
+                    spring_sdk_internal::generated::owned::gfx::font_set_outline_color(
                         font_id,
                         r,
                         g,
@@ -15629,7 +16701,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::font_set_text_color(
+                    spring_sdk_internal::generated::owned::gfx::font_set_text_color(
                         font_id,
                         r,
                         g,
@@ -15661,7 +16733,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::font_submit_buffered(font_id, options) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::font_submit_buffered(
+                        font_id,
+                        options,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::font_submit_buffered(
@@ -15729,7 +16806,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::frustum(
+                    spring_sdk_internal::generated::owned::gfx::frustum(
                         left,
                         right,
                         bottom,
@@ -15764,7 +16841,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::generate_mipmap(name) }
+                { spring_sdk_internal::generated::owned::gfx::generate_mipmap(name) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::generate_mipmap(&self._engine, name) }
             };
@@ -15779,7 +16856,11 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_active_uniforms(shader_id) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_active_uniforms(
+                        shader_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_active_uniforms(&self._engine, shader_id) }
             };
@@ -15806,7 +16887,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::get_atlas_texture(
+                    spring_sdk_internal::generated::owned::gfx::get_atlas_texture(
                         atlas_name,
                         texture_name,
                     )
@@ -15854,7 +16935,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_console_commands(0) }
+                { spring_sdk_internal::generated::owned::gfx::get_console_commands(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_console_commands(&self._engine) }
             };
@@ -15874,7 +16955,11 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_engine_atlas_textures(name) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_engine_atlas_textures(
+                        name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_engine_atlas_textures(&self._engine, name) }
             };
@@ -15886,7 +16971,11 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_engine_model_uniform_data_def(0) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_engine_model_uniform_data_def(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_engine_model_uniform_data_def(&self._engine) }
             };
@@ -15900,7 +16989,11 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_engine_model_uniform_data_size(0) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_engine_model_uniform_data_size(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_engine_model_uniform_data_size(&self._engine) }
             };
@@ -15912,7 +17005,11 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_engine_texture_names(0) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_engine_texture_names(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_engine_texture_names(&self._engine) }
             };
@@ -15924,7 +17021,11 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_engine_uniform_buffer_def(index) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_engine_uniform_buffer_def(
+                        index,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::get_engine_uniform_buffer_def(
@@ -15946,7 +17047,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_fixed_state(param) }
+                { spring_sdk_internal::generated::owned::gfx::get_fixed_state(param) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_fixed_state(&self._engine, param) }
             };
@@ -15978,7 +17079,11 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_global_tex_coords(value) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_global_tex_coords(
+                        value,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_global_tex_coords(&self._engine, value) }
             };
@@ -15990,7 +17095,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_global_tex_names(0) }
+                { spring_sdk_internal::generated::owned::gfx::get_global_tex_names(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_global_tex_names(&self._engine) }
             };
@@ -16002,7 +17107,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_idvbo(value) }
+                { spring_sdk_internal::generated::owned::gfx::get_idvbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_idvbo(&self._engine, value) }
             };
@@ -16040,7 +17145,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_matrix_data(mode) }
+                { spring_sdk_internal::generated::owned::gfx::get_matrix_data(mode) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_matrix_data(&self._engine, mode) }
             };
@@ -16052,7 +17157,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_number(pname, max_values) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_number(
+                        pname,
+                        max_values,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_number(&self._engine, pname, max_values) }
             };
@@ -16064,7 +17174,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_query(value) }
+                { spring_sdk_internal::generated::owned::gfx::get_query(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_query(&self._engine, value) }
             };
@@ -16076,7 +17186,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_rbo_info(rbo_id) }
+                { spring_sdk_internal::generated::owned::gfx::get_rbo_info(rbo_id) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_rbo_info(&self._engine, rbo_id) }
             };
@@ -16088,7 +17198,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_screen_view_trans(0) }
+                { spring_sdk_internal::generated::owned::gfx::get_screen_view_trans(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_screen_view_trans(&self._engine) }
             };
@@ -16100,7 +17210,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_shader_log(0) }
+                { spring_sdk_internal::generated::owned::gfx::get_shader_log(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_shader_log(&self._engine) }
             };
@@ -16112,7 +17222,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_shadow_map_params(0) }
+                { spring_sdk_internal::generated::owned::gfx::get_shadow_map_params(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_shadow_map_params(&self._engine) }
             };
@@ -16124,7 +17234,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_string(pname) }
+                { spring_sdk_internal::generated::owned::gfx::get_string(pname) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_string(&self._engine, pname) }
             };
@@ -16147,7 +17257,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::get_subroutine_index(
+                    spring_sdk_internal::generated::owned::gfx::get_subroutine_index(
                         shader_id,
                         shader_type,
                         name,
@@ -16197,7 +17307,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_text_height(value) }
+                { spring_sdk_internal::generated::owned::gfx::get_text_height(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_text_height(&self._engine, value) }
             };
@@ -16214,7 +17324,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_text_width(value) }
+                { spring_sdk_internal::generated::owned::gfx::get_text_width(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_text_width(&self._engine, value) }
             };
@@ -16231,7 +17341,12 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_uniform_location(shader_id, name) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_uniform_location(
+                        shader_id,
+                        name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::get_uniform_location(
@@ -16249,7 +17364,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_vao(0) }
+                { spring_sdk_internal::generated::owned::gfx::get_vao(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_vao(&self._engine) }
             };
@@ -16261,7 +17376,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_vbo(target, freq_updated) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_vbo(
+                        target,
+                        freq_updated,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_vbo(&self._engine, target, freq_updated) }
             };
@@ -16273,7 +17393,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_vbo_info(vbo_id) }
+                { spring_sdk_internal::generated::owned::gfx::get_vbo_info(vbo_id) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_vbo_info(&self._engine, vbo_id) }
             };
@@ -16285,7 +17405,11 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_view_range(camera_type) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::get_view_range(
+                        camera_type,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_view_range(&self._engine, camera_type) }
             };
@@ -16297,7 +17421,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::get_view_sizes(0) }
+                { spring_sdk_internal::generated::owned::gfx::get_view_sizes(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::get_view_sizes(&self._engine) }
             };
@@ -16340,7 +17464,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::has_extension(value) }
+                { spring_sdk_internal::generated::owned::gfx::has_extension(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::has_extension(&self._engine, value) }
             };
@@ -16360,7 +17484,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::instance_data_from_feature_defs_vbo(
+                    spring_sdk_internal::generated::owned::gfx::instance_data_from_feature_defs_vbo(
                         vbo_id,
                         ids,
                         attribute_index,
@@ -16396,7 +17520,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::instance_data_from_features_vbo(
+                    spring_sdk_internal::generated::owned::gfx::instance_data_from_features_vbo(
                         vbo_id,
                         ids,
                         attribute_index,
@@ -16432,7 +17556,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::instance_data_from_unit_defs_vbo(
+                    spring_sdk_internal::generated::owned::gfx::instance_data_from_unit_defs_vbo(
                         vbo_id,
                         ids,
                         attribute_index,
@@ -16468,7 +17592,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::instance_data_from_units_vbo(
+                    spring_sdk_internal::generated::owned::gfx::instance_data_from_units_vbo(
                         vbo_id,
                         ids,
                         attribute_index,
@@ -16496,7 +17620,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::is_fence_signaled(value) }
+                { spring_sdk_internal::generated::owned::gfx::is_fence_signaled(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::is_fence_signaled(&self._engine, value) }
             };
@@ -16508,7 +17632,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::is_query_available(value) }
+                { spring_sdk_internal::generated::owned::gfx::is_query_available(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::is_query_available(&self._engine, value) }
             };
@@ -16520,7 +17644,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::is_valid_fbo(fbo_id, target) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::is_valid_fbo(
+                        fbo_id,
+                        target,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::is_valid_fbo(&self._engine, fbo_id, target) }
             };
@@ -16545,7 +17674,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::light(
+                    spring_sdk_internal::generated::owned::gfx::light(
                         light,
                         options,
                         pname,
@@ -16573,7 +17702,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::lighting(value) }
+                { spring_sdk_internal::generated::owned::gfx::lighting(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::lighting(&self._engine, value) }
             };
@@ -16585,7 +17714,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::line_stipple(factor, pattern) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::line_stipple(
+                        factor,
+                        pattern,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::line_stipple(&self._engine, factor, pattern) }
             };
@@ -16597,7 +17731,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::line_width(value) }
+                { spring_sdk_internal::generated::owned::gfx::line_width(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::line_width(&self._engine, value) }
             };
@@ -16621,7 +17755,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::load_font(
+                    spring_sdk_internal::generated::owned::gfx::load_font(
                         path,
                         size,
                         outline_width,
@@ -16647,7 +17781,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::load_identity(0) }
+                { spring_sdk_internal::generated::owned::gfx::load_identity(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::load_identity(&self._engine) }
             };
@@ -16664,7 +17798,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::load_matrix(values) }
+                { spring_sdk_internal::generated::owned::gfx::load_matrix(values) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::load_matrix(&self._engine, values) }
             };
@@ -16676,7 +17810,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::logic_op(enable, opcode) }
+                { spring_sdk_internal::generated::owned::gfx::logic_op(enable, opcode) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::logic_op(&self._engine, enable, opcode) }
             };
@@ -16693,7 +17827,13 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::material(pname, values, count) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::material(
+                        pname,
+                        values,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::material(&self._engine, pname, values, count) }
             };
@@ -16713,7 +17853,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::matrix_data_from_projectiles_vbo(
+                    spring_sdk_internal::generated::owned::gfx::matrix_data_from_projectiles_vbo(
                         vbo_id,
                         ids,
                         attribute_index,
@@ -16741,7 +17881,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::matrix_mode(mode) }
+                { spring_sdk_internal::generated::owned::gfx::matrix_mode(mode) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::matrix_mode(&self._engine, mode) }
             };
@@ -16753,7 +17893,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::memory_barrier(barriers) }
+                { spring_sdk_internal::generated::owned::gfx::memory_barrier(barriers) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::memory_barrier(&self._engine, barriers) }
             };
@@ -16765,7 +17905,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::models_vbo(value) }
+                { spring_sdk_internal::generated::owned::gfx::models_vbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::models_vbo(&self._engine, value) }
             };
@@ -16782,7 +17922,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::mult_matrix(values) }
+                { spring_sdk_internal::generated::owned::gfx::mult_matrix(values) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::mult_matrix(&self._engine, values) }
             };
@@ -16803,7 +17943,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::multi_tex_coord(
+                    spring_sdk_internal::generated::owned::gfx::multi_tex_coord(
                         tex_num,
                         s,
                         t,
@@ -16846,7 +17986,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::multi_tex_env(
+                    spring_sdk_internal::generated::owned::gfx::multi_tex_env(
                         tex_num,
                         target,
                         pname,
@@ -16888,7 +18028,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::multi_tex_gen(
+                    spring_sdk_internal::generated::owned::gfx::multi_tex_gen(
                         tex_num,
                         target,
                         options,
@@ -16918,7 +18058,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::normal(x, y, z) }
+                { spring_sdk_internal::generated::owned::gfx::normal(x, y, z) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::normal(&self._engine, x, y, z) }
             };
@@ -16941,7 +18081,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::object_label(
+                    spring_sdk_internal::generated::owned::gfx::object_label(
                         identifier,
                         object_id,
                         label,
@@ -16974,7 +18114,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::ortho(
+                    spring_sdk_internal::generated::owned::gfx::ortho(
                         left,
                         right,
                         bottom,
@@ -17016,7 +18156,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::point_parameter(
+                    spring_sdk_internal::generated::owned::gfx::point_parameter(
                         pname,
                         value,
                         values,
@@ -17042,7 +18182,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::point_size(value) }
+                { spring_sdk_internal::generated::owned::gfx::point_size(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::point_size(&self._engine, value) }
             };
@@ -17054,7 +18194,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::point_sprite(value) }
+                { spring_sdk_internal::generated::owned::gfx::point_sprite(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::point_sprite(&self._engine, value) }
             };
@@ -17066,7 +18206,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::polygon_mode(face, mode) }
+                { spring_sdk_internal::generated::owned::gfx::polygon_mode(face, mode) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::polygon_mode(&self._engine, face, mode) }
             };
@@ -17078,7 +18218,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::polygon_offset(factor, units) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::polygon_offset(
+                        factor,
+                        units,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::polygon_offset(&self._engine, factor, units) }
             };
@@ -17090,7 +18235,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::pop_attrib(0) }
+                { spring_sdk_internal::generated::owned::gfx::pop_attrib(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::pop_attrib(&self._engine) }
             };
@@ -17102,7 +18247,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::pop_debug_group(0) }
+                { spring_sdk_internal::generated::owned::gfx::pop_debug_group(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::pop_debug_group(&self._engine) }
             };
@@ -17114,7 +18259,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::pop_matrix(0) }
+                { spring_sdk_internal::generated::owned::gfx::pop_matrix(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::pop_matrix(&self._engine) }
             };
@@ -17126,7 +18271,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::push_attrib(value) }
+                { spring_sdk_internal::generated::owned::gfx::push_attrib(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::push_attrib(&self._engine, value) }
             };
@@ -17149,7 +18294,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::push_debug_group(
+                    spring_sdk_internal::generated::owned::gfx::push_debug_group(
                         id,
                         message,
                         source_is_third_party,
@@ -17173,7 +18318,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::push_matrix(0) }
+                { spring_sdk_internal::generated::owned::gfx::push_matrix(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::push_matrix(&self._engine) }
             };
@@ -17207,7 +18352,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::raw_bind_fbo(
+                    spring_sdk_internal::generated::owned::gfx::raw_bind_fbo(
                         bind_default,
                         fbo_id,
                         target,
@@ -17241,7 +18386,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::read_pixels(
+                    spring_sdk_internal::generated::owned::gfx::read_pixels(
                         x,
                         y,
                         width,
@@ -17275,7 +18420,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::read_readback(
+                    spring_sdk_internal::generated::owned::gfx::read_readback(
                         readback_id,
                         offset,
                         count,
@@ -17299,7 +18444,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::rect(x1, y1, x2, y2) }
+                { spring_sdk_internal::generated::owned::gfx::rect(x1, y1, x2, y2) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::rect(&self._engine, x1, y1, x2, y2) }
             };
@@ -17312,7 +18457,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::remove_from_submission_vao(
+                    spring_sdk_internal::generated::owned::gfx::remove_from_submission_vao(
                         vao_id,
                         index,
                     )
@@ -17365,7 +18510,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::reset_matrices(0) }
+                { spring_sdk_internal::generated::owned::gfx::reset_matrices(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::reset_matrices(&self._engine) }
             };
@@ -17377,7 +18522,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::reset_state(0) }
+                { spring_sdk_internal::generated::owned::gfx::reset_state(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::reset_state(&self._engine) }
             };
@@ -17389,7 +18534,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::rotate(degrees, x, y, z) }
+                { spring_sdk_internal::generated::owned::gfx::rotate(degrees, x, y, z) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::rotate(&self._engine, degrees, x, y, z) }
             };
@@ -17432,7 +18577,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::save_image(
+                    spring_sdk_internal::generated::owned::gfx::save_image(
                         x,
                         y,
                         width,
@@ -17464,7 +18609,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::scale(x, y, z) }
+                { spring_sdk_internal::generated::owned::gfx::scale(x, y, z) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::scale(&self._engine, x, y, z) }
             };
@@ -17476,7 +18621,14 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::scissor(x, y, width, height) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::scissor(
+                        x,
+                        y,
+                        width,
+                        height,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::scissor(&self._engine, x, y, width, height) }
             };
@@ -17488,7 +18640,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::secondary_color(x, y, z) }
+                { spring_sdk_internal::generated::owned::gfx::secondary_color(x, y, z) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::secondary_color(&self._engine, x, y, z) }
             };
@@ -17515,7 +18667,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::set_fbo_attachment(
+                    spring_sdk_internal::generated::owned::gfx::set_fbo_attachment(
                         fbo_id,
                         attachment,
                         texture_name,
@@ -17547,7 +18699,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::set_fbo_draw_buffers(fbo_id, buffers) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::set_fbo_draw_buffers(
+                        fbo_id,
+                        buffers,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::set_fbo_draw_buffers(
@@ -17565,7 +18722,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::set_fbo_read_buffer(fbo_id, buffer) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::set_fbo_read_buffer(
+                        fbo_id,
+                        buffer,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::set_fbo_read_buffer(
@@ -17589,7 +18751,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::set_feature_buffer_uniforms(
+                    spring_sdk_internal::generated::owned::gfx::set_feature_buffer_uniforms(
                         object_id,
                         values,
                         offset,
@@ -17619,7 +18781,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::set_geometry_shader_parameter(
+                    spring_sdk_internal::generated::owned::gfx::set_geometry_shader_parameter(
                         shader_id,
                         param,
                         value,
@@ -17656,7 +18818,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::set_tesselation_shader_parameter(
+                    spring_sdk_internal::generated::owned::gfx::set_tesselation_shader_parameter(
                         param,
                         value,
                         values,
@@ -17690,7 +18852,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::set_unit_buffer_uniforms(
+                    spring_sdk_internal::generated::owned::gfx::set_unit_buffer_uniforms(
                         object_id,
                         values,
                         offset,
@@ -17714,7 +18876,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::shade_model(mode) }
+                { spring_sdk_internal::generated::owned::gfx::shade_model(mode) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::shade_model(&self._engine, mode) }
             };
@@ -17748,7 +18910,12 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::shape(primitive, vertices) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::shape(
+                        primitive,
+                        vertices,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::shape(&self._engine, primitive, vertices) }
             };
@@ -17760,7 +18927,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::slave_mini_map(value) }
+                { spring_sdk_internal::generated::owned::gfx::slave_mini_map(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::slave_mini_map(&self._engine, value) }
             };
@@ -17772,7 +18939,13 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::stencil_func(func, ref_, mask) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::stencil_func(
+                        func,
+                        ref_,
+                        mask,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::stencil_func(&self._engine, func, ref_, mask) }
             };
@@ -17791,7 +18964,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::stencil_func_separate(
+                    spring_sdk_internal::generated::owned::gfx::stencil_func_separate(
                         face,
                         func,
                         ref_,
@@ -17817,7 +18990,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::stencil_mask(mask) }
+                { spring_sdk_internal::generated::owned::gfx::stencil_mask(mask) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::stencil_mask(&self._engine, mask) }
             };
@@ -17829,7 +19002,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::stencil_mask_separate(face, mask) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::stencil_mask_separate(
+                        face,
+                        mask,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::stencil_mask_separate(&self._engine, face, mask) }
             };
@@ -17841,7 +19019,13 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::stencil_op(fail, zfail, zpass) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::stencil_op(
+                        fail,
+                        zfail,
+                        zpass,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::stencil_op(&self._engine, fail, zfail, zpass) }
             };
@@ -17860,7 +19044,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::stencil_op_separate(
+                    spring_sdk_internal::generated::owned::gfx::stencil_op_separate(
                         face,
                         fail,
                         zfail,
@@ -17886,7 +19070,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::stencil_test(enable) }
+                { spring_sdk_internal::generated::owned::gfx::stencil_test(enable) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::stencil_test(&self._engine, enable) }
             };
@@ -17898,7 +19082,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::submit_vao(value) }
+                { spring_sdk_internal::generated::owned::gfx::submit_vao(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::submit_vao(&self._engine, value) }
             };
@@ -17910,7 +19094,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::swap_buffers(0) }
+                { spring_sdk_internal::generated::owned::gfx::swap_buffers(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::swap_buffers(&self._engine) }
             };
@@ -17929,7 +19113,15 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::tex_coord(x, y, z, w, count) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::tex_coord(
+                        x,
+                        y,
+                        z,
+                        w,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::tex_coord(&self._engine, x, y, z, w, count) }
             };
@@ -17952,7 +19144,14 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::tex_env(target, pname, values, count) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::tex_env(
+                        target,
+                        pname,
+                        values,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::tex_env(
@@ -17985,7 +19184,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::tex_gen(
+                    spring_sdk_internal::generated::owned::gfx::tex_gen(
                         target,
                         options,
                         pname,
@@ -18024,7 +19223,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::tex_rect(
+                    spring_sdk_internal::generated::owned::gfx::tex_rect(
                         x1,
                         y1,
                         x2,
@@ -18075,7 +19274,15 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::text(text, x, y, size, options) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::text(
+                        text,
+                        x,
+                        y,
+                        size,
+                        options,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::text(&self._engine, text, x, y, size, options) }
             };
@@ -18098,7 +19305,14 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::text_env(target, pname, values, count) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::text_env(
+                        target,
+                        pname,
+                        values,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::text_env(
@@ -18123,7 +19337,7 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::texture_info(name) }
+                { spring_sdk_internal::generated::owned::gfx::texture_info(name) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::texture_info(&self._engine, name) }
             };
@@ -18135,7 +19349,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::translate(x, y, z) }
+                { spring_sdk_internal::generated::owned::gfx::translate(x, y, z) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::translate(&self._engine, x, y, z) }
             };
@@ -18156,7 +19370,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::unbind_buffer_range_vbo(
+                    spring_sdk_internal::generated::owned::gfx::unbind_buffer_range_vbo(
                         vbo_id,
                         binding_index,
                         element_offset,
@@ -18191,7 +19405,13 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::uniform(location, values, count) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::uniform(
+                        location,
+                        values,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::uniform(&self._engine, location, values, count) }
             };
@@ -18209,7 +19429,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::uniform_array_float(
+                    spring_sdk_internal::generated::owned::gfx::uniform_array_float(
                         location,
                         values,
                         components,
@@ -18239,7 +19459,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::uniform_array_int(
+                    spring_sdk_internal::generated::owned::gfx::uniform_array_int(
                         location,
                         values,
                         components,
@@ -18273,7 +19493,13 @@ pub mod gfx {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::uniform_int(location, values, count) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::uniform_int(
+                        location,
+                        values,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::uniform_int(
@@ -18298,7 +19524,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::uniform_matrix(
+                    spring_sdk_internal::generated::owned::gfx::uniform_matrix(
                         location,
                         values,
                         transpose,
@@ -18322,7 +19548,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::uniform_subroutine(shader_type, index) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::uniform_subroutine(
+                        shader_type,
+                        index,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::uniform_subroutine(
@@ -18340,7 +19571,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::unit(unit_id, options) }
+                { spring_sdk_internal::generated::owned::gfx::unit(unit_id, options) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::unit(&self._engine, unit_id, options) }
             };
@@ -18352,7 +19583,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::unit_mult_matrix(value) }
+                { spring_sdk_internal::generated::owned::gfx::unit_mult_matrix(value) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::unit_mult_matrix(&self._engine, value) }
             };
@@ -18364,7 +19595,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::unit_piece(object_id, piece_id) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::unit_piece(
+                        object_id,
+                        piece_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::unit_piece(&self._engine, object_id, piece_id) }
             };
@@ -18376,7 +19612,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::unit_piece_matrix(object_id, piece_id) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::unit_piece_matrix(
+                        object_id,
+                        piece_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::unit_piece_matrix(
@@ -18399,7 +19640,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::unit_piece_mult_matrix(
+                    spring_sdk_internal::generated::owned::gfx::unit_piece_mult_matrix(
                         object_id,
                         piece_id,
                     )
@@ -18421,7 +19662,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::unit_raw(unit_id, options) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::unit_raw(
+                        unit_id,
+                        options,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::unit_raw(&self._engine, unit_id, options) }
             };
@@ -18438,7 +19684,13 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::unit_shape(def_id, team_id, options) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::unit_shape(
+                        def_id,
+                        team_id,
+                        options,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::unit_shape(
@@ -18457,7 +19709,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::unit_shape_textures(object_id, push) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::unit_shape_textures(
+                        object_id,
+                        push,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::gfx::unit_shape_textures(
@@ -18475,7 +19732,12 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::unit_textures(object_id, push) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::unit_textures(
+                        object_id,
+                        push,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::unit_textures(&self._engine, object_id, push) }
             };
@@ -18534,7 +19796,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::upload_texture(
+                    spring_sdk_internal::generated::owned::gfx::upload_texture(
                         name,
                         target,
                         level,
@@ -18585,7 +19847,7 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::gfx::upload_vbo(
+                    spring_sdk_internal::generated::owned::gfx::upload_vbo(
                         vbo_id,
                         data,
                         attribute_index,
@@ -18615,7 +19877,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::use_shader(shader_id) }
+                { spring_sdk_internal::generated::owned::gfx::use_shader(shader_id) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::use_shader(&self._engine, shader_id) }
             };
@@ -18627,7 +19889,7 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::vertex(x, y, z, w, count) }
+                { spring_sdk_internal::generated::owned::gfx::vertex(x, y, z, w, count) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::vertex(&self._engine, x, y, z, w, count) }
             };
@@ -18639,7 +19901,14 @@ pub mod gfx {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::gfx::viewport(x, y, width, height) }
+                {
+                    spring_sdk_internal::generated::owned::gfx::viewport(
+                        x,
+                        y,
+                        width,
+                        height,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::gfx::viewport(&self._engine, x, y, width, height) }
             };
@@ -18674,7 +19943,7 @@ pub mod lights {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::lights::add_light_tracking_target(
+                    spring_sdk_internal::generated::owned::lights::add_light_tracking_target(
                         light_handle,
                         object_id,
                         track_unit,
@@ -18755,7 +20024,7 @@ pub mod lights {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::lights::add_map_light(params) }
+                { spring_sdk_internal::generated::owned::lights::add_map_light(params) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::lights::add_map_light(&self._engine, params) }
             };
@@ -18822,7 +20091,11 @@ pub mod lights {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::lights::add_model_light(params) }
+                {
+                    spring_sdk_internal::generated::owned::lights::add_model_light(
+                        params,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::lights::add_model_light(&self._engine, params) }
             };
@@ -18841,7 +20114,7 @@ pub mod lights {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::lights::set_map_light_tracking_state(
+                    spring_sdk_internal::generated::owned::lights::set_map_light_tracking_state(
                         light_handle,
                         object_id,
                         enable_tracking,
@@ -18874,7 +20147,7 @@ pub mod lights {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::lights::set_model_light_tracking_state(
+                    spring_sdk_internal::generated::owned::lights::set_model_light_tracking_state(
                         light_handle,
                         object_id,
                         enable_tracking,
@@ -18960,7 +20233,7 @@ pub mod lights {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::lights::update_map_light(
+                    spring_sdk_internal::generated::owned::lights::update_map_light(
                         light_handle,
                         params,
                     )
@@ -19042,7 +20315,7 @@ pub mod lights {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::lights::update_model_light(
+                    spring_sdk_internal::generated::owned::lights::update_model_light(
                         light_handle,
                         params,
                     )
@@ -19103,7 +20376,7 @@ pub mod icons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::icons::add_unit_icon(
+                    spring_sdk_internal::generated::owned::icons::add_unit_icon(
                         icon_name,
                         tex_file,
                         size,
@@ -19144,7 +20417,11 @@ pub mod icons {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::icons::free_unit_icon(icon_name) }
+                {
+                    spring_sdk_internal::generated::owned::icons::free_unit_icon(
+                        icon_name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::icons::free_unit_icon(&self._engine, icon_name) }
             };
@@ -19159,7 +20436,11 @@ pub mod icons {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::icons::get_all_icon_data_array(full_data) }
+                {
+                    spring_sdk_internal::generated::owned::icons::get_all_icon_data_array(
+                        full_data,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::icons::get_all_icon_data_array(
@@ -19185,7 +20466,12 @@ pub mod icons {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::icons::get_icon_data(icon_name, full_data) }
+                {
+                    spring_sdk_internal::generated::owned::icons::get_icon_data(
+                        icon_name,
+                        full_data,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::icons::get_icon_data(
@@ -19203,7 +20489,11 @@ pub mod icons {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::icons::unit_icon_get_draw(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::icons::unit_icon_get_draw(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::icons::unit_icon_get_draw(&self._engine, unit_id) }
             };
@@ -19216,7 +20506,7 @@ pub mod icons {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::icons::unit_icon_set_draw(
+                    spring_sdk_internal::generated::owned::icons::unit_icon_set_draw(
                         unit_id,
                         draw_icon,
                     )
@@ -19254,7 +20544,12 @@ pub mod markers {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::markers::add_world_icon(cmd_id, pos) }
+                {
+                    spring_sdk_internal::generated::owned::markers::add_world_icon(
+                        cmd_id,
+                        pos,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::markers::add_world_icon(&self._engine, cmd_id, pos) }
             };
@@ -19271,7 +20566,12 @@ pub mod markers {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::markers::add_world_text(text, pos) }
+                {
+                    spring_sdk_internal::generated::owned::markers::add_world_text(
+                        text,
+                        pos,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::markers::add_world_text(&self._engine, text, pos) }
             };
@@ -19290,7 +20590,7 @@ pub mod markers {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::markers::add_world_unit(
+                    spring_sdk_internal::generated::owned::markers::add_world_unit(
                         unit_def_id,
                         pos,
                         team_id,
@@ -19323,7 +20623,7 @@ pub mod markers {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::markers::marker_add_line(
+                    spring_sdk_internal::generated::owned::markers::marker_add_line(
                         from,
                         to,
                         local_only,
@@ -19361,7 +20661,7 @@ pub mod markers {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::markers::marker_add_point(
+                    spring_sdk_internal::generated::owned::markers::marker_add_point(
                         pos,
                         text,
                         local_only,
@@ -19394,7 +20694,7 @@ pub mod markers {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::markers::marker_erase_position(
+                    spring_sdk_internal::generated::owned::markers::marker_erase_position(
                         pos,
                         unused,
                         options,
@@ -19438,7 +20738,11 @@ pub mod ground_decals {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::ground_decals::create_ground_decal(0) }
+                {
+                    spring_sdk_internal::generated::owned::ground_decals::create_ground_decal(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::ground_decals::create_ground_decal(&self._engine) }
             };
@@ -19451,7 +20755,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::destroy_ground_decal(
+                    spring_sdk_internal::generated::owned::ground_decals::destroy_ground_decal(
                         decal_id,
                     )
                 }
@@ -19471,7 +20775,11 @@ pub mod ground_decals {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::ground_decals::get_all_ground_decals(0) }
+                {
+                    spring_sdk_internal::generated::owned::ground_decals::get_all_ground_decals(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::ground_decals::get_all_ground_decals(&self._engine) }
             };
@@ -19487,7 +20795,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_alpha(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_alpha(
                         decal_id,
                     )
                 }
@@ -19511,7 +20819,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_creation_frame(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_creation_frame(
                         decal_id,
                     )
                 }
@@ -19535,7 +20843,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_glow_params(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_glow_params(
                         decal_id,
                     )
                 }
@@ -19559,7 +20867,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_middle_pos(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_middle_pos(
                         decal_id,
                     )
                 }
@@ -19583,7 +20891,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_misc(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_misc(
                         decal_id,
                     )
                 }
@@ -19604,7 +20912,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_normal(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_normal(
                         decal_id,
                     )
                 }
@@ -19628,7 +20936,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_owner(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_owner(
                         decal_id,
                     )
                 }
@@ -19652,7 +20960,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_quad_pos(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_quad_pos(
                         decal_id,
                     )
                 }
@@ -19676,7 +20984,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_rotation(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_rotation(
                         decal_id,
                     )
                 }
@@ -19700,7 +21008,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_size_and_height(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_size_and_height(
                         decal_id,
                     )
                 }
@@ -19725,7 +21033,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_texture(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_texture(
                         decal_id,
                         main_tex,
                     )
@@ -19751,7 +21059,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_texture_params(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_texture_params(
                         decal_id,
                     )
                 }
@@ -19792,7 +21100,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_tint(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_tint(
                         decal_id,
                     )
                 }
@@ -19813,7 +21121,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_type(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_type(
                         decal_id,
                     )
                 }
@@ -19838,7 +21146,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::get_ground_decal_user_data(
+                    spring_sdk_internal::generated::owned::ground_decals::get_ground_decal_user_data(
                         decal_id,
                         quad_index,
                     )
@@ -19866,7 +21174,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_alpha(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_alpha(
                         decal_id,
                         alpha,
                         alpha_falloff,
@@ -19896,7 +21204,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_creation_frame(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_creation_frame(
                         decal_id,
                         creation_frame_min,
                         creation_frame_max,
@@ -19926,7 +21234,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_glow_params(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_glow_params(
                         decal_id,
                         glow,
                         glow_falloff,
@@ -19959,7 +21267,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_misc(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_misc(
                         decal_id,
                         dot_elim_exp,
                         ref_height,
@@ -19996,7 +21304,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_normal(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_normal(
                         decal_id,
                         normal_x,
                         normal_y,
@@ -20031,7 +21339,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_pos_and_dims(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_pos_and_dims(
                         decal_id,
                         mid_pos_x,
                         mid_pos_z,
@@ -20074,7 +21382,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_quad_pos_and_height(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_quad_pos_and_height(
                         decal_id,
                         pos_tlx,
                         pos_tly,
@@ -20117,7 +21425,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_rotation(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_rotation(
                         decal_id,
                         rotation,
                     )
@@ -20150,7 +21458,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_texture(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_texture(
                         decal_id,
                         texture_name,
                         main_tex,
@@ -20180,7 +21488,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_texture_params(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_texture_params(
                         decal_id,
                         tex_wrap_distance,
                         tex_traveled_distance,
@@ -20212,7 +21520,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_tint(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_tint(
                         decal_id,
                         tint_r,
                         tint_g,
@@ -20249,7 +21557,7 @@ pub mod ground_decals {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::ground_decals::set_ground_decal_user_data(
+                    spring_sdk_internal::generated::owned::ground_decals::set_ground_decal_user_data(
                         decal_id,
                         quad_index,
                         value_x,
@@ -20332,7 +21640,7 @@ pub mod system_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::system_control::clear_watch_dog_timer(
+                    spring_sdk_internal::generated::owned::system_control::clear_watch_dog_timer(
                         thread_name,
                         keep_stopped,
                     )
@@ -20365,7 +21673,7 @@ pub mod system_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::system_control::garbage_collect_ctrl(
+                    spring_sdk_internal::generated::owned::system_control::garbage_collect_ctrl(
                         iters_per_batch,
                         num_steps_per_iter,
                         min_steps_per_iter,
@@ -20399,7 +21707,11 @@ pub mod system_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::get_game_name(0) }
+                {
+                    spring_sdk_internal::generated::owned::system_control::get_game_name(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::system_control::get_game_name(&self._engine) }
             };
@@ -20411,7 +21723,11 @@ pub mod system_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::get_game_state(max_latency) }
+                {
+                    spring_sdk_internal::generated::owned::system_control::get_game_state(
+                        max_latency,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::system_control::get_game_state(
@@ -20428,7 +21744,11 @@ pub mod system_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::get_gather_mode(0) }
+                {
+                    spring_sdk_internal::generated::owned::system_control::get_gather_mode(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::system_control::get_gather_mode(&self._engine) }
             };
@@ -20440,7 +21760,11 @@ pub mod system_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::get_menu_name(0) }
+                {
+                    spring_sdk_internal::generated::owned::system_control::get_menu_name(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::system_control::get_menu_name(&self._engine) }
             };
@@ -20464,7 +21788,11 @@ pub mod system_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::get_replay_length(0) }
+                {
+                    spring_sdk_internal::generated::owned::system_control::get_replay_length(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::system_control::get_replay_length(&self._engine) }
             };
@@ -20494,7 +21822,11 @@ pub mod system_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::get_video_capturing_mode(0) }
+                {
+                    spring_sdk_internal::generated::owned::system_control::get_video_capturing_mode(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::system_control::get_video_capturing_mode(
@@ -20522,7 +21854,7 @@ pub mod system_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::is_replay(0) }
+                { spring_sdk_internal::generated::owned::system_control::is_replay(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::system_control::is_replay(&self._engine) }
             };
@@ -20534,7 +21866,7 @@ pub mod system_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::ping(tag) }
+                { spring_sdk_internal::generated::owned::system_control::ping(tag) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::system_control::ping(&self._engine, tag) }
             };
@@ -20546,7 +21878,7 @@ pub mod system_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::quit(0) }
+                { spring_sdk_internal::generated::owned::system_control::quit(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::system_control::quit(&self._engine) }
             };
@@ -20563,7 +21895,11 @@ pub mod system_control {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::reload(start_script) }
+                {
+                    spring_sdk_internal::generated::owned::system_control::reload(
+                        start_script,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::system_control::reload(&self._engine, start_script) }
             };
@@ -20576,7 +21912,7 @@ pub mod system_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::system_control::request_start_position(
+                    spring_sdk_internal::generated::owned::system_control::request_start_position(
                         pos,
                         ready,
                     )
@@ -20609,7 +21945,7 @@ pub mod system_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::system_control::restart(
+                    spring_sdk_internal::generated::owned::system_control::restart(
                         cmd_args,
                         start_script,
                     )
@@ -20637,7 +21973,7 @@ pub mod system_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::system_control::set_share_level(
+                    spring_sdk_internal::generated::owned::system_control::set_share_level(
                         resource,
                         level,
                     )
@@ -20670,7 +22006,7 @@ pub mod system_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::system_control::share_resources(
+                    spring_sdk_internal::generated::owned::system_control::share_resources(
                         team_id,
                         resource,
                         amount,
@@ -20705,7 +22041,7 @@ pub mod system_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::system_control::start(
+                    spring_sdk_internal::generated::owned::system_control::start(
                         cmd_args,
                         start_script,
                     )
@@ -20727,7 +22063,7 @@ pub mod system_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::system_control::yield_(0) }
+                { spring_sdk_internal::generated::owned::system_control::yield_(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::system_control::yield_(&self._engine) }
             };
@@ -20763,7 +22099,7 @@ pub mod profiling {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::profiling::diff_timers(
+                    spring_sdk_internal::profiling::diff_timers(
                         end_timer,
                         start_timer,
                         options.return_ms,
@@ -20788,7 +22124,7 @@ pub mod profiling {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::profiling::get_draw_seconds(0) }
+                { spring_sdk_internal::generated::owned::profiling::get_draw_seconds(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::profiling::get_draw_seconds(&self._engine) }
             };
@@ -20800,7 +22136,11 @@ pub mod profiling {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::profiling::get_frame_timer(last_frame_time) }
+                {
+                    spring_sdk_internal::generated::owned::profiling::get_frame_timer(
+                        last_frame_time,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::profiling::get_frame_timer(
@@ -20817,7 +22157,11 @@ pub mod profiling {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::profiling::get_lua_mem_usage(0) }
+                {
+                    spring_sdk_internal::generated::owned::profiling::get_lua_mem_usage(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::profiling::get_lua_mem_usage(&self._engine) }
             };
@@ -20829,7 +22173,11 @@ pub mod profiling {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::profiling::get_profiler_record_names(0) }
+                {
+                    spring_sdk_internal::generated::owned::profiling::get_profiler_record_names(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::profiling::get_profiler_record_names(&self._engine) }
             };
@@ -20873,7 +22221,11 @@ pub mod profiling {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::profiling::get_synced_gc_info(collect) }
+                {
+                    spring_sdk_internal::generated::owned::profiling::get_synced_gc_info(
+                        collect,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::profiling::get_synced_gc_info(&self._engine, collect) }
             };
@@ -20885,7 +22237,7 @@ pub mod profiling {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::profiling::get_timer(0) }
+                { spring_sdk_internal::generated::owned::profiling::get_timer(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::profiling::get_timer(&self._engine) }
             };
@@ -20896,7 +22248,8 @@ pub mod profiling {
         pub fn get_timer_micros(&self) -> Result<u64> {
             self._engine.check()?;
             let result = {
-                #[cfg(target_arch = "wasm32")] { spring::desync::get_timer_micros() }
+                #[cfg(target_arch = "wasm32")]
+                { spring_sdk_internal::desync::get_timer_micros() }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::profiling::get_timer_micros(&self._engine) }
             };
@@ -20908,7 +22261,11 @@ pub mod profiling {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::profiling::get_vid_mem_usage(0) }
+                {
+                    spring_sdk_internal::generated::owned::profiling::get_vid_mem_usage(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::profiling::get_vid_mem_usage(&self._engine) }
             };
@@ -20953,7 +22310,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::add_translation_string(
+                    spring_sdk_internal::generated::owned::rml_ui::add_translation_string(
                         key,
                         translation,
                     )
@@ -20981,7 +22338,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::clear_document_path_requests(
+                    spring_sdk_internal::generated::owned::rml_ui::clear_document_path_requests(
                         document_path,
                     )
                 }
@@ -21001,7 +22358,7 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::clear_translations(0) }
+                { spring_sdk_internal::generated::owned::rml_ui::clear_translations(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::clear_translations(&self._engine) }
             };
@@ -21024,7 +22381,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_activate_theme(
+                    spring_sdk_internal::generated::owned::rml_ui::context_activate_theme(
                         context_handle,
                         name,
                         value,
@@ -21096,7 +22453,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_create_data_model(
+                    spring_sdk_internal::generated::owned::rml_ui::context_create_data_model(
                         context_handle,
                         name,
                     )
@@ -21128,7 +22485,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_create_document(
+                    spring_sdk_internal::generated::owned::rml_ui::context_create_document(
                         context_handle,
                         tag,
                     )
@@ -21155,7 +22512,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_enable_mouse_cursor(
+                    spring_sdk_internal::generated::owned::rml_ui::context_enable_mouse_cursor(
                         context_handle,
                         value,
                     )
@@ -21181,7 +22538,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_get_density_independent_pixel_ratio(
+                    spring_sdk_internal::generated::owned::rml_ui::context_get_density_independent_pixel_ratio(
                         context_handle,
                     )
                 }
@@ -21205,7 +22562,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_get_dimensions(
+                    spring_sdk_internal::generated::owned::rml_ui::context_get_dimensions(
                         context_handle,
                     )
                 }
@@ -21235,7 +22592,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_get_document(
+                    spring_sdk_internal::generated::owned::rml_ui::context_get_document(
                         context_handle,
                         name,
                     )
@@ -21264,7 +22621,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_get_element_at_point(
+                    spring_sdk_internal::generated::owned::rml_ui::context_get_element_at_point(
                         context_handle,
                         x,
                         y,
@@ -21294,7 +22651,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_get_focus_element(
+                    spring_sdk_internal::generated::owned::rml_ui::context_get_focus_element(
                         context_handle,
                     )
                 }
@@ -21318,7 +22675,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_get_hover_element(
+                    spring_sdk_internal::generated::owned::rml_ui::context_get_hover_element(
                         context_handle,
                     )
                 }
@@ -21338,7 +22695,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::context_get_name(context_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::context_get_name(
+                        context_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::rml_ui::context_get_name(
@@ -21359,7 +22720,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_get_root_element(
+                    spring_sdk_internal::generated::owned::rml_ui::context_get_root_element(
                         context_handle,
                     )
                 }
@@ -21380,7 +22741,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_is_mouse_interacting(
+                    spring_sdk_internal::generated::owned::rml_ui::context_is_mouse_interacting(
                         context_handle,
                     )
                 }
@@ -21410,7 +22771,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_is_theme_active(
+                    spring_sdk_internal::generated::owned::rml_ui::context_is_theme_active(
                         context_handle,
                         name,
                     )
@@ -21442,7 +22803,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_load_document(
+                    spring_sdk_internal::generated::owned::rml_ui::context_load_document(
                         context_handle,
                         document_path,
                     )
@@ -21474,7 +22835,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_open_data_model(
+                    spring_sdk_internal::generated::owned::rml_ui::context_open_data_model(
                         context_handle,
                         name,
                     )
@@ -21502,7 +22863,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_process_key_down(
+                    spring_sdk_internal::generated::owned::rml_ui::context_process_key_down(
                         context_handle,
                         key,
                         key_modifier_state,
@@ -21532,7 +22893,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_process_key_up(
+                    spring_sdk_internal::generated::owned::rml_ui::context_process_key_up(
                         context_handle,
                         key,
                         key_modifier_state,
@@ -21562,7 +22923,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_process_mouse_button_down(
+                    spring_sdk_internal::generated::owned::rml_ui::context_process_mouse_button_down(
                         context_handle,
                         button,
                         key_modifier_state,
@@ -21592,7 +22953,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_process_mouse_button_up(
+                    spring_sdk_internal::generated::owned::rml_ui::context_process_mouse_button_up(
                         context_handle,
                         button,
                         key_modifier_state,
@@ -21617,7 +22978,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_process_mouse_leave(
+                    spring_sdk_internal::generated::owned::rml_ui::context_process_mouse_leave(
                         context_handle,
                     )
                 }
@@ -21644,7 +23005,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_process_mouse_move(
+                    spring_sdk_internal::generated::owned::rml_ui::context_process_mouse_move(
                         context_handle,
                         x,
                         y,
@@ -21677,7 +23038,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_process_mouse_wheel(
+                    spring_sdk_internal::generated::owned::rml_ui::context_process_mouse_wheel(
                         context_handle,
                         x,
                         y,
@@ -21713,7 +23074,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_process_text_input(
+                    spring_sdk_internal::generated::owned::rml_ui::context_process_text_input(
                         context_handle,
                         text,
                     )
@@ -21740,7 +23101,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_pull_document_to_front(
+                    spring_sdk_internal::generated::owned::rml_ui::context_pull_document_to_front(
                         context_handle,
                         document_handle,
                     )
@@ -21763,7 +23124,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_pull_to_front(
+                    spring_sdk_internal::generated::owned::rml_ui::context_pull_to_front(
                         context_handle,
                     )
                 }
@@ -21788,7 +23149,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_push_document_to_back(
+                    spring_sdk_internal::generated::owned::rml_ui::context_push_document_to_back(
                         context_handle,
                         document_handle,
                     )
@@ -21820,7 +23181,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_remove_data_model(
+                    spring_sdk_internal::generated::owned::rml_ui::context_remove_data_model(
                         context_handle,
                         name,
                     )
@@ -21854,7 +23215,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_remove_event_listener(
+                    spring_sdk_internal::generated::owned::rml_ui::context_remove_event_listener(
                         context_handle,
                         event_listener_handle,
                         event,
@@ -21880,7 +23241,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::context_render(context_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::context_render(
+                        context_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::context_render(&self._engine, context_handle) }
             };
@@ -21897,7 +23262,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_set_density_independent_pixel_ratio(
+                    spring_sdk_internal::generated::owned::rml_ui::context_set_density_independent_pixel_ratio(
                         context_handle,
                         value,
                     )
@@ -21925,7 +23290,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_set_dimensions(
+                    spring_sdk_internal::generated::owned::rml_ui::context_set_dimensions(
                         context_handle,
                         x,
                         y,
@@ -21956,7 +23321,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_set_pointer_capture(
+                    spring_sdk_internal::generated::owned::rml_ui::context_set_pointer_capture(
                         context_handle,
                         anchor_x,
                         anchor_y,
@@ -21986,7 +23351,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_take_pointer_capture_delta(
+                    spring_sdk_internal::generated::owned::rml_ui::context_take_pointer_capture_delta(
                         context_handle,
                     )
                 }
@@ -22007,7 +23372,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_unload_all_documents(
+                    spring_sdk_internal::generated::owned::rml_ui::context_unload_all_documents(
                         context_handle,
                     )
                 }
@@ -22032,7 +23397,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::context_unload_document(
+                    spring_sdk_internal::generated::owned::rml_ui::context_unload_document(
                         context_handle,
                         document_handle,
                     )
@@ -22054,7 +23419,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::context_update(context_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::context_update(
+                        context_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::context_update(&self._engine, context_handle) }
             };
@@ -22071,7 +23440,7 @@ pub mod rml_ui {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::create_context(name) }
+                { spring_sdk_internal::generated::owned::rml_ui::create_context(name) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::create_context(&self._engine, name) }
             };
@@ -22094,7 +23463,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_bind_bool(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_bind_bool(
                         data_model_handle,
                         name,
                         initial_value,
@@ -22132,7 +23501,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_bind_color(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_bind_color(
                         data_model_handle,
                         name,
                         red,
@@ -22211,7 +23580,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_bind_float(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_bind_float(
                         data_model_handle,
                         name,
                         initial_value,
@@ -22246,7 +23615,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_bind_int(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_bind_int(
                         data_model_handle,
                         name,
                         initial_value,
@@ -22281,7 +23650,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_bind_percent(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_bind_percent(
                         data_model_handle,
                         name,
                         initial_value,
@@ -22316,7 +23685,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_bind_pixels(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_bind_pixels(
                         data_model_handle,
                         name,
                         initial_value,
@@ -22358,7 +23727,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_bind_rows(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_bind_rows(
                         data_model_handle,
                         name,
                         fields,
@@ -22398,7 +23767,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_bind_string(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_bind_string(
                         data_model_handle,
                         name,
                         initial_value,
@@ -22426,7 +23795,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_get_bool(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_get_bool(
                         variable_handle,
                     )
                 }
@@ -22450,7 +23819,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_get_color(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_get_color(
                         variable_handle,
                     )
                 }
@@ -22474,7 +23843,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_get_float(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_get_float(
                         variable_handle,
                     )
                 }
@@ -22497,7 +23866,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::data_model_get_int(variable_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_get_int(
+                        variable_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::rml_ui::data_model_get_int(
@@ -22518,7 +23891,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_get_percent(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_get_percent(
                         variable_handle,
                     )
                 }
@@ -22542,7 +23915,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_get_pixels(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_get_pixels(
                         variable_handle,
                     )
                 }
@@ -22587,7 +23960,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_set_bool(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_set_bool(
                         variable_handle,
                         value,
                     )
@@ -22617,7 +23990,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_set_color(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_set_color(
                         variable_handle,
                         red,
                         green,
@@ -22650,7 +24023,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_set_float(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_set_float(
                         variable_handle,
                         value,
                     )
@@ -22677,7 +24050,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_set_int(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_set_int(
                         variable_handle,
                         value,
                     )
@@ -22704,7 +24077,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_set_percent(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_set_percent(
                         variable_handle,
                         value,
                     )
@@ -22731,7 +24104,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_set_pixels(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_set_pixels(
                         variable_handle,
                         value,
                     )
@@ -22765,7 +24138,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_set_rows(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_set_rows(
                         rows_handle,
                         values,
                     )
@@ -22797,7 +24170,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::data_model_set_string(
+                    spring_sdk_internal::generated::owned::rml_ui::data_model_set_string(
                         variable_handle,
                         value,
                     )
@@ -22846,7 +24219,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_append_to_style_sheet(
+                    spring_sdk_internal::generated::owned::rml_ui::document_append_to_style_sheet(
                         document_handle,
                         value,
                     )
@@ -22868,7 +24241,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::document_close(document_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::document_close(
+                        document_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::document_close(&self._engine, document_handle) }
             };
@@ -22890,7 +24267,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_create_element(
+                    spring_sdk_internal::generated::owned::rml_ui::document_create_element(
                         document_handle,
                         tag_name,
                     )
@@ -22922,7 +24299,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_create_text_node(
+                    spring_sdk_internal::generated::owned::rml_ui::document_create_text_node(
                         document_handle,
                         value,
                     )
@@ -22948,7 +24325,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_get_context(
+                    spring_sdk_internal::generated::owned::rml_ui::document_get_context(
                         document_handle,
                     )
                 }
@@ -22968,7 +24345,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::document_get_title(document_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::document_get_title(
+                        document_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::rml_ui::document_get_title(
@@ -22985,7 +24366,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::document_get_url(document_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::document_get_url(
+                        document_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::rml_ui::document_get_url(
@@ -23002,7 +24387,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::document_hide(document_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::document_hide(
+                        document_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::document_hide(&self._engine, document_handle) }
             };
@@ -23014,7 +24403,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::document_is_modal(document_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::document_is_modal(
+                        document_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::rml_ui::document_is_modal(
@@ -23041,7 +24434,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_load_external_script(
+                    spring_sdk_internal::generated::owned::rml_ui::document_load_external_script(
                         document_handle,
                         value,
                     )
@@ -23080,7 +24473,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_load_inline_script(
+                    spring_sdk_internal::generated::owned::rml_ui::document_load_inline_script(
                         document_handle,
                         content,
                         source_path,
@@ -23107,7 +24500,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_pull_to_front(
+                    spring_sdk_internal::generated::owned::rml_ui::document_pull_to_front(
                         document_handle,
                     )
                 }
@@ -23128,7 +24521,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_push_to_back(
+                    spring_sdk_internal::generated::owned::rml_ui::document_push_to_back(
                         document_handle,
                     )
                 }
@@ -23149,7 +24542,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_reload_style_sheet(
+                    spring_sdk_internal::generated::owned::rml_ui::document_reload_style_sheet(
                         document_handle,
                     )
                 }
@@ -23179,7 +24572,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_set_title(
+                    spring_sdk_internal::generated::owned::rml_ui::document_set_title(
                         document_handle,
                         title,
                     )
@@ -23206,7 +24599,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_show(
+                    spring_sdk_internal::generated::owned::rml_ui::document_show(
                         document_handle,
                         options,
                     )
@@ -23229,7 +24622,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::document_update_document(
+                    spring_sdk_internal::generated::owned::rml_ui::document_update_document(
                         document_handle,
                     )
                 }
@@ -23292,7 +24685,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_append_child(
+                    spring_sdk_internal::generated::owned::rml_ui::element_append_child(
                         element_handle,
                         element_ptr_handle,
                     )
@@ -23324,7 +24717,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_are_pseudo_classes_set(
+                    spring_sdk_internal::generated::owned::rml_ui::element_are_pseudo_classes_set(
                         element_handle,
                         value,
                     )
@@ -23346,7 +24739,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::element_blur(element_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::element_blur(
+                        element_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::element_blur(&self._engine, element_handle) }
             };
@@ -23358,7 +24755,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::element_click(element_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::element_click(
+                        element_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::element_click(&self._engine, element_handle) }
             };
@@ -23370,7 +24771,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::element_clone(element_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::element_clone(
+                        element_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::element_clone(&self._engine, element_handle) }
             };
@@ -23392,7 +24797,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_closest(
+                    spring_sdk_internal::generated::owned::rml_ui::element_closest(
                         element_handle,
                         value,
                     )
@@ -23424,7 +24829,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_dispatch_event(
+                    spring_sdk_internal::generated::owned::rml_ui::element_dispatch_event(
                         element_handle,
                         event,
                     )
@@ -23446,7 +24851,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::element_focus(element_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::element_focus(
+                        element_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::element_focus(&self._engine, element_handle) }
             };
@@ -23486,7 +24895,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_form_control_input_select(
+                    spring_sdk_internal::generated::owned::rml_ui::element_form_control_input_select(
                         element_handle,
                     )
                 }
@@ -23512,7 +24921,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_form_control_input_set_selection(
+                    spring_sdk_internal::generated::owned::rml_ui::element_form_control_input_set_selection(
                         element_handle,
                         start,
                         end,
@@ -23542,7 +24951,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_form_control_select_add(
+                    spring_sdk_internal::generated::owned::rml_ui::element_form_control_select_add(
                         element_handle,
                         element_ptr_handle,
                         before,
@@ -23571,7 +24980,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_form_control_select_remove(
+                    spring_sdk_internal::generated::owned::rml_ui::element_form_control_select_remove(
                         element_handle,
                         index,
                     )
@@ -23597,7 +25006,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_form_control_select_remove_all(
+                    spring_sdk_internal::generated::owned::rml_ui::element_form_control_select_remove_all(
                         element_handle,
                     )
                 }
@@ -23645,7 +25054,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_form_control_text_area_select(
+                    spring_sdk_internal::generated::owned::rml_ui::element_form_control_text_area_select(
                         element_handle,
                     )
                 }
@@ -23671,7 +25080,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_form_control_text_area_set_selection(
+                    spring_sdk_internal::generated::owned::rml_ui::element_form_control_text_area_set_selection(
                         element_handle,
                         start,
                         end,
@@ -23711,7 +25120,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_form_submit(
+                    spring_sdk_internal::generated::owned::rml_ui::element_form_submit(
                         element_handle,
                         name,
                         value,
@@ -23739,7 +25148,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_active_pseudo_classes(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_active_pseudo_classes(
                         element_handle,
                     )
                 }
@@ -23791,7 +25200,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_child(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_child(
                         element_handle,
                         index,
                     )
@@ -23814,7 +25223,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_class_name(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_class_name(
                         element_handle,
                     )
                 }
@@ -23844,7 +25253,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_element_by_id(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_element_by_id(
                         element_handle,
                         value,
                     )
@@ -23876,7 +25285,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_elements_by_class_name(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_elements_by_class_name(
                         element_handle,
                         value,
                     )
@@ -23908,7 +25317,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_elements_by_class_name_count(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_elements_by_class_name_count(
                         element_handle,
                         value,
                     )
@@ -23940,7 +25349,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_elements_by_tag_name(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_elements_by_tag_name(
                         element_handle,
                         value,
                     )
@@ -23972,7 +25381,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_elements_by_tag_name_count(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_elements_by_tag_name_count(
                         element_handle,
                         value,
                     )
@@ -23994,7 +25403,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::element_get_id(element_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_id(
+                        element_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::element_get_id(&self._engine, element_handle) }
             };
@@ -24007,7 +25420,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_inner_rml(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_inner_rml(
                         element_handle,
                     )
                 }
@@ -24030,7 +25443,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::element_get_rect(element_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_rect(
+                        element_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::rml_ui::element_get_rect(
@@ -24048,7 +25465,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_scroll_left(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_scroll_left(
                         element_handle,
                     )
                 }
@@ -24069,7 +25486,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_scroll_top(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_scroll_top(
                         element_handle,
                     )
                 }
@@ -24090,7 +25507,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_get_tag_name(
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_tag_name(
                         element_handle,
                     )
                 }
@@ -24110,7 +25527,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::element_get_value(element_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::element_get_value(
+                        element_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::rml_ui::element_get_value(
@@ -24137,7 +25558,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_has_attribute(
+                    spring_sdk_internal::generated::owned::rml_ui::element_has_attribute(
                         element_handle,
                         value,
                     )
@@ -24160,7 +25581,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_has_child_nodes(
+                    spring_sdk_internal::generated::owned::rml_ui::element_has_child_nodes(
                         element_handle,
                     )
                 }
@@ -24186,7 +25607,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_insert_before(
+                    spring_sdk_internal::generated::owned::rml_ui::element_insert_before(
                         element_handle,
                         element_ptr_handle,
                         adjacent_element_handle,
@@ -24220,7 +25641,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_is_class_set(
+                    spring_sdk_internal::generated::owned::rml_ui::element_is_class_set(
                         element_handle,
                         value,
                     )
@@ -24248,7 +25669,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_is_point_within_element(
+                    spring_sdk_internal::generated::owned::rml_ui::element_is_point_within_element(
                         element_handle,
                         x,
                         y,
@@ -24282,7 +25703,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_is_pseudo_class_set(
+                    spring_sdk_internal::generated::owned::rml_ui::element_is_pseudo_class_set(
                         element_handle,
                         value,
                     )
@@ -24304,7 +25725,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::element_is_visible(element_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::element_is_visible(
+                        element_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::rml_ui::element_is_visible(
@@ -24327,7 +25752,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_matches(
+                    spring_sdk_internal::generated::owned::rml_ui::element_matches(
                         element_handle,
                         value,
                     )
@@ -24354,7 +25779,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_process_default_action(
+                    spring_sdk_internal::generated::owned::rml_ui::element_process_default_action(
                         element_handle,
                         event_handle,
                     )
@@ -24386,7 +25811,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_query_selector(
+                    spring_sdk_internal::generated::owned::rml_ui::element_query_selector(
                         element_handle,
                         value,
                     )
@@ -24418,7 +25843,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_query_selector_all(
+                    spring_sdk_internal::generated::owned::rml_ui::element_query_selector_all(
                         element_handle,
                         value,
                     )
@@ -24450,7 +25875,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_query_selector_all_count(
+                    spring_sdk_internal::generated::owned::rml_ui::element_query_selector_all_count(
                         element_handle,
                         value,
                     )
@@ -24482,7 +25907,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_remove_attribute(
+                    spring_sdk_internal::generated::owned::rml_ui::element_remove_attribute(
                         element_handle,
                         value,
                     )
@@ -24509,7 +25934,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_remove_child(
+                    spring_sdk_internal::generated::owned::rml_ui::element_remove_child(
                         element_handle,
                         child_element_handle,
                     )
@@ -24543,7 +25968,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_remove_event_listener(
+                    spring_sdk_internal::generated::owned::rml_ui::element_remove_event_listener(
                         element_handle,
                         event_listener_handle,
                         event,
@@ -24575,7 +26000,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_replace_child(
+                    spring_sdk_internal::generated::owned::rml_ui::element_replace_child(
                         element_handle,
                         element_ptr_handle,
                         replaced_element_handle,
@@ -24604,7 +26029,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_scroll_into_view(
+                    spring_sdk_internal::generated::owned::rml_ui::element_scroll_into_view(
                         element_handle,
                         align_with_top,
                     )
@@ -24642,7 +26067,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_set_attribute(
+                    spring_sdk_internal::generated::owned::rml_ui::element_set_attribute(
                         element_handle,
                         name,
                         value,
@@ -24677,7 +26102,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_set_class(
+                    spring_sdk_internal::generated::owned::rml_ui::element_set_class(
                         element_handle,
                         name,
                         value,
@@ -24711,7 +26136,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_set_class_name(
+                    spring_sdk_internal::generated::owned::rml_ui::element_set_class_name(
                         element_handle,
                         value,
                     )
@@ -24739,7 +26164,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_set_id(
+                    spring_sdk_internal::generated::owned::rml_ui::element_set_id(
                         element_handle,
                         value,
                     )
@@ -24771,7 +26196,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_set_inner_rml(
+                    spring_sdk_internal::generated::owned::rml_ui::element_set_inner_rml(
                         element_handle,
                         value,
                     )
@@ -24804,7 +26229,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_set_pseudo_class(
+                    spring_sdk_internal::generated::owned::rml_ui::element_set_pseudo_class(
                         element_handle,
                         name,
                         value,
@@ -24833,7 +26258,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_set_scroll_left(
+                    spring_sdk_internal::generated::owned::rml_ui::element_set_scroll_left(
                         element_handle,
                         value,
                     )
@@ -24860,7 +26285,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_set_scroll_top(
+                    spring_sdk_internal::generated::owned::rml_ui::element_set_scroll_top(
                         element_handle,
                         value,
                     )
@@ -24887,7 +26312,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_tab_set_remove_tab(
+                    spring_sdk_internal::generated::owned::rml_ui::element_tab_set_remove_tab(
                         element_handle,
                         index,
                     )
@@ -24920,7 +26345,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_tab_set_set_panel(
+                    spring_sdk_internal::generated::owned::rml_ui::element_tab_set_set_panel(
                         element_handle,
                         index,
                         rml,
@@ -24955,7 +26380,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::element_tab_set_set_tab(
+                    spring_sdk_internal::generated::owned::rml_ui::element_tab_set_set_tab(
                         element_handle,
                         index,
                         rml,
@@ -24979,7 +26404,7 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::event_get_current(0) }
+                { spring_sdk_internal::generated::owned::rml_ui::event_get_current(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::event_get_current(&self._engine) }
             };
@@ -24995,7 +26420,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::event_get_current_element(
+                    spring_sdk_internal::generated::owned::rml_ui::event_get_current_element(
                         event_handle,
                     )
                 }
@@ -25025,7 +26450,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::event_get_parameter_bool(
+                    spring_sdk_internal::generated::owned::rml_ui::event_get_parameter_bool(
                         event_handle,
                         name,
                     )
@@ -25057,7 +26482,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::event_get_parameter_float(
+                    spring_sdk_internal::generated::owned::rml_ui::event_get_parameter_float(
                         event_handle,
                         name,
                     )
@@ -25089,7 +26514,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::event_get_parameter_int(
+                    spring_sdk_internal::generated::owned::rml_ui::event_get_parameter_int(
                         event_handle,
                         name,
                     )
@@ -25148,7 +26573,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::event_get_parameter_type(
+                    spring_sdk_internal::generated::owned::rml_ui::event_get_parameter_type(
                         event_handle,
                         name,
                     )
@@ -25170,7 +26595,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::event_get_phase(event_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::event_get_phase(
+                        event_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::event_get_phase(&self._engine, event_handle) }
             };
@@ -25186,7 +26615,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::event_get_target_element(
+                    spring_sdk_internal::generated::owned::rml_ui::event_get_target_element(
                         event_handle,
                     )
                 }
@@ -25222,7 +26651,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::event_is_immediate_propagating(
+                    spring_sdk_internal::generated::owned::rml_ui::event_is_immediate_propagating(
                         event_handle,
                     )
                 }
@@ -25246,7 +26675,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::event_is_interruptible(
+                    spring_sdk_internal::generated::owned::rml_ui::event_is_interruptible(
                         event_handle,
                     )
                 }
@@ -25269,7 +26698,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::event_is_propagating(event_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::event_is_propagating(
+                        event_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::rml_ui::event_is_propagating(
@@ -25371,7 +26804,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::event_stop_immediate_propagation(
+                    spring_sdk_internal::generated::owned::rml_ui::event_stop_immediate_propagation(
                         event_handle,
                     )
                 }
@@ -25392,7 +26825,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::event_stop_propagation(
+                    spring_sdk_internal::generated::owned::rml_ui::event_stop_propagation(
                         event_handle,
                     )
                 }
@@ -25417,7 +26850,7 @@ pub mod rml_ui {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::get_context(name) }
+                { spring_sdk_internal::generated::owned::rml_ui::get_context(name) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::get_context(&self._engine, name) }
             };
@@ -25438,7 +26871,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::get_document_path_requests(
+                    spring_sdk_internal::generated::owned::rml_ui::get_document_path_requests(
                         document_path,
                     )
                 }
@@ -25458,7 +26891,7 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::get_version(0) }
+                { spring_sdk_internal::generated::owned::rml_ui::get_version(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::get_version(&self._engine) }
             };
@@ -25470,7 +26903,7 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::is_ready(0) }
+                { spring_sdk_internal::generated::owned::rml_ui::is_ready(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::is_ready(&self._engine) }
             };
@@ -25565,7 +26998,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::remove_context(context_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::remove_context(
+                        context_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::remove_context(&self._engine, context_handle) }
             };
@@ -25582,7 +27019,11 @@ pub mod rml_ui {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::remove_context_by_name(name) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::remove_context_by_name(
+                        name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::remove_context_by_name(&self._engine, name) }
             };
@@ -25594,7 +27035,11 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::set_debug_context(context_handle) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::set_debug_context(
+                        context_handle,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::rml_ui::set_debug_context(
@@ -25616,7 +27061,11 @@ pub mod rml_ui {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::set_debug_context_by_name(name) }
+                {
+                    spring_sdk_internal::generated::owned::rml_ui::set_debug_context_by_name(
+                        name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::set_debug_context_by_name(&self._engine, name) }
             };
@@ -25643,7 +27092,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::set_mouse_cursor_alias(
+                    spring_sdk_internal::generated::owned::rml_ui::set_mouse_cursor_alias(
                         rml_name,
                         recoil_name,
                     )
@@ -25675,7 +27124,7 @@ pub mod rml_ui {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::rml_ui::sol_lua_data_model_set_dirty(
+                    spring_sdk_internal::generated::owned::rml_ui::sol_lua_data_model_set_dirty(
                         data_model_handle,
                         property,
                     )
@@ -25697,7 +27146,7 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::vector2f_new(x, y) }
+                { spring_sdk_internal::generated::owned::rml_ui::vector2f_new(x, y) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::vector2f_new(&self._engine, x, y) }
             };
@@ -25709,7 +27158,7 @@ pub mod rml_ui {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::rml_ui::vector2i_new(x, y) }
+                { spring_sdk_internal::generated::owned::rml_ui::vector2i_new(x, y) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::rml_ui::vector2i_new(&self._engine, x, y) }
             };
@@ -25739,7 +27188,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::abort_download(id) }
+                { spring_sdk_internal::generated::owned::vfs::abort_download(id) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::abort_download(&self._engine, id) }
             };
@@ -25751,7 +27200,12 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::calculate_hash(data, hash_type) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::calculate_hash(
+                        data,
+                        hash_type,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::calculate_hash(&self._engine, data, hash_type) }
             };
@@ -25791,7 +27245,7 @@ pub mod vfs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::vfs::compress_folder(
+                    spring_sdk_internal::generated::owned::vfs::compress_folder(
                         folder_path,
                         archive_type,
                         compressed_file_path,
@@ -25824,7 +27278,7 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::create_dir(path) }
+                { spring_sdk_internal::generated::owned::vfs::create_dir(path) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::create_dir(&self._engine, path) }
             };
@@ -25858,7 +27312,7 @@ pub mod vfs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::vfs::dir_list(
+                    spring_sdk_internal::generated::owned::vfs::dir_list(
                         path,
                         pattern,
                         mode,
@@ -25894,7 +27348,12 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::download_archive(filename, category) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::download_archive(
+                        filename,
+                        category,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::vfs::download_archive(
@@ -25917,7 +27376,11 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::extract_mod_archive_file(path) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::extract_mod_archive_file(
+                        path,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::extract_mod_archive_file(&self._engine, path) }
             };
@@ -25934,7 +27397,7 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::file_exists(path) }
+                { spring_sdk_internal::generated::owned::vfs::file_exists(path) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::file_exists(&self._engine, path) }
             };
@@ -25946,7 +27409,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_all_archives(0) }
+                { spring_sdk_internal::generated::owned::vfs::get_all_archives(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_all_archives(&self._engine) }
             };
@@ -25993,7 +27456,7 @@ pub mod vfs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::vfs::get_archive_containing_file(
+                    spring_sdk_internal::generated::owned::vfs::get_archive_containing_file(
                         path,
                         mode,
                     )
@@ -26023,7 +27486,11 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_archive_dependencies(archive_name) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::get_archive_dependencies(
+                        archive_name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::vfs::get_archive_dependencies(
@@ -26048,7 +27515,11 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_archive_info(archive_name) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::get_archive_info(
+                        archive_name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_archive_info(&self._engine, archive_name) }
             };
@@ -26065,7 +27536,11 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_archive_path(archive_name) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::get_archive_path(
+                        archive_name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_archive_path(&self._engine, archive_name) }
             };
@@ -26082,7 +27557,11 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_archive_replaces(archive_name) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::get_archive_replaces(
+                        archive_name,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_archive_replaces(&self._engine, archive_name) }
             };
@@ -26094,7 +27573,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_archives(0) }
+                { spring_sdk_internal::generated::owned::vfs::get_archives(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_archives(&self._engine) }
             };
@@ -26121,7 +27600,7 @@ pub mod vfs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::vfs::get_available_a_is(
+                    spring_sdk_internal::generated::owned::vfs::get_available_a_is(
                         game_archive_name,
                         map_archive_name,
                     )
@@ -26153,7 +27632,12 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_file_absolute_path(path, mode) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::get_file_absolute_path(
+                        path,
+                        mode,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_file_absolute_path(&self._engine, path, mode) }
             };
@@ -26170,7 +27654,7 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_file_info(path) }
+                { spring_sdk_internal::generated::owned::vfs::get_file_info(path) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_file_info(&self._engine, path) }
             };
@@ -26187,7 +27671,7 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_file_size(path) }
+                { spring_sdk_internal::generated::owned::vfs::get_file_size(path) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_file_size(&self._engine, path) }
             };
@@ -26199,7 +27683,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_games(0) }
+                { spring_sdk_internal::generated::owned::vfs::get_games(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_games(&self._engine) }
             };
@@ -26211,7 +27695,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_loaded_archives(0) }
+                { spring_sdk_internal::generated::owned::vfs::get_loaded_archives(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_loaded_archives(&self._engine) }
             };
@@ -26236,7 +27720,7 @@ pub mod vfs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::vfs::get_map_square_texture(
+                    spring_sdk_internal::generated::owned::vfs::get_map_square_texture(
                         tex_square_x,
                         tex_square_y,
                         lod_min,
@@ -26266,7 +27750,11 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_map_square_texture_info(0) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::get_map_square_texture_info(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_map_square_texture_info(&self._engine) }
             };
@@ -26278,7 +27766,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_maps(0) }
+                { spring_sdk_internal::generated::owned::vfs::get_maps(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_maps(&self._engine) }
             };
@@ -26295,7 +27783,11 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::get_name_from_rapid_tag(rapid_tag) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::get_name_from_rapid_tag(
+                        rapid_tag,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::get_name_from_rapid_tag(&self._engine, rapid_tag) }
             };
@@ -26312,7 +27804,7 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::has_archive(archive_name) }
+                { spring_sdk_internal::generated::owned::vfs::has_archive(archive_name) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::has_archive(&self._engine, archive_name) }
             };
@@ -26329,7 +27821,7 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::is_directory(path) }
+                { spring_sdk_internal::generated::owned::vfs::is_directory(path) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::is_directory(&self._engine, path) }
             };
@@ -26363,7 +27855,7 @@ pub mod vfs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::vfs::list_dir(
+                    spring_sdk_internal::generated::owned::vfs::list_dir(
                         path,
                         pattern,
                         mode,
@@ -26399,7 +27891,7 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::load_file(path, mode) }
+                { spring_sdk_internal::generated::owned::vfs::load_file(path, mode) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::load_file(&self._engine, path, mode) }
             };
@@ -26428,7 +27920,7 @@ pub mod vfs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::vfs::load_file_range(
+                    spring_sdk_internal::generated::owned::vfs::load_file_range(
                         path,
                         mode,
                         offset,
@@ -26454,7 +27946,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::pack_f32(values) }
+                { spring_sdk_internal::generated::owned::vfs::pack_f32(values) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::pack_f32(&self._engine, values) }
             };
@@ -26466,7 +27958,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::pack_s16(values) }
+                { spring_sdk_internal::generated::owned::vfs::pack_s16(values) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::pack_s16(&self._engine, values) }
             };
@@ -26478,7 +27970,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::pack_s32(values) }
+                { spring_sdk_internal::generated::owned::vfs::pack_s32(values) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::pack_s32(&self._engine, values) }
             };
@@ -26490,7 +27982,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::pack_s8(values) }
+                { spring_sdk_internal::generated::owned::vfs::pack_s8(values) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::pack_s8(&self._engine, values) }
             };
@@ -26502,7 +27994,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::pack_u16(values) }
+                { spring_sdk_internal::generated::owned::vfs::pack_u16(values) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::pack_u16(&self._engine, values) }
             };
@@ -26514,7 +28006,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::pack_u32(values) }
+                { spring_sdk_internal::generated::owned::vfs::pack_u32(values) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::pack_u32(&self._engine, values) }
             };
@@ -26526,7 +28018,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::pack_u8(values) }
+                { spring_sdk_internal::generated::owned::vfs::pack_u8(values) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::pack_u8(&self._engine, values) }
             };
@@ -26543,7 +28035,7 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::read_file(path) }
+                { spring_sdk_internal::generated::owned::vfs::read_file(path) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::read_file(&self._engine, path) }
             };
@@ -26560,7 +28052,7 @@ pub mod vfs {
             }
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::read_file_as_string(path) }
+                { spring_sdk_internal::generated::owned::vfs::read_file_as_string(path) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::read_file_as_string(&self._engine, path) }
             };
@@ -26572,7 +28064,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::scan_all_dirs(0) }
+                { spring_sdk_internal::generated::owned::vfs::scan_all_dirs(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::scan_all_dirs(&self._engine) }
             };
@@ -26595,7 +28087,7 @@ pub mod vfs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::vfs::set_map_square_texture(
+                    spring_sdk_internal::generated::owned::vfs::set_map_square_texture(
                         tex_square_x,
                         tex_square_y,
                         texture_name,
@@ -26641,7 +28133,7 @@ pub mod vfs {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::vfs::sub_dirs(
+                    spring_sdk_internal::generated::owned::vfs::sub_dirs(
                         path,
                         pattern,
                         mode,
@@ -26672,7 +28164,13 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::unpack_f32(data, byte_offset, count) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::unpack_f32(
+                        data,
+                        byte_offset,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::vfs::unpack_f32(
@@ -26696,7 +28194,13 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::unpack_s16(data, byte_offset, count) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::unpack_s16(
+                        data,
+                        byte_offset,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::vfs::unpack_s16(
@@ -26720,7 +28224,13 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::unpack_s32(data, byte_offset, count) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::unpack_s32(
+                        data,
+                        byte_offset,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::vfs::unpack_s32(
@@ -26744,7 +28254,13 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::unpack_s8(data, byte_offset, count) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::unpack_s8(
+                        data,
+                        byte_offset,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::vfs::unpack_s8(
@@ -26768,7 +28284,13 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::unpack_u16(data, byte_offset, count) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::unpack_u16(
+                        data,
+                        byte_offset,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::vfs::unpack_u16(
@@ -26792,7 +28314,13 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::unpack_u32(data, byte_offset, count) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::unpack_u32(
+                        data,
+                        byte_offset,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::vfs::unpack_u32(
@@ -26816,7 +28344,13 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::unpack_u8(data, byte_offset, count) }
+                {
+                    spring_sdk_internal::generated::owned::vfs::unpack_u8(
+                        data,
+                        byte_offset,
+                        count,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::vfs::unpack_u8(
@@ -26866,7 +28400,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::zlib_compress(data) }
+                { spring_sdk_internal::generated::owned::vfs::zlib_compress(data) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::zlib_compress(&self._engine, data) }
             };
@@ -26878,7 +28412,7 @@ pub mod vfs {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::vfs::zlib_decompress(data) }
+                { spring_sdk_internal::generated::owned::vfs::zlib_decompress(data) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::vfs::zlib_decompress(&self._engine, data) }
             };
@@ -26912,7 +28446,7 @@ pub mod unsynced_read {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_read::get_active_cmd_desc(
+                    spring_sdk_internal::generated::owned::unsynced_read::get_active_cmd_desc(
                         cmd_index,
                     )
                 }
@@ -26932,7 +28466,11 @@ pub mod unsynced_read {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_read::get_active_cmd_descs(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_read::get_active_cmd_descs(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_read::get_active_cmd_descs(&self._engine) }
             };
@@ -26945,7 +28483,7 @@ pub mod unsynced_read {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_read::get_box_selection_by_engine(
+                    spring_sdk_internal::generated::owned::unsynced_read::get_box_selection_by_engine(
                         0,
                     )
                 }
@@ -26964,7 +28502,11 @@ pub mod unsynced_read {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_read::get_build_facing(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_read::get_build_facing(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_read::get_build_facing(&self._engine) }
             };
@@ -26976,7 +28518,11 @@ pub mod unsynced_read {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_read::get_build_spacing(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_read::get_build_spacing(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_read::get_build_spacing(&self._engine) }
             };
@@ -26988,7 +28534,11 @@ pub mod unsynced_read {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_read::get_clipboard(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_read::get_clipboard(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_read::get_clipboard(&self._engine) }
             };
@@ -27000,7 +28550,11 @@ pub mod unsynced_read {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_read::get_cmd_desc_index(cmd_id) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_read::get_cmd_desc_index(
+                        cmd_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_read::get_cmd_desc_index(
@@ -27021,7 +28575,7 @@ pub mod unsynced_read {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_read::get_custom_palette_color(
+                    spring_sdk_internal::generated::owned::unsynced_read::get_custom_palette_color(
                         index,
                     )
                 }
@@ -27041,7 +28595,11 @@ pub mod unsynced_read {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_read::get_draw_selection_info(0) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_read::get_draw_selection_info(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_read::get_draw_selection_info(&self._engine) }
             };
@@ -27057,7 +28615,7 @@ pub mod unsynced_read {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_read::get_feature_palette_index(
+                    spring_sdk_internal::generated::owned::unsynced_read::get_feature_palette_index(
                         feature_id,
                     )
                 }
@@ -27078,7 +28636,7 @@ pub mod unsynced_read {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_read::get_game_seconds_interpolated(
+                    spring_sdk_internal::generated::owned::unsynced_read::get_game_seconds_interpolated(
                         0,
                     )
                 }
@@ -27116,7 +28674,7 @@ pub mod unsynced_read {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_read::get_nano_projectile_params(
+                    spring_sdk_internal::generated::owned::unsynced_read::get_nano_projectile_params(
                         0,
                     )
                 }
@@ -27136,7 +28694,7 @@ pub mod unsynced_read {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_read::get_piece_projectile_name(
+                    spring_sdk_internal::generated::owned::unsynced_read::get_piece_projectile_name(
                         projectile_id,
                     )
                 }
@@ -27157,7 +28715,7 @@ pub mod unsynced_read {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_read::get_prev_frame_sync_checksum(
+                    spring_sdk_internal::generated::owned::unsynced_read::get_prev_frame_sync_checksum(
                         0,
                     )
                 }
@@ -27180,7 +28738,7 @@ pub mod unsynced_read {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_read::get_team_damage_stats(
+                    spring_sdk_internal::generated::owned::unsynced_read::get_team_damage_stats(
                         team_id,
                     )
                 }
@@ -27204,7 +28762,7 @@ pub mod unsynced_read {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unsynced_read::get_unit_palette_index(
+                    spring_sdk_internal::generated::owned::unsynced_read::get_unit_palette_index(
                         unit_id,
                     )
                 }
@@ -27224,7 +28782,11 @@ pub mod unsynced_read {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_read::is_unit_allied(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_read::is_unit_allied(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_read::is_unit_allied(&self._engine, unit_id) }
             };
@@ -27236,7 +28798,11 @@ pub mod unsynced_read {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_read::is_unit_selected(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_read::is_unit_selected(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unsynced_read::is_unit_selected(
@@ -27313,7 +28879,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::add_team_resource(
+                    spring_sdk_internal::generated::owned::team_control::add_team_resource(
                         team_id,
                         resource_type,
                         amount,
@@ -27348,7 +28914,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::add_team_resource_excess_stats(
+                    spring_sdk_internal::generated::owned::team_control::add_team_resource_excess_stats(
                         team_id,
                         resource_type,
                         amount,
@@ -27377,7 +28943,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::assign_player_to_team(
+                    spring_sdk_internal::generated::owned::team_control::assign_player_to_team(
                         player_id,
                         team_id,
                     )
@@ -27399,7 +28965,11 @@ pub mod team_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::team_control::game_over(winning_ally_teams) }
+                {
+                    spring_sdk_internal::generated::owned::team_control::game_over(
+                        winning_ally_teams,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::team_control::game_over(
@@ -27416,7 +28986,11 @@ pub mod team_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::team_control::kill_team(team_id) }
+                {
+                    spring_sdk_internal::generated::owned::team_control::kill_team(
+                        team_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::team_control::kill_team(&self._engine, team_id) }
             };
@@ -27434,7 +29008,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::set_ally(
+                    spring_sdk_internal::generated::owned::team_control::set_ally(
                         first_ally_team_id,
                         second_ally_team_id,
                         allied,
@@ -27466,7 +29040,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::set_ally_team_start_box(
+                    spring_sdk_internal::generated::owned::team_control::set_ally_team_start_box(
                         ally_team_id,
                         min_x,
                         min_z,
@@ -27495,7 +29069,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::set_global_los(
+                    spring_sdk_internal::generated::owned::team_control::set_global_los(
                         ally_team_id,
                         enabled,
                     )
@@ -27522,7 +29096,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::set_player_ready_state(
+                    spring_sdk_internal::generated::owned::team_control::set_player_ready_state(
                         player_id,
                         ready,
                     )
@@ -27555,7 +29129,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::set_team_resource(
+                    spring_sdk_internal::generated::owned::team_control::set_team_resource(
                         team_id,
                         resource_type,
                         amount,
@@ -27590,7 +29164,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::set_team_share_level(
+                    spring_sdk_internal::generated::owned::team_control::set_team_share_level(
                         team_id,
                         resource_type,
                         share_level,
@@ -27619,7 +29193,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::set_team_start_position(
+                    spring_sdk_internal::generated::owned::team_control::set_team_start_position(
                         team_id,
                         pos,
                     )
@@ -27653,7 +29227,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::share_team_resource(
+                    spring_sdk_internal::generated::owned::team_control::share_team_resource(
                         team_id,
                         target_team_id,
                         resource_type,
@@ -27685,7 +29259,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::transfer_team_max_units(
+                    spring_sdk_internal::generated::owned::team_control::transfer_team_max_units(
                         from_team_id,
                         to_team_id,
                         amount,
@@ -27720,7 +29294,7 @@ pub mod team_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::team_control::use_team_resource(
+                    spring_sdk_internal::generated::owned::team_control::use_team_resource(
                         team_id,
                         resource_type,
                         amount,
@@ -27760,7 +29334,11 @@ pub mod unit_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_control::add_object_decal(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_control::add_object_decal(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unit_control::add_object_decal(&self._engine, unit_id) }
             };
@@ -27781,7 +29359,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::add_unit_damage(
+                    spring_sdk_internal::generated::owned::unit_control::add_unit_damage(
                         unit_id,
                         damage,
                         paralyze_time,
@@ -27816,7 +29394,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::add_unit_experience(
+                    spring_sdk_internal::generated::owned::unit_control::add_unit_experience(
                         unit_id,
                         experience,
                     )
@@ -27844,7 +29422,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::add_unit_impulse(
+                    spring_sdk_internal::generated::owned::unit_control::add_unit_impulse(
                         unit_id,
                         impulse,
                         decay_rate,
@@ -27879,7 +29457,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::add_unit_resource(
+                    spring_sdk_internal::generated::owned::unit_control::add_unit_resource(
                         unit_id,
                         resource_type,
                         amount,
@@ -27908,7 +29486,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::add_unit_seismic_ping(
+                    spring_sdk_internal::generated::owned::unit_control::add_unit_seismic_ping(
                         unit_id,
                         ping_size,
                     )
@@ -27938,7 +29516,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::bugger_off(
+                    spring_sdk_internal::generated::owned::unit_control::bugger_off(
                         pos,
                         radius,
                         team_id,
@@ -27967,7 +29545,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::clear_unit_goal(
+                    spring_sdk_internal::generated::owned::unit_control::clear_unit_goal(
                         unit_id,
                         cancel_raw,
                     )
@@ -28002,7 +29580,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::create_unit(
+                    spring_sdk_internal::generated::owned::unit_control::create_unit(
                         unit_def,
                         pos,
                         facing,
@@ -28035,7 +29613,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::destroy_unit(
+                    spring_sdk_internal::generated::owned::unit_control::destroy_unit(
                         unit_id,
                         options,
                     )
@@ -28095,7 +29673,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::edit_unit_cmd_desc(
+                    spring_sdk_internal::generated::owned::unit_control::edit_unit_cmd_desc(
                         unit_id,
                         cmd_desc_index,
                         cmd_desc,
@@ -28120,7 +29698,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::force_unit_collision_update(
+                    spring_sdk_internal::generated::owned::unit_control::force_unit_collision_update(
                         unit_id,
                     )
                 }
@@ -28146,7 +29724,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::get_unit_feature_separation(
+                    spring_sdk_internal::generated::owned::unit_control::get_unit_feature_separation(
                         unit_id,
                         feature_id,
                         ignore_y,
@@ -28171,7 +29749,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::get_unit_leaves_ghost(
+                    spring_sdk_internal::generated::owned::unit_control::get_unit_leaves_ghost(
                         unit_id,
                     )
                 }
@@ -28192,7 +29770,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::get_unit_physical_state(
+                    spring_sdk_internal::generated::owned::unit_control::get_unit_physical_state(
                         unit_id,
                     )
                 }
@@ -28217,7 +29795,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::give_order_array_to_unit(
+                    spring_sdk_internal::generated::owned::unit_control::give_order_array_to_unit(
                         unit_id,
                         commands,
                     )
@@ -28245,7 +29823,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::give_order_array_to_unit_array(
+                    spring_sdk_internal::generated::owned::unit_control::give_order_array_to_unit_array(
                         unit_i_ds,
                         commands,
                         pairwise,
@@ -28313,7 +29891,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::give_order_to_unit_array(
+                    spring_sdk_internal::generated::owned::unit_control::give_order_to_unit_array(
                         unit_i_ds,
                         cmd_id,
                         params,
@@ -28379,7 +29957,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::insert_unit_cmd_desc(
+                    spring_sdk_internal::generated::owned::unit_control::insert_unit_cmd_desc(
                         unit_id,
                         cmd_desc_index,
                         cmd_desc,
@@ -28403,7 +29981,11 @@ pub mod unit_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_control::remove_object_decal(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_control::remove_object_decal(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_control::remove_object_decal(
@@ -28425,7 +30007,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::remove_unit_cmd_desc(
+                    spring_sdk_internal::generated::owned::unit_control::remove_unit_cmd_desc(
                         unit_id,
                         cmd_desc_index,
                     )
@@ -28452,7 +30034,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_factory_bugger_off(
+                    spring_sdk_internal::generated::owned::unit_control::set_factory_bugger_off(
                         unit_id,
                         options,
                     )
@@ -28479,7 +30061,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_always_visible(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_always_visible(
                         unit_id,
                         always_visible,
                     )
@@ -28507,7 +30089,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_armored(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_armored(
                         unit_id,
                         armored_state,
                         armored_multiple,
@@ -28536,7 +30118,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_blocking(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_blocking(
                         unit_id,
                         options,
                     )
@@ -28569,7 +30151,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_build_params(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_build_params(
                         unit_id,
                         param_name,
                         value,
@@ -28603,7 +30185,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_build_speed(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_build_speed(
                         unit_id,
                         build_speed,
                         repair_speed,
@@ -28640,7 +30222,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_buildee_radius(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_buildee_radius(
                         unit_id,
                         radius,
                     )
@@ -28668,7 +30250,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_cloak(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_cloak(
                         unit_id,
                         cloak,
                         cloak_arg,
@@ -28701,7 +30283,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_collision_volume_data(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_collision_volume_data(
                         unit_id,
                         scales,
                         offsets,
@@ -28736,7 +30318,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_costs(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_costs(
                         unit_id,
                         costs,
                     )
@@ -28759,7 +30341,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_crashing(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_crashing(
                         unit_id,
                         want_crash,
                     )
@@ -28787,7 +30369,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_direction(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_direction(
                         unit_id,
                         front_dir,
                         right_dir,
@@ -28816,7 +30398,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_experience(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_experience(
                         unit_id,
                         experience,
                     )
@@ -28849,7 +30431,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_flanking(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_flanking(
                         unit_id,
                         type_,
                         args,
@@ -28881,7 +30463,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_harvest_storage(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_harvest_storage(
                         unit_id,
                         stored_metal,
                         max_stored_metal,
@@ -28915,7 +30497,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_heading(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_heading(
                         unit_id,
                         heading,
                         use_smoothing,
@@ -28945,7 +30527,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_heading_and_up_dir(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_heading_and_up_dir(
                         unit_id,
                         heading,
                         up_dir,
@@ -28974,7 +30556,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_health(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_health(
                         unit_id,
                         value,
                     )
@@ -29002,7 +30584,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_land_goal(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_land_goal(
                         unit_id,
                         pos,
                         radius_sq,
@@ -29031,7 +30613,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_leaves_ghost(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_leaves_ghost(
                         unit_id,
                         options,
                     )
@@ -29058,7 +30640,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_loading_transport(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_loading_transport(
                         unit_id,
                         transport_id,
                     )
@@ -29086,7 +30668,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_los_mask(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_los_mask(
                         unit_id,
                         ally_team_id,
                         los_mask,
@@ -29116,7 +30698,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_los_state(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_los_state(
                         unit_id,
                         ally_team_id,
                         los_state,
@@ -29140,7 +30722,12 @@ pub mod unit_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_control::set_unit_mass(unit_id, mass) }
+                {
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_mass(
+                        unit_id,
+                        mass,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_control::set_unit_mass(
@@ -29163,7 +30750,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_max_health(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_max_health(
                         unit_id,
                         max_health,
                     )
@@ -29186,7 +30773,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_max_range(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_max_range(
                         unit_id,
                         max_range,
                     )
@@ -29214,7 +30801,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_metal_extraction(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_metal_extraction(
                         unit_id,
                         depth,
                         range,
@@ -29245,7 +30832,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_mid_and_aim_pos(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_mid_and_aim_pos(
                         unit_id,
                         mid_pos,
                         aim_pos,
@@ -29279,7 +30866,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_move_goal(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_move_goal(
                         unit_id,
                         pos,
                         radius,
@@ -29312,7 +30899,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_nano_pieces(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_nano_pieces(
                         unit_id,
                         piece_indices,
                     )
@@ -29335,7 +30922,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_neutral(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_neutral(
                         unit_id,
                         neutral,
                     )
@@ -29362,7 +30949,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_physical_state_bit(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_physical_state_bit(
                         unit_id,
                         state_bit,
                     )
@@ -29392,7 +30979,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_physics(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_physics(
                         unit_id,
                         pos,
                         velocity,
@@ -29430,7 +31017,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_piece_collision_volume_data(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_piece_collision_volume_data(
                         unit_id,
                         piece_index,
                         enable,
@@ -29473,7 +31060,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_piece_matrix(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_piece_matrix(
                         unit_id,
                         piece_index,
                         matrix,
@@ -29503,7 +31090,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_piece_parent(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_piece_parent(
                         unit_id,
                         child_piece_index,
                         parent_piece_index,
@@ -29533,7 +31120,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_piece_visible(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_piece_visible(
                         unit_id,
                         piece_index,
                         visible,
@@ -29566,7 +31153,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_pos_error_params(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_pos_error_params(
                         unit_id,
                         pos_error_vector,
                         pos_error_delta,
@@ -29597,7 +31184,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_position(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_position(
                         unit_id,
                         pos,
                     )
@@ -29625,7 +31212,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_radius_and_height(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_radius_and_height(
                         unit_id,
                         radius,
                         height,
@@ -29660,7 +31247,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_resourcing(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_resourcing(
                         unit_id,
                         type_,
                         amount,
@@ -29685,7 +31272,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_rotation(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_rotation(
                         unit_id,
                         rotation,
                     )
@@ -29712,7 +31299,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_seismic_signature(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_seismic_signature(
                         unit_id,
                         seismic_signature,
                     )
@@ -29743,7 +31330,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_selection_volume_data(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_selection_volume_data(
                         unit_id,
                         scales,
                         offsets,
@@ -29784,7 +31371,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_sensor_radius(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_sensor_radius(
                         unit_id,
                         sensor_type,
                         radius,
@@ -29814,7 +31401,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_shield_recharge_delay(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_shield_recharge_delay(
                         unit_id,
                         weapon_num,
                         recharge_delay,
@@ -29845,7 +31432,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_shield_state(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_shield_state(
                         unit_id,
                         weapon_num,
                         enabled,
@@ -29876,7 +31463,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_sonar_stealth(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_sonar_stealth(
                         unit_id,
                         sonar_stealth,
                     )
@@ -29899,7 +31486,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_stealth(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_stealth(
                         unit_id,
                         stealth,
                     )
@@ -29927,7 +31514,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_stockpile(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_stockpile(
                         unit_id,
                         stockpile,
                         build_percent,
@@ -29962,7 +31549,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_storage(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_storage(
                         unit_id,
                         resource,
                         amount,
@@ -29993,7 +31580,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_target(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_target(
                         unit_id,
                         target,
                         options,
@@ -30025,7 +31612,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_tooltip(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_tooltip(
                         unit_id,
                         tooltip,
                     )
@@ -30052,7 +31639,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_use_air_los(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_use_air_los(
                         unit_id,
                         use_air_los,
                     )
@@ -30079,7 +31666,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_use_weapons(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_use_weapons(
                         unit_id,
                         options,
                     )
@@ -30102,7 +31689,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_velocity(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_velocity(
                         unit_id,
                         velocity,
                     )
@@ -30136,7 +31723,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_weapon_damages(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_weapon_damages(
                         unit_id,
                         weapon_num,
                         damage_key,
@@ -30174,7 +31761,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::set_unit_weapon_state(
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_weapon_state(
                         unit_id,
                         weapon_num,
                         key,
@@ -30207,7 +31794,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::transfer_unit(
+                    spring_sdk_internal::generated::owned::unit_control::transfer_unit(
                         unit_id,
                         new_team_id,
                         given,
@@ -30239,7 +31826,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::unit_attach(
+                    spring_sdk_internal::generated::owned::unit_control::unit_attach(
                         transporter_id,
                         transportee_id,
                         piece_num,
@@ -30263,7 +31850,11 @@ pub mod unit_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_control::unit_detach(transportee_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_control::unit_detach(
+                        transportee_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_control::unit_detach(
@@ -30285,7 +31876,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::unit_detach_from_air(
+                    spring_sdk_internal::generated::owned::unit_control::unit_detach_from_air(
                         transportee_id,
                         pos,
                     )
@@ -30307,7 +31898,11 @@ pub mod unit_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_control::unit_finish_command(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_control::unit_finish_command(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_control::unit_finish_command(
@@ -30325,7 +31920,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::unit_weapon_fire(
+                    spring_sdk_internal::generated::owned::unit_control::unit_weapon_fire(
                         unit_id,
                         weapon_num,
                     )
@@ -30352,7 +31947,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::unit_weapon_hold_fire(
+                    spring_sdk_internal::generated::owned::unit_control::unit_weapon_hold_fire(
                         unit_id,
                         weapon_num,
                     )
@@ -30385,7 +31980,7 @@ pub mod unit_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_control::use_unit_resource(
+                    spring_sdk_internal::generated::owned::unit_control::use_unit_resource(
                         unit_id,
                         resource_type,
                         amount,
@@ -30434,7 +32029,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::add_feature_damage(
+                    spring_sdk_internal::generated::owned::feature_control::add_feature_damage(
                         feature_id,
                         damage,
                         paralyze_time,
@@ -30477,7 +32072,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::create_feature(
+                    spring_sdk_internal::generated::owned::feature_control::create_feature(
                         feature_def,
                         pos,
                         heading,
@@ -30511,7 +32106,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::create_feature_wreck(
+                    spring_sdk_internal::generated::owned::feature_control::create_feature_wreck(
                         feature_id,
                         wreck_level,
                         do_smoke,
@@ -30541,7 +32136,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::create_unit_wreck(
+                    spring_sdk_internal::generated::owned::feature_control::create_unit_wreck(
                         unit_id,
                         wreck_level,
                         do_smoke,
@@ -30566,7 +32161,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::destroy_feature(
+                    spring_sdk_internal::generated::owned::feature_control::destroy_feature(
                         feature_id,
                     )
                 }
@@ -30591,7 +32186,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_always_visible(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_always_visible(
                         feature_id,
                         always_visible,
                     )
@@ -30618,7 +32213,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_blocking(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_blocking(
                         feature_id,
                         options,
                     )
@@ -30649,7 +32244,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_collision_volume_data(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_collision_volume_data(
                         feature_id,
                         scales,
                         offsets,
@@ -30685,7 +32280,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_direction(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_direction(
                         feature_id,
                         front_dir,
                         right_dir,
@@ -30714,7 +32309,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_fire_time(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_fire_time(
                         feature_id,
                         fire_time,
                     )
@@ -30742,7 +32337,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_heading_and_up_dir(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_heading_and_up_dir(
                         feature_id,
                         heading,
                         up_dir,
@@ -30772,7 +32367,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_health(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_health(
                         feature_id,
                         health,
                         check_destruction,
@@ -30797,7 +32392,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_mass(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_mass(
                         feature_id,
                         mass,
                     )
@@ -30824,7 +32419,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_max_health(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_max_health(
                         feature_id,
                         max_health,
                     )
@@ -30853,7 +32448,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_mid_and_aim_pos(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_mid_and_aim_pos(
                         feature_id,
                         mid_pos,
                         aim_pos,
@@ -30887,7 +32482,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_move_ctrl(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_move_ctrl(
                         feature_id,
                         enable,
                         velocity_or_mask,
@@ -30920,7 +32515,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_no_select(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_no_select(
                         feature_id,
                         no_select,
                     )
@@ -30950,7 +32545,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_physics(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_physics(
                         feature_id,
                         pos,
                         velocity,
@@ -30988,7 +32583,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_piece_collision_volume_data(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_piece_collision_volume_data(
                         feature_id,
                         piece_index,
                         enable,
@@ -31031,7 +32626,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_piece_matrix(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_piece_matrix(
                         feature_id,
                         piece_index,
                         matrix,
@@ -31061,7 +32656,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_piece_visible(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_piece_visible(
                         feature_id,
                         piece_index,
                         visible,
@@ -31091,7 +32686,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_position(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_position(
                         feature_id,
                         pos,
                         snap_to_ground,
@@ -31121,7 +32716,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_radius_and_height(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_radius_and_height(
                         feature_id,
                         radius,
                         height,
@@ -31150,7 +32745,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_reclaim(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_reclaim(
                         feature_id,
                         reclaim_left,
                     )
@@ -31182,7 +32777,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_resources(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_resources(
                         feature_id,
                         metal,
                         energy,
@@ -31226,7 +32821,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_resurrect(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_resurrect(
                         feature_id,
                         unit_def,
                         facing,
@@ -31257,7 +32852,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_rotation(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_rotation(
                         feature_id,
                         rotation,
                     )
@@ -31288,7 +32883,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_selection_volume_data(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_selection_volume_data(
                         feature_id,
                         scales,
                         offsets,
@@ -31323,7 +32918,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_smoke_time(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_smoke_time(
                         feature_id,
                         smoke_time,
                     )
@@ -31350,7 +32945,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_use_air_los(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_use_air_los(
                         feature_id,
                         use_air_los,
                     )
@@ -31377,7 +32972,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::set_feature_velocity(
+                    spring_sdk_internal::generated::owned::feature_control::set_feature_velocity(
                         feature_id,
                         velocity,
                     )
@@ -31404,7 +32999,7 @@ pub mod feature_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::feature_control::transfer_feature(
+                    spring_sdk_internal::generated::owned::feature_control::transfer_feature(
                         feature_id,
                         new_team_id,
                     )
@@ -31443,7 +33038,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::add_grass(
+                    spring_sdk_internal::generated::owned::terrain_control::add_grass(
                         x,
                         z,
                         grass_value,
@@ -31468,7 +33063,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::add_height_map(
+                    spring_sdk_internal::generated::owned::terrain_control::add_height_map(
                         x,
                         z,
                         height,
@@ -31498,7 +33093,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::add_original_height_map(
+                    spring_sdk_internal::generated::owned::terrain_control::add_original_height_map(
                         x,
                         z,
                         height,
@@ -31523,7 +33118,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::add_smooth_mesh(
+                    spring_sdk_internal::generated::owned::terrain_control::add_smooth_mesh(
                         x,
                         z,
                         height,
@@ -31555,7 +33150,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::adjust_height_map(
+                    spring_sdk_internal::generated::owned::terrain_control::adjust_height_map(
                         x1,
                         z1,
                         x2,
@@ -31591,7 +33186,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::adjust_original_height_map(
+                    spring_sdk_internal::generated::owned::terrain_control::adjust_original_height_map(
                         x1,
                         z1,
                         x2,
@@ -31627,7 +33222,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::adjust_smooth_mesh(
+                    spring_sdk_internal::generated::owned::terrain_control::adjust_smooth_mesh(
                         x1,
                         z1,
                         x2,
@@ -31663,7 +33258,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::level_height_map(
+                    spring_sdk_internal::generated::owned::terrain_control::level_height_map(
                         x1,
                         z1,
                         x2,
@@ -31699,7 +33294,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::level_original_height_map(
+                    spring_sdk_internal::generated::owned::terrain_control::level_original_height_map(
                         x1,
                         z1,
                         x2,
@@ -31735,7 +33330,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::level_smooth_mesh(
+                    spring_sdk_internal::generated::owned::terrain_control::level_smooth_mesh(
                         x1,
                         z1,
                         x2,
@@ -31763,7 +33358,11 @@ pub mod terrain_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain_control::rebuild_smooth_mesh(0) }
+                {
+                    spring_sdk_internal::generated::owned::terrain_control::rebuild_smooth_mesh(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain_control::rebuild_smooth_mesh(&self._engine) }
             };
@@ -31775,7 +33374,12 @@ pub mod terrain_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain_control::remove_grass(x, z) }
+                {
+                    spring_sdk_internal::generated::owned::terrain_control::remove_grass(
+                        x,
+                        z,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain_control::remove_grass(&self._engine, x, z) }
             };
@@ -31795,7 +33399,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::revert_height_map(
+                    spring_sdk_internal::generated::owned::terrain_control::revert_height_map(
                         x1,
                         z1,
                         x2,
@@ -31831,7 +33435,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::revert_original_height_map(
+                    spring_sdk_internal::generated::owned::terrain_control::revert_original_height_map(
                         x1,
                         z1,
                         x2,
@@ -31867,7 +33471,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::revert_smooth_mesh(
+                    spring_sdk_internal::generated::owned::terrain_control::revert_smooth_mesh(
                         x1,
                         z1,
                         x2,
@@ -31902,7 +33506,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::set_height_map(
+                    spring_sdk_internal::generated::owned::terrain_control::set_height_map(
                         x,
                         z,
                         height,
@@ -31959,7 +33563,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::set_map_square_terrain_type(
+                    spring_sdk_internal::generated::owned::terrain_control::set_map_square_terrain_type(
                         x,
                         z,
                         terrain_type,
@@ -31990,7 +33594,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::set_original_height_map(
+                    spring_sdk_internal::generated::owned::terrain_control::set_original_height_map(
                         x,
                         z,
                         height,
@@ -32047,7 +33651,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::set_smooth_mesh(
+                    spring_sdk_internal::generated::owned::terrain_control::set_smooth_mesh(
                         x,
                         z,
                         height,
@@ -32114,7 +33718,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::set_terrain_type_data(
+                    spring_sdk_internal::generated::owned::terrain_control::set_terrain_type_data(
                         type_index,
                         tank_speed,
                         kbot_speed,
@@ -32148,7 +33752,11 @@ pub mod terrain_control {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::terrain_control::set_tidal(tidal) }
+                {
+                    spring_sdk_internal::generated::owned::terrain_control::set_tidal(
+                        tidal,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::terrain_control::set_tidal(&self._engine, tidal) }
             };
@@ -32161,7 +33769,7 @@ pub mod terrain_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::terrain_control::set_wind(
+                    spring_sdk_internal::generated::owned::terrain_control::set_wind(
                         min_wind,
                         max_wind,
                     )
@@ -32200,7 +33808,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::delete_projectile(
+                    spring_sdk_internal::generated::owned::projectile_control::delete_projectile(
                         projectile_id,
                     )
                 }
@@ -32228,7 +33836,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_piece_projectile_params(
+                    spring_sdk_internal::generated::owned::projectile_control::set_piece_projectile_params(
                         projectile_id,
                         expl_flags,
                         spin_angle,
@@ -32261,7 +33869,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_always_visible(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_always_visible(
                         projectile_id,
                         always_visible,
                     )
@@ -32293,7 +33901,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_ceg(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_ceg(
                         projectile_id,
                         ceg_name,
                     )
@@ -32316,7 +33924,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_collision(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_collision(
                         projectile_id,
                     )
                 }
@@ -32348,7 +33956,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_damages(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_damages(
                         projectile_id,
                         unused,
                         damage_key,
@@ -32379,7 +33987,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_gravity(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_gravity(
                         projectile_id,
                         gravity,
                     )
@@ -32406,7 +34014,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_ignore_tracking_error(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_ignore_tracking_error(
                         projectile_id,
                         ignore,
                     )
@@ -32433,7 +34041,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_is_intercepted(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_is_intercepted(
                         projectile_id,
                         intercepted,
                     )
@@ -32460,7 +34068,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_move_control(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_move_control(
                         projectile_id,
                         enable,
                     )
@@ -32487,7 +34095,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_position(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_position(
                         projectile_id,
                         pos,
                     )
@@ -32514,7 +34122,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_target(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_target(
                         projectile_id,
                         target,
                     )
@@ -32541,7 +34149,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_time_to_live(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_time_to_live(
                         projectile_id,
                         time_to_live,
                     )
@@ -32568,7 +34176,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_use_air_los(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_use_air_los(
                         projectile_id,
                         use_air_los,
                     )
@@ -32595,7 +34203,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::set_projectile_velocity(
+                    spring_sdk_internal::generated::owned::projectile_control::set_projectile_velocity(
                         projectile_id,
                         velocity,
                     )
@@ -32632,7 +34240,7 @@ pub mod projectile_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::projectile_control::spawn_projectile(
+                    spring_sdk_internal::generated::owned::projectile_control::spawn_projectile(
                         weapon_def_id,
                         projectile_params,
                     )
@@ -32684,7 +34292,7 @@ pub mod effects_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::effects_control::spawn_ceg(
+                    spring_sdk_internal::generated::owned::effects_control::spawn_ceg(
                         ceg,
                         pos,
                         dir,
@@ -32720,7 +34328,7 @@ pub mod effects_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::effects_control::spawn_explosion(
+                    spring_sdk_internal::generated::owned::effects_control::spawn_explosion(
                         pos,
                         dir,
                         explosion_params,
@@ -32754,7 +34362,7 @@ pub mod effects_control {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::effects_control::spawn_sfx(
+                    spring_sdk_internal::generated::owned::effects_control::spawn_sfx(
                         unit_id,
                         sfx_id,
                         pos,
@@ -32802,7 +34410,11 @@ pub mod game_config {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game_config::set_cheating_enabled(enabled) }
+                {
+                    spring_sdk_internal::generated::owned::game_config::set_cheating_enabled(
+                        enabled,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::game_config::set_cheating_enabled(
@@ -32826,7 +34438,7 @@ pub mod game_config {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::game_config::set_experience_grade(
+                    spring_sdk_internal::generated::owned::game_config::set_experience_grade(
                         exp_grade,
                         exp_power_scale,
                         exp_health_scale,
@@ -32852,7 +34464,11 @@ pub mod game_config {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game_config::set_god_mode(options) }
+                {
+                    spring_sdk_internal::generated::owned::game_config::set_god_mode(
+                        options,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game_config::set_god_mode(&self._engine, options) }
             };
@@ -32864,7 +34480,11 @@ pub mod game_config {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::game_config::set_no_pause(no_pause) }
+                {
+                    spring_sdk_internal::generated::owned::game_config::set_no_pause(
+                        no_pause,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::game_config::set_no_pause(&self._engine, no_pause) }
             };
@@ -32883,7 +34503,7 @@ pub mod game_config {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::game_config::set_radar_error_params(
+                    spring_sdk_internal::generated::owned::game_config::set_radar_error_params(
                         ally_team_id,
                         ally_team_error_size,
                         base_error_size,
@@ -32915,7 +34535,7 @@ pub mod game_config {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::game_config::set_square_building_mask(
+                    spring_sdk_internal::generated::owned::game_config::set_square_building_mask(
                         x,
                         z,
                         mask,
@@ -32999,7 +34619,7 @@ pub mod cob_script {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::cob_script::get_cob_script_id(
+                    spring_sdk_internal::generated::owned::cob_script::get_cob_script_id(
                         unit_id,
                         func_name,
                     )
@@ -33049,7 +34669,7 @@ pub mod unit_script {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_script::call_unit_script(
+                    spring_sdk_internal::generated::owned::unit_script::call_unit_script(
                         unit_id,
                         function_name,
                         args,
@@ -33091,7 +34711,7 @@ pub mod synced_random {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::synced_random::next_float(0) }
+                { spring_sdk_internal::generated::owned::synced_random::next_float(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::synced_random::next_float(&self._engine) }
             };
@@ -33103,7 +34723,12 @@ pub mod synced_random {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::synced_random::next_int(lower, upper) }
+                {
+                    spring_sdk_internal::generated::owned::synced_random::next_int(
+                        lower,
+                        upper,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::synced_random::next_int(&self._engine, lower, upper) }
             };
@@ -33115,7 +34740,11 @@ pub mod synced_random {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::synced_random::next_int_up_to(upper) }
+                {
+                    spring_sdk_internal::generated::owned::synced_random::next_int_up_to(
+                        upper,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::synced_random::next_int_up_to(&self._engine, upper) }
             };
@@ -33127,7 +34756,7 @@ pub mod synced_random {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::synced_random::set_seed(seed) }
+                { spring_sdk_internal::generated::owned::synced_random::set_seed(seed) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::synced_random::set_seed(&self._engine, seed) }
             };
@@ -33155,7 +34784,7 @@ pub mod unsynced_random {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_random::next_float(0) }
+                { spring_sdk_internal::generated::owned::unsynced_random::next_float(0) }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_random::next_float(&self._engine) }
             };
@@ -33167,7 +34796,12 @@ pub mod unsynced_random {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_random::next_int(lower, upper) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_random::next_int(
+                        lower,
+                        upper,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_random::next_int(&self._engine, lower, upper) }
             };
@@ -33179,7 +34813,11 @@ pub mod unsynced_random {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_random::next_int_up_to(upper) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_random::next_int_up_to(
+                        upper,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_random::next_int_up_to(&self._engine, upper) }
             };
@@ -33191,7 +34829,11 @@ pub mod unsynced_random {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unsynced_random::set_seed(seed) }
+                {
+                    spring_sdk_internal::generated::owned::unsynced_random::set_seed(
+                        seed,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unsynced_random::set_seed(&self._engine, seed) }
             };
@@ -33220,7 +34862,11 @@ pub mod unit_rendering {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_rendering::get_camera_rotation(0) }
+                {
+                    spring_sdk_internal::generated::owned::unit_rendering::get_camera_rotation(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unit_rendering::get_camera_rotation(&self._engine) }
             };
@@ -33232,7 +34878,11 @@ pub mod unit_rendering {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_rendering::get_camera_vectors(0) }
+                {
+                    spring_sdk_internal::generated::owned::unit_rendering::get_camera_vectors(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unit_rendering::get_camera_vectors(&self._engine) }
             };
@@ -33251,7 +34901,7 @@ pub mod unit_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_rendering::get_features_in_screen_rectangle(
+                    spring_sdk_internal::generated::owned::unit_rendering::get_features_in_screen_rectangle(
                         left,
                         top,
                         right,
@@ -33277,7 +34927,11 @@ pub mod unit_rendering {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_rendering::get_frustum_planes(0) }
+                {
+                    spring_sdk_internal::generated::owned::unit_rendering::get_frustum_planes(
+                        0,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unit_rendering::get_frustum_planes(&self._engine) }
             };
@@ -33290,7 +34944,7 @@ pub mod unit_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_rendering::get_unit_always_update_matrix(
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_always_update_matrix(
                         unit_id,
                     )
                 }
@@ -33310,7 +34964,11 @@ pub mod unit_rendering {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_rendering::get_unit_draw_flag(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_draw_flag(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_rendering::get_unit_draw_flag(
@@ -33328,7 +34986,7 @@ pub mod unit_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_rendering::get_unit_engine_draw_mask(
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_engine_draw_mask(
                         unit_id,
                     )
                 }
@@ -33382,7 +35040,11 @@ pub mod unit_rendering {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_rendering::get_unit_lua_draw(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_lua_draw(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_rendering::get_unit_lua_draw(
@@ -33399,7 +35061,11 @@ pub mod unit_rendering {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_rendering::get_unit_no_draw(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_no_draw(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_rendering::get_unit_no_draw(
@@ -33416,7 +35082,11 @@ pub mod unit_rendering {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_rendering::get_unit_no_group(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_no_group(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_rendering::get_unit_no_group(
@@ -33434,7 +35104,7 @@ pub mod unit_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_rendering::get_unit_no_minimap(
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_no_minimap(
                         unit_id,
                     )
                 }
@@ -33454,7 +35124,11 @@ pub mod unit_rendering {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_rendering::get_unit_no_select(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_no_select(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_rendering::get_unit_no_select(
@@ -33475,7 +35149,7 @@ pub mod unit_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_rendering::get_unit_selection_volume_data(
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_selection_volume_data(
                         unit_id,
                     )
                 }
@@ -33496,7 +35170,7 @@ pub mod unit_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_rendering::get_unit_transform_matrix(
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_transform_matrix(
                         unit_id,
                     )
                 }
@@ -33521,7 +35195,7 @@ pub mod unit_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_rendering::get_unit_view_position(
+                    spring_sdk_internal::generated::owned::unit_rendering::get_unit_view_position(
                         unit_id,
                         use_mid_pos,
                     )
@@ -33551,7 +35225,7 @@ pub mod unit_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_rendering::get_units_in_screen_rectangle(
+                    spring_sdk_internal::generated::owned::unit_rendering::get_units_in_screen_rectangle(
                         left,
                         top,
                         right,
@@ -33642,7 +35316,7 @@ pub mod unit_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_rendering::get_visible_units(
+                    spring_sdk_internal::generated::owned::unit_rendering::get_visible_units(
                         team_id,
                         radius,
                         include_icons,
@@ -33666,7 +35340,11 @@ pub mod unit_rendering {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_rendering::is_unit_icon(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_rendering::is_unit_icon(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 { crate::native::unit_rendering::is_unit_icon(&self._engine, unit_id) }
             };
@@ -33678,7 +35356,11 @@ pub mod unit_rendering {
             self._engine.check()?;
             let result = {
                 #[cfg(target_arch = "wasm32")]
-                { spring::generated::owned::unit_rendering::is_unit_in_view(unit_id) }
+                {
+                    spring_sdk_internal::generated::owned::unit_rendering::is_unit_in_view(
+                        unit_id,
+                    )
+                }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_rendering::is_unit_in_view(
@@ -33701,7 +35383,7 @@ pub mod unit_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::unit_rendering::is_unit_visible(
+                    spring_sdk_internal::generated::owned::unit_rendering::is_unit_visible(
                         unit_id,
                         radius,
                         check_icon,
@@ -33754,7 +35436,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::clear_deferred_material_uniform(
+                    spring_sdk_internal::generated::owned::object_rendering::clear_deferred_material_uniform(
                         object_type,
                         object_id,
                         material_type,
@@ -33795,7 +35477,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::clear_forward_material_uniform(
+                    spring_sdk_internal::generated::owned::object_rendering::clear_forward_material_uniform(
                         object_type,
                         object_id,
                         material_type,
@@ -33828,7 +35510,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::get_lod(
+                    spring_sdk_internal::generated::owned::object_rendering::get_lod(
                         object_type,
                         object_id,
                     )
@@ -33873,7 +35555,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::set_deferred_material_uniform(
+                    spring_sdk_internal::generated::owned::object_rendering::set_deferred_material_uniform(
                         object_type,
                         object_id,
                         material_type,
@@ -33924,7 +35606,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::set_forward_material_uniform(
+                    spring_sdk_internal::generated::owned::object_rendering::set_forward_material_uniform(
                         object_type,
                         object_id,
                         material_type,
@@ -33958,7 +35640,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::set_lod_count(
+                    spring_sdk_internal::generated::owned::object_rendering::set_lod_count(
                         object_type,
                         object_id,
                         lod_count,
@@ -33989,7 +35671,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::set_lod_distance(
+                    spring_sdk_internal::generated::owned::object_rendering::set_lod_distance(
                         object_type,
                         object_id,
                         lod_level,
@@ -34022,7 +35704,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::set_lod_length(
+                    spring_sdk_internal::generated::owned::object_rendering::set_lod_length(
                         object_type,
                         object_id,
                         lod_level,
@@ -34068,7 +35750,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::set_material(
+                    spring_sdk_internal::generated::owned::object_rendering::set_material(
                         object_type,
                         object_id,
                         lod_level,
@@ -34105,7 +35787,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::set_material_display_lists(
+                    spring_sdk_internal::generated::owned::object_rendering::set_material_display_lists(
                         object_type,
                         object_id,
                         lod_level,
@@ -34142,7 +35824,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::set_material_last_lod(
+                    spring_sdk_internal::generated::owned::object_rendering::set_material_last_lod(
                         object_type,
                         object_id,
                         material_type,
@@ -34176,7 +35858,7 @@ pub mod object_rendering {
             let result = {
                 #[cfg(target_arch = "wasm32")]
                 {
-                    spring::generated::owned::object_rendering::set_piece_list(
+                    spring_sdk_internal::generated::owned::object_rendering::set_piece_list(
                         object_type,
                         object_id,
                         lod_level,

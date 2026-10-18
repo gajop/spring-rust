@@ -10,18 +10,22 @@ fn decode_string(bytes: Vec<u8>) -> String {
     }
 }
 
-fn collect_i32(mut call: impl FnMut(&mut [i32]) -> Result<spring::BufferFill>) -> Result<Vec<i32>> {
+fn collect_i32(
+    mut call: impl FnMut(&mut [i32]) -> Result<spring_sdk_internal::BufferFill>,
+) -> Result<Vec<i32>> {
     let mut output = Vec::new();
     loop {
         match call(&mut output)? {
-            spring::BufferFill::Complete(count) => {
+            spring_sdk_internal::BufferFill::Complete(count) => {
                 if count > output.len() {
                     return Err(ApiError::new(ErrorCode::InvalidState as i32));
                 }
                 output.truncate(count);
                 return Ok(output);
             }
-            spring::BufferFill::Insufficient { required } => output.resize(required, 0),
+            spring_sdk_internal::BufferFill::Insufficient { required } => {
+                output.resize(required, 0)
+            }
         }
     }
 }

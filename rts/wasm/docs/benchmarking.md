@@ -1,6 +1,9 @@
 # Lua / native / Wasm benchmarking plan
 
-Compare the three backends against each other. Nothing does this today.
+The current runner is `test/native_api_parity/run_benchmarks_sdk.py`: Lua versus
+native and Core Wasm through `spring-sdk`. The same scenarios can still run
+through the legacy Rust APIs with `run_benchmarks_core.py`. See
+[runner details](../../../test/native_api_parity/CORE_WASM_BENCHMARKS.md).
 
 **33 tests, 3 backends, 99 runs.** Budget context: 33 ms/frame at 30 Hz sim, 16 ms at 60 fps, 7 ms at 144 fps.
 

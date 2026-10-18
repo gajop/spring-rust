@@ -161,7 +161,7 @@ fn graphics_counted_arrays_accept_short_inputs_and_zero_fill_native_capacity() {
             spring.gfx().uniform_int(4, &[7], 1).unwrap();
             spring
                 .gfx()
-                .clear(spring::gl::DEPTH_BUFFER_BIT, &[1.0], 1)
+                .clear(spring_sdk_internal::gl::DEPTH_BUFFER_BIT, &[1.0], 1)
                 .unwrap();
             assert!(spring.gfx().uniform(3, &[1.0; 5], 5).is_err());
             assert!(spring.gfx().uniform_int(4, &[1; 5], 5).is_err());

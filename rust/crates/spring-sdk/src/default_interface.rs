@@ -2,7 +2,7 @@
 
 use crate::{Result, Spring, capabilities::Game};
 
-pub use spring::default_interface::{
+pub use spring_sdk_internal::default_interface::{
     ALL, CLOCK, COMMAND_MENU, CONSOLE, END_GRAPH, FPS, MAP_BORDER, MINIMAP, PLAYER_INFO,
     RESOURCE_BAR, SPEED, TOOLTIP, UNIT_ICONS,
 };

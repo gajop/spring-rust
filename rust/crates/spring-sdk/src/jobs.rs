@@ -13,7 +13,7 @@
 
 use crate::{ApiError, Environment, ErrorCode, Result, Spring};
 #[cfg(target_arch = "wasm32")]
-pub use spring::jobs::{JobError, JobId};
+pub use spring_sdk_internal::jobs::{JobError, JobId};
 #[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct JobId(pub u32);
@@ -79,8 +79,8 @@ impl<E: Environment> Jobs<'_, '_, E> {
         }
         #[cfg(target_arch = "wasm32")]
         let result = match worker.wasm_module {
-            Some(module) => spring::jobs::submit_to(module, worker.name, input),
-            None => spring::jobs::submit(worker.name, input),
+            Some(module) => spring_sdk_internal::jobs::submit_to(module, worker.name, input),
+            None => spring_sdk_internal::jobs::submit(worker.name, input),
         };
         #[cfg(not(target_arch = "wasm32"))]
         let result = self.0.engine.owner.jobs.borrow_mut().submit(worker, input);

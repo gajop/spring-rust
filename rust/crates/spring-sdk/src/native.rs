@@ -24,6 +24,9 @@ impl Inputs {
         ptr
     }
     fn string(&mut self, value: &str) -> Result<*const c_char> {
+        if value.is_empty() {
+            return Ok(c"".as_ptr());
+        }
         let value =
             CString::new(value).map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
         let ptr = value.as_ptr();

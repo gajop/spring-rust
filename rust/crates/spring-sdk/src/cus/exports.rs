@@ -93,7 +93,9 @@ unsafe fn mutable_slice<'a, T>(pointer: *mut T, count: usize) -> Result<&'a mut 
 #[cfg(target_arch = "wasm32")]
 pub mod wire {
     use super::*;
-    pub use spring::cus::core_module::{BUFFER_SIZE, MAX_RESULTS, buffer_range_contains};
+    pub use spring_sdk_internal::cus::core_module::{
+        BUFFER_SIZE, MAX_RESULTS, buffer_range_contains,
+    };
 
     unsafe fn values<T: Copy>(pointer: i32, count: i32, base: usize) -> Result<Vec<T>> {
         if pointer < 0 || !(0..=256).contains(&count) {

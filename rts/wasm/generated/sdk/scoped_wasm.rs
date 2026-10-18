@@ -9,7 +9,7 @@ pub mod units_query {
         team_id: i32,
         unit_def_i_ds: &[i32],
     ) -> Result<Vec<i32>> {
-        super::collect_i32(|output| spring::get_team_units_by_defs_into(
+        super::collect_i32(|output| spring_sdk_internal::get_team_units_by_defs_into(
             team_id,
             unit_def_i_ds,
             output,
@@ -76,10 +76,10 @@ pub mod units_query {
         }
     }
     pub fn get_unit_array_centroid(unit_i_ds: &[i32]) -> Result<Float3> {
-        spring::get_unit_array_centroid(unit_i_ds)
+        spring_sdk_internal::get_unit_array_centroid(unit_i_ds)
     }
     pub fn get_unit_map_centroid(unit_i_ds: &[i32]) -> Result<Float3> {
-        spring::get_unit_map_centroid(unit_i_ds)
+        spring_sdk_internal::get_unit_map_centroid(unit_i_ds)
     }
     pub fn get_units_in_box(
         xmin: f32,
@@ -90,7 +90,7 @@ pub mod units_query {
         zmax: f32,
         allegiance: i32,
     ) -> Result<Vec<i32>> {
-        spring::get_units_in_box(
+        spring_sdk_internal::get_units_in_box(
             crate::Float3 {
                 x: xmin,
                 y: ymin,
@@ -110,7 +110,7 @@ pub mod units_query {
         radius: f32,
         allegiance: i32,
     ) -> Result<Vec<i32>> {
-        spring::get_units_in_cylinder(x, z, radius, allegiance)
+        spring_sdk_internal::get_units_in_cylinder(x, z, radius, allegiance)
     }
     pub fn get_units_in_planes(
         planes: &PlanesQuery,
@@ -199,7 +199,7 @@ pub mod units_query {
         zmax: f32,
         allegiance: i32,
     ) -> Result<Vec<i32>> {
-        spring::get_units_in_rectangle(xmin, zmin, xmax, zmax, allegiance)
+        spring_sdk_internal::get_units_in_rectangle(xmin, zmin, xmax, zmax, allegiance)
     }
     pub fn get_units_in_sphere(
         x: f32,
@@ -208,7 +208,11 @@ pub mod units_query {
         radius: f32,
         allegiance: i32,
     ) -> Result<Vec<i32>> {
-        spring::get_units_in_sphere(crate::Float3 { x, y, z }, radius, allegiance)
+        spring_sdk_internal::get_units_in_sphere(
+            crate::Float3 { x, y, z },
+            radius,
+            allegiance,
+        )
     }
 }
 pub mod units_info {
@@ -220,7 +224,7 @@ pub mod units_info {
     ) -> Result<Option<NumberOrBool>> {
         let string1 = alloc::ffi::CString::new(param_name)
             .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        let bytes = spring::generated::borrowed::units_info::get_unit_build_params(
+        let bytes = spring_sdk_internal::generated::borrowed::units_info::get_unit_build_params(
             unit_id,
             string1.as_c_str(),
         )?;
@@ -327,7 +331,7 @@ pub mod units_commands {
         unit_id: i32,
         max_commands: u32,
     ) -> Result<Vec<CommandFFI>> {
-        spring::get_unit_commands(unit_id, max_commands)
+        spring_sdk_internal::get_unit_commands(unit_id, max_commands)
             .map(|commands| {
                 commands
                     .into_iter()
@@ -348,7 +352,7 @@ pub mod units_commands {
         options: u32,
         timeout: i32,
     ) -> Result<bool> {
-        spring::give_order(cmd_id, params, options, timeout)
+        spring_sdk_internal::give_order(cmd_id, params, options, timeout)
     }
     pub fn give_order_to_unit_map(
         unit_i_ds: &[i32],
@@ -357,7 +361,13 @@ pub mod units_commands {
         options: u32,
         timeout: i32,
     ) -> Result<i32> {
-        spring::give_order_to_unit_map(unit_i_ds, cmd_id, params, options, timeout)
+        spring_sdk_internal::give_order_to_unit_map(
+            unit_i_ds,
+            cmd_id,
+            params,
+            options,
+            timeout,
+        )
     }
 }
 pub mod teams {
@@ -742,10 +752,12 @@ pub mod unit_defs {
     use alloc::string::String;
     use crate::Result;
     pub fn get_unit_def_human_name(unit_def_id: i32) -> Result<String> {
-        spring::get_unit_def_human_name_bytes(unit_def_id).map(super::decode_string)
+        spring_sdk_internal::get_unit_def_human_name_bytes(unit_def_id)
+            .map(super::decode_string)
     }
     pub fn get_unit_def_name(unit_def_id: i32) -> Result<String> {
-        spring::get_unit_def_name_bytes(unit_def_id).map(super::decode_string)
+        spring_sdk_internal::get_unit_def_name_bytes(unit_def_id)
+            .map(super::decode_string)
     }
 }
 pub mod game {
@@ -881,7 +893,7 @@ pub mod game {
         }
     }
     pub fn get_mod_option(key: &str) -> Result<GetModOptionValue> {
-        spring::get_mod_option(key)
+        spring_sdk_internal::get_mod_option(key)
             .map(|v| GetModOptionValue {
                 exists: v.is_some(),
                 value: v.unwrap_or_default(),
@@ -1276,7 +1288,7 @@ pub mod path_finder {
             .bytes
             .try_into()
             .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        spring::generated::borrowed::path_finder::request_path(
+        spring_sdk_internal::generated::borrowed::path_finder::request_path(
             move_def_id,
             string1.as_deref(),
             &input2,
@@ -1410,7 +1422,7 @@ pub mod move_ctrl {
             .map(alloc::ffi::CString::new)
             .transpose()
             .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        spring::generated::borrowed::move_ctrl::set_move_def(
+        spring_sdk_internal::generated::borrowed::move_ctrl::set_move_def(
             unit_id,
             move_def_id,
             string2.as_deref(),
@@ -1749,7 +1761,7 @@ pub mod display {
 pub mod messages {
     use crate::Result;
     pub fn send_message_to_team(team_id: i32, message: &str) -> Result<bool> {
-        spring::send_message_to_team(team_id, message)
+        spring_sdk_internal::send_message_to_team(team_id, message)
     }
 }
 pub mod config {
@@ -1780,7 +1792,7 @@ pub mod config {
             .bytes
             .try_into()
             .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        let bytes = spring::generated::borrowed::config::get_config_float(
+        let bytes = spring_sdk_internal::generated::borrowed::config::get_config_float(
             string0.as_c_str(),
             &input1,
         )?;
@@ -1820,7 +1832,7 @@ pub mod config {
             .bytes
             .try_into()
             .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        let bytes = spring::generated::borrowed::config::get_config_int(
+        let bytes = spring_sdk_internal::generated::borrowed::config::get_config_int(
             string0.as_c_str(),
             &input1,
         )?;
@@ -2025,7 +2037,7 @@ pub mod gfx {
         identities: bool,
         mut callback: F,
     ) -> Result<()> {
-        spring::active_fbo(
+        spring_sdk_internal::active_fbo(
             fbo_id,
             target,
             identities,
@@ -2036,7 +2048,7 @@ pub mod gfx {
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, shader_id: u32, mut callback: F) -> Result<()> {
-        spring::active_shader(
+        spring_sdk_internal::active_shader(
             shader_id,
             || engine.with_nested::<E, _>(|spring| callback(spring)),
         )
@@ -2045,7 +2057,7 @@ pub mod gfx {
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, primitive: u32, mut callback: F) -> Result<()> {
-        spring::begin_end(
+        spring_sdk_internal::begin_end(
             primitive,
             || engine.with_nested::<E, _>(|spring| callback(spring)),
         )
@@ -2054,7 +2066,9 @@ pub mod gfx {
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, mut callback: F) -> Result<u32> {
-        spring::create_list(|| engine.with_nested::<E, _>(|spring| callback(spring)))
+        spring_sdk_internal::create_list(|| {
+            engine.with_nested::<E, _>(|spring| callback(spring))
+        })
     }
     pub fn create_texture(
         xsize: i32,
@@ -2062,11 +2076,11 @@ pub mod gfx {
         zsize: i32,
         params: GfxTextureParams,
     ) -> Result<String> {
-        spring::create_texture(
+        spring_sdk_internal::create_texture(
             xsize,
             ysize,
             zsize,
-            spring::TextureCreateParams {
+            spring_sdk_internal::TextureCreateParams {
                 target: params.target,
                 format: params.format,
                 border: params.border,
@@ -2089,7 +2103,7 @@ pub mod gfx {
         ysize: i32,
         alloc_type: i32,
     ) -> Result<String> {
-        spring::create_texture_atlas(xsize, ysize, alloc_type)
+        spring_sdk_internal::create_texture_atlas(xsize, ysize, alloc_type)
     }
     pub fn draw_func_at_unit<
         E: crate::Environment,
@@ -2100,7 +2114,7 @@ pub mod gfx {
         use_mid_pos: bool,
         mut callback: F,
     ) -> Result<()> {
-        spring::draw_func_at_unit(
+        spring_sdk_internal::draw_func_at_unit(
             unit_id,
             use_mid_pos,
             || engine.with_nested::<E, _>(|spring| callback(spring)),
@@ -2662,13 +2676,15 @@ pub mod gfx {
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, mut callback: F) -> Result<()> {
-        spring::push_pop_matrix(|| engine.with_nested::<E, _>(|spring| callback(spring)))
+        spring_sdk_internal::push_pop_matrix(|| {
+            engine.with_nested::<E, _>(|spring| callback(spring))
+        })
     }
     pub fn render_to_texture<
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, name: &str, mut callback: F) -> Result<()> {
-        spring::render_to_texture(
+        spring_sdk_internal::render_to_texture(
             name,
             || engine.with_nested::<E, _>(|spring| callback(spring)),
         )
@@ -2677,7 +2693,10 @@ pub mod gfx {
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, id: u32, mut callback: F) -> Result<()> {
-        spring::run_query(id, || engine.with_nested::<E, _>(|spring| callback(spring)))
+        spring_sdk_internal::run_query(
+            id,
+            || engine.with_nested::<E, _>(|spring| callback(spring)),
+        )
     }
     pub fn unsafe_state<
         E: crate::Environment,
@@ -2688,7 +2707,7 @@ pub mod gfx {
         reverse: bool,
         mut callback: F,
     ) -> Result<()> {
-        spring::unsafe_state(
+        spring_sdk_internal::unsafe_state(
             state,
             reverse,
             || engine.with_nested::<E, _>(|spring| callback(spring)),
@@ -2710,7 +2729,7 @@ pub mod ground_decals {
         input.u32(options.include_filenames as u32);
         let mut output = Vec::new();
         loop {
-            match spring::generated::dynamic_output::ground_decals::get_ground_decal_textures(
+            match spring_sdk_internal::generated::dynamic_output::ground_decals::get_ground_decal_textures(
                 input.bytes.as_ptr() as i32,
                 &mut output,
             ) {
@@ -2747,7 +2766,7 @@ pub mod system_control {
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, team_id: i32, mut callback: F) -> Result<bool> {
-        spring::call_as_team(
+        spring_sdk_internal::call_as_team(
             team_id,
             || engine.with_nested::<E, _>(|spring| callback(spring)),
         )
@@ -3030,7 +3049,7 @@ pub mod rml_ui {
         callback: F,
     ) -> Result<ContextAddEventListenerValue> {
         let id = crate::callbacks::register::<E, F>(engine, None, callback)?;
-        let result = spring::context_add_event_listener(
+        let result = spring_sdk_internal::context_add_event_listener(
                 context_handle,
                 event,
                 in_capture_phase,
@@ -3062,7 +3081,7 @@ pub mod rml_ui {
             E,
             F,
         >(engine, Some(field_types), callback)?;
-        let result = spring::data_model_bind_event(
+        let result = spring_sdk_internal::data_model_bind_event(
                 data_model_handle,
                 name,
                 crate::callbacks::wire(id),
@@ -3126,7 +3145,7 @@ pub mod rml_ui {
         }
     }
     pub fn data_model_unbind_event(event_handle: u64) -> Result<bool> {
-        spring::data_model_unbind_event(event_handle)
+        spring_sdk_internal::data_model_unbind_event(event_handle)
     }
     pub fn element_add_event_listener<
         E: crate::Environment,
@@ -3142,7 +3161,7 @@ pub mod rml_ui {
         callback: F,
     ) -> Result<ElementAddEventListenerValue> {
         let id = crate::callbacks::register::<E, F>(engine, None, callback)?;
-        let result = spring::element_add_event_listener(
+        let result = spring_sdk_internal::element_add_event_listener(
                 element_handle,
                 event,
                 in_capture_phase,
@@ -3443,19 +3462,28 @@ pub mod rml_ui {
         event_listener_handle: u64,
         element_handle: u64,
     ) -> Result<bool> {
-        spring::event_listener_on_attach(event_listener_handle, element_handle)
+        spring_sdk_internal::event_listener_on_attach(
+            event_listener_handle,
+            element_handle,
+        )
     }
     pub fn event_listener_on_detach(
         event_listener_handle: u64,
         element_handle: u64,
     ) -> Result<bool> {
-        spring::event_listener_on_detach(event_listener_handle, element_handle)
+        spring_sdk_internal::event_listener_on_detach(
+            event_listener_handle,
+            element_handle,
+        )
     }
     pub fn event_listener_process_event(
         event_listener_handle: u64,
         event_handle: u64,
     ) -> Result<bool> {
-        spring::event_listener_process_event(event_listener_handle, event_handle)
+        spring_sdk_internal::event_listener_process_event(
+            event_listener_handle,
+            event_handle,
+        )
     }
     pub fn load_font_face(
         file_path: &str,
@@ -3480,7 +3508,7 @@ pub mod rml_ui {
             .bytes
             .try_into()
             .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        spring::generated::borrowed::rml_ui::load_font_face(
+        spring_sdk_internal::generated::borrowed::rml_ui::load_font_face(
             string0.as_c_str(),
             fallback,
             &input2,
@@ -3513,7 +3541,7 @@ pub mod rml_ui {
             .bytes
             .try_into()
             .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        spring::generated::borrowed::rml_ui::regiser_event_type(
+        spring_sdk_internal::generated::borrowed::rml_ui::regiser_event_type(
             string0.as_c_str(),
             &input1,
         )
@@ -3545,7 +3573,7 @@ pub mod rml_ui {
             .bytes
             .try_into()
             .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        spring::generated::borrowed::rml_ui::register_event_type(
+        spring_sdk_internal::generated::borrowed::rml_ui::register_event_type(
             string0.as_c_str(),
             &input1,
         )
@@ -3628,7 +3656,7 @@ pub mod vfs {
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, archive_name: &str, mut callback: F) -> Result<bool> {
-        spring::use_archive(
+        spring_sdk_internal::use_archive(
             archive_name,
             || engine.with_nested::<E, _>(|spring| callback(spring)),
         )
@@ -3823,7 +3851,13 @@ pub mod unit_control {
         options: u32,
         timeout: i32,
     ) -> Result<bool> {
-        spring::give_order_to_unit(unit_id, cmd_id, params, options, timeout)
+        spring_sdk_internal::give_order_to_unit(
+            unit_id,
+            cmd_id,
+            params,
+            options,
+            timeout,
+        )
     }
 }
 pub mod terrain_control {
@@ -3832,7 +3866,7 @@ pub mod terrain_control {
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, mut callback: F) -> Result<bool> {
-        spring::set_height_map_func(|| {
+        spring_sdk_internal::set_height_map_func(|| {
             engine.with_nested::<E, _>(|spring| callback(spring))
         })
     }
@@ -3840,7 +3874,7 @@ pub mod terrain_control {
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, mut callback: F) -> Result<bool> {
-        spring::set_original_height_map_func(|| {
+        spring_sdk_internal::set_original_height_map_func(|| {
             engine.with_nested::<E, _>(|spring| callback(spring))
         })
     }
@@ -3848,7 +3882,7 @@ pub mod terrain_control {
         E: crate::Environment,
         F: for<'call> FnMut(&mut crate::Spring<'call, E>),
     >(engine: &crate::Backend<'_>, mut callback: F) -> Result<bool> {
-        spring::set_smooth_mesh_func(|| {
+        spring_sdk_internal::set_smooth_mesh_func(|| {
             engine.with_nested::<E, _>(|spring| callback(spring))
         })
     }
@@ -3863,7 +3897,7 @@ pub mod cob_script {
         args: &[i32],
     ) -> Result<CallCOBScriptValue> {
         let mut ret_values = alloc::vec![0i32; ret_args as usize];
-        let result = spring::call_cob_script(
+        let result = spring_sdk_internal::call_cob_script(
             unit_id,
             func.id,
             &func.name,
