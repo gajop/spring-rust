@@ -48,6 +48,10 @@ public:
 	*/
 	void addRule(RestrictType type, const std::string& hostname, int port, bool allowed);
 
+	// Match endpoints are denied only until the engine reloads into another match.
+	void addGameRule(const std::string& hostname, int port);
+	void clearGameRules();
+
 private:
 	/**
 	* parses and adds a rules string
@@ -73,6 +77,7 @@ private:
 	const char* ruleToStr(RestrictType type);
 
 	std::list<TSocketRule> restrictions[ALL_RULES];
+	std::list<TSocketRule> gameRestrictions;
 
 };
 

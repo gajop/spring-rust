@@ -60,6 +60,24 @@ CLuaSocketRestrictions::~CLuaSocketRestrictions()
 }
 
 
+void CLuaSocketRestrictions::addGameRule(const std::string& hostname, int port)
+{
+	if (port <= 0 || port > 65535) {
+		LOG_L(L_ERROR, "Invalid game endpoint port: %d", port);
+		return;
+	}
+	for (const TSocketRule& rule: gameRestrictions) {
+		if (rule.hostname == hostname && rule.port == port)
+			return;
+	}
+	gameRestrictions.emplace_back(hostname, port, false);
+}
+
+void CLuaSocketRestrictions::clearGameRules()
+{
+	gameRestrictions.clear();
+}
+
 void CLuaSocketRestrictions::addRule(RestrictType type, const std::string& hostname, int port, bool allowed)
 {
 	if ((port != WILDCARD_PORT) && ((port <= 0) || (port > 65535))) {
@@ -154,6 +172,12 @@ const TSocketRule* CLuaSocketRestrictions::getRule(RestrictType type, const char
 	}
 
 	for (int i = start; i < end; i++) {
+		if (i == UDP_CONNECT) {
+			for (const TSocketRule& rule: gameRestrictions) {
+				if (rule.hostname == hostname && rule.port == port)
+					return &rule;
+			}
+		}
 		for (const TSocketRule& rule: restrictions[i]) {
 			if ((hostname != rule.hostname) && (rule.hostname != WILDCARD_HOST))
 				continue;
@@ -170,6 +194,10 @@ const TSocketRule* CLuaSocketRestrictions::getRule(RestrictType type, const char
 
 void CLuaSocketRestrictions::addIP(const char* hostname, const char* ip)
 {
+	for (const TSocketRule& rule: gameRestrictions) {
+		if (rule.hostname == hostname)
+			addGameRule(ip, rule.port);
+	}
 	for (int i = 0; i < ALL_RULES; i++) {
 		for (const TSocketRule& rule: restrictions[i]) {
 			if (rule.hostname != hostname)

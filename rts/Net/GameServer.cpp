@@ -389,7 +389,7 @@ void CGameServer::AddAutohostInterface(const std::string& autohostIP, const int 
 
 #ifndef DEDICATED
 	// disallow luasockets access to autohost interface
-	luaSocketRestrictions->addRule(CLuaSocketRestrictions::UDP_CONNECT, autohostIP, autohostPort, false);
+	luaSocketRestrictions->addGameRule(autohostIP, autohostPort);
 #endif
 
 	if (!hostif) {
