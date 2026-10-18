@@ -127,7 +127,7 @@ bool CLocalConnection::HasIncomingData() const
 unsigned int CLocalConnection::GetPacketQueueSize() const
 {
 	std::lock_guard<spring::mutex> scoped_lock(mutexes[instanceIdx]);
-	return (!pktQueues[instanceIdx].size());
+	return pktQueues[instanceIdx].size();
 }
 
 } // namespace netcode

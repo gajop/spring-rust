@@ -153,6 +153,21 @@ endmacro()
 	endif()
 
 ################################################################################
+### Local transport: no socket or CI network access required.
+	set(test_name LocalConnection)
+	set(test_src
+		"${CMAKE_CURRENT_SOURCE_DIR}/engine/System/Net/TestLocalConnection.cpp"
+		"${ENGINE_SOURCE_DIR}/Game/GameVersion.cpp"
+		"${ENGINE_SOURCE_DIR}/Net/Protocol/BaseNetProtocol.cpp"
+		"${ENGINE_SOURCE_DIR}/System/Misc/SpringTime.cpp"
+		${sources_engine_System_Threading}
+		${test_Common_sources}
+	)
+	add_spring_test(${test_name} "${test_src}" "engineSystemNet;${REALTIME_LIBRARY};${WINMM_LIBRARY}"
+		"-DNOT_USING_CREG -DNOT_USING_STREFLOP")
+	add_dependencies(test_LocalConnection generateVersionFiles)
+
+################################################################################
 ### UDPListener
 # disabled for travis: https://springrts.com/mantis/view.php?id=5014
 if(NOT DEFINED ENV{CI})

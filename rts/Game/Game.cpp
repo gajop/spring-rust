@@ -1929,7 +1929,8 @@ void CGame::SimFrame() {
 		// multiply by 0.5 to give unsynced code some execution time (50% of our sleep-budget)
 		const float msecSleepTime = (msecMaxSimFrameTime - msecDifSimFrameTime) * 0.5f;
 
-		if (msecSleepTime > 0.0f) {
+		// The server paces live play. Do not delay queued reconnect or replay frames.
+		if (msecSleepTime > 0.0f && clientNet->GetNumWaitingServerPackets() == 0) {
 			spring_sleep(spring_msecs(msecSleepTime));
 		}
 	}
