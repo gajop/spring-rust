@@ -5,6 +5,14 @@ Status: local Linux memory/checksum verification and deterministic jobs implemen
 and [API](recoil_wasm_synced_jobs.md). The cross-platform matrix and broader
 perturbations below remain planned.
 
+Integration checked on 2026-10-18: `rust-wip` contains the jobs integration
+(`c24a0727aa`), opt-in memory-hashing correction (`4dc4e25e0d`), and engine
+follow-up fixes (`e36d269449`). The separate `codex/wasm-synced-jobs` development
+history was consolidated into the integration commit; it is not pending a merge.
+The broader matrix below is future engine verification work, beyond the completed
+local task. No GitHub Actions were run or added for that task. Ship Game adoption
+and gameplay work belong in Ship Game's own plans.
+
 Goal: prove automatically, without playtesting, that every synced Wasm game stays in sync across the supported platforms (amd64-linux, arm64-linux, amd64-windows) and across machine conditions that must not matter. One binary per platform is shipped, so compiler variety is out of scope; operating system and CPU architecture are in scope.
 
 This plan implements the "Synced determinism tests" of [Parity & Testing](recoil_wasm_parity_testing.md) and the "Synced acceptance tests" of [Sandbox & Determinism](recoil_wasm_sandbox_determinism.md), and extends them from engine fixtures to real games.
@@ -35,11 +43,13 @@ A divergence in any of them is treated the same way: as an engine, runtime or ho
 
 ### 1. Hash synced Wasm state into the sync checksum
 
-After each simulation frame, every synced Wasm instance's linear memory is hashed (a fast non-cryptographic hash such as xxHash3) and fed to `CSyncChecker::Sync`, together with the instance's memory size and module identity.
+After each simulation frame, synced module metadata and cached job digests are
+fed to `CSyncChecker::Sync`. Full linear-memory hashing uses XXH3-64 only when
+explicitly enabled, under the policy below.
 
 - **Implemented policy**: full-memory hashing is off in normal games (`system.WasmStateHashInterval = 0` by default). `WasmSyncLog` hashes every frame for local verification without changing the network checksum; a positive game-owned interval explicitly opts into network memory scans. Normal checks cover only module metadata and cached job digests. See [the cost report and fix](recoil_wasm_state_hash_cost_2026-10-12.md). Dirty-page tracking may support cheaper full-state coverage later.
 - **Unsynced instances are excluded**: they legitimately differ per client.
-- **Consequence**: a guest divergence shows on the frame it happens, in live games, demos and tests alike, with no per-game code.
+- **Coverage**: with diagnostic logging enabled, a linear-memory divergence is visible on its first logged frame, without per-game code. Normal metadata checks do not detect arbitrary guest-memory changes. Opt-in network memory checks detect persistent differences on the next scan; transient differences between scans may escape them.
 - **Precondition**: no host call writes client-dependent data into synced guest memory. Any such write is itself a sync bug, and this hash will expose it.
 
 ### 2. Sync log
