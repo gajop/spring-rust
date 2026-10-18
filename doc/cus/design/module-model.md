@@ -83,7 +83,7 @@ Keeping CUS inside the game module gives:
 
 ## Runtime source layout
 
-The portable runtime is kept in `rust/crates/spring/src/cus/`. `mod.rs` is a
+The portable runtime is kept in `rust/crates/spring-sdk-internal/src/cus/`. `mod.rs` is a
 thin compatibility surface that re-exports the public API. Value types,
 engine operations, scheduling, script behavior, instance ownership, registry
 ownership, and the native/Core-Wasm transports live in their corresponding
