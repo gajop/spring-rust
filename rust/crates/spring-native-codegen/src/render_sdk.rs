@@ -272,7 +272,7 @@ pub fn render(
             String::new()
         } else {
             format!(
-                "pub use spring::generated::owned::{name}::{{{}}};",
+                "pub use spring_sdk_internal::generated::owned::{name}::{{{}}};",
                 names.into_iter().collect::<Vec<_>>().join(",")
             )
         };
@@ -338,13 +338,13 @@ pub fn render(
             let diagnostic_clock = name == "profiling" && function.name == "GetTimerMicros";
             let timer_difference = name == "profiling" && function.name == "DiffTimers";
             let wasm_path = if diagnostic_clock {
-                "spring::desync".to_string()
+                "spring_sdk_internal::desync".to_string()
             } else if timer_difference {
-                "spring::profiling".to_string()
+                "spring_sdk_internal::profiling".to_string()
             } else if extra_fn.is_some() {
                 format!("crate::wasm::{name}")
             } else {
-                format!("spring::generated::owned::{name}")
+                format!("spring_sdk_internal::generated::owned::{name}")
             };
             let signature = extra_fn.or_else(|| {
                 members.iter().find_map(|item| match item {
@@ -553,7 +553,7 @@ pub fn render(
         }
         let alloc_api = alloc_imports(&family_methods);
         let constants = if name == "rules_params" {
-            "pub use spring::rules_param_los as los;"
+            "pub use spring_sdk_internal::rules_param_los as los;"
         } else {
             ""
         };
@@ -674,7 +674,7 @@ impl NativeRenderer<'_> {
                 bail!("projected input {}", field.name)
             }
         }
-        let (setup, fields) = self.inputs_extra(&inputs, query, &values, &extra)?;
+        let (setup, fields) = self.inputs_extra(&inputs, query, &values, &extra, true)?;
         let (path, _) = crate::render_core_native::native_api_path(&self.semantic.name)
             .context("native API path")?;
         let mut access = "engine.raw()".to_owned();
@@ -766,7 +766,7 @@ impl NativeRenderer<'_> {
         raw: &StructDef,
         values: &BTreeMap<String, String>,
     ) -> Result<(String, String)> {
-        self.inputs_extra(semantic, raw, values, &BTreeMap::new())
+        self.inputs_extra(semantic, raw, values, &BTreeMap::new(), false)
     }
 
     fn inputs_extra(
@@ -775,6 +775,7 @@ impl NativeRenderer<'_> {
         raw: &StructDef,
         values: &BTreeMap<String, String>,
         extra: &BTreeMap<String, String>,
+        stack_strings: bool,
     ) -> Result<(String, String)> {
         let mut setup = String::new();
         let mut inits = extra.clone();
@@ -787,8 +788,17 @@ impl NativeRenderer<'_> {
                 .iter()
                 .find(|r| r.name == field.name)
                 .with_context(|| format!("native field {}", field.name))?;
-            let value = self.input_value(&field.ty, &raw_field.ty, source)?;
             let local = format!("native_{}", ident(&field.name));
+            // A query's string can live in a local CString until its host call
+            // returns. Nested record converters still need the input arena:
+            // their local variables would be dropped before that call.
+            let value = if stack_strings && matches!(field.ty, SemanticType::String) {
+                let storage = format!("storage_{}", ident(&field.name));
+                setup.push_str(&format!("let {storage}=std::ffi::CString::new({source}).map_err(|_|ApiError::new(ErrorCode::InvalidArgument as i32))?;"));
+                format!("{storage}.as_ptr() as _")
+            } else {
+                self.input_value(&field.ty, &raw_field.ty, source)?
+            };
             setup.push_str(&format!("let {local} = {value};\n"));
             inits.insert(field.name.clone(), local);
             for meta in &field.metadata {
@@ -953,10 +963,16 @@ impl NativeRenderer<'_> {
                     SemanticType::List { element } => *element.clone(),
                     _ => unreachable!(),
                 };
-                let converted = self.output_value(&element, pointee, "*item", None)?;
-                format!(
-                    "unsafe {{ read_slice({value}, {count} as usize)? }}.iter().map(|item| -> Result<_> {{ Ok({converted}) }}).collect::<Result<Vec<_>>>()?"
-                )
+                if matches!((&element, pointee.as_ref()),
+                    (SemanticType::Scalar { name }, CType::Primitive(raw)) if name == raw.rust_type())
+                {
+                    format!("unsafe {{ read_slice({value}, {count} as usize)? }}.to_vec()")
+                } else {
+                    let converted = self.output_value(&element, pointee, "*item", None)?;
+                    format!(
+                        "unsafe {{ read_slice({value}, {count} as usize)? }}.iter().map(|item| -> Result<_> {{ Ok({converted}) }}).collect::<Result<Vec<_>>>()?"
+                    )
+                }
             }
             (
                 SemanticType::FixedArray { element, .. },
@@ -1109,6 +1125,7 @@ pub fn render_native_callins(
             raw,
             &values,
             &BTreeMap::from([("error".into(), "core::ptr::null()".into())]),
+            false,
         )?;
         let arena = if has_word(&setup, "inputs") {
             "inputs"

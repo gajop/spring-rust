@@ -30,10 +30,7 @@ pub(crate) mod units_query {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_closest_enemy_unit(
         engine: &crate::Backend<'_>,
@@ -98,10 +95,7 @@ pub(crate) mod units_query {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_render_units_draw_flag_changed(
         engine: &crate::Backend<'_>,
@@ -128,10 +122,7 @@ pub(crate) mod units_query {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_team_unit_count(
         engine: &crate::Backend<'_>,
@@ -211,10 +202,7 @@ pub(crate) mod units_query {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_team_units_by_defs(
         engine: &crate::Backend<'_>,
@@ -255,10 +243,7 @@ pub(crate) mod units_query {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_team_units_counts(
         engine: &crate::Backend<'_>,
@@ -535,10 +520,7 @@ pub(crate) mod units_query {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_units_in_cylinder(
         engine: &crate::Backend<'_>,
@@ -574,10 +556,7 @@ pub(crate) mod units_query {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_units_in_planes(
         engine: &crate::Backend<'_>,
@@ -606,10 +585,7 @@ pub(crate) mod units_query {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_units_in_rectangle(
         engine: &crate::Backend<'_>,
@@ -648,10 +624,7 @@ pub(crate) mod units_query {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_units_in_sphere(
         engine: &crate::Backend<'_>,
@@ -688,10 +661,7 @@ pub(crate) mod units_query {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn valid_unit_id(
         engine: &crate::Backend<'_>,
@@ -809,10 +779,7 @@ pub(crate) mod units_query {
     fn from_team_units_by_def(value: &sys::TeamUnitsByDef) -> Result<TeamUnitsByDef> {
         Ok(TeamUnitsByDef {
             unit_def_id: (value.unitDefID) as _,
-            units: unsafe { read_slice(value.units, value.count as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+            units: unsafe { read_slice(value.units, value.count as usize)? }.to_vec(),
         })
     }
     fn from_unit_def_count(value: &sys::UnitDefCount) -> Result<UnitDefCount> {
@@ -996,9 +963,10 @@ pub(crate) mod units_info {
         unit_id: i32,
         param_name: &str,
     ) -> Result<Option<NumberOrBool>> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let query = sys::GetUnitBuildParamsQuery {
             unitID: native_unit_id,
             paramName: native_param_name,
@@ -1632,9 +1600,7 @@ pub(crate) mod units_info {
         }
         Ok(GetUnitIsTransportingValue {
             unit_i_ds: unsafe { read_slice(result.unitIDs, result.count as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
             is_transporting: (result.isTransporting) as _,
         })
     }
@@ -1831,10 +1797,7 @@ pub(crate) mod units_info {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.pieces, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.pieces, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_unit_neutral(
         engine: &crate::Backend<'_>,
@@ -2082,9 +2045,10 @@ pub(crate) mod units_info {
         unit_id: i32,
         type_: &str,
     ) -> Result<UnitSensorRadius> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_type_ = inputs.string(type_)? as _;
+        let storage_type_ = std::ffi::CString::new(type_)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_type_ = storage_type_.as_ptr() as _;
         let query = sys::GetUnitSensorRadiusQuery {
             unitID: native_unit_id,
             type_: native_type_,
@@ -2614,7 +2578,6 @@ pub(crate) mod units_weapons {
         GetUnitWeaponTryTargetOptions, UnitWeaponDamages, UnitWeaponState,
         UnitWeaponTarget, UnitWeaponVectors,
     };
-    use alloc::vec::Vec;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
     use super::{Inputs, read_slice, check_error};
@@ -2782,10 +2745,11 @@ pub(crate) mod units_weapons {
         weapon_num: i32,
         key: &str,
     ) -> Result<UnitWeaponState> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
         let native_weapon_num = (weapon_num) as _;
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetUnitWeaponStateQuery {
             unitID: native_unit_id,
             weaponNum: native_weapon_num,
@@ -3034,9 +2998,7 @@ pub(crate) mod units_weapons {
     ) -> Result<UnitWeaponDamages> {
         Ok(UnitWeaponDamages {
             damages: unsafe { read_slice(value.damages, value.damageCount as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
             paralyze_damage_time: (value.paralyzeDamageTime) as _,
             impulse_factor: (value.impulseFactor) as _,
             impulse_boost: (value.impulseBoost) as _,
@@ -3155,10 +3117,7 @@ pub(crate) mod units_commands {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.params, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.params, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_command_queue(
         engine: &crate::Backend<'_>,
@@ -3371,10 +3330,7 @@ pub(crate) mod units_commands {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.unitDefIDs, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.unitDefIDs, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_unit_cmd_descs(
         engine: &crate::Backend<'_>,
@@ -3953,9 +3909,7 @@ pub(crate) mod units_commands {
             ai_command_id: (value.aiCommandID) as _,
             time_out: (value.timeOut) as _,
             params: unsafe { read_slice(value.params, value.paramCount as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     fn from_factory_queue_info(
@@ -3967,13 +3921,9 @@ pub(crate) mod units_commands {
             unit_def_i_ds: unsafe {
                 read_slice(value.unitDefIDs, value.uniqueCount as usize)?
             }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
             counts: unsafe { read_slice(value.counts, value.uniqueCount as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
 }
@@ -3986,7 +3936,7 @@ pub(crate) mod units_pieces {
     use alloc::string::String;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
-    use super::{Inputs, read_string, read_slice, check_error};
+    use super::{read_string, read_slice, check_error};
     pub(crate) fn get_feature_piece_direction(
         engine: &crate::Backend<'_>,
         feature_id: i32,
@@ -4231,8 +4181,9 @@ pub(crate) mod units_pieces {
         engine: &crate::Backend<'_>,
         model_name: &str,
     ) -> Result<Vec<String>> {
-        let mut inputs = Inputs::default();
-        let native_model_name = inputs.string(model_name)? as _;
+        let storage_model_name = std::ffi::CString::new(model_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_model_name = storage_model_name.as_ptr() as _;
         let query = sys::GetModelPieceListQuery {
             modelName: native_model_name,
         };
@@ -4262,8 +4213,9 @@ pub(crate) mod units_pieces {
         engine: &crate::Backend<'_>,
         model_name: &str,
     ) -> Result<Vec<PieceMapEntry>> {
-        let mut inputs = Inputs::default();
-        let native_model_name = inputs.string(model_name)? as _;
+        let storage_model_name = std::ffi::CString::new(model_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_model_name = storage_model_name.as_ptr() as _;
         let query = sys::GetModelPieceMapQuery {
             modelName: native_model_name,
         };
@@ -4291,8 +4243,9 @@ pub(crate) mod units_pieces {
         engine: &crate::Backend<'_>,
         model_name: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
-        let native_model_name = inputs.string(model_name)? as _;
+        let storage_model_name = std::ffi::CString::new(model_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_model_name = storage_model_name.as_ptr() as _;
         let query = sys::GetModelRootPieceQuery {
             modelName: native_model_name,
         };
@@ -4660,7 +4613,7 @@ pub(crate) mod teams {
     use alloc::string::String;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
-    use super::{Inputs, read_string, read_slice, check_error};
+    use super::{read_string, read_slice, check_error};
     pub(crate) fn are_players_allied(
         engine: &crate::Backend<'_>,
         player_id1: i32,
@@ -4788,10 +4741,7 @@ pub(crate) mod teams {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.allyTeams, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.allyTeams, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_player_controlled_unit(
         engine: &crate::Backend<'_>,
@@ -4877,10 +4827,7 @@ pub(crate) mod teams {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.players, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.players, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_player_list_in_ally_team(
         engine: &crate::Backend<'_>,
@@ -4907,10 +4854,7 @@ pub(crate) mod teams {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.players, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.players, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_player_list_in_team(
         engine: &crate::Backend<'_>,
@@ -4937,10 +4881,7 @@ pub(crate) mod teams {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.players, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.players, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_team_ally_team_id(
         engine: &crate::Backend<'_>,
@@ -5020,10 +4961,7 @@ pub(crate) mod teams {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.teams, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.teams, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_team_lua_ai(
         engine: &crate::Backend<'_>,
@@ -5080,9 +5018,10 @@ pub(crate) mod teams {
         team_id: i32,
         resource: &str,
     ) -> Result<TeamResources> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_resource = inputs.string(resource)? as _;
+        let storage_resource = std::ffi::CString::new(resource)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource = storage_resource.as_ptr() as _;
         let query = sys::GetTeamResourceStatsQuery {
             teamID: native_team_id,
             resource: native_resource,
@@ -5111,9 +5050,10 @@ pub(crate) mod teams {
         team_id: i32,
         resource: &str,
     ) -> Result<TeamResources> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_resource = inputs.string(resource)? as _;
+        let storage_resource = std::ffi::CString::new(resource)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource = storage_resource.as_ptr() as _;
         let query = sys::GetTeamResourcesQuery {
             teamID: native_team_id,
             resource: native_resource,
@@ -5373,10 +5313,7 @@ pub(crate) mod features {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.features, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.features, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_feature_ally_team(
         engine: &crate::Backend<'_>,
@@ -6220,10 +6157,7 @@ pub(crate) mod features {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.features, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.features, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_features_in_rectangle(
         engine: &crate::Backend<'_>,
@@ -6259,10 +6193,7 @@ pub(crate) mod features {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.features, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.features, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_features_in_sphere(
         engine: &crate::Backend<'_>,
@@ -6293,10 +6224,7 @@ pub(crate) mod features {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.features, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.features, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_render_features(
         engine: &crate::Backend<'_>,
@@ -6326,10 +6254,7 @@ pub(crate) mod features {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.features, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.features, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_render_features_draw_flag_changed(
         engine: &crate::Backend<'_>,
@@ -6356,10 +6281,7 @@ pub(crate) mod features {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.features, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.features, result.count as usize)? }.to_vec())
     }
     pub(crate) fn valid_feature_id(
         engine: &crate::Backend<'_>,
@@ -6547,10 +6469,7 @@ pub(crate) mod projectiles {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.projectiles, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.projectiles, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_piece_projectile_params(
         engine: &crate::Backend<'_>,
@@ -6614,9 +6533,10 @@ pub(crate) mod projectiles {
         projectile_id: i32,
         tag: &str,
     ) -> Result<ProjectileDamages> {
-        let mut inputs = Inputs::default();
         let native_projectile_id = (projectile_id) as _;
-        let native_tag = inputs.string(tag)? as _;
+        let storage_tag = std::ffi::CString::new(tag)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tag = storage_tag.as_ptr() as _;
         let query = sys::GetProjectileDamagesQuery {
             projectileID: native_projectile_id,
             tag: native_tag,
@@ -6981,10 +6901,7 @@ pub(crate) mod projectiles {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.projectiles, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.projectiles, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_projectiles_in_sphere(
         engine: &crate::Backend<'_>,
@@ -7021,10 +6938,7 @@ pub(crate) mod projectiles {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.projectiles, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.projectiles, result.count as usize)? }.to_vec())
     }
     fn to_float3(value: &Float3, _inputs: &mut Inputs) -> Result<sys::Float3> {
         let native_x = value.x as _;
@@ -7098,9 +7012,7 @@ pub(crate) mod projectiles {
     ) -> Result<ProjectileDamages> {
         Ok(ProjectileDamages {
             damages: unsafe { read_slice(value.damages, value.damageCount as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
             paralyze_damage_time: (value.paralyzeDamageTime) as _,
             impulse_factor: (value.impulseFactor) as _,
             impulse_boost: (value.impulseBoost) as _,
@@ -7429,7 +7341,7 @@ pub(crate) mod unit_defs {
     use alloc::string::String;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
-    use super::{Inputs, read_string, read_slice, check_error};
+    use super::{read_string, read_slice, check_error};
     pub(crate) fn get_unit_def_by_id(
         engine: &crate::Backend<'_>,
         unit_def_id: i32,
@@ -7544,9 +7456,10 @@ pub(crate) mod unit_defs {
         unit_def_id: i32,
         key: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
         let native_unit_def_id = (unit_def_id) as _;
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetUnitDefCustomParamQuery {
             unitDefID: native_unit_def_id,
             key: native_key,
@@ -7656,8 +7569,9 @@ pub(crate) mod unit_defs {
         engine: &crate::Backend<'_>,
         unit_def_name: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
-        let native_unit_def_name = inputs.string(unit_def_name)? as _;
+        let storage_unit_def_name = std::ffi::CString::new(unit_def_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_unit_def_name = storage_unit_def_name.as_ptr() as _;
         let query = sys::GetUnitDefIDByNameQuery {
             unitDefName: native_unit_def_name,
         };
@@ -7700,10 +7614,7 @@ pub(crate) mod unit_defs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.ids, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.ids, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_unit_def_name(
         engine: &crate::Backend<'_>,
@@ -7735,9 +7646,10 @@ pub(crate) mod unit_defs {
         unit_def_id: i32,
         key: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_def_id = (unit_def_id) as _;
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetUnitDefParamBoolQuery {
             unitDefID: native_unit_def_id,
             key: native_key,
@@ -7766,9 +7678,10 @@ pub(crate) mod unit_defs {
         unit_def_id: i32,
         key: &str,
     ) -> Result<f32> {
-        let mut inputs = Inputs::default();
         let native_unit_def_id = (unit_def_id) as _;
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetUnitDefParamFloatQuery {
             unitDefID: native_unit_def_id,
             key: native_key,
@@ -7797,9 +7710,10 @@ pub(crate) mod unit_defs {
         unit_def_id: i32,
         key: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
         let native_unit_def_id = (unit_def_id) as _;
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetUnitDefParamIntQuery {
             unitDefID: native_unit_def_id,
             key: native_key,
@@ -7857,9 +7771,10 @@ pub(crate) mod unit_defs {
         unit_def_id: i32,
         key: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
         let native_unit_def_id = (unit_def_id) as _;
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetUnitDefParamStringQuery {
             unitDefID: native_unit_def_id,
             key: native_key,
@@ -7887,8 +7802,9 @@ pub(crate) mod unit_defs {
         engine: &crate::Backend<'_>,
         key: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetUnitDefParamTypeQuery {
             key: native_key,
         };
@@ -7979,9 +7895,7 @@ pub(crate) mod unit_defs {
             buildable_unit_def_i_ds: unsafe {
                 read_slice(value.buildableUnitDefIDs, value.buildableCount as usize)?
             }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     fn from_unit_def_classify(value: &sys::UnitDefClassify) -> Result<UnitDefClassify> {
@@ -8059,9 +7973,7 @@ pub(crate) mod unit_defs {
             weapon_def_i_ds: unsafe {
                 read_slice(value.weaponDefIDs, value.weaponCount as usize)?
             }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
 }
@@ -8071,7 +7983,7 @@ pub(crate) mod feature_defs {
     use alloc::string::String;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
-    use super::{Inputs, read_string, read_slice, check_error};
+    use super::{read_string, read_slice, check_error};
     pub(crate) fn get_feature_def_by_id(
         engine: &crate::Backend<'_>,
         feature_def_id: i32,
@@ -8131,9 +8043,10 @@ pub(crate) mod feature_defs {
         feature_def_id: i32,
         key: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
         let native_feature_def_id = (feature_def_id) as _;
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetFeatureDefCustomParamQuery {
             featureDefID: native_feature_def_id,
             key: native_key,
@@ -8218,8 +8131,9 @@ pub(crate) mod feature_defs {
         engine: &crate::Backend<'_>,
         feature_def_name: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
-        let native_feature_def_name = inputs.string(feature_def_name)? as _;
+        let storage_feature_def_name = std::ffi::CString::new(feature_def_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_feature_def_name = storage_feature_def_name.as_ptr() as _;
         let query = sys::GetFeatureDefIDByNameQuery {
             featureDefName: native_feature_def_name,
         };
@@ -8262,10 +8176,7 @@ pub(crate) mod feature_defs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.ids, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.ids, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_feature_def_metal(
         engine: &crate::Backend<'_>,
@@ -8378,7 +8289,7 @@ pub(crate) mod weapon_defs {
     use alloc::string::String;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
-    use super::{Inputs, read_string, read_slice, check_error};
+    use super::{read_string, read_slice, check_error};
     pub(crate) fn get_weapon_def_by_id(
         engine: &crate::Backend<'_>,
         weapon_def_id: i32,
@@ -8436,9 +8347,10 @@ pub(crate) mod weapon_defs {
         weapon_def_id: i32,
         key: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
         let native_weapon_def_id = (weapon_def_id) as _;
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetWeaponDefCustomParamQuery {
             weaponDefID: native_weapon_def_id,
             key: native_key,
@@ -8523,8 +8435,9 @@ pub(crate) mod weapon_defs {
         engine: &crate::Backend<'_>,
         weapon_def_name: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
-        let native_weapon_def_name = inputs.string(weapon_def_name)? as _;
+        let storage_weapon_def_name = std::ffi::CString::new(weapon_def_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_weapon_def_name = storage_weapon_def_name.as_ptr() as _;
         let query = sys::GetWeaponDefIDQuery {
             weaponDefName: native_weapon_def_name,
         };
@@ -8565,10 +8478,7 @@ pub(crate) mod weapon_defs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.ids, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.ids, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_weapon_def_name(
         engine: &crate::Backend<'_>,
@@ -8705,7 +8615,7 @@ pub(crate) mod game {
     use alloc::string::String;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
-    use super::{Inputs, read_string, read_slice, check_error};
+    use super::{read_string, read_slice, check_error};
     pub(crate) fn are_helper_a_is_enabled(engine: &crate::Backend<'_>) -> Result<bool> {
         let native_unused = 0 as _;
         let query = sys::AreHelperAIsEnabledQuery {
@@ -9084,8 +8994,9 @@ pub(crate) mod game {
         engine: &crate::Backend<'_>,
         key: &str,
     ) -> Result<GetMapOptionValue> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetMapOptionQuery {
             key: native_key,
         };
@@ -9167,8 +9078,9 @@ pub(crate) mod game {
         engine: &crate::Backend<'_>,
         key: &str,
     ) -> Result<GetModOptionValue> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let query = sys::GetModOptionQuery {
             key: native_key,
         };
@@ -9221,8 +9133,9 @@ pub(crate) mod game {
         engine: &crate::Backend<'_>,
         side_name: &str,
     ) -> Result<SideData> {
-        let mut inputs = Inputs::default();
-        let native_side_name = inputs.string(side_name)? as _;
+        let storage_side_name = std::ffi::CString::new(side_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_side_name = storage_side_name.as_ptr() as _;
         let query = sys::GetSideDataQuery {
             sideName: native_side_name,
         };
@@ -9825,10 +9738,7 @@ pub(crate) mod terrain {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.heights, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.heights, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_ground_info(
         engine: &crate::Backend<'_>,
@@ -10718,8 +10628,9 @@ pub(crate) mod encoding {
         engine: &crate::Backend<'_>,
         text: &str,
     ) -> Result<Vec<u8>> {
-        let mut inputs = Inputs::default();
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let query = sys::DecodeBase64Query {
             text: native_text,
         };
@@ -10738,17 +10649,18 @@ pub(crate) mod encoding {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.decoded, result.decodedLength as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(
+            unsafe { read_slice(result.decoded, result.decodedLength as usize)? }
+                .to_vec(),
+        )
     }
     pub(crate) fn decode_base64_url(
         engine: &crate::Backend<'_>,
         text: &str,
     ) -> Result<Vec<u8>> {
-        let mut inputs = Inputs::default();
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let query = sys::DecodeBase64UrlQuery {
             text: native_text,
         };
@@ -10767,10 +10679,10 @@ pub(crate) mod encoding {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.decoded, result.decodedLength as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(
+            unsafe { read_slice(result.decoded, result.decodedLength as usize)? }
+                .to_vec(),
+        )
     }
     pub(crate) fn encode_base64(
         engine: &crate::Backend<'_>,
@@ -10851,8 +10763,9 @@ pub(crate) mod encoding {
         engine: &crate::Backend<'_>,
         text: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let query = sys::IsValidBase64Query {
             text: native_text,
         };
@@ -10877,8 +10790,9 @@ pub(crate) mod encoding {
         engine: &crate::Backend<'_>,
         text: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let query = sys::IsValidBase64UrlQuery {
             text: native_text,
         };
@@ -11169,10 +11083,7 @@ pub(crate) mod path_finder {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.costs, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.costs, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_path_way_points(
         engine: &crate::Backend<'_>,
@@ -11203,9 +11114,7 @@ pub(crate) mod path_finder {
                 .map(|item| -> Result<_> { from_float3(item) })
                 .collect::<Result<Vec<_>>>()?,
             starts: unsafe { read_slice(result.starts, result.startCount as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     pub(crate) fn init_path_node_costs_array(
@@ -11419,9 +11328,10 @@ pub(crate) mod rules_params {
         feature_id: i32,
         param_name: &str,
     ) -> Result<RulesParamValue> {
-        let mut inputs = Inputs::default();
         let native_feature_id = (feature_id) as _;
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let query = sys::GetFeatureRulesParamQuery {
             featureID: native_feature_id,
             paramName: native_param_name,
@@ -11484,8 +11394,9 @@ pub(crate) mod rules_params {
         engine: &crate::Backend<'_>,
         param_name: &str,
     ) -> Result<RulesParamValue> {
-        let mut inputs = Inputs::default();
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let query = sys::GetGameRulesParamQuery {
             paramName: native_param_name,
         };
@@ -11547,9 +11458,10 @@ pub(crate) mod rules_params {
         player_id: i32,
         param_name: &str,
     ) -> Result<RulesParamValue> {
-        let mut inputs = Inputs::default();
         let native_player_id = (player_id) as _;
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let query = sys::GetPlayerRulesParamQuery {
             playerID: native_player_id,
             paramName: native_param_name,
@@ -11613,9 +11525,10 @@ pub(crate) mod rules_params {
         team_id: i32,
         param_name: &str,
     ) -> Result<RulesParamValue> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let query = sys::GetTeamRulesParamQuery {
             teamID: native_team_id,
             paramName: native_param_name,
@@ -11679,9 +11592,10 @@ pub(crate) mod rules_params {
         unit_id: i32,
         param_name: &str,
     ) -> Result<RulesParamValue> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let query = sys::GetUnitRulesParamQuery {
             unitID: native_unit_id,
             paramName: native_param_name,
@@ -11749,7 +11663,9 @@ pub(crate) mod rules_params {
     ) -> Result<bool> {
         let mut inputs = Inputs::default();
         let native_feature_id = (feature_id) as _;
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let native_value = to_rules_param_value(value, &mut inputs)?;
         let native_los = (los) as _;
         let query = sys::SetFeatureRulesParamQuery {
@@ -11784,7 +11700,9 @@ pub(crate) mod rules_params {
         los: i32,
     ) -> Result<bool> {
         let mut inputs = Inputs::default();
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let native_value = to_rules_param_value(value, &mut inputs)?;
         let native_los = (los) as _;
         let query = sys::SetGameRulesParamQuery {
@@ -11820,7 +11738,9 @@ pub(crate) mod rules_params {
     ) -> Result<bool> {
         let mut inputs = Inputs::default();
         let native_player_id = (player_id) as _;
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let native_value = to_rules_param_value(value, &mut inputs)?;
         let native_los = (los) as _;
         let query = sys::SetPlayerRulesParamQuery {
@@ -11857,7 +11777,9 @@ pub(crate) mod rules_params {
     ) -> Result<bool> {
         let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let native_value = to_rules_param_value(value, &mut inputs)?;
         let native_los = (los) as _;
         let query = sys::SetTeamRulesParamQuery {
@@ -11894,7 +11816,9 @@ pub(crate) mod rules_params {
     ) -> Result<bool> {
         let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let native_value = to_rules_param_value(value, &mut inputs)?;
         let native_los = (los) as _;
         let query = sys::SetUnitRulesParamQuery {
@@ -12011,9 +11935,7 @@ pub(crate) mod move_ctrl {
                 .map(|item| -> Result<_> { from_path_waypoint(item) })
                 .collect::<Result<Vec<_>>>()?,
             starts: unsafe { read_slice(result.starts, result.startCount as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     pub(crate) fn get_unit_move_type_data(
@@ -13323,8 +13245,9 @@ pub(crate) mod input {
         engine: &crate::Backend<'_>,
         action: &str,
     ) -> Result<Vec<String>> {
-        let mut inputs = Inputs::default();
-        let native_action = inputs.string(action)? as _;
+        let storage_action = std::ffi::CString::new(action)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_action = storage_action.as_ptr() as _;
         let query = sys::GetActionHotKeysQuery {
             action: native_action,
         };
@@ -13464,9 +13387,12 @@ pub(crate) mod input {
         key_set1: &str,
         key_set2: &str,
     ) -> Result<Vec<KeyBindingEntry>> {
-        let mut inputs = Inputs::default();
-        let native_key_set1 = inputs.string(key_set1)? as _;
-        let native_key_set2 = inputs.string(key_set2)? as _;
+        let storage_key_set1 = std::ffi::CString::new(key_set1)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key_set1 = storage_key_set1.as_ptr() as _;
+        let storage_key_set2 = std::ffi::CString::new(key_set2)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key_set2 = storage_key_set2.as_ptr() as _;
         let query = sys::GetKeyBindingsQuery {
             keySet1: native_key_set1,
             keySet2: native_key_set2,
@@ -13495,8 +13421,9 @@ pub(crate) mod input {
         engine: &crate::Backend<'_>,
         key_sym: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
-        let native_key_sym = inputs.string(key_sym)? as _;
+        let storage_key_sym = std::ffi::CString::new(key_sym)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key_sym = storage_key_sym.as_ptr() as _;
         let query = sys::GetKeyCodeQuery {
             keySym: native_key_sym,
         };
@@ -13521,8 +13448,9 @@ pub(crate) mod input {
         engine: &crate::Backend<'_>,
         scan_symbol: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
-        let native_scan_symbol = inputs.string(scan_symbol)? as _;
+        let storage_scan_symbol = std::ffi::CString::new(scan_symbol)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_scan_symbol = storage_scan_symbol.as_ptr() as _;
         let query = sys::GetKeyFromScanSymbolQuery {
             scanSymbol: native_scan_symbol,
         };
@@ -13665,10 +13593,7 @@ pub(crate) mod input {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.pressed, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.pressed, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_mouse_cursor(engine: &crate::Backend<'_>) -> Result<String> {
         let native_unused = 0 as _;
@@ -13765,10 +13690,7 @@ pub(crate) mod input {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.keys, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.keys, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_pressed_scans(engine: &crate::Backend<'_>) -> Result<Vec<i32>> {
         let native_unused = 0 as _;
@@ -13790,10 +13712,7 @@ pub(crate) mod input {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.scans, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.scans, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_scan_symbol(
         engine: &crate::Backend<'_>,
@@ -13922,7 +13841,7 @@ pub(crate) mod input {
 pub(crate) mod debug_input {
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
-    use super::{Inputs, check_error};
+    use super::check_error;
     pub(crate) fn clear_emulated_input(
         engine: &crate::Backend<'_>,
         fire_releases: bool,
@@ -14069,8 +13988,9 @@ pub(crate) mod debug_input {
         start: u32,
         length: u32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_utf8_text = inputs.string(utf8_text)? as _;
+        let storage_utf8_text = std::ffi::CString::new(utf8_text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_utf8_text = storage_utf8_text.as_ptr() as _;
         let native_start = (start) as _;
         let native_length = (length) as _;
         let query = sys::EmulateTextEditingQuery {
@@ -14101,8 +14021,9 @@ pub(crate) mod debug_input {
         engine: &crate::Backend<'_>,
         utf8_text: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_utf8_text = inputs.string(utf8_text)? as _;
+        let storage_utf8_text = std::ffi::CString::new(utf8_text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_utf8_text = storage_utf8_text.as_ptr() as _;
         let query = sys::EmulateTextInputQuery {
             utf8Text: native_utf8_text,
         };
@@ -14957,10 +14878,7 @@ pub(crate) mod selection {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.groups, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.groups, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_group_units(
         engine: &crate::Backend<'_>,
@@ -14985,10 +14903,7 @@ pub(crate) mod selection {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_group_units_count(
         engine: &crate::Backend<'_>,
@@ -15116,10 +15031,7 @@ pub(crate) mod selection {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_selected_units_count(engine: &crate::Backend<'_>) -> Result<u32> {
         let native_unused = 0 as _;
@@ -15195,10 +15107,7 @@ pub(crate) mod selection {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.units, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.units, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_unit_group(
         engine: &crate::Backend<'_>,
@@ -15328,22 +15237,15 @@ pub(crate) mod selection {
             unit_def_i_ds: unsafe {
                 read_slice(value.unitDefIDs, value.uniqueCount as usize)?
             }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
             counts: unsafe { read_slice(value.counts, value.uniqueCount as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     fn from_team_units_by_def(value: &sys::TeamUnitsByDef) -> Result<TeamUnitsByDef> {
         Ok(TeamUnitsByDef {
             unit_def_id: (value.unitDefID) as _,
-            units: unsafe { read_slice(value.units, value.count as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+            units: unsafe { read_slice(value.units, value.count as usize)? }.to_vec(),
         })
     }
 }
@@ -15457,8 +15359,9 @@ pub(crate) mod sound {
         engine: &crate::Backend<'_>,
         sound_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_sound_name = inputs.string(sound_name)? as _;
+        let storage_sound_name = std::ffi::CString::new(sound_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_sound_name = storage_sound_name.as_ptr() as _;
         let query = sys::LoadSoundDefQuery {
             soundName: native_sound_name,
         };
@@ -15510,7 +15413,9 @@ pub(crate) mod sound {
         channel: i32,
     ) -> Result<bool> {
         let mut inputs = Inputs::default();
-        let native_sound_file = inputs.string(sound_file)? as _;
+        let storage_sound_file = std::ffi::CString::new(sound_file)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_sound_file = storage_sound_file.as_ptr() as _;
         let native_volume = (volume) as _;
         let native_pos = to_float3(&(pos), &mut inputs)?;
         let native_velocity = to_float3(&(velocity), &mut inputs)?;
@@ -15545,8 +15450,9 @@ pub(crate) mod sound {
         volume: f32,
         enqueue: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_ogg_file = inputs.string(ogg_file)? as _;
+        let storage_ogg_file = std::ffi::CString::new(ogg_file)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_ogg_file = storage_ogg_file.as_ptr() as _;
         let native_volume = (volume) as _;
         let native_enqueue = (enqueue) as _;
         let query = sys::PlaySoundStreamQuery {
@@ -15575,8 +15481,9 @@ pub(crate) mod sound {
         engine: &crate::Backend<'_>,
         sound_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_sound_name = inputs.string(sound_name)? as _;
+        let storage_sound_name = std::ffi::CString::new(sound_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_sound_name = storage_sound_name.as_ptr() as _;
         let query = sys::PreloadSoundItemQuery {
             soundName: native_sound_name,
         };
@@ -15700,15 +15607,18 @@ pub(crate) mod messages {
     use alloc::string::String;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
-    use super::{Inputs, read_string, read_slice, check_error};
+    use super::{read_string, read_slice, check_error};
     pub(crate) fn echo(
         engine: &crate::Backend<'_>,
         message: &str,
         rest: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
-        let native_rest = inputs.string(rest)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
+        let storage_rest = std::ffi::CString::new(rest)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_rest = storage_rest.as_ptr() as _;
         let query = sys::EchoQuery {
             message: native_message,
             rest: native_rest,
@@ -15808,10 +15718,13 @@ pub(crate) mod messages {
         level: i32,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_section = inputs.string(section)? as _;
+        let storage_section = std::ffi::CString::new(section)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_section = storage_section.as_ptr() as _;
         let native_level = (level) as _;
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::LogQuery {
             section: native_section,
             level: native_level,
@@ -15836,8 +15749,9 @@ pub(crate) mod messages {
         engine: &crate::Backend<'_>,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendAllyChatQuery {
             message: native_message,
         };
@@ -15863,9 +15777,12 @@ pub(crate) mod messages {
         command: &str,
         rest: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_command = inputs.string(command)? as _;
-        let native_rest = inputs.string(rest)? as _;
+        let storage_command = std::ffi::CString::new(command)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_command = storage_command.as_ptr() as _;
+        let storage_rest = std::ffi::CString::new(rest)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_rest = storage_rest.as_ptr() as _;
         let query = sys::SendCommandsQuery {
             command: native_command,
             rest: native_rest,
@@ -15891,8 +15808,9 @@ pub(crate) mod messages {
         engine: &crate::Backend<'_>,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendLuaGaiaQuery {
             message: native_message,
         };
@@ -15917,8 +15835,9 @@ pub(crate) mod messages {
         engine: &crate::Backend<'_>,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendLuaMenuMsgQuery {
             message: native_message,
         };
@@ -15943,8 +15862,9 @@ pub(crate) mod messages {
         engine: &crate::Backend<'_>,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendLuaRulesQuery {
             message: native_message,
         };
@@ -15970,9 +15890,12 @@ pub(crate) mod messages {
         message: &str,
         mode: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let query = sys::SendLuaUIQuery {
             message: native_message,
             mode: native_mode,
@@ -15998,8 +15921,9 @@ pub(crate) mod messages {
         engine: &crate::Backend<'_>,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendMessageQuery {
             message: native_message,
         };
@@ -16025,9 +15949,10 @@ pub(crate) mod messages {
         ally_team_id: i32,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_ally_team_id = (ally_team_id) as _;
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendMessageToAllyTeamQuery {
             allyTeamID: native_ally_team_id,
             message: native_message,
@@ -16056,9 +15981,10 @@ pub(crate) mod messages {
         player_id: i32,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_player_id = (player_id) as _;
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendMessageToPlayerQuery {
             playerID: native_player_id,
             message: native_message,
@@ -16086,8 +16012,9 @@ pub(crate) mod messages {
         engine: &crate::Backend<'_>,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendMessageToSpectatorsQuery {
             message: native_message,
         };
@@ -16115,9 +16042,10 @@ pub(crate) mod messages {
         team_id: i32,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendMessageToTeamQuery {
             teamID: native_team_id,
             message: native_message,
@@ -16146,8 +16074,9 @@ pub(crate) mod messages {
         message: &str,
         player_id: i32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let native_player_id = (player_id) as _;
         let query = sys::SendPrivateChatQuery {
             message: native_message,
@@ -16174,8 +16103,9 @@ pub(crate) mod messages {
         engine: &crate::Backend<'_>,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendPublicChatQuery {
             message: native_message,
         };
@@ -16201,9 +16131,10 @@ pub(crate) mod messages {
         ai_id: i32,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_ai_id = (ai_id) as _;
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendSkirmishAIMessageQuery {
             aiID: native_ai_id,
             message: native_message,
@@ -16231,8 +16162,9 @@ pub(crate) mod messages {
         engine: &crate::Backend<'_>,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendSpectatorChatQuery {
             message: native_message,
         };
@@ -16259,8 +16191,9 @@ pub(crate) mod messages {
         engine: &crate::Backend<'_>,
         message: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let query = sys::SendToUnsyncedQuery {
             message: native_message,
         };
@@ -16303,8 +16236,9 @@ pub(crate) mod config {
         key: &str,
         default_value: Option<f32>,
     ) -> Result<GetConfigFloatValue> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let native_default_value = match &(default_value) {
             Some(value) => *(value) as _,
             None => unsafe { core::mem::zeroed() }
@@ -16339,8 +16273,9 @@ pub(crate) mod config {
         key: &str,
         default_value: Option<i32>,
     ) -> Result<GetConfigIntValue> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let native_default_value = match &(default_value) {
             Some(value) => *(value) as _,
             None => unsafe { core::mem::zeroed() }
@@ -16403,7 +16338,9 @@ pub(crate) mod config {
         default_value: Option<&str>,
     ) -> Result<GetConfigStringValue> {
         let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let native_default_value = match &(default_value) {
             Some(value) => inputs.string(value)? as _,
             None => unsafe { core::mem::zeroed() }
@@ -16464,8 +16401,9 @@ pub(crate) mod config {
         value: f32,
         use_overlay: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let native_value = (value) as _;
         let native_use_overlay = (use_overlay) as _;
         let query = sys::SetConfigFloatQuery {
@@ -16496,8 +16434,9 @@ pub(crate) mod config {
         value: i32,
         use_overlay: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let native_value = (value) as _;
         let native_use_overlay = (use_overlay) as _;
         let query = sys::SetConfigIntQuery {
@@ -16528,9 +16467,12 @@ pub(crate) mod config {
         value: &str,
         use_overlay: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let native_use_overlay = (use_overlay) as _;
         let query = sys::SetConfigStringQuery {
             key: native_key,
@@ -16559,8 +16501,9 @@ pub(crate) mod config {
         section: &str,
         level: i32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_section = inputs.string(section)? as _;
+        let storage_section = std::ffi::CString::new(section)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_section = storage_section.as_ptr() as _;
         let native_level = (level) as _;
         let query = sys::SetLogSectionFilterLevelQuery {
             section: native_section,
@@ -16653,7 +16596,9 @@ pub(crate) mod tracing {
         let mut inputs = Inputs::default();
         let native_start = to_float3(&(start), &mut inputs)?;
         let native_end = to_float3(&(end), &mut inputs)?;
-        let native_type_ = inputs.string(type_)? as _;
+        let storage_type_ = std::ffi::CString::new(type_)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_type_ = storage_type_.as_ptr() as _;
         let query = sys::TraceRayBetweenPositionsQuery {
             start: native_start,
             end: native_end,
@@ -16808,7 +16753,9 @@ pub(crate) mod tracing {
         let native_pos = to_float3(&(pos), &mut inputs)?;
         let native_dir = to_float3(&(dir), &mut inputs)?;
         let native_options = to_trace_ray_in_direction_options(&(options), &mut inputs)?;
-        let native_type_ = inputs.string(type_)? as _;
+        let storage_type_ = std::ffi::CString::new(type_)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_type_ = storage_type_.as_ptr() as _;
         let query = sys::TraceRayInDirectionQuery {
             pos: native_pos,
             dir: native_dir,
@@ -17002,8 +16949,9 @@ pub(crate) mod utils {
         from_float3(&(result.buildPos))
     }
     pub(crate) fn get_cegid(engine: &crate::Backend<'_>, ceg_name: &str) -> Result<i32> {
-        let mut inputs = Inputs::default();
-        let native_ceg_name = inputs.string(ceg_name)? as _;
+        let storage_ceg_name = std::ffi::CString::new(ceg_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_ceg_name = storage_ceg_name.as_ptr() as _;
         let query = sys::GetCEGIDQuery {
             cegName: native_ceg_name,
         };
@@ -17246,9 +17194,12 @@ pub(crate) mod unsynced_ctrl {
         overwrite: bool,
         hot_spot_top_left: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_command_name = inputs.string(command_name)? as _;
-        let native_cursor_file_name = inputs.string(cursor_file_name)? as _;
+        let storage_command_name = std::ffi::CString::new(command_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_command_name = storage_command_name.as_ptr() as _;
+        let storage_cursor_file_name = std::ffi::CString::new(cursor_file_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_cursor_file_name = storage_cursor_file_name.as_ptr() as _;
         let native_overwrite = (overwrite) as _;
         let native_hot_spot_top_left = (hot_spot_top_left) as _;
         let query = sys::AssignMouseCursorQuery {
@@ -17412,8 +17363,9 @@ pub(crate) mod unsynced_ctrl {
         engine: &crate::Backend<'_>,
         tex_type: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
-        let native_tex_type = inputs.string(tex_type)? as _;
+        let storage_tex_type = std::ffi::CString::new(tex_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tex_type = storage_tex_type.as_ptr() as _;
         let query = sys::GetWaterTextureQuery {
             texType: native_tex_type,
         };
@@ -17438,8 +17390,9 @@ pub(crate) mod unsynced_ctrl {
         engine: &crate::Backend<'_>,
         filename: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_filename = inputs.string(filename)? as _;
+        let storage_filename = std::ffi::CString::new(filename)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_filename = storage_filename.as_ptr() as _;
         let query = sys::LoadCmdColorsConfigQuery {
             filename: native_filename,
         };
@@ -17466,8 +17419,9 @@ pub(crate) mod unsynced_ctrl {
         engine: &crate::Backend<'_>,
         filename: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_filename = inputs.string(filename)? as _;
+        let storage_filename = std::ffi::CString::new(filename)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_filename = storage_filename.as_ptr() as _;
         let query = sys::LoadCtrlPanelConfigQuery {
             filename: native_filename,
         };
@@ -17494,8 +17448,9 @@ pub(crate) mod unsynced_ctrl {
         engine: &crate::Backend<'_>,
         model_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_model_name = inputs.string(model_name)? as _;
+        let storage_model_name = std::ffi::CString::new(model_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_model_name = storage_model_name.as_ptr() as _;
         let query = sys::LoadModelTexturesQuery {
             modelName: native_model_name,
         };
@@ -17603,9 +17558,12 @@ pub(crate) mod unsynced_ctrl {
         new_cursor_file_name: &str,
         hot_spot_top_left: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_old_cursor_file_name = inputs.string(old_cursor_file_name)? as _;
-        let native_new_cursor_file_name = inputs.string(new_cursor_file_name)? as _;
+        let storage_old_cursor_file_name = std::ffi::CString::new(old_cursor_file_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_old_cursor_file_name = storage_old_cursor_file_name.as_ptr() as _;
+        let storage_new_cursor_file_name = std::ffi::CString::new(new_cursor_file_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_new_cursor_file_name = storage_new_cursor_file_name.as_ptr() as _;
         let native_hot_spot_top_left = (hot_spot_top_left) as _;
         let query = sys::ReplaceMouseCursorQuery {
             oldCursorFileName: native_old_cursor_file_name,
@@ -17994,8 +17952,9 @@ pub(crate) mod unsynced_ctrl {
         engine: &crate::Backend<'_>,
         text: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let query = sys::SetClipboardQuery {
             text: native_text,
         };
@@ -18877,9 +18836,12 @@ pub(crate) mod unsynced_ctrl {
         tex_name: &str,
         num: i32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_tex_type = inputs.string(tex_type)? as _;
-        let native_tex_name = inputs.string(tex_name)? as _;
+        let storage_tex_type = std::ffi::CString::new(tex_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tex_type = storage_tex_type.as_ptr() as _;
+        let storage_tex_name = std::ffi::CString::new(tex_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tex_name = storage_tex_name.as_ptr() as _;
         let native_num = (num) as _;
         let query = sys::SetMapShadingTextureQuery {
             texType: native_tex_type,
@@ -18940,8 +18902,9 @@ pub(crate) mod unsynced_ctrl {
         cursor_name: &str,
         scale: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_cursor_name = inputs.string(cursor_name)? as _;
+        let storage_cursor_name = std::ffi::CString::new(cursor_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_cursor_name = storage_cursor_name.as_ptr() as _;
         let native_scale = (scale) as _;
         let query = sys::SetMouseCursorQuery {
             cursorName: native_cursor_name,
@@ -19071,8 +19034,9 @@ pub(crate) mod unsynced_ctrl {
         engine: &crate::Backend<'_>,
         tex_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_tex_name = inputs.string(tex_name)? as _;
+        let storage_tex_name = std::ffi::CString::new(tex_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tex_name = storage_tex_name.as_ptr() as _;
         let query = sys::SetSkyBoxTextureQuery {
             texName: native_tex_name,
         };
@@ -19183,9 +19147,10 @@ pub(crate) mod unsynced_ctrl {
         unit_def_id: i32,
         icon_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_def_id = (unit_def_id) as _;
-        let native_icon_name = inputs.string(icon_name)? as _;
+        let storage_icon_name = std::ffi::CString::new(icon_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_icon_name = storage_icon_name.as_ptr() as _;
         let query = sys::SetUnitDefIconQuery {
             unitDefID: native_unit_def_id,
             iconName: native_icon_name,
@@ -19212,9 +19177,10 @@ pub(crate) mod unsynced_ctrl {
         unit_def_id: i32,
         image: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_def_id = (unit_def_id) as _;
-        let native_image = inputs.string(image)? as _;
+        let storage_image = std::ffi::CString::new(image)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_image = storage_image.as_ptr() as _;
         let query = sys::SetUnitDefImageQuery {
             unitDefID: native_unit_def_id,
             image: native_image,
@@ -19271,9 +19237,10 @@ pub(crate) mod unsynced_ctrl {
         unit_id: i32,
         icon_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_icon_name = inputs.string(icon_name)? as _;
+        let storage_icon_name = std::ffi::CString::new(icon_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_icon_name = storage_icon_name.as_ptr() as _;
         let query = sys::SetUnitIconQuery {
             unitID: native_unit_id,
             iconName: native_icon_name,
@@ -19582,9 +19549,12 @@ pub(crate) mod unsynced_ctrl {
         title: &str,
         title_short: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_title = inputs.string(title)? as _;
-        let native_title_short = inputs.string(title_short)? as _;
+        let storage_title = std::ffi::CString::new(title)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_title = storage_title.as_ptr() as _;
+        let storage_title_short = std::ffi::CString::new(title_short)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_title_short = storage_title_short.as_ptr() as _;
         let query = sys::SetWMCaptionQuery {
             title: native_title,
             titleShort: native_title_short,
@@ -19611,8 +19581,9 @@ pub(crate) mod unsynced_ctrl {
         icon_file_name: &str,
         force_resolution: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_icon_file_name = inputs.string(icon_file_name)? as _;
+        let storage_icon_file_name = std::ffi::CString::new(icon_file_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_icon_file_name = storage_icon_file_name.as_ptr() as _;
         let native_force_resolution = (force_resolution) as _;
         let query = sys::SetWMIconQuery {
             iconFileName: native_icon_file_name,
@@ -19664,9 +19635,12 @@ pub(crate) mod unsynced_ctrl {
         tex_type: &str,
         tex_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_tex_type = inputs.string(tex_type)? as _;
-        let native_tex_name = inputs.string(tex_name)? as _;
+        let storage_tex_type = std::ffi::CString::new(tex_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tex_type = storage_tex_type.as_ptr() as _;
+        let storage_tex_name = std::ffi::CString::new(tex_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tex_name = storage_tex_name.as_ptr() as _;
         let query = sys::SetWaterTextureQuery {
             texType: native_tex_type,
             texName: native_tex_name,
@@ -20642,9 +20616,12 @@ pub(crate) mod gfx {
         atlas_name: &str,
         texture_name: &str,
     ) -> Result<()> {
-        let mut inputs = Inputs::default();
-        let native_atlas_name = inputs.string(atlas_name)? as _;
-        let native_texture_name = inputs.string(texture_name)? as _;
+        let storage_atlas_name = std::ffi::CString::new(atlas_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_atlas_name = storage_atlas_name.as_ptr() as _;
+        let storage_texture_name = std::ffi::CString::new(texture_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_texture_name = storage_texture_name.as_ptr() as _;
         let query = sys::GfxAtlasTextureQuery {
             atlasName: native_atlas_name,
             textureName: native_texture_name,
@@ -20670,8 +20647,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::GfxStringQuery {
             value: native_value,
         };
@@ -21113,9 +21091,10 @@ pub(crate) mod gfx {
         access: u32,
         format: u32,
     ) -> Result<()> {
-        let mut inputs = Inputs::default();
         let native_unit = (unit) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_level = (level) as _;
         let native_layer = (layer) as _;
         let native_layered = (layered) as _;
@@ -21153,8 +21132,9 @@ pub(crate) mod gfx {
         tex_num: i32,
         enable: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_tex_num = (tex_num) as _;
         let native_enable = (enable) as _;
         let query = sys::GfxTextureBindQuery {
@@ -21391,7 +21371,9 @@ pub(crate) mod gfx {
         params: GfxTextureParams,
     ) -> Result<()> {
         let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_params = to_gfx_texture_params(&(params), &mut inputs)?;
         let query = sys::GfxChangeTextureParamsQuery {
             name: native_name,
@@ -21727,8 +21709,9 @@ pub(crate) mod gfx {
         target: u32,
         level: u32,
     ) -> Result<()> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_xoff = (xoff) as _;
         let native_yoff = (yoff) as _;
         let native_x = (x) as _;
@@ -22047,13 +22030,27 @@ pub(crate) mod gfx {
         options: GfxCreateShaderOptions,
     ) -> Result<CreateShaderValue> {
         let mut inputs = Inputs::default();
-        let native_definitions = inputs.string(definitions)? as _;
-        let native_vertex = inputs.string(vertex)? as _;
-        let native_tcs = inputs.string(tcs)? as _;
-        let native_tes = inputs.string(tes)? as _;
-        let native_geometry = inputs.string(geometry)? as _;
-        let native_fragment = inputs.string(fragment)? as _;
-        let native_compute = inputs.string(compute)? as _;
+        let storage_definitions = std::ffi::CString::new(definitions)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_definitions = storage_definitions.as_ptr() as _;
+        let storage_vertex = std::ffi::CString::new(vertex)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_vertex = storage_vertex.as_ptr() as _;
+        let storage_tcs = std::ffi::CString::new(tcs)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tcs = storage_tcs.as_ptr() as _;
+        let storage_tes = std::ffi::CString::new(tes)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tes = storage_tes.as_ptr() as _;
+        let storage_geometry = std::ffi::CString::new(geometry)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_geometry = storage_geometry.as_ptr() as _;
+        let storage_fragment = std::ffi::CString::new(fragment)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_fragment = storage_fragment.as_ptr() as _;
+        let storage_compute = std::ffi::CString::new(compute)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_compute = storage_compute.as_ptr() as _;
         let native_options = to_gfx_create_shader_options(&(options), &mut inputs)?;
         let query = sys::GfxCreateShaderQuery {
             definitions: native_definitions,
@@ -22430,8 +22427,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::GfxTextureNameQuery {
             name: native_name,
         };
@@ -22456,8 +22454,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::GfxTextureNameQuery {
             name: native_name,
         };
@@ -22482,8 +22481,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::GfxTextureNameQuery {
             name: native_name,
         };
@@ -22679,10 +22679,7 @@ pub(crate) mod gfx {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.values, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.values, result.count as usize)? }.to_vec())
     }
     pub(crate) fn draw_arrays_vao(
         engine: &crate::Backend<'_>,
@@ -23289,8 +23286,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::GfxTextureNameQuery {
             name: native_name,
         };
@@ -23471,13 +23469,16 @@ pub(crate) mod gfx {
         size: f32,
         options: &str,
     ) -> Result<FontGetTextHeightValue> {
-        let mut inputs = Inputs::default();
         let native_font_id = (font_id) as _;
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let native_x = (x) as _;
         let native_y = (y) as _;
         let native_size = (size) as _;
-        let native_options = inputs.string(options)? as _;
+        let storage_options = std::ffi::CString::new(options)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_options = storage_options.as_ptr() as _;
         let query = sys::GfxFontTextQuery {
             fontID: native_font_id,
             text: native_text,
@@ -23516,13 +23517,16 @@ pub(crate) mod gfx {
         size: f32,
         options: &str,
     ) -> Result<f32> {
-        let mut inputs = Inputs::default();
         let native_font_id = (font_id) as _;
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let native_x = (x) as _;
         let native_y = (y) as _;
         let native_size = (size) as _;
-        let native_options = inputs.string(options)? as _;
+        let storage_options = std::ffi::CString::new(options)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_options = storage_options.as_ptr() as _;
         let query = sys::GfxFontTextQuery {
             fontID: native_font_id,
             text: native_text,
@@ -23557,13 +23561,16 @@ pub(crate) mod gfx {
         size: f32,
         options: &str,
     ) -> Result<()> {
-        let mut inputs = Inputs::default();
         let native_font_id = (font_id) as _;
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let native_x = (x) as _;
         let native_y = (y) as _;
         let native_size = (size) as _;
-        let native_options = inputs.string(options)? as _;
+        let storage_options = std::ffi::CString::new(options)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_options = storage_options.as_ptr() as _;
         let query = sys::GfxFontTextQuery {
             fontID: native_font_id,
             text: native_text,
@@ -23597,10 +23604,14 @@ pub(crate) mod gfx {
     ) -> Result<()> {
         let mut inputs = Inputs::default();
         let native_font_id = (font_id) as _;
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let native_pos = to_float3(&(pos), &mut inputs)?;
         let native_size = (size) as _;
-        let native_options = inputs.string(options)? as _;
+        let storage_options = std::ffi::CString::new(options)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_options = storage_options.as_ptr() as _;
         let query = sys::GfxFontWorldTextQuery {
             fontID: native_font_id,
             text: native_text,
@@ -23767,9 +23778,10 @@ pub(crate) mod gfx {
         max_height: f32,
         size: f32,
     ) -> Result<FontWrapTextValue> {
-        let mut inputs = Inputs::default();
         let native_font_id = (font_id) as _;
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let native_max_width = (max_width) as _;
         let native_max_height = (max_height) as _;
         let native_size = (size) as _;
@@ -23842,8 +23854,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<()> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::GfxTextureNameQuery {
             name: native_name,
         };
@@ -23899,9 +23912,12 @@ pub(crate) mod gfx {
         atlas_name: &str,
         texture_name: &str,
     ) -> Result<GetAtlasTextureValue> {
-        let mut inputs = Inputs::default();
-        let native_atlas_name = inputs.string(atlas_name)? as _;
-        let native_texture_name = inputs.string(texture_name)? as _;
+        let storage_atlas_name = std::ffi::CString::new(atlas_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_atlas_name = storage_atlas_name.as_ptr() as _;
+        let storage_texture_name = std::ffi::CString::new(texture_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_texture_name = storage_texture_name.as_ptr() as _;
         let query = sys::GfxAtlasTextureQuery {
             atlasName: native_atlas_name,
             textureName: native_texture_name,
@@ -23934,9 +23950,12 @@ pub(crate) mod gfx {
         key: &str,
         mode: &str,
     ) -> Result<GetAtmosphereValue> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let query = sys::GfxValueQuery {
             key: native_key,
             mode: native_mode,
@@ -24003,8 +24022,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<Vec<GfxAtlasTextureEntry>> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::GfxTextureNameQuery {
             name: native_name,
         };
@@ -24139,8 +24159,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         param: &str,
     ) -> Result<GetFixedStateValue> {
-        let mut inputs = Inputs::default();
-        let native_param = inputs.string(param)? as _;
+        let storage_param = std::ffi::CString::new(param)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param = storage_param.as_ptr() as _;
         let query = sys::GfxFixedStateQuery {
             param: native_param,
         };
@@ -24217,8 +24238,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         value: &str,
     ) -> Result<GetGlobalTexCoordsValue> {
-        let mut inputs = Inputs::default();
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::GfxStringQuery {
             value: native_value,
         };
@@ -24297,9 +24319,12 @@ pub(crate) mod gfx {
         key: &str,
         mode: &str,
     ) -> Result<GetMapRenderingValue> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let query = sys::GfxValueQuery {
             key: native_key,
             mode: native_mode,
@@ -24542,10 +24567,11 @@ pub(crate) mod gfx {
         shader_type: u32,
         name: &str,
     ) -> Result<GetSubroutineIndexValue> {
-        let mut inputs = Inputs::default();
         let native_shader_id = (shader_id) as _;
         let native_shader_type = (shader_type) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::GfxSubroutineIndexQuery {
             shaderID: native_shader_id,
             shaderType: native_shader_type,
@@ -24578,9 +24604,12 @@ pub(crate) mod gfx {
         key: &str,
         mode: &str,
     ) -> Result<GetSunValue> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let query = sys::GfxValueQuery {
             key: native_key,
             mode: native_mode,
@@ -24616,8 +24645,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         value: &str,
     ) -> Result<GetTextHeightValue> {
-        let mut inputs = Inputs::default();
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::GfxStringQuery {
             value: native_value,
         };
@@ -24646,8 +24676,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         value: &str,
     ) -> Result<f32> {
-        let mut inputs = Inputs::default();
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::GfxStringQuery {
             value: native_value,
         };
@@ -24673,9 +24704,10 @@ pub(crate) mod gfx {
         shader_id: u32,
         name: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
         let native_shader_id = (shader_id) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::GfxUniformLocationQuery {
             shaderID: native_shader_id,
             name: native_name,
@@ -24846,9 +24878,12 @@ pub(crate) mod gfx {
         key: &str,
         mode: &str,
     ) -> Result<GetWaterRenderingValue> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let query = sys::GfxValueQuery {
             key: native_key,
             mode: native_mode,
@@ -24886,8 +24921,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::GfxStringQuery {
             value: native_value,
         };
@@ -25301,8 +25337,9 @@ pub(crate) mod gfx {
         outline_width: i32,
         outline_weight: f32,
     ) -> Result<u32> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
         let native_size = (size) as _;
         let native_outline_width = (outline_width) as _;
         let native_outline_weight = (outline_weight) as _;
@@ -25767,10 +25804,11 @@ pub(crate) mod gfx {
         object_id: u32,
         label: &str,
     ) -> Result<()> {
-        let mut inputs = Inputs::default();
         let native_identifier = (identifier) as _;
         let native_object_id = (object_id) as _;
-        let native_label = inputs.string(label)? as _;
+        let storage_label = std::ffi::CString::new(label)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_label = storage_label.as_ptr() as _;
         let query = sys::GfxObjectLabelQuery {
             identifier: native_identifier,
             objectID: native_object_id,
@@ -26062,9 +26100,10 @@ pub(crate) mod gfx {
         message: &str,
         source_is_third_party: bool,
     ) -> Result<()> {
-        let mut inputs = Inputs::default();
         let native_id = (id) as _;
-        let native_message = inputs.string(message)? as _;
+        let storage_message = std::ffi::CString::new(message)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_message = storage_message.as_ptr() as _;
         let native_source_is_third_party = (source_is_third_party) as _;
         let query = sys::GfxPushDebugGroupQuery {
             id: native_id,
@@ -26219,9 +26258,7 @@ pub(crate) mod gfx {
         }
         Ok(ReadPixelsValue {
             values: unsafe { read_slice(result.values, result.count as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
             components: (result.components) as _,
         })
     }
@@ -26254,10 +26291,7 @@ pub(crate) mod gfx {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.values, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.values, result.count as usize)? }.to_vec())
     }
     pub(crate) fn rect(
         engine: &crate::Backend<'_>,
@@ -26331,8 +26365,9 @@ pub(crate) mod gfx {
             engine,
             callback,
             |callback, user_data| {
-                let mut inputs = Inputs::default();
-                let native_name = inputs.string(name)? as _;
+                let storage_name = std::ffi::CString::new(name)
+                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+                let native_name = storage_name.as_ptr() as _;
                 let query = sys::GfxRenderToTextureQuery {
                     name: native_name,
                     callback,
@@ -26485,7 +26520,9 @@ pub(crate) mod gfx {
         let native_y = (y) as _;
         let native_width = (width) as _;
         let native_height = (height) as _;
-        let native_filename = inputs.string(filename)? as _;
+        let storage_filename = std::ffi::CString::new(filename)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_filename = storage_filename.as_ptr() as _;
         let native_options = to_gfx_save_image_options(&(options), &mut inputs)?;
         let native_read_buffer = (read_buffer) as _;
         let query = sys::GfxSaveImageQuery {
@@ -26614,10 +26651,11 @@ pub(crate) mod gfx {
         rbo_id: u32,
         use_rbo: bool,
     ) -> Result<()> {
-        let mut inputs = Inputs::default();
         let native_fbo_id = (fbo_id) as _;
         let native_attachment = (attachment) as _;
-        let native_texture_name = inputs.string(texture_name)? as _;
+        let storage_texture_name = std::ffi::CString::new(texture_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_texture_name = storage_texture_name.as_ptr() as _;
         let native_texture_target = (texture_target) as _;
         let native_mip_level = (mip_level) as _;
         let native_rbo_id = (rbo_id) as _;
@@ -27381,12 +27419,15 @@ pub(crate) mod gfx {
         size: f32,
         options: &str,
     ) -> Result<()> {
-        let mut inputs = Inputs::default();
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let native_x = (x) as _;
         let native_y = (y) as _;
         let native_size = (size) as _;
-        let native_options = inputs.string(options)? as _;
+        let storage_options = std::ffi::CString::new(options)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_options = storage_options.as_ptr() as _;
         let query = sys::GfxTextQuery {
             text: native_text,
             x: native_x,
@@ -27454,8 +27495,9 @@ pub(crate) mod gfx {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<TextureInfoValue> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::GfxTextureNameQuery {
             name: native_name,
         };
@@ -28091,7 +28133,9 @@ pub(crate) mod gfx {
         data: &[u8],
     ) -> Result<()> {
         let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_target = (target) as _;
         let native_level = (level) as _;
         let native_xoff = (xoff) as _;
@@ -28994,7 +29038,7 @@ pub(crate) mod icons {
     use alloc::vec::Vec;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
-    use super::{Inputs, read_string, read_slice, check_error};
+    use super::{read_string, read_slice, check_error};
     pub(crate) fn add_unit_icon(
         engine: &crate::Backend<'_>,
         icon_name: &str,
@@ -29007,9 +29051,12 @@ pub(crate) mod icons {
         u1: f32,
         v1: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_icon_name = inputs.string(icon_name)? as _;
-        let native_tex_file = inputs.string(tex_file)? as _;
+        let storage_icon_name = std::ffi::CString::new(icon_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_icon_name = storage_icon_name.as_ptr() as _;
+        let storage_tex_file = std::ffi::CString::new(tex_file)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tex_file = storage_tex_file.as_ptr() as _;
         let native_size = (size) as _;
         let native_distance = (distance) as _;
         let native_radius_adjust = (radius_adjust) as _;
@@ -29049,8 +29096,9 @@ pub(crate) mod icons {
         engine: &crate::Backend<'_>,
         icon_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_icon_name = inputs.string(icon_name)? as _;
+        let storage_icon_name = std::ffi::CString::new(icon_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_icon_name = storage_icon_name.as_ptr() as _;
         let query = sys::FreeUnitIconQuery {
             iconName: native_icon_name,
         };
@@ -29106,8 +29154,9 @@ pub(crate) mod icons {
         icon_name: &str,
         full_data: bool,
     ) -> Result<IconDataEntry> {
-        let mut inputs = Inputs::default();
-        let native_icon_name = inputs.string(icon_name)? as _;
+        let storage_icon_name = std::ffi::CString::new(icon_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_icon_name = storage_icon_name.as_ptr() as _;
         let native_full_data = (full_data) as _;
         let query = sys::GetIconDataQuery {
             iconName: native_icon_name,
@@ -29236,7 +29285,9 @@ pub(crate) mod markers {
         pos: Float3,
     ) -> Result<bool> {
         let mut inputs = Inputs::default();
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let native_pos = to_float3(&(pos), &mut inputs)?;
         let query = sys::AddWorldTextQuery {
             text: native_text,
@@ -29338,7 +29389,9 @@ pub(crate) mod markers {
     ) -> Result<bool> {
         let mut inputs = Inputs::default();
         let native_pos = to_float3(&(pos), &mut inputs)?;
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let native_local_only = (local_only) as _;
         let native_player_id = (player_id) as _;
         let query = sys::MarkerAddPointQuery {
@@ -29518,10 +29571,7 @@ pub(crate) mod ground_decals {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.decalIDs, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.decalIDs, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_ground_decal_alpha(
         engine: &crate::Backend<'_>,
@@ -30340,9 +30390,10 @@ pub(crate) mod ground_decals {
         texture_name: &str,
         main_tex: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_decal_id = (decal_id) as _;
-        let native_texture_name = inputs.string(texture_name)? as _;
+        let storage_texture_name = std::ffi::CString::new(texture_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_texture_name = storage_texture_name.as_ptr() as _;
         let native_main_tex = (main_tex) as _;
         let query = sys::SetGroundDecalTextureQuery {
             decalID: native_decal_id,
@@ -30551,8 +30602,9 @@ pub(crate) mod system_control {
         thread_name: &str,
         keep_stopped: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_thread_name = inputs.string(thread_name)? as _;
+        let storage_thread_name = std::ffi::CString::new(thread_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_thread_name = storage_thread_name.as_ptr() as _;
         let native_keep_stopped = (keep_stopped) as _;
         let query = sys::ClearWatchDogTimerQuery {
             threadName: native_thread_name,
@@ -30925,8 +30977,9 @@ pub(crate) mod system_control {
         engine: &crate::Backend<'_>,
         start_script: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_start_script = inputs.string(start_script)? as _;
+        let storage_start_script = std::ffi::CString::new(start_script)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_start_script = storage_start_script.as_ptr() as _;
         let query = sys::ReloadQuery {
             startScript: native_start_script,
         };
@@ -30981,9 +31034,12 @@ pub(crate) mod system_control {
         cmd_args: &str,
         start_script: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_cmd_args = inputs.string(cmd_args)? as _;
-        let native_start_script = inputs.string(start_script)? as _;
+        let storage_cmd_args = std::ffi::CString::new(cmd_args)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_cmd_args = storage_cmd_args.as_ptr() as _;
+        let storage_start_script = std::ffi::CString::new(start_script)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_start_script = storage_start_script.as_ptr() as _;
         let query = sys::RestartQuery {
             cmdArgs: native_cmd_args,
             startScript: native_start_script,
@@ -31008,8 +31064,9 @@ pub(crate) mod system_control {
         resource: &str,
         level: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_resource = inputs.string(resource)? as _;
+        let storage_resource = std::ffi::CString::new(resource)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource = storage_resource.as_ptr() as _;
         let native_level = (level) as _;
         let query = sys::SetShareLevelQuery {
             resource: native_resource,
@@ -31038,9 +31095,10 @@ pub(crate) mod system_control {
         resource: &str,
         amount: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_resource = inputs.string(resource)? as _;
+        let storage_resource = std::ffi::CString::new(resource)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource = storage_resource.as_ptr() as _;
         let native_amount = (amount) as _;
         let query = sys::ShareResourcesQuery {
             teamID: native_team_id,
@@ -31069,9 +31127,12 @@ pub(crate) mod system_control {
         cmd_args: &str,
         start_script: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_cmd_args = inputs.string(cmd_args)? as _;
-        let native_start_script = inputs.string(start_script)? as _;
+        let storage_cmd_args = std::ffi::CString::new(cmd_args)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_cmd_args = storage_cmd_args.as_ptr() as _;
+        let storage_start_script = std::ffi::CString::new(start_script)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_start_script = storage_start_script.as_ptr() as _;
         let query = sys::StartQuery {
             cmdArgs: native_cmd_args,
             startScript: native_start_script,
@@ -31278,8 +31339,9 @@ pub(crate) mod profiling {
         name: &str,
         include_frame_data: bool,
     ) -> Result<GetProfilerTimeRecordValue> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_include_frame_data = (include_frame_data) as _;
         let query = sys::GetProfilerTimeRecordQuery {
             name: native_name,
@@ -31311,9 +31373,7 @@ pub(crate) mod profiling {
             frame_data: unsafe {
                 read_slice(result.frameData, result.frameCount as usize)?
             }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     pub(crate) fn get_synced_gc_info(
@@ -31460,9 +31520,12 @@ pub(crate) mod rml_ui {
         key: &str,
         translation: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_key = inputs.string(key)? as _;
-        let native_translation = inputs.string(translation)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
+        let storage_translation = std::ffi::CString::new(translation)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_translation = storage_translation.as_ptr() as _;
         let query = sys::RmlAddTranslationStringQuery {
             key: native_key,
             translation: native_translation,
@@ -31490,8 +31553,9 @@ pub(crate) mod rml_ui {
         engine: &crate::Backend<'_>,
         document_path: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_document_path = inputs.string(document_path)? as _;
+        let storage_document_path = std::ffi::CString::new(document_path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_document_path = storage_document_path.as_ptr() as _;
         let query = sys::RmlClearDocumentPathRequestsQuery {
             documentPath: native_document_path,
         };
@@ -31544,9 +31608,10 @@ pub(crate) mod rml_ui {
         name: &str,
         value: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_context_handle = (context_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_value = (value) as _;
         let query = sys::RmlContextStringBoolQuery {
             contextHandle: native_context_handle,
@@ -31585,9 +31650,10 @@ pub(crate) mod rml_ui {
     ) -> Result<ContextAddEventListenerValue> {
         let id = crate::callbacks::register::<E, F>(engine, None, callback)?;
         let result = (|| {
-            let mut inputs = Inputs::default();
             let native_context_handle = (context_handle) as _;
-            let native_event = inputs.string(event)? as _;
+            let storage_event = std::ffi::CString::new(event)
+                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+            let native_event = storage_event.as_ptr() as _;
             let native_in_capture_phase = (in_capture_phase) as _;
             let query = sys::RmlContextEventListenerCallbackQuery {
                 contextHandle: native_context_handle,
@@ -31629,9 +31695,10 @@ pub(crate) mod rml_ui {
         context_handle: u64,
         name: &str,
     ) -> Result<ContextCreateDataModelValue> {
-        let mut inputs = Inputs::default();
         let native_context_handle = (context_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlContextCreateDataModelQuery {
             contextHandle: native_context_handle,
             name: native_name,
@@ -31663,9 +31730,10 @@ pub(crate) mod rml_ui {
         context_handle: u64,
         tag: &str,
     ) -> Result<ContextCreateDocumentValue> {
-        let mut inputs = Inputs::default();
         let native_context_handle = (context_handle) as _;
-        let native_tag = inputs.string(tag)? as _;
+        let storage_tag = std::ffi::CString::new(tag)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tag = storage_tag.as_ptr() as _;
         let query = sys::RmlContextCreateDocumentQuery {
             contextHandle: native_context_handle,
             tag: native_tag,
@@ -31782,9 +31850,10 @@ pub(crate) mod rml_ui {
         context_handle: u64,
         name: &str,
     ) -> Result<ContextGetDocumentValue> {
-        let mut inputs = Inputs::default();
         let native_context_handle = (context_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlContextGetDocumentQuery {
             contextHandle: native_context_handle,
             name: native_name,
@@ -31997,9 +32066,10 @@ pub(crate) mod rml_ui {
         context_handle: u64,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_context_handle = (context_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlContextStringQuery {
             contextHandle: native_context_handle,
             name: native_name,
@@ -32026,9 +32096,10 @@ pub(crate) mod rml_ui {
         context_handle: u64,
         document_path: &str,
     ) -> Result<ContextLoadDocumentValue> {
-        let mut inputs = Inputs::default();
         let native_context_handle = (context_handle) as _;
-        let native_document_path = inputs.string(document_path)? as _;
+        let storage_document_path = std::ffi::CString::new(document_path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_document_path = storage_document_path.as_ptr() as _;
         let query = sys::RmlContextLoadDocumentQuery {
             contextHandle: native_context_handle,
             documentPath: native_document_path,
@@ -32060,9 +32131,10 @@ pub(crate) mod rml_ui {
         context_handle: u64,
         name: &str,
     ) -> Result<ContextOpenDataModelValue> {
-        let mut inputs = Inputs::default();
         let native_context_handle = (context_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlContextOpenDataModelQuery {
             contextHandle: native_context_handle,
             name: native_name,
@@ -32311,9 +32383,10 @@ pub(crate) mod rml_ui {
         context_handle: u64,
         text: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_context_handle = (context_handle) as _;
-        let native_text = inputs.string(text)? as _;
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
         let query = sys::RmlContextTextInputQuery {
             contextHandle: native_context_handle,
             text: native_text,
@@ -32421,9 +32494,10 @@ pub(crate) mod rml_ui {
         context_handle: u64,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_context_handle = (context_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlContextStringQuery {
             contextHandle: native_context_handle,
             name: native_name,
@@ -32452,10 +32526,11 @@ pub(crate) mod rml_ui {
         event: &str,
         in_capture_phase: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_context_handle = (context_handle) as _;
         let native_event_listener_handle = (event_listener_handle) as _;
-        let native_event = inputs.string(event)? as _;
+        let storage_event = std::ffi::CString::new(event)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_event = storage_event.as_ptr() as _;
         let native_in_capture_phase = (in_capture_phase) as _;
         let query = sys::RmlContextEventListenerRemoveQuery {
             contextHandle: native_context_handle,
@@ -32711,8 +32786,9 @@ pub(crate) mod rml_ui {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<CreateContextValue> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlCreateContextQuery {
             name: native_name,
         };
@@ -32742,9 +32818,10 @@ pub(crate) mod rml_ui {
         name: &str,
         initial_value: bool,
     ) -> Result<DataModelBindBoolValue> {
-        let mut inputs = Inputs::default();
         let native_data_model_handle = (data_model_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_initial_value = (initial_value) as _;
         let query = sys::RmlDataModelBindBoolQuery {
             dataModelHandle: native_data_model_handle,
@@ -32780,9 +32857,10 @@ pub(crate) mod rml_ui {
         blue: u8,
         alpha: u8,
     ) -> Result<DataModelBindColorValue> {
-        let mut inputs = Inputs::default();
         let native_data_model_handle = (data_model_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_red = (red) as _;
         let native_green = (green) as _;
         let native_blue = (blue) as _;
@@ -32835,7 +32913,9 @@ pub(crate) mod rml_ui {
         let result = (|| {
             let mut inputs = Inputs::default();
             let native_data_model_handle = (data_model_handle) as _;
-            let native_name = inputs.string(name)? as _;
+            let storage_name = std::ffi::CString::new(name)
+                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+            let native_name = storage_name.as_ptr() as _;
             let native_field_types = {
                 let mut converted: Vec<u8> = Vec::with_capacity((field_types).len());
                 for item in (field_types).iter() {
@@ -32888,9 +32968,10 @@ pub(crate) mod rml_ui {
         name: &str,
         initial_value: f32,
     ) -> Result<DataModelBindFloatValue> {
-        let mut inputs = Inputs::default();
         let native_data_model_handle = (data_model_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_initial_value = (initial_value) as _;
         let query = sys::RmlDataModelBindFloatQuery {
             dataModelHandle: native_data_model_handle,
@@ -32923,9 +33004,10 @@ pub(crate) mod rml_ui {
         name: &str,
         initial_value: i32,
     ) -> Result<DataModelBindIntValue> {
-        let mut inputs = Inputs::default();
         let native_data_model_handle = (data_model_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_initial_value = (initial_value) as _;
         let query = sys::RmlDataModelBindIntQuery {
             dataModelHandle: native_data_model_handle,
@@ -32958,9 +33040,10 @@ pub(crate) mod rml_ui {
         name: &str,
         initial_value: f32,
     ) -> Result<DataModelBindPercentValue> {
-        let mut inputs = Inputs::default();
         let native_data_model_handle = (data_model_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_initial_value = (initial_value) as _;
         let query = sys::RmlDataModelBindPercentQuery {
             dataModelHandle: native_data_model_handle,
@@ -32993,9 +33076,10 @@ pub(crate) mod rml_ui {
         name: &str,
         initial_value: f32,
     ) -> Result<DataModelBindPixelsValue> {
-        let mut inputs = Inputs::default();
         let native_data_model_handle = (data_model_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_initial_value = (initial_value) as _;
         let query = sys::RmlDataModelBindPixelsQuery {
             dataModelHandle: native_data_model_handle,
@@ -33030,7 +33114,9 @@ pub(crate) mod rml_ui {
     ) -> Result<DataModelBindRowsValue> {
         let mut inputs = Inputs::default();
         let native_data_model_handle = (data_model_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_fields = {
             let mut converted: Vec<sys::RmlDataFieldDef> = Vec::with_capacity(
                 (fields).len(),
@@ -33075,10 +33161,13 @@ pub(crate) mod rml_ui {
         name: &str,
         initial_value: &str,
     ) -> Result<DataModelBindStringValue> {
-        let mut inputs = Inputs::default();
         let native_data_model_handle = (data_model_handle) as _;
-        let native_name = inputs.string(name)? as _;
-        let native_initial_value = inputs.string(initial_value)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
+        let storage_initial_value = std::ffi::CString::new(initial_value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_initial_value = storage_initial_value.as_ptr() as _;
         let query = sys::RmlDataModelBindStringQuery {
             dataModelHandle: native_data_model_handle,
             name: native_name,
@@ -33540,9 +33629,10 @@ pub(crate) mod rml_ui {
         variable_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_variable_handle = (variable_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlDataModelVariableStringQuery {
             variableHandle: native_variable_handle,
             value: native_value,
@@ -33594,9 +33684,10 @@ pub(crate) mod rml_ui {
         document_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_document_handle = (document_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlDocumentStringQuery {
             documentHandle: native_document_handle,
             value: native_value,
@@ -33648,9 +33739,10 @@ pub(crate) mod rml_ui {
         document_handle: u64,
         tag_name: &str,
     ) -> Result<DocumentCreateElementValue> {
-        let mut inputs = Inputs::default();
         let native_document_handle = (document_handle) as _;
-        let native_tag_name = inputs.string(tag_name)? as _;
+        let storage_tag_name = std::ffi::CString::new(tag_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tag_name = storage_tag_name.as_ptr() as _;
         let query = sys::RmlDocumentCreateElementQuery {
             documentHandle: native_document_handle,
             tagName: native_tag_name,
@@ -33682,9 +33774,10 @@ pub(crate) mod rml_ui {
         document_handle: u64,
         value: &str,
     ) -> Result<DocumentCreateTextNodeValue> {
-        let mut inputs = Inputs::default();
         let native_document_handle = (document_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlDocumentStringQuery {
             documentHandle: native_document_handle,
             value: native_value,
@@ -33850,9 +33943,10 @@ pub(crate) mod rml_ui {
         document_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_document_handle = (document_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlDocumentStringQuery {
             documentHandle: native_document_handle,
             value: native_value,
@@ -33881,10 +33975,13 @@ pub(crate) mod rml_ui {
         source_path: &str,
         source_line: i32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_document_handle = (document_handle) as _;
-        let native_content = inputs.string(content)? as _;
-        let native_source_path = inputs.string(source_path)? as _;
+        let storage_content = std::ffi::CString::new(content)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_content = storage_content.as_ptr() as _;
+        let storage_source_path = std::ffi::CString::new(source_path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_source_path = storage_source_path.as_ptr() as _;
         let native_source_line = (source_line) as _;
         let query = sys::RmlDocumentInlineScriptQuery {
             documentHandle: native_document_handle,
@@ -33989,9 +34086,10 @@ pub(crate) mod rml_ui {
         document_handle: u64,
         title: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_document_handle = (document_handle) as _;
-        let native_title = inputs.string(title)? as _;
+        let storage_title = std::ffi::CString::new(title)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_title = storage_title.as_ptr() as _;
         let query = sys::RmlDocumentSetTitleQuery {
             documentHandle: native_document_handle,
             title: native_title,
@@ -34082,9 +34180,10 @@ pub(crate) mod rml_ui {
     ) -> Result<ElementAddEventListenerValue> {
         let id = crate::callbacks::register::<E, F>(engine, None, callback)?;
         let result = (|| {
-            let mut inputs = Inputs::default();
             let native_element_handle = (element_handle) as _;
-            let native_event = inputs.string(event)? as _;
+            let storage_event = std::ffi::CString::new(event)
+                .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+            let native_event = storage_event.as_ptr() as _;
             let native_in_capture_phase = (in_capture_phase) as _;
             let query = sys::RmlEventListenerCallbackQuery {
                 elementHandle: native_element_handle,
@@ -34159,9 +34258,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -34268,9 +34368,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<ElementClosestValue> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -34302,9 +34403,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         event: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_event = inputs.string(event)? as _;
+        let storage_event = std::ffi::CString::new(event)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_event = storage_event.as_ptr() as _;
         let query = sys::RmlElementDispatchEventQuery {
             elementHandle: native_element_handle,
             event: native_event,
@@ -34617,10 +34719,13 @@ pub(crate) mod rml_ui {
         name: &str,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_name = inputs.string(name)? as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementFormSubmitQuery {
             elementHandle: native_element_handle,
             name: native_name,
@@ -34678,9 +34783,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         name: &str,
     ) -> Result<ElementGetAttributeValue> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlElementGetAttributeQuery {
             elementHandle: native_element_handle,
             name: native_name,
@@ -34772,9 +34878,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<ElementGetElementByIdValue> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -34806,9 +34913,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<Vec<u64>> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -34830,19 +34938,22 @@ pub(crate) mod rml_ui {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.elementHandles, result.elementHandleCount as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(
+            unsafe {
+                read_slice(result.elementHandles, result.elementHandleCount as usize)?
+            }
+                .to_vec(),
+        )
     }
     pub(crate) fn element_get_elements_by_class_name_count(
         engine: &crate::Backend<'_>,
         element_handle: u64,
         value: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -34869,9 +34980,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<Vec<u64>> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -34893,19 +35005,22 @@ pub(crate) mod rml_ui {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.elementHandles, result.elementHandleCount as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(
+            unsafe {
+                read_slice(result.elementHandles, result.elementHandleCount as usize)?
+            }
+                .to_vec(),
+        )
     }
     pub(crate) fn element_get_elements_by_tag_name_count(
         engine: &crate::Backend<'_>,
         element_handle: u64,
         value: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35122,9 +35237,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35212,9 +35328,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35272,9 +35389,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35326,9 +35444,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35383,9 +35502,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<ElementQuerySelectorValue> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35417,9 +35537,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<Vec<u64>> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35441,19 +35562,22 @@ pub(crate) mod rml_ui {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.elementHandles, result.elementHandleCount as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(
+            unsafe {
+                read_slice(result.elementHandles, result.elementHandleCount as usize)?
+            }
+                .to_vec(),
+        )
     }
     pub(crate) fn element_query_selector_all_count(
         engine: &crate::Backend<'_>,
         element_handle: u64,
         value: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35480,9 +35604,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementGetByStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35544,10 +35669,11 @@ pub(crate) mod rml_ui {
         event: &str,
         in_capture_phase: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
         let native_event_listener_handle = (event_listener_handle) as _;
-        let native_event = inputs.string(event)? as _;
+        let storage_event = std::ffi::CString::new(event)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_event = storage_event.as_ptr() as _;
         let native_in_capture_phase = (in_capture_phase) as _;
         let query = sys::RmlElementEventListenerRemoveQuery {
             elementHandle: native_element_handle,
@@ -35642,10 +35768,13 @@ pub(crate) mod rml_ui {
         name: &str,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_name = inputs.string(name)? as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementSetAttributeQuery {
             elementHandle: native_element_handle,
             name: native_name,
@@ -35674,9 +35803,10 @@ pub(crate) mod rml_ui {
         name: &str,
         value: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_value = (value) as _;
         let query = sys::RmlElementStringBoolQuery {
             elementHandle: native_element_handle,
@@ -35705,9 +35835,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementSetStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35734,9 +35865,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementSetStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35763,9 +35895,10 @@ pub(crate) mod rml_ui {
         element_handle: u64,
         value: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_value = inputs.string(value)? as _;
+        let storage_value = std::ffi::CString::new(value)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_value = storage_value.as_ptr() as _;
         let query = sys::RmlElementSetStringQuery {
             elementHandle: native_element_handle,
             value: native_value,
@@ -35793,9 +35926,10 @@ pub(crate) mod rml_ui {
         name: &str,
         value: bool,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let native_value = (value) as _;
         let query = sys::RmlElementStringBoolQuery {
             elementHandle: native_element_handle,
@@ -35909,10 +36043,11 @@ pub(crate) mod rml_ui {
         index: i32,
         rml: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
         let native_index = (index) as _;
-        let native_rml = inputs.string(rml)? as _;
+        let storage_rml = std::ffi::CString::new(rml)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_rml = storage_rml.as_ptr() as _;
         let query = sys::RmlElementTabSetIndexStringQuery {
             elementHandle: native_element_handle,
             index: native_index,
@@ -35941,10 +36076,11 @@ pub(crate) mod rml_ui {
         index: i32,
         rml: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_element_handle = (element_handle) as _;
         let native_index = (index) as _;
-        let native_rml = inputs.string(rml)? as _;
+        let storage_rml = std::ffi::CString::new(rml)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_rml = storage_rml.as_ptr() as _;
         let query = sys::RmlElementTabSetIndexStringQuery {
             elementHandle: native_element_handle,
             index: native_index,
@@ -36031,9 +36167,10 @@ pub(crate) mod rml_ui {
         event_handle: u64,
         name: &str,
     ) -> Result<EventGetParameterBoolValue> {
-        let mut inputs = Inputs::default();
         let native_event_handle = (event_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlEventParameterQuery {
             eventHandle: native_event_handle,
             name: native_name,
@@ -36063,9 +36200,10 @@ pub(crate) mod rml_ui {
         event_handle: u64,
         name: &str,
     ) -> Result<EventGetParameterFloatValue> {
-        let mut inputs = Inputs::default();
         let native_event_handle = (event_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlEventParameterQuery {
             eventHandle: native_event_handle,
             name: native_name,
@@ -36095,9 +36233,10 @@ pub(crate) mod rml_ui {
         event_handle: u64,
         name: &str,
     ) -> Result<EventGetParameterIntValue> {
-        let mut inputs = Inputs::default();
         let native_event_handle = (event_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlEventParameterQuery {
             eventHandle: native_event_handle,
             name: native_name,
@@ -36127,9 +36266,10 @@ pub(crate) mod rml_ui {
         event_handle: u64,
         name: &str,
     ) -> Result<EventGetParameterStringValue> {
-        let mut inputs = Inputs::default();
         let native_event_handle = (event_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlEventParameterQuery {
             eventHandle: native_event_handle,
             name: native_name,
@@ -36161,9 +36301,10 @@ pub(crate) mod rml_ui {
         event_handle: u64,
         name: &str,
     ) -> Result<EventGetParameterTypeValue> {
-        let mut inputs = Inputs::default();
         let native_event_handle = (event_handle) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlEventParameterQuery {
             eventHandle: native_event_handle,
             name: native_name,
@@ -36498,8 +36639,9 @@ pub(crate) mod rml_ui {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<GetContextValue> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlGetContextQuery {
             name: native_name,
         };
@@ -36527,8 +36669,9 @@ pub(crate) mod rml_ui {
         engine: &crate::Backend<'_>,
         document_path: &str,
     ) -> Result<Vec<String>> {
-        let mut inputs = Inputs::default();
-        let native_document_path = inputs.string(document_path)? as _;
+        let storage_document_path = std::ffi::CString::new(document_path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_document_path = storage_document_path.as_ptr() as _;
         let query = sys::RmlGetDocumentPathRequestsQuery {
             documentPath: native_document_path,
         };
@@ -36602,8 +36745,9 @@ pub(crate) mod rml_ui {
         fallback: bool,
         weight: Option<i32>,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_file_path = inputs.string(file_path)? as _;
+        let storage_file_path = std::ffi::CString::new(file_path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_file_path = storage_file_path.as_ptr() as _;
         let native_fallback = (fallback) as _;
         let native_weight = match &(weight) {
             Some(value) => *(value) as _,
@@ -36638,7 +36782,9 @@ pub(crate) mod rml_ui {
         options: RmlRegisterEventTypeOptions,
     ) -> Result<i32> {
         let mut inputs = Inputs::default();
-        let native_event_type = inputs.string(event_type)? as _;
+        let storage_event_type = std::ffi::CString::new(event_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_event_type = storage_event_type.as_ptr() as _;
         let native_options = to_rml_register_event_type_options(
             &(options),
             &mut inputs,
@@ -36672,7 +36818,9 @@ pub(crate) mod rml_ui {
         options: RmlRegisterEventTypeOptions,
     ) -> Result<i32> {
         let mut inputs = Inputs::default();
-        let native_event_type = inputs.string(event_type)? as _;
+        let storage_event_type = std::ffi::CString::new(event_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_event_type = storage_event_type.as_ptr() as _;
         let native_options = to_rml_register_event_type_options(
             &(options),
             &mut inputs,
@@ -36729,8 +36877,9 @@ pub(crate) mod rml_ui {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlRemoveContextByNameQuery {
             name: native_name,
         };
@@ -36784,8 +36933,9 @@ pub(crate) mod rml_ui {
         engine: &crate::Backend<'_>,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::RmlSetDebugContextByNameQuery {
             name: native_name,
         };
@@ -36813,9 +36963,12 @@ pub(crate) mod rml_ui {
         rml_name: &str,
         recoil_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_rml_name = inputs.string(rml_name)? as _;
-        let native_recoil_name = inputs.string(recoil_name)? as _;
+        let storage_rml_name = std::ffi::CString::new(rml_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_rml_name = storage_rml_name.as_ptr() as _;
+        let storage_recoil_name = std::ffi::CString::new(recoil_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_recoil_name = storage_recoil_name.as_ptr() as _;
         let query = sys::RmlSetMouseCursorAliasQuery {
             rmlName: native_rml_name,
             recoilName: native_recoil_name,
@@ -36844,9 +36997,10 @@ pub(crate) mod rml_ui {
         data_model_handle: u64,
         property: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_data_model_handle = (data_model_handle) as _;
-        let native_property = inputs.string(property)? as _;
+        let storage_property = std::ffi::CString::new(property)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_property = storage_property.as_ptr() as _;
         let query = sys::RmlSolLuaDataModelSetDirtyQuery {
             dataModelHandle: native_data_model_handle,
             property: native_property,
@@ -37082,12 +37236,19 @@ pub(crate) mod vfs {
         include_folder: bool,
         mode: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_folder_path = inputs.string(folder_path)? as _;
-        let native_archive_type = inputs.string(archive_type)? as _;
-        let native_compressed_file_path = inputs.string(compressed_file_path)? as _;
+        let storage_folder_path = std::ffi::CString::new(folder_path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_folder_path = storage_folder_path.as_ptr() as _;
+        let storage_archive_type = std::ffi::CString::new(archive_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_archive_type = storage_archive_type.as_ptr() as _;
+        let storage_compressed_file_path = std::ffi::CString::new(compressed_file_path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_compressed_file_path = storage_compressed_file_path.as_ptr() as _;
         let native_include_folder = (include_folder) as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let query = sys::CompressFolderQuery {
             folderPath: native_folder_path,
             archiveType: native_archive_type,
@@ -37113,8 +37274,9 @@ pub(crate) mod vfs {
         Ok((result.success) as _)
     }
     pub(crate) fn create_dir(engine: &crate::Backend<'_>, path: &str) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
         let query = sys::CreateDirQuery {
             path: native_path,
         };
@@ -37140,10 +37302,15 @@ pub(crate) mod vfs {
         mode: &str,
         recursive: bool,
     ) -> Result<Vec<DirEntry>> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
-        let native_pattern = inputs.string(pattern)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
+        let storage_pattern = std::ffi::CString::new(pattern)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_pattern = storage_pattern.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let native_recursive = (recursive) as _;
         let query = sys::ListDirQuery {
             path: native_path,
@@ -37174,9 +37341,12 @@ pub(crate) mod vfs {
         filename: &str,
         category: &str,
     ) -> Result<()> {
-        let mut inputs = Inputs::default();
-        let native_filename = inputs.string(filename)? as _;
-        let native_category = inputs.string(category)? as _;
+        let storage_filename = std::ffi::CString::new(filename)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_filename = storage_filename.as_ptr() as _;
+        let storage_category = std::ffi::CString::new(category)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_category = storage_category.as_ptr() as _;
         let query = sys::DownloadArchiveQuery {
             filename: native_filename,
             category: native_category,
@@ -37202,8 +37372,9 @@ pub(crate) mod vfs {
         engine: &crate::Backend<'_>,
         path: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
         let query = sys::ExtractModArchiveFileQuery {
             path: native_path,
         };
@@ -37227,8 +37398,9 @@ pub(crate) mod vfs {
         Ok((result.success) as _)
     }
     pub(crate) fn file_exists(engine: &crate::Backend<'_>, path: &str) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
         let query = sys::FileExistsQuery {
             path: native_path,
         };
@@ -37278,8 +37450,9 @@ pub(crate) mod vfs {
         engine: &crate::Backend<'_>,
         archive_name: &str,
     ) -> Result<GetArchiveChecksumValue> {
-        let mut inputs = Inputs::default();
-        let native_archive_name = inputs.string(archive_name)? as _;
+        let storage_archive_name = std::ffi::CString::new(archive_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_archive_name = storage_archive_name.as_ptr() as _;
         let query = sys::GetArchiveChecksumQuery {
             archiveName: native_archive_name,
         };
@@ -37310,9 +37483,12 @@ pub(crate) mod vfs {
         path: &str,
         mode: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let query = sys::GetArchiveContainingFileQuery {
             path: native_path,
             mode: native_mode,
@@ -37340,8 +37516,9 @@ pub(crate) mod vfs {
         engine: &crate::Backend<'_>,
         archive_name: &str,
     ) -> Result<Vec<String>> {
-        let mut inputs = Inputs::default();
-        let native_archive_name = inputs.string(archive_name)? as _;
+        let storage_archive_name = std::ffi::CString::new(archive_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_archive_name = storage_archive_name.as_ptr() as _;
         let query = sys::GetArchiveDependenciesQuery {
             archiveName: native_archive_name,
         };
@@ -37371,8 +37548,9 @@ pub(crate) mod vfs {
         engine: &crate::Backend<'_>,
         archive_name: &str,
     ) -> Result<Vec<ArchiveInfoEntry>> {
-        let mut inputs = Inputs::default();
-        let native_archive_name = inputs.string(archive_name)? as _;
+        let storage_archive_name = std::ffi::CString::new(archive_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_archive_name = storage_archive_name.as_ptr() as _;
         let query = sys::GetArchiveInfoQuery {
             archiveName: native_archive_name,
         };
@@ -37400,8 +37578,9 @@ pub(crate) mod vfs {
         engine: &crate::Backend<'_>,
         archive_name: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
-        let native_archive_name = inputs.string(archive_name)? as _;
+        let storage_archive_name = std::ffi::CString::new(archive_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_archive_name = storage_archive_name.as_ptr() as _;
         let query = sys::GetArchivePathQuery {
             archiveName: native_archive_name,
         };
@@ -37426,8 +37605,9 @@ pub(crate) mod vfs {
         engine: &crate::Backend<'_>,
         archive_name: &str,
     ) -> Result<Vec<String>> {
-        let mut inputs = Inputs::default();
-        let native_archive_name = inputs.string(archive_name)? as _;
+        let storage_archive_name = std::ffi::CString::new(archive_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_archive_name = storage_archive_name.as_ptr() as _;
         let query = sys::GetArchiveReplacesQuery {
             archiveName: native_archive_name,
         };
@@ -37483,9 +37663,12 @@ pub(crate) mod vfs {
         game_archive_name: &str,
         map_archive_name: &str,
     ) -> Result<Vec<AIInfoEntry>> {
-        let mut inputs = Inputs::default();
-        let native_game_archive_name = inputs.string(game_archive_name)? as _;
-        let native_map_archive_name = inputs.string(map_archive_name)? as _;
+        let storage_game_archive_name = std::ffi::CString::new(game_archive_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_game_archive_name = storage_game_archive_name.as_ptr() as _;
+        let storage_map_archive_name = std::ffi::CString::new(map_archive_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_map_archive_name = storage_map_archive_name.as_ptr() as _;
         let query = sys::GetAvailableAIsQuery {
             gameArchiveName: native_game_archive_name,
             mapArchiveName: native_map_archive_name,
@@ -37515,9 +37698,12 @@ pub(crate) mod vfs {
         path: &str,
         mode: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let query = sys::GetFileAbsolutePathQuery {
             path: native_path,
             mode: native_mode,
@@ -37545,8 +37731,9 @@ pub(crate) mod vfs {
         engine: &crate::Backend<'_>,
         path: &str,
     ) -> Result<GetFileInfoValue> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
         let query = sys::GetFileInfoQuery {
             path: native_path,
         };
@@ -37571,8 +37758,9 @@ pub(crate) mod vfs {
         })
     }
     pub(crate) fn get_file_size(engine: &crate::Backend<'_>, path: &str) -> Result<u32> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
         let query = sys::GetFileSizeQuery {
             path: native_path,
         };
@@ -37653,11 +37841,12 @@ pub(crate) mod vfs {
         texture_name: &str,
         lod_max: i32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_tex_square_x = (tex_square_x) as _;
         let native_tex_square_y = (tex_square_y) as _;
         let native_lod_min = (lod_min) as _;
-        let native_texture_name = inputs.string(texture_name)? as _;
+        let storage_texture_name = std::ffi::CString::new(texture_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_texture_name = storage_texture_name.as_ptr() as _;
         let native_lod_max = (lod_max) as _;
         let query = sys::GetMapSquareTextureQuery {
             texSquareX: native_tex_square_x,
@@ -37742,8 +37931,9 @@ pub(crate) mod vfs {
         engine: &crate::Backend<'_>,
         rapid_tag: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
-        let native_rapid_tag = inputs.string(rapid_tag)? as _;
+        let storage_rapid_tag = std::ffi::CString::new(rapid_tag)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_rapid_tag = storage_rapid_tag.as_ptr() as _;
         let query = sys::GetNameFromRapidTagQuery {
             rapidTag: native_rapid_tag,
         };
@@ -37770,8 +37960,9 @@ pub(crate) mod vfs {
         engine: &crate::Backend<'_>,
         archive_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_archive_name = inputs.string(archive_name)? as _;
+        let storage_archive_name = std::ffi::CString::new(archive_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_archive_name = storage_archive_name.as_ptr() as _;
         let query = sys::HasArchiveQuery {
             archiveName: native_archive_name,
         };
@@ -37793,8 +37984,9 @@ pub(crate) mod vfs {
         Ok((result.hasArchive) as _)
     }
     pub(crate) fn is_directory(engine: &crate::Backend<'_>, path: &str) -> Result<bool> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
         let query = sys::IsDirectoryQuery {
             path: native_path,
         };
@@ -37822,10 +38014,15 @@ pub(crate) mod vfs {
         mode: &str,
         recursive: bool,
     ) -> Result<Vec<DirEntry>> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
-        let native_pattern = inputs.string(pattern)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
+        let storage_pattern = std::ffi::CString::new(pattern)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_pattern = storage_pattern.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let native_recursive = (recursive) as _;
         let query = sys::ListDirQuery {
             path: native_path,
@@ -37856,9 +38053,12 @@ pub(crate) mod vfs {
         path: &str,
         mode: &str,
     ) -> Result<Vec<u8>> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let query = sys::LoadFileQuery {
             path: native_path,
             mode: native_mode,
@@ -37876,10 +38076,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn load_file_range(
         engine: &crate::Backend<'_>,
@@ -37888,9 +38085,12 @@ pub(crate) mod vfs {
         offset: u32,
         length: u32,
     ) -> Result<Vec<u8>> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let native_offset = (offset) as _;
         let native_length = (length) as _;
         let query = sys::LoadFileRangeQuery {
@@ -37914,10 +38114,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn pack_f32(
         engine: &crate::Backend<'_>,
@@ -37951,10 +38148,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn pack_s16(
         engine: &crate::Backend<'_>,
@@ -37988,10 +38182,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn pack_s32(
         engine: &crate::Backend<'_>,
@@ -38025,10 +38216,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn pack_s8(
         engine: &crate::Backend<'_>,
@@ -38062,10 +38250,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn pack_u16(
         engine: &crate::Backend<'_>,
@@ -38099,10 +38284,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn pack_u32(
         engine: &crate::Backend<'_>,
@@ -38136,10 +38318,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn pack_u8(
         engine: &crate::Backend<'_>,
@@ -38173,14 +38352,12 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn read_file(engine: &crate::Backend<'_>, path: &str) -> Result<Vec<u8>> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
         let query = sys::ReadFileQuery {
             path: native_path,
         };
@@ -38197,17 +38374,15 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn read_file_as_string(
         engine: &crate::Backend<'_>,
         path: &str,
     ) -> Result<String> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
         let query = sys::ReadFileAsStringQuery {
             path: native_path,
         };
@@ -38256,10 +38431,11 @@ pub(crate) mod vfs {
         tex_square_y: i32,
         texture_name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_tex_square_x = (tex_square_x) as _;
         let native_tex_square_y = (tex_square_y) as _;
-        let native_texture_name = inputs.string(texture_name)? as _;
+        let storage_texture_name = std::ffi::CString::new(texture_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_texture_name = storage_texture_name.as_ptr() as _;
         let query = sys::SetMapSquareTextureQuery {
             texSquareX: native_tex_square_x,
             texSquareY: native_tex_square_y,
@@ -38291,10 +38467,15 @@ pub(crate) mod vfs {
         mode: &str,
         recursive: bool,
     ) -> Result<Vec<String>> {
-        let mut inputs = Inputs::default();
-        let native_path = inputs.string(path)? as _;
-        let native_pattern = inputs.string(pattern)? as _;
-        let native_mode = inputs.string(mode)? as _;
+        let storage_path = std::ffi::CString::new(path)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_path = storage_path.as_ptr() as _;
+        let storage_pattern = std::ffi::CString::new(pattern)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_pattern = storage_pattern.as_ptr() as _;
+        let storage_mode = std::ffi::CString::new(mode)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_mode = storage_mode.as_ptr() as _;
         let native_recursive = (recursive) as _;
         let query = sys::SubDirsQuery {
             path: native_path,
@@ -38358,10 +38539,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.values, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.values, result.count as usize)? }.to_vec())
     }
     pub(crate) fn unpack_s16(
         engine: &crate::Backend<'_>,
@@ -38401,10 +38579,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.values, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.values, result.count as usize)? }.to_vec())
     }
     pub(crate) fn unpack_s32(
         engine: &crate::Backend<'_>,
@@ -38444,10 +38619,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.values, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.values, result.count as usize)? }.to_vec())
     }
     pub(crate) fn unpack_s8(
         engine: &crate::Backend<'_>,
@@ -38487,10 +38659,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.values, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.values, result.count as usize)? }.to_vec())
     }
     pub(crate) fn unpack_u16(
         engine: &crate::Backend<'_>,
@@ -38530,10 +38699,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.values, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.values, result.count as usize)? }.to_vec())
     }
     pub(crate) fn unpack_u32(
         engine: &crate::Backend<'_>,
@@ -38573,10 +38739,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.values, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.values, result.count as usize)? }.to_vec())
     }
     pub(crate) fn unpack_u8(
         engine: &crate::Backend<'_>,
@@ -38616,10 +38779,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.values, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.values, result.count as usize)? }.to_vec())
     }
     pub(crate) fn use_archive<
         E: crate::Environment,
@@ -38633,8 +38793,9 @@ pub(crate) mod vfs {
             engine,
             callback,
             |callback, user_data| {
-                let mut inputs = Inputs::default();
-                let native_archive_name = inputs.string(archive_name)? as _;
+                let storage_archive_name = std::ffi::CString::new(archive_name)
+                    .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+                let native_archive_name = storage_archive_name.as_ptr() as _;
                 let query = sys::UseArchiveQuery {
                     archiveName: native_archive_name,
                     callback,
@@ -38695,10 +38856,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     pub(crate) fn zlib_decompress(
         engine: &crate::Backend<'_>,
@@ -38734,10 +38892,7 @@ pub(crate) mod vfs {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.data, result.size as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.data, result.size as usize)? }.to_vec())
     }
     fn from_ai_info_entry(value: &sys::AIInfoEntry) -> Result<AIInfoEntry> {
         Ok(AIInfoEntry {
@@ -39412,9 +39567,10 @@ pub(crate) mod team_control {
         resource_type: &str,
         amount: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_resource_type = inputs.string(resource_type)? as _;
+        let storage_resource_type = std::ffi::CString::new(resource_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource_type = storage_resource_type.as_ptr() as _;
         let native_amount = (amount) as _;
         let query = sys::AddTeamResourceQuery {
             teamID: native_team_id,
@@ -39446,9 +39602,10 @@ pub(crate) mod team_control {
         resource_type: &str,
         amount: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_resource_type = inputs.string(resource_type)? as _;
+        let storage_resource_type = std::ffi::CString::new(resource_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource_type = storage_resource_type.as_ptr() as _;
         let native_amount = (amount) as _;
         let query = sys::AddTeamResourceExcessStatsQuery {
             teamID: native_team_id,
@@ -39706,9 +39863,10 @@ pub(crate) mod team_control {
         resource_type: &str,
         amount: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_resource_type = inputs.string(resource_type)? as _;
+        let storage_resource_type = std::ffi::CString::new(resource_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource_type = storage_resource_type.as_ptr() as _;
         let native_amount = (amount) as _;
         let query = sys::SetTeamResourceQuery {
             teamID: native_team_id,
@@ -39740,9 +39898,10 @@ pub(crate) mod team_control {
         resource_type: &str,
         share_level: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_resource_type = inputs.string(resource_type)? as _;
+        let storage_resource_type = std::ffi::CString::new(resource_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource_type = storage_resource_type.as_ptr() as _;
         let native_share_level = (share_level) as _;
         let query = sys::SetTeamShareLevelQuery {
             teamID: native_team_id,
@@ -39810,10 +39969,11 @@ pub(crate) mod team_control {
         resource_type: &str,
         amount: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
         let native_target_team_id = (target_team_id) as _;
-        let native_resource_type = inputs.string(resource_type)? as _;
+        let storage_resource_type = std::ffi::CString::new(resource_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource_type = storage_resource_type.as_ptr() as _;
         let native_amount = (amount) as _;
         let query = sys::ShareTeamResourceQuery {
             teamID: native_team_id,
@@ -39883,9 +40043,10 @@ pub(crate) mod team_control {
         resource_type: &str,
         amount: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_team_id = (team_id) as _;
-        let native_resource_type = inputs.string(resource_type)? as _;
+        let storage_resource_type = std::ffi::CString::new(resource_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource_type = storage_resource_type.as_ptr() as _;
         let native_amount = (amount) as _;
         let query = sys::UseTeamResourceQuery {
             teamID: native_team_id,
@@ -40076,9 +40237,10 @@ pub(crate) mod unit_control {
         resource_type: &str,
         amount: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_resource_type = inputs.string(resource_type)? as _;
+        let storage_resource_type = std::ffi::CString::new(resource_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource_type = storage_resource_type.as_ptr() as _;
         let native_amount = (amount) as _;
         let query = sys::AddUnitResourceQuery {
             unitID: native_unit_id,
@@ -40898,7 +41060,9 @@ pub(crate) mod unit_control {
     ) -> Result<bool> {
         let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_param_name = inputs.string(param_name)? as _;
+        let storage_param_name = std::ffi::CString::new(param_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_param_name = storage_param_name.as_ptr() as _;
         let native_value = to_number_or_bool(&(value), &mut inputs)?;
         let query = sys::SetUnitBuildParamsQuery {
             unitID: native_unit_id,
@@ -41219,7 +41383,9 @@ pub(crate) mod unit_control {
     ) -> Result<bool> {
         let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_type_ = inputs.string(type_)? as _;
+        let storage_type_ = std::ffi::CString::new(type_)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_type_ = storage_type_.as_ptr() as _;
         let native_args = to_float3(&(args), &mut inputs)?;
         let query = sys::SetUnitFlankingQuery {
             unitID: native_unit_id,
@@ -42179,9 +42345,10 @@ pub(crate) mod unit_control {
         type_: &str,
         amount: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_type_ = inputs.string(type_)? as _;
+        let storage_type_ = std::ffi::CString::new(type_)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_type_ = storage_type_.as_ptr() as _;
         let native_amount = (amount) as _;
         let query = sys::SetUnitResourcingQuery {
             unitID: native_unit_id,
@@ -42323,9 +42490,10 @@ pub(crate) mod unit_control {
         sensor_type: &str,
         radius: i32,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_sensor_type = inputs.string(sensor_type)? as _;
+        let storage_sensor_type = std::ffi::CString::new(sensor_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_sensor_type = storage_sensor_type.as_ptr() as _;
         let native_radius = (radius) as _;
         let query = sys::SetUnitSensorRadiusQuery {
             unitID: native_unit_id,
@@ -42527,9 +42695,10 @@ pub(crate) mod unit_control {
         resource: &str,
         amount: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_resource = inputs.string(resource)? as _;
+        let storage_resource = std::ffi::CString::new(resource)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource = storage_resource.as_ptr() as _;
         let native_amount = (amount) as _;
         let query = sys::SetUnitStorageQuery {
             unitID: native_unit_id,
@@ -42597,9 +42766,10 @@ pub(crate) mod unit_control {
         unit_id: i32,
         tooltip: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_tooltip = inputs.string(tooltip)? as _;
+        let storage_tooltip = std::ffi::CString::new(tooltip)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_tooltip = storage_tooltip.as_ptr() as _;
         let query = sys::SetUnitTooltipQuery {
             unitID: native_unit_id,
             tooltip: native_tooltip,
@@ -42724,10 +42894,11 @@ pub(crate) mod unit_control {
         damage_key: &str,
         damage_value: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
         let native_weapon_num = (weapon_num) as _;
-        let native_damage_key = inputs.string(damage_key)? as _;
+        let storage_damage_key = std::ffi::CString::new(damage_key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_damage_key = storage_damage_key.as_ptr() as _;
         let native_damage_value = (damage_value) as _;
         let query = sys::SetUnitWeaponDamagesQuery {
             unitID: native_unit_id,
@@ -42763,10 +42934,11 @@ pub(crate) mod unit_control {
         key: &str,
         value: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
         let native_weapon_num = (weapon_num) as _;
-        let native_key = inputs.string(key)? as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
         let native_value = (value) as _;
         let query = sys::SetUnitWeaponStateQuery {
             unitID: native_unit_id,
@@ -43021,9 +43193,10 @@ pub(crate) mod unit_control {
         resource_type: &str,
         amount: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_resource_type = inputs.string(resource_type)? as _;
+        let storage_resource_type = std::ffi::CString::new(resource_type)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_resource_type = storage_resource_type.as_ptr() as _;
         let native_amount = (amount) as _;
         let query = sys::UseUnitResourceQuery {
             unitID: native_unit_id,
@@ -44524,7 +44697,7 @@ pub(crate) mod feature_control {
 pub(crate) mod terrain_control {
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
-    use super::{Inputs, check_error};
+    use super::check_error;
     pub(crate) fn add_grass(
         engine: &crate::Backend<'_>,
         x: f32,
@@ -45343,7 +45516,6 @@ pub(crate) mod terrain_control {
         receive_tracks: bool,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_type_index = (type_index) as _;
         let native_tank_speed = (tank_speed) as _;
         let native_kbot_speed = (kbot_speed) as _;
@@ -45351,7 +45523,9 @@ pub(crate) mod terrain_control {
         let native_ship_speed = (ship_speed) as _;
         let native_hardness = (hardness) as _;
         let native_receive_tracks = (receive_tracks) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::SetTerrainTypeDataQuery {
             typeIndex: native_type_index,
             tankSpeed: native_tank_speed,
@@ -45547,9 +45721,10 @@ pub(crate) mod projectile_control {
         projectile_id: i32,
         ceg_name: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
         let native_projectile_id = (projectile_id) as _;
-        let native_ceg_name = inputs.string(ceg_name)? as _;
+        let storage_ceg_name = std::ffi::CString::new(ceg_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_ceg_name = storage_ceg_name.as_ptr() as _;
         let query = sys::SetProjectileCEGQuery {
             projectileID: native_projectile_id,
             cegName: native_ceg_name,
@@ -45609,10 +45784,11 @@ pub(crate) mod projectile_control {
         damage_key: &str,
         damage_value: f32,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_projectile_id = (projectile_id) as _;
         let native_unused = (unused) as _;
-        let native_damage_key = inputs.string(damage_key)? as _;
+        let storage_damage_key = std::ffi::CString::new(damage_key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_damage_key = storage_damage_key.as_ptr() as _;
         let native_damage_value = (damage_value) as _;
         let query = sys::SetProjectileDamagesQuery {
             projectileID: native_projectile_id,
@@ -46487,9 +46663,7 @@ pub(crate) mod cob_script {
             ret_values: unsafe {
                 read_slice(result.retValues, result.retCount as usize)?
             }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     pub(crate) fn get_cob_script_id(
@@ -46497,9 +46671,10 @@ pub(crate) mod cob_script {
         unit_id: i32,
         func_name: &str,
     ) -> Result<i32> {
-        let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_func_name = inputs.string(func_name)? as _;
+        let storage_func_name = std::ffi::CString::new(func_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_func_name = storage_func_name.as_ptr() as _;
         let query = sys::GetCOBScriptIDQuery {
             unitID: native_unit_id,
             funcName: native_func_name,
@@ -46550,7 +46725,9 @@ pub(crate) mod unit_script {
     ) -> Result<CallUnitScriptValue> {
         let mut inputs = Inputs::default();
         let native_unit_id = (unit_id) as _;
-        let native_function_name = inputs.string(function_name)? as _;
+        let storage_function_name = std::ffi::CString::new(function_name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_function_name = storage_function_name.as_ptr() as _;
         let native_args = {
             let mut converted: Vec<f32> = Vec::with_capacity((args).len());
             for item in (args).iter() {
@@ -46592,9 +46769,7 @@ pub(crate) mod unit_script {
             ret_values: unsafe {
                 read_slice(result.retValues, result.retCount as usize)?
             }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
 }
@@ -46914,10 +47089,7 @@ pub(crate) mod unit_rendering {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.featureIDs, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.featureIDs, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_frustum_planes(engine: &crate::Backend<'_>) -> Result<Vec<f32>> {
         let native_unused = 0 as _;
@@ -47380,10 +47552,7 @@ pub(crate) mod unit_rendering {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.unitIDs, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.unitIDs, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_visible_features(
         engine: &crate::Backend<'_>,
@@ -47419,10 +47588,7 @@ pub(crate) mod unit_rendering {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.featureIDs, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.featureIDs, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_visible_projectiles(
         engine: &crate::Backend<'_>,
@@ -47458,10 +47624,7 @@ pub(crate) mod unit_rendering {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.projectileIDs, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.projectileIDs, result.count as usize)? }.to_vec())
     }
     pub(crate) fn get_visible_units(
         engine: &crate::Backend<'_>,
@@ -47494,10 +47657,7 @@ pub(crate) mod unit_rendering {
         unsafe {
             check_error(result.error)?;
         }
-        unsafe { read_slice(result.unitIDs, result.count as usize)? }
-            .iter()
-            .map(|item| -> Result<_> { Ok((*item) as _) })
-            .collect::<Result<Vec<_>>>()
+        Ok(unsafe { read_slice(result.unitIDs, result.count as usize)? }.to_vec())
     }
     pub(crate) fn is_unit_icon(
         engine: &crate::Backend<'_>,
@@ -47635,12 +47795,13 @@ pub(crate) mod object_rendering {
         lod_level: u32,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_object_type = (object_type) as _;
         let native_object_id = (object_id) as _;
         let native_material_type = (material_type) as _;
         let native_lod_level = (lod_level) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::ClearObjectMaterialUniformQuery {
             objectType: native_object_type,
             objectID: native_object_id,
@@ -47673,12 +47834,13 @@ pub(crate) mod object_rendering {
         lod_level: u32,
         name: &str,
     ) -> Result<bool> {
-        let mut inputs = Inputs::default();
         let native_object_type = (object_type) as _;
         let native_object_id = (object_id) as _;
         let native_material_type = (material_type) as _;
         let native_lod_level = (lod_level) as _;
-        let native_name = inputs.string(name)? as _;
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
         let query = sys::ClearObjectMaterialUniformQuery {
             objectType: native_object_type,
             objectID: native_object_id,

@@ -1,0 +1,177 @@
+{
+  "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+  "iterations": 0,
+  "moduleRefPerCall": false,
+  "nativeArtifactOverride": null,
+  "nativeArtifactSha256": "69cfcb3334fb2581b2dca767c08eb23eb1db66097d6aae0a8d49b2d27006eb1a",
+  "profile": "memory",
+  "repeats": 10,
+  "rows": {
+    "lua": [
+      {
+        "allocations": 0,
+        "backend": "lua",
+        "bytes": 0,
+        "elapsedMs": 3.81100011,
+        "scale": 1,
+        "status": "pass",
+        "test": "mem_per_call_small"
+      },
+      {
+        "allocations": 2000,
+        "backend": "lua",
+        "bytes": 16064001,
+        "elapsedMs": 7.01900005,
+        "scale": 1,
+        "status": "pass",
+        "test": "mem_per_call_list"
+      },
+      {
+        "backend": "lua",
+        "gcKB": 571,
+        "scale": 1,
+        "status": "pass",
+        "test": "gc_pause",
+        "totalPauseMs": 0.47999999
+      },
+      {
+        "backend": "lua",
+        "frames": 5000,
+        "p99Ms": 0.078,
+        "scale": 1,
+        "status": "pass",
+        "test": "frame_spike",
+        "worstMs": 0.108
+      },
+      {
+        "backend": "lua",
+        "peakBytes": 18354020,
+        "scale": 1,
+        "status": "pass",
+        "steadyBytes": 18354020,
+        "test": "mem_growth"
+      },
+      {
+        "backend": "lua",
+        "benchmarkCase": "memory",
+        "status": "pass",
+        "test": "complete"
+      }
+    ],
+    "native": [
+      {
+        "allocations": 0.0,
+        "backend": "native",
+        "bytes": 0.0,
+        "elapsedMs": 1.194,
+        "scale": 1,
+        "status": "pass",
+        "test": "mem_per_call_small"
+      },
+      {
+        "allocations": 0.0,
+        "backend": "native",
+        "bytes": 0.0,
+        "elapsedMs": 0.604,
+        "scale": 1,
+        "status": "pass",
+        "test": "mem_per_call_list"
+      },
+      {
+        "backend": "native",
+        "gcKB": 571.0,
+        "scale": 1,
+        "status": "pass",
+        "test": "gc_pause",
+        "totalPauseMs": 0.478
+      },
+      {
+        "backend": "native",
+        "frames": 5000,
+        "p99Ms": 0.025,
+        "scale": 1,
+        "status": "pass",
+        "test": "frame_spike",
+        "worstMs": 0.038
+      },
+      {
+        "backend": "native",
+        "peakBytes": 2194059.0,
+        "scale": 1,
+        "status": "pass",
+        "steadyBytes": 2152843.0,
+        "test": "mem_growth"
+      },
+      {
+        "backend": "native",
+        "benchmarkCase": "memory",
+        "scale": 1,
+        "status": "pass",
+        "test": "complete"
+      }
+    ],
+    "wasm_core": [
+      {
+        "allocations": 0.0,
+        "backend": "wasm_core",
+        "bytes": 0.0,
+        "elapsedMs": 5.041,
+        "scale": 1,
+        "status": "pass",
+        "test": "mem_per_call_small"
+      },
+      {
+        "allocations": 0.0,
+        "backend": "wasm_core",
+        "bytes": 0.0,
+        "elapsedMs": 1.16,
+        "scale": 1,
+        "status": "pass",
+        "test": "mem_per_call_list"
+      },
+      {
+        "backend": "wasm_core",
+        "gcKB": 571.0,
+        "scale": 1,
+        "status": "pass",
+        "test": "gc_pause",
+        "totalPauseMs": 0.469
+      },
+      {
+        "backend": "wasm_core",
+        "frames": 5000,
+        "p99Ms": 0.074,
+        "scale": 1,
+        "status": "pass",
+        "test": "frame_spike",
+        "worstMs": 0.14
+      },
+      {
+        "backend": "wasm_core",
+        "peakBytes": 2176781.0,
+        "scale": 1,
+        "status": "pass",
+        "steadyBytes": 2135565.0,
+        "test": "mem_growth"
+      },
+      {
+        "backend": "wasm_core",
+        "benchmarkCase": "memory",
+        "scale": 1,
+        "status": "pass",
+        "test": "complete"
+      }
+    ]
+  },
+  "runRoot": "/tmp/sdk-performance-final-4/memory/20261018-105800",
+  "rustSdk": "spring-sdk",
+  "scale": 1.0,
+  "seed": 424242,
+  "tests": [
+    "mem_per_call_small",
+    "mem_per_call_list",
+    "gc_pause",
+    "frame_spike",
+    "mem_growth"
+  ]
+}

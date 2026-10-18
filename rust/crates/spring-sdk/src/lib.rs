@@ -8,10 +8,12 @@ compile_error!(
     "native spring-sdk modules require panic=unwind to contain panics at C ABI boundaries"
 );
 use core::marker::PhantomData;
-pub use spring::{ApiError, DamageResult, ErrorCode, Float3, Result, UnitId, WeaponDefId};
 #[cfg(not(target_arch = "wasm32"))]
 #[doc(hidden)]
 pub use spring_native_sys as __sys;
+pub use spring_sdk_internal::{
+    ApiError, DamageResult, ErrorCode, Float3, Result, UnitId, WeaponDefId,
+};
 use std::cell::Cell;
 #[cfg(target_arch = "wasm32")]
 use std::rc::Rc as Shared;
@@ -19,7 +21,7 @@ use std::rc::Rc as Shared;
 use std::sync::Arc as Shared;
 #[cfg(not(target_arch = "wasm32"))]
 mod native_thread;
-#[path = "../../spring/src/pcg.rs"]
+#[path = "../../spring-sdk-internal/src/pcg.rs"]
 mod pcg;
 
 /// Native retained captures must survive the loading-to-game-thread handoff.
@@ -118,7 +120,7 @@ impl<E: Environment> Spring<'_, E> {
     /// still requires an active callin of this module.
     pub fn module_ref(&self) -> ModuleRef<E> {
         ModuleRef {
-            owner: Shared::downgrade(&self.engine.owner),
+            owner: Shared::downgrade(self.engine.owner),
             environment: PhantomData,
         }
     }
@@ -128,7 +130,7 @@ impl<E: Environment> Spring<'_, E> {
     pub fn reborrow(&self) -> Spring<'_, E> {
         Spring {
             engine: Backend {
-                owner: Shared::clone(&self.engine.owner),
+                owner: self.engine.owner,
                 scope: PhantomData,
             },
             environment: PhantomData,
@@ -210,7 +212,7 @@ impl<E: Environment> ModuleContext<E> {
         }
         let mut spring = Spring {
             engine: Backend {
-                owner: Shared::clone(&self.owner),
+                owner: &self.owner,
                 scope: PhantomData,
             },
             environment: PhantomData,
@@ -263,15 +265,30 @@ unsafe impl Send for Authority {}
 #[cfg(not(target_arch = "wasm32"))]
 unsafe impl Sync for Authority {}
 
-struct ActiveScope<'a>(&'a Authority);
+#[cfg(not(target_arch = "wasm32"))]
+thread_local! {
+    static ACTIVE_OWNERS: std::cell::RefCell<Vec<*const Authority>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+struct ActiveScope<'a>(&'a Authority, PhantomData<*mut ()>);
 impl<'a> ActiveScope<'a> {
     fn enter(owner: &'a Authority) -> Self {
         owner.scopes.set(owner.scopes.get() + 1);
-        Self(owner)
+        #[cfg(not(target_arch = "wasm32"))]
+        ACTIVE_OWNERS.with(|owners| owners.borrow_mut().push(owner));
+        Self(owner, PhantomData)
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    fn contains(owner: &Authority) -> bool {
+        ACTIVE_OWNERS.with(|owners| owners.borrow().contains(&(owner as *const Authority)))
     }
 }
 impl Drop for ActiveScope<'_> {
     fn drop(&mut self) {
+        #[cfg(not(target_arch = "wasm32"))]
+        ACTIVE_OWNERS.with(|owners| {
+            let removed = owners.borrow_mut().pop();
+            debug_assert_eq!(removed, Some(self.0 as *const Authority));
+        });
         self.0.scopes.set(self.0.scopes.get() - 1);
     }
 }
@@ -303,12 +320,17 @@ impl<E: Environment> ModuleRef<E> {
         let invalid = || ApiError::new(ErrorCode::InvalidState as i32);
         let owner = self.owner.upgrade().ok_or_else(invalid)?;
         #[cfg(not(target_arch = "wasm32"))]
-        let _entry = owner.gate.enter_existing()?;
+        // A callback already holds the owner's native entry guard. TLS proves
+        // that this thread is inside that callback before reading any Cells;
+        // workers and other modules cannot resolve this identifier.
+        if !ActiveScope::contains(&owner) {
+            return Err(invalid());
+        }
         if owner.scopes.get() == 0 {
             return Err(invalid());
         }
         let engine = Backend {
-            owner: Shared::clone(&owner),
+            owner: &owner,
             scope: PhantomData,
         };
         engine.check()?;
@@ -318,7 +340,9 @@ impl<E: Environment> ModuleRef<E> {
 }
 
 struct Backend<'call> {
-    owner: Shared<Authority>,
+    // The callback or retained node owns the strong reference. Borrow it for
+    // this scope instead of cloning an Arc for every API-family accessor.
+    owner: &'call Shared<Authority>,
     // Invariant call lifetime, and !Send + !Sync on both targets.
     scope: PhantomData<(&'call mut &'call (), *mut ())>,
 }
@@ -326,7 +350,7 @@ struct Backend<'call> {
 impl Backend<'_> {
     fn reborrow(&self) -> Backend<'_> {
         Backend {
-            owner: Shared::clone(&self.owner),
+            owner: self.owner,
             scope: PhantomData,
         }
     }
@@ -348,7 +372,11 @@ impl Backend<'_> {
             if self
                 .owner
                 .foreign_callback
-                .swap(false, std::sync::atomic::Ordering::Relaxed)
+                .load(std::sync::atomic::Ordering::Relaxed)
+                && self
+                    .owner
+                    .foreign_callback
+                    .swap(false, std::sync::atomic::Ordering::Relaxed)
             {
                 return Err(ApiError::new(ErrorCode::InvalidState as i32));
             }
@@ -374,12 +402,12 @@ impl Backend<'_> {
     ) -> R {
         let mut spring = Spring {
             engine: Backend {
-                owner: Shared::clone(&self.owner),
+                owner: self.owner,
                 scope: PhantomData,
             },
             environment: PhantomData,
         };
-        let _scope = ActiveScope::enter(&self.owner);
+        let _scope = ActiveScope::enter(self.owner);
         callback(&mut spring)
     }
 }
@@ -402,8 +430,8 @@ include!(concat!(
     "/../../../rts/wasm/generated/sdk/scoped_api.rs"
 ));
 
-pub use spring::{cmd, consts, gl, los_state, mouse};
-#[path = "../../spring/src/gfx_params.rs"]
+pub use spring_sdk_internal::{cmd, consts, gl, los_state, mouse};
+#[path = "../../spring-sdk-internal/src/gfx_params.rs"]
 mod gfx_params;
 pub use gfx_params::*;
 pub mod log_level {
@@ -433,10 +461,10 @@ pub mod rml;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 #[cfg(target_arch = "wasm32")]
-pub use spring::export_callin_scratch;
+pub use spring_sdk_internal::export_callin_scratch;
 #[cfg(target_arch = "wasm32")]
 #[doc(hidden)]
-pub use spring::generated::__core_callin_scratch_wire as __callin_wire;
+pub use spring_sdk_internal::generated::__core_callin_scratch_wire as __callin_wire;
 
 /// Export the Wasm callback dispatcher once per module. Native callbacks use
 /// C trampolines and need no exported dispatcher.

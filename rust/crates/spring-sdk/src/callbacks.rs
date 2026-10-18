@@ -92,7 +92,7 @@ where
     let id = NEXT_ID
         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
         .map_err(|_| ApiError::new(ErrorCode::OutOfBounds as i32))?;
-    let owner = crate::Shared::clone(&engine.owner);
+    let owner = crate::Shared::clone(engine.owner);
     let callback_owner = crate::Shared::clone(&owner);
     let schema = schema.map(<[u8]>::to_vec);
     // Keep the Rml reader in the registered closure. The common dispatcher
@@ -100,7 +100,7 @@ where
     // no Rml registrations.
     let callback = Box::new(move |event: Option<Event>| {
         let backend = Backend {
-            owner: crate::Shared::clone(&callback_owner),
+            owner: &callback_owner,
             scope: PhantomData,
         };
         backend.check()?;
@@ -167,14 +167,14 @@ fn invoke(node: &Node, event: Event) -> Result<()> {
 }
 
 #[cfg(target_arch = "wasm32")]
-pub(crate) fn wire(id: u32) -> spring::RetainedCallback {
-    spring::RetainedCallback::new(INVOKE, id, DESTROY)
+pub(crate) fn wire(id: u32) -> spring_sdk_internal::RetainedCallback {
+    spring_sdk_internal::RetainedCallback::new(INVOKE, id, DESTROY)
 }
 
 #[cfg(target_arch = "wasm32")]
 fn wasm_event(schema: Option<&[u8]>) -> Result<Event> {
     if schema.is_none() {
-        let event = spring::generated::owned::rml_ui::event_get_current(0)?;
+        let event = spring_sdk_internal::generated::owned::rml_ui::event_get_current(0)?;
         if !event.exists {
             return Err(ApiError::new(ErrorCode::NotFound as i32));
         }
@@ -184,7 +184,7 @@ fn wasm_event(schema: Option<&[u8]>) -> Result<Event> {
             values: Vec::new(),
         });
     }
-    let event = spring::data_model_current_event()?;
+    let event = spring_sdk_internal::data_model_current_event()?;
     let count = usize::try_from(event.value_count)
         .map_err(|_| ApiError::new(ErrorCode::OutOfBounds as i32))?;
     if schema.unwrap().len() != count {
@@ -194,8 +194,8 @@ fn wasm_event(schema: Option<&[u8]>) -> Result<Event> {
     let mut string_buffer = Vec::new();
     for index in 0..count {
         loop {
-            use spring::DataEventValue as V;
-            match spring::data_model_current_value(index as u64, &mut string_buffer) {
+            use spring_sdk_internal::DataEventValue as V;
+            match spring_sdk_internal::data_model_current_value(index as u64, &mut string_buffer) {
                 Ok(value) => {
                     values.push(match value {
                         V::Bool(v) => Value::Bool(v),
@@ -208,10 +208,10 @@ fn wasm_event(schema: Option<&[u8]>) -> Result<Event> {
                     });
                     break;
                 }
-                Err(spring::DataEventValueError::BufferTooSmall { required }) => {
+                Err(spring_sdk_internal::DataEventValueError::BufferTooSmall { required }) => {
                     string_buffer.resize(required as usize, 0)
                 }
-                Err(spring::DataEventValueError::Api(error)) => return Err(error),
+                Err(spring_sdk_internal::DataEventValueError::Api(error)) => return Err(error),
             }
         }
     }
@@ -225,8 +225,8 @@ fn wasm_event(schema: Option<&[u8]>) -> Result<Event> {
 #[cfg(target_arch = "wasm32")]
 #[doc(hidden)]
 pub fn __dispatch(callback_id: u32, id: u32) {
-    if callback_id == spring::callback::SYNC_CLOSURE_CALLBACK_ID {
-        if spring::callback::dispatch_sync_closure() {
+    if callback_id == spring_sdk_internal::callback::SYNC_CLOSURE_CALLBACK_ID {
+        if spring_sdk_internal::callback::dispatch_sync_closure() {
             return;
         }
         panic!("Spring synchronous callback reentered its active closure");
@@ -258,7 +258,7 @@ fn native_boundary(id: u32, event: impl FnOnce(&Backend<'_>) -> Result<Event>) {
         return;
     };
     let engine = Backend {
-        owner: crate::Shared::clone(&node.owner),
+        owner: &node.owner,
         scope: PhantomData,
     };
     let result = catch_unwind(AssertUnwindSafe(|| {

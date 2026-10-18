@@ -69,6 +69,7 @@ impl<E: Game> crate::terrain::Terrain<'_, E> {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn numeric_param(value: crate::rules_params::RulesParamValue) -> Result<f32> {
     if value.type_ == crate::rules_params::RulesParamType::RulesparamTypeFloat {
         Ok(value.float_value)
@@ -78,10 +79,28 @@ fn numeric_param(value: crate::rules_params::RulesParamValue) -> Result<f32> {
 }
 impl<E: Game> crate::rules_params::RulesParams<'_, E> {
     pub fn get_unit_rules_param_f32(&self, unit: i32, name: &str) -> Result<f32> {
-        numeric_param(self.get_unit_rules_param(unit, name)?)
+        #[cfg(target_arch = "wasm32")]
+        {
+            self._engine.check()?;
+            self._engine
+                .finish(spring_sdk_internal::get_unit_rules_param_f32(unit, name))
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            numeric_param(self.get_unit_rules_param(unit, name)?)
+        }
     }
     pub fn get_game_rules_param_f32(&self, name: &str) -> Result<f32> {
-        numeric_param(self.get_game_rules_param(name)?)
+        #[cfg(target_arch = "wasm32")]
+        {
+            self._engine.check()?;
+            self._engine
+                .finish(spring_sdk_internal::get_game_rules_param_f32(name))
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            numeric_param(self.get_game_rules_param(name)?)
+        }
     }
 }
 impl<E: Synced> crate::rules_params::RulesParams<'_, E> {
@@ -92,6 +111,15 @@ impl<E: Synced> crate::rules_params::RulesParams<'_, E> {
         value: f32,
         los: i32,
     ) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            self._engine.check()?;
+            self._engine
+                .finish(spring_sdk_internal::set_unit_rules_param_f32(
+                    unit, name, value, los,
+                ))
+        }
+        #[cfg(not(target_arch = "wasm32"))]
         self.set_unit_rules_param(
             unit,
             name,

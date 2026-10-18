@@ -211,7 +211,7 @@ fn on_draw_world() {
 spring::export_draw_world!(on_draw_world);
 
 #[cfg(benchmark_context_ui)]
-#[export_name = "spring:callback/dispatch"]
+#[unsafe(export_name = "spring:callback/dispatch")]
 pub extern "C" fn spring_callback_dispatch(callback_id: i32, _user_data: i32) {
     match callback_id as u32 {
         2 => draw::callback(),

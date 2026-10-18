@@ -4,6 +4,11 @@ One scoped Rust API for native and Core-Wasm engine modules. This opt-in crate
 keeps existing SDK consumers unchanged. See the
 [design and compatibility notes](../../../rts/wasm/docs/recoil_rust_sdk_unification.md).
 
+Games normally use `spring-addons` on top of this crate. Its module registration
+macros generate the exports; individual widgets and gadgets only implement their
+callback methods. The example below shows direct module registration, as used by
+menus and SpringBoard.
+
 ```rust
 use spring_sdk::{Menu, Spring, Result, module::Module};
 
@@ -64,6 +69,24 @@ synced Wasm. Native uses a bounded thread pool; Wasm uses fresh private worker
 instances. Workers take owned input snapshots and must not access mutable
 globals or engine functions. See the design notes for limits and delivery timing.
 Nested native Update calls run immediately; only the outer call advances jobs.
+
+The SDK depends on private `spring-sdk-internal` transport code and native FFI
+bindings. It no longer depends on the legacy public `spring` or `spring-native`
+APIs. The old `spring` crate temporarily re-exports the internal implementation
+so existing consumers keep building. Renaming the unified public crate to
+`spring` can follow once those consumers have migrated.
+
+Native engine calls do not take a mutex or clone a module `Arc` per API accessor.
+Callback entry still serializes module access. `ModuleRef` resolution checks the
+current thread's active callbacks and reuses their existing entry guard.
+
+Measured scalar query cost after this cleanup: native 10.3 ns (legacy 6.1 ns),
+Wasm 17.7 ns (legacy 16.9 ns), Lua 32.2 ns. Resolving a stored ModuleRef for each
+native query costs 20.2 ns; resolve it once around loops when possible. Native
+direct calls previously cost 57.2 ns, and per-call ModuleRef access 155.1 ns.
+Cold-cache native callback dispatch also remains slower than the legacy wrapper
+(GameFrame 1.65 → 2.51 µs; UnitCreated 1.23 → 3.67 µs).
+See [benchmark results and limits](../../../test/native_api_parity/CORE_WASM_BENCHMARKS.md#measurements-2026-10-18).
 
 ## Port status
 

@@ -14,22 +14,22 @@
 //! uses `Arc` and checked mutexes, while Wasm uses `Rc` and `RefCell`.
 //! End state borrows before engine calls that can enter the same script.
 
-#[path = "../../../spring/src/cus/engine.rs"]
+#[path = "../../../spring-sdk-internal/src/cus/engine.rs"]
 mod engine;
 #[doc(hidden)]
 pub mod exports;
 pub mod host;
-#[path = "../../../spring/src/cus/instance.rs"]
+#[path = "../../../spring-sdk-internal/src/cus/instance.rs"]
 mod instance;
-#[path = "../../../spring/src/cus/registry.rs"]
+#[path = "../../../spring-sdk-internal/src/cus/registry.rs"]
 mod registry;
-#[path = "../../../spring/src/cus/scheduler.rs"]
+#[path = "../../../spring-sdk-internal/src/cus/scheduler.rs"]
 mod scheduler;
-#[path = "../../../spring/src/cus/script.rs"]
+#[path = "../../../spring-sdk-internal/src/cus/script.rs"]
 mod script;
 pub mod shared;
 mod transport;
-#[path = "../../../spring/src/cus/types.rs"]
+#[path = "../../../spring-sdk-internal/src/cus/types.rs"]
 mod types;
 
 pub use engine::*;
@@ -64,5 +64,5 @@ pub mod prelude {
 }
 
 #[cfg(test)]
-#[path = "../../../spring/src/cus/tests.rs"]
+#[path = "../../../spring-sdk-internal/src/cus/tests.rs"]
 mod tests;

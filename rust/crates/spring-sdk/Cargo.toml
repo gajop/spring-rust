@@ -6,7 +6,7 @@ publish = false
 license = "GPL-2.0-or-later"
 
 [dependencies]
-spring = { path = "../spring", features = ["alloc"] }
+spring-sdk-internal = { path = "../spring-sdk-internal", features = ["alloc"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 spring-native-sys = { path = "../spring-native-sys" }

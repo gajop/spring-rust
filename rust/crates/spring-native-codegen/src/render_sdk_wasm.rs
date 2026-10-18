@@ -95,17 +95,17 @@ pub fn render(model: &ApiModel, owned: &str) -> Result<String> {
                 let (schema, call, field) = match f.name.as_str() {
                     "ContextAddEventListener" => (
                         "None",
-                        "spring::context_add_event_listener(context_handle,event,in_capture_phase,crate::callbacks::wire(id))",
+                        "spring_sdk_internal::context_add_event_listener(context_handle,event,in_capture_phase,crate::callbacks::wire(id))",
                         "event_listener_handle",
                     ),
                     "ElementAddEventListener" => (
                         "None",
-                        "spring::element_add_event_listener(element_handle,event,in_capture_phase,crate::callbacks::wire(id))",
+                        "spring_sdk_internal::element_add_event_listener(element_handle,event,in_capture_phase,crate::callbacks::wire(id))",
                         "event_listener_handle",
                     ),
                     _ => (
                         "Some(field_types)",
-                        "spring::data_model_bind_event(data_model_handle,name,crate::callbacks::wire(id),field_types)",
+                        "spring_sdk_internal::data_model_bind_event(data_model_handle,name,crate::callbacks::wire(id),field_types)",
                         "event_handle",
                     ),
                 };
@@ -164,7 +164,7 @@ pub fn render(model: &ApiModel, owned: &str) -> Result<String> {
                     _ => bail!("multi-result synchronous callback"),
                 };
                 let function = rust_ident(&f.name);
-                methods.push_str(&format!("pub fn {function}<E:crate::Environment,F:for<'call>FnMut(&mut crate::Spring<'call,E>)>(engine:&crate::Backend<'_>,{params})->Result<{result}> {{ spring::{function}({args}) }}"));
+                methods.push_str(&format!("pub fn {function}<E:crate::Environment,F:for<'call>FnMut(&mut crate::Spring<'call,E>)>(engine:&crate::Backend<'_>,{params})->Result<{result}> {{ spring_sdk_internal::{function}({args}) }}"));
                 continue;
             }
             if typed.contains(&(name.clone(), rust_ident(&f.name))) {
@@ -227,7 +227,7 @@ pub fn render(model: &ApiModel, owned: &str) -> Result<String> {
                     }
                 }
                 let call = format!(
-                    "spring::generated::borrowed::{name}::{}({})?",
+                    "spring_sdk_internal::generated::borrowed::{name}::{}({})?",
                     rust_ident(&f.name),
                     args.join(",")
                 );
@@ -462,61 +462,73 @@ pub fn render(model: &ApiModel, owned: &str) -> Result<String> {
 fn manual_body(module: &str, function: &str) -> Option<&'static str> {
     Some(match (module, function) {
         ("units_query", "GetUnitsInRectangle") => {
-            "spring::get_units_in_rectangle(xmin,zmin,xmax,zmax,allegiance)"
+            "spring_sdk_internal::get_units_in_rectangle(xmin,zmin,xmax,zmax,allegiance)"
         }
         ("units_query", "GetUnitsInBox") => {
-            "spring::get_units_in_box(crate::Float3{x:xmin,y:ymin,z:zmin},crate::Float3{x:xmax,y:ymax,z:zmax},allegiance)"
+            "spring_sdk_internal::get_units_in_box(crate::Float3{x:xmin,y:ymin,z:zmin},crate::Float3{x:xmax,y:ymax,z:zmax},allegiance)"
         }
         ("units_query", "GetUnitsInSphere") => {
-            "spring::get_units_in_sphere(crate::Float3{x,y,z},radius,allegiance)"
+            "spring_sdk_internal::get_units_in_sphere(crate::Float3{x,y,z},radius,allegiance)"
         }
         ("units_query", "GetUnitsInCylinder") => {
-            "spring::get_units_in_cylinder(x,z,radius,allegiance)"
+            "spring_sdk_internal::get_units_in_cylinder(x,z,radius,allegiance)"
         }
-        ("units_query", "GetUnitArrayCentroid") => "spring::get_unit_array_centroid(unit_i_ds)",
-        ("units_query", "GetUnitMapCentroid") => "spring::get_unit_map_centroid(unit_i_ds)",
+        ("units_query", "GetUnitArrayCentroid") => {
+            "spring_sdk_internal::get_unit_array_centroid(unit_i_ds)"
+        }
+        ("units_query", "GetUnitMapCentroid") => {
+            "spring_sdk_internal::get_unit_map_centroid(unit_i_ds)"
+        }
         ("units_query", "GetTeamUnitsByDefs") => {
-            "super::collect_i32(|output|spring::get_team_units_by_defs_into(team_id,unit_def_i_ds,output))"
+            "super::collect_i32(|output|spring_sdk_internal::get_team_units_by_defs_into(team_id,unit_def_i_ds,output))"
         }
-        ("units_commands", "GiveOrder") => "spring::give_order(cmd_id,params,options,timeout)",
+        ("units_commands", "GiveOrder") => {
+            "spring_sdk_internal::give_order(cmd_id,params,options,timeout)"
+        }
         ("units_commands", "GiveOrderToUnitMap") => {
-            "spring::give_order_to_unit_map(unit_i_ds,cmd_id,params,options,timeout)"
+            "spring_sdk_internal::give_order_to_unit_map(unit_i_ds,cmd_id,params,options,timeout)"
         }
         ("unit_control", "GiveOrderToUnit") => {
-            "spring::give_order_to_unit(unit_id,cmd_id,params,options,timeout)"
+            "spring_sdk_internal::give_order_to_unit(unit_id,cmd_id,params,options,timeout)"
         }
         ("units_commands", "GetUnitCommands") => {
-            "spring::get_unit_commands(unit_id,max_commands).map(|commands|commands.into_iter().map(|c|CommandFFI{cmd_id:c.cmd_id,options:c.options,tag:c.tag,ai_command_id:c.ai_command_id,time_out:c.timeout,params:c.params}).collect())"
+            "spring_sdk_internal::get_unit_commands(unit_id,max_commands).map(|commands|commands.into_iter().map(|c|CommandFFI{cmd_id:c.cmd_id,options:c.options,tag:c.tag,ai_command_id:c.ai_command_id,time_out:c.timeout,params:c.params}).collect())"
         }
         ("unit_defs", "GetUnitDefName") => {
-            "spring::get_unit_def_name_bytes(unit_def_id).map(super::decode_string)"
+            "spring_sdk_internal::get_unit_def_name_bytes(unit_def_id).map(super::decode_string)"
         }
         ("unit_defs", "GetUnitDefHumanName") => {
-            "spring::get_unit_def_human_name_bytes(unit_def_id).map(super::decode_string)"
+            "spring_sdk_internal::get_unit_def_human_name_bytes(unit_def_id).map(super::decode_string)"
         }
-        ("gfx", "CreateTextureAtlas") => "spring::create_texture_atlas(xsize,ysize,alloc_type)",
+        ("gfx", "CreateTextureAtlas") => {
+            "spring_sdk_internal::create_texture_atlas(xsize,ysize,alloc_type)"
+        }
         ("gfx", "CreateTexture") => {
-            "spring::create_texture(xsize,ysize,zsize,spring::TextureCreateParams{target:params.target,format:params.format,border:params.border,min_filter:params.min_filter,mag_filter:params.mag_filter,wrap_s:params.wrap_s,wrap_t:params.wrap_t,wrap_r:params.wrap_r,compare_func:params.compare_func,lod_bias:params.lod_bias,aniso:params.aniso,samples:params.samples,fbo:params.fbo,fbo_depth:params.fbo_depth})"
+            "spring_sdk_internal::create_texture(xsize,ysize,zsize,spring_sdk_internal::TextureCreateParams{target:params.target,format:params.format,border:params.border,min_filter:params.min_filter,mag_filter:params.mag_filter,wrap_s:params.wrap_s,wrap_t:params.wrap_t,wrap_r:params.wrap_r,compare_func:params.compare_func,lod_bias:params.lod_bias,aniso:params.aniso,samples:params.samples,fbo:params.fbo,fbo_depth:params.fbo_depth})"
         }
         ("game", "GetModOption") => {
-            "spring::get_mod_option(key).map(|v|GetModOptionValue{exists:v.is_some(),value:v.unwrap_or_default()})"
+            "spring_sdk_internal::get_mod_option(key).map(|v|GetModOptionValue{exists:v.is_some(),value:v.unwrap_or_default()})"
         }
-        ("rml_ui", "DataModelUnbindEvent") => "spring::data_model_unbind_event(event_handle)",
+        ("rml_ui", "DataModelUnbindEvent") => {
+            "spring_sdk_internal::data_model_unbind_event(event_handle)"
+        }
         ("rml_ui", "EventListenerOnAttach") => {
-            "spring::event_listener_on_attach(event_listener_handle,element_handle)"
+            "spring_sdk_internal::event_listener_on_attach(event_listener_handle,element_handle)"
         }
         ("rml_ui", "EventListenerOnDetach") => {
-            "spring::event_listener_on_detach(event_listener_handle,element_handle)"
+            "spring_sdk_internal::event_listener_on_detach(event_listener_handle,element_handle)"
         }
         ("rml_ui", "EventListenerProcessEvent") => {
-            "spring::event_listener_process_event(event_listener_handle,event_handle)"
+            "spring_sdk_internal::event_listener_process_event(event_listener_handle,event_handle)"
         }
-        ("messages", "SendMessageToTeam") => "spring::send_message_to_team(team_id,message)",
+        ("messages", "SendMessageToTeam") => {
+            "spring_sdk_internal::send_message_to_team(team_id,message)"
+        }
         ("cob_script", "CallCOBScript") => {
-            "let mut ret_values=alloc::vec![0i32;ret_args as usize]; let result=spring::call_cob_script(unit_id,func.id,&func.name,ret_args,args,&mut ret_values)?; ret_values.truncate(result.ret_count); Ok(CallCOBScriptValue{ret_code:result.ret_code,ret_values})"
+            "let mut ret_values=alloc::vec![0i32;ret_args as usize]; let result=spring_sdk_internal::call_cob_script(unit_id,func.id,&func.name,ret_args,args,&mut ret_values)?; ret_values.truncate(result.ret_count); Ok(CallCOBScriptValue{ret_code:result.ret_code,ret_values})"
         }
         ("ground_decals", "GetGroundDecalTextures") => {
-            "let mut input=super::Writer::default(); input.u32(options.main_tex.is_some() as u32); input.u32(options.main_tex.unwrap_or(false) as u32); input.u32(options.include_filenames as u32); let mut output=Vec::new(); loop { match spring::generated::dynamic_output::ground_decals::get_ground_decal_textures(input.bytes.as_ptr() as i32,&mut output) { Ok(required)=>{ if required>output.len(){return Err(ApiError::new(ErrorCode::InvalidState as i32));} output.truncate(required); let mut reader=super::Reader::new(&output); let textures=reader.strings()?; let filenames=reader.strings()?; reader.finish(8)?; return Ok(GetGroundDecalTexturesValue{textures,filenames}); }, Err(error) if error.error.code==ErrorCode::BufferOverflow as i32=>output.resize(error.required,0),Err(error)=>return Err(error.error) } }"
+            "let mut input=super::Writer::default(); input.u32(options.main_tex.is_some() as u32); input.u32(options.main_tex.unwrap_or(false) as u32); input.u32(options.include_filenames as u32); let mut output=Vec::new(); loop { match spring_sdk_internal::generated::dynamic_output::ground_decals::get_ground_decal_textures(input.bytes.as_ptr() as i32,&mut output) { Ok(required)=>{ if required>output.len(){return Err(ApiError::new(ErrorCode::InvalidState as i32));} output.truncate(required); let mut reader=super::Reader::new(&output); let textures=reader.strings()?; let filenames=reader.strings()?; reader.finish(8)?; return Ok(GetGroundDecalTexturesValue{textures,filenames}); }, Err(error) if error.error.code==ErrorCode::BufferOverflow as i32=>output.resize(error.required,0),Err(error)=>return Err(error.error) } }"
         }
         _ => return None,
     })

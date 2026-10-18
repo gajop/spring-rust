@@ -1,0 +1,24 @@
+[package]
+name = "recoil-sdk-benchmark-suite-guest"
+version = "0.1.0"
+edition = "2024"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "src/entry.rs"
+crate-type = ["cdylib"]
+
+[features]
+# Core-only transport-floor rows. They have no peer in the other backends, so
+# they are noise in the comparison table and are off by default; enable them
+# when investigating how far a Core path sits above its own floor.
+transport_ceiling = []
+
+[dependencies]
+spring-sdk = { path = "../../../../rust/crates/spring-sdk" }
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "unwind"

@@ -438,9 +438,7 @@ pub mod callins {
             z: (value.z) as _,
             facing: (value.facing) as _,
             statuses: unsafe { read_slice(value.statuses, value.statusCount as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     /// # Safety
@@ -654,9 +652,7 @@ pub mod callins {
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
         Ok(GameIDQuery {
             game_id: unsafe { read_slice(value.gameID, value.numBytes as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     /// # Safety
@@ -670,9 +666,7 @@ pub mod callins {
             winning_ally_teams: unsafe {
                 read_slice(value.winningAllyTeams, value.count as usize)?
             }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     /// # Safety
@@ -770,10 +764,7 @@ pub mod callins {
             player_id: (value.playerID) as _,
             script: (value.script) as _,
             mode: (value.mode) as _,
-            data: unsafe { read_slice(value.data, value.dataLength as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+            data: unsafe { read_slice(value.data, value.dataLength as usize)? }.to_vec(),
         })
     }
     /// # Safety
@@ -2626,9 +2617,7 @@ pub mod callins {
             tag: (value.tag) as _,
             options: (value.options) as _,
             params: unsafe { read_slice(value.params, value.numParams as usize)? }
-                .iter()
-                .map(|item| -> Result<_> { Ok((*item) as _) })
-                .collect::<Result<Vec<_>>>()?,
+                .to_vec(),
         })
     }
     fn from_resource_excess_entry(

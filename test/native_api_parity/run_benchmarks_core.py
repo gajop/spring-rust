@@ -21,6 +21,7 @@ import run_benchmarks as base
 
 
 ROOT = base.ROOT
+RUNNER_SCRIPT = Path(__file__).resolve()
 CORE_CRATE = ROOT / "test" / "wasm_api" / "guests" / "core_benchmark_suite_guest" / "Cargo.toml"
 CORE_RAW = (
     ROOT
@@ -641,7 +642,7 @@ def run_suite(args) -> int:
         profile_output = suite_root / profile
         command = [
             sys.executable,
-            str(Path(__file__).resolve()),
+            str(RUNNER_SCRIPT),
             flag,
             "--seed",
             str(args.seed),

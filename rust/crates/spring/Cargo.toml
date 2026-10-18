@@ -8,10 +8,10 @@ publish = false
 default = []
 # Enables owned Vec-returning convenience APIs. The zero-allocation `_into`
 # variants remain available in pure no_std builds without this feature.
-alloc = []
+alloc = ["spring-sdk-internal/alloc"]
 
 [dependencies]
-libm = "0.2"
+spring-sdk-internal = { path = "../spring-sdk-internal" }
 
 [lints.rust]
 warnings = "deny"

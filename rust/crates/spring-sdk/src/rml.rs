@@ -61,7 +61,7 @@ impl ModelState {
         if !self.alive.load(std::sync::atomic::Ordering::Relaxed)
             || !self
                 .owner
-                .ptr_eq(&crate::Shared::downgrade(&spring.engine.owner))
+                .ptr_eq(&crate::Shared::downgrade(spring.engine.owner))
         {
             return Err(invalid());
         }
@@ -89,7 +89,7 @@ impl DataModel {
             name: name.into(),
             handle: result.data_model_handle,
             state: crate::Shared::new(ModelState {
-                owner: crate::Shared::downgrade(&spring.engine.owner),
+                owner: crate::Shared::downgrade(spring.engine.owner),
                 alive: std::sync::atomic::AtomicBool::new(true),
             }),
         })
