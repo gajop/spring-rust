@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "UnitsCommands.h"
 
 #include "Sim/Units/Unit.h"
@@ -28,12 +30,12 @@ static thread_local std::vector<std::vector<const char*>> descriptionParameterSt
 static thread_local std::vector<float> parameterStorage;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game not ready" };
-static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
-static const Error NOT_FACTORY_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Unit is not a factory" };
-static const Error NO_COMMAND_AI_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit has no command AI" };
-static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
-static const Error ORDERS_BLOCKED_ERROR = { .code = ERROR_PERMISSION_DENIED, .message = "Command issuing not allowed" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Game not ready" };
+static const Error INVALID_UNIT_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid unit ID" };
+static const Error NOT_FACTORY_ERROR = { .code = native_error::InvalidArgument, .message = "Unit is not a factory" };
+static const Error NO_COMMAND_AI_ERROR = { .code = native_error::NotAvailable, .message = "Unit has no command AI" };
+static const Error BUFFER_OVERFLOW_ERROR = { .code = native_error::BufferOverflow, .message = "Buffer overflow" };
+static const Error ORDERS_BLOCKED_ERROR = { .code = native_error::PermissionDenied, .message = "Command issuing not allowed" };
 
 static bool IsReady() {
 	return (gs != nullptr);

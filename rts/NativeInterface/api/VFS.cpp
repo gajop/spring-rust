@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "VFS.h"
 
 #include "System/FileSystem/VFSHandler.h"
@@ -39,17 +41,17 @@ static thread_local Error dynamicError;
 static thread_local std::string dynamicErrorMessage;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "VFS system not ready" };
-static const Error FILE_NOT_FOUND_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "File not found" };
-static const Error READ_ERROR = { .code = ERROR_INTERNAL, .message = "Failed to read file" };
-static const Error INVALID_ARGUMENT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid argument" };
-static const Error MAP_TEX_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Map texture system not available" };
-static const Error HASH_TYPE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Unsupported hash type" };
-static const Error COMPRESS_ERROR = { .code = ERROR_INTERNAL, .message = "Compression failed" };
-static const Error DECOMPRESS_ERROR = { .code = ERROR_INTERNAL, .message = "Decompression failed" };
-static const Error ARCHIVE_NOT_FOUND_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Archive not found" };
-static const Error ARCHIVE_ALREADY_LOADED_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Archive already loaded" };
-static const Error UNSUPPORTED_ARCHIVE_TYPE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Unsupported archive type" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "VFS system not ready" };
+static const Error FILE_NOT_FOUND_ERROR = { .code = native_error::InvalidArgument, .message = "File not found" };
+static const Error READ_ERROR = { .code = native_error::Internal, .message = "Failed to read file" };
+static const Error INVALID_ARGUMENT_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid argument" };
+static const Error MAP_TEX_ERROR = { .code = native_error::NotAvailable, .message = "Map texture system not available" };
+static const Error HASH_TYPE_ERROR = { .code = native_error::InvalidArgument, .message = "Unsupported hash type" };
+static const Error COMPRESS_ERROR = { .code = native_error::Internal, .message = "Compression failed" };
+static const Error DECOMPRESS_ERROR = { .code = native_error::Internal, .message = "Decompression failed" };
+static const Error ARCHIVE_NOT_FOUND_ERROR = { .code = native_error::InvalidArgument, .message = "Archive not found" };
+static const Error ARCHIVE_ALREADY_LOADED_ERROR = { .code = native_error::InvalidArgument, .message = "Archive already loaded" };
+static const Error UNSUPPORTED_ARCHIVE_TYPE_ERROR = { .code = native_error::InvalidArgument, .message = "Unsupported archive type" };
 
 static const Error* MakeDynamicError(int32_t code, std::string message)
 {
@@ -488,7 +490,7 @@ static void NativeDownloadArchive(const DownloadArchiveQuery* query, DownloadArc
 
 	std::string errorMessage;
 	if (!LuaVFSDownload::QueueArchiveDownload(query->filename, query->category, &errorMessage))
-		result->error = MakeDynamicError(ERROR_INVALID_ARGUMENT, std::move(errorMessage));
+		result->error = MakeDynamicError(native_error::InvalidArgument, std::move(errorMessage));
 }
 
 static void NativeAbortDownload(const AbortDownloadQuery* query, AbortDownloadResult* result) {
@@ -697,7 +699,7 @@ static void NativeGetArchiveChecksum(const GetArchiveChecksumQuery* query, GetAr
 		sha512::dump_digest(archiveScanner->GetArchiveSingleChecksumBytes(archivePath), singleChecksum);
 		sha512::dump_digest(archiveScanner->GetArchiveCompleteChecksumBytes(archiveName), completeChecksum);
 	} catch (const std::exception& error) {
-		result->error = MakeDynamicError(ERROR_INVALID_ARGUMENT, error.what());
+		result->error = MakeDynamicError(native_error::InvalidArgument, error.what());
 		return;
 	}
 
@@ -922,13 +924,13 @@ static void NativeCompressFolder(const CompressFolderQuery* query, CompressFolde
 	const std::string modes = GetModes(query->mode);
 
 	if (CFileHandler::FileExists(compressedFilePath, modes)) {
-		result->error = MakeDynamicError(ERROR_INVALID_ARGUMENT, "File already exists: " + compressedFilePath);
+		result->error = MakeDynamicError(native_error::InvalidArgument, "File already exists: " + compressedFilePath);
 		return;
 	}
 
 	std::string error;
 	if (!LuaZipFolder::ZipFolder(folderPath, compressedFilePath, query->includeFolder, modes, &error)) {
-		result->error = MakeDynamicError(ERROR_OPERATION_FAILED, error);
+		result->error = MakeDynamicError(native_error::OperationFailed, error);
 		return;
 	}
 

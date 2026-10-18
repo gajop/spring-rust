@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "RmlUi.h"
 
 #include "Rml/Backends/RmlUi_Backend.h"
@@ -27,8 +29,8 @@
 
 namespace {
 
-static const Error INVALID_ARGUMENT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid argument" };
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "RmlUi is not ready" };
+static const Error INVALID_ARGUMENT_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid argument" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "RmlUi is not ready" };
 
 template <typename T>
 static uint64_t ToHandle(T* pointer)
@@ -3421,7 +3423,7 @@ static void NativeEventListenerOnDetach(const RmlEventListenerElementQuery* quer
 	// the element with a dangling pointer; ElementRemoveEventListener detaches it
 	// properly (RmlUi then calls OnDetach itself).
 	static const Error ATTACHED_LISTENER_ERROR = {
-		.code = ERROR_INVALID_ARGUMENT,
+		.code = native_error::InvalidArgument,
 		.message = "listener is attached; use ElementRemoveEventListener or ContextRemoveEventListener"
 	};
 	result->error = &ATTACHED_LISTENER_ERROR;

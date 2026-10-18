@@ -23,17 +23,17 @@
 namespace {
 
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Lighting system not available"
 };
 
 static const Error INVALID_LIGHT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid light handle"
 };
 
 static const Error INVALID_TARGET_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid tracking target"
 };
 

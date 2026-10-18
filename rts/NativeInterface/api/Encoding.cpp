@@ -20,7 +20,7 @@ static const std::string BASE64_URL_CHARS =
 	"0123456789-_";
 
 static const Error NULL_TEXT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "text is null",
 };
 

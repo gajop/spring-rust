@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "FeatureDefs.h"
 
 #include "Sim/Features/FeatureDef.h"
@@ -11,8 +13,8 @@ static thread_local std::vector<int32_t> featureDefIDs;
 static thread_local std::vector<const char*> customParamKeys;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "FeatureDef system not ready" };
-static const Error INVALID_FEATUREDEF_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid feature def ID" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "FeatureDef system not ready" };
+static const Error INVALID_FEATUREDEF_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid feature def ID" };
 
 static bool IsReady() {
 	return (featureDefHandler != nullptr);

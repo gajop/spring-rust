@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Player.h"
 
 #include "NativeInterface/WasmUiVisibility.h"
@@ -22,12 +24,12 @@ static thread_local std::vector<RosterEntry> rosterEntries;
 
 // Static errors
 static const Error PLAYER_NOT_AVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Player system is not available"
 };
 
 static const Error INVALID_PLAYER_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid player ID"
 };
 

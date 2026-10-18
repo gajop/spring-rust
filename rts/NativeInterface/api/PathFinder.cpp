@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "PathFinder.h"
 
 #include "Sim/Path/IPathManager.h"
@@ -13,12 +15,12 @@ static thread_local std::vector<int32_t> pathStarts;
 static thread_local std::vector<float> pathCosts;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game not ready" };
-static const Error INVALID_PATH_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid path ID" };
-static const Error INVALID_MOVEDEF_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid move definition" };
-static const Error INVALID_OVERLAY_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid overlay index" };
-static const Error OVERLAY_EXISTS_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Overlay already exists" };
-static const Error OVERLAY_EMPTY_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Overlay is empty" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Game not ready" };
+static const Error INVALID_PATH_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid path ID" };
+static const Error INVALID_MOVEDEF_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid move definition" };
+static const Error INVALID_OVERLAY_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid overlay index" };
+static const Error OVERLAY_EXISTS_ERROR = { .code = native_error::InvalidArgument, .message = "Overlay already exists" };
+static const Error OVERLAY_EMPTY_ERROR = { .code = native_error::InvalidArgument, .message = "Overlay is empty" };
 
 // Node cost overlay structure (similar to Lua implementation)
 struct NodeCostOverlay {

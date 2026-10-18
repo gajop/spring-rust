@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Display.h"
 
 #include "Game/Game.h"
@@ -28,7 +30,7 @@ static thread_local Error dynamicError;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Display system not ready"
 };
 
@@ -119,7 +121,7 @@ static void NativeGetScreenGeometry(const GetScreenGeometryQuery* query, GetScre
 	result->error = nullptr;
 	result->geom = {};
 	if (query->screenNum < -1 || query->screenNum >= SDL_GetNumVideoDisplays()) {
-		dynamicError = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid display index" };
+		dynamicError = { .code = native_error::InvalidArgument, .message = "Invalid display index" };
 		result->error = &dynamicError;
 		return;
 	}

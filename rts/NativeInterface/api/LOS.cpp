@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "LOS.h"
 
 #include "NativeInterface/WasmUiVisibility.h"
@@ -18,10 +20,10 @@ static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "LOS system not ready" };
-static const Error INVALID_ALLY_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
-static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
-static const Error NOT_IMPLEMENTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "GetClosestValidPosition is not implemented by the Lua API" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "LOS system not ready" };
+static const Error INVALID_ALLY_TEAM_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid ally team ID" };
+static const Error INVALID_UNIT_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid unit ID" };
+static const Error NOT_IMPLEMENTED_ERROR = { .code = native_error::NotAvailable, .message = "GetClosestValidPosition is not implemented by the Lua API" };
 
 static bool IsReady() { return (gs != nullptr) && (losHandler != nullptr); }
 

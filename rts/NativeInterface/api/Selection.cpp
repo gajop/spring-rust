@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Selection.h"
 #include "NativeInterface/ResultStorage.h"
 
@@ -19,10 +21,10 @@ namespace {
 static thread_local NativeResultStorage resultStorage;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Selection system not ready" };
-static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
-static const Error INVALID_GROUP_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid group ID" };
-static const Error RESULT_BUFFER_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Selection result buffer allocation failed" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Selection system not ready" };
+static const Error INVALID_UNIT_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid unit ID" };
+static const Error INVALID_GROUP_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid group ID" };
+static const Error RESULT_BUFFER_ERROR = { .code = native_error::BufferOverflow, .message = "Selection result buffer allocation failed" };
 
 static bool IsReady() { return (gu != nullptr); }
 

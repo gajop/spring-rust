@@ -153,6 +153,16 @@ endmacro()
 	endif()
 
 ################################################################################
+### Native errors must keep their ABI values in either platform-header order.
+	set(test_name NativeErrorCodes)
+	set(test_src
+		"${CMAKE_CURRENT_SOURCE_DIR}/engine/NativeInterface/TestNativeErrorsPlatformFirst.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/engine/NativeInterface/TestNativeErrorsApiFirst.cpp"
+		${test_Common_sources}
+	)
+	add_spring_test(${test_name} "${test_src}" "" "-DNOT_USING_CREG -DNOT_USING_STREFLOP")
+
+################################################################################
 ### Local transport: no socket or CI network access required.
 	set(test_name LocalConnection)
 	set(test_src

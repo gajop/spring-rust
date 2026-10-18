@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #pragma once
 
 #include <stdint.h>
@@ -362,9 +364,9 @@ struct Float4Result {
 // Common Error Codes
 // ============================================================================
 
-// winerror.h defines several of these names as macros; hide them for the enum
-// declaration so TUs that include windows.h first still compile.
-#ifdef _WIN32
+// Keep the existing C ABI names, hiding platform macros while declaring them.
+// C++ implementation code uses native_error below, because a later windows.h
+// include can redefine the legacy names even if this declaration compiled.
 #pragma push_macro("ERROR_INVALID_ARGUMENT")
 #pragma push_macro("ERROR_NOT_FOUND")
 #pragma push_macro("ERROR_INVALID_STATE")
@@ -375,7 +377,6 @@ struct Float4Result {
 #undef ERROR_INVALID_STATE
 #undef ERROR_ALREADY_EXISTS
 #undef ERROR_BUFFER_OVERFLOW
-#endif
 
 enum CommonErrorCode {
 	ERROR_NONE = 0,
@@ -392,13 +393,28 @@ enum CommonErrorCode {
 	ERROR_INTERNAL = 999
 };
 
-#ifdef _WIN32
+#ifdef __cplusplus
+namespace native_error {
+inline constexpr auto Ok = ERROR_NONE;
+inline constexpr auto InvalidArgument = ERROR_INVALID_ARGUMENT;
+inline constexpr auto OutOfBounds = ERROR_OUT_OF_BOUNDS;
+inline constexpr auto NotFound = ERROR_NOT_FOUND;
+inline constexpr auto NotAvailable = ERROR_NOT_AVAILABLE;
+inline constexpr auto InvalidState = ERROR_INVALID_STATE;
+inline constexpr auto PermissionDenied = ERROR_PERMISSION_DENIED;
+inline constexpr auto AlreadyExists = ERROR_ALREADY_EXISTS;
+inline constexpr auto OperationFailed = ERROR_OPERATION_FAILED;
+inline constexpr auto BufferOverflow = ERROR_BUFFER_OVERFLOW;
+inline constexpr auto InvalidId = ERROR_INVALID_ID;
+inline constexpr auto Internal = ERROR_INTERNAL;
+}
+#endif
+
 #pragma pop_macro("ERROR_BUFFER_OVERFLOW")
 #pragma pop_macro("ERROR_ALREADY_EXISTS")
 #pragma pop_macro("ERROR_INVALID_STATE")
 #pragma pop_macro("ERROR_NOT_FOUND")
 #pragma pop_macro("ERROR_INVALID_ARGUMENT")
-#endif
 
 #ifdef __cplusplus
 }

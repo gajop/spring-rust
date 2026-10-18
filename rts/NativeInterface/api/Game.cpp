@@ -44,12 +44,12 @@ static thread_local std::vector<const char*> mapOptionKeys;
 static thread_local std::vector<const char*> modOptionKeys;
 
 // Static errors
-static const Error GAME_NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game is not initialized" };
-static const Error INVALID_OPTION_ERROR = { .code = ERROR_NOT_FOUND, .message = "Option key not found" };
-static const Error INVALID_ARG = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid argument" };
-static const Error INVALID_TEAM = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid team ID" };
-static const Error NOT_FOUND = { .code = ERROR_NOT_FOUND, .message = "Not found" };
-static const Error INTERNAL = { .code = ERROR_INTERNAL, .message = "Internal error" };
+static const Error GAME_NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Game is not initialized" };
+static const Error INVALID_OPTION_ERROR = { .code = native_error::NotFound, .message = "Option key not found" };
+static const Error INVALID_ARG = { .code = native_error::InvalidArgument, .message = "Invalid argument" };
+static const Error INVALID_TEAM = { .code = native_error::InvalidArgument, .message = "Invalid team ID" };
+static const Error NOT_FOUND = { .code = native_error::NotFound, .message = "Not found" };
+static const Error INTERNAL = { .code = native_error::Internal, .message = "Internal error" };
 
 static_assert(GAME_MAX_TEAMS == MAX_TEAMS);
 static_assert(GAME_MAX_PLAYERS == MAX_PLAYERS);

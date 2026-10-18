@@ -11,8 +11,8 @@
 
 namespace {
 
-static const Error INVALID_PARAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid parameters" };
-static const Error DRAWER_UNAVAILABLE_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "InMapDrawer not available" };
+static const Error INVALID_PARAM_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid parameters" };
+static const Error DRAWER_UNAVAILABLE_ERROR = { .code = native_error::NotAvailable, .message = "InMapDrawer not available" };
 
 static void NativeAddWorldIcon(const AddWorldIconQuery* query, AddWorldIconResult* result)
 {

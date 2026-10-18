@@ -20,17 +20,17 @@
 namespace {
 
 static const Error INVALID_OBJECT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid object ID",
 };
 
 static const Error INVALID_ARGUMENT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid object rendering argument",
 };
 
 static const Error NOT_FOUND_ERROR = {
-	.code = ERROR_NOT_FOUND,
+	.code = native_error::NotFound,
 	.message = "Object rendering resource was not found",
 };
 

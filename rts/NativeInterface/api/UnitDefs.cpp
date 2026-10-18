@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "UnitDefs.h"
 
 #include "Sim/Units/UnitDefHandler.h"
@@ -25,9 +27,9 @@ static thread_local std::vector<int32_t> unitBuildableIDs;
 static thread_local std::vector<const char*> unitCustomParamKeys;
 
 // Static errors
-static const Error INVALID_UNITDEF_ERROR = { .code = ERROR_INVALID_ID, .message = "Invalid unit def ID" };
-static const Error NOT_FOUND_ERROR = { .code = ERROR_NOT_FOUND, .message = "UnitDef not found" };
-static const Error INVALID_UNITDEF_PARAM_ERROR = { .code = ERROR_NOT_FOUND, .message = "No such UnitDef property, or it is not of the requested type" };
+static const Error INVALID_UNITDEF_ERROR = { .code = native_error::InvalidId, .message = "Invalid unit def ID" };
+static const Error NOT_FOUND_ERROR = { .code = native_error::NotFound, .message = "UnitDef not found" };
+static const Error INVALID_UNITDEF_PARAM_ERROR = { .code = native_error::NotFound, .message = "No such UnitDef property, or it is not of the requested type" };
 
 static void NativeGetUnitDefIDs(const GetUnitDefIDsQuery* query, GetUnitDefIDsResult* result) {
 	bufferPos = 0;

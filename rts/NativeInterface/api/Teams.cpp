@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Teams.h"
 
 #include "NativeInterface/WasmUiVisibility.h"
@@ -45,10 +47,10 @@ static std::string EncodeCustomOptions(const auto& options)
 }
 
 // Static errors
-static const Error INVALID_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid team ID" };
-static const Error INVALID_ALLY_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
-static const Error INVALID_PLAYER_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid player ID" };
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Team system not ready" };
+static const Error INVALID_TEAM_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid team ID" };
+static const Error INVALID_ALLY_TEAM_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid ally team ID" };
+static const Error INVALID_PLAYER_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid player ID" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Team system not ready" };
 
 static bool IsReady() { return (gs != nullptr); }
 

@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Messages.h"
 
 #include "System/Log/ILog.h"
@@ -38,11 +40,11 @@ static thread_local std::vector<std::string> consoleTextBuffer;
 static thread_local std::vector<ConsoleEntry> consoleEntryBuffer;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Message system not ready" };
-static const Error INVALID_PLAYER_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid player" };
-static const Error INVALID_LUA_UI_MODE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid LuaUI message mode" };
-static const Error PACKET_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Lua message packet error" };
-static const Error GUI_NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "GUI handler not ready" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Message system not ready" };
+static const Error INVALID_PLAYER_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid player" };
+static const Error INVALID_LUA_UI_MODE_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid LuaUI message mode" };
+static const Error PACKET_ERROR = { .code = native_error::InvalidArgument, .message = "Lua message packet error" };
+static const Error GUI_NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "GUI handler not ready" };
 
 static void NativeEcho(const EchoQuery* query, EchoResult* result) {
 	bufferPos = 0;
@@ -72,7 +74,7 @@ static void NativeLog(const LogQuery* query, LogResult* result) {
 	}
 
 	if (query->section == nullptr || query->level < 0) {
-		dynamicError = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid log section or level" };
+		dynamicError = { .code = native_error::InvalidArgument, .message = "Invalid log section or level" };
 		result->error = &dynamicError;
 		result->success = false;
 		return;

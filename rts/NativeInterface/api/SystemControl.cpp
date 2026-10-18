@@ -52,22 +52,22 @@ namespace {
 static thread_local char scratchBuffer[256];
 
 static const Error NOT_AVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Function not available"
 };
 
 static const Error INVALID_ARGUMENT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid argument"
 };
 
 static const Error OPERATION_FAILED_ERROR = {
-	.code = ERROR_OPERATION_FAILED,
+	.code = native_error::OperationFailed,
 	.message = "Operation failed"
 };
 
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "System not ready"
 };
 

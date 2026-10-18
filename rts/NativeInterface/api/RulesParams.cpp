@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "RulesParams.h"
 
 #include "NativeInterface/WasmUiVisibility.h"
@@ -29,9 +31,9 @@ static thread_local std::vector<std::string> visibleNameStorage;
 static thread_local std::vector<const char*> visibleNamePointers;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game not ready" };
-static const Error INVALID_ID_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ID" };
-static const Error BUFFER_OVERFLOW_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Buffer overflow" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Game not ready" };
+static const Error INVALID_ID_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid ID" };
+static const Error BUFFER_OVERFLOW_ERROR = { .code = native_error::BufferOverflow, .message = "Buffer overflow" };
 
 static bool IsReady() {
 	return (gs != nullptr);

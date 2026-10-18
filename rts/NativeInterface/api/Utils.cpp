@@ -25,17 +25,17 @@ static thread_local Error dynamicError;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "System not ready"
 };
 
 static const Error INVALID_UNITDEF_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid unit definition ID"
 };
 
 static const Error INVALID_FEATUREDEF_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid feature definition ID"
 };
 

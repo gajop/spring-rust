@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "UnitsWeapons.h"
 
 #include "Sim/Units/Unit.h"
@@ -16,9 +18,9 @@ namespace {
 static thread_local std::vector<float> damageValues;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit system not ready" };
-static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
-static const Error INVALID_WEAPON_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid weapon number" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Unit system not ready" };
+static const Error INVALID_UNIT_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid unit ID" };
+static const Error INVALID_WEAPON_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid weapon number" };
 
 static bool IsReady() {
 	return (gs != nullptr);

@@ -32,12 +32,12 @@ static thread_local std::vector<std::string> profileNameStorage;
 static thread_local std::vector<const char*> profileNamePointers;
 
 static const Error INVALID_ARGUMENT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid argument"
 };
 
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Not available"
 };
 

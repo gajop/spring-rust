@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Config.h"
 
 #include "System/Config/ConfigHandler.h"
@@ -22,12 +24,12 @@ static thread_local std::vector<const char*> logSectionBuffer;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Config system not ready"
 };
 
 static const Error INVALID_ARG_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid argument"
 };
 

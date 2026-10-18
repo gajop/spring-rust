@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Tracing.h"
 
 #include "Game/TraceRay.h"
@@ -25,12 +27,12 @@ static thread_local Error dynamicError;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Tracing system not ready"
 };
 
 static const Error INVALID_ARGUMENT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid tracing argument"
 };
 

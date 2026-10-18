@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "UnsyncedRead.h"
 
 #include "NativeInterface/WasmUiVisibility.h"
@@ -60,37 +62,37 @@ thread_local std::vector<std::vector<const char*>> activeCommandParameterStorage
 
 // Error messages
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Game not ready"
 };
 
 static const Error INVALID_UNIT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid unit ID"
 };
 
 static const Error INVALID_FEATURE_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid feature ID"
 };
 
 static const Error INVALID_ARGUMENT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid argument"
 };
 
 static const Error CAMERA_UNAVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Camera not available"
 };
 
 static const Error NOT_AVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Not available in Native API"
 };
 
 static const Error BUFFER_OVERFLOW_ERROR = {
-	.code = ERROR_BUFFER_OVERFLOW,
+	.code = native_error::BufferOverflow,
 	.message = "Scratch buffer overflow"
 };
 

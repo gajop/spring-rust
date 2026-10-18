@@ -14,8 +14,8 @@ static thread_local std::vector<int32_t> weaponDefIDs;
 static thread_local std::vector<const char*> customParamKeys;
 
 // Static errors
-static const Error INVALID_WEAPONDEF_ERROR = { .code = ERROR_INVALID_ID, .message = "Invalid weapon def ID" };
-static const Error NOT_FOUND_ERROR = { .code = ERROR_NOT_FOUND, .message = "WeaponDef not found" };
+static const Error INVALID_WEAPONDEF_ERROR = { .code = native_error::InvalidId, .message = "Invalid weapon def ID" };
+static const Error NOT_FOUND_ERROR = { .code = native_error::NotFound, .message = "WeaponDef not found" };
 
 static void NativeGetWeaponDefIDs(const GetWeaponDefIDsQuery* query, GetWeaponDefIDsResult* result) {
 	bufferPos = 0;

@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "UnitsInfo.h"
 
 #include "NativeInterface/WasmUiVisibility.h"
@@ -42,9 +44,9 @@ static thread_local std::vector<int32_t> nanoPieceIDs;
 static thread_local std::vector<int32_t> transportedUnitIDs;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit system not ready" };
-static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
-static const Error INVALID_ALLY_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Unit system not ready" };
+static const Error INVALID_UNIT_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid unit ID" };
+static const Error INVALID_ALLY_TEAM_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid ally team ID" };
 
 static bool IsReady() {
 	return (gs != nullptr);

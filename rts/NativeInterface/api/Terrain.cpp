@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Terrain.h"
 
 #include "Map/ReadMap.h"
@@ -21,12 +23,12 @@ static thread_local Error dynamicError;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Map not ready"
 };
 
 static const Error INVALID_ARG_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid argument"
 };
 
@@ -203,7 +205,7 @@ static void NativeGetTerrainTypeData(const GetTerrainTypeDataQuery* query, GetTe
 		bufferPos += snprintf(msg, sizeof(scratchBuffer) - bufferPos,
 			"Terrain type index %d out of range [0-%d]",
 			query->terrainTypeIndex, CMapInfo::NUM_TERRAIN_TYPES - 1) + 1;
-		dynamicError.code = ERROR_OUT_OF_BOUNDS;
+		dynamicError.code = native_error::OutOfBounds;
 		dynamicError.message = msg;
 		result->error = &dynamicError;
 		return;

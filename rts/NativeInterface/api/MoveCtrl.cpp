@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "MoveCtrl.h"
 
 #include "Sim/Units/Unit.h"
@@ -28,27 +30,27 @@ static thread_local std::vector<int32_t> estimatedStarts;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Move control system not ready"
 };
 
 static const Error INVALID_UNIT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid unit ID"
 };
 
 static const Error INVALID_ARGUMENT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid movement speed"
 };
 
 static const Error INVALID_MOVE_TYPE_FIELD_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Move type field is not supported by this unit"
 };
 
 static const Error INVALID_PROGRESS_STATE_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid move control progress state"
 };
 

@@ -90,22 +90,22 @@ static_assert(static_cast<unsigned>(GFX_CULL_FACE_FRONT_AND_BACK) == static_cast
 namespace {
 
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Graphics system not ready",
 };
 
 static const Error INVALID_ARGUMENT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid graphics argument",
 };
 
 static const Error NOT_FOUND_ERROR = {
-	.code = ERROR_NOT_FOUND,
+	.code = native_error::NotFound,
 	.message = "Graphics object not found",
 };
 
 static const Error OPERATION_FAILED_ERROR = {
-	.code = ERROR_INTERNAL,
+	.code = native_error::Internal,
 	.message = "Graphics operation failed",
 };
 

@@ -29,22 +29,22 @@ static thread_local std::vector<std::string> filenameStorage;
 static thread_local std::vector<const char*> filenamePointers;
 
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Ground decal system not available"
 };
 
 static const Error INVALID_DECAL_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid decal ID"
 };
 
 static const Error BUFFER_OVERFLOW_ERROR = {
-	.code = ERROR_BUFFER_OVERFLOW,
+	.code = native_error::BufferOverflow,
 	.message = "Scratch buffer overflow"
 };
 
 static const Error INVALID_ARGUMENT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid argument"
 };
 

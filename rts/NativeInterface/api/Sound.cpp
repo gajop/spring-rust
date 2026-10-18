@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Sound.h"
 
 #include <vector>
@@ -20,9 +22,9 @@ static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Sound system not ready" };
-static const Error INVALID_SOUND_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid sound file or ID" };
-static const Error SOUND_EFFECTS_UNSUPPORTED_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Sound effects are not supported" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Sound system not ready" };
+static const Error INVALID_SOUND_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid sound file or ID" };
+static const Error SOUND_EFFECTS_UNSUPPORTED_ERROR = { .code = native_error::NotAvailable, .message = "Sound effects are not supported" };
 
 static bool IsReady() { return (sound != nullptr) && ISound::IsInitialized(); }
 

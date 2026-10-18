@@ -19,22 +19,22 @@ thread_local std::vector<IconDataEntry> iconEntries;
 thread_local std::vector<std::string> iconNameStorage;
 
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Icon system not available"
 };
 
 static const Error INVALID_ICON_NAME_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Icon name is null"
 };
 
 static const Error BUFFER_OVERFLOW_ERROR = {
-	.code = ERROR_BUFFER_OVERFLOW,
+	.code = native_error::BufferOverflow,
 	.message = "Scratch buffer overflow"
 };
 
 static const Error INVALID_UNIT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid unit ID"
 };
 

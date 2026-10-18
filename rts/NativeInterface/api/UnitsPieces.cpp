@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "UnitsPieces.h"
 
 #include "Sim/Units/Unit.h"
@@ -20,9 +22,9 @@ static thread_local std::vector<const char*> pointerStorage;
 static thread_local std::vector<PieceMapEntry> pieceMapEntries;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Game not ready" };
-static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit or feature ID" };
-static const Error INVALID_PIECE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid piece number" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Game not ready" };
+static const Error INVALID_UNIT_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid unit or feature ID" };
+static const Error INVALID_PIECE_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid piece number" };
 
 static bool IsReady() {
 	return (gs != nullptr);

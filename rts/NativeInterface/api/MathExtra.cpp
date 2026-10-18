@@ -17,7 +17,7 @@ static thread_local size_t bufferPos = 0;
 static thread_local Error dynamicError;
 
 // Static errors
-static const Error NULL_PTR_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Vector pointer is null" };
+static const Error NULL_PTR_ERROR = { .code = native_error::InvalidArgument, .message = "Vector pointer is null" };
 static constexpr uint32_t EXACT_INTEGER_MASK = 0x00FFFFFF;
 
 static void NativeHypot(const HypotQuery* query, HypotResult* result) {

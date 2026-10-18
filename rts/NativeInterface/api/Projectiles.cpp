@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Projectiles.h"
 
 #include "NativeInterface/WasmUiVisibility.h"
@@ -25,8 +27,8 @@ static thread_local std::vector<int32_t> projectileIDs;
 static thread_local std::vector<float> damageValues;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Projectile system not ready" };
-static const Error INVALID_PROJECTILE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid projectile ID" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Projectile system not ready" };
+static const Error INVALID_PROJECTILE_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid projectile ID" };
 
 // Helper: check if ready
 static bool IsReady()

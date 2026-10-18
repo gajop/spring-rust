@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "MetalMap.h"
 #include "CommonTypes.h"
 
@@ -13,7 +15,7 @@ static thread_local Error dynamicError;
 
 // Static errors
 static const Error METAL_MAP_UNAVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Metal map is not available"
 };
 
@@ -53,7 +55,7 @@ static void NativeGetMetalAmount(const GetMetalAmountQuery* query, GetMetalAmoun
 		bufferPos += snprintf(msg, sizeof(scratchBuffer) - bufferPos,
 			"Coordinates (%d, %d) out of bounds [0-%d, 0-%d]",
 			query->x, query->z, maxX, maxZ) + 1;
-		dynamicError.code = ERROR_OUT_OF_BOUNDS;
+		dynamicError.code = native_error::OutOfBounds;
 		dynamicError.message = msg;
 		result->error = &dynamicError;
 		return;
@@ -80,7 +82,7 @@ static void NativeGetMetalExtraction(const GetMetalExtractionQuery* query, GetMe
 		bufferPos += snprintf(msg, sizeof(scratchBuffer) - bufferPos,
 			"Coordinates (%d, %d) out of bounds [0-%d, 0-%d]",
 			query->x, query->z, maxX, maxZ) + 1;
-		dynamicError.code = ERROR_OUT_OF_BOUNDS;
+		dynamicError.code = native_error::OutOfBounds;
 		dynamicError.message = msg;
 		result->error = &dynamicError;
 		return;
@@ -107,7 +109,7 @@ static void NativeSetMetalAmount(const SetMetalAmountQuery* query, SetMetalAmoun
 		bufferPos += snprintf(msg, sizeof(scratchBuffer) - bufferPos,
 			"Coordinates (%d, %d) out of bounds [0-%d, 0-%d]",
 			query->x, query->z, maxX, maxZ) + 1;
-		dynamicError.code = ERROR_OUT_OF_BOUNDS;
+		dynamicError.code = native_error::OutOfBounds;
 		dynamicError.message = msg;
 		result->error = &dynamicError;
 		return;

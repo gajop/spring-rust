@@ -72,117 +72,117 @@
 namespace {
 
 static const Error INVALID_UNIT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid unit ID"
 };
 
 static const Error INVALID_FEATURE_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid feature ID"
 };
 
 static const Error INVALID_ARGUMENT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid argument"
 };
 
 static const Error GUI_UNAVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "GUI handler not available"
 };
 
 static const Error RENDERING_UNAVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Rendering context not available"
 };
 
 static const Error MINIMAP_UNAVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Minimap not available or rotation locked"
 };
 
 static const Error DECALS_UNAVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Ground decals system not ready"
 };
 
 static const Error MAP_UNAVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Map rendering not available"
 };
 
 static const Error INVALID_TEXTURE_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid texture"
 };
 
 static const Error MOUSE_UNAVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Mouse handler not available"
 };
 
 static const Error LUAUI_UNAVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "LuaUI not available"
 };
 
 static const Error INVALID_CURSOR_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Cursor name is null"
 };
 
 static const Error INVALID_CURSOR_MAPPING_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Command or cursor file name is null"
 };
 
 static const Error CLIPBOARD_ERROR = {
-	.code = ERROR_OPERATION_FAILED,
+	.code = native_error::OperationFailed,
 	.message = "Failed to set clipboard text"
 };
 
 static const Error TEXT_INPUT_ERROR = {
-	.code = ERROR_OPERATION_FAILED,
+	.code = native_error::OperationFailed,
 	.message = "Failed to configure text input"
 };
 
 static const Error ICON_LOAD_ERROR = {
-	.code = ERROR_OPERATION_FAILED,
+	.code = native_error::OperationFailed,
 	.message = "Failed to load window icon"
 };
 
 static const Error INVALID_ICON_NAME_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Icon file name is null"
 };
 
 static const Error INVALID_UNIT_ICON_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid icon name"
 };
 
 static const Error INVALID_UNIT_IMAGE_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid unit image"
 };
 
 static const Error INVALID_CAPTION_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Window caption is null"
 };
 
 static const Error INVALID_WINDOW_GEOMETRY_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid window geometry parameters"
 };
 
 static const Error VIDEO_CAPTURE_UNAVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Video capturing not available"
 };
 
 static const Error NOT_AVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Not available in Native API"
 };
 
@@ -1918,7 +1918,7 @@ static void NativeUnsyncedNextFloat(const NextFloatQuery* /*query*/, NextFloatRe
 
 static void NativeUnsyncedNextIntUpTo(const NextIntUpToQuery* query, NextIntUpToResult* result)
 {
-	static const Error UPPER_BELOW_ONE = { .code = ERROR_INVALID_ARGUMENT, .message = "Upper limit must be >= 1" };
+	static const Error UPPER_BELOW_ONE = { .code = native_error::InvalidArgument, .message = "Upper limit must be >= 1" };
 
 	result->error = nullptr;
 	result->value = 0;
@@ -1933,7 +1933,7 @@ static void NativeUnsyncedNextIntUpTo(const NextIntUpToQuery* query, NextIntUpTo
 
 static void NativeUnsyncedNextInt(const NextIntQuery* query, NextIntResult* result)
 {
-	static const Error EMPTY_INTERVAL = { .code = ERROR_INVALID_ARGUMENT, .message = "Empty interval (lower > upper)" };
+	static const Error EMPTY_INTERVAL = { .code = native_error::InvalidArgument, .message = "Empty interval (lower > upper)" };
 
 	result->error = nullptr;
 	result->value = 0;
@@ -1969,7 +1969,7 @@ static const UnsyncedRandomApi UNSYNCED_RANDOM_API = {
 
 static void NativeSetDefaultInterfaceVisible(const SetDefaultInterfaceVisibleQuery* query, SetDefaultInterfaceVisibleResult* result)
 {
-	static const Error GAME_NOT_RUNNING = { .code = ERROR_NOT_AVAILABLE, .message = "No game is running" };
+	static const Error GAME_NOT_RUNNING = { .code = native_error::NotAvailable, .message = "No game is running" };
 
 	result->error = nullptr;
 	result->hiddenParts = 0;

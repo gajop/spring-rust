@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "SyncedCtrl.h"
 #include <algorithm>
 #include <cstring>
@@ -88,77 +90,77 @@ thread_local size_t bufferPos = 0;
 
 // Error messages
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Game not ready"
 };
 
 static const Error NOT_AVAILABLE_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Not available in Native API"
 };
 
 static const Error INVALID_TEAM_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid team ID"
 };
 
 static const Error INVALID_ALLYTEAM_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid ally team ID"
 };
 
 static const Error INVALID_UNIT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid unit ID"
 };
 
 static const Error UNIT_CREATION_FAILED_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Unit loader could not create the requested unit"
 };
 
 static const Error INVALID_UNITDEF_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid unit definition ID"
 };
 
 static const Error INVALID_FEATURE_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid feature ID"
 };
 
 static const Error INVALID_FEATUREDEF_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid feature definition ID"
 };
 
 static const Error INVALID_WEAPONDEF_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid weapon definition ID"
 };
 
 static const Error INVALID_PROJECTILE_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid projectile ID"
 };
 
 static const Error INVALID_PLAYER_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid player ID"
 };
 
 static const Error INVALID_RESOURCE_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid resource type (use 'metal' or 'energy')"
 };
 
 static const Error INVALID_ARGUMENT_ERROR = {
-	.code = ERROR_INVALID_ARGUMENT,
+	.code = native_error::InvalidArgument,
 	.message = "Invalid argument"
 };
 
 static const Error BUFFER_OVERFLOW_ERROR = {
-	.code = ERROR_BUFFER_OVERFLOW,
+	.code = native_error::BufferOverflow,
 	.message = "Scratch buffer overflow"
 };
 
@@ -289,7 +291,7 @@ static void NativeAssignPlayerToTeam(const AssignPlayerToTeamQuery* query, Assig
 	}
 
 	if (!playerHandler.IsValidPlayer(query->playerID)) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid player ID");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid player ID");
 		return;
 	}
 
@@ -300,7 +302,7 @@ static void NativeAssignPlayerToTeam(const AssignPlayerToTeamQuery* query, Assig
 
 	CPlayer* player = playerHandler.Player(query->playerID);
 	if (player == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid player");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid player");
 		return;
 	}
 
@@ -644,7 +646,7 @@ static void NativeSetPlayerReadyState(const SetPlayerReadyStateQuery* query, Set
 	}
 
 	if (!playerHandler.IsValidPlayer(query->playerID)) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid player ID");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid player ID");
 		return;
 	}
 
@@ -664,12 +666,12 @@ static void NativeTransferTeamMaxUnits(const TransferTeamMaxUnitsQuery* query, T
 	}
 
 	if (!teamHandler.IsValidTeam(query->fromTeamID)) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid from team ID");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid from team ID");
 		return;
 	}
 
 	if (!teamHandler.IsValidTeam(query->toTeamID)) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid to team ID");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid to team ID");
 		return;
 	}
 
@@ -1762,12 +1764,12 @@ static void NativeEditUnitCmdDesc(const EditUnitCmdDescQuery* query, EditUnitCmd
 	// Convert to the command AI's 0-based vector index before accessing it.
 	const int cmdDescIndex = static_cast<int>(query->cmdDescIndex) - CMD_INDEX_OFFSET;
 	if (cmdDescIndex < 0 || cmdDescIndex >= static_cast<int>(cmdDescs.size())) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid command description index");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid command description index");
 		return;
 	}
 
 	if (query->cmdDesc == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Command description is null");
+		result->error = MakeError(native_error::InvalidArgument, "Command description is null");
 		return;
 	}
 
@@ -1801,7 +1803,7 @@ static void NativeInsertUnitCmdDesc(const InsertUnitCmdDescQuery* query, InsertU
 	}
 
 	if (query->cmdDesc == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Command description is null");
+		result->error = MakeError(native_error::InvalidArgument, "Command description is null");
 		return;
 	}
 
@@ -1814,7 +1816,7 @@ static void NativeInsertUnitCmdDesc(const InsertUnitCmdDescQuery* query, InsertU
 	if (query->cmdDescIndex >= 0) {
 		cmdDescIdx = query->cmdDescIndex - CMD_INDEX_OFFSET;
 		if (cmdDescIdx < 0 || cmdDescIdx > static_cast<int>(unit->commandAI->possibleCommands.size())) {
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid command description index");
+			result->error = MakeError(native_error::InvalidArgument, "Invalid command description index");
 			return;
 		}
 	}
@@ -1849,7 +1851,7 @@ static void NativeRemoveUnitCmdDesc(const RemoveUnitCmdDescQuery* query, RemoveU
 	} else {
 		cmdDescIdx = query->cmdDescIndex - CMD_INDEX_OFFSET;
 		if (cmdDescIdx < 0 || cmdDescIdx >= static_cast<int>(unit->commandAI->possibleCommands.size())) {
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid command description index");
+			result->error = MakeError(native_error::InvalidArgument, "Invalid command description index");
 			return;
 		}
 	}
@@ -1914,7 +1916,7 @@ static void NativeSetUnitBuildSpeed(const SetUnitBuildSpeedQuery* query, SetUnit
 	// Check if it's a builder
 	CBuilder* builder = dynamic_cast<CBuilder*>(unit);
 	if (builder == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not a builder or factory");
+		result->error = MakeError(native_error::InvalidArgument, "Unit is not a builder or factory");
 		return;
 	}
 
@@ -2015,7 +2017,7 @@ static void NativeSetUnitPieceCollisionVolumeData(const SetUnitPieceCollisionVol
 
 	LocalModel& localModel = unit->localModel;
 	if (query->pieceIndex < 0 || static_cast<size_t>(query->pieceIndex) >= localModel.pieces.size()) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid piece index");
 		return;
 	}
 
@@ -2081,12 +2083,12 @@ static void NativeSetUnitTarget(const SetUnitTargetQuery* query, SetUnitTargetRe
 	// Unit target
 	CUnit* target = unitHandler.GetUnit(query->target.targetID);
 	if (target == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid target unit");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid target unit");
 		return;
 	}
 
 	if (target == unit) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit cannot attack itself");
+		result->error = MakeError(native_error::InvalidArgument, "Unit cannot attack itself");
 		return;
 	}
 
@@ -2196,7 +2198,7 @@ static void NativeSetUnitFlanking(const SetUnitFlankingQuery* query, SetUnitFlan
 	}
 
 	if (query->type == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Missing flanking type");
+		result->error = MakeError(native_error::InvalidArgument, "Missing flanking type");
 		return;
 	}
 
@@ -2221,7 +2223,7 @@ static void NativeSetUnitFlanking(const SetUnitFlankingQuery* query, SetUnitFlan
 			unit->flankingBonusDifDamage = (query->args.x - minDamage) * 0.5f;
 		} break;
 		default:
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown flanking type");
+			result->error = MakeError(native_error::InvalidArgument, "Unknown flanking type");
 			return;
 	}
 
@@ -2295,7 +2297,7 @@ static void NativeSetUnitMoveGoal(const SetUnitMoveGoalQuery* query, SetUnitMove
 	}
 
 	if (unit->moveType == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit has no move type");
+		result->error = MakeError(native_error::InvalidArgument, "Unit has no move type");
 		return;
 	}
 
@@ -2330,7 +2332,7 @@ static void NativeSetUnitLandGoal(const SetUnitLandGoalQuery* query, SetUnitLand
 
 	AAirMoveType* amt = dynamic_cast<AAirMoveType*>(unit->moveType);
 	if (amt == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not a flying unit");
+		result->error = MakeError(native_error::InvalidArgument, "Unit is not a flying unit");
 		return;
 	}
 
@@ -2358,7 +2360,7 @@ static void NativeClearUnitGoal(const ClearUnitGoalQuery* query, ClearUnitGoalRe
 	}
 
 	if (unit->moveType == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit has no move type");
+		result->error = MakeError(native_error::InvalidArgument, "Unit has no move type");
 		return;
 	}
 
@@ -2425,7 +2427,7 @@ static void NativeSetUnitDirection(const SetUnitDirectionQuery* query, SetUnitDi
 	rightDir.SafeNormalize();
 
 	if (math::fabsf(dir.SqLength() - 1.0f) > float3::cmp_eps() || math::fabsf(rightDir.SqLength() - 1.0f) > float3::cmp_eps()) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid direction vector");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid direction vector");
 		return;
 	}
 
@@ -2446,18 +2448,18 @@ static void NativeUnitAttach(const UnitAttachQuery* query, UnitAttachResult* res
 
 	CUnit* transporter = unitHandler.GetUnit(query->transporterID);
 	if (transporter == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid transporter unit ID");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid transporter unit ID");
 		return;
 	}
 
 	CUnit* transportee = unitHandler.GetUnit(query->transporteeID);
 	if (transportee == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid transportee unit ID");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid transportee unit ID");
 		return;
 	}
 
 	if (transporter == transportee) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Cannot attach unit to itself");
+		result->error = MakeError(native_error::InvalidArgument, "Cannot attach unit to itself");
 		return;
 	}
 
@@ -2465,7 +2467,7 @@ static void NativeUnitAttach(const UnitAttachQuery* query, UnitAttachResult* res
 	const auto& pieces = transporter->localModel.pieces;
 
 	if (piece >= static_cast<int>(pieces.size())) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece number");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid piece number");
 		return;
 	}
 
@@ -2496,7 +2498,7 @@ static void NativeUnitDetach(const UnitDetachQuery* query, UnitDetachResult* res
 
 	CUnit* transporter = transportee->GetTransporter();
 	if (transporter == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not being transported");
+		result->error = MakeError(native_error::InvalidArgument, "Unit is not being transported");
 		return;
 	}
 
@@ -2523,7 +2525,7 @@ static void NativeUnitDetachFromAir(const UnitDetachFromAirQuery* query, UnitDet
 
 	CUnit* transporter = transportee->GetTransporter();
 	if (transporter == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not being transported");
+		result->error = MakeError(native_error::InvalidArgument, "Unit is not being transported");
 		return;
 	}
 
@@ -2558,7 +2560,7 @@ static void NativeSetUnitLoadingTransport(const SetUnitLoadingTransportQuery* qu
 
 	CUnit* transport = unitHandler.GetUnit(query->transportID);
 	if (transport == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid transport unit ID");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid transport unit ID");
 		return;
 	}
 
@@ -2693,19 +2695,19 @@ static void NativeSetUnitWeaponState(const SetUnitWeaponStateQuery* query, SetUn
 	// Lua parity adapter converts Lua's one-based number before reaching here.
 	const int weaponIndex = query->weaponNum;
 	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid weapon number");
 		return;
 	}
 
 	CWeapon* weapon = unit->weapons[weaponIndex];
 	if (query->key == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Key is null");
+		result->error = MakeError(native_error::InvalidArgument, "Key is null");
 		return;
 	}
 
 	result->success = SetSingleWeaponState(weapon, query->key, query->value);
 	if (!result->success) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown weapon state key");
+		result->error = MakeError(native_error::InvalidArgument, "Unknown weapon state key");
 	}
 }
 
@@ -2730,7 +2732,7 @@ static void NativeUnitWeaponFire(const UnitWeaponFireQuery* query, UnitWeaponFir
 	// Lua parity adapter converts Lua's one-based number before reaching here.
 	const int weaponIndex = query->weaponNum;
 	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid weapon number");
 		return;
 	}
 
@@ -2759,7 +2761,7 @@ static void NativeUnitWeaponHoldFire(const UnitWeaponHoldFireQuery* query, UnitW
 	// Lua parity adapter converts Lua's one-based number before reaching here.
 	const int weaponIndex = query->weaponNum;
 	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid weapon number");
 		return;
 	}
 
@@ -2943,19 +2945,19 @@ static void NativeSetUnitWeaponDamages(const SetUnitWeaponDamagesQuery* query, S
 		// Lua parity adapter converts Lua's one-based number before reaching here.
 		const int weaponIndex = query->weaponNum;
 		if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid weapon number");
+			result->error = MakeError(native_error::InvalidArgument, "Invalid weapon number");
 			return;
 		}
 		damages = DynDamageArray::GetMutable(unit->weapons[weaponIndex]->damages);
 	}
 
 	if (damages == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Could not get damage array");
+		result->error = MakeError(native_error::InvalidArgument, "Could not get damage array");
 		return;
 	}
 
 	if (query->damageKey == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Damage key is null");
+		result->error = MakeError(native_error::InvalidArgument, "Damage key is null");
 		return;
 	}
 
@@ -2968,7 +2970,7 @@ static void NativeSetUnitWeaponDamages(const SetUnitWeaponDamagesQuery* query, S
 			damages->Set(static_cast<unsigned>(armType), query->damageValue);
 			result->success = true;
 		} else {
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid armor type index");
+			result->error = MakeError(native_error::InvalidArgument, "Invalid armor type index");
 		}
 		return;
 	}
@@ -2976,7 +2978,7 @@ static void NativeSetUnitWeaponDamages(const SetUnitWeaponDamagesQuery* query, S
 	// It's a named property
 	result->success = SetSingleDynDamagesKey(damages, query->damageKey, query->damageValue);
 	if (!result->success) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown damage key");
+		result->error = MakeError(native_error::InvalidArgument, "Unknown damage key");
 	}
 }
 
@@ -2998,7 +3000,7 @@ static void NativeForceUnitCollisionUpdate(const ForceUnitCollisionUpdateQuery* 
 	}
 
 	if (unit->moveType == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit has no move type");
+		result->error = MakeError(native_error::InvalidArgument, "Unit has no move type");
 		return;
 	}
 
@@ -3051,7 +3053,7 @@ static void NativeSetUnitHeadingAndUpDir(const SetUnitHeadingAndUpDirQuery* quer
 
 	const float3 upDir = float3(query->upDir.x, query->upDir.y, query->upDir.z).SafeNormalize();
 	if (std::fabs(upDir.SqLength() - 1.0f) > float3::cmp_eps()) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid up direction (must be non-zero)");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid up direction (must be non-zero)");
 		return;
 	}
 
@@ -3144,7 +3146,7 @@ static void NativeSetUnitSensorRadius(const SetUnitSensorRadiusQuery* query, Set
 	}
 
 	if (query->sensorType == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Sensor type is null");
+		result->error = MakeError(native_error::InvalidArgument, "Sensor type is null");
 		return;
 	}
 
@@ -3175,7 +3177,7 @@ static void NativeSetUnitSensorRadius(const SetUnitSensorRadiusQuery* query, Set
 			result->newRadius = unit->sonarJamRadius = radius;
 			break;
 		default:
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown sensor type");
+			result->error = MakeError(native_error::InvalidArgument, "Unknown sensor type");
 			return;
 	}
 }
@@ -3224,12 +3226,12 @@ static void NativeSetUnitBuildParams(const SetUnitBuildParamsQuery* query, SetUn
 
 	CBuilder* builder = dynamic_cast<CBuilder*>(unit);
 	if (builder == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not a builder");
+		result->error = MakeError(native_error::InvalidArgument, "Unit is not a builder");
 		return;
 	}
 
 	if (query->paramName == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Param name is null");
+		result->error = MakeError(native_error::InvalidArgument, "Param name is null");
 		return;
 	}
 
@@ -3242,7 +3244,7 @@ static void NativeSetUnitBuildParams(const SetUnitBuildParamsQuery* query, SetUn
 			builder->range3D = query->value.useBoolean ? query->value.boolean : (query->value.number != 0.0f);
 			break;
 		default:
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown build param");
+			result->error = MakeError(native_error::InvalidArgument, "Unknown build param");
 			return;
 	}
 
@@ -3390,7 +3392,7 @@ static void NativeSetFactoryBuggerOff(const SetFactoryBuggerOffQuery* query, Set
 
 	CFactory* factory = dynamic_cast<CFactory*>(unit);
 	if (factory == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not a factory");
+		result->error = MakeError(native_error::InvalidArgument, "Unit is not a factory");
 		return;
 	}
 
@@ -3482,7 +3484,7 @@ static void NativeAddUnitResource(const AddUnitResourceQuery* query, AddUnitReso
 	}
 
 	if (query->resourceType == nullptr || query->resourceType[0] == '\0') {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Resource type is null or empty");
+		result->error = MakeError(native_error::InvalidArgument, "Resource type is null or empty");
 		return;
 	}
 
@@ -3497,7 +3499,7 @@ static void NativeAddUnitResource(const AddUnitResourceQuery* query, AddUnitReso
 			result->success = true;
 			break;
 		default:
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown resource type");
+			result->error = MakeError(native_error::InvalidArgument, "Unknown resource type");
 			break;
 	}
 }
@@ -3520,7 +3522,7 @@ static void NativeUseUnitResource(const UseUnitResourceQuery* query, UseUnitReso
 	}
 
 	if (query->resourceType == nullptr || query->resourceType[0] == '\0') {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Resource type is null or empty");
+		result->error = MakeError(native_error::InvalidArgument, "Resource type is null or empty");
 		return;
 	}
 
@@ -3533,7 +3535,7 @@ static void NativeUseUnitResource(const UseUnitResourceQuery* query, UseUnitReso
 			result->success = unit->UseEnergy(amount);
 			break;
 		default:
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown resource type");
+			result->error = MakeError(native_error::InvalidArgument, "Unknown resource type");
 			break;
 	}
 }
@@ -3557,7 +3559,7 @@ static void NativeSetUnitPieceVisible(const SetUnitPieceVisibleQuery* query, Set
 
 	LocalModel& localModel = unit->localModel;
 	if (query->pieceIndex < 0 || query->pieceIndex >= static_cast<int>(localModel.pieces.size())) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid piece index");
 		return;
 	}
 
@@ -3584,11 +3586,11 @@ static void NativeSetUnitPieceParent(const SetUnitPieceParentQuery* query, SetUn
 
 	LocalModel& localModel = unit->localModel;
 	if (query->childPieceIndex < 0 || query->childPieceIndex >= static_cast<int>(localModel.pieces.size())) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid child piece index");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid child piece index");
 		return;
 	}
 	if (query->parentPieceIndex < 0 || query->parentPieceIndex >= static_cast<int>(localModel.pieces.size())) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid parent piece index");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid parent piece index");
 		return;
 	}
 
@@ -3597,7 +3599,7 @@ static void NativeSetUnitPieceParent(const SetUnitPieceParentQuery* query, SetUn
 
 	// Cannot change the root piece's parent
 	if (childPiece == localModel.GetRoot()) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Cannot change root piece's parent");
+		result->error = MakeError(native_error::InvalidArgument, "Cannot change root piece's parent");
 		return;
 	}
 
@@ -3626,7 +3628,7 @@ static void NativeSetUnitPieceMatrix(const SetUnitPieceMatrixQuery* query, SetUn
 
 	LocalModel& localModel = unit->localModel;
 	if (query->pieceIndex < 0 || query->pieceIndex >= static_cast<int>(localModel.pieces.size())) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid piece index");
 		return;
 	}
 
@@ -3678,7 +3680,7 @@ static void NativeSetUnitNanoPieces(const SetUnitNanoPiecesQuery* query, SetUnit
 	}
 
 	if (nanoPieces == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not a builder or factory");
+		result->error = MakeError(native_error::InvalidArgument, "Unit is not a builder or factory");
 		return;
 	}
 
@@ -3691,7 +3693,7 @@ static void NativeSetUnitNanoPieces(const SetUnitNanoPiecesQuery* query, SetUnit
 		if (unit->localModel.HasPiece(modelPieceNum)) {
 			nanoPieces->push_back(modelPieceNum);
 		} else {
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+			result->error = MakeError(native_error::InvalidArgument, "Invalid piece index");
 			return;
 		}
 	}
@@ -4634,7 +4636,7 @@ static void NativeSetFeaturePieceVisible(const SetFeaturePieceVisibleQuery* quer
 
 	LocalModel& localModel = feature->localModel;
 	if (query->pieceIndex < 0 || query->pieceIndex >= static_cast<int>(localModel.pieces.size())) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid piece index");
 		return;
 	}
 
@@ -4661,7 +4663,7 @@ static void NativeSetFeaturePieceMatrix(const SetFeaturePieceMatrixQuery* query,
 
 	LocalModel& localModel = feature->localModel;
 	if (query->pieceIndex < 0 || query->pieceIndex >= static_cast<int>(localModel.pieces.size())) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid piece index");
 		return;
 	}
 
@@ -4697,7 +4699,7 @@ static void NativeSetFeaturePieceCollisionVolumeData(const SetFeaturePieceCollis
 
 	LocalModel& localModel = feature->localModel;
 	if (query->pieceIndex < 0 || query->pieceIndex >= static_cast<int>(localModel.pieces.size())) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid piece index");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid piece index");
 		return;
 	}
 
@@ -5005,7 +5007,7 @@ static void NativeSetTerrainTypeData(const SetTerrainTypeDataQuery* query, SetTe
 	}
 
 	if (query->typeIndex < 0 || query->typeIndex >= CMapInfo::NUM_TERRAIN_TYPES) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid terrain type index");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid terrain type index");
 		return;
 	}
 
@@ -5767,7 +5769,7 @@ static void NativeSetProjectileTarget(const SetProjectileTargetQuery* query, Set
 
 	CWeaponProjectile* weaponProj = dynamic_cast<CWeaponProjectile*>(projectile);
 	if (weaponProj == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Projectile is not a weapon projectile");
+		result->error = MakeError(native_error::InvalidArgument, "Projectile is not a weapon projectile");
 		return;
 	}
 
@@ -5828,7 +5830,7 @@ static void NativeSetProjectileDamages(const SetProjectileDamagesQuery* query, S
 	DynDamageArray* damages = DynDamageArray::GetMutable(wpro->damages);
 	(void)query->unused;
 	if (query->damageKey == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Damage key is null");
+		result->error = MakeError(native_error::InvalidArgument, "Damage key is null");
 		return;
 	}
 
@@ -5836,7 +5838,7 @@ static void NativeSetProjectileDamages(const SetProjectileDamagesQuery* query, S
 	const long armType = std::strtol(query->damageKey, &endptr, 10);
 	if (*endptr == '\0' && armType >= 0) {
 		if (static_cast<unsigned long>(armType) >= static_cast<unsigned long>(damages->GetNumTypes())) {
-			result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid armor type index");
+			result->error = MakeError(native_error::InvalidArgument, "Invalid armor type index");
 			return;
 		}
 		damages->Set(static_cast<int>(armType), query->damageValue);
@@ -5846,7 +5848,7 @@ static void NativeSetProjectileDamages(const SetProjectileDamagesQuery* query, S
 
 	result->success = SetSingleDynDamagesKey(damages, query->damageKey, query->damageValue);
 	if (!result->success)
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unknown damage key");
+		result->error = MakeError(native_error::InvalidArgument, "Unknown damage key");
 }
 
 static void NativeSetProjectileTimeToLive(const SetProjectileTimeToLiveQuery* query, SetProjectileTimeToLiveResult* result)
@@ -5934,7 +5936,7 @@ static void NativeSetProjectileCEG(const SetProjectileCEGQuery* query, SetProjec
 	if (!proj->weapon && !proj->piece)
 		return;
 	if (query->cegName == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "CEG name is null");
+		result->error = MakeError(native_error::InvalidArgument, "CEG name is null");
 		return;
 	}
 
@@ -6058,7 +6060,7 @@ static void NativeSetPieceProjectileParams(const SetPieceProjectileParamsQuery* 
 	}
 
 	if (!proj->piece) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Projectile is not a piece projectile");
+		result->error = MakeError(native_error::InvalidArgument, "Projectile is not a piece projectile");
 		return;
 	}
 
@@ -6161,7 +6163,7 @@ static void NativeSpawnCEG(const SpawnCEGQuery* query, SpawnCEGResult* result)
 	} else if (query->ceg.name != nullptr) {
 		cegID = explGenHandler.LoadCustomGeneratorID(query->ceg.name);
 	} else {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid CEG reference");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid CEG reference");
 		return;
 	}
 
@@ -6234,7 +6236,7 @@ static void NativeSetNoPause(const SetNoPauseQuery* query, SetNoPauseResult* res
 		gameServer->SetGamePausable(!query->noPause);
 		result->success = true;
 	} else {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Not in server mode");
+		result->error = MakeError(native_error::InvalidArgument, "Not in server mode");
 	}
 }
 
@@ -6339,7 +6341,7 @@ static void NativeSetSquareBuildingMask(const SetSquareBuildingMaskQuery* query,
 	}
 
 	if (!buildingMaskMap.SetTileMask(query->x, query->z, query->mask)) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid tile coordinates");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid tile coordinates");
 		return;
 	}
 
@@ -6385,7 +6387,7 @@ static void NativeCallCOBScript(const CallCOBScriptQuery* query, CallCOBScriptRe
 
 	CCobInstance* cob = dynamic_cast<CCobInstance*>(unit->script);
 	if (cob == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit is not running a COB script");
+		result->error = MakeError(native_error::InvalidArgument, "Unit is not running a COB script");
 		return;
 	}
 
@@ -6402,7 +6404,7 @@ static void NativeCallCOBScript(const CallCOBScriptQuery* query, CallCOBScriptRe
 	} else if (query->func.name != nullptr) {
 		retCode = cob->Call(query->func.name, cobArgs);
 	} else {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "No function ID or name provided");
+		result->error = MakeError(native_error::InvalidArgument, "No function ID or name provided");
 		return;
 	}
 
@@ -6440,7 +6442,7 @@ static void NativeGetCOBScriptID(const GetCOBScriptIDQuery* query, GetCOBScriptI
 	}
 
 	if (query->funcName == nullptr) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Function name is null");
+		result->error = MakeError(native_error::InvalidArgument, "Function name is null");
 		return;
 	}
 
@@ -6467,11 +6469,11 @@ static void NativeCallUnitScript(const CallUnitScriptQuery* query, CallUnitScrip
 	}
 
 	if (query->functionName == nullptr || (query->argCount > 0 && query->args == nullptr)) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Invalid unit-script call arguments");
+		result->error = MakeError(native_error::InvalidArgument, "Invalid unit-script call arguments");
 		return;
 	}
 	if (query->retCapacity > MAX_UNIT_SCRIPT_RETURN_VALUES) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Unit-script return capacity is too large");
+		result->error = MakeError(native_error::InvalidArgument, "Unit-script return capacity is too large");
 		return;
 	}
 
@@ -6524,7 +6526,7 @@ static void NativeNextIntUpTo(const NextIntUpToQuery* query, NextIntUpToResult* 
 
 	const int upper = query->upper;
 	if (upper < 1) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Upper limit must be >= 1");
+		result->error = MakeError(native_error::InvalidArgument, "Upper limit must be >= 1");
 		return;
 	}
 
@@ -6540,7 +6542,7 @@ static void NativeNextInt(const NextIntQuery* query, NextIntResult* result)
 	const int lower = query->lower;
 	const int upper = query->upper;
 	if (lower > upper) {
-		result->error = MakeError(ERROR_INVALID_ARGUMENT, "Empty interval (lower > upper)");
+		result->error = MakeError(native_error::InvalidArgument, "Empty interval (lower > upper)");
 		return;
 	}
 

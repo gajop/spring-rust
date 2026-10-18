@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "UnitsQuery.h"
 #include "NativeInterface/ResultStorage.h"
 
@@ -21,12 +23,12 @@
 namespace {
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Unit system not ready" };
-static const Error INVALID_UNIT_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid unit ID" };
-static const Error INVALID_TEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid team ID" };
-static const Error INVALID_ALLYTEAM_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid ally team ID" };
-static const Error INVALID_DEFS_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Unit definition IDs are required" };
-static const Error RESULT_BUFFER_ERROR = { .code = ERROR_BUFFER_OVERFLOW, .message = "Unit query result buffer allocation failed" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Unit system not ready" };
+static const Error INVALID_UNIT_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid unit ID" };
+static const Error INVALID_TEAM_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid team ID" };
+static const Error INVALID_ALLYTEAM_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid ally team ID" };
+static const Error INVALID_DEFS_ERROR = { .code = native_error::InvalidArgument, .message = "Unit definition IDs are required" };
+static const Error RESULT_BUFFER_ERROR = { .code = native_error::BufferOverflow, .message = "Unit query result buffer allocation failed" };
 
 static thread_local NativeResultStorage resultStorage;
 

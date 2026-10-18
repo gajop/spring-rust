@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Camera.h"
 
 #include "Game/Camera.h"
@@ -29,7 +31,7 @@ static thread_local std::vector<const char*> cameraNamePointers;
 
 // Static errors
 static const Error NOT_READY_ERROR = {
-	.code = ERROR_NOT_AVAILABLE,
+	.code = native_error::NotAvailable,
 	.message = "Camera system not ready"
 };
 

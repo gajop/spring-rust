@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "Features.h"
 
 #include "NativeInterface/WasmUiVisibility.h"
@@ -28,8 +30,8 @@ static thread_local Error dynamicError;
 static thread_local std::vector<int32_t> featureIDs;
 
 // Static errors
-static const Error NOT_READY_ERROR = { .code = ERROR_NOT_AVAILABLE, .message = "Feature system not ready" };
-static const Error INVALID_FEATURE_ERROR = { .code = ERROR_INVALID_ARGUMENT, .message = "Invalid feature ID" };
+static const Error NOT_READY_ERROR = { .code = native_error::NotAvailable, .message = "Feature system not ready" };
+static const Error INVALID_FEATURE_ERROR = { .code = native_error::InvalidArgument, .message = "Invalid feature ID" };
 
 // Helper: check if ready
 static bool IsReady()
