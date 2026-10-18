@@ -1041,14 +1041,15 @@ void SpringApp::Kill(bool fromRun)
 
 	spring::SafeDelete(game);
 	spring::SafeDelete(pregame);
-	spring::SafeDelete(luaMenuController);
-	RmlGui::Shutdown();
-
-	LuaMemPool::KillStatic();
 
 	LOG("[SpringApp::%s][3]", __func__);
 	spring::SafeDelete(clientNet);
 	spring::SafeDelete(gameServer);
+	// Embedded menus may own the existing autohost event receiver. Keep them
+	// alive until the server has sent its final disconnect/quit events.
+	spring::SafeDelete(luaMenuController);
+	RmlGui::Shutdown();
+	LuaMemPool::KillStatic();
 
 	LOG("[SpringApp::%s][4] font=%p", __func__, font.get());
 	#ifndef HEADLESS
