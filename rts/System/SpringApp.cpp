@@ -803,6 +803,9 @@ void SpringApp::Reload(const std::string script)
 	spring::SafeDelete(clientNet);
 	// no-op if we are not the server
 	spring::SafeDelete(gameServer);
+	// Keep configured permissions; match-specific anti-spoofing rules belong to
+	// the connections just closed, and must not accumulate across rematches.
+	luaSocketRestrictions->clearGameRules();
 
 	LOG("[SpringApp::%s][5]", __func__);
 

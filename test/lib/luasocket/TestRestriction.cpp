@@ -97,3 +97,20 @@ TEST_CASE("TestRestriction")
 
 }
 
+
+TEST_CASE("Game restrictions expire on reload without changing configured permissions")
+{
+	CLuaSocketRestrictions rest;
+	rest.addRule(CLuaSocketRestrictions::UDP_CONNECT, "*", -1, true);
+	rest.addGameRule("game.example", 8452);
+	rest.addGameRule("game.example", 8452);
+	rest.addIP("game.example", "127.0.0.1");
+	CHECK_FALSE(rest.isAllowed(CLuaSocketRestrictions::UDP_CONNECT, "game.example", 8452));
+	CHECK_FALSE(rest.isAllowed(CLuaSocketRestrictions::UDP_CONNECT, "127.0.0.1", 8452));
+	CHECK(rest.isAllowed(CLuaSocketRestrictions::UDP_CONNECT, "127.0.0.1", 8453));
+	rest.clearGameRules();
+	CHECK(rest.isAllowed(CLuaSocketRestrictions::UDP_CONNECT, "game.example", 8452));
+	CHECK(rest.isAllowed(CLuaSocketRestrictions::UDP_CONNECT, "127.0.0.1", 8452));
+	rest.addGameRule("127.0.0.1", 8452);
+	CHECK_FALSE(rest.isAllowed(CLuaSocketRestrictions::UDP_CONNECT, "127.0.0.1", 8452));
+}
