@@ -681,8 +681,25 @@ static void NativeGetArchiveChecksum(const GetArchiveChecksumQuery* query, GetAr
 
 	static thread_local sha512::hex_digest singleChecksum;
 	static thread_local sha512::hex_digest completeChecksum;
-	sha512::dump_digest(archiveScanner->GetArchiveSingleChecksumBytes(query->archiveName ? query->archiveName : ""), singleChecksum);
-	sha512::dump_digest(archiveScanner->GetArchiveCompleteChecksumBytes(query->archiveName ? query->archiveName : ""), completeChecksum);
+	result->singleChecksum = nullptr;
+	result->completeChecksum = nullptr;
+	const std::string requestedName = query->archiveName ? query->archiveName : "";
+	const std::string archiveName = FileSystem::GetFilename(archiveScanner->ArchiveFromName(requestedName));
+	if (archiveName.empty() || archiveScanner->GetArchiveDataByArchive(archiveName).IsEmpty()) {
+		result->error = &ARCHIVE_NOT_FOUND_ERROR;
+		return;
+	}
+
+	// Single checksums take a filesystem path; dependency checksums take an
+	// archive name. A displayed game name is not a path on disk.
+	const std::string archivePath = archiveScanner->GetArchivePath(archiveName) + archiveName;
+	try {
+		sha512::dump_digest(archiveScanner->GetArchiveSingleChecksumBytes(archivePath), singleChecksum);
+		sha512::dump_digest(archiveScanner->GetArchiveCompleteChecksumBytes(archiveName), completeChecksum);
+	} catch (const std::exception& error) {
+		result->error = MakeDynamicError(ERROR_INVALID_ARGUMENT, error.what());
+		return;
+	}
 
 	result->error = nullptr;
 	result->singleChecksum = singleChecksum.data();
