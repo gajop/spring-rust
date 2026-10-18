@@ -86,10 +86,9 @@ fn check_scope(
         string_value: alloc::string::String::new(),
     };
     assert!(set("hidden", &hidden, 0).unwrap());
-    assert_eq!(
-        get("hidden").unwrap_err(),
-        ApiError::new(ErrorCode::NotFound as i32)
-    );
+    // This fixture is synced. UI visibility masks must not hide its own
+    // private parameters from the simulation.
+    assert_eq!(get("hidden").unwrap(), hidden);
 }
 
 fn on_frame(frame: i32) {
@@ -119,10 +118,7 @@ fn on_frame(frame: i32) {
         get_game_rules_param_f32("missing").unwrap_err().code,
         ErrorCode::NotFound as i32
     );
-    assert_eq!(
-        get_game_rules_param_f32("hidden").unwrap_err().code,
-        ErrorCode::NotFound as i32
-    );
+    assert_eq!(get_game_rules_param_f32("hidden").unwrap(), 7.0);
     assert_eq!(
         get_game_rules_param_f32("roundtrip").unwrap_err().code,
         ErrorCode::InvalidArgument as i32
@@ -149,10 +145,7 @@ fn on_frame(frame: i32) {
         get_game_rules_param("float_probe").unwrap().float_value,
         -42.25
     );
-    assert_eq!(
-        get_unit_rules_param_f32(unit, "hidden").unwrap_err().code,
-        ErrorCode::NotFound as i32
-    );
+    assert_eq!(get_unit_rules_param_f32(unit, "hidden").unwrap(), 7.0);
     assert_eq!(
         get_team_rules_param(-1, "roundtrip").unwrap_err().code,
         ErrorCode::InvalidArgument as i32
@@ -164,6 +157,7 @@ spring::export_environment_mask!(1u32);
 spring::export_game_frame!(on_frame);
 
 #[panic_handler]
-fn panic(_: &core::panic::PanicInfo<'_>) -> ! {
+fn panic(info: &core::panic::PanicInfo<'_>) -> ! {
+    let _ = spring::messages::echo(&alloc::format!("RULES_PARAMS_TYPED_FAIL: {info}"), "");
     core::arch::wasm32::unreachable()
 }
