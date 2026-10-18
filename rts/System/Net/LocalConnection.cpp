@@ -45,6 +45,7 @@ void CLocalConnection::Close(bool flush)
 
 	std::lock_guard<spring::mutex> scoped_lock(mutexes[instanceIdx]);
 	pktQueues[instanceIdx].clear();
+	numPings = 0;
 }
 
 void CLocalConnection::SendData(std::shared_ptr<const RawPacket> pkt)
@@ -104,7 +105,7 @@ void CLocalConnection::DeleteBufferPacketAt(unsigned index)
 	if (index >= pktQueue.size())
 		return;
 
-	numPings -= (pktQueue[0]->data[0] == NETMSG_PING);
+	numPings -= (pktQueue[index]->data[0] == NETMSG_PING);
 	pktQueue.erase(pktQueue.begin() + index);
 }
 
