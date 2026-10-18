@@ -82,8 +82,12 @@ class ProbeTests(unittest.TestCase):
             (crate / 'src').mkdir(parents=True)
             sdk = root / 'rts/wasm/generated/sdk'
             sdk.mkdir(parents=True)
+            internal = root / 'rust/crates/spring-sdk-internal'
+            (internal / 'src').mkdir(parents=True)
+            internal_inputs = (internal / 'Cargo.toml', internal / 'build.rs', internal / 'src/lib.rs')
             for path in (crate / 'Cargo.toml', crate / 'Cargo.lock', crate / 'src/probe.rs',
-                         root / 'manifest.json', root / 'probe.lua', root / 'rts/wasm/generated/model.json', sdk / 'api.rs'):
+                         root / 'manifest.json', root / 'probe.lua', root / 'rts/wasm/generated/model.json', sdk / 'api.rs',
+                         *internal_inputs):
                 path.write_text('{}')
             with patch.multiple(harness, ROOT=root, WASM_PARITY_CRATE=crate / 'Cargo.toml',
                                 WASM_CONTEXT_CORE_MANIFESTS={'ui': root / 'manifest.json'},
@@ -93,6 +97,10 @@ class ProbeTests(unittest.TestCase):
                 self.assertNotEqual(before, harness.probe_build_fingerprint('ui', True))
                 (sdk / 'api.rs').write_text('changed API')
                 self.assertNotEqual(before, harness.probe_build_fingerprint('ui', False))
+                for path in internal_inputs:
+                    before = harness.probe_build_fingerprint('ui', False)
+                    path.write_text('changed implementation')
+                    self.assertNotEqual(before, harness.probe_build_fingerprint('ui', False))
 
     def test_wasm_crash_or_missing_values_are_not_mutant_kills(self):
         with tempfile.TemporaryDirectory() as directory:

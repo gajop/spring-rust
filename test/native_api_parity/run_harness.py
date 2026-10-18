@@ -419,10 +419,13 @@ def probe_build_fingerprint(context: str, include_rendering: bool) -> str:
               ROOT / "rts/wasm/generated/model.json"]
     inputs.extend(sorted((crate / "src").rglob("*.rs")))
     inputs.extend(sorted((ROOT / "rts/wasm/generated/sdk").rglob("*.rs")))
-    inputs.extend(sorted((ROOT / "rust/crates/spring/src").rglob("*.rs")))
-    dependency_manifest = ROOT / "rust/crates/spring/Cargo.toml"
-    if dependency_manifest.exists():
-        inputs.append(dependency_manifest)
+    for name in ("spring", "spring-sdk-internal"):
+        dependency = ROOT / "rust/crates" / name
+        inputs.extend(sorted((dependency / "src").rglob("*.rs")))
+        for filename in ("Cargo.toml", "build.rs"):
+            path = dependency / filename
+            if path.exists():
+                inputs.append(path)
     digest = hashlib.sha256(f"{context}:{include_rendering}".encode())
     for path in inputs:
         digest.update(str(path.relative_to(ROOT)).encode())
