@@ -3002,7 +3002,11 @@ unsigned CGameServer::BindConnection(
 		};
 
 		// find the player in the current list
-		const auto pred = [&clientName](const GameParticipant& gp) { return (clientName == gp.name); };
+		const auto pred = [&clientName](const GameParticipant& gp) {
+			// Anonymous spectators join with the name they originally supplied;
+			// the server-added display prefix must not create a second player on rejoin.
+			return clientName == gp.name || (gp.isMidgameJoin && gp.spectator && gp.name == "~" + clientName);
+		};
 		const auto iter = std::find_if(players.begin(), players.end(), pred);
 
 		const auto GetConnectionFlags = [&](const GameParticipant& gp) -> ConnectionFlags {
@@ -3013,8 +3017,12 @@ unsigned CGameServer::BindConnection(
 				// not an existing connection
 				if (reconnect)
 					return {"User is not ingame", false, false};
-				if (canReconnect || !gameHasStarted)
-					return {"", true, false};
+				if (canReconnect || !gameHasStarted) {
+					// A new client process needs game data and the packet cache again.
+					// The old link may still be waiting for its delayed close after quit;
+					// resuming its UDP sequence state would leave the new client loading forever.
+					return {"", true, gp.clientLink != nullptr};
+				}
 
 				return {"Game has already started", false, false};
 			}
