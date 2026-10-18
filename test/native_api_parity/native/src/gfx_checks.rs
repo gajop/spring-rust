@@ -15,6 +15,12 @@ void main() {
 impl NativeApiParity {
     pub(crate) fn check_gfx_compute_upload(&self) -> Result<(), String> {
         let gfx = self.interface.gfx();
+        if !gfx
+            .bind_texture("", 0, false)
+            .map_err(|error| format!("unnamed texture disable: {error:?}"))?
+        {
+            return Err("Unnamed texture disable failed".into());
+        }
         let params = GfxTextureParams {
             target: GL_TEXTURE_2D,
             format: GL_R32F,

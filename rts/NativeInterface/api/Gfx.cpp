@@ -1832,7 +1832,10 @@ static void BindTexture(const GfxTextureBindQuery* query, GfxBoolResult* result)
 	result->value = false;
 
 	ResolvedTexture texture;
-	if (!ResolveTexture(query->name, texture)) {
+	if (!query->enable && (query->name == nullptr || query->name[0] == '\0')) {
+		// The unnamed disable is the equivalent of Lua's gl.Texture(false).
+		texture.target = GL_TEXTURE_2D;
+	} else if (!ResolveTexture(query->name, texture)) {
 		result->error = &NOT_FOUND_ERROR;
 		return;
 	}
@@ -1846,7 +1849,10 @@ static void BindTexture(const GfxTextureBindQuery* query, GfxBoolResult* result)
 		glActiveTexture(GL_TEXTURE0 + query->texNum);
 	}
 
-	query->enable ? glEnable(texture.target) : glDisable(texture.target);
+	// Only 2D texturing uses the fixed-function enable state, matching LuaMatTexture.
+	// Array and multisample targets are shader bindings, not glEnable capabilities.
+	if (texture.target == GL_TEXTURE_2D)
+		query->enable ? glEnable(texture.target) : glDisable(texture.target);
 	glBindTexture(texture.target, query->enable ? texture.id : 0);
 
 	if (switchUnit)

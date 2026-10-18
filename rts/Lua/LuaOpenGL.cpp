@@ -10,6 +10,7 @@
 
 #include "Rendering/GL/myGL.h"
 
+#include <array>
 #include <vector>
 #include <algorithm>
 #include <optional>
@@ -96,6 +97,11 @@ void (*LuaOpenGL::resetMatrixFunc)() = nullptr;
 
 LuaOpenGL::DrawMode LuaOpenGL::drawMode = LuaOpenGL::DRAW_NONE;
 LuaOpenGL::DrawMode LuaOpenGL::prevDrawMode = LuaOpenGL::DRAW_NONE;
+
+namespace {
+// MiniMap can nest inside Screen, so retain the framebuffer for each draw mode.
+std::array<GLint, LuaOpenGL::DRAW_LAST_MODE + 1> drawModeFramebuffers = {};
+}
 
 bool  LuaOpenGL::safeMode = true;
 bool  LuaOpenGL::canUseShaders = false;
@@ -602,6 +608,8 @@ void LuaOpenGL::EnableCommon(DrawMode mode)
 	assert(drawMode == DRAW_NONE);
 	drawMode = mode;
 	if (safeMode) {
+		if (FBO::IsSupported())
+			glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawModeFramebuffers[mode]);
 		glPushAttrib(AttribBits);
 		ResetGLState();
 	}
@@ -619,7 +627,19 @@ void LuaOpenGL::DisableCommon(DrawMode mode)
 	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SINGLE_COLOR);
 	drawMode = DRAW_NONE;
 	if (safeMode) {
+		GLint currentDrawFramebuffer = 0;
+		if (FBO::IsSupported()) {
+			glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentDrawFramebuffer);
+			// Draw-buffer selections belong to their framebuffer. A callback may
+			// intentionally bind a different render target across draw callins.
+			// Restore the saved selections on the original framebuffer, then keep
+			// the callback's current target for subsequent engine rendering.
+			if (currentDrawFramebuffer != drawModeFramebuffers[mode])
+				glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER, drawModeFramebuffers[mode]);
+		}
 		glPopAttrib();
+		if (FBO::IsSupported() && currentDrawFramebuffer != drawModeFramebuffers[mode])
+			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER, currentDrawFramebuffer);
 	}
 	if (IS_GL_FUNCTION_AVAILABLE(glUseProgram)) {
 		glUseProgram(0);
