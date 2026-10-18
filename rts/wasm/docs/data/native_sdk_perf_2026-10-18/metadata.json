@@ -1,0 +1,62 @@
+{
+  "baselineSdkCommit": "4c1202909c",
+  "engineVersion": "2026.10.16-44-g4c5a86c",
+  "engineRebuilt": false,
+  "compiler": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+  "cpu": "Intel Core i7-12700, logical CPU 14 (P core)",
+  "host": "Workstation with other user jobs; frequency and shared cache contention are not isolated. Workers alternate on the same callback thread, same live engine state. Three warm runs rotate initial library order.",
+  "callbackMeasurement": "DLL C ABI entry to result validation; excludes the C++ event dispatcher. Empty callback handlers black-box their arguments; callback results and query checksums are checked.",
+  "calloutMeasurement": "One admitted GameFrame batches 10,000 operations (1,000 for unit ID lists); callback cost is amortized. String case includes unit-def-ID lookup. Small command list contains the fixture move and three parameters. Legacy command results contain engine pointers; SDK results own parameter copies.",
+  "warm": {
+    "runs": 3,
+    "repeatsPerRun": 101,
+    "entriesPerSample": 20000,
+    "batchedQueryEntriesPerSample": 1
+  },
+  "cold": {
+    "repeats": 65,
+    "entriesPerSample": 1,
+    "evictionBytes": 67108864,
+    "limitations": "Cache lines dirtied once and walked outside timer before each entry. Batched query cases are not cold for each query. Single-entry timing includes clock overhead. This is forced eviction, not a real frame scheduling model. The data walk does not guarantee a cold instruction cache."
+  },
+  "artifacts": {
+    "sdk-current-v4.so": "2d52457e3d5632108763248cd5bd2baa0197c86091b9a99837354892f1ed58eb",
+    "sdk-before-v4.so": "e85739bf5db7bdf2f4c58266e6f635f99f09d248718add7fd3546893089f1999",
+    "legacy-v4.so": "b3f5a98cbc60e9e8494fe8034b7f974ad45276bdce27fa2a119907b16e29c38b"
+  },
+  "driverSha256": "3344a60882aef5ca51727e2d2b9b0b3fd7687377bac964f9b072521107a92b4c",
+  "baselineOrGoldenChanges": false,
+  "implementationSourceSha256": {
+    "rts/wasm/generated/sdk/scoped_api.rs": "ec70252a583f8b1751d1227423e799ba41d234c357061be988c562c7f19d5024",
+    "rts/wasm/generated/sdk/scoped_callin_exports_test.rs": "026ff330197d2526ef633e37b7a2f20b62f5b820c1e5f78885ccf210783eeec3",
+    "rts/wasm/generated/sdk/scoped_callins.rs": "6afa786699c6fa15e1ecf81fe42dbd8479ca86b405606947d9b346c3b1cfaa06",
+    "rts/wasm/generated/sdk/scoped_native.rs": "21052835a253819046c5e174281088c9295a620ac7a6ca41a5ae1cb1d7efb72f",
+    "rts/wasm/generated/sdk/scoped_native_callins.rs": "1cf415e7b80bc5dbc98a14b1198362f0c72ff686d71f558d0a9cf38d77de434f",
+    "rts/wasm/generated/sdk/scoped_types.rs": "4ebb6b4ad017a23b5fec7fc8dbbd51111437da8d515a5ca8167ec8ed5ff630a2",
+    "rts/wasm/generated/sdk/scoped_types_wasm.rs": "37721286790d1a2e56415bedf88f1367760633fae9edd33d6394afd5db1c8dae",
+    "rts/wasm/generated/sdk/scoped_wasm.rs": "288dc206415ede6eb9eaa4907d1be8723508b2889d53e753ae01689e6acb02dc",
+    "rust/crates/spring-native-codegen/src/render_sdk.rs": "12ba27b25a610f05187105c3f2f4f5b84f665d33aa1be8649fc372a753296449",
+    "rust/crates/spring-native-codegen/src/render_sdk_callins.rs": "6f5d735e1d8c4f4957482d77ac2f7f3a353d9c065667be05d6e5fdb6cb3f045d",
+    "rust/crates/spring-sdk/src/callbacks.rs": "049700f3e85e8a54cda71e336b46cc5562251c23c0ce2cbae7f09184dcb54686",
+    "rust/crates/spring-sdk/src/commands/calls.rs": "a8ccb71077394c0eb940aa35fce529c0723e9720d5f94423d726163a72c69fb3",
+    "rust/crates/spring-sdk/src/commands.rs": "365537e3eae97dddd3c59fad4215ff22829cf4c597690275864501b35f8e07c4",
+    "rust/crates/spring-sdk/src/cus/exports.rs": "fa9714203aaa5ee9ca46d45e2abbcc63c23263bfd2e93de8a2ad1ab4a951fc43",
+    "rust/crates/spring-sdk/src/cus/host.rs": "b38e1fe418032b6a4016847cd8b1d4c15ac71d1d7b41d933b018d49b216dbe78",
+    "rust/crates/spring-sdk/src/cus/mod.rs": "9fbdf5cef7bd725aa875373fda80e7e07c64a433a663d0b1709abcf1992eae88",
+    "rust/crates/spring-sdk/src/cus/shared.rs": "4849e60463f328c5087efb44d9e6ff1ad9612e0228bf04396f7ad0b81b37fdcc",
+    "rust/crates/spring-sdk/src/cus/transport.rs": "125223fc5b730c2d289a1e7b2ea3cc823879f44bed23bc8d96b4461240c9a350",
+    "rust/crates/spring-sdk/src/default_interface.rs": "32aca0aac554fa72d59453c64d47942e7d8192de28751e20741097e2234540b4",
+    "rust/crates/spring-sdk/src/exports.rs": "2568d89c732235ff58c566f4234644f6cfa95dc3ae2ae671571300cfa7689dd0",
+    "rust/crates/spring-sdk/src/helpers.rs": "12508da1db1bf5d9c0464554ac45fdc0467cb779f6034e0bff56e90997e7cea2",
+    "rust/crates/spring-sdk/src/jobs.rs": "5289726f9ca12ffb2f6bc5db0b08b3f1cf4a592643acf63cb77eefd6b146a04d",
+    "rust/crates/spring-sdk/src/lib.rs": "795ab0c5dfd7dc7125d725f68c3db04e7138f0737708514ceda4e12fb8af2726",
+    "rust/crates/spring-sdk/src/logging.rs": "5ed245786aee25eb8d192585759efa540df2dcff323d9fbbb34b4f17c02f22eb",
+    "rust/crates/spring-sdk/src/module.rs": "d94852d1091344f8c4bca0311f563fdcf23a7e13092ef79bf89056f99cd51b29",
+    "rust/crates/spring-sdk/src/native.rs": "34a6fdf8e9c7c1f9b3493a7fdeb325632a8979b2beda1a85a4ec2edb3c308241",
+    "rust/crates/spring-sdk/src/native_thread.rs": "338e29a0113341bf8071d58c6349334c1bcc477b19063d5222480f625e157049",
+    "rust/crates/spring-sdk/src/rml.rs": "0b49111b0c21963d1dcd7fdf505b71f9b83b7ceead4dec16d20c98efaa78db3d",
+    "rust/crates/spring-sdk/src/tests.rs": "85a2aa5f45f370c7d9aff9e924e3081110160dfbc5bdd4488767c5308e0335f7",
+    "rust/crates/spring-sdk/src/wasm.rs": "addb7d33d1c701403210d4237da8047c5f9ea7093b1c2839ea6920955047cd0a",
+    "rust/crates/spring-sdk/tests/exports.rs": "81124a866ef0f02c8b3e6b04bf508f9b59b5aabd51963e827275cbaf974efed1"
+  }
+}

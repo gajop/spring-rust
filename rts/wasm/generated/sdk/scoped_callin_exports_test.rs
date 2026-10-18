@@ -22,7 +22,7 @@ fn handler_add_console_line(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,s
 spring_sdk::export_add_console_line!(MODULE,handler_add_console_line);
 fn handler_allow_builder_hold_fire(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32)->spring_sdk::Result<bool> {record_call(module);Ok(Default::default())}
 spring_sdk::export_allow_builder_hold_fire!(MODULE_RULES_SYNCED,handler_allow_builder_hold_fire);
-fn handler_allow_command(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32,_arg3:&spring_sdk::types::callins::NativeCallinCommand,_arg4:i32,_arg5:bool,_arg6:bool)->spring_sdk::Result<bool> {record_call(module);Ok(Default::default())}
+fn handler_allow_command(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32,_arg3:&spring_sdk::CallinCommand<'_>,_arg4:i32,_arg5:bool,_arg6:bool)->spring_sdk::Result<bool> {record_call(module);Ok(Default::default())}
 spring_sdk::export_allow_command!(MODULE_RULES_SYNCED,handler_allow_command);
 fn handler_allow_direct_unit_control(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32,_arg3:i32)->spring_sdk::Result<bool> {record_call(module);Ok(Default::default())}
 spring_sdk::export_allow_direct_unit_control!(MODULE_RULES_SYNCED,handler_allow_direct_unit_control);
@@ -74,9 +74,9 @@ fn handler_camera_rotation_changed(module:&Fixture,_spring:&mut spring_sdk::Spri
 spring_sdk::export_camera_rotation_changed!(MODULE_RULES_SYNCED,handler_camera_rotation_changed);
 fn handler_collect_garbage(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::Menu>,_arg0:bool)->spring_sdk::Result<()> {record_call(module);Ok(())}
 spring_sdk::export_collect_garbage!(MODULE,handler_collect_garbage);
-fn handler_command_fallback(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32,_arg3:&spring_sdk::types::callins::NativeCallinCommand)->spring_sdk::Result<bool> {record_call(module);Ok(Default::default())}
+fn handler_command_fallback(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32,_arg3:&spring_sdk::CallinCommand<'_>)->spring_sdk::Result<bool> {record_call(module);Ok(Default::default())}
 spring_sdk::export_command_fallback!(MODULE_RULES_SYNCED,handler_command_fallback);
-fn handler_command_notify(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:&spring_sdk::types::callins::NativeCallinCommand)->spring_sdk::Result<bool> {record_call(module);Ok(Default::default())}
+fn handler_command_notify(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:&spring_sdk::CallinCommand<'_>)->spring_sdk::Result<bool> {record_call(module);Ok(Default::default())}
 spring_sdk::export_command_notify!(MODULE_RULES_SYNCED,handler_command_notify);
 fn handler_default_command(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32)->spring_sdk::Result<(bool, i32)> {record_call(module);Ok(Default::default())}
 spring_sdk::export_default_command!(MODULE_RULES_SYNCED,handler_default_command);
@@ -296,9 +296,9 @@ fn handler_unit_cloak_event(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,s
 spring_sdk::export_unit_cloak_event!(MODULE_RULES_SYNCED,handler_unit_cloak_event);
 fn handler_unit_cloaked(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32)->spring_sdk::Result<()> {record_call(module);Ok(())}
 spring_sdk::export_unit_cloaked!(MODULE_RULES_SYNCED,handler_unit_cloaked);
-fn handler_unit_cmd_done(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32,_arg3:&spring_sdk::types::callins::NativeCallinCommand)->spring_sdk::Result<()> {record_call(module);Ok(())}
+fn handler_unit_cmd_done(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32,_arg3:&spring_sdk::CallinCommand<'_>)->spring_sdk::Result<()> {record_call(module);Ok(())}
 spring_sdk::export_unit_cmd_done!(MODULE_RULES_SYNCED,handler_unit_cmd_done);
-fn handler_unit_command(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32,_arg3:&spring_sdk::types::callins::NativeCallinCommand,_arg4:i32,_arg5:bool,_arg6:bool)->spring_sdk::Result<()> {record_call(module);Ok(())}
+fn handler_unit_command(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32,_arg3:&spring_sdk::CallinCommand<'_>,_arg4:i32,_arg5:bool,_arg6:bool)->spring_sdk::Result<()> {record_call(module);Ok(())}
 spring_sdk::export_unit_command!(MODULE_RULES_SYNCED,handler_unit_command);
 fn handler_unit_construction_decayed(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32,_arg1:i32,_arg2:i32,_arg3:f32,_arg4:f32,_arg5:f32)->spring_sdk::Result<()> {record_call(module);Ok(())}
 spring_sdk::export_unit_construction_decayed!(MODULE_RULES_SYNCED,handler_unit_construction_decayed);

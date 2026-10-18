@@ -24,6 +24,11 @@ mod native_thread;
 #[path = "../../spring-sdk-internal/src/pcg.rs"]
 mod pcg;
 
+#[cfg(not(target_arch = "wasm32"))]
+type Weak<T> = std::sync::Weak<T>;
+#[cfg(target_arch = "wasm32")]
+type Weak<T> = std::rc::Weak<T>;
+
 /// Native retained captures must survive the loading-to-game-thread handoff.
 #[cfg(not(target_arch = "wasm32"))]
 pub trait RetainedCapture: Send {}
@@ -120,7 +125,7 @@ impl<E: Environment> Spring<'_, E> {
     /// still requires an active callin of this module.
     pub fn module_ref(&self) -> ModuleRef<E> {
         ModuleRef {
-            owner: Shared::downgrade(self.engine.owner),
+            owner: self.engine.owner.identity.clone(),
             environment: PhantomData,
         }
     }
@@ -153,19 +158,30 @@ impl<E: Environment> ModuleContext<E> {
     /// until the context is dropped, and belong to environment `E`.
     #[cfg(not(target_arch = "wasm32"))]
     pub unsafe fn from_native(raw: *const spring_native_sys::NativeInterface) -> Result<Self> {
+        unsafe { Self::from_native_with_gate(raw, None) }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(crate) unsafe fn from_native_with_gate(
+        raw: *const spring_native_sys::NativeInterface,
+        gate: Option<Shared<native_thread::Gate>>,
+    ) -> Result<Self> {
         if raw.is_null() {
             return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
         }
         Ok(Self {
-            owner: Shared::new(Authority {
+            owner: Shared::new_cyclic(|identity| Authority {
+                identity: identity.clone(),
                 raw,
-                gate: Shared::new(native_thread::Gate::new()),
+                native_tables: unsafe { native::Tables::new(raw) },
+                gate: gate.unwrap_or_else(|| Shared::new(native_thread::Gate::new())),
+                #[cfg(target_arch = "wasm32")]
                 scopes: Cell::new(0),
                 alive: Cell::new(true),
                 error: Cell::new(None),
                 unsynced_rng: Cell::new(None),
                 panic: Default::default(),
-                foreign_callback: Default::default(),
+                callback_failed: Default::default(),
                 jobs: Default::default(),
             }),
             environment: PhantomData,
@@ -178,7 +194,9 @@ impl<E: Environment> ModuleContext<E> {
     #[cfg(target_arch = "wasm32")]
     pub unsafe fn from_wasm() -> Self {
         Self {
-            owner: Shared::new(Authority {
+            owner: Shared::new_cyclic(|identity| Authority {
+                identity: identity.clone(),
+                #[cfg(target_arch = "wasm32")]
                 scopes: Cell::new(0),
                 alive: Cell::new(true),
                 error: Cell::new(None),
@@ -206,10 +224,6 @@ impl<E: Environment> ModuleContext<E> {
     ) -> Result<R> {
         #[cfg(not(target_arch = "wasm32"))]
         let _entry = self.owner.gate.enter()?;
-        #[cfg(not(target_arch = "wasm32"))]
-        if !self.owner.gate.is_current() {
-            return Err(ApiError::new(ErrorCode::InvalidState as i32));
-        }
         let mut spring = Spring {
             engine: Backend {
                 owner: &self.owner,
@@ -241,10 +255,14 @@ impl<E: Environment> Drop for ModuleContext<E> {
 }
 
 struct Authority {
+    identity: Weak<Authority>,
     #[cfg(not(target_arch = "wasm32"))]
     raw: *const spring_native_sys::NativeInterface,
     #[cfg(not(target_arch = "wasm32"))]
+    native_tables: native::Tables,
+    #[cfg(not(target_arch = "wasm32"))]
     gate: Shared<native_thread::Gate>,
+    #[cfg(target_arch = "wasm32")]
     scopes: Cell<usize>,
     alive: Cell<bool>,
     error: Cell<Option<ApiError>>,
@@ -252,7 +270,7 @@ struct Authority {
     #[cfg(not(target_arch = "wasm32"))]
     panic: std::cell::RefCell<Option<Box<dyn core::any::Any + Send>>>,
     #[cfg(not(target_arch = "wasm32"))]
-    foreign_callback: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    callback_failed: std::sync::atomic::AtomicBool,
     #[cfg(not(target_arch = "wasm32"))]
     jobs: std::cell::RefCell<jobs::native::State>,
 }
@@ -267,29 +285,75 @@ unsafe impl Sync for Authority {}
 
 #[cfg(not(target_arch = "wasm32"))]
 thread_local! {
-    static ACTIVE_OWNERS: std::cell::RefCell<Vec<*const Authority>> = const { std::cell::RefCell::new(Vec::new()) };
+    static ACTIVE_OWNER: Cell<*const Authority> = const { Cell::new(core::ptr::null()) };
+    static OUTER_OWNERS: std::cell::RefCell<Vec<*const Authority>> = const { std::cell::RefCell::new(Vec::new()) };
 }
-struct ActiveScope<'a>(&'a Authority, PhantomData<*mut ()>);
+struct ActiveScope<'a> {
+    owner: &'a Authority,
+    #[cfg(not(target_arch = "wasm32"))]
+    previous: *const Authority,
+    affinity: PhantomData<*mut ()>,
+}
 impl<'a> ActiveScope<'a> {
+    #[inline]
     fn enter(owner: &'a Authority) -> Self {
+        #[cfg(target_arch = "wasm32")]
         owner.scopes.set(owner.scopes.get() + 1);
         #[cfg(not(target_arch = "wasm32"))]
-        ACTIVE_OWNERS.with(|owners| owners.borrow_mut().push(owner));
-        Self(owner, PhantomData)
+        let previous = ACTIVE_OWNER.with(|active| {
+            let previous = active.get();
+            if !core::ptr::eq(previous, owner) {
+                active.set(owner);
+            }
+            previous
+        });
+        #[cfg(not(target_arch = "wasm32"))]
+        if !previous.is_null() && !core::ptr::eq(previous, owner) {
+            Self::push_outer(previous);
+        }
+        Self {
+            owner,
+            #[cfg(not(target_arch = "wasm32"))]
+            previous,
+            affinity: PhantomData,
+        }
     }
     #[cfg(not(target_arch = "wasm32"))]
-    fn contains(owner: &Authority) -> bool {
-        ACTIVE_OWNERS.with(|owners| owners.borrow().contains(&(owner as *const Authority)))
+    #[cold]
+    #[inline(never)]
+    fn push_outer(owner: *const Authority) {
+        OUTER_OWNERS.with(|owners| owners.borrow_mut().push(owner));
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    #[cold]
+    #[inline(never)]
+    fn pop_outer(owner: *const Authority) {
+        OUTER_OWNERS.with(|owners| {
+            let removed = owners.borrow_mut().pop();
+            debug_assert_eq!(removed, Some(owner));
+        });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    #[inline]
+    fn contains(owner: *const Authority) -> bool {
+        ACTIVE_OWNER.with(|active| active.get() == owner)
+            || OUTER_OWNERS.with(|owners| owners.borrow().contains(&owner))
     }
 }
 impl Drop for ActiveScope<'_> {
+    #[inline]
     fn drop(&mut self) {
         #[cfg(not(target_arch = "wasm32"))]
-        ACTIVE_OWNERS.with(|owners| {
-            let removed = owners.borrow_mut().pop();
-            debug_assert_eq!(removed, Some(self.0 as *const Authority));
-        });
-        self.0.scopes.set(self.0.scopes.get() - 1);
+        {
+            if !self.previous.is_null() && !core::ptr::eq(self.previous, self.owner) {
+                Self::pop_outer(self.previous);
+            }
+            if !core::ptr::eq(self.previous, self.owner) {
+                ACTIVE_OWNER.with(|active| active.set(self.previous));
+            }
+        }
+        #[cfg(target_arch = "wasm32")]
+        self.owner.scopes.set(self.owner.scopes.get() - 1);
     }
 }
 
@@ -318,19 +382,27 @@ impl<E: Environment> ModuleRef<E> {
         call: impl for<'call> FnOnce(&mut Spring<'call, E>) -> Result<R>,
     ) -> Result<R> {
         let invalid = || ApiError::new(ErrorCode::InvalidState as i32);
-        let owner = self.owner.upgrade().ok_or_else(invalid)?;
+        #[cfg(target_arch = "wasm32")]
+        let strong = self.owner.upgrade().ok_or_else(invalid)?;
+        #[cfg(target_arch = "wasm32")]
+        let owner = &*strong;
         #[cfg(not(target_arch = "wasm32"))]
-        // A callback already holds the owner's native entry guard. TLS proves
-        // that this thread is inside that callback before reading any Cells;
-        // workers and other modules cannot resolve this identifier.
-        if !ActiveScope::contains(&owner) {
-            return Err(invalid());
-        }
+        let owner = {
+            let pointer = self.owner.as_ptr();
+            if !ActiveScope::contains(pointer) {
+                return Err(invalid());
+            }
+            // TLS membership proves a live enclosing scope holds this
+            // authority and its entry guard. Weak retains the allocation's
+            // identity, so a dead owner's address cannot be reused here.
+            unsafe { &*pointer }
+        };
+        #[cfg(target_arch = "wasm32")]
         if owner.scopes.get() == 0 {
             return Err(invalid());
         }
         let engine = Backend {
-            owner: &owner,
+            owner,
             scope: PhantomData,
         };
         engine.check()?;
@@ -340,9 +412,9 @@ impl<E: Environment> ModuleRef<E> {
 }
 
 struct Backend<'call> {
-    // The callback or retained node owns the strong reference. Borrow it for
-    // this scope instead of cloning an Arc for every API-family accessor.
-    owner: &'call Shared<Authority>,
+    // The enclosing callback owns the strong reference. Keep a direct borrow
+    // so API calls do not load through a reference to its Arc/Rc wrapper.
+    owner: &'call Authority,
     // Invariant call lifetime, and !Send + !Sync on both targets.
     scope: PhantomData<(&'call mut &'call (), *mut ())>,
 }
@@ -359,38 +431,48 @@ impl Backend<'_> {
         self.owner.raw
     }
 
+    #[inline]
     fn check(&self) -> Result<()> {
-        #[cfg(not(target_arch = "wasm32"))]
-        if !self.owner.gate.is_current() {
-            return Err(ApiError::new(ErrorCode::InvalidState as i32));
-        }
+        // Every Backend borrows a live entry guard, or is constructed inside
+        // that guard by a retained callback/ModuleRef. It is !Send. The gate
+        // cannot hand off to another thread while this token exists.
         if !self.owner.alive.get() {
             return Err(ApiError::new(ErrorCode::InvalidState as i32));
         }
         #[cfg(not(target_arch = "wasm32"))]
+        if self
+            .owner
+            .callback_failed
+            .load(std::sync::atomic::Ordering::Relaxed)
         {
-            if self
-                .owner
-                .foreign_callback
-                .load(std::sync::atomic::Ordering::Relaxed)
-                && self
-                    .owner
-                    .foreign_callback
-                    .swap(false, std::sync::atomic::Ordering::Relaxed)
-            {
-                return Err(ApiError::new(ErrorCode::InvalidState as i32));
-            }
-            let panic = self.owner.panic.borrow_mut().take();
-            if let Some(panic) = panic {
-                std::panic::resume_unwind(panic);
-            }
+            return self.callback_failure();
         }
+        #[cfg(target_arch = "wasm32")]
         if let Some(error) = self.owner.error.take() {
             return Err(error);
         }
         Ok(())
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
+    #[cold]
+    #[inline(never)]
+    fn callback_failure(&self) -> Result<()> {
+        self.owner
+            .callback_failed
+            .store(false, std::sync::atomic::Ordering::Relaxed);
+        let panic = self.owner.panic.borrow_mut().take();
+        if let Some(panic) = panic {
+            std::panic::resume_unwind(panic);
+        }
+        Err(self
+            .owner
+            .error
+            .take()
+            .unwrap_or_else(|| ApiError::new(ErrorCode::InvalidState as i32)))
+    }
+
+    #[inline]
     fn finish<R>(&self, result: Result<R>) -> Result<R> {
         self.check()?;
         result
@@ -423,6 +505,54 @@ pub mod types {
         env!("CARGO_MANIFEST_DIR"),
         "/../../../rts/wasm/generated/sdk/scoped_types.rs"
     ));
+}
+
+/// Command arguments borrowed for one callback. Use `to_owned` to retain them.
+/// ```compile_fail
+/// fn escape(command: &spring_sdk::CallinCommand<'_>) -> &'static [f32] {
+///     command.params
+/// }
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CallinCommand<'call> {
+    pub id: i32,
+    pub time_out: i32,
+    pub page_index: u32,
+    pub num_params: u32,
+    pub tag: u32,
+    pub options: u8,
+    pub params: &'call [f32],
+}
+impl CallinCommand<'_> {
+    pub fn to_owned(&self) -> types::callins::NativeCallinCommand {
+        types::callins::NativeCallinCommand {
+            id: self.id,
+            time_out: self.time_out,
+            page_index: self.page_index,
+            num_params: self.num_params,
+            tag: self.tag,
+            options: self.options,
+            params: self.params.to_vec(),
+        }
+    }
+}
+impl<'a> From<&'a types::callins::NativeCallinCommand> for CallinCommand<'a> {
+    fn from(value: &'a types::callins::NativeCallinCommand) -> Self {
+        Self {
+            id: value.id,
+            time_out: value.time_out,
+            page_index: value.page_index,
+            num_params: value.num_params,
+            tag: value.tag,
+            options: value.options,
+            params: &value.params,
+        }
+    }
+}
+impl<'a> From<&CallinCommand<'a>> for CallinCommand<'a> {
+    fn from(value: &CallinCommand<'a>) -> Self {
+        *value
+    }
 }
 
 include!(concat!(

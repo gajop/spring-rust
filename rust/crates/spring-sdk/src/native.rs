@@ -60,6 +60,140 @@ unsafe fn read_string(ptr: *const c_char, length: Option<usize>) -> Result<Strin
     })
 }
 
+// Callback inputs are snapshots: a reentrant engine call may replace the
+// original command queue or scratch string. Common inputs fit on the stack;
+// larger inputs reuse separate buffers, including during nested callbacks.
+thread_local! {
+    static BYTE_INPUTS: std::cell::RefCell<Vec<Vec<u8>>> = const { std::cell::RefCell::new(Vec::new()) };
+    static FLOAT_INPUTS: std::cell::RefCell<Vec<Vec<f32>>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+trait InputElement: Copy {
+    fn take_buffer() -> Vec<Self>;
+    fn return_buffer(value: Vec<Self>);
+}
+macro_rules! input_element {
+    ($ty:ty,$pool:ident) => {
+        impl InputElement for $ty {
+            #[cold]
+            #[inline(never)]
+            fn take_buffer() -> Vec<Self> {
+                $pool.with(|pool| pool.borrow_mut().pop().unwrap_or_default())
+            }
+            #[cold]
+            #[inline(never)]
+            fn return_buffer(mut value: Vec<Self>) {
+                if value.capacity() > 16 * 1024 / core::mem::size_of::<Self>() {
+                    return;
+                }
+                value.clear();
+                $pool.with(|pool| {
+                    let mut pool = pool.borrow_mut();
+                    if pool.len() < 8 {
+                        pool.push(value);
+                    }
+                });
+            }
+        }
+    };
+}
+input_element!(u8, BYTE_INPUTS);
+input_element!(f32, FLOAT_INPUTS);
+struct InputBuffer<T: InputElement, const N: usize> {
+    inline: [core::mem::MaybeUninit<T>; N],
+    spill: Vec<T>,
+    len: usize,
+}
+impl<T: InputElement, const N: usize> InputBuffer<T, N> {
+    #[inline]
+    fn copy(value: &[T]) -> Self {
+        let mut result = Self {
+            inline: [const { core::mem::MaybeUninit::uninit() }; N],
+            spill: Vec::new(),
+            len: value.len(),
+        };
+        if value.len() <= N {
+            unsafe {
+                core::ptr::copy_nonoverlapping(
+                    value.as_ptr(),
+                    result.inline.as_mut_ptr().cast::<T>(),
+                    value.len(),
+                )
+            };
+        } else {
+            result.spill = T::take_buffer();
+            result.spill.extend_from_slice(value);
+        }
+        result
+    }
+    #[inline]
+    fn as_slice(&self) -> &[T] {
+        if self.len <= N {
+            // copy initialized exactly this prefix; unused inline slots stay uninitialized.
+            unsafe { core::slice::from_raw_parts(self.inline.as_ptr().cast::<T>(), self.len) }
+        } else {
+            &self.spill
+        }
+    }
+}
+impl<T: InputElement, const N: usize> Drop for InputBuffer<T, N> {
+    #[inline]
+    fn drop(&mut self) {
+        if self.spill.capacity() != 0 {
+            T::return_buffer(core::mem::take(&mut self.spill));
+        }
+    }
+}
+pub struct InputString(InputBuffer<u8, 64>);
+impl AsRef<str> for InputString {
+    fn as_ref(&self) -> &str {
+        // Constructors copy validated UTF-8, or encode the byte fallback.
+        unsafe { core::str::from_utf8_unchecked(self.0.as_slice()) }
+    }
+}
+unsafe fn read_callin_string(ptr: *const c_char, length: Option<usize>) -> Result<InputString> {
+    let bytes = if let Some(length) = length {
+        unsafe { read_slice(ptr.cast(), length)? }
+    } else if ptr.is_null() {
+        &[]
+    } else {
+        unsafe { CStr::from_ptr(ptr) }.to_bytes()
+    };
+    let result = match core::str::from_utf8(bytes) {
+        Ok(_) => InputBuffer::copy(bytes),
+        Err(_) => {
+            let value: String = bytes.iter().copied().map(char::from).collect();
+            InputBuffer::copy(value.as_bytes())
+        }
+    };
+    Ok(InputString(result))
+}
+pub struct CommandInput {
+    raw: spring_native_sys::NativeCallinCommand,
+    params: InputBuffer<f32, 8>,
+}
+impl<'a> From<&'a CommandInput> for crate::CallinCommand<'a> {
+    fn from(value: &'a CommandInput) -> Self {
+        Self {
+            id: value.raw.id,
+            time_out: value.raw.timeOut,
+            page_index: value.raw.pageIndex,
+            num_params: value.raw.numParams,
+            tag: value.raw.tag,
+            options: value.raw.options,
+            params: value.params.as_slice(),
+        }
+    }
+}
+unsafe fn read_callin_command(
+    value: &spring_native_sys::NativeCallinCommand,
+) -> Result<CommandInput> {
+    let params = unsafe { read_slice(value.params, value.numParams as usize)? };
+    Ok(CommandInput {
+        raw: *value,
+        params: InputBuffer::copy(params),
+    })
+}
+
 pub(crate) unsafe fn check_error(error: *const spring_native_sys::Error) -> Result<()> {
     if let Some(error) = unsafe { error.as_ref() } {
         Err(ApiError::new(error.code))
@@ -151,3 +285,52 @@ include!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../../../rts/wasm/generated/sdk/scoped_native_callins.rs"
 ));
+
+#[cfg(test)]
+mod input_tests {
+    use super::*;
+
+    #[test]
+    fn callback_commands_survive_host_reuse_and_nested_inputs() {
+        for count in [0, 4, 64, 1024] {
+            for _ in 0..3 {
+                let mut params = (0..count).map(|i| i as f32).collect::<Vec<_>>();
+                let raw = spring_native_sys::NativeCallinCommand {
+                    id: 17,
+                    numParams: count as u32,
+                    params: params.as_ptr(),
+                    ..Default::default()
+                };
+                let outer = unsafe { read_callin_command(&raw) }.unwrap();
+                let expected = params.clone();
+                params.fill(-1.0);
+                let nested = unsafe { read_callin_command(&raw) }.unwrap();
+                let view = crate::CallinCommand::from(&outer);
+                assert_eq!(view.params, expected);
+                assert_eq!(crate::CallinCommand::from(&nested).params, params);
+                let retained = view.to_owned();
+                drop(nested);
+                drop(outer);
+                assert_eq!(retained.params, expected);
+            }
+        }
+    }
+
+    #[test]
+    fn callback_strings_preserve_utf8_and_byte_fallback_after_host_reuse() {
+        for value in ["text".to_owned(), "船🚀".repeat(100)] {
+            let mut bytes = value.as_bytes().to_vec();
+            let input =
+                unsafe { read_callin_string(bytes.as_ptr().cast(), Some(bytes.len())) }.unwrap();
+            bytes.fill(b'x');
+            let nested =
+                unsafe { read_callin_string(bytes.as_ptr().cast(), Some(bytes.len())) }.unwrap();
+            assert_eq!(input.as_ref(), value);
+            assert_eq!(nested.as_ref(), core::str::from_utf8(&bytes).unwrap());
+        }
+        let bytes = [0xffu8, 0, 0xfe];
+        let input =
+            unsafe { read_callin_string(bytes.as_ptr().cast(), Some(bytes.len())) }.unwrap();
+        assert_eq!(input.as_ref(), "ÿ\0þ");
+    }
+}

@@ -9,48 +9,64 @@ pub mod callins {
         static RESULTS : std::cell::RefCell < Inputs >=
         std::cell::RefCell::new(Inputs::default());
     }
+    pub struct ActivateMenuQueryInput {
+        pub message: crate::native::InputString,
+        pub message_length: u32,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_activate_menu_query(
         pointer: *const sys::ActivateMenuQuery,
-    ) -> Result<ActivateMenuQuery> {
+    ) -> Result<ActivateMenuQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(ActivateMenuQuery {
-            message: unsafe { read_string(value.message, None)? },
+        Ok(ActivateMenuQueryInput {
+            message: unsafe { read_callin_string(value.message, None)? },
             message_length: (value.messageLength) as _,
         })
     }
-    /// # Safety
-    /// Pointer must reference this callin's valid host query.
-    pub unsafe fn decode_active_command_changed_query(
-        pointer: *const sys::ActiveCommandChangedQuery,
-    ) -> Result<ActiveCommandChangedQuery> {
-        let value = unsafe { pointer.as_ref() }
-            .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(ActiveCommandChangedQuery {
-            cmd_id: (value.cmdID) as _,
-            cmd_type: (value.cmdType) as _,
-            name: unsafe { read_string(value.name, None)? },
-            action: unsafe { read_string(value.action, None)? },
-            tooltip: unsafe { read_string(value.tooltip, None)? },
-        })
+    pub struct ActiveCommandChangedQueryInput {
+        pub cmd_id: i32,
+        pub cmd_type: i32,
+        pub name: crate::native::InputString,
+        pub action: crate::native::InputString,
+        pub tooltip: crate::native::InputString,
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
-    pub unsafe fn decode_add_console_line_query(
-        pointer: *const sys::AddConsoleLineQuery,
-    ) -> Result<AddConsoleLineQuery> {
+    /// Host query and pointed-to inputs must be valid while decoding.
+    pub unsafe fn decode_active_command_changed_query(
+        pointer: *const sys::ActiveCommandChangedQuery,
+    ) -> Result<ActiveCommandChangedQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(AddConsoleLineQuery {
-            message: unsafe { read_string(value.message, None)? },
-            section: unsafe { read_string(value.section, None)? },
+        Ok(ActiveCommandChangedQueryInput {
+            cmd_id: (value.cmdID) as _,
+            cmd_type: (value.cmdType) as _,
+            name: unsafe { read_callin_string(value.name, None)? },
+            action: unsafe { read_callin_string(value.action, None)? },
+            tooltip: unsafe { read_callin_string(value.tooltip, None)? },
+        })
+    }
+    pub struct AddConsoleLineQueryInput {
+        pub message: crate::native::InputString,
+        pub section: crate::native::InputString,
+        pub level: i32,
+    }
+    /// # Safety
+    /// Host query and pointed-to inputs must be valid while decoding.
+    pub unsafe fn decode_add_console_line_query(
+        pointer: *const sys::AddConsoleLineQuery,
+    ) -> Result<AddConsoleLineQueryInput> {
+        let value = unsafe { pointer.as_ref() }
+            .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        Ok(AddConsoleLineQueryInput {
+            message: unsafe { read_callin_string(value.message, None)? },
+            section: unsafe { read_callin_string(value.section, None)? },
             level: (value.level) as _,
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_builder_hold_fire_query(
         pointer: *const sys::AllowBuilderHoldFireQuery,
     ) -> Result<AllowBuilderHoldFireQuery> {
@@ -63,7 +79,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_direct_unit_control_query(
         pointer: *const sys::AllowDirectUnitControlQuery,
     ) -> Result<AllowDirectUnitControlQuery> {
@@ -77,7 +93,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_feature_build_step_query(
         pointer: *const sys::AllowFeatureBuildStepQuery,
     ) -> Result<AllowFeatureBuildStepQuery> {
@@ -92,7 +108,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_feature_creation_query(
         pointer: *const sys::AllowFeatureCreationQuery,
     ) -> Result<AllowFeatureCreationQuery> {
@@ -104,35 +120,46 @@ pub mod callins {
             position: from_float3(&(value.position))?,
         })
     }
+    pub struct AllowResourceLevelQueryInput {
+        pub team_id: i32,
+        pub type_: crate::native::InputString,
+        pub level: f32,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_resource_level_query(
         pointer: *const sys::AllowResourceLevelQuery,
-    ) -> Result<AllowResourceLevelQuery> {
+    ) -> Result<AllowResourceLevelQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(AllowResourceLevelQuery {
+        Ok(AllowResourceLevelQueryInput {
             team_id: (value.teamID) as _,
-            type_: unsafe { read_string(value.type_, None)? },
+            type_: unsafe { read_callin_string(value.type_, None)? },
             level: (value.level) as _,
         })
     }
+    pub struct AllowResourceTransferQueryInput {
+        pub old_team: i32,
+        pub new_team: i32,
+        pub type_: crate::native::InputString,
+        pub amount: f32,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_resource_transfer_query(
         pointer: *const sys::AllowResourceTransferQuery,
-    ) -> Result<AllowResourceTransferQuery> {
+    ) -> Result<AllowResourceTransferQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(AllowResourceTransferQuery {
+        Ok(AllowResourceTransferQueryInput {
             old_team: (value.oldTeam) as _,
             new_team: (value.newTeam) as _,
-            type_: unsafe { read_string(value.type_, None)? },
+            type_: unsafe { read_callin_string(value.type_, None)? },
             amount: (value.amount) as _,
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_start_position_query(
         pointer: *const sys::AllowStartPositionQuery,
     ) -> Result<AllowStartPositionQuery> {
@@ -147,7 +174,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_unit_build_step_query(
         pointer: *const sys::AllowUnitBuildStepQuery,
     ) -> Result<AllowUnitBuildStepQuery> {
@@ -162,7 +189,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_unit_cloak_query(
         pointer: *const sys::AllowUnitCloakQuery,
     ) -> Result<AllowUnitCloakQuery> {
@@ -175,7 +202,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_unit_creation_query(
         pointer: *const sys::AllowUnitCreationQuery,
     ) -> Result<AllowUnitCreationQuery> {
@@ -191,7 +218,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_unit_decloak_query(
         pointer: *const sys::AllowUnitDecloakQuery,
     ) -> Result<AllowUnitDecloakQuery> {
@@ -206,7 +233,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_unit_kamikaze_query(
         pointer: *const sys::AllowUnitKamikazeQuery,
     ) -> Result<AllowUnitKamikazeQuery> {
@@ -219,7 +246,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_unit_transfer_query(
         pointer: *const sys::AllowUnitTransferQuery,
     ) -> Result<AllowUnitTransferQuery> {
@@ -234,7 +261,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_unit_transport_position_query(
         pointer: *const sys::AllowUnitTransportPositionQuery,
     ) -> Result<AllowUnitTransportPositionQuery> {
@@ -247,7 +274,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_unit_transport_query(
         pointer: *const sys::AllowUnitTransportQuery,
     ) -> Result<AllowUnitTransportQuery> {
@@ -263,7 +290,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_weapon_intercept_target_query(
         pointer: *const sys::AllowWeaponInterceptTargetQuery,
     ) -> Result<AllowWeaponInterceptTargetQuery> {
@@ -276,7 +303,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_weapon_target_check_query(
         pointer: *const sys::AllowWeaponTargetCheckQuery,
     ) -> Result<AllowWeaponTargetCheckQuery> {
@@ -289,7 +316,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_allow_weapon_target_query(
         pointer: *const sys::AllowWeaponTargetQuery,
     ) -> Result<AllowWeaponTargetQuery> {
@@ -305,7 +332,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_collect_garbage_query(
         pointer: *const sys::CollectGarbageQuery,
     ) -> Result<CollectGarbageQuery> {
@@ -315,33 +342,42 @@ pub mod callins {
             forced: (value.forced) as _,
         })
     }
+    pub struct CommandFallbackQueryInput {
+        pub unit_id: i32,
+        pub unit_def_id: i32,
+        pub unit_team: i32,
+        pub command: crate::native::CommandInput,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_command_fallback_query(
         pointer: *const sys::CommandFallbackQuery,
-    ) -> Result<CommandFallbackQuery> {
+    ) -> Result<CommandFallbackQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(CommandFallbackQuery {
+        Ok(CommandFallbackQueryInput {
             unit_id: (value.unitID) as _,
             unit_def_id: (value.unitDefID) as _,
             unit_team: (value.unitTeam) as _,
-            command: from_native_callin_command(&(value.command))?,
+            command: unsafe { read_callin_command(&value.command)? },
         })
     }
+    pub struct CommandNotifyQueryInput {
+        pub command: crate::native::CommandInput,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_command_notify_query(
         pointer: *const sys::CommandNotifyQuery,
-    ) -> Result<CommandNotifyQuery> {
+    ) -> Result<CommandNotifyQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(CommandNotifyQuery {
-            command: from_native_callin_command(&(value.command))?,
+        Ok(CommandNotifyQueryInput {
+            command: unsafe { read_callin_command(&value.command)? },
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_default_command_query(
         pointer: *const sys::DefaultCommandQuery,
     ) -> Result<DefaultCommandQuery> {
@@ -354,7 +390,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_download_failed_query(
         pointer: *const sys::DownloadFailedQuery,
     ) -> Result<DownloadFailedQuery> {
@@ -366,7 +402,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_download_finished_query(
         pointer: *const sys::DownloadFinishedQuery,
     ) -> Result<DownloadFinishedQuery> {
@@ -377,7 +413,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_download_progress_query(
         pointer: *const sys::DownloadProgressQuery,
     ) -> Result<DownloadProgressQuery> {
@@ -389,21 +425,26 @@ pub mod callins {
             total: (value.total) as _,
         })
     }
+    pub struct DownloadQueuedQueryInput {
+        pub download_id: i32,
+        pub archive_name: crate::native::InputString,
+        pub archive_type: crate::native::InputString,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_download_queued_query(
         pointer: *const sys::DownloadQueuedQuery,
-    ) -> Result<DownloadQueuedQuery> {
+    ) -> Result<DownloadQueuedQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(DownloadQueuedQuery {
+        Ok(DownloadQueuedQueryInput {
             download_id: (value.downloadID) as _,
-            archive_name: unsafe { read_string(value.archiveName, None)? },
-            archive_type: unsafe { read_string(value.archiveType, None)? },
+            archive_name: unsafe { read_callin_string(value.archiveName, None)? },
+            archive_type: unsafe { read_callin_string(value.archiveType, None)? },
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_download_started_query(
         pointer: *const sys::DownloadStartedQuery,
     ) -> Result<DownloadStartedQuery> {
@@ -414,7 +455,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_draw_alpha_objects_lua_query(
         pointer: *const sys::DrawAlphaObjectsLuaQuery,
     ) -> Result<DrawAlphaObjectsLuaQuery> {
@@ -426,7 +467,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_draw_build_square_query(
         pointer: *const sys::DrawBuildSquareQuery,
     ) -> Result<DrawBuildSquareQuery> {
@@ -442,7 +483,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_draw_feature_query(
         pointer: *const sys::DrawFeatureQuery,
     ) -> Result<DrawFeatureQuery> {
@@ -454,7 +495,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_draw_material_query(
         pointer: *const sys::DrawMaterialQuery,
     ) -> Result<DrawMaterialQuery> {
@@ -466,7 +507,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_draw_objects_lua_query(
         pointer: *const sys::DrawObjectsLuaQuery,
     ) -> Result<DrawObjectsLuaQuery> {
@@ -479,7 +520,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_draw_projectile_query(
         pointer: *const sys::DrawProjectileQuery,
     ) -> Result<DrawProjectileQuery> {
@@ -491,7 +532,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_draw_screen_query(
         pointer: *const sys::DrawScreenQuery,
     ) -> Result<DrawScreenQuery> {
@@ -503,7 +544,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_draw_shield_query(
         pointer: *const sys::DrawShieldQuery,
     ) -> Result<DrawShieldQuery> {
@@ -516,7 +557,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_draw_unit_query(
         pointer: *const sys::DrawUnitQuery,
     ) -> Result<DrawUnitQuery> {
@@ -528,7 +569,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_draw_world_pre_particles_query(
         pointer: *const sys::DrawWorldPreParticlesQuery,
     ) -> Result<DrawWorldPreParticlesQuery> {
@@ -542,7 +583,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_explosion_query(
         pointer: *const sys::ExplosionQuery,
     ) -> Result<ExplosionQuery> {
@@ -556,7 +597,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_feature_created_query(
         pointer: *const sys::FeatureCreatedQuery,
     ) -> Result<FeatureCreatedQuery> {
@@ -568,7 +609,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_feature_damaged_query(
         pointer: *const sys::FeatureDamagedQuery,
     ) -> Result<FeatureDamagedQuery> {
@@ -587,7 +628,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_feature_destroyed_query(
         pointer: *const sys::FeatureDestroyedQuery,
     ) -> Result<FeatureDestroyedQuery> {
@@ -599,7 +640,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_feature_moved_query(
         pointer: *const sys::FeatureMovedQuery,
     ) -> Result<FeatureMovedQuery> {
@@ -611,7 +652,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_float3_callin_query(
         pointer: *const sys::Float3CallinQuery,
     ) -> Result<Float3CallinQuery> {
@@ -622,7 +663,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_game_frame_post_query(
         pointer: *const sys::GameFramePostQuery,
     ) -> Result<GameFramePostQuery> {
@@ -633,7 +674,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_game_frame_query(
         pointer: *const sys::GameFrameQuery,
     ) -> Result<GameFrameQuery> {
@@ -644,7 +685,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_game_id_query(
         pointer: *const sys::GameIDQuery,
     ) -> Result<GameIDQuery> {
@@ -656,7 +697,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_game_over_event_query(
         pointer: *const sys::GameOverEventQuery,
     ) -> Result<GameOverEventQuery> {
@@ -670,7 +711,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_game_paused_query(
         pointer: *const sys::GamePausedQuery,
     ) -> Result<GamePausedQuery> {
@@ -682,7 +723,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_game_preload_query(
         pointer: *const sys::GamePreloadQuery,
     ) -> Result<GamePreloadQuery> {
@@ -691,7 +732,7 @@ pub mod callins {
         Ok(GamePreloadQuery {})
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_game_progress_query(
         pointer: *const sys::GameProgressQuery,
     ) -> Result<GameProgressQuery> {
@@ -701,15 +742,20 @@ pub mod callins {
             game_frame: (value.gameFrame) as _,
         })
     }
+    pub struct GameSetupQueryInput {
+        pub state: crate::native::InputString,
+        pub ready: bool,
+        pub player_states: Vec<GameSetupPlayerState>,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_game_setup_query(
         pointer: *const sys::GameSetupQuery,
-    ) -> Result<GameSetupQuery> {
+    ) -> Result<GameSetupQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(GameSetupQuery {
-            state: unsafe { read_string(value.state, None)? },
+        Ok(GameSetupQueryInput {
+            state: unsafe { read_callin_string(value.state, None)? },
             ready: (value.ready) as _,
             player_states: unsafe {
                 read_slice(value.playerStates, value.playerStateCount as usize)?
@@ -720,7 +766,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_game_start_query(
         pointer: *const sys::GameStartQuery,
     ) -> Result<GameStartQuery> {
@@ -729,7 +775,7 @@ pub mod callins {
         Ok(GameStartQuery {})
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_group_changed_query(
         pointer: *const sys::GroupChangedQuery,
     ) -> Result<GroupChangedQuery> {
@@ -740,7 +786,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_handle_lua_call_query(
         pointer: *const sys::HandleLuaCallQuery,
     ) -> Result<HandleLuaCallQuery> {
@@ -754,7 +800,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_handle_lua_msg_query(
         pointer: *const sys::HandleLuaMsgQuery,
     ) -> Result<HandleLuaMsgQuery> {
@@ -767,21 +813,33 @@ pub mod callins {
             data: unsafe { read_slice(value.data, value.dataLength as usize)? }.to_vec(),
         })
     }
+    pub struct KeyPressQueryInput {
+        pub key_code: i32,
+        pub alt: bool,
+        pub ctrl: bool,
+        pub meta: bool,
+        pub shift: bool,
+        pub is_repeat: bool,
+        pub label: crate::native::InputString,
+        pub utf32_char: i32,
+        pub scan_code: i32,
+        pub action_list: Vec<KeyAction>,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_key_press_query(
         pointer: *const sys::KeyPressQuery,
-    ) -> Result<KeyPressQuery> {
+    ) -> Result<KeyPressQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(KeyPressQuery {
+        Ok(KeyPressQueryInput {
             key_code: (value.keyCode) as _,
             alt: (value.alt) as _,
             ctrl: (value.ctrl) as _,
             meta: (value.meta) as _,
             shift: (value.shift) as _,
             is_repeat: (value.isRepeat) as _,
-            label: unsafe { read_string(value.label, None)? },
+            label: unsafe { read_callin_string(value.label, None)? },
             utf32_char: (value.utf32Char) as _,
             scan_code: (value.scanCode) as _,
             action_list: unsafe {
@@ -792,20 +850,31 @@ pub mod callins {
                 .collect::<Result<Vec<_>>>()?,
         })
     }
+    pub struct KeyReleaseQueryInput {
+        pub key_code: i32,
+        pub alt: bool,
+        pub ctrl: bool,
+        pub meta: bool,
+        pub shift: bool,
+        pub label: crate::native::InputString,
+        pub utf32_char: i32,
+        pub scan_code: i32,
+        pub action_list: Vec<KeyAction>,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_key_release_query(
         pointer: *const sys::KeyReleaseQuery,
-    ) -> Result<KeyReleaseQuery> {
+    ) -> Result<KeyReleaseQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(KeyReleaseQuery {
+        Ok(KeyReleaseQueryInput {
             key_code: (value.keyCode) as _,
             alt: (value.alt) as _,
             ctrl: (value.ctrl) as _,
             meta: (value.meta) as _,
             shift: (value.shift) as _,
-            label: unsafe { read_string(value.label, None)? },
+            label: unsafe { read_callin_string(value.label, None)? },
             utf32_char: (value.utf32Char) as _,
             scan_code: (value.scanCode) as _,
             action_list: unsafe {
@@ -817,7 +886,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_last_message_position_query(
         pointer: *const sys::LastMessagePositionQuery,
     ) -> Result<LastMessagePositionQuery> {
@@ -827,27 +896,42 @@ pub mod callins {
             pos: from_float3(&(value.pos))?,
         })
     }
+    pub struct LoadProgressQueryInput {
+        pub message: crate::native::InputString,
+        pub message_length: u32,
+        pub replace_last_line: u8,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_load_progress_query(
         pointer: *const sys::LoadProgressQuery,
-    ) -> Result<LoadProgressQuery> {
+    ) -> Result<LoadProgressQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(LoadProgressQuery {
-            message: unsafe { read_string(value.message, None)? },
+        Ok(LoadProgressQueryInput {
+            message: unsafe { read_callin_string(value.message, None)? },
             message_length: (value.messageLength) as _,
             replace_last_line: (value.replaceLastLine) as _,
         })
     }
+    pub struct MapDrawCmdQueryInput {
+        pub player_id: i32,
+        pub type_: i32,
+        pub has_pos0: bool,
+        pub pos0: Float3,
+        pub has_pos1: bool,
+        pub pos1: Float3,
+        pub has_label: bool,
+        pub label: crate::native::InputString,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_map_draw_cmd_query(
         pointer: *const sys::MapDrawCmdQuery,
-    ) -> Result<MapDrawCmdQuery> {
+    ) -> Result<MapDrawCmdQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(MapDrawCmdQuery {
+        Ok(MapDrawCmdQueryInput {
             player_id: (value.playerID) as _,
             type_: (value.type_) as _,
             has_pos0: (value.hasPos0) as _,
@@ -855,11 +939,11 @@ pub mod callins {
             has_pos1: (value.hasPos1) as _,
             pos1: from_float3(&(value.pos1))?,
             has_label: (value.hasLabel) as _,
-            label: unsafe { read_string(value.label, None)? },
+            label: unsafe { read_callin_string(value.label, None)? },
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_mini_map_draw_query(
         pointer: *const sys::MiniMapDrawQuery,
     ) -> Result<MiniMapDrawQuery> {
@@ -871,7 +955,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_mini_map_geometry_changed_query(
         pointer: *const sys::MiniMapGeometryChangedQuery,
     ) -> Result<MiniMapGeometryChangedQuery> {
@@ -889,7 +973,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_mini_map_rotation_changed_query(
         pointer: *const sys::MiniMapRotationChangedQuery,
     ) -> Result<MiniMapRotationChangedQuery> {
@@ -901,7 +985,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_mini_map_state_changed_query(
         pointer: *const sys::MiniMapStateChangedQuery,
     ) -> Result<MiniMapStateChangedQuery> {
@@ -914,7 +998,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_mouse_move_query(
         pointer: *const sys::MouseMoveQuery,
     ) -> Result<MouseMoveQuery> {
@@ -929,7 +1013,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_mouse_press_query(
         pointer: *const sys::MousePressQuery,
     ) -> Result<MousePressQuery> {
@@ -942,7 +1026,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_mouse_release_query(
         pointer: *const sys::MouseReleaseQuery,
     ) -> Result<MouseReleaseQuery> {
@@ -955,7 +1039,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_mouse_wheel_query(
         pointer: *const sys::MouseWheelQuery,
     ) -> Result<MouseWheelQuery> {
@@ -967,7 +1051,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_move_ctrl_notify_query(
         pointer: *const sys::MoveCtrlNotifyQuery,
     ) -> Result<MoveCtrlNotifyQuery> {
@@ -981,7 +1065,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_player_added_query(
         pointer: *const sys::PlayerAddedQuery,
     ) -> Result<PlayerAddedQuery> {
@@ -992,7 +1076,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_player_changed_query(
         pointer: *const sys::PlayerChangedQuery,
     ) -> Result<PlayerChangedQuery> {
@@ -1003,7 +1087,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_player_removed_query(
         pointer: *const sys::PlayerRemovedQuery,
     ) -> Result<PlayerRemovedQuery> {
@@ -1015,7 +1099,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_pong_query(
         pointer: *const sys::PongQuery,
     ) -> Result<PongQuery> {
@@ -1028,7 +1112,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_projectile_event_query(
         pointer: *const sys::ProjectileEventQuery,
     ) -> Result<ProjectileEventQuery> {
@@ -1041,7 +1125,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_rect_changed_query(
         pointer: *const sys::RectChangedQuery,
     ) -> Result<RectChangedQuery> {
@@ -1055,7 +1139,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_recv_from_synced_query(
         pointer: *const sys::RecvFromSyncedQuery,
     ) -> Result<RecvFromSyncedQuery> {
@@ -1069,7 +1153,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_render_unit_destroyed_query(
         pointer: *const sys::RenderUnitDestroyedQuery,
     ) -> Result<RenderUnitDestroyedQuery> {
@@ -1082,7 +1166,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_resource_excess_query(
         pointer: *const sys::ResourceExcessQuery,
     ) -> Result<ResourceExcessQuery> {
@@ -1096,7 +1180,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_screen_position_query(
         pointer: *const sys::ScreenPositionQuery,
     ) -> Result<ScreenPositionQuery> {
@@ -1108,7 +1192,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_shield_pre_damaged_query(
         pointer: *const sys::ShieldPreDamagedQuery,
     ) -> Result<ShieldPreDamagedQuery> {
@@ -1127,7 +1211,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_simple_callin_query(
         pointer: *const sys::SimpleCallinQuery,
     ) -> Result<SimpleCallinQuery> {
@@ -1138,7 +1222,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_stockpile_changed_query(
         pointer: *const sys::StockpileChangedQuery,
     ) -> Result<StockpileChangedQuery> {
@@ -1154,7 +1238,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_sun_changed_query(
         pointer: *const sys::SunChangedQuery,
     ) -> Result<SunChangedQuery> {
@@ -1165,7 +1249,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_team_changed_query(
         pointer: *const sys::TeamChangedQuery,
     ) -> Result<TeamChangedQuery> {
@@ -1176,7 +1260,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_team_died_query(
         pointer: *const sys::TeamDiedQuery,
     ) -> Result<TeamDiedQuery> {
@@ -1187,7 +1271,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_terraform_complete_query(
         pointer: *const sys::TerraformCompleteQuery,
     ) -> Result<TerraformCompleteQuery> {
@@ -1202,32 +1286,40 @@ pub mod callins {
             build_unit_team: (value.buildUnitTeam) as _,
         })
     }
+    pub struct TextEditingQueryInput {
+        pub utf8: crate::native::InputString,
+        pub start: u32,
+        pub length: u32,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_text_editing_query(
         pointer: *const sys::TextEditingQuery,
-    ) -> Result<TextEditingQuery> {
+    ) -> Result<TextEditingQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(TextEditingQuery {
-            utf8: unsafe { read_string(value.utf8, None)? },
+        Ok(TextEditingQueryInput {
+            utf8: unsafe { read_callin_string(value.utf8, None)? },
             start: (value.start) as _,
             length: (value.length) as _,
         })
     }
+    pub struct TextInputQueryInput {
+        pub utf8: crate::native::InputString,
+    }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_text_input_query(
         pointer: *const sys::TextInputQuery,
-    ) -> Result<TextInputQuery> {
+    ) -> Result<TextInputQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(TextInputQuery {
-            utf8: unsafe { read_string(value.utf8, None)? },
+        Ok(TextInputQueryInput {
+            utf8: unsafe { read_callin_string(value.utf8, None)? },
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_cloak_event_query(
         pointer: *const sys::UnitCloakEventQuery,
     ) -> Result<UnitCloakEventQuery> {
@@ -1239,39 +1331,54 @@ pub mod callins {
             unit_team: (value.unitTeam) as _,
         })
     }
-    /// # Safety
-    /// Pointer must reference this callin's valid host query.
-    pub unsafe fn decode_unit_cmd_done_query(
-        pointer: *const sys::UnitCmdDoneQuery,
-    ) -> Result<UnitCmdDoneQuery> {
-        let value = unsafe { pointer.as_ref() }
-            .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(UnitCmdDoneQuery {
-            unit_id: (value.unitID) as _,
-            unit_def_id: (value.unitDefID) as _,
-            unit_team: (value.unitTeam) as _,
-            command: from_native_callin_command(&(value.command))?,
-        })
+    pub struct UnitCmdDoneQueryInput {
+        pub unit_id: i32,
+        pub unit_def_id: i32,
+        pub unit_team: i32,
+        pub command: crate::native::CommandInput,
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
-    pub unsafe fn decode_unit_command_query(
-        pointer: *const sys::UnitCommandQuery,
-    ) -> Result<UnitCommandQuery> {
+    /// Host query and pointed-to inputs must be valid while decoding.
+    pub unsafe fn decode_unit_cmd_done_query(
+        pointer: *const sys::UnitCmdDoneQuery,
+    ) -> Result<UnitCmdDoneQueryInput> {
         let value = unsafe { pointer.as_ref() }
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
-        Ok(UnitCommandQuery {
+        Ok(UnitCmdDoneQueryInput {
             unit_id: (value.unitID) as _,
             unit_def_id: (value.unitDefID) as _,
             unit_team: (value.unitTeam) as _,
-            command: from_native_callin_command(&(value.command))?,
+            command: unsafe { read_callin_command(&value.command)? },
+        })
+    }
+    pub struct UnitCommandQueryInput {
+        pub unit_id: i32,
+        pub unit_def_id: i32,
+        pub unit_team: i32,
+        pub command: crate::native::CommandInput,
+        pub player_num: i32,
+        pub from_synced: bool,
+        pub from_lua: bool,
+    }
+    /// # Safety
+    /// Host query and pointed-to inputs must be valid while decoding.
+    pub unsafe fn decode_unit_command_query(
+        pointer: *const sys::UnitCommandQuery,
+    ) -> Result<UnitCommandQueryInput> {
+        let value = unsafe { pointer.as_ref() }
+            .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        Ok(UnitCommandQueryInput {
+            unit_id: (value.unitID) as _,
+            unit_def_id: (value.unitDefID) as _,
+            unit_team: (value.unitTeam) as _,
+            command: unsafe { read_callin_command(&value.command)? },
             player_num: (value.playerNum) as _,
             from_synced: (value.fromSynced) as _,
             from_lua: (value.fromLua) as _,
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_construction_decayed_query(
         pointer: *const sys::UnitConstructionDecayedQuery,
     ) -> Result<UnitConstructionDecayedQuery> {
@@ -1287,7 +1394,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_created_query(
         pointer: *const sys::UnitCreatedQuery,
     ) -> Result<UnitCreatedQuery> {
@@ -1301,7 +1408,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_damaged_query(
         pointer: *const sys::UnitDamagedQuery,
     ) -> Result<UnitDamagedQuery> {
@@ -1321,7 +1428,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_destroyed_query(
         pointer: *const sys::UnitDestroyedQuery,
     ) -> Result<UnitDestroyedQuery> {
@@ -1338,7 +1445,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_experience_query(
         pointer: *const sys::UnitExperienceQuery,
     ) -> Result<UnitExperienceQuery> {
@@ -1353,7 +1460,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_feature_collision_query(
         pointer: *const sys::UnitFeatureCollisionQuery,
     ) -> Result<UnitFeatureCollisionQuery> {
@@ -1365,7 +1472,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_finished_query(
         pointer: *const sys::UnitFinishedQuery,
     ) -> Result<UnitFinishedQuery> {
@@ -1378,7 +1485,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_from_factory_query(
         pointer: *const sys::UnitFromFactoryQuery,
     ) -> Result<UnitFromFactoryQuery> {
@@ -1394,7 +1501,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_given_query(
         pointer: *const sys::UnitGivenQuery,
     ) -> Result<UnitGivenQuery> {
@@ -1408,7 +1515,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_harvest_storage_full_query(
         pointer: *const sys::UnitHarvestStorageFullQuery,
     ) -> Result<UnitHarvestStorageFullQuery> {
@@ -1421,7 +1528,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_idle_query(
         pointer: *const sys::UnitIdleQuery,
     ) -> Result<UnitIdleQuery> {
@@ -1434,7 +1541,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_loaded_query(
         pointer: *const sys::UnitLoadedQuery,
     ) -> Result<UnitLoadedQuery> {
@@ -1449,7 +1556,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_los_event_query(
         pointer: *const sys::UnitLosEventQuery,
     ) -> Result<UnitLosEventQuery> {
@@ -1463,7 +1570,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_move_event_query(
         pointer: *const sys::UnitMoveEventQuery,
     ) -> Result<UnitMoveEventQuery> {
@@ -1476,7 +1583,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_movement_class_event_query(
         pointer: *const sys::UnitMovementClassEventQuery,
     ) -> Result<UnitMovementClassEventQuery> {
@@ -1489,7 +1596,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_reverse_built_query(
         pointer: *const sys::UnitReverseBuiltQuery,
     ) -> Result<UnitReverseBuiltQuery> {
@@ -1502,7 +1609,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_seismic_ping_query(
         pointer: *const sys::UnitSeismicPingQuery,
     ) -> Result<UnitSeismicPingQuery> {
@@ -1517,7 +1624,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_stunned_query(
         pointer: *const sys::UnitStunnedQuery,
     ) -> Result<UnitStunnedQuery> {
@@ -1531,7 +1638,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_taken_query(
         pointer: *const sys::UnitTakenQuery,
     ) -> Result<UnitTakenQuery> {
@@ -1545,7 +1652,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_unit_collision_query(
         pointer: *const sys::UnitUnitCollisionQuery,
     ) -> Result<UnitUnitCollisionQuery> {
@@ -1557,7 +1664,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_unit_unloaded_query(
         pointer: *const sys::UnitUnloadedQuery,
     ) -> Result<UnitUnloadedQuery> {
@@ -1572,7 +1679,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_update_query(
         pointer: *const sys::UpdateQuery,
     ) -> Result<UpdateQuery> {
@@ -1583,7 +1690,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_view_resize_query(
         pointer: *const sys::ViewResizeQuery,
     ) -> Result<ViewResizeQuery> {
@@ -1609,7 +1716,7 @@ pub mod callins {
         })
     }
     /// # Safety
-    /// Pointer must reference this callin's valid host query.
+    /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_world_tooltip_query(
         pointer: *const sys::WorldTooltipQuery,
     ) -> Result<WorldTooltipQuery> {
@@ -2604,20 +2711,6 @@ pub mod callins {
             command: unsafe { read_string(value.command, None)? },
             extra: unsafe { read_string(value.extra, None)? },
             bound_with: unsafe { read_string(value.boundWith, None)? },
-        })
-    }
-    fn from_native_callin_command(
-        value: &sys::NativeCallinCommand,
-    ) -> Result<NativeCallinCommand> {
-        Ok(NativeCallinCommand {
-            id: (value.id) as _,
-            time_out: (value.timeOut) as _,
-            page_index: (value.pageIndex) as _,
-            num_params: (value.numParams) as _,
-            tag: (value.tag) as _,
-            options: (value.options) as _,
-            params: unsafe { read_slice(value.params, value.numParams as usize)? }
-                .to_vec(),
         })
     }
     fn from_resource_excess_entry(

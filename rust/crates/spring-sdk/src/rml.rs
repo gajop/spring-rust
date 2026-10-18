@@ -59,9 +59,7 @@ impl ModelState {
     fn check<E: Session>(&self, spring: &Spring<'_, E>) -> Result<()> {
         spring.engine.check()?;
         if !self.alive.load(std::sync::atomic::Ordering::Relaxed)
-            || !self
-                .owner
-                .ptr_eq(&crate::Shared::downgrade(spring.engine.owner))
+            || !self.owner.ptr_eq(&spring.engine.owner.identity)
         {
             return Err(invalid());
         }
@@ -89,7 +87,7 @@ impl DataModel {
             name: name.into(),
             handle: result.data_model_handle,
             state: crate::Shared::new(ModelState {
-                owner: crate::Shared::downgrade(spring.engine.owner),
+                owner: spring.engine.owner.identity.clone(),
                 alive: std::sync::atomic::AtomicBool::new(true),
             }),
         })

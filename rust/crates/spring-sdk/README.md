@@ -76,17 +76,20 @@ APIs. The old `spring` crate temporarily re-exports the internal implementation
 so existing consumers keep building. Renaming the unified public crate to
 `spring` can follow once those consumers have migrated.
 
+Command callins receive `&CallinCommand<'_>` with `params: &[f32]`.
+Use `command.to_owned()` when retaining a command after its callback. Addons'
+command events already use slices and need no caller changes.
+
 Native engine calls do not take a mutex or clone a module `Arc` per API accessor.
 Callback entry still serializes module access. `ModuleRef` resolution checks the
 current thread's active callbacks and reuses their existing entry guard.
 
-Measured scalar query cost after this cleanup: native 10.3 ns (legacy 6.1 ns),
-Wasm 17.7 ns (legacy 16.9 ns), Lua 32.2 ns. Resolving a stored ModuleRef for each
-native query costs 20.2 ns; resolve it once around loops when possible. Native
-direct calls previously cost 57.2 ns, and per-call ModuleRef access 155.1 ns.
-Cold-cache native callback dispatch also remains slower than the legacy wrapper
-(GameFrame 1.65 → 2.51 µs; UnitCreated 1.23 → 3.67 µs).
-See [benchmark results and limits](../../../test/native_api_parity/CORE_WASM_BENCHMARKS.md#measurements-2026-10-18).
+Matched native benchmarks now put scalar queries and numeric mutations at
+legacy speed. Vectors still add about 2 ns. Empty callback entry fell from
+roughly 170–210 ns to 24–31 ns; legacy remains 2–6 ns. Cold entry and callbacks
+that copy strings/commands retain overhead. Small command-list outputs own
+nested parameter copies; legacy outputs retain engine pointers.
+See [results, raw samples and limits](../../../test/native_api_parity/CORE_WASM_BENCHMARKS.md#native-follow-up-2026-10-18).
 
 ## Port status
 

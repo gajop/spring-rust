@@ -13,12 +13,19 @@ pub mod units_query {
     use alloc::vec::Vec;
     pub struct UnitsQuery<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnitsQueryApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn units_query(&self) -> UnitsQuery<'_, E> {
             UnitsQuery {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.units_query.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -30,7 +37,12 @@ pub mod units_query {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::units_query::get_all_units(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_query::get_all_units(&self._engine) }
+                {
+                    crate::native::units_query::get_all_units(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -58,6 +70,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_closest_enemy_unit(
                         &self._engine,
+                        self._native_api,
                         pos,
                         range,
                         ally_team_id,
@@ -87,6 +100,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_render_units(
                         &self._engine,
+                        self._native_api,
                         draw_mask,
                         send_mask,
                     )
@@ -112,6 +126,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_render_units_draw_flag_changed(
                         &self._engine,
+                        self._native_api,
                         send_mask,
                     )
                 }
@@ -133,6 +148,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_team_unit_count(
                         &self._engine,
+                        self._native_api,
                         team_id,
                     )
                 }
@@ -159,6 +175,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_team_unit_def_count(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         unit_def_id,
                     )
@@ -178,7 +195,13 @@ pub mod units_query {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_query::get_team_units(&self._engine, team_id) }
+                {
+                    crate::native::units_query::get_team_units(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -202,6 +225,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_team_units_by_defs(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         unit_def_i_ds,
                     )
@@ -220,6 +244,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_team_units_counts(
                         &self._engine,
+                        self._native_api,
                         team_id,
                     )
                 }
@@ -244,6 +269,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_team_units_sorted(
                         &self._engine,
+                        self._native_api,
                         team_id,
                     )
                 }
@@ -261,6 +287,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_unit_array_centroid(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                     )
                 }
@@ -278,6 +305,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_unit_map_centroid(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                     )
                 }
@@ -300,6 +328,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_unit_nearest_ally(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         range,
                     )
@@ -329,6 +358,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_unit_nearest_enemy(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         range,
                         options,
@@ -359,6 +389,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_unit_separation(
                         &self._engine,
+                        self._native_api,
                         unit_id1,
                         unit_id2,
                         options,
@@ -397,6 +428,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_units_in_box(
                         &self._engine,
+                        self._native_api,
                         xmin,
                         ymin,
                         zmin,
@@ -433,6 +465,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_units_in_cylinder(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         radius,
@@ -462,6 +495,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_units_in_planes(
                         &self._engine,
+                        self._native_api,
                         planes,
                         allegiance,
                     )
@@ -495,6 +529,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_units_in_rectangle(
                         &self._engine,
+                        self._native_api,
                         xmin,
                         zmin,
                         xmax,
@@ -531,6 +566,7 @@ pub mod units_query {
                 {
                     crate::native::units_query::get_units_in_sphere(
                         &self._engine,
+                        self._native_api,
                         x,
                         y,
                         z,
@@ -553,7 +589,13 @@ pub mod units_query {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_query::valid_unit_id(&self._engine, unit_id) }
+                {
+                    crate::native::units_query::valid_unit_id(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -566,12 +608,19 @@ pub mod units_info {
     use alloc::string::String;
     pub struct UnitsInfo<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnitsInfoApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn units_info(&self) -> UnitsInfo<'_, E> {
             UnitsInfo {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.units_info.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -590,6 +639,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::clear_units_previous_draw_flag(
                         &self._engine,
+                        self._native_api,
                     )
                 }
             };
@@ -607,7 +657,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_ally_team(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_ally_team(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -623,7 +679,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_armored(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_armored(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -642,6 +704,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_base_position(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -660,7 +723,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_blocking(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_blocking(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -679,6 +748,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_build_facing(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -705,6 +775,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_build_params(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         param_name,
                     )
@@ -727,6 +798,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_buildee_radius(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -751,6 +823,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_collision_volume_data(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -772,6 +845,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_cost_table(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -790,7 +864,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_costs(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_costs(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -806,7 +886,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_crashing(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_crashing(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -825,6 +911,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_current_build_power(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -843,7 +930,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_def_id(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_def_id(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -859,7 +952,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_direction(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_direction(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -883,6 +982,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_effective_build_range(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         buildee_def_id,
                     )
@@ -905,6 +1005,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_experience(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -923,7 +1024,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_flanking(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_flanking(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -945,6 +1052,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_harvest_storage(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -971,6 +1079,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_heading(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         convert_to_radians,
                     )
@@ -990,7 +1099,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_health(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_health(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1006,7 +1121,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_height(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_height(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1025,6 +1146,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_in_build_stance(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1043,7 +1165,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_is_active(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_is_active(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1062,6 +1190,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_is_being_built(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1083,6 +1212,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_is_building(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1104,6 +1234,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_is_cloaked(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1122,7 +1253,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_is_dead(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_is_dead(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1141,6 +1278,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_is_stunned(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1165,6 +1303,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_is_transporting(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1189,6 +1328,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_last_attacked_piece(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1213,6 +1353,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_last_attacker(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1241,6 +1382,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_los_state(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         ally_team_id,
                         raw,
@@ -1261,7 +1403,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_mass(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_mass(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1280,6 +1428,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_metal_extraction(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1301,6 +1450,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_move_def_id(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1322,6 +1472,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_nano_pieces(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1340,7 +1491,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_neutral(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_neutral(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1364,6 +1521,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_piece_collision_volume_data(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         piece_num,
                     )
@@ -1391,6 +1549,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_pos_error_params(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         ally_team_id,
                     )
@@ -1418,6 +1577,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_position(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         options,
                     )
@@ -1437,7 +1597,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_radius(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_radius(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1453,7 +1619,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_resources(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_resources(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1469,7 +1641,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_rotation(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_rotation(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1488,6 +1666,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_seismic_signature(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1509,6 +1688,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_self_d_time(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1540,6 +1720,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_sensor_radius(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         type_,
                     )
@@ -1567,6 +1748,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_shield_state(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                     )
@@ -1594,6 +1776,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_states(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         options,
                     )
@@ -1613,7 +1796,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_stockpile(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_stockpile(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1629,7 +1818,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_storage(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_storage(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1645,7 +1840,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_team(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_team(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1661,7 +1862,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_tooltip(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_tooltip(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1680,6 +1887,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_transporter(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1698,7 +1906,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_vectors(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_vectors(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1714,7 +1928,13 @@ pub mod units_info {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::units_info::get_unit_velocity(&self._engine, unit_id) }
+                {
+                    crate::native::units_info::get_unit_velocity(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -1733,6 +1953,7 @@ pub mod units_info {
                 {
                     crate::native::units_info::get_unit_worker_task(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1746,12 +1967,19 @@ pub mod units_weapons {
     use crate::Result;
     pub struct UnitsWeapons<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnitsWeaponsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn units_weapons(&self) -> UnitsWeapons<'_, E> {
             UnitsWeapons {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.units_weapons.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -1770,6 +1998,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_max_range(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1796,6 +2025,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_weapon_can_fire(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                     )
@@ -1818,6 +2048,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_weapon_count(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -1844,6 +2075,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_weapon_damages(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                     )
@@ -1879,6 +2111,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_weapon_have_free_line_of_fire(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                         target_id,
@@ -1917,6 +2150,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_weapon_state(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                         key,
@@ -1945,6 +2179,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_weapon_target(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                     )
@@ -1974,6 +2209,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_weapon_test_range(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                         target_pos,
@@ -2008,6 +2244,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_weapon_test_target(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                         target_id,
@@ -2044,6 +2281,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_weapon_try_target(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                         target_id,
@@ -2074,6 +2312,7 @@ pub mod units_weapons {
                 {
                     crate::native::units_weapons::get_unit_weapon_vectors(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                     )
@@ -2089,12 +2328,19 @@ pub mod units_commands {
     use alloc::vec::Vec;
     pub struct UnitsCommands<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnitsCommandsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn units_commands(&self) -> UnitsCommands<'_, E> {
             UnitsCommands {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.units_commands.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -2118,6 +2364,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::find_unit_cmd_desc(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         cmd_id,
                     )
@@ -2140,6 +2387,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_command_params(
                         &self._engine,
+                        self._native_api,
                         command,
                     )
                 }
@@ -2166,6 +2414,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_command_queue(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         max_commands,
                     )
@@ -2191,6 +2440,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_factory_bugger_off(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -2212,6 +2462,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_factory_command_count(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -2238,6 +2489,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_factory_commands(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         max_commands,
                     )
@@ -2267,6 +2519,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_factory_counts(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         count,
                         add_cmds,
@@ -2289,6 +2542,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_full_build_queue(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -2310,6 +2564,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_real_build_queue(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -2334,6 +2589,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_unit_cmd_descs(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -2355,6 +2611,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_unit_command_count(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -2376,6 +2633,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_unit_commands(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         max_commands,
                     )
@@ -2403,6 +2661,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::get_unit_current_command(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         cmd_index,
                     )
@@ -2434,6 +2693,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::give_order(
                         &self._engine,
+                        self._native_api,
                         cmd_id,
                         params,
                         options,
@@ -2463,6 +2723,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::give_order_array_to_unit(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         commands,
                     )
@@ -2492,6 +2753,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::give_order_array_to_unit_array(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                         commands,
                         pairwise,
@@ -2520,6 +2782,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::give_order_array_to_unit_map(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                         commands,
                     )
@@ -2553,6 +2816,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::give_order_to_unit(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         cmd_id,
                         params,
@@ -2589,6 +2853,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::give_order_to_unit_array(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                         cmd_id,
                         params,
@@ -2625,6 +2890,7 @@ pub mod units_commands {
                 {
                     crate::native::units_commands::give_order_to_unit_map(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                         cmd_id,
                         params,
@@ -2644,12 +2910,19 @@ pub mod units_pieces {
     use alloc::string::String;
     pub struct UnitsPieces<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnitsPiecesApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn units_pieces(&self) -> UnitsPieces<'_, E> {
             UnitsPieces {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.units_pieces.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -2673,6 +2946,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_feature_piece_direction(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         piece_num,
                     )
@@ -2700,6 +2974,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_feature_piece_info(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         piece_num,
                     )
@@ -2722,6 +2997,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_feature_piece_list(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -2746,6 +3022,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_feature_piece_map(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -2772,6 +3049,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_feature_piece_matrix(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         piece_num,
                     )
@@ -2799,6 +3077,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_feature_piece_pos_dir(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         piece_num,
                     )
@@ -2826,6 +3105,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_feature_piece_position(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         piece_num,
                     )
@@ -2848,6 +3128,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_feature_root_piece(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -2874,6 +3155,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_model_piece_list(
                         &self._engine,
+                        self._native_api,
                         model_name,
                     )
                 }
@@ -2903,6 +3185,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_model_piece_map(
                         &self._engine,
+                        self._native_api,
                         model_name,
                     )
                 }
@@ -2929,6 +3212,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_model_root_piece(
                         &self._engine,
+                        self._native_api,
                         model_name,
                     )
                 }
@@ -2955,6 +3239,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_unit_piece_direction(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         piece_num,
                     )
@@ -2982,6 +3267,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_unit_piece_info(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         piece_num,
                     )
@@ -3004,6 +3290,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_unit_piece_list(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -3025,6 +3312,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_unit_piece_map(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -3051,6 +3339,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_unit_piece_matrix(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         piece_num,
                     )
@@ -3078,6 +3367,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_unit_piece_pos_dir(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         piece_num,
                     )
@@ -3105,6 +3395,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_unit_piece_position(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         piece_num,
                     )
@@ -3127,6 +3418,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_unit_root_piece(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -3148,6 +3440,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_unit_script_names(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -3174,6 +3467,7 @@ pub mod units_pieces {
                 {
                     crate::native::units_pieces::get_unit_script_piece(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         script_num,
                     )
@@ -3190,12 +3484,17 @@ pub mod teams {
     use alloc::string::String;
     pub struct Teams<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::TeamsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn teams(&self) -> Teams<'_, E> {
             Teams {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.teams.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -3219,6 +3518,7 @@ pub mod teams {
                 {
                     crate::native::teams::are_players_allied(
                         &self._engine,
+                        self._native_api,
                         player_id1,
                         player_id2,
                     )
@@ -3242,6 +3542,7 @@ pub mod teams {
                 {
                     crate::native::teams::are_teams_allied(
                         &self._engine,
+                        self._native_api,
                         team_id1,
                         team_id2,
                     )
@@ -3257,7 +3558,13 @@ pub mod teams {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::teams::get_ai_info(team_id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::teams::get_ai_info(&self._engine, team_id) }
+                {
+                    crate::native::teams::get_ai_info(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3273,7 +3580,13 @@ pub mod teams {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::teams::get_ally_team_info(&self._engine, ally_team_id) }
+                {
+                    crate::native::teams::get_ally_team_info(
+                        &self._engine,
+                        self._native_api,
+                        ally_team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3285,7 +3598,12 @@ pub mod teams {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::teams::get_ally_team_list(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::teams::get_ally_team_list(&self._engine) }
+                {
+                    crate::native::teams::get_ally_team_list(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3307,6 +3625,7 @@ pub mod teams {
                 {
                     crate::native::teams::get_player_controlled_unit(
                         &self._engine,
+                        self._native_api,
                         player_id,
                     )
                 }
@@ -3333,6 +3652,7 @@ pub mod teams {
                 {
                     crate::native::teams::get_player_info(
                         &self._engine,
+                        self._native_api,
                         player_id,
                         get_player_opts,
                     )
@@ -3353,7 +3673,14 @@ pub mod teams {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::teams::get_player_list(&self._engine, team_id, active) }
+                {
+                    crate::native::teams::get_player_list(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                        active,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3375,6 +3702,7 @@ pub mod teams {
                 {
                     crate::native::teams::get_player_list_in_ally_team(
                         &self._engine,
+                        self._native_api,
                         ally_team_id,
                     )
                 }
@@ -3393,7 +3721,13 @@ pub mod teams {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::teams::get_player_list_in_team(&self._engine, team_id) }
+                {
+                    crate::native::teams::get_player_list_in_team(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3409,7 +3743,13 @@ pub mod teams {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::teams::get_team_ally_team_id(&self._engine, team_id) }
+                {
+                    crate::native::teams::get_team_ally_team_id(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3433,6 +3773,7 @@ pub mod teams {
                 {
                     crate::native::teams::get_team_info(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         get_team_keys,
                     )
@@ -3452,7 +3793,13 @@ pub mod teams {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::teams::get_team_list(&self._engine, ally_team_id) }
+                {
+                    crate::native::teams::get_team_list(
+                        &self._engine,
+                        self._native_api,
+                        ally_team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3468,7 +3815,13 @@ pub mod teams {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::teams::get_team_lua_ai(&self._engine, team_id) }
+                {
+                    crate::native::teams::get_team_lua_ai(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3484,7 +3837,13 @@ pub mod teams {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::teams::get_team_max_units(&self._engine, team_id) }
+                {
+                    crate::native::teams::get_team_max_units(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3513,6 +3872,7 @@ pub mod teams {
                 {
                     crate::native::teams::get_team_resource_stats(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         resource,
                     )
@@ -3545,6 +3905,7 @@ pub mod teams {
                 {
                     crate::native::teams::get_team_resources(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         resource,
                     )
@@ -3574,6 +3935,7 @@ pub mod teams {
                 {
                     crate::native::teams::get_team_stats_history(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         start_index,
                         end_index,
@@ -3594,7 +3956,13 @@ pub mod teams {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::teams::get_team_unit_stats(&self._engine, team_id) }
+                {
+                    crate::native::teams::get_team_unit_stats(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3606,12 +3974,19 @@ pub mod features {
     use alloc::vec::Vec;
     pub struct Features<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::FeaturesApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn features(&self) -> Features<'_, E> {
             Features {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.features.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -3630,6 +4005,7 @@ pub mod features {
                 {
                     crate::native::features::clear_features_previous_draw_flag(
                         &self._engine,
+                        self._native_api,
                     )
                 }
             };
@@ -3643,7 +4019,12 @@ pub mod features {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::features::get_all_features(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::features::get_all_features(&self._engine) }
+                {
+                    crate::native::features::get_all_features(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3662,6 +4043,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_ally_team(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3683,6 +4065,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_always_update_matrix(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3707,6 +4090,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_blocking(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3731,6 +4115,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_collision_volume_data(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3752,6 +4137,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_def_id(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3773,6 +4159,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_direction(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3794,6 +4181,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_draw_flag(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3815,6 +4203,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_engine_draw_mask(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3836,6 +4225,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_fire_time(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3857,6 +4247,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_heading(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3878,6 +4269,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_health(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3899,6 +4291,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_height(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3923,6 +4316,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_last_attacked_piece(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3944,6 +4338,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_lua_draw(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -3962,7 +4357,13 @@ pub mod features {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::features::get_feature_mass(&self._engine, feature_id) }
+                {
+                    crate::native::features::get_feature_mass(
+                        &self._engine,
+                        self._native_api,
+                        feature_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -3981,6 +4382,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_no_draw(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4002,6 +4404,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_no_select(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4028,6 +4431,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_piece_collision_volume_data(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         piece_num,
                     )
@@ -4050,6 +4454,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_position(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4074,6 +4479,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_position_ext(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4095,6 +4501,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_radius(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4119,6 +4526,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_resources(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4143,6 +4551,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_resurrect(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4164,6 +4573,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_rotation(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4188,6 +4598,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_selection_volume_data(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4216,6 +4627,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_separation(
                         &self._engine,
+                        self._native_api,
                         feature_id1,
                         feature_id2,
                         positional,
@@ -4239,6 +4651,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_smoke_time(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4257,7 +4670,13 @@ pub mod features {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::features::get_feature_team(&self._engine, feature_id) }
+                {
+                    crate::native::features::get_feature_team(
+                        &self._engine,
+                        self._native_api,
+                        feature_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -4279,6 +4698,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_transform_matrix(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4300,6 +4720,7 @@ pub mod features {
                 {
                     crate::native::features::get_feature_velocity(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -4330,6 +4751,7 @@ pub mod features {
                 {
                     crate::native::features::get_features_in_cylinder(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         radius,
@@ -4363,6 +4785,7 @@ pub mod features {
                 {
                     crate::native::features::get_features_in_rectangle(
                         &self._engine,
+                        self._native_api,
                         min_x,
                         min_z,
                         max_x,
@@ -4387,6 +4810,7 @@ pub mod features {
                 {
                     crate::native::features::get_features_in_sphere(
                         &self._engine,
+                        self._native_api,
                         center,
                         radius,
                     )
@@ -4414,6 +4838,7 @@ pub mod features {
                 {
                     crate::native::features::get_render_features(
                         &self._engine,
+                        self._native_api,
                         draw_mask,
                         send_mask,
                     )
@@ -4439,6 +4864,7 @@ pub mod features {
                 {
                     crate::native::features::get_render_features_draw_flag_changed(
                         &self._engine,
+                        self._native_api,
                         send_mask,
                     )
                 }
@@ -4457,7 +4883,13 @@ pub mod features {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::features::valid_feature_id(&self._engine, feature_id) }
+                {
+                    crate::native::features::valid_feature_id(
+                        &self._engine,
+                        self._native_api,
+                        feature_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -4469,12 +4901,19 @@ pub mod projectiles {
     use alloc::vec::Vec;
     pub struct Projectiles<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::ProjectilesApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn projectiles(&self) -> Projectiles<'_, E> {
             Projectiles {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.projectiles.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -4496,6 +4935,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_all_projectiles(
                         &self._engine,
+                        self._native_api,
                         options,
                     )
                 }
@@ -4520,6 +4960,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_piece_projectile_params(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4541,6 +4982,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_ally_team_id(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4572,6 +5014,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_damages(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         tag,
                     )
@@ -4594,6 +5037,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_def_id(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4615,6 +5059,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_direction(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4636,6 +5081,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_gravity(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4657,6 +5103,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_is_intercepted(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4678,6 +5125,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_owner_id(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4699,6 +5147,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_position(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4723,6 +5172,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_target(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4744,6 +5194,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_team_id(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4765,6 +5216,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_time_to_live(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4789,6 +5241,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_type(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4810,6 +5263,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectile_velocity(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -4842,6 +5296,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectiles_in_rectangle(
                         &self._engine,
+                        self._native_api,
                         min_x,
                         min_z,
                         max_x,
@@ -4874,6 +5329,7 @@ pub mod projectiles {
                 {
                     crate::native::projectiles::get_projectiles_in_sphere(
                         &self._engine,
+                        self._native_api,
                         center,
                         radius,
                         options,
@@ -4889,12 +5345,17 @@ pub mod los {
     use crate::Result;
     pub struct Los<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::LOSApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn los(&self) -> Los<'_, E> {
             Los {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.los.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -4918,6 +5379,7 @@ pub mod los {
                 {
                     crate::native::los::get_position_los_state(
                         &self._engine,
+                        self._native_api,
                         pos,
                         ally_team_id,
                     )
@@ -4943,6 +5405,7 @@ pub mod los {
                 {
                     crate::native::los::get_radar_error_params(
                         &self._engine,
+                        self._native_api,
                         ally_team_id,
                     )
                 }
@@ -4965,6 +5428,7 @@ pub mod los {
                 {
                     crate::native::los::is_pos_in_air_los(
                         &self._engine,
+                        self._native_api,
                         pos,
                         ally_team_id,
                     )
@@ -4985,7 +5449,14 @@ pub mod los {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::los::is_pos_in_los(&self._engine, pos, ally_team_id) }
+                {
+                    crate::native::los::is_pos_in_los(
+                        &self._engine,
+                        self._native_api,
+                        pos,
+                        ally_team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -5002,7 +5473,14 @@ pub mod los {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::los::is_pos_in_radar(&self._engine, pos, ally_team_id) }
+                {
+                    crate::native::los::is_pos_in_radar(
+                        &self._engine,
+                        self._native_api,
+                        pos,
+                        ally_team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -5026,6 +5504,7 @@ pub mod los {
                 {
                     crate::native::los::is_unit_in_air_los(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         ally_team_id,
                     )
@@ -5053,6 +5532,7 @@ pub mod los {
                 {
                     crate::native::los::is_unit_in_jammer(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         ally_team_id,
                     )
@@ -5076,6 +5556,7 @@ pub mod los {
                 {
                     crate::native::los::is_unit_in_los(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         ally_team_id,
                     )
@@ -5099,6 +5580,7 @@ pub mod los {
                 {
                     crate::native::los::is_unit_in_radar(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         ally_team_id,
                     )
@@ -5115,12 +5597,19 @@ pub mod unit_defs {
     use alloc::string::String;
     pub struct UnitDefs<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnitDefsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn unit_defs(&self) -> UnitDefs<'_, E> {
             UnitDefs {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.unit_defs.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -5142,6 +5631,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_by_id(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                     )
                 }
@@ -5166,6 +5656,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_classify(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                     )
                 }
@@ -5187,6 +5678,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_costs(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                     )
                 }
@@ -5205,7 +5697,12 @@ pub mod unit_defs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unit_defs::get_unit_def_count(&self._engine) }
+                {
+                    crate::native::unit_defs::get_unit_def_count(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -5234,6 +5731,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_custom_param(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         key,
                     )
@@ -5259,6 +5757,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_custom_param_keys(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                     )
                 }
@@ -5280,6 +5779,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_health(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                     )
                 }
@@ -5297,6 +5797,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_human_name(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                     )
                 }
@@ -5323,6 +5824,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_id_by_name(
                         &self._engine,
+                        self._native_api,
                         unit_def_name,
                     )
                 }
@@ -5341,7 +5843,12 @@ pub mod unit_defs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unit_defs::get_unit_def_i_ds(&self._engine) }
+                {
+                    crate::native::unit_defs::get_unit_def_i_ds(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -5356,6 +5863,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_name(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                     )
                 }
@@ -5387,6 +5895,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_param_bool(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         key,
                     )
@@ -5419,6 +5928,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_param_float(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         key,
                     )
@@ -5451,6 +5961,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_param_int(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         key,
                     )
@@ -5470,7 +5981,12 @@ pub mod unit_defs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unit_defs::get_unit_def_param_keys(&self._engine) }
+                {
+                    crate::native::unit_defs::get_unit_def_param_keys(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -5499,6 +6015,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_param_string(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         key,
                     )
@@ -5523,7 +6040,13 @@ pub mod unit_defs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unit_defs::get_unit_def_param_type(&self._engine, key) }
+                {
+                    crate::native::unit_defs::get_unit_def_param_type(
+                        &self._engine,
+                        self._native_api,
+                        key,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -5542,6 +6065,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::get_unit_def_speed(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                     )
                 }
@@ -5563,6 +6087,7 @@ pub mod unit_defs {
                 {
                     crate::native::unit_defs::valid_unit_def_id(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                     )
                 }
@@ -5578,12 +6103,19 @@ pub mod feature_defs {
     use alloc::string::String;
     pub struct FeatureDefs<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::FeatureDefsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn feature_defs(&self) -> FeatureDefs<'_, E> {
             FeatureDefs {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.feature_defs.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -5605,6 +6137,7 @@ pub mod feature_defs {
                 {
                     crate::native::feature_defs::get_feature_def_by_id(
                         &self._engine,
+                        self._native_api,
                         feature_def_id,
                     )
                 }
@@ -5623,7 +6156,12 @@ pub mod feature_defs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::feature_defs::get_feature_def_count(&self._engine) }
+                {
+                    crate::native::feature_defs::get_feature_def_count(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -5652,6 +6190,7 @@ pub mod feature_defs {
                 {
                     crate::native::feature_defs::get_feature_def_custom_param(
                         &self._engine,
+                        self._native_api,
                         feature_def_id,
                         key,
                     )
@@ -5677,6 +6216,7 @@ pub mod feature_defs {
                 {
                     crate::native::feature_defs::get_feature_def_custom_param_keys(
                         &self._engine,
+                        self._native_api,
                         feature_def_id,
                     )
                 }
@@ -5698,6 +6238,7 @@ pub mod feature_defs {
                 {
                     crate::native::feature_defs::get_feature_def_energy(
                         &self._engine,
+                        self._native_api,
                         feature_def_id,
                     )
                 }
@@ -5724,6 +6265,7 @@ pub mod feature_defs {
                 {
                     crate::native::feature_defs::get_feature_def_id_by_name(
                         &self._engine,
+                        self._native_api,
                         feature_def_name,
                     )
                 }
@@ -5742,7 +6284,12 @@ pub mod feature_defs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::feature_defs::get_feature_def_i_ds(&self._engine) }
+                {
+                    crate::native::feature_defs::get_feature_def_i_ds(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -5761,6 +6308,7 @@ pub mod feature_defs {
                 {
                     crate::native::feature_defs::get_feature_def_metal(
                         &self._engine,
+                        self._native_api,
                         feature_def_id,
                     )
                 }
@@ -5782,6 +6330,7 @@ pub mod feature_defs {
                 {
                     crate::native::feature_defs::get_feature_def_name(
                         &self._engine,
+                        self._native_api,
                         feature_def_id,
                     )
                 }
@@ -5803,6 +6352,7 @@ pub mod feature_defs {
                 {
                     crate::native::feature_defs::valid_feature_def_id(
                         &self._engine,
+                        self._native_api,
                         feature_def_id,
                     )
                 }
@@ -5818,12 +6368,19 @@ pub mod weapon_defs {
     use alloc::string::String;
     pub struct WeaponDefs<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::WeaponDefsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn weapon_defs(&self) -> WeaponDefs<'_, E> {
             WeaponDefs {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.weapon_defs.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -5845,6 +6402,7 @@ pub mod weapon_defs {
                 {
                     crate::native::weapon_defs::get_weapon_def_by_id(
                         &self._engine,
+                        self._native_api,
                         weapon_def_id,
                     )
                 }
@@ -5863,7 +6421,12 @@ pub mod weapon_defs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::weapon_defs::get_weapon_def_count(&self._engine) }
+                {
+                    crate::native::weapon_defs::get_weapon_def_count(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -5892,6 +6455,7 @@ pub mod weapon_defs {
                 {
                     crate::native::weapon_defs::get_weapon_def_custom_param(
                         &self._engine,
+                        self._native_api,
                         weapon_def_id,
                         key,
                     )
@@ -5917,6 +6481,7 @@ pub mod weapon_defs {
                 {
                     crate::native::weapon_defs::get_weapon_def_custom_param_keys(
                         &self._engine,
+                        self._native_api,
                         weapon_def_id,
                     )
                 }
@@ -5938,6 +6503,7 @@ pub mod weapon_defs {
                 {
                     crate::native::weapon_defs::get_weapon_def_damage(
                         &self._engine,
+                        self._native_api,
                         weapon_def_id,
                     )
                 }
@@ -5964,6 +6530,7 @@ pub mod weapon_defs {
                 {
                     crate::native::weapon_defs::get_weapon_def_id(
                         &self._engine,
+                        self._native_api,
                         weapon_def_name,
                     )
                 }
@@ -5982,7 +6549,12 @@ pub mod weapon_defs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::weapon_defs::get_weapon_def_i_ds(&self._engine) }
+                {
+                    crate::native::weapon_defs::get_weapon_def_i_ds(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6001,6 +6573,7 @@ pub mod weapon_defs {
                 {
                     crate::native::weapon_defs::get_weapon_def_name(
                         &self._engine,
+                        self._native_api,
                         weapon_def_id,
                     )
                 }
@@ -6025,6 +6598,7 @@ pub mod weapon_defs {
                 {
                     crate::native::weapon_defs::get_weapon_def_projectile_params(
                         &self._engine,
+                        self._native_api,
                         weapon_def_id,
                     )
                 }
@@ -6046,6 +6620,7 @@ pub mod weapon_defs {
                 {
                     crate::native::weapon_defs::get_weapon_def_range(
                         &self._engine,
+                        self._native_api,
                         weapon_def_id,
                     )
                 }
@@ -6067,6 +6642,7 @@ pub mod weapon_defs {
                 {
                     crate::native::weapon_defs::valid_weapon_def_id(
                         &self._engine,
+                        self._native_api,
                         weapon_def_id,
                     )
                 }
@@ -6082,12 +6658,17 @@ pub mod game {
     use alloc::string::String;
     pub struct Game<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::GameApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn game(&self) -> Game<'_, E> {
             Game {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.game.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -6103,7 +6684,12 @@ pub mod game {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::are_helper_a_is_enabled(&self._engine) }
+                {
+                    crate::native::game::are_helper_a_is_enabled(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6115,7 +6701,7 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::fixed_allies(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::fixed_allies(&self._engine) }
+                { crate::native::game::fixed_allies(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -6137,6 +6723,7 @@ pub mod game {
                 {
                     crate::native::game::get_ally_team_start_box(
                         &self._engine,
+                        self._native_api,
                         ally_team_id,
                     )
                 }
@@ -6155,7 +6742,13 @@ pub mod game {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_facing_from_heading(&self._engine, heading) }
+                {
+                    crate::native::game::get_facing_from_heading(
+                        &self._engine,
+                        self._native_api,
+                        heading,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6167,7 +6760,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_gaia_team_id(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_gaia_team_id(&self._engine) }
+                {
+                    crate::native::game::get_gaia_team_id(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6179,7 +6777,7 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_game_frame(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_game_frame(&self._engine) }
+                { crate::native::game::get_game_frame(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -6191,7 +6789,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_game_map_info(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_game_map_info(&self._engine) }
+                {
+                    crate::native::game::get_game_map_info(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6203,7 +6806,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_game_mod_info(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_game_mod_info(&self._engine) }
+                {
+                    crate::native::game::get_game_mod_info(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6215,7 +6823,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_game_rules_info(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_game_rules_info(&self._engine) }
+                {
+                    crate::native::game::get_game_rules_info(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6231,7 +6844,12 @@ pub mod game {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_game_rules_resource_info(&self._engine) }
+                {
+                    crate::native::game::get_game_rules_resource_info(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6243,7 +6861,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_game_seconds(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_game_seconds(&self._engine) }
+                {
+                    crate::native::game::get_game_seconds(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6255,7 +6878,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_game_setup_info(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_game_setup_info(&self._engine) }
+                {
+                    crate::native::game::get_game_setup_info(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6271,7 +6899,13 @@ pub mod game {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_global_los(&self._engine, ally_team_id) }
+                {
+                    crate::native::game::get_global_los(
+                        &self._engine,
+                        self._native_api,
+                        ally_team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6287,7 +6921,13 @@ pub mod game {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_heading_from_facing(&self._engine, facing) }
+                {
+                    crate::native::game::get_heading_from_facing(
+                        &self._engine,
+                        self._native_api,
+                        facing,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6304,7 +6944,14 @@ pub mod game {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_heading_from_vector(&self._engine, x, z) }
+                {
+                    crate::native::game::get_heading_from_vector(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6320,7 +6967,13 @@ pub mod game {
             let result = {
                 #[cfg(target_arch = "wasm32")] { crate::wasm::game::get_map_option(key) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_map_option(&self._engine, key) }
+                {
+                    crate::native::game::get_map_option(
+                        &self._engine,
+                        self._native_api,
+                        key,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6332,7 +6985,7 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_map_options(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_map_options(&self._engine) }
+                { crate::native::game::get_map_options(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -6344,7 +6997,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::game::get_map_start_positions(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_map_start_positions(&self._engine) }
+                {
+                    crate::native::game::get_map_start_positions(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6360,7 +7018,13 @@ pub mod game {
             let result = {
                 #[cfg(target_arch = "wasm32")] { crate::wasm::game::get_mod_option(key) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_mod_option(&self._engine, key) }
+                {
+                    crate::native::game::get_mod_option(
+                        &self._engine,
+                        self._native_api,
+                        key,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6372,7 +7036,7 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_mod_options(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_mod_options(&self._engine) }
+                { crate::native::game::get_mod_options(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -6389,7 +7053,13 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_side_data(side_name) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_side_data(&self._engine, side_name) }
+                {
+                    crate::native::game::get_side_data(
+                        &self._engine,
+                        self._native_api,
+                        side_name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6408,6 +7078,7 @@ pub mod game {
                 {
                     crate::native::game::get_side_data_by_index(
                         &self._engine,
+                        self._native_api,
                         side_index,
                     )
                 }
@@ -6422,7 +7093,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_side_data_count(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_side_data_count(&self._engine) }
+                {
+                    crate::native::game::get_side_data_count(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6441,7 +7117,13 @@ pub mod game {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_team_start_position(&self._engine, team_id) }
+                {
+                    crate::native::game::get_team_start_position(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6453,7 +7135,7 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_tidal(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_tidal(&self._engine) }
+                { crate::native::game::get_tidal(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -6469,7 +7151,13 @@ pub mod game {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_vector_from_heading(&self._engine, heading) }
+                {
+                    crate::native::game::get_vector_from_heading(
+                        &self._engine,
+                        self._native_api,
+                        heading,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6481,7 +7169,7 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::get_wind(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::get_wind(&self._engine) }
+                { crate::native::game::get_wind(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -6493,7 +7181,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::is_cheating_enabled(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::is_cheating_enabled(&self._engine) }
+                {
+                    crate::native::game::is_cheating_enabled(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6505,7 +7198,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::is_dev_lua_enabled(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::is_dev_lua_enabled(&self._engine) }
+                {
+                    crate::native::game::is_dev_lua_enabled(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6517,7 +7215,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::is_edit_defs_enabled(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::is_edit_defs_enabled(&self._engine) }
+                {
+                    crate::native::game::is_edit_defs_enabled(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6529,7 +7232,7 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::is_game_over(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::is_game_over(&self._engine) }
+                { crate::native::game::is_game_over(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -6541,7 +7244,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::is_god_mode_enabled(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::is_god_mode_enabled(&self._engine) }
+                {
+                    crate::native::game::is_god_mode_enabled(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6553,7 +7261,12 @@ pub mod game {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::game::is_no_cost_enabled(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game::is_no_cost_enabled(&self._engine) }
+                {
+                    crate::native::game::is_no_cost_enabled(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6565,12 +7278,17 @@ pub mod terrain {
     use alloc::vec::Vec;
     pub struct Terrain<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::TerrainApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn terrain(&self) -> Terrain<'_, E> {
             Terrain {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.terrain.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -6582,7 +7300,14 @@ pub mod terrain {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::terrain::get_grass(x, z) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_grass(&self._engine, x, z) }
+                {
+                    crate::native::terrain::get_grass(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6610,6 +7335,7 @@ pub mod terrain {
                 {
                     crate::native::terrain::get_ground_blocked(
                         &self._engine,
+                        self._native_api,
                         x1,
                         z1,
                         x2,
@@ -6631,7 +7357,12 @@ pub mod terrain {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_ground_extremes(&self._engine) }
+                {
+                    crate::native::terrain::get_ground_extremes(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6648,7 +7379,14 @@ pub mod terrain {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_ground_height(&self._engine, x, z) }
+                {
+                    crate::native::terrain::get_ground_height(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6664,7 +7402,13 @@ pub mod terrain {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_ground_heights(&self._engine, positions) }
+                {
+                    crate::native::terrain::get_ground_heights(
+                        &self._engine,
+                        self._native_api,
+                        positions,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6676,7 +7420,14 @@ pub mod terrain {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::terrain::get_ground_info(x, z) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_ground_info(&self._engine, x, z) }
+                {
+                    crate::native::terrain::get_ground_info(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6702,6 +7453,7 @@ pub mod terrain {
                 {
                     crate::native::terrain::get_ground_normal(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         smoothed,
@@ -6723,7 +7475,14 @@ pub mod terrain {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_ground_orig_height(&self._engine, x, z) }
+                {
+                    crate::native::terrain::get_ground_orig_height(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6739,7 +7498,12 @@ pub mod terrain {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_height_map_size(&self._engine) }
+                {
+                    crate::native::terrain::get_height_map_size(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6756,7 +7520,14 @@ pub mod terrain {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_smooth_mesh_height(&self._engine, x, z) }
+                {
+                    crate::native::terrain::get_smooth_mesh_height(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6774,6 +7545,7 @@ pub mod terrain {
                 {
                     crate::native::terrain::get_terrain_type_data(
                         &self._engine,
+                        self._native_api,
                         terrain_type_index,
                     )
                 }
@@ -6788,7 +7560,14 @@ pub mod terrain {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::terrain::get_water_level(x, z) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_water_level(&self._engine, x, z) }
+                {
+                    crate::native::terrain::get_water_level(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6804,7 +7583,12 @@ pub mod terrain {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::get_water_plane_level(&self._engine) }
+                {
+                    crate::native::terrain::get_water_plane_level(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6816,7 +7600,14 @@ pub mod terrain {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::terrain::is_pos_in_map(x, z) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain::is_pos_in_map(&self._engine, x, z) }
+                {
+                    crate::native::terrain::is_pos_in_map(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6828,12 +7619,17 @@ pub mod player {
     use alloc::vec::Vec;
     pub struct Player<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::PlayerApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn player(&self) -> Player<'_, E> {
             Player {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.player.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -6849,7 +7645,12 @@ pub mod player {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::player::get_local_ally_team_id(&self._engine) }
+                {
+                    crate::native::player::get_local_ally_team_id(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6861,7 +7662,12 @@ pub mod player {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::player::get_local_player_id(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::player::get_local_player_id(&self._engine) }
+                {
+                    crate::native::player::get_local_player_id(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6873,7 +7679,12 @@ pub mod player {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::player::get_local_team_id(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::player::get_local_team_id(&self._engine) }
+                {
+                    crate::native::player::get_local_team_id(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6897,6 +7708,7 @@ pub mod player {
                 {
                     crate::native::player::get_player_roster(
                         &self._engine,
+                        self._native_api,
                         sort_mode,
                         show_pathing_players,
                     )
@@ -6919,6 +7731,7 @@ pub mod player {
                 {
                     crate::native::player::get_player_statistics(
                         &self._engine,
+                        self._native_api,
                         player_id,
                     )
                 }
@@ -6940,6 +7753,7 @@ pub mod player {
                 {
                     crate::native::player::get_player_traffic(
                         &self._engine,
+                        self._native_api,
                         player_id,
                         packet_id,
                     )
@@ -6959,7 +7773,12 @@ pub mod player {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::player::get_spectating_state(&self._engine) }
+                {
+                    crate::native::player::get_spectating_state(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6970,12 +7789,19 @@ pub mod math_extra {
     use crate::Result;
     pub struct MathExtra<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::MathExtraApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn math_extra(&self) -> MathExtra<'_, E> {
             MathExtra {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.math_extra.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -6987,7 +7813,14 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::bit_and(a, b) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::bit_and(&self._engine, a, b) }
+                {
+                    crate::native::math_extra::bit_and(
+                        &self._engine,
+                        self._native_api,
+                        a,
+                        b,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -6999,7 +7832,13 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::bit_bits(bits) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::bit_bits(&self._engine, bits) }
+                {
+                    crate::native::math_extra::bit_bits(
+                        &self._engine,
+                        self._native_api,
+                        bits,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7011,7 +7850,13 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::bit_inv(a) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::bit_inv(&self._engine, a) }
+                {
+                    crate::native::math_extra::bit_inv(
+                        &self._engine,
+                        self._native_api,
+                        a,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7023,7 +7868,14 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::bit_or(a, b) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::bit_or(&self._engine, a, b) }
+                {
+                    crate::native::math_extra::bit_or(
+                        &self._engine,
+                        self._native_api,
+                        a,
+                        b,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7035,7 +7887,14 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::bit_xor(a, b) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::bit_xor(&self._engine, a, b) }
+                {
+                    crate::native::math_extra::bit_xor(
+                        &self._engine,
+                        self._native_api,
+                        a,
+                        b,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7053,7 +7912,15 @@ pub mod math_extra {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::clamp(&self._engine, value, min, max) }
+                {
+                    crate::native::math_extra::clamp(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                        min,
+                        max,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7065,7 +7932,13 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::diag(values) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::diag(&self._engine, values) }
+                {
+                    crate::native::math_extra::diag(
+                        &self._engine,
+                        self._native_api,
+                        values,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7077,7 +7950,13 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::erf(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::erf(&self._engine, value) }
+                {
+                    crate::native::math_extra::erf(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7089,7 +7968,14 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::hypot(x, y) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::hypot(&self._engine, x, y) }
+                {
+                    crate::native::math_extra::hypot(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7101,7 +7987,15 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::mix(a, b, t) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::mix(&self._engine, a, b, t) }
+                {
+                    crate::native::math_extra::mix(
+                        &self._engine,
+                        self._native_api,
+                        a,
+                        b,
+                        t,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7113,7 +8007,13 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::normalize(vec) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::normalize(&self._engine, vec) }
+                {
+                    crate::native::math_extra::normalize(
+                        &self._engine,
+                        self._native_api,
+                        vec,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7125,7 +8025,13 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::round(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::round(&self._engine, value) }
+                {
+                    crate::native::math_extra::round(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7137,7 +8043,13 @@ pub mod math_extra {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::math_extra::sgn(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::math_extra::sgn(&self._engine, value) }
+                {
+                    crate::native::math_extra::sgn(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7158,6 +8070,7 @@ pub mod math_extra {
                 {
                     crate::native::math_extra::smooth_step(
                         &self._engine,
+                        self._native_api,
                         edge0,
                         edge1,
                         x,
@@ -7175,12 +8088,19 @@ pub mod encoding {
     use alloc::string::String;
     pub struct Encoding<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::EncodingApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn encoding(&self) -> Encoding<'_, E> {
             Encoding {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.encoding.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -7197,7 +8117,13 @@ pub mod encoding {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::encoding::decode_base64(text) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::encoding::decode_base64(&self._engine, text) }
+                {
+                    crate::native::encoding::decode_base64(
+                        &self._engine,
+                        self._native_api,
+                        text,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7218,7 +8144,13 @@ pub mod encoding {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::encoding::decode_base64_url(&self._engine, text) }
+                {
+                    crate::native::encoding::decode_base64_url(
+                        &self._engine,
+                        self._native_api,
+                        text,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7238,6 +8170,7 @@ pub mod encoding {
                 {
                     crate::native::encoding::encode_base64(
                         &self._engine,
+                        self._native_api,
                         text,
                         strip_padding,
                     )
@@ -7257,7 +8190,13 @@ pub mod encoding {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::encoding::encode_base64_url(&self._engine, text) }
+                {
+                    crate::native::encoding::encode_base64_url(
+                        &self._engine,
+                        self._native_api,
+                        text,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7278,7 +8217,13 @@ pub mod encoding {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::encoding::is_valid_base64(&self._engine, text) }
+                {
+                    crate::native::encoding::is_valid_base64(
+                        &self._engine,
+                        self._native_api,
+                        text,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7299,7 +8244,13 @@ pub mod encoding {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::encoding::is_valid_base64_url(&self._engine, text) }
+                {
+                    crate::native::encoding::is_valid_base64_url(
+                        &self._engine,
+                        self._native_api,
+                        text,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7310,12 +8261,19 @@ pub mod metal_map {
     use crate::Result;
     pub struct MetalMap<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::MetalMapApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn metal_map(&self) -> MetalMap<'_, E> {
             MetalMap {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.metal_map.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -7332,7 +8290,14 @@ pub mod metal_map {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::metal_map::get_metal_amount(&self._engine, x, z) }
+                {
+                    crate::native::metal_map::get_metal_amount(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7349,7 +8314,14 @@ pub mod metal_map {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::metal_map::get_metal_extraction(&self._engine, x, z) }
+                {
+                    crate::native::metal_map::get_metal_extraction(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7365,7 +8337,12 @@ pub mod metal_map {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::metal_map::get_metal_map_size(&self._engine) }
+                {
+                    crate::native::metal_map::get_metal_map_size(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7386,6 +8363,7 @@ pub mod metal_map {
                 {
                     crate::native::metal_map::set_metal_amount(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         amount,
@@ -7402,12 +8380,19 @@ pub mod path_finder {
     use alloc::vec::Vec;
     pub struct PathFinder<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::PathFinderApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn path_finder(&self) -> PathFinder<'_, E> {
             PathFinder {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.path_finder.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -7423,7 +8408,13 @@ pub mod path_finder {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::path_finder::delete_path(&self._engine, path_id) }
+                {
+                    crate::native::path_finder::delete_path(
+                        &self._engine,
+                        self._native_api,
+                        path_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7442,6 +8433,7 @@ pub mod path_finder {
                 {
                     crate::native::path_finder::free_path_node_costs_array(
                         &self._engine,
+                        self._native_api,
                         overlay_index,
                     )
                 }
@@ -7470,6 +8462,7 @@ pub mod path_finder {
                 {
                     crate::native::path_finder::get_next_way_point(
                         &self._engine,
+                        self._native_api,
                         path_id,
                         caller_pos,
                         min_dist,
@@ -7491,7 +8484,14 @@ pub mod path_finder {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::path_finder::get_path_node_cost(&self._engine, x, z) }
+                {
+                    crate::native::path_finder::get_path_node_cost(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7510,6 +8510,7 @@ pub mod path_finder {
                 {
                     crate::native::path_finder::get_path_node_costs(
                         &self._engine,
+                        self._native_api,
                         overlay_index,
                     )
                 }
@@ -7530,6 +8531,7 @@ pub mod path_finder {
                 {
                     crate::native::path_finder::get_path_way_points(
                         &self._engine,
+                        self._native_api,
                         path_id,
                     )
                 }
@@ -7558,6 +8560,7 @@ pub mod path_finder {
                 {
                     crate::native::path_finder::init_path_node_costs_array(
                         &self._engine,
+                        self._native_api,
                         overlay_index,
                         size_x,
                         size_z,
@@ -7599,6 +8602,7 @@ pub mod path_finder {
                 {
                     crate::native::path_finder::request_path(
                         &self._engine,
+                        self._native_api,
                         move_def_id,
                         move_def_name,
                         start_pos,
@@ -7631,6 +8635,7 @@ pub mod path_finder {
                 {
                     crate::native::path_finder::set_path_node_cost(
                         &self._engine,
+                        self._native_api,
                         overlay_index,
                         cost_index,
                         cost,
@@ -7654,6 +8659,7 @@ pub mod path_finder {
                 {
                     crate::native::path_finder::set_path_node_costs(
                         &self._engine,
+                        self._native_api,
                         overlay_index,
                     )
                 }
@@ -7668,12 +8674,19 @@ pub mod platform {
     use alloc::string::String;
     pub struct Platform<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::PlatformApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn platform(&self) -> Platform<'_, E> {
             Platform {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.platform.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -7685,7 +8698,12 @@ pub mod platform {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::platform::get_architecture(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::platform::get_architecture(&self._engine) }
+                {
+                    crate::native::platform::get_architecture(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7697,7 +8715,7 @@ pub mod platform {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::platform::is_headless(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::platform::is_headless(&self._engine) }
+                { crate::native::platform::is_headless(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -7711,12 +8729,19 @@ pub mod rules_params {
     use alloc::string::String;
     pub struct RulesParams<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::RulesParamsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn rules_params(&self) -> RulesParams<'_, E> {
             RulesParams {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.rules_params.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -7745,6 +8770,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::get_feature_rules_param(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         param_name,
                     )
@@ -7767,6 +8793,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::get_feature_rules_params(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -7793,6 +8820,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::get_game_rules_param(
                         &self._engine,
+                        self._native_api,
                         param_name,
                     )
                 }
@@ -7811,7 +8839,12 @@ pub mod rules_params {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rules_params::get_game_rules_params(&self._engine) }
+                {
+                    crate::native::rules_params::get_game_rules_params(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -7840,6 +8873,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::get_player_rules_param(
                         &self._engine,
+                        self._native_api,
                         player_id,
                         param_name,
                     )
@@ -7862,6 +8896,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::get_player_rules_params(
                         &self._engine,
+                        self._native_api,
                         player_id,
                     )
                 }
@@ -7893,6 +8928,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::get_team_rules_param(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         param_name,
                     )
@@ -7915,6 +8951,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::get_team_rules_params(
                         &self._engine,
+                        self._native_api,
                         team_id,
                     )
                 }
@@ -7946,6 +8983,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::get_unit_rules_param(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         param_name,
                     )
@@ -7968,6 +9006,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::get_unit_rules_params(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -8008,6 +9047,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::set_feature_rules_param(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         param_name,
                         value,
@@ -8049,6 +9089,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::set_game_rules_param(
                         &self._engine,
+                        self._native_api,
                         param_name,
                         value,
                         los,
@@ -8091,6 +9132,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::set_player_rules_param(
                         &self._engine,
+                        self._native_api,
                         player_id,
                         param_name,
                         value,
@@ -8134,6 +9176,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::set_team_rules_param(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         param_name,
                         value,
@@ -8177,6 +9220,7 @@ pub mod rules_params {
                 {
                     crate::native::rules_params::set_unit_rules_param(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         param_name,
                         value,
@@ -8193,12 +9237,19 @@ pub mod move_ctrl {
     use crate::Result;
     pub struct MoveCtrl<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::MoveCtrlApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn move_ctrl(&self) -> MoveCtrl<'_, E> {
             MoveCtrl {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.move_ctrl.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -8210,7 +9261,13 @@ pub mod move_ctrl {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::move_ctrl::get_tag(unit_id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::move_ctrl::get_tag(&self._engine, unit_id) }
+                {
+                    crate::native::move_ctrl::get_tag(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8228,6 +9285,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::get_unit_estimated_path(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -8249,6 +9307,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::get_unit_move_type_data(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -8270,6 +9329,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::is_move_ctrl_enabled(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -8289,7 +9349,14 @@ pub mod move_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::move_ctrl::move_ctrl(&self._engine, unit_id, enable) }
+                {
+                    crate::native::move_ctrl::move_ctrl(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        enable,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8309,6 +9376,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_collide_stop(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -8329,7 +9397,14 @@ pub mod move_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::move_ctrl::set_drag(&self._engine, unit_id, value) }
+                {
+                    crate::native::move_ctrl::set_drag(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8349,6 +9424,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_extrapolate(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -8369,7 +9445,14 @@ pub mod move_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::move_ctrl::set_gravity(&self._engine, unit_id, value) }
+                {
+                    crate::native::move_ctrl::set_gravity(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8393,6 +9476,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_ground_move_type_max_speed(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         max_speed,
                     )
@@ -8416,6 +9500,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_ground_offset(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -8439,6 +9524,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_heading(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         heading,
                     )
@@ -8468,6 +9554,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_limits(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         mins,
                         maxs,
@@ -8492,6 +9579,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_limits_stop(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -8519,6 +9607,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_move_ctrl_gravity(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         gravity_factor,
                     )
@@ -8555,6 +9644,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_move_def(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         move_def_id,
                         move_def_name,
@@ -8585,6 +9675,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_move_type_boolean(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         field,
                         value,
@@ -8615,6 +9706,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_move_type_numeric(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         field,
                         value,
@@ -8639,6 +9731,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_no_blocking(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         no_blocking,
                     )
@@ -8670,6 +9763,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_physics(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         position,
                         velocity,
@@ -8692,7 +9786,14 @@ pub mod move_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::move_ctrl::set_position(&self._engine, unit_id, value) }
+                {
+                    crate::native::move_ctrl::set_position(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8716,6 +9817,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_progress_state(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         state,
                     )
@@ -8743,6 +9845,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_relative_velocity(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -8763,7 +9866,14 @@ pub mod move_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::move_ctrl::set_rotation(&self._engine, unit_id, value) }
+                {
+                    crate::native::move_ctrl::set_rotation(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8787,6 +9897,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_rotation_velocity(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -8807,7 +9918,14 @@ pub mod move_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::move_ctrl::set_tag(&self._engine, unit_id, tag) }
+                {
+                    crate::native::move_ctrl::set_tag(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        tag,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8827,6 +9945,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_track_ground(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -8850,6 +9969,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_track_limits(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -8873,6 +9993,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_track_slope(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -8893,7 +10014,14 @@ pub mod move_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::move_ctrl::set_velocity(&self._engine, unit_id, value) }
+                {
+                    crate::native::move_ctrl::set_velocity(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8913,6 +10041,7 @@ pub mod move_ctrl {
                 {
                     crate::native::move_ctrl::set_wind_factor(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -8929,12 +10058,17 @@ pub mod camera {
     use alloc::string::String;
     pub struct Camera<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::CameraApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn camera(&self) -> Camera<'_, E> {
             Camera {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.camera.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -8950,7 +10084,12 @@ pub mod camera {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::camera::get_camera_direction(&self._engine) }
+                {
+                    crate::native::camera::get_camera_direction(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8962,7 +10101,12 @@ pub mod camera {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::camera::get_camera_fov(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::camera::get_camera_fov(&self._engine) }
+                {
+                    crate::native::camera::get_camera_fov(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8974,7 +10118,12 @@ pub mod camera {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::camera::get_camera_names(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::camera::get_camera_names(&self._engine) }
+                {
+                    crate::native::camera::get_camera_names(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -8986,7 +10135,12 @@ pub mod camera {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::camera::get_camera_position(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::camera::get_camera_position(&self._engine) }
+                {
+                    crate::native::camera::get_camera_position(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9002,7 +10156,13 @@ pub mod camera {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::camera::get_camera_state(&self._engine, use_table) }
+                {
+                    crate::native::camera::get_camera_state(
+                        &self._engine,
+                        self._native_api,
+                        use_table,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9022,6 +10182,7 @@ pub mod camera {
                 {
                     crate::native::camera::get_pixel_dir(
                         &self._engine,
+                        self._native_api,
                         screen_x,
                         screen_y,
                     )
@@ -9058,6 +10219,7 @@ pub mod camera {
                 {
                     crate::native::camera::set_camera_state(
                         &self._engine,
+                        self._native_api,
                         state,
                         transition_time,
                         transition_time_factor,
@@ -9087,6 +10249,7 @@ pub mod camera {
                 {
                     crate::native::camera::set_camera_target(
                         &self._engine,
+                        self._native_api,
                         target,
                         options,
                     )
@@ -9116,6 +10279,7 @@ pub mod camera {
                 {
                     crate::native::camera::trace_screen_ray(
                         &self._engine,
+                        self._native_api,
                         screen_x,
                         screen_y,
                         options,
@@ -9142,6 +10306,7 @@ pub mod camera {
                 {
                     crate::native::camera::world_to_screen_coords(
                         &self._engine,
+                        self._native_api,
                         world_pos,
                     )
                 }
@@ -9157,12 +10322,17 @@ pub mod input {
     use alloc::string::String;
     pub struct Input<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::InputApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn input(&self) -> Input<'_, E> {
             Input {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.input.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -9183,7 +10353,13 @@ pub mod input {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_action_hot_keys(&self._engine, action) }
+                {
+                    crate::native::input::get_action_hot_keys(
+                        &self._engine,
+                        self._native_api,
+                        action,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9195,7 +10371,12 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::input::get_active_command(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_active_command(&self._engine) }
+                {
+                    crate::native::input::get_active_command(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9207,7 +10388,12 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::input::get_active_page(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_active_page(&self._engine) }
+                {
+                    crate::native::input::get_active_page(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9219,7 +10405,12 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::input::get_default_command(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_default_command(&self._engine) }
+                {
+                    crate::native::input::get_default_command(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9231,7 +10422,12 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::input::get_invert_queue_key(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_invert_queue_key(&self._engine) }
+                {
+                    crate::native::input::get_invert_queue_key(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9265,6 +10461,7 @@ pub mod input {
                 {
                     crate::native::input::get_key_bindings(
                         &self._engine,
+                        self._native_api,
                         key_set1,
                         key_set2,
                     )
@@ -9285,7 +10482,13 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::input::get_key_code(key_sym) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_key_code(&self._engine, key_sym) }
+                {
+                    crate::native::input::get_key_code(
+                        &self._engine,
+                        self._native_api,
+                        key_sym,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9309,6 +10512,7 @@ pub mod input {
                 {
                     crate::native::input::get_key_from_scan_symbol(
                         &self._engine,
+                        self._native_api,
                         scan_symbol,
                     )
                 }
@@ -9323,7 +10527,13 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::input::get_key_state(key_code) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_key_state(&self._engine, key_code) }
+                {
+                    crate::native::input::get_key_state(
+                        &self._engine,
+                        self._native_api,
+                        key_code,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9335,7 +10545,13 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::input::get_key_symbol(key_code) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_key_symbol(&self._engine, key_code) }
+                {
+                    crate::native::input::get_key_symbol(
+                        &self._engine,
+                        self._native_api,
+                        key_code,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9347,7 +10563,12 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::input::get_mod_key_state(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_mod_key_state(&self._engine) }
+                {
+                    crate::native::input::get_mod_key_state(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9366,6 +10587,7 @@ pub mod input {
                 {
                     crate::native::input::get_mouse_buttons_pressed(
                         &self._engine,
+                        self._native_api,
                         buttons,
                     )
                 }
@@ -9380,7 +10602,12 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::input::get_mouse_cursor(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_mouse_cursor(&self._engine) }
+                {
+                    crate::native::input::get_mouse_cursor(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9399,7 +10626,13 @@ pub mod input {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_mouse_start_position(&self._engine, button) }
+                {
+                    crate::native::input::get_mouse_start_position(
+                        &self._engine,
+                        self._native_api,
+                        button,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9411,7 +10644,12 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::input::get_mouse_state(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_mouse_state(&self._engine) }
+                {
+                    crate::native::input::get_mouse_state(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9423,7 +10661,12 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::input::get_pressed_keys(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_pressed_keys(&self._engine) }
+                {
+                    crate::native::input::get_pressed_keys(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9435,7 +10678,12 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::input::get_pressed_scans(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_pressed_scans(&self._engine) }
+                {
+                    crate::native::input::get_pressed_scans(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9447,7 +10695,13 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::input::get_scan_symbol(scan_code) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_scan_symbol(&self._engine, scan_code) }
+                {
+                    crate::native::input::get_scan_symbol(
+                        &self._engine,
+                        self._native_api,
+                        scan_code,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9459,7 +10713,12 @@ pub mod input {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::input::get_selection_box(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::input::get_selection_box(&self._engine) }
+                {
+                    crate::native::input::get_selection_box(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9479,6 +10738,7 @@ pub mod input {
                 {
                     crate::native::input::is_above_mini_map(
                         &self._engine,
+                        self._native_api,
                         screen_x,
                         screen_y,
                     )
@@ -9493,12 +10753,19 @@ pub mod debug_input {
     use crate::Result;
     pub struct DebugInput<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::DebugInputApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn debug_input(&self) -> DebugInput<'_, E> {
             DebugInput {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.debug_input.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -9517,6 +10784,7 @@ pub mod debug_input {
                 {
                     crate::native::debug_input::clear_emulated_input(
                         &self._engine,
+                        self._native_api,
                         fire_releases,
                     )
                 }
@@ -9539,6 +10807,7 @@ pub mod debug_input {
                 {
                     crate::native::debug_input::emulate_key(
                         &self._engine,
+                        self._native_api,
                         key_code,
                         pressed,
                     )
@@ -9562,6 +10831,7 @@ pub mod debug_input {
                 {
                     crate::native::debug_input::emulate_mouse_button(
                         &self._engine,
+                        self._native_api,
                         button,
                         pressed,
                     )
@@ -9582,7 +10852,14 @@ pub mod debug_input {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::debug_input::emulate_mouse_move(&self._engine, x, y) }
+                {
+                    crate::native::debug_input::emulate_mouse_move(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9598,7 +10875,13 @@ pub mod debug_input {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::debug_input::emulate_mouse_wheel(&self._engine, delta) }
+                {
+                    crate::native::debug_input::emulate_mouse_wheel(
+                        &self._engine,
+                        self._native_api,
+                        delta,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9629,6 +10912,7 @@ pub mod debug_input {
                 {
                     crate::native::debug_input::emulate_text_editing(
                         &self._engine,
+                        self._native_api,
                         utf8_text,
                         start,
                         length,
@@ -9657,6 +10941,7 @@ pub mod debug_input {
                 {
                     crate::native::debug_input::emulate_text_input(
                         &self._engine,
+                        self._native_api,
                         utf8_text,
                     )
                 }
@@ -9671,12 +10956,17 @@ pub mod display {
     use alloc::string::String;
     pub struct Display<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::DisplayApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn display(&self) -> Display<'_, E> {
             Display {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.display.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -9688,7 +10978,12 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::display::get_draw_frame(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_draw_frame(&self._engine) }
+                {
+                    crate::native::display::get_draw_frame(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9704,7 +10999,12 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_dual_view_geometry(&self._engine) }
+                {
+                    crate::native::display::get_dual_view_geometry(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9716,7 +11016,7 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::display::get_fps(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_fps(&self._engine) }
+                { crate::native::display::get_fps(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -9732,7 +11032,12 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_frame_time_offset(&self._engine) }
+                {
+                    crate::native::display::get_frame_time_offset(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9744,7 +11049,12 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::display::get_game_speed(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_game_speed(&self._engine) }
+                {
+                    crate::native::display::get_game_speed(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9760,7 +11070,12 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_last_update_seconds(&self._engine) }
+                {
+                    crate::native::display::get_last_update_seconds(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9776,7 +11091,12 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_los_view_colors(&self._engine) }
+                {
+                    crate::native::display::get_los_view_colors(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9788,7 +11108,12 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::display::get_map_draw_mode(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_map_draw_mode(&self._engine) }
+                {
+                    crate::native::display::get_map_draw_mode(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9800,7 +11125,12 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::display::get_mini_map_dual_screen(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_mini_map_dual_screen(&self._engine) }
+                {
+                    crate::native::display::get_mini_map_dual_screen(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9816,7 +11146,12 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_mini_map_geometry(&self._engine) }
+                {
+                    crate::native::display::get_mini_map_geometry(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9832,7 +11167,12 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_mini_map_rotation(&self._engine) }
+                {
+                    crate::native::display::get_mini_map_rotation(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9844,7 +11184,12 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::display::get_num_displays(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_num_displays(&self._engine) }
+                {
+                    crate::native::display::get_num_displays(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9868,6 +11213,7 @@ pub mod display {
                 {
                     crate::native::display::get_screen_geometry(
                         &self._engine,
+                        self._native_api,
                         screen_num,
                         query_usable,
                     )
@@ -9895,6 +11241,7 @@ pub mod display {
                 {
                     crate::native::display::get_screen_geometry_full(
                         &self._engine,
+                        self._native_api,
                         screen_num,
                         query_usable,
                     )
@@ -9914,7 +11261,13 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_team_color(&self._engine, team_id) }
+                {
+                    crate::native::display::get_team_color(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9930,7 +11283,13 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_team_orig_color(&self._engine, team_id) }
+                {
+                    crate::native::display::get_team_orig_color(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9942,7 +11301,12 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::display::get_view_geometry(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_view_geometry(&self._engine) }
+                {
+                    crate::native::display::get_view_geometry(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9954,7 +11318,12 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::display::get_water_mode(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_water_mode(&self._engine) }
+                {
+                    crate::native::display::get_water_mode(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9970,7 +11339,12 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::get_window_geometry(&self._engine) }
+                {
+                    crate::native::display::get_window_geometry(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9982,7 +11356,12 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::display::have_adv_shading(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::have_adv_shading(&self._engine) }
+                {
+                    crate::native::display::have_adv_shading(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -9998,7 +11377,12 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::have_adv_shading_full(&self._engine) }
+                {
+                    crate::native::display::have_adv_shading_full(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10010,7 +11394,7 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::display::have_shadows(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::have_shadows(&self._engine) }
+                { crate::native::display::have_shadows(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -10027,7 +11411,14 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::is_aabb_in_view(&self._engine, mins, maxs) }
+                {
+                    crate::native::display::is_aabb_in_view(
+                        &self._engine,
+                        self._native_api,
+                        mins,
+                        maxs,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10039,7 +11430,12 @@ pub mod display {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::display::is_gui_hidden(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::is_gui_hidden(&self._engine) }
+                {
+                    crate::native::display::is_gui_hidden(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10059,6 +11455,7 @@ pub mod display {
                 {
                     crate::native::display::is_sphere_in_view(
                         &self._engine,
+                        self._native_api,
                         center,
                         radius,
                     )
@@ -10079,7 +11476,14 @@ pub mod display {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::display::set_team_color(&self._engine, team_id, color) }
+                {
+                    crate::native::display::set_team_color(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                        color,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10091,12 +11495,19 @@ pub mod selection {
     use alloc::vec::Vec;
     pub struct Selection<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::SelectionApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn selection(&self) -> Selection<'_, E> {
             Selection {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.selection.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -10112,7 +11523,13 @@ pub mod selection {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::selection::deselect_unit(&self._engine, unit_id) }
+                {
+                    crate::native::selection::deselect_unit(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10131,6 +11548,7 @@ pub mod selection {
                 {
                     crate::native::selection::deselect_unit_array(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                     )
                 }
@@ -10145,7 +11563,12 @@ pub mod selection {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::selection::get_group_list(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::selection::get_group_list(&self._engine) }
+                {
+                    crate::native::selection::get_group_list(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10161,7 +11584,13 @@ pub mod selection {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::selection::get_group_units(&self._engine, group_id) }
+                {
+                    crate::native::selection::get_group_units(
+                        &self._engine,
+                        self._native_api,
+                        group_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10180,6 +11609,7 @@ pub mod selection {
                 {
                     crate::native::selection::get_group_units_count(
                         &self._engine,
+                        self._native_api,
                         group_id,
                     )
                 }
@@ -10201,6 +11631,7 @@ pub mod selection {
                 {
                     crate::native::selection::get_group_units_counts(
                         &self._engine,
+                        self._native_api,
                         group_id,
                     )
                 }
@@ -10225,6 +11656,7 @@ pub mod selection {
                 {
                     crate::native::selection::get_group_units_sorted(
                         &self._engine,
+                        self._native_api,
                         group_id,
                     )
                 }
@@ -10243,7 +11675,12 @@ pub mod selection {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::selection::get_selected_group(&self._engine) }
+                {
+                    crate::native::selection::get_selected_group(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10259,7 +11696,12 @@ pub mod selection {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::selection::get_selected_units(&self._engine) }
+                {
+                    crate::native::selection::get_selected_units(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10275,7 +11717,12 @@ pub mod selection {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::selection::get_selected_units_count(&self._engine) }
+                {
+                    crate::native::selection::get_selected_units_count(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10291,7 +11738,12 @@ pub mod selection {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::selection::get_selected_units_counts(&self._engine) }
+                {
+                    crate::native::selection::get_selected_units_counts(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10307,7 +11759,12 @@ pub mod selection {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::selection::get_selected_units_sorted(&self._engine) }
+                {
+                    crate::native::selection::get_selected_units_sorted(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10323,7 +11780,13 @@ pub mod selection {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::selection::get_unit_group(&self._engine, unit_id) }
+                {
+                    crate::native::selection::get_unit_group(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10340,7 +11803,14 @@ pub mod selection {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::selection::select_unit(&self._engine, unit_id, append) }
+                {
+                    crate::native::selection::select_unit(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        append,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10364,6 +11834,7 @@ pub mod selection {
                 {
                     crate::native::selection::select_unit_array(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                         append,
                     )
@@ -10387,6 +11858,7 @@ pub mod selection {
                 {
                     crate::native::selection::set_unit_group(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         group_id,
                     )
@@ -10403,12 +11875,17 @@ pub mod sound {
     use alloc::string::String;
     pub struct Sound<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::SoundApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn sound(&self) -> Sound<'_, E> {
             Sound {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.sound.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -10420,7 +11897,12 @@ pub mod sound {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::sound::get_sound_devices(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::sound::get_sound_devices(&self._engine) }
+                {
+                    crate::native::sound::get_sound_devices(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10436,7 +11918,12 @@ pub mod sound {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::sound::get_sound_effect_params(&self._engine) }
+                {
+                    crate::native::sound::get_sound_effect_params(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10452,7 +11939,12 @@ pub mod sound {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::sound::get_sound_stream_play_time(&self._engine) }
+                {
+                    crate::native::sound::get_sound_stream_play_time(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10468,7 +11960,12 @@ pub mod sound {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::sound::get_sound_stream_time(&self._engine) }
+                {
+                    crate::native::sound::get_sound_stream_time(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10489,7 +11986,13 @@ pub mod sound {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::sound::load_sound_def(&self._engine, sound_name) }
+                {
+                    crate::native::sound::load_sound_def(
+                        &self._engine,
+                        self._native_api,
+                        sound_name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10501,7 +12004,12 @@ pub mod sound {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::sound::pause_sound_stream(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::sound::pause_sound_stream(&self._engine) }
+                {
+                    crate::native::sound::pause_sound_stream(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10536,6 +12044,7 @@ pub mod sound {
                 {
                     crate::native::sound::play_sound_file(
                         &self._engine,
+                        self._native_api,
                         sound_file,
                         volume,
                         pos,
@@ -10573,6 +12082,7 @@ pub mod sound {
                 {
                     crate::native::sound::play_sound_stream(
                         &self._engine,
+                        self._native_api,
                         ogg_file,
                         volume,
                         enqueue,
@@ -10598,7 +12108,13 @@ pub mod sound {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::sound::preload_sound_item(&self._engine, sound_name) }
+                {
+                    crate::native::sound::preload_sound_item(
+                        &self._engine,
+                        self._native_api,
+                        sound_name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10622,7 +12138,13 @@ pub mod sound {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::sound::set_sound_effect_params(&self._engine, params) }
+                {
+                    crate::native::sound::set_sound_effect_params(
+                        &self._engine,
+                        self._native_api,
+                        params,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10638,7 +12160,13 @@ pub mod sound {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::sound::set_sound_stream_volume(&self._engine, volume) }
+                {
+                    crate::native::sound::set_sound_stream_volume(
+                        &self._engine,
+                        self._native_api,
+                        volume,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10650,7 +12178,12 @@ pub mod sound {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::sound::stop_sound_stream(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::sound::stop_sound_stream(&self._engine) }
+                {
+                    crate::native::sound::stop_sound_stream(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10663,12 +12196,19 @@ pub mod messages {
     use alloc::string::String;
     pub struct Messages<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::MessagesApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn messages(&self) -> Messages<'_, E> {
             Messages {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.messages.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -10690,7 +12230,14 @@ pub mod messages {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::messages::echo(message, rest) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::echo(&self._engine, message, rest) }
+                {
+                    crate::native::messages::echo(
+                        &self._engine,
+                        self._native_api,
+                        message,
+                        rest,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10706,7 +12253,13 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::get_console_buffer(&self._engine, max_lines) }
+                {
+                    crate::native::messages::get_console_buffer(
+                        &self._engine,
+                        self._native_api,
+                        max_lines,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10722,7 +12275,12 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::get_current_tooltip(&self._engine) }
+                {
+                    crate::native::messages::get_current_tooltip(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10734,7 +12292,12 @@ pub mod messages {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::messages::is_user_writing(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::is_user_writing(&self._engine) }
+                {
+                    crate::native::messages::is_user_writing(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10762,7 +12325,15 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::log(&self._engine, section, level, message) }
+                {
+                    crate::native::messages::log(
+                        &self._engine,
+                        self._native_api,
+                        section,
+                        level,
+                        message,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10783,7 +12354,13 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::send_ally_chat(&self._engine, message) }
+                {
+                    crate::native::messages::send_ally_chat(
+                        &self._engine,
+                        self._native_api,
+                        message,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10810,7 +12387,14 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::send_commands(&self._engine, command, rest) }
+                {
+                    crate::native::messages::send_commands(
+                        &self._engine,
+                        self._native_api,
+                        command,
+                        rest,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10831,7 +12415,13 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::send_lua_gaia_msg(&self._engine, message) }
+                {
+                    crate::native::messages::send_lua_gaia_msg(
+                        &self._engine,
+                        self._native_api,
+                        message,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10852,7 +12442,13 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::send_lua_menu_msg(&self._engine, message) }
+                {
+                    crate::native::messages::send_lua_menu_msg(
+                        &self._engine,
+                        self._native_api,
+                        message,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10873,7 +12469,13 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::send_lua_rules_msg(&self._engine, message) }
+                {
+                    crate::native::messages::send_lua_rules_msg(
+                        &self._engine,
+                        self._native_api,
+                        message,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10903,6 +12505,7 @@ pub mod messages {
                 {
                     crate::native::messages::send_lua_ui_msg(
                         &self._engine,
+                        self._native_api,
                         message,
                         mode,
                     )
@@ -10927,7 +12530,13 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::send_message(&self._engine, message) }
+                {
+                    crate::native::messages::send_message(
+                        &self._engine,
+                        self._native_api,
+                        message,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -10956,6 +12565,7 @@ pub mod messages {
                 {
                     crate::native::messages::send_message_to_ally_team(
                         &self._engine,
+                        self._native_api,
                         ally_team_id,
                         message,
                     )
@@ -10988,6 +12598,7 @@ pub mod messages {
                 {
                     crate::native::messages::send_message_to_player(
                         &self._engine,
+                        self._native_api,
                         player_id,
                         message,
                     )
@@ -11015,6 +12626,7 @@ pub mod messages {
                 {
                     crate::native::messages::send_message_to_spectators(
                         &self._engine,
+                        self._native_api,
                         message,
                     )
                 }
@@ -11037,6 +12649,7 @@ pub mod messages {
                 {
                     crate::native::messages::send_message_to_team(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         message,
                     )
@@ -11065,6 +12678,7 @@ pub mod messages {
                 {
                     crate::native::messages::send_private_chat(
                         &self._engine,
+                        self._native_api,
                         message,
                         player_id,
                     )
@@ -11089,7 +12703,13 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::send_public_chat(&self._engine, message) }
+                {
+                    crate::native::messages::send_public_chat(
+                        &self._engine,
+                        self._native_api,
+                        message,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -11118,6 +12738,7 @@ pub mod messages {
                 {
                     crate::native::messages::send_skirmish_ai_message(
                         &self._engine,
+                        self._native_api,
                         ai_id,
                         message,
                     )
@@ -11142,7 +12763,13 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::send_spectator_chat(&self._engine, message) }
+                {
+                    crate::native::messages::send_spectator_chat(
+                        &self._engine,
+                        self._native_api,
+                        message,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -11163,7 +12790,13 @@ pub mod messages {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::messages::send_to_unsynced(&self._engine, message) }
+                {
+                    crate::native::messages::send_to_unsynced(
+                        &self._engine,
+                        self._native_api,
+                        message,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -11176,12 +12809,17 @@ pub mod config {
     use alloc::string::String;
     pub struct Config<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::ConfigApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn config(&self) -> Config<'_, E> {
             Config {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.config.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -11205,6 +12843,7 @@ pub mod config {
                 {
                     crate::native::config::get_config_float(
                         &self._engine,
+                        self._native_api,
                         key,
                         default_value,
                     )
@@ -11232,6 +12871,7 @@ pub mod config {
                 {
                     crate::native::config::get_config_int(
                         &self._engine,
+                        self._native_api,
                         key,
                         default_value,
                     )
@@ -11247,7 +12887,12 @@ pub mod config {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::config::get_config_params(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::config::get_config_params(&self._engine) }
+                {
+                    crate::native::config::get_config_params(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -11278,6 +12923,7 @@ pub mod config {
                 {
                     crate::native::config::get_config_string(
                         &self._engine,
+                        self._native_api,
                         key,
                         default_value,
                     )
@@ -11293,7 +12939,12 @@ pub mod config {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::config::get_log_sections(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::config::get_log_sections(&self._engine) }
+                {
+                    crate::native::config::get_log_sections(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -11324,6 +12975,7 @@ pub mod config {
                 {
                     crate::native::config::set_config_float(
                         &self._engine,
+                        self._native_api,
                         key,
                         value,
                         use_overlay,
@@ -11359,6 +13011,7 @@ pub mod config {
                 {
                     crate::native::config::set_config_int(
                         &self._engine,
+                        self._native_api,
                         key,
                         value,
                         use_overlay,
@@ -11399,6 +13052,7 @@ pub mod config {
                 {
                     crate::native::config::set_config_string(
                         &self._engine,
+                        self._native_api,
                         key,
                         value,
                         use_overlay,
@@ -11432,6 +13086,7 @@ pub mod config {
                 {
                     crate::native::config::set_log_section_filter_level(
                         &self._engine,
+                        self._native_api,
                         section,
                         level,
                     )
@@ -11447,12 +13102,17 @@ pub mod tracing {
     use alloc::vec::Vec;
     pub struct Tracing<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::TracingApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn tracing(&self) -> Tracing<'_, E> {
             Tracing {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.tracing.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -11464,7 +13124,13 @@ pub mod tracing {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::tracing::trace_ray(ray) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::tracing::trace_ray(&self._engine, ray) }
+                {
+                    crate::native::tracing::trace_ray(
+                        &self._engine,
+                        self._native_api,
+                        ray,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -11495,6 +13161,7 @@ pub mod tracing {
                 {
                     crate::native::tracing::trace_ray_between_positions(
                         &self._engine,
+                        self._native_api,
                         start,
                         end,
                         type_,
@@ -11515,7 +13182,13 @@ pub mod tracing {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::tracing::trace_ray_features(&self._engine, ray) }
+                {
+                    crate::native::tracing::trace_ray_features(
+                        &self._engine,
+                        self._native_api,
+                        ray,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -11541,6 +13214,7 @@ pub mod tracing {
                 {
                     crate::native::tracing::trace_ray_ground_between_positions(
                         &self._engine,
+                        self._native_api,
                         start,
                         end,
                         options,
@@ -11571,6 +13245,7 @@ pub mod tracing {
                 {
                     crate::native::tracing::trace_ray_ground_in_direction(
                         &self._engine,
+                        self._native_api,
                         start,
                         dir,
                         options,
@@ -11608,6 +13283,7 @@ pub mod tracing {
                 {
                     crate::native::tracing::trace_ray_in_direction(
                         &self._engine,
+                        self._native_api,
                         pos,
                         dir,
                         options,
@@ -11625,7 +13301,13 @@ pub mod tracing {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::tracing::trace_ray_units(ray) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::tracing::trace_ray_units(&self._engine, ray) }
+                {
+                    crate::native::tracing::trace_ray_units(
+                        &self._engine,
+                        self._native_api,
+                        ray,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -11636,12 +13318,17 @@ pub mod utils {
     use crate::Result;
     pub struct Utils<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UtilsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn utils(&self) -> Utils<'_, E> {
             Utils {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.utils.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -11673,6 +13360,7 @@ pub mod utils {
                 {
                     crate::native::utils::closest_build_pos(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         unit_def_id,
                         pos,
@@ -11697,7 +13385,13 @@ pub mod utils {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::utils::get_cegid(ceg_name) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::utils::get_cegid(&self._engine, ceg_name) }
+                {
+                    crate::native::utils::get_cegid(
+                        &self._engine,
+                        self._native_api,
+                        ceg_name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -11719,6 +13413,7 @@ pub mod utils {
                 {
                     crate::native::utils::get_feature_def_dimensions(
                         &self._engine,
+                        self._native_api,
                         feature_def_id,
                     )
                 }
@@ -11743,6 +13438,7 @@ pub mod utils {
                 {
                     crate::native::utils::get_unit_def_dimensions(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                     )
                 }
@@ -11771,6 +13467,7 @@ pub mod utils {
                 {
                     crate::native::utils::pos2_build_pos(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         pos,
                         facing,
@@ -11801,6 +13498,7 @@ pub mod utils {
                 {
                     crate::native::utils::test_build_order(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         pos,
                         facing,
@@ -11833,6 +13531,7 @@ pub mod utils {
                 {
                     crate::native::utils::test_move_order(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         pos,
                         dir,
@@ -11850,12 +13549,19 @@ pub mod unsynced_ctrl {
     use alloc::string::String;
     pub struct UnsyncedCtrl<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnsyncedCtrlApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn unsynced_ctrl(&self) -> UnsyncedCtrl<'_, E> {
             UnsyncedCtrl {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.unsynced_ctrl.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -11893,6 +13599,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::assign_mouse_cursor(
                         &self._engine,
+                        self._native_api,
                         command_name,
                         cursor_file_name,
                         overwrite,
@@ -11917,6 +13624,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::deselect_unit_map(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                     )
                 }
@@ -11945,6 +13653,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::draw_unit_commands(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                         table_or_array,
                         queue_draw_depth,
@@ -11965,7 +13674,12 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::force_layout_update(&self._engine) }
+                {
+                    crate::native::unsynced_ctrl::force_layout_update(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -11989,6 +13703,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::force_tesselation_update(
                         &self._engine,
+                        self._native_api,
                         normal,
                         shadow,
                     )
@@ -12016,6 +13731,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::get_water_texture(
                         &self._engine,
+                        self._native_api,
                         tex_type,
                     )
                 }
@@ -12042,6 +13758,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::load_cmd_colors_config(
                         &self._engine,
+                        self._native_api,
                         filename,
                     )
                 }
@@ -12068,6 +13785,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::load_ctrl_panel_config(
                         &self._engine,
+                        self._native_api,
                         filename,
                     )
                 }
@@ -12094,6 +13812,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::load_model_textures(
                         &self._engine,
+                        self._native_api,
                         model_name,
                     )
                 }
@@ -12115,6 +13834,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::pause_dolly_camera(
                         &self._engine,
+                        self._native_api,
                         percent,
                     )
                 }
@@ -12136,6 +13856,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::preload_feature_def_model(
                         &self._engine,
+                        self._native_api,
                         def_id,
                     )
                 }
@@ -12157,6 +13878,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::preload_unit_def_model(
                         &self._engine,
+                        self._native_api,
                         def_id,
                     )
                 }
@@ -12195,6 +13917,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::replace_mouse_cursor(
                         &self._engine,
+                        self._native_api,
                         old_cursor_file_name,
                         new_cursor_file_name,
                         hot_spot_top_left,
@@ -12215,7 +13938,12 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::resume_dolly_camera(&self._engine) }
+                {
+                    crate::native::unsynced_ctrl::resume_dolly_camera(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -12234,6 +13962,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::run_dolly_camera(
                         &self._engine,
+                        self._native_api,
                         runtime_ms,
                     )
                 }
@@ -12264,6 +13993,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::sdl_set_text_input_rect(
                         &self._engine,
+                        self._native_api,
                         x,
                         y,
                         w,
@@ -12285,7 +14015,12 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::sdl_start_text_input(&self._engine) }
+                {
+                    crate::native::unsynced_ctrl::sdl_start_text_input(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -12301,7 +14036,12 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::sdl_stop_text_input(&self._engine) }
+                {
+                    crate::native::unsynced_ctrl::sdl_stop_text_input(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -12321,6 +14061,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::select_unit_map(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                         append,
                     )
@@ -12350,6 +14091,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_active_command(
                         &self._engine,
+                        self._native_api,
                         cmd_index,
                         button,
                         options,
@@ -12405,7 +14147,13 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::set_atmosphere(&self._engine, params) }
+                {
+                    crate::native::unsynced_ctrl::set_atmosphere(
+                        &self._engine,
+                        self._native_api,
+                        params,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -12424,6 +14172,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_auto_show_metal(
                         &self._engine,
+                        self._native_api,
                         enable,
                     )
                 }
@@ -12445,6 +14194,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_box_selection_by_engine(
                         &self._engine,
+                        self._native_api,
                         state,
                     )
                 }
@@ -12463,7 +14213,13 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::set_build_facing(&self._engine, facing) }
+                {
+                    crate::native::unsynced_ctrl::set_build_facing(
+                        &self._engine,
+                        self._native_api,
+                        facing,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -12482,6 +14238,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_build_spacing(
                         &self._engine,
+                        self._native_api,
                         spacing,
                     )
                 }
@@ -12508,6 +14265,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_camera_offset(
                         &self._engine,
+                        self._native_api,
                         pos_offset,
                         tilt_offset,
                     )
@@ -12532,7 +14290,13 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::set_clipboard(&self._engine, text) }
+                {
+                    crate::native::unsynced_ctrl::set_clipboard(
+                        &self._engine,
+                        self._native_api,
+                        text,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -12565,6 +14329,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_custom_command_draw_data(
                         &self._engine,
+                        self._native_api,
                         cmd_id,
                         cmd_reference,
                         color,
@@ -12598,6 +14363,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_custom_palette_color(
                         &self._engine,
+                        self._native_api,
                         index,
                         r,
                         g,
@@ -12627,6 +14393,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_default_interface_visible(
                         &self._engine,
+                        self._native_api,
                         parts,
                         visible,
                     )
@@ -12656,6 +14423,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_dolly_camera_curve(
                         &self._engine,
+                        self._native_api,
                         degree,
                         control_points,
                         knots,
@@ -12686,6 +14454,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_dolly_camera_look_curve(
                         &self._engine,
+                        self._native_api,
                         degree,
                         control_points,
                         knots,
@@ -12709,6 +14478,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_dolly_camera_look_position(
                         &self._engine,
+                        self._native_api,
                         position,
                     )
                 }
@@ -12730,6 +14500,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_dolly_camera_look_unit(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -12751,6 +14522,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_dolly_camera_mode(
                         &self._engine,
+                        self._native_api,
                         mode,
                     )
                 }
@@ -12772,6 +14544,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_dolly_camera_position(
                         &self._engine,
+                        self._native_api,
                         position,
                     )
                 }
@@ -12793,6 +14566,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_dolly_camera_relative_mode(
                         &self._engine,
+                        self._native_api,
                         mode,
                     )
                 }
@@ -12814,6 +14588,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_draw_ground(
                         &self._engine,
+                        self._native_api,
                         draw_ground,
                     )
                 }
@@ -12840,6 +14615,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_draw_ground_deferred(
                         &self._engine,
+                        self._native_api,
                         draw_deferred,
                         draw_forward,
                     )
@@ -12871,6 +14647,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_draw_models_deferred(
                         &self._engine,
+                        self._native_api,
                         draw_units_deferred,
                         draw_features_deferred,
                         draw_units_forward,
@@ -12895,6 +14672,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_draw_selection_info(
                         &self._engine,
+                        self._native_api,
                         draw,
                     )
                 }
@@ -12913,7 +14691,13 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::set_draw_sky(&self._engine, draw_sky) }
+                {
+                    crate::native::unsynced_ctrl::set_draw_sky(
+                        &self._engine,
+                        self._native_api,
+                        draw_sky,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -12932,6 +14716,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_draw_water(
                         &self._engine,
+                        self._native_api,
                         draw_water,
                     )
                 }
@@ -12953,6 +14738,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_engine_build_square_rendering(
                         &self._engine,
+                        self._native_api,
                         enabled,
                     )
                 }
@@ -12979,6 +14765,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_feature_always_update_matrix(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         enable,
                     )
@@ -13006,6 +14793,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_feature_engine_draw_mask(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         mask,
                     )
@@ -13029,6 +14817,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_feature_fade(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         allow,
                     )
@@ -13056,6 +14845,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_feature_lua_draw(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         lua_draw,
                     )
@@ -13083,6 +14873,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_feature_no_draw(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         no_draw,
                     )
@@ -13110,6 +14901,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_feature_palette_index(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         custom_index,
                     )
@@ -13132,6 +14924,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_last_message_position(
                         &self._engine,
+                        self._native_api,
                         pos,
                     )
                 }
@@ -13164,6 +14957,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_los_view_colors(
                         &self._engine,
+                        self._native_api,
                         always,
                         los,
                         radar,
@@ -13206,6 +15000,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_map_rendering_params(
                         &self._engine,
+                        self._native_api,
                         params,
                     )
                 }
@@ -13232,6 +15027,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_map_shader(
                         &self._engine,
+                        self._native_api,
                         standard_shader_id,
                         deferred_shader_id,
                     )
@@ -13271,6 +15067,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_map_shading_texture(
                         &self._engine,
+                        self._native_api,
                         tex_type,
                         tex_name,
                         num,
@@ -13297,6 +15094,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_mini_map_rotation(
                         &self._engine,
+                        self._native_api,
                         radians,
                     )
                 }
@@ -13324,6 +15122,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_mouse_cursor(
                         &self._engine,
+                        self._native_api,
                         cursor_name,
                         scale,
                     )
@@ -13359,6 +15158,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_nano_projectile_params(
                         &self._engine,
+                        self._native_api,
                         r,
                         v,
                         a,
@@ -13390,6 +15190,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_projectile_lua_draw(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         lua_draw,
                     )
@@ -13415,6 +15216,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_shock_front_factors(
                         &self._engine,
+                        self._native_api,
                         options,
                     )
                 }
@@ -13441,6 +15243,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_sky_box_texture(
                         &self._engine,
+                        self._native_api,
                         tex_name,
                     )
                 }
@@ -13463,6 +15266,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_sun_direction(
                         &self._engine,
+                        self._native_api,
                         dir,
                         intensity,
                     )
@@ -13524,7 +15328,13 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::set_sun_lighting(&self._engine, params) }
+                {
+                    crate::native::unsynced_ctrl::set_sun_lighting(
+                        &self._engine,
+                        self._native_api,
+                        params,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -13548,6 +15358,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_always_update_matrix(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         always_update_matrix,
                     )
@@ -13580,6 +15391,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_def_icon(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         icon_name,
                     )
@@ -13608,6 +15420,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_def_image(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         image,
                     )
@@ -13635,6 +15448,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_engine_draw_mask(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         draw_mask,
                     )
@@ -13663,6 +15477,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_icon(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         icon_name,
                     )
@@ -13686,6 +15501,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_icon_draw(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         draw_icon,
                     )
@@ -13713,6 +15529,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_leave_tracks(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         leave_tracks,
                     )
@@ -13736,6 +15553,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_lua_draw(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         lua_draw,
                     )
@@ -13759,6 +15577,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_no_draw(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         no_draw,
                     )
@@ -13782,6 +15601,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_no_group(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         no_group,
                     )
@@ -13809,6 +15629,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_no_minimap(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         no_minimap,
                     )
@@ -13832,6 +15653,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_no_select(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         no_select,
                     )
@@ -13859,6 +15681,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_unit_palette_index(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         custom_index,
                     )
@@ -13884,6 +15707,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_video_capturing_mode(
                         &self._engine,
+                        self._native_api,
                         allow_capture_mode,
                     )
                 }
@@ -13905,6 +15729,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_video_capturing_time_offset(
                         &self._engine,
+                        self._native_api,
                         time_offset,
                     )
                 }
@@ -13937,6 +15762,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_wm_caption(
                         &self._engine,
+                        self._native_api,
                         title,
                         title_short,
                     )
@@ -13969,6 +15795,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_wm_icon(
                         &self._engine,
+                        self._native_api,
                         icon_file_name,
                         force_resolution,
                     )
@@ -14037,7 +15864,13 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::set_water_params(&self._engine, params) }
+                {
+                    crate::native::unsynced_ctrl::set_water_params(
+                        &self._engine,
+                        self._native_api,
+                        params,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14067,6 +15900,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_water_texture(
                         &self._engine,
+                        self._native_api,
                         tex_type,
                         tex_name,
                     )
@@ -14102,6 +15936,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::set_window_geometry(
                         &self._engine,
+                        self._native_api,
                         display_index,
                         window_pos_x,
                         window_pos_y,
@@ -14125,7 +15960,12 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::set_window_maximized(&self._engine) }
+                {
+                    crate::native::unsynced_ctrl::set_window_maximized(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14141,7 +15981,12 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::set_window_minimized(&self._engine) }
+                {
+                    crate::native::unsynced_ctrl::set_window_minimized(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14157,7 +16002,12 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::stop_tracking_units(&self._engine) }
+                {
+                    crate::native::unsynced_ctrl::stop_tracking_units(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14177,6 +16027,7 @@ pub mod unsynced_ctrl {
                 {
                     crate::native::unsynced_ctrl::track_units(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                         mode,
                     )
@@ -14197,7 +16048,14 @@ pub mod unsynced_ctrl {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_ctrl::warp_mouse(&self._engine, x, y) }
+                {
+                    crate::native::unsynced_ctrl::warp_mouse(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14210,12 +16068,17 @@ pub mod gfx {
     use alloc::string::String;
     pub struct Gfx<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::GfxApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn gfx(&self) -> Gfx<'_, E> {
             Gfx {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.gfx.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -14242,7 +16105,14 @@ pub mod gfx {
                     crate::native::gfx::active_fbo::<
                         E,
                         _,
-                    >(&self._engine, fbo_id, target, identities, callback)
+                    >(
+                        &self._engine,
+                        self._native_api,
+                        fbo_id,
+                        target,
+                        identities,
+                        callback,
+                    )
                 }
             };
             self._engine.finish(result)
@@ -14268,7 +16138,7 @@ pub mod gfx {
                     crate::native::gfx::active_shader::<
                         E,
                         _,
-                    >(&self._engine, shader_id, callback)
+                    >(&self._engine, self._native_api, shader_id, callback)
                 }
             };
             self._engine.finish(result)
@@ -14281,7 +16151,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::active_texture(tex_num) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::active_texture(&self._engine, tex_num) }
+                {
+                    crate::native::gfx::active_texture(
+                        &self._engine,
+                        self._native_api,
+                        tex_num,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14315,6 +16191,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::add_atlas_texture(
                         &self._engine,
+                        self._native_api,
                         atlas_name,
                         texture_name,
                     )
@@ -14335,7 +16212,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::add_fallback_font(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::add_fallback_font(&self._engine, value) }
+                {
+                    crate::native::gfx::add_fallback_font(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14359,6 +16242,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::add_feature_defs_to_submission_vao(
                         &self._engine,
+                        self._native_api,
                         vao_id,
                         ids,
                     )
@@ -14386,6 +16270,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::add_features_to_submission_vao(
                         &self._engine,
+                        self._native_api,
                         vao_id,
                         ids,
                     )
@@ -14413,6 +16298,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::add_unit_defs_to_submission_vao(
                         &self._engine,
+                        self._native_api,
                         vao_id,
                         ids,
                     )
@@ -14440,6 +16326,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::add_units_to_submission_vao(
                         &self._engine,
+                        self._native_api,
                         vao_id,
                         ids,
                     )
@@ -14461,7 +16348,15 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::alpha_test(&self._engine, enable, func, ref_) }
+                {
+                    crate::native::gfx::alpha_test(
+                        &self._engine,
+                        self._native_api,
+                        enable,
+                        func,
+                        ref_,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14473,7 +16368,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::alpha_to_coverage(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::alpha_to_coverage(&self._engine, value) }
+                {
+                    crate::native::gfx::alpha_to_coverage(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14493,6 +16394,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::attach_index_buffer_vao(
                         &self._engine,
+                        self._native_api,
                         vao_id,
                         vbo_id,
                     )
@@ -14520,6 +16422,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::attach_instance_buffer_vao(
                         &self._engine,
+                        self._native_api,
                         vao_id,
                         vbo_id,
                     )
@@ -14543,6 +16446,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::attach_vertex_buffer_vao(
                         &self._engine,
+                        self._native_api,
                         vao_id,
                         vbo_id,
                     )
@@ -14571,7 +16475,7 @@ pub mod gfx {
                     crate::native::gfx::begin_end::<
                         E,
                         _,
-                    >(&self._engine, primitive, callback)
+                    >(&self._engine, self._native_api, primitive, callback)
                 }
             };
             self._engine.finish(result)
@@ -14584,7 +16488,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::begin_text(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::begin_text(&self._engine, value) }
+                {
+                    crate::native::gfx::begin_text(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14596,7 +16506,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::billboard(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::billboard(&self._engine) }
+                { crate::native::gfx::billboard(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -14628,6 +16538,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::bind_buffer_range_vbo(
                         &self._engine,
+                        self._native_api,
                         vbo_id,
                         binding_index,
                         element_offset,
@@ -14674,6 +16585,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::bind_image_texture(
                         &self._engine,
+                        self._native_api,
                         unit,
                         name,
                         level,
@@ -14713,6 +16625,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::bind_texture(
                         &self._engine,
+                        self._native_api,
                         name,
                         tex_num,
                         enable,
@@ -14729,7 +16642,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::blend_equation(mode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::blend_equation(&self._engine, mode) }
+                {
+                    crate::native::gfx::blend_equation(
+                        &self._engine,
+                        self._native_api,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14753,6 +16672,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::blend_equation_separate(
                         &self._engine,
+                        self._native_api,
                         mode_rgb,
                         mode_alpha,
                     )
@@ -14768,7 +16688,14 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::blend_func(src, dst) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::blend_func(&self._engine, src, dst) }
+                {
+                    crate::native::gfx::blend_func(
+                        &self._engine,
+                        self._native_api,
+                        src,
+                        dst,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14796,6 +16723,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::blend_func_separate(
                         &self._engine,
+                        self._native_api,
                         src_rgb,
                         dst_rgb,
                         src_alpha,
@@ -14813,7 +16741,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::blending(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::blending(&self._engine, value) }
+                { crate::native::gfx::blending(&self._engine, self._native_api, value) }
             };
             self._engine.finish(result)
         }
@@ -14857,6 +16785,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::blit_fbo(
                         &self._engine,
+                        self._native_api,
                         src_fboid,
                         dst_fboid,
                         x0_src,
@@ -14882,7 +16811,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::call_list(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::call_list(&self._engine, value) }
+                { crate::native::gfx::call_list(&self._engine, self._native_api, value) }
             };
             self._engine.finish(result)
         }
@@ -14911,6 +16840,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::change_texture_params(
                         &self._engine,
+                        self._native_api,
                         name,
                         params,
                     )
@@ -14937,7 +16867,15 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::clear(&self._engine, bits, values, count) }
+                {
+                    crate::native::gfx::clear(
+                        &self._engine,
+                        self._native_api,
+                        bits,
+                        values,
+                        count,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -14970,6 +16908,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::clear_attachment_fbo(
                         &self._engine,
+                        self._native_api,
                         target,
                         attachment,
                         values,
@@ -14987,7 +16926,12 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::clear_fallback_fonts(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::clear_fallback_fonts(&self._engine) }
+                {
+                    crate::native::gfx::clear_fallback_fonts(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15003,7 +16947,13 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::clear_submission_vao(&self._engine, value) }
+                {
+                    crate::native::gfx::clear_submission_vao(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15015,7 +16965,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::clear_vbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::clear_vbo(&self._engine, value) }
+                { crate::native::gfx::clear_vbo(&self._engine, self._native_api, value) }
             };
             self._engine.finish(result)
         }
@@ -15032,7 +16982,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::clip_distance(&self._engine, index, enable) }
+                {
+                    crate::native::gfx::clip_distance(
+                        &self._engine,
+                        self._native_api,
+                        index,
+                        enable,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15054,7 +17011,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::clip_plane(&self._engine, plane, equation) }
+                {
+                    crate::native::gfx::clip_plane(
+                        &self._engine,
+                        self._native_api,
+                        plane,
+                        equation,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15066,7 +17030,16 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::color(r, g, b, a) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::color(&self._engine, r, g, b, a) }
+                {
+                    crate::native::gfx::color(
+                        &self._engine,
+                        self._native_api,
+                        r,
+                        g,
+                        b,
+                        a,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15078,7 +17051,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::color_mask(options) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::color_mask(&self._engine, options) }
+                {
+                    crate::native::gfx::color_mask(
+                        &self._engine,
+                        self._native_api,
+                        options,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15097,7 +17076,16 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::config_mini_map(&self._engine, px, py, sx, sy) }
+                {
+                    crate::native::gfx::config_mini_map(
+                        &self._engine,
+                        self._native_api,
+                        px,
+                        py,
+                        sx,
+                        sy,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15140,6 +17128,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::copy_to_texture(
                         &self._engine,
+                        self._native_api,
                         name,
                         xoff,
                         yoff,
@@ -15176,6 +17165,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::copy_to_vbo(
                         &self._engine,
+                        self._native_api,
                         source_vboid,
                         destination_vboid,
                         copy_size_in_bytes,
@@ -15210,6 +17200,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::copy_vbo_to_readback(
                         &self._engine,
+                        self._native_api,
                         readback_id,
                         vbo_id,
                         src_offset,
@@ -15251,6 +17242,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::create_fbo(
                         &self._engine,
+                        self._native_api,
                         target,
                         attachments,
                         draw_buffers,
@@ -15268,7 +17260,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::create_fence(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::create_fence(&self._engine) }
+                { crate::native::gfx::create_fence(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -15283,7 +17275,12 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::gfx::create_list::<E, _>(&self._engine, callback) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::create_list::<E, _>(&self._engine, callback) }
+                {
+                    crate::native::gfx::create_list::<
+                        E,
+                        _,
+                    >(&self._engine, self._native_api, callback)
+                }
             };
             self._engine.finish(result)
         }
@@ -15295,7 +17292,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::create_query(target) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::create_query(&self._engine, target) }
+                {
+                    crate::native::gfx::create_query(
+                        &self._engine,
+                        self._native_api,
+                        target,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15325,6 +17328,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::create_rbo(
                         &self._engine,
+                        self._native_api,
                         xsize,
                         ysize,
                         target,
@@ -15343,7 +17347,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::create_readback(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::create_readback(&self._engine, value) }
+                {
+                    crate::native::gfx::create_readback(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15414,6 +17424,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::create_shader(
                         &self._engine,
+                        self._native_api,
                         definitions,
                         vertex,
                         tcs,
@@ -15444,6 +17455,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::create_texture(
                         &self._engine,
+                        self._native_api,
                         xsize,
                         ysize,
                         zsize,
@@ -15469,6 +17481,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::create_texture_atlas(
                         &self._engine,
+                        self._native_api,
                         xsize,
                         ysize,
                         alloc_type,
@@ -15485,7 +17498,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::cull_face(face) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::cull_face(&self._engine, face) }
+                { crate::native::gfx::cull_face(&self._engine, self._native_api, face) }
             };
             self._engine.finish(result)
         }
@@ -15497,7 +17510,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::culling(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::culling(&self._engine, value) }
+                { crate::native::gfx::culling(&self._engine, self._native_api, value) }
             };
             self._engine.finish(result)
         }
@@ -15531,6 +17544,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::define_vbo(
                         &self._engine,
+                        self._native_api,
                         vbo_id,
                         elements_count,
                         element_array,
@@ -15551,7 +17565,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_fbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_fbo(&self._engine, value) }
+                {
+                    crate::native::gfx::delete_fbo(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15563,7 +17583,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_fence(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_fence(&self._engine, value) }
+                {
+                    crate::native::gfx::delete_fence(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15575,7 +17601,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_font(font_id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_font(&self._engine, font_id) }
+                {
+                    crate::native::gfx::delete_font(
+                        &self._engine,
+                        self._native_api,
+                        font_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15587,7 +17619,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_list(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_list(&self._engine, value) }
+                {
+                    crate::native::gfx::delete_list(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15599,7 +17637,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_query(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_query(&self._engine, value) }
+                {
+                    crate::native::gfx::delete_query(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15611,7 +17655,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_rbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_rbo(&self._engine, value) }
+                {
+                    crate::native::gfx::delete_rbo(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15623,7 +17673,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_readback(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_readback(&self._engine, value) }
+                {
+                    crate::native::gfx::delete_readback(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15635,7 +17691,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_shader(shader_id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_shader(&self._engine, shader_id) }
+                {
+                    crate::native::gfx::delete_shader(
+                        &self._engine,
+                        self._native_api,
+                        shader_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15652,7 +17714,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_texture(name) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_texture(&self._engine, name) }
+                {
+                    crate::native::gfx::delete_texture(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15673,7 +17741,13 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_texture_atlas(&self._engine, name) }
+                {
+                    crate::native::gfx::delete_texture_atlas(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15690,7 +17764,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_texture_fbo(name) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_texture_fbo(&self._engine, name) }
+                {
+                    crate::native::gfx::delete_texture_fbo(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15702,7 +17782,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_vao(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_vao(&self._engine, value) }
+                {
+                    crate::native::gfx::delete_vao(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15714,7 +17800,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::delete_vbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::delete_vbo(&self._engine, value) }
+                {
+                    crate::native::gfx::delete_vbo(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15726,7 +17818,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::depth_clamp(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::depth_clamp(&self._engine, value) }
+                {
+                    crate::native::gfx::depth_clamp(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15738,7 +17836,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::depth_mask(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::depth_mask(&self._engine, value) }
+                {
+                    crate::native::gfx::depth_mask(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15750,7 +17854,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::depth_test(options) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::depth_test(&self._engine, options) }
+                {
+                    crate::native::gfx::depth_test(
+                        &self._engine,
+                        self._native_api,
+                        options,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -15778,6 +17888,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::dispatch_compute(
                         &self._engine,
+                        self._native_api,
                         num_group_x,
                         num_group_y,
                         num_group_z,
@@ -15813,6 +17924,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::download_vbo(
                         &self._engine,
+                        self._native_api,
                         vbo_id,
                         attribute_index,
                         element_offset,
@@ -15851,6 +17963,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::draw_arrays_vao(
                         &self._engine,
+                        self._native_api,
                         vao_id,
                         mode,
                         vertex_count,
@@ -15892,6 +18005,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::draw_elements_vao(
                         &self._engine,
+                        self._native_api,
                         vao_id,
                         mode,
                         draw_count,
@@ -15926,7 +18040,7 @@ pub mod gfx {
                     crate::native::gfx::draw_func_at_unit::<
                         E,
                         _,
-                    >(&self._engine, unit_id, use_mid_pos, callback)
+                    >(&self._engine, self._native_api, unit_id, use_mid_pos, callback)
                 }
             };
             self._engine.finish(result)
@@ -15961,6 +18075,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::draw_ground_circle(
                         &self._engine,
+                        self._native_api,
                         pos,
                         radius,
                         resolution,
@@ -16007,6 +18122,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::draw_ground_quad(
                         &self._engine,
+                        self._native_api,
                         x0,
                         z0,
                         x1,
@@ -16049,6 +18165,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::draw_list_at_unit(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         list_id,
                         use_mid_pos,
@@ -16068,7 +18185,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::draw_mini_map(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::draw_mini_map(&self._engine, value) }
+                {
+                    crate::native::gfx::draw_mini_map(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16084,7 +18207,13 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::dump_definition_vbo(&self._engine, value) }
+                {
+                    crate::native::gfx::dump_definition_vbo(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16096,7 +18225,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::edge_flag(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::edge_flag(&self._engine, value) }
+                { crate::native::gfx::edge_flag(&self._engine, self._native_api, value) }
             };
             self._engine.finish(result)
         }
@@ -16108,7 +18237,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::end_text(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::end_text(&self._engine) }
+                { crate::native::gfx::end_text(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -16129,7 +18258,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::feature(&self._engine, feature_id, options) }
+                {
+                    crate::native::gfx::feature(
+                        &self._engine,
+                        self._native_api,
+                        feature_id,
+                        options,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16145,7 +18281,13 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::feature_mult_matrix(&self._engine, value) }
+                {
+                    crate::native::gfx::feature_mult_matrix(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16162,7 +18304,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::feature_piece(&self._engine, object_id, piece_id) }
+                {
+                    crate::native::gfx::feature_piece(
+                        &self._engine,
+                        self._native_api,
+                        object_id,
+                        piece_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16182,6 +18331,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::feature_piece_matrix(
                         &self._engine,
+                        self._native_api,
                         object_id,
                         piece_id,
                     )
@@ -16209,6 +18359,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::feature_piece_mult_matrix(
                         &self._engine,
+                        self._native_api,
                         object_id,
                         piece_id,
                     )
@@ -16233,7 +18384,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::feature_raw(&self._engine, feature_id, options) }
+                {
+                    crate::native::gfx::feature_raw(
+                        &self._engine,
+                        self._native_api,
+                        feature_id,
+                        options,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16259,6 +18417,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::feature_shape(
                         &self._engine,
+                        self._native_api,
                         def_id,
                         team_id,
                         options,
@@ -16283,6 +18442,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::feature_shape_textures(
                         &self._engine,
+                        self._native_api,
                         object_id,
                         push,
                     )
@@ -16303,7 +18463,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::feature_textures(&self._engine, object_id, push) }
+                {
+                    crate::native::gfx::feature_textures(
+                        &self._engine,
+                        self._native_api,
+                        object_id,
+                        push,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16324,7 +18491,13 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::finalize_texture_atlas(&self._engine, name) }
+                {
+                    crate::native::gfx::finalize_texture_atlas(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16336,7 +18509,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::finish(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::finish(&self._engine) }
+                { crate::native::gfx::finish(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -16348,7 +18521,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::flush(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::flush(&self._engine) }
+                { crate::native::gfx::flush(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -16360,7 +18533,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::fog(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::fog(&self._engine, value) }
+                { crate::native::gfx::fog(&self._engine, self._native_api, value) }
             };
             self._engine.finish(result)
         }
@@ -16372,7 +18545,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::fog_coord(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::fog_coord(&self._engine, value) }
+                { crate::native::gfx::fog_coord(&self._engine, self._native_api, value) }
             };
             self._engine.finish(result)
         }
@@ -16396,6 +18569,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::font_begin(
                         &self._engine,
+                        self._native_api,
                         font_id,
                         user_defined_blending,
                     )
@@ -16415,7 +18589,13 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::font_bind_texture(&self._engine, font_id) }
+                {
+                    crate::native::gfx::font_bind_texture(
+                        &self._engine,
+                        self._native_api,
+                        font_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16427,7 +18607,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::font_end(font_id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::font_end(&self._engine, font_id) }
+                {
+                    crate::native::gfx::font_end(
+                        &self._engine,
+                        self._native_api,
+                        font_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16469,6 +18655,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::font_get_text_height(
                         &self._engine,
+                        self._native_api,
                         font_id,
                         text,
                         x,
@@ -16518,6 +18705,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::font_get_text_width(
                         &self._engine,
+                        self._native_api,
                         font_id,
                         text,
                         x,
@@ -16567,6 +18755,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::font_print(
                         &self._engine,
+                        self._native_api,
                         font_id,
                         text,
                         x,
@@ -16614,6 +18803,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::font_print_world(
                         &self._engine,
+                        self._native_api,
                         font_id,
                         text,
                         pos,
@@ -16644,6 +18834,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::font_set_auto_outline_color(
                         &self._engine,
+                        self._native_api,
                         font_id,
                         enable,
                     )
@@ -16677,6 +18868,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::font_set_outline_color(
                         &self._engine,
+                        self._native_api,
                         font_id,
                         r,
                         g,
@@ -16713,6 +18905,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::font_set_text_color(
                         &self._engine,
+                        self._native_api,
                         font_id,
                         r,
                         g,
@@ -16743,6 +18936,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::font_submit_buffered(
                         &self._engine,
+                        self._native_api,
                         font_id,
                         options,
                     )
@@ -16781,6 +18975,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::font_wrap_text(
                         &self._engine,
+                        self._native_api,
                         font_id,
                         text,
                         max_width,
@@ -16819,6 +19014,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::frustum(
                         &self._engine,
+                        self._native_api,
                         left,
                         right,
                         bottom,
@@ -16843,7 +19039,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::generate_mipmap(name) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::generate_mipmap(&self._engine, name) }
+                {
+                    crate::native::gfx::generate_mipmap(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16862,7 +19064,13 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_active_uniforms(&self._engine, shader_id) }
+                {
+                    crate::native::gfx::get_active_uniforms(
+                        &self._engine,
+                        self._native_api,
+                        shader_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16896,6 +19104,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::get_atlas_texture(
                         &self._engine,
+                        self._native_api,
                         atlas_name,
                         texture_name,
                     )
@@ -16925,7 +19134,14 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::gfx::get_atmosphere(key, mode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_atmosphere(&self._engine, key, mode) }
+                {
+                    crate::native::gfx::get_atmosphere(
+                        &self._engine,
+                        self._native_api,
+                        key,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16937,7 +19153,12 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_console_commands(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_console_commands(&self._engine) }
+                {
+                    crate::native::gfx::get_console_commands(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16961,7 +19182,13 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_engine_atlas_textures(&self._engine, name) }
+                {
+                    crate::native::gfx::get_engine_atlas_textures(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16977,7 +19204,12 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_engine_model_uniform_data_def(&self._engine) }
+                {
+                    crate::native::gfx::get_engine_model_uniform_data_def(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -16995,7 +19227,12 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_engine_model_uniform_data_size(&self._engine) }
+                {
+                    crate::native::gfx::get_engine_model_uniform_data_size(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17011,7 +19248,12 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_engine_texture_names(&self._engine) }
+                {
+                    crate::native::gfx::get_engine_texture_names(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17030,6 +19272,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::get_engine_uniform_buffer_def(
                         &self._engine,
+                        self._native_api,
                         index,
                     )
                 }
@@ -17049,7 +19292,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_fixed_state(param) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_fixed_state(&self._engine, param) }
+                {
+                    crate::native::gfx::get_fixed_state(
+                        &self._engine,
+                        self._native_api,
+                        param,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17061,7 +19310,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::gfx::get_font_info(font_id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_font_info(&self._engine, font_id) }
+                {
+                    crate::native::gfx::get_font_info(
+                        &self._engine,
+                        self._native_api,
+                        font_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17085,7 +19340,13 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_global_tex_coords(&self._engine, value) }
+                {
+                    crate::native::gfx::get_global_tex_coords(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17097,7 +19358,12 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_global_tex_names(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_global_tex_names(&self._engine) }
+                {
+                    crate::native::gfx::get_global_tex_names(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17109,7 +19375,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_idvbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_idvbo(&self._engine, value) }
+                { crate::native::gfx::get_idvbo(&self._engine, self._native_api, value) }
             };
             self._engine.finish(result)
         }
@@ -17135,7 +19401,14 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::gfx::get_map_rendering(key, mode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_map_rendering(&self._engine, key, mode) }
+                {
+                    crate::native::gfx::get_map_rendering(
+                        &self._engine,
+                        self._native_api,
+                        key,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17147,7 +19420,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_matrix_data(mode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_matrix_data(&self._engine, mode) }
+                {
+                    crate::native::gfx::get_matrix_data(
+                        &self._engine,
+                        self._native_api,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17164,7 +19443,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_number(&self._engine, pname, max_values) }
+                {
+                    crate::native::gfx::get_number(
+                        &self._engine,
+                        self._native_api,
+                        pname,
+                        max_values,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17176,7 +19462,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_query(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_query(&self._engine, value) }
+                { crate::native::gfx::get_query(&self._engine, self._native_api, value) }
             };
             self._engine.finish(result)
         }
@@ -17188,7 +19474,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_rbo_info(rbo_id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_rbo_info(&self._engine, rbo_id) }
+                {
+                    crate::native::gfx::get_rbo_info(
+                        &self._engine,
+                        self._native_api,
+                        rbo_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17200,7 +19492,12 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_screen_view_trans(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_screen_view_trans(&self._engine) }
+                {
+                    crate::native::gfx::get_screen_view_trans(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17212,7 +19509,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_shader_log(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_shader_log(&self._engine) }
+                { crate::native::gfx::get_shader_log(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -17224,7 +19521,12 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_shadow_map_params(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_shadow_map_params(&self._engine) }
+                {
+                    crate::native::gfx::get_shadow_map_params(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17236,7 +19538,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_string(pname) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_string(&self._engine, pname) }
+                {
+                    crate::native::gfx::get_string(
+                        &self._engine,
+                        self._native_api,
+                        pname,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17267,6 +19575,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::get_subroutine_index(
                         &self._engine,
+                        self._native_api,
                         shader_id,
                         shader_type,
                         name,
@@ -17292,7 +19601,14 @@ pub mod gfx {
             let result = {
                 #[cfg(target_arch = "wasm32")] { crate::wasm::gfx::get_sun(key, mode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_sun(&self._engine, key, mode) }
+                {
+                    crate::native::gfx::get_sun(
+                        &self._engine,
+                        self._native_api,
+                        key,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17309,7 +19625,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_text_height(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_text_height(&self._engine, value) }
+                {
+                    crate::native::gfx::get_text_height(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17326,7 +19648,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_text_width(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_text_width(&self._engine, value) }
+                {
+                    crate::native::gfx::get_text_width(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17351,6 +19679,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::get_uniform_location(
                         &self._engine,
+                        self._native_api,
                         shader_id,
                         name,
                     )
@@ -17366,7 +19695,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_vao(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_vao(&self._engine) }
+                { crate::native::gfx::get_vao(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -17383,7 +19712,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_vbo(&self._engine, target, freq_updated) }
+                {
+                    crate::native::gfx::get_vbo(
+                        &self._engine,
+                        self._native_api,
+                        target,
+                        freq_updated,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17395,7 +19731,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_vbo_info(vbo_id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_vbo_info(&self._engine, vbo_id) }
+                {
+                    crate::native::gfx::get_vbo_info(
+                        &self._engine,
+                        self._native_api,
+                        vbo_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17411,7 +19753,13 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_view_range(&self._engine, camera_type) }
+                {
+                    crate::native::gfx::get_view_range(
+                        &self._engine,
+                        self._native_api,
+                        camera_type,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17423,7 +19771,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::get_view_sizes(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_view_sizes(&self._engine) }
+                { crate::native::gfx::get_view_sizes(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -17449,7 +19797,14 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::gfx::get_water_rendering(key, mode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::get_water_rendering(&self._engine, key, mode) }
+                {
+                    crate::native::gfx::get_water_rendering(
+                        &self._engine,
+                        self._native_api,
+                        key,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17466,7 +19821,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::has_extension(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::has_extension(&self._engine, value) }
+                {
+                    crate::native::gfx::has_extension(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17496,6 +19857,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::instance_data_from_feature_defs_vbo(
                         &self._engine,
+                        self._native_api,
                         vbo_id,
                         ids,
                         attribute_index,
@@ -17532,6 +19894,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::instance_data_from_features_vbo(
                         &self._engine,
+                        self._native_api,
                         vbo_id,
                         ids,
                         attribute_index,
@@ -17568,6 +19931,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::instance_data_from_unit_defs_vbo(
                         &self._engine,
+                        self._native_api,
                         vbo_id,
                         ids,
                         attribute_index,
@@ -17604,6 +19968,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::instance_data_from_units_vbo(
                         &self._engine,
+                        self._native_api,
                         vbo_id,
                         ids,
                         attribute_index,
@@ -17622,7 +19987,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::is_fence_signaled(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::is_fence_signaled(&self._engine, value) }
+                {
+                    crate::native::gfx::is_fence_signaled(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17634,7 +20005,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::is_query_available(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::is_query_available(&self._engine, value) }
+                {
+                    crate::native::gfx::is_query_available(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17651,7 +20028,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::is_valid_fbo(&self._engine, fbo_id, target) }
+                {
+                    crate::native::gfx::is_valid_fbo(
+                        &self._engine,
+                        self._native_api,
+                        fbo_id,
+                        target,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17686,6 +20070,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::light(
                         &self._engine,
+                        self._native_api,
                         light,
                         options,
                         pname,
@@ -17704,7 +20089,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::lighting(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::lighting(&self._engine, value) }
+                { crate::native::gfx::lighting(&self._engine, self._native_api, value) }
             };
             self._engine.finish(result)
         }
@@ -17721,7 +20106,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::line_stipple(&self._engine, factor, pattern) }
+                {
+                    crate::native::gfx::line_stipple(
+                        &self._engine,
+                        self._native_api,
+                        factor,
+                        pattern,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17733,7 +20125,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::line_width(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::line_width(&self._engine, value) }
+                {
+                    crate::native::gfx::line_width(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17766,6 +20164,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::load_font(
                         &self._engine,
+                        self._native_api,
                         path,
                         size,
                         outline_width,
@@ -17783,7 +20182,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::load_identity(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::load_identity(&self._engine) }
+                { crate::native::gfx::load_identity(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -17800,7 +20199,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::load_matrix(values) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::load_matrix(&self._engine, values) }
+                {
+                    crate::native::gfx::load_matrix(
+                        &self._engine,
+                        self._native_api,
+                        values,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17812,7 +20217,14 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::logic_op(enable, opcode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::logic_op(&self._engine, enable, opcode) }
+                {
+                    crate::native::gfx::logic_op(
+                        &self._engine,
+                        self._native_api,
+                        enable,
+                        opcode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17835,7 +20247,15 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::material(&self._engine, pname, values, count) }
+                {
+                    crate::native::gfx::material(
+                        &self._engine,
+                        self._native_api,
+                        pname,
+                        values,
+                        count,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17865,6 +20285,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::matrix_data_from_projectiles_vbo(
                         &self._engine,
+                        self._native_api,
                         vbo_id,
                         ids,
                         attribute_index,
@@ -17883,7 +20304,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::matrix_mode(mode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::matrix_mode(&self._engine, mode) }
+                {
+                    crate::native::gfx::matrix_mode(
+                        &self._engine,
+                        self._native_api,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17895,7 +20322,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::memory_barrier(barriers) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::memory_barrier(&self._engine, barriers) }
+                {
+                    crate::native::gfx::memory_barrier(
+                        &self._engine,
+                        self._native_api,
+                        barriers,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17907,7 +20340,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::models_vbo(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::models_vbo(&self._engine, value) }
+                {
+                    crate::native::gfx::models_vbo(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17924,7 +20363,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::mult_matrix(values) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::mult_matrix(&self._engine, values) }
+                {
+                    crate::native::gfx::mult_matrix(
+                        &self._engine,
+                        self._native_api,
+                        values,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -17956,6 +20401,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::multi_tex_coord(
                         &self._engine,
+                        self._native_api,
                         tex_num,
                         s,
                         t,
@@ -17998,6 +20444,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::multi_tex_env(
                         &self._engine,
+                        self._native_api,
                         tex_num,
                         target,
                         pname,
@@ -18041,6 +20488,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::multi_tex_gen(
                         &self._engine,
+                        self._native_api,
                         tex_num,
                         target,
                         options,
@@ -18060,7 +20508,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::normal(x, y, z) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::normal(&self._engine, x, y, z) }
+                { crate::native::gfx::normal(&self._engine, self._native_api, x, y, z) }
             };
             self._engine.finish(result)
         }
@@ -18091,6 +20539,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::object_label(
                         &self._engine,
+                        self._native_api,
                         identifier,
                         object_id,
                         label,
@@ -18127,6 +20576,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::ortho(
                         &self._engine,
+                        self._native_api,
                         left,
                         right,
                         bottom,
@@ -18167,6 +20617,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::point_parameter(
                         &self._engine,
+                        self._native_api,
                         pname,
                         value,
                         values,
@@ -18184,7 +20635,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::point_size(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::point_size(&self._engine, value) }
+                {
+                    crate::native::gfx::point_size(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18196,7 +20653,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::point_sprite(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::point_sprite(&self._engine, value) }
+                {
+                    crate::native::gfx::point_sprite(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18208,7 +20671,14 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::polygon_mode(face, mode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::polygon_mode(&self._engine, face, mode) }
+                {
+                    crate::native::gfx::polygon_mode(
+                        &self._engine,
+                        self._native_api,
+                        face,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18225,7 +20695,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::polygon_offset(&self._engine, factor, units) }
+                {
+                    crate::native::gfx::polygon_offset(
+                        &self._engine,
+                        self._native_api,
+                        factor,
+                        units,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18237,7 +20714,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::pop_attrib(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::pop_attrib(&self._engine) }
+                { crate::native::gfx::pop_attrib(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -18249,7 +20726,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::pop_debug_group(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::pop_debug_group(&self._engine) }
+                { crate::native::gfx::pop_debug_group(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -18261,7 +20738,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::pop_matrix(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::pop_matrix(&self._engine) }
+                { crate::native::gfx::pop_matrix(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -18273,7 +20750,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::push_attrib(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::push_attrib(&self._engine, value) }
+                {
+                    crate::native::gfx::push_attrib(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18304,6 +20787,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::push_debug_group(
                         &self._engine,
+                        self._native_api,
                         id,
                         message,
                         source_is_third_party,
@@ -18320,7 +20804,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::push_matrix(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::push_matrix(&self._engine) }
+                { crate::native::gfx::push_matrix(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -18335,7 +20819,12 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::gfx::push_pop_matrix::<E, _>(&self._engine, callback) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::push_pop_matrix::<E, _>(&self._engine, callback) }
+                {
+                    crate::native::gfx::push_pop_matrix::<
+                        E,
+                        _,
+                    >(&self._engine, self._native_api, callback)
+                }
             };
             self._engine.finish(result)
         }
@@ -18363,6 +20852,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::raw_bind_fbo(
                         &self._engine,
+                        self._native_api,
                         bind_default,
                         fbo_id,
                         target,
@@ -18398,6 +20888,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::read_pixels(
                         &self._engine,
+                        self._native_api,
                         x,
                         y,
                         width,
@@ -18430,6 +20921,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::read_readback(
                         &self._engine,
+                        self._native_api,
                         readback_id,
                         offset,
                         count,
@@ -18446,7 +20938,16 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::rect(x1, y1, x2, y2) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::rect(&self._engine, x1, y1, x2, y2) }
+                {
+                    crate::native::gfx::rect(
+                        &self._engine,
+                        self._native_api,
+                        x1,
+                        y1,
+                        x2,
+                        y2,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18466,6 +20967,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::remove_from_submission_vao(
                         &self._engine,
+                        self._native_api,
                         vao_id,
                         index,
                     )
@@ -18499,7 +21001,7 @@ pub mod gfx {
                     crate::native::gfx::render_to_texture::<
                         E,
                         _,
-                    >(&self._engine, name, callback)
+                    >(&self._engine, self._native_api, name, callback)
                 }
             };
             self._engine.finish(result)
@@ -18512,7 +21014,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::reset_matrices(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::reset_matrices(&self._engine) }
+                { crate::native::gfx::reset_matrices(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -18524,7 +21026,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::reset_state(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::reset_state(&self._engine) }
+                { crate::native::gfx::reset_state(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -18536,7 +21038,16 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::rotate(degrees, x, y, z) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::rotate(&self._engine, degrees, x, y, z) }
+                {
+                    crate::native::gfx::rotate(
+                        &self._engine,
+                        self._native_api,
+                        degrees,
+                        x,
+                        y,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18552,7 +21063,12 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::gfx::run_query::<E, _>(&self._engine, id, callback) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::run_query::<E, _>(&self._engine, id, callback) }
+                {
+                    crate::native::gfx::run_query::<
+                        E,
+                        _,
+                    >(&self._engine, self._native_api, id, callback)
+                }
             };
             self._engine.finish(result)
         }
@@ -18591,6 +21107,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::save_image(
                         &self._engine,
+                        self._native_api,
                         x,
                         y,
                         width,
@@ -18611,7 +21128,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::scale(x, y, z) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::scale(&self._engine, x, y, z) }
+                { crate::native::gfx::scale(&self._engine, self._native_api, x, y, z) }
             };
             self._engine.finish(result)
         }
@@ -18630,7 +21147,16 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::scissor(&self._engine, x, y, width, height) }
+                {
+                    crate::native::gfx::scissor(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                        width,
+                        height,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18642,7 +21168,15 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::secondary_color(x, y, z) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::secondary_color(&self._engine, x, y, z) }
+                {
+                    crate::native::gfx::secondary_color(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18681,6 +21215,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::set_fbo_attachment(
                         &self._engine,
+                        self._native_api,
                         fbo_id,
                         attachment,
                         texture_name,
@@ -18709,6 +21244,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::set_fbo_draw_buffers(
                         &self._engine,
+                        self._native_api,
                         fbo_id,
                         buffers,
                     )
@@ -18732,6 +21268,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::set_fbo_read_buffer(
                         &self._engine,
+                        self._native_api,
                         fbo_id,
                         buffer,
                     )
@@ -18761,6 +21298,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::set_feature_buffer_uniforms(
                         &self._engine,
+                        self._native_api,
                         object_id,
                         values,
                         offset,
@@ -18791,6 +21329,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::set_geometry_shader_parameter(
                         &self._engine,
+                        self._native_api,
                         shader_id,
                         param,
                         value,
@@ -18830,6 +21369,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::set_tesselation_shader_parameter(
                         &self._engine,
+                        self._native_api,
                         param,
                         value,
                         values,
@@ -18862,6 +21402,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::set_unit_buffer_uniforms(
                         &self._engine,
+                        self._native_api,
                         object_id,
                         values,
                         offset,
@@ -18878,7 +21419,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::shade_model(mode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::shade_model(&self._engine, mode) }
+                {
+                    crate::native::gfx::shade_model(
+                        &self._engine,
+                        self._native_api,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18917,7 +21464,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::shape(&self._engine, primitive, vertices) }
+                {
+                    crate::native::gfx::shape(
+                        &self._engine,
+                        self._native_api,
+                        primitive,
+                        vertices,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18929,7 +21483,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::slave_mini_map(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::slave_mini_map(&self._engine, value) }
+                {
+                    crate::native::gfx::slave_mini_map(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18947,7 +21507,15 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::stencil_func(&self._engine, func, ref_, mask) }
+                {
+                    crate::native::gfx::stencil_func(
+                        &self._engine,
+                        self._native_api,
+                        func,
+                        ref_,
+                        mask,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -18975,6 +21543,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::stencil_func_separate(
                         &self._engine,
+                        self._native_api,
                         face,
                         func,
                         ref_,
@@ -18992,7 +21561,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::stencil_mask(mask) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::stencil_mask(&self._engine, mask) }
+                {
+                    crate::native::gfx::stencil_mask(
+                        &self._engine,
+                        self._native_api,
+                        mask,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19009,7 +21584,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::stencil_mask_separate(&self._engine, face, mask) }
+                {
+                    crate::native::gfx::stencil_mask_separate(
+                        &self._engine,
+                        self._native_api,
+                        face,
+                        mask,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19027,7 +21609,15 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::stencil_op(&self._engine, fail, zfail, zpass) }
+                {
+                    crate::native::gfx::stencil_op(
+                        &self._engine,
+                        self._native_api,
+                        fail,
+                        zfail,
+                        zpass,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19055,6 +21645,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::stencil_op_separate(
                         &self._engine,
+                        self._native_api,
                         face,
                         fail,
                         zfail,
@@ -19072,7 +21663,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::stencil_test(enable) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::stencil_test(&self._engine, enable) }
+                {
+                    crate::native::gfx::stencil_test(
+                        &self._engine,
+                        self._native_api,
+                        enable,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19084,7 +21681,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::submit_vao(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::submit_vao(&self._engine, value) }
+                {
+                    crate::native::gfx::submit_vao(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19096,7 +21699,7 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::swap_buffers(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::swap_buffers(&self._engine) }
+                { crate::native::gfx::swap_buffers(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -19123,7 +21726,17 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::tex_coord(&self._engine, x, y, z, w, count) }
+                {
+                    crate::native::gfx::tex_coord(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                        z,
+                        w,
+                        count,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19156,6 +21769,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::tex_env(
                         &self._engine,
+                        self._native_api,
                         target,
                         pname,
                         values,
@@ -19196,6 +21810,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::tex_gen(
                         &self._engine,
+                        self._native_api,
                         target,
                         options,
                         pname,
@@ -19238,6 +21853,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::tex_rect(
                         &self._engine,
+                        self._native_api,
                         x1,
                         y1,
                         x2,
@@ -19284,7 +21900,17 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::text(&self._engine, text, x, y, size, options) }
+                {
+                    crate::native::gfx::text(
+                        &self._engine,
+                        self._native_api,
+                        text,
+                        x,
+                        y,
+                        size,
+                        options,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19317,6 +21943,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::text_env(
                         &self._engine,
+                        self._native_api,
                         target,
                         pname,
                         values,
@@ -19339,7 +21966,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::texture_info(name) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::texture_info(&self._engine, name) }
+                {
+                    crate::native::gfx::texture_info(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19351,7 +21984,15 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::translate(x, y, z) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::translate(&self._engine, x, y, z) }
+                {
+                    crate::native::gfx::translate(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19383,6 +22024,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::unbind_buffer_range_vbo(
                         &self._engine,
+                        self._native_api,
                         vbo_id,
                         binding_index,
                         element_offset,
@@ -19413,7 +22055,15 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::uniform(&self._engine, location, values, count) }
+                {
+                    crate::native::gfx::uniform(
+                        &self._engine,
+                        self._native_api,
+                        location,
+                        values,
+                        count,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19439,6 +22089,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::uniform_array_float(
                         &self._engine,
+                        self._native_api,
                         location,
                         values,
                         components,
@@ -19469,6 +22120,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::uniform_array_int(
                         &self._engine,
+                        self._native_api,
                         location,
                         values,
                         components,
@@ -19504,6 +22156,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::uniform_int(
                         &self._engine,
+                        self._native_api,
                         location,
                         values,
                         count,
@@ -19534,6 +22187,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::uniform_matrix(
                         &self._engine,
+                        self._native_api,
                         location,
                         values,
                         transpose,
@@ -19558,6 +22212,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::uniform_subroutine(
                         &self._engine,
+                        self._native_api,
                         shader_type,
                         index,
                     )
@@ -19573,7 +22228,14 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::unit(unit_id, options) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::unit(&self._engine, unit_id, options) }
+                {
+                    crate::native::gfx::unit(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        options,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19585,7 +22247,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::unit_mult_matrix(value) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::unit_mult_matrix(&self._engine, value) }
+                {
+                    crate::native::gfx::unit_mult_matrix(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19602,7 +22270,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::unit_piece(&self._engine, object_id, piece_id) }
+                {
+                    crate::native::gfx::unit_piece(
+                        &self._engine,
+                        self._native_api,
+                        object_id,
+                        piece_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19622,6 +22297,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::unit_piece_matrix(
                         &self._engine,
+                        self._native_api,
                         object_id,
                         piece_id,
                     )
@@ -19649,6 +22325,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::unit_piece_mult_matrix(
                         &self._engine,
+                        self._native_api,
                         object_id,
                         piece_id,
                     )
@@ -19669,7 +22346,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::unit_raw(&self._engine, unit_id, options) }
+                {
+                    crate::native::gfx::unit_raw(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        options,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19695,6 +22379,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::unit_shape(
                         &self._engine,
+                        self._native_api,
                         def_id,
                         team_id,
                         options,
@@ -19719,6 +22404,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::unit_shape_textures(
                         &self._engine,
+                        self._native_api,
                         object_id,
                         push,
                     )
@@ -19739,7 +22425,14 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::unit_textures(&self._engine, object_id, push) }
+                {
+                    crate::native::gfx::unit_textures(
+                        &self._engine,
+                        self._native_api,
+                        object_id,
+                        push,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19765,7 +22458,7 @@ pub mod gfx {
                     crate::native::gfx::unsafe_state::<
                         E,
                         _,
-                    >(&self._engine, state, reverse, callback)
+                    >(&self._engine, self._native_api, state, reverse, callback)
                 }
             };
             self._engine.finish(result)
@@ -19815,6 +22508,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::upload_texture(
                         &self._engine,
+                        self._native_api,
                         name,
                         target,
                         level,
@@ -19860,6 +22554,7 @@ pub mod gfx {
                 {
                     crate::native::gfx::upload_vbo(
                         &self._engine,
+                        self._native_api,
                         vbo_id,
                         data,
                         attribute_index,
@@ -19879,7 +22574,13 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::use_shader(shader_id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::use_shader(&self._engine, shader_id) }
+                {
+                    crate::native::gfx::use_shader(
+                        &self._engine,
+                        self._native_api,
+                        shader_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19891,7 +22592,17 @@ pub mod gfx {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::gfx::vertex(x, y, z, w, count) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::vertex(&self._engine, x, y, z, w, count) }
+                {
+                    crate::native::gfx::vertex(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                        z,
+                        w,
+                        count,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19910,7 +22621,16 @@ pub mod gfx {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::gfx::viewport(&self._engine, x, y, width, height) }
+                {
+                    crate::native::gfx::viewport(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                        width,
+                        height,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -19921,12 +22641,17 @@ pub mod lights {
     use crate::Result;
     pub struct Lights<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::LightsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn lights(&self) -> Lights<'_, E> {
             Lights {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.lights.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -19954,6 +22679,7 @@ pub mod lights {
                 {
                     crate::native::lights::add_light_tracking_target(
                         &self._engine,
+                        self._native_api,
                         light_handle,
                         object_id,
                         track_unit,
@@ -20026,7 +22752,13 @@ pub mod lights {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::lights::add_map_light(params) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::lights::add_map_light(&self._engine, params) }
+                {
+                    crate::native::lights::add_map_light(
+                        &self._engine,
+                        self._native_api,
+                        params,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -20097,7 +22829,13 @@ pub mod lights {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::lights::add_model_light(&self._engine, params) }
+                {
+                    crate::native::lights::add_model_light(
+                        &self._engine,
+                        self._native_api,
+                        params,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -20125,6 +22863,7 @@ pub mod lights {
                 {
                     crate::native::lights::set_map_light_tracking_state(
                         &self._engine,
+                        self._native_api,
                         light_handle,
                         object_id,
                         enable_tracking,
@@ -20158,6 +22897,7 @@ pub mod lights {
                 {
                     crate::native::lights::set_model_light_tracking_state(
                         &self._engine,
+                        self._native_api,
                         light_handle,
                         object_id,
                         enable_tracking,
@@ -20242,6 +22982,7 @@ pub mod lights {
                 {
                     crate::native::lights::update_map_light(
                         &self._engine,
+                        self._native_api,
                         light_handle,
                         params,
                     )
@@ -20324,6 +23065,7 @@ pub mod lights {
                 {
                     crate::native::lights::update_model_light(
                         &self._engine,
+                        self._native_api,
                         light_handle,
                         params,
                     )
@@ -20339,12 +23081,17 @@ pub mod icons {
     use alloc::vec::Vec;
     pub struct Icons<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::IconsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn icons(&self) -> Icons<'_, E> {
             Icons {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.icons.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -20392,6 +23139,7 @@ pub mod icons {
                 {
                     crate::native::icons::add_unit_icon(
                         &self._engine,
+                        self._native_api,
                         icon_name,
                         tex_file,
                         size,
@@ -20423,7 +23171,13 @@ pub mod icons {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::icons::free_unit_icon(&self._engine, icon_name) }
+                {
+                    crate::native::icons::free_unit_icon(
+                        &self._engine,
+                        self._native_api,
+                        icon_name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -20445,6 +23199,7 @@ pub mod icons {
                 {
                     crate::native::icons::get_all_icon_data_array(
                         &self._engine,
+                        self._native_api,
                         full_data,
                     )
                 }
@@ -20476,6 +23231,7 @@ pub mod icons {
                 {
                     crate::native::icons::get_icon_data(
                         &self._engine,
+                        self._native_api,
                         icon_name,
                         full_data,
                     )
@@ -20495,7 +23251,13 @@ pub mod icons {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::icons::unit_icon_get_draw(&self._engine, unit_id) }
+                {
+                    crate::native::icons::unit_icon_get_draw(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -20515,6 +23277,7 @@ pub mod icons {
                 {
                     crate::native::icons::unit_icon_set_draw(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         draw_icon,
                     )
@@ -20529,12 +23292,17 @@ pub mod markers {
     use crate::Result;
     pub struct Markers<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::MarkersApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn markers(&self) -> Markers<'_, E> {
             Markers {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.markers.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -20551,7 +23319,14 @@ pub mod markers {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::markers::add_world_icon(&self._engine, cmd_id, pos) }
+                {
+                    crate::native::markers::add_world_icon(
+                        &self._engine,
+                        self._native_api,
+                        cmd_id,
+                        pos,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -20573,7 +23348,14 @@ pub mod markers {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::markers::add_world_text(&self._engine, text, pos) }
+                {
+                    crate::native::markers::add_world_text(
+                        &self._engine,
+                        self._native_api,
+                        text,
+                        pos,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -20601,6 +23383,7 @@ pub mod markers {
                 {
                     crate::native::markers::add_world_unit(
                         &self._engine,
+                        self._native_api,
                         unit_def_id,
                         pos,
                         team_id,
@@ -20634,6 +23417,7 @@ pub mod markers {
                 {
                     crate::native::markers::marker_add_line(
                         &self._engine,
+                        self._native_api,
                         from,
                         to,
                         local_only,
@@ -20672,6 +23456,7 @@ pub mod markers {
                 {
                     crate::native::markers::marker_add_point(
                         &self._engine,
+                        self._native_api,
                         pos,
                         text,
                         local_only,
@@ -20705,6 +23490,7 @@ pub mod markers {
                 {
                     crate::native::markers::marker_erase_position(
                         &self._engine,
+                        self._native_api,
                         pos,
                         unused,
                         options,
@@ -20723,12 +23509,19 @@ pub mod ground_decals {
     use alloc::string::String;
     pub struct GroundDecals<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::GroundDecalsApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn ground_decals(&self) -> GroundDecals<'_, E> {
             GroundDecals {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.ground_decals.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -20744,7 +23537,12 @@ pub mod ground_decals {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::ground_decals::create_ground_decal(&self._engine) }
+                {
+                    crate::native::ground_decals::create_ground_decal(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -20763,6 +23561,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::destroy_ground_decal(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -20781,7 +23580,12 @@ pub mod ground_decals {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::ground_decals::get_all_ground_decals(&self._engine) }
+                {
+                    crate::native::ground_decals::get_all_ground_decals(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -20803,6 +23607,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_alpha(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -20827,6 +23632,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_creation_frame(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -20851,6 +23657,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_glow_params(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -20875,6 +23682,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_middle_pos(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -20899,6 +23707,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_misc(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -20920,6 +23729,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_normal(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -20944,6 +23754,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_owner(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -20968,6 +23779,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_quad_pos(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -20992,6 +23804,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_rotation(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -21016,6 +23829,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_size_and_height(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -21042,6 +23856,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_texture(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         main_tex,
                     )
@@ -21067,6 +23882,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_texture_params(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -21087,6 +23903,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_textures(
                         &self._engine,
+                        self._native_api,
                         options,
                     )
                 }
@@ -21108,6 +23925,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_tint(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -21129,6 +23947,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_type(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                     )
                 }
@@ -21155,6 +23974,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::get_ground_decal_user_data(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         quad_index,
                     )
@@ -21184,6 +24004,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_alpha(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         alpha,
                         alpha_falloff,
@@ -21214,6 +24035,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_creation_frame(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         creation_frame_min,
                         creation_frame_max,
@@ -21244,6 +24066,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_glow_params(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         glow,
                         glow_falloff,
@@ -21280,6 +24103,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_misc(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         dot_elim_exp,
                         ref_height,
@@ -21315,6 +24139,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_normal(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         normal_x,
                         normal_y,
@@ -21352,6 +24177,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_pos_and_dims(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         mid_pos_x,
                         mid_pos_z,
@@ -21399,6 +24225,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_quad_pos_and_height(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         pos_tlx,
                         pos_tly,
@@ -21434,6 +24261,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_rotation(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         rotation,
                     )
@@ -21468,6 +24296,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_texture(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         texture_name,
                         main_tex,
@@ -21498,6 +24327,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_texture_params(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         tex_wrap_distance,
                         tex_traveled_distance,
@@ -21532,6 +24362,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_tint(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         tint_r,
                         tint_g,
@@ -21570,6 +24401,7 @@ pub mod ground_decals {
                 {
                     crate::native::ground_decals::set_ground_decal_user_data(
                         &self._engine,
+                        self._native_api,
                         decal_id,
                         quad_index,
                         value_x,
@@ -21589,12 +24421,19 @@ pub mod system_control {
     use alloc::string::String;
     pub struct SystemControl<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::SystemControlApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn system_control(&self) -> SystemControl<'_, E> {
             SystemControl {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.system_control.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -21619,7 +24458,7 @@ pub mod system_control {
                     crate::native::system_control::call_as_team::<
                         E,
                         _,
-                    >(&self._engine, team_id, callback)
+                    >(&self._engine, self._native_api, team_id, callback)
                 }
             };
             self._engine.finish(result)
@@ -21649,6 +24488,7 @@ pub mod system_control {
                 {
                     crate::native::system_control::clear_watch_dog_timer(
                         &self._engine,
+                        self._native_api,
                         thread_name,
                         keep_stopped,
                     )
@@ -21688,6 +24528,7 @@ pub mod system_control {
                 {
                     crate::native::system_control::garbage_collect_ctrl(
                         &self._engine,
+                        self._native_api,
                         iters_per_batch,
                         num_steps_per_iter,
                         min_steps_per_iter,
@@ -21713,7 +24554,12 @@ pub mod system_control {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::get_game_name(&self._engine) }
+                {
+                    crate::native::system_control::get_game_name(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -21732,6 +24578,7 @@ pub mod system_control {
                 {
                     crate::native::system_control::get_game_state(
                         &self._engine,
+                        self._native_api,
                         max_latency,
                     )
                 }
@@ -21750,7 +24597,12 @@ pub mod system_control {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::get_gather_mode(&self._engine) }
+                {
+                    crate::native::system_control::get_gather_mode(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -21766,7 +24618,12 @@ pub mod system_control {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::get_menu_name(&self._engine) }
+                {
+                    crate::native::system_control::get_menu_name(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -21778,7 +24635,12 @@ pub mod system_control {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::system_control::get_replay_file_path(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::get_replay_file_path(&self._engine) }
+                {
+                    crate::native::system_control::get_replay_file_path(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -21794,7 +24656,12 @@ pub mod system_control {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::get_replay_length(&self._engine) }
+                {
+                    crate::native::system_control::get_replay_length(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -21811,6 +24678,7 @@ pub mod system_control {
                 {
                     crate::native::system_control::get_replay_recording_file_path(
                         &self._engine,
+                        self._native_api,
                     )
                 }
             };
@@ -21831,6 +24699,7 @@ pub mod system_control {
                 {
                     crate::native::system_control::get_video_capturing_mode(
                         &self._engine,
+                        self._native_api,
                     )
                 }
             };
@@ -21844,7 +24713,12 @@ pub mod system_control {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::system_control::get_window_display_mode(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::get_window_display_mode(&self._engine) }
+                {
+                    crate::native::system_control::get_window_display_mode(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -21856,7 +24730,12 @@ pub mod system_control {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::system_control::is_replay(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::is_replay(&self._engine) }
+                {
+                    crate::native::system_control::is_replay(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -21868,7 +24747,13 @@ pub mod system_control {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::system_control::ping(tag) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::ping(&self._engine, tag) }
+                {
+                    crate::native::system_control::ping(
+                        &self._engine,
+                        self._native_api,
+                        tag,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -21880,7 +24765,7 @@ pub mod system_control {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::system_control::quit(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::quit(&self._engine) }
+                { crate::native::system_control::quit(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -21901,7 +24786,13 @@ pub mod system_control {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::reload(&self._engine, start_script) }
+                {
+                    crate::native::system_control::reload(
+                        &self._engine,
+                        self._native_api,
+                        start_script,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -21921,6 +24812,7 @@ pub mod system_control {
                 {
                     crate::native::system_control::request_start_position(
                         &self._engine,
+                        self._native_api,
                         pos,
                         ready,
                     )
@@ -21954,6 +24846,7 @@ pub mod system_control {
                 {
                     crate::native::system_control::restart(
                         &self._engine,
+                        self._native_api,
                         cmd_args,
                         start_script,
                     )
@@ -21982,6 +24875,7 @@ pub mod system_control {
                 {
                     crate::native::system_control::set_share_level(
                         &self._engine,
+                        self._native_api,
                         resource,
                         level,
                     )
@@ -22016,6 +24910,7 @@ pub mod system_control {
                 {
                     crate::native::system_control::share_resources(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         resource,
                         amount,
@@ -22050,6 +24945,7 @@ pub mod system_control {
                 {
                     crate::native::system_control::start(
                         &self._engine,
+                        self._native_api,
                         cmd_args,
                         start_script,
                     )
@@ -22065,7 +24961,12 @@ pub mod system_control {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::system_control::yield_(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::system_control::yield_(&self._engine) }
+                {
+                    crate::native::system_control::yield_(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -22078,12 +24979,19 @@ pub mod profiling {
     use alloc::string::String;
     pub struct Profiling<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::ProfilingApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn profiling(&self) -> Profiling<'_, E> {
             Profiling {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.profiling.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -22110,6 +25018,7 @@ pub mod profiling {
                 {
                     crate::native::profiling::diff_timers(
                         &self._engine,
+                        self._native_api,
                         end_timer,
                         start_timer,
                         options,
@@ -22126,7 +25035,12 @@ pub mod profiling {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::profiling::get_draw_seconds(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::profiling::get_draw_seconds(&self._engine) }
+                {
+                    crate::native::profiling::get_draw_seconds(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -22145,6 +25059,7 @@ pub mod profiling {
                 {
                     crate::native::profiling::get_frame_timer(
                         &self._engine,
+                        self._native_api,
                         last_frame_time,
                     )
                 }
@@ -22163,7 +25078,12 @@ pub mod profiling {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::profiling::get_lua_mem_usage(&self._engine) }
+                {
+                    crate::native::profiling::get_lua_mem_usage(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -22179,7 +25099,12 @@ pub mod profiling {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::profiling::get_profiler_record_names(&self._engine) }
+                {
+                    crate::native::profiling::get_profiler_record_names(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -22208,6 +25133,7 @@ pub mod profiling {
                 {
                     crate::native::profiling::get_profiler_time_record(
                         &self._engine,
+                        self._native_api,
                         name,
                         include_frame_data,
                     )
@@ -22227,7 +25153,13 @@ pub mod profiling {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::profiling::get_synced_gc_info(&self._engine, collect) }
+                {
+                    crate::native::profiling::get_synced_gc_info(
+                        &self._engine,
+                        self._native_api,
+                        collect,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -22239,7 +25171,7 @@ pub mod profiling {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::profiling::get_timer(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::profiling::get_timer(&self._engine) }
+                { crate::native::profiling::get_timer(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -22251,7 +25183,12 @@ pub mod profiling {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::desync::get_timer_micros() }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::profiling::get_timer_micros(&self._engine) }
+                {
+                    crate::native::profiling::get_timer_micros(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -22267,7 +25204,12 @@ pub mod profiling {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::profiling::get_vid_mem_usage(&self._engine) }
+                {
+                    crate::native::profiling::get_vid_mem_usage(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -22280,12 +25222,17 @@ pub mod rml_ui {
     use alloc::string::String;
     pub struct RmlUi<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::RmlUiApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn rml_ui(&self) -> RmlUi<'_, E> {
             RmlUi {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.rml_ui.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -22319,6 +25266,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::add_translation_string(
                         &self._engine,
+                        self._native_api,
                         key,
                         translation,
                     )
@@ -22346,6 +25294,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::clear_document_path_requests(
                         &self._engine,
+                        self._native_api,
                         document_path,
                     )
                 }
@@ -22360,7 +25309,12 @@ pub mod rml_ui {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::rml_ui::clear_translations(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::clear_translations(&self._engine) }
+                {
+                    crate::native::rml_ui::clear_translations(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -22391,6 +25345,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_activate_theme(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         name,
                         value,
@@ -22432,7 +25387,14 @@ pub mod rml_ui {
                     crate::native::rml_ui::context_add_event_listener::<
                         E,
                         _,
-                    >(&self._engine, context_handle, event, in_capture_phase, callback)
+                    >(
+                        &self._engine,
+                        self._native_api,
+                        context_handle,
+                        event,
+                        in_capture_phase,
+                        callback,
+                    )
                 }
             };
             self._engine.finish(result)
@@ -22462,6 +25424,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_create_data_model(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         name,
                     )
@@ -22494,6 +25457,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_create_document(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         tag,
                     )
@@ -22521,6 +25485,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_enable_mouse_cursor(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         value,
                     )
@@ -22546,6 +25511,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_get_density_independent_pixel_ratio(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -22570,6 +25536,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_get_dimensions(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -22601,6 +25568,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_get_document(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         name,
                     )
@@ -22632,6 +25600,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_get_element_at_point(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         x,
                         y,
@@ -22659,6 +25628,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_get_focus_element(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -22683,6 +25653,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_get_hover_element(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -22704,6 +25675,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_get_name(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -22728,6 +25700,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_get_root_element(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -22749,6 +25722,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_is_mouse_interacting(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -22780,6 +25754,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_is_theme_active(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         name,
                     )
@@ -22812,6 +25787,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_load_document(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         document_path,
                     )
@@ -22844,6 +25820,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_open_data_model(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         name,
                     )
@@ -22873,6 +25850,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_process_key_down(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         key,
                         key_modifier_state,
@@ -22903,6 +25881,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_process_key_up(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         key,
                         key_modifier_state,
@@ -22933,6 +25912,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_process_mouse_button_down(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         button,
                         key_modifier_state,
@@ -22963,6 +25943,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_process_mouse_button_up(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         button,
                         key_modifier_state,
@@ -22986,6 +25967,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_process_mouse_leave(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -23016,6 +25998,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_process_mouse_move(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         x,
                         y,
@@ -23049,6 +26032,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_process_mouse_wheel(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         x,
                         y,
@@ -23083,6 +26067,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_process_text_input(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         text,
                     )
@@ -23110,6 +26095,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_pull_document_to_front(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         document_handle,
                     )
@@ -23132,6 +26118,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_pull_to_front(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -23158,6 +26145,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_push_document_to_back(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         document_handle,
                     )
@@ -23190,6 +26178,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_remove_data_model(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         name,
                     )
@@ -23226,6 +26215,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_remove_event_listener(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         event_listener_handle,
                         event,
@@ -23247,7 +26237,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::context_render(&self._engine, context_handle) }
+                {
+                    crate::native::rml_ui::context_render(
+                        &self._engine,
+                        self._native_api,
+                        context_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -23271,6 +26267,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_set_density_independent_pixel_ratio(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         value,
                     )
@@ -23300,6 +26297,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_set_dimensions(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         x,
                         y,
@@ -23332,6 +26330,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_set_pointer_capture(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         anchor_x,
                         anchor_y,
@@ -23359,6 +26358,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_take_pointer_capture_delta(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -23380,6 +26380,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_unload_all_documents(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -23406,6 +26407,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::context_unload_document(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                         document_handle,
                     )
@@ -23425,7 +26427,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::context_update(&self._engine, context_handle) }
+                {
+                    crate::native::rml_ui::context_update(
+                        &self._engine,
+                        self._native_api,
+                        context_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -23442,7 +26450,13 @@ pub mod rml_ui {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::rml_ui::create_context(name) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::create_context(&self._engine, name) }
+                {
+                    crate::native::rml_ui::create_context(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -23473,6 +26487,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_bind_bool(
                         &self._engine,
+                        self._native_api,
                         data_model_handle,
                         name,
                         initial_value,
@@ -23514,6 +26529,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_bind_color(
                         &self._engine,
+                        self._native_api,
                         data_model_handle,
                         name,
                         red,
@@ -23558,7 +26574,14 @@ pub mod rml_ui {
                     crate::native::rml_ui::data_model_bind_event::<
                         E,
                         _,
-                    >(&self._engine, data_model_handle, name, field_types, callback)
+                    >(
+                        &self._engine,
+                        self._native_api,
+                        data_model_handle,
+                        name,
+                        field_types,
+                        callback,
+                    )
                 }
             };
             self._engine.finish(result)
@@ -23590,6 +26613,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_bind_float(
                         &self._engine,
+                        self._native_api,
                         data_model_handle,
                         name,
                         initial_value,
@@ -23625,6 +26649,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_bind_int(
                         &self._engine,
+                        self._native_api,
                         data_model_handle,
                         name,
                         initial_value,
@@ -23660,6 +26685,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_bind_percent(
                         &self._engine,
+                        self._native_api,
                         data_model_handle,
                         name,
                         initial_value,
@@ -23695,6 +26721,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_bind_pixels(
                         &self._engine,
+                        self._native_api,
                         data_model_handle,
                         name,
                         initial_value,
@@ -23737,6 +26764,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_bind_rows(
                         &self._engine,
+                        self._native_api,
                         data_model_handle,
                         name,
                         fields,
@@ -23777,6 +26805,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_bind_string(
                         &self._engine,
+                        self._native_api,
                         data_model_handle,
                         name,
                         initial_value,
@@ -23803,6 +26832,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_get_bool(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                     )
                 }
@@ -23827,6 +26857,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_get_color(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                     )
                 }
@@ -23851,6 +26882,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_get_float(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                     )
                 }
@@ -23875,6 +26907,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_get_int(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                     )
                 }
@@ -23899,6 +26932,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_get_percent(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                     )
                 }
@@ -23923,6 +26957,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_get_pixels(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                     )
                 }
@@ -23943,6 +26978,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_get_string(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                     )
                 }
@@ -23969,6 +27005,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_set_bool(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                         value,
                     )
@@ -24002,6 +27039,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_set_color(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                         red,
                         green,
@@ -24032,6 +27070,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_set_float(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                         value,
                     )
@@ -24059,6 +27098,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_set_int(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                         value,
                     )
@@ -24086,6 +27126,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_set_percent(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                         value,
                     )
@@ -24113,6 +27154,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_set_pixels(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                         value,
                     )
@@ -24147,6 +27189,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_set_rows(
                         &self._engine,
+                        self._native_api,
                         rows_handle,
                         values,
                     )
@@ -24179,6 +27222,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_set_string(
                         &self._engine,
+                        self._native_api,
                         variable_handle,
                         value,
                     )
@@ -24197,6 +27241,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::data_model_unbind_event(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                     )
                 }
@@ -24228,6 +27273,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_append_to_style_sheet(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                         value,
                     )
@@ -24247,7 +27293,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::document_close(&self._engine, document_handle) }
+                {
+                    crate::native::rml_ui::document_close(
+                        &self._engine,
+                        self._native_api,
+                        document_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -24276,6 +27328,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_create_element(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                         tag_name,
                     )
@@ -24308,6 +27361,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_create_text_node(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                         value,
                     )
@@ -24333,6 +27387,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_get_context(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                     )
                 }
@@ -24354,6 +27409,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_get_title(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                     )
                 }
@@ -24375,6 +27431,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_get_url(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                     )
                 }
@@ -24393,7 +27450,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::document_hide(&self._engine, document_handle) }
+                {
+                    crate::native::rml_ui::document_hide(
+                        &self._engine,
+                        self._native_api,
+                        document_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -24412,6 +27475,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_is_modal(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                     )
                 }
@@ -24443,6 +27507,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_load_external_script(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                         value,
                     )
@@ -24484,6 +27549,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_load_inline_script(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                         content,
                         source_path,
@@ -24508,6 +27574,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_pull_to_front(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                     )
                 }
@@ -24529,6 +27596,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_push_to_back(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                     )
                 }
@@ -24550,6 +27618,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_reload_style_sheet(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                     )
                 }
@@ -24581,6 +27650,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_set_title(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                         title,
                     )
@@ -24608,6 +27678,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_show(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                         options,
                     )
@@ -24630,6 +27701,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::document_update_document(
                         &self._engine,
+                        self._native_api,
                         document_handle,
                     )
                 }
@@ -24669,7 +27741,14 @@ pub mod rml_ui {
                     crate::native::rml_ui::element_add_event_listener::<
                         E,
                         _,
-                    >(&self._engine, element_handle, event, in_capture_phase, callback)
+                    >(
+                        &self._engine,
+                        self._native_api,
+                        element_handle,
+                        event,
+                        in_capture_phase,
+                        callback,
+                    )
                 }
             };
             self._engine.finish(result)
@@ -24694,6 +27773,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_append_child(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         element_ptr_handle,
                     )
@@ -24726,6 +27806,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_are_pseudo_classes_set(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -24745,7 +27826,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::element_blur(&self._engine, element_handle) }
+                {
+                    crate::native::rml_ui::element_blur(
+                        &self._engine,
+                        self._native_api,
+                        element_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -24761,7 +27848,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::element_click(&self._engine, element_handle) }
+                {
+                    crate::native::rml_ui::element_click(
+                        &self._engine,
+                        self._native_api,
+                        element_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -24777,7 +27870,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::element_clone(&self._engine, element_handle) }
+                {
+                    crate::native::rml_ui::element_clone(
+                        &self._engine,
+                        self._native_api,
+                        element_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -24806,6 +27905,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_closest(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -24838,6 +27938,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_dispatch_event(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         event,
                     )
@@ -24857,7 +27958,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::element_focus(&self._engine, element_handle) }
+                {
+                    crate::native::rml_ui::element_focus(
+                        &self._engine,
+                        self._native_api,
+                        element_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -24879,6 +27986,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_form_control_input_get_selection(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -24903,6 +28011,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_form_control_input_select(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -24931,6 +28040,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_form_control_input_set_selection(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         start,
                         end,
@@ -24961,6 +28071,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_form_control_select_add(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         element_ptr_handle,
                         before,
@@ -24989,6 +28100,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_form_control_select_remove(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         index,
                     )
@@ -25014,6 +28126,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_form_control_select_remove_all(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25038,6 +28151,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_form_control_text_area_get_selection(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25062,6 +28176,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_form_control_text_area_select(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25090,6 +28205,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_form_control_text_area_set_selection(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         start,
                         end,
@@ -25130,6 +28246,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_form_submit(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         name,
                         value,
@@ -25156,6 +28273,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_active_pseudo_classes(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25182,6 +28300,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_attribute(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         name,
                     )
@@ -25209,6 +28328,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_child(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         index,
                     )
@@ -25231,6 +28351,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_class_name(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25262,6 +28383,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_element_by_id(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25294,6 +28416,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_elements_by_class_name(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25326,6 +28449,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_elements_by_class_name_count(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25358,6 +28482,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_elements_by_tag_name(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25390,6 +28515,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_elements_by_tag_name_count(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25409,7 +28535,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::element_get_id(&self._engine, element_handle) }
+                {
+                    crate::native::rml_ui::element_get_id(
+                        &self._engine,
+                        self._native_api,
+                        element_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -25428,6 +28560,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_inner_rml(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25452,6 +28585,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_rect(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25473,6 +28607,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_scroll_left(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25494,6 +28629,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_scroll_top(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25515,6 +28651,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_tag_name(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25536,6 +28673,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_get_value(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25567,6 +28705,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_has_attribute(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25589,6 +28728,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_has_child_nodes(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25617,6 +28757,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_insert_before(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         element_ptr_handle,
                         adjacent_element_handle,
@@ -25650,6 +28791,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_is_class_set(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25679,6 +28821,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_is_point_within_element(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         x,
                         y,
@@ -25712,6 +28855,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_is_pseudo_class_set(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25734,6 +28878,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_is_visible(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                     )
                 }
@@ -25761,6 +28906,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_matches(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25788,6 +28934,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_process_default_action(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         event_handle,
                     )
@@ -25820,6 +28967,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_query_selector(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25852,6 +29000,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_query_selector_all(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25884,6 +29033,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_query_selector_all_count(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25916,6 +29066,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_remove_attribute(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -25943,6 +29094,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_remove_child(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         child_element_handle,
                     )
@@ -25979,6 +29131,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_remove_event_listener(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         event_listener_handle,
                         event,
@@ -26010,6 +29163,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_replace_child(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         element_ptr_handle,
                         replaced_element_handle,
@@ -26038,6 +29192,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_scroll_into_view(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         align_with_top,
                     )
@@ -26077,6 +29232,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_set_attribute(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         name,
                         value,
@@ -26112,6 +29268,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_set_class(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         name,
                         value,
@@ -26145,6 +29302,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_set_class_name(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -26173,6 +29331,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_set_id(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -26205,6 +29364,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_set_inner_rml(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -26239,6 +29399,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_set_pseudo_class(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         name,
                         value,
@@ -26267,6 +29428,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_set_scroll_left(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -26294,6 +29456,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_set_scroll_top(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         value,
                     )
@@ -26321,6 +29484,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_tab_set_remove_tab(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         index,
                     )
@@ -26355,6 +29519,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_tab_set_set_panel(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         index,
                         rml,
@@ -26390,6 +29555,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::element_tab_set_set_tab(
                         &self._engine,
+                        self._native_api,
                         element_handle,
                         index,
                         rml,
@@ -26406,7 +29572,12 @@ pub mod rml_ui {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::rml_ui::event_get_current(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::event_get_current(&self._engine) }
+                {
+                    crate::native::rml_ui::event_get_current(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -26428,6 +29599,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_get_current_element(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                     )
                 }
@@ -26459,6 +29631,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_get_parameter_bool(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                         name,
                     )
@@ -26491,6 +29664,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_get_parameter_float(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                         name,
                     )
@@ -26523,6 +29697,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_get_parameter_int(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                         name,
                     )
@@ -26550,6 +29725,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_get_parameter_string(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                         name,
                     )
@@ -26582,6 +29758,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_get_parameter_type(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                         name,
                     )
@@ -26601,7 +29778,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::event_get_phase(&self._engine, event_handle) }
+                {
+                    crate::native::rml_ui::event_get_phase(
+                        &self._engine,
+                        self._native_api,
+                        event_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -26623,6 +29806,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_get_target_element(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                     )
                 }
@@ -26637,7 +29821,13 @@ pub mod rml_ui {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::rml_ui::event_get_type(event_handle) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::event_get_type(&self._engine, event_handle) }
+                {
+                    crate::native::rml_ui::event_get_type(
+                        &self._engine,
+                        self._native_api,
+                        event_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -26659,6 +29849,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_is_immediate_propagating(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                     )
                 }
@@ -26683,6 +29874,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_is_interruptible(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                     )
                 }
@@ -26707,6 +29899,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_is_propagating(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                     )
                 }
@@ -26733,6 +29926,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_listener_on_attach(
                         &self._engine,
+                        self._native_api,
                         event_listener_handle,
                         element_handle,
                     )
@@ -26760,6 +29954,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_listener_on_detach(
                         &self._engine,
+                        self._native_api,
                         event_listener_handle,
                         element_handle,
                     )
@@ -26787,6 +29982,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_listener_process_event(
                         &self._engine,
+                        self._native_api,
                         event_listener_handle,
                         event_handle,
                     )
@@ -26812,6 +30008,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_stop_immediate_propagation(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                     )
                 }
@@ -26833,6 +30030,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::event_stop_propagation(
                         &self._engine,
+                        self._native_api,
                         event_handle,
                     )
                 }
@@ -26852,7 +30050,13 @@ pub mod rml_ui {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::rml_ui::get_context(name) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::get_context(&self._engine, name) }
+                {
+                    crate::native::rml_ui::get_context(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -26879,6 +30083,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::get_document_path_requests(
                         &self._engine,
+                        self._native_api,
                         document_path,
                     )
                 }
@@ -26893,7 +30098,7 @@ pub mod rml_ui {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::rml_ui::get_version(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::get_version(&self._engine) }
+                { crate::native::rml_ui::get_version(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -26905,7 +30110,7 @@ pub mod rml_ui {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::rml_ui::is_ready(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::is_ready(&self._engine) }
+                { crate::native::rml_ui::is_ready(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -26930,6 +30135,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::load_font_face(
                         &self._engine,
+                        self._native_api,
                         file_path,
                         fallback,
                         weight,
@@ -26958,6 +30164,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::regiser_event_type(
                         &self._engine,
+                        self._native_api,
                         event_type,
                         options,
                     )
@@ -26985,6 +30192,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::register_event_type(
                         &self._engine,
+                        self._native_api,
                         event_type,
                         options,
                     )
@@ -27004,7 +30212,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::remove_context(&self._engine, context_handle) }
+                {
+                    crate::native::rml_ui::remove_context(
+                        &self._engine,
+                        self._native_api,
+                        context_handle,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27025,7 +30239,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::remove_context_by_name(&self._engine, name) }
+                {
+                    crate::native::rml_ui::remove_context_by_name(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27044,6 +30264,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::set_debug_context(
                         &self._engine,
+                        self._native_api,
                         context_handle,
                     )
                 }
@@ -27067,7 +30288,13 @@ pub mod rml_ui {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::set_debug_context_by_name(&self._engine, name) }
+                {
+                    crate::native::rml_ui::set_debug_context_by_name(
+                        &self._engine,
+                        self._native_api,
+                        name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27101,6 +30328,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::set_mouse_cursor_alias(
                         &self._engine,
+                        self._native_api,
                         rml_name,
                         recoil_name,
                     )
@@ -27133,6 +30361,7 @@ pub mod rml_ui {
                 {
                     crate::native::rml_ui::sol_lua_data_model_set_dirty(
                         &self._engine,
+                        self._native_api,
                         data_model_handle,
                         property,
                     )
@@ -27148,7 +30377,14 @@ pub mod rml_ui {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::rml_ui::vector2f_new(x, y) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::vector2f_new(&self._engine, x, y) }
+                {
+                    crate::native::rml_ui::vector2f_new(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27160,7 +30396,14 @@ pub mod rml_ui {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::rml_ui::vector2i_new(x, y) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::rml_ui::vector2i_new(&self._engine, x, y) }
+                {
+                    crate::native::rml_ui::vector2i_new(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        y,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27173,12 +30416,17 @@ pub mod vfs {
     use alloc::string::String;
     pub struct Vfs<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::VFSApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn vfs(&self) -> Vfs<'_, E> {
             Vfs {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe { self.engine.owner.native_tables.vfs.as_ref() },
                 environment: core::marker::PhantomData,
             }
         }
@@ -27190,7 +30438,13 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::abort_download(id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::abort_download(&self._engine, id) }
+                {
+                    crate::native::vfs::abort_download(
+                        &self._engine,
+                        self._native_api,
+                        id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27207,7 +30461,14 @@ pub mod vfs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::calculate_hash(&self._engine, data, hash_type) }
+                {
+                    crate::native::vfs::calculate_hash(
+                        &self._engine,
+                        self._native_api,
+                        data,
+                        hash_type,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27257,6 +30518,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::compress_folder(
                         &self._engine,
+                        self._native_api,
                         folder_path,
                         archive_type,
                         compressed_file_path,
@@ -27280,7 +30542,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::create_dir(path) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::create_dir(&self._engine, path) }
+                { crate::native::vfs::create_dir(&self._engine, self._native_api, path) }
             };
             self._engine.finish(result)
         }
@@ -27323,6 +30585,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::dir_list(
                         &self._engine,
+                        self._native_api,
                         path,
                         pattern,
                         mode,
@@ -27358,6 +30621,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::download_archive(
                         &self._engine,
+                        self._native_api,
                         filename,
                         category,
                     )
@@ -27382,7 +30646,13 @@ pub mod vfs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::extract_mod_archive_file(&self._engine, path) }
+                {
+                    crate::native::vfs::extract_mod_archive_file(
+                        &self._engine,
+                        self._native_api,
+                        path,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27399,7 +30669,13 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::file_exists(path) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::file_exists(&self._engine, path) }
+                {
+                    crate::native::vfs::file_exists(
+                        &self._engine,
+                        self._native_api,
+                        path,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27411,7 +30687,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::get_all_archives(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_all_archives(&self._engine) }
+                { crate::native::vfs::get_all_archives(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -27431,7 +30707,13 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::vfs::get_archive_checksum(archive_name) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_archive_checksum(&self._engine, archive_name) }
+                {
+                    crate::native::vfs::get_archive_checksum(
+                        &self._engine,
+                        self._native_api,
+                        archive_name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27465,6 +30747,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::get_archive_containing_file(
                         &self._engine,
+                        self._native_api,
                         path,
                         mode,
                     )
@@ -27495,6 +30778,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::get_archive_dependencies(
                         &self._engine,
+                        self._native_api,
                         archive_name,
                     )
                 }
@@ -27521,7 +30805,13 @@ pub mod vfs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_archive_info(&self._engine, archive_name) }
+                {
+                    crate::native::vfs::get_archive_info(
+                        &self._engine,
+                        self._native_api,
+                        archive_name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27542,7 +30832,13 @@ pub mod vfs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_archive_path(&self._engine, archive_name) }
+                {
+                    crate::native::vfs::get_archive_path(
+                        &self._engine,
+                        self._native_api,
+                        archive_name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27563,7 +30859,13 @@ pub mod vfs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_archive_replaces(&self._engine, archive_name) }
+                {
+                    crate::native::vfs::get_archive_replaces(
+                        &self._engine,
+                        self._native_api,
+                        archive_name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27575,7 +30877,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::get_archives(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_archives(&self._engine) }
+                { crate::native::vfs::get_archives(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -27609,6 +30911,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::get_available_a_is(
                         &self._engine,
+                        self._native_api,
                         game_archive_name,
                         map_archive_name,
                     )
@@ -27639,7 +30942,14 @@ pub mod vfs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_file_absolute_path(&self._engine, path, mode) }
+                {
+                    crate::native::vfs::get_file_absolute_path(
+                        &self._engine,
+                        self._native_api,
+                        path,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27656,7 +30966,13 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::get_file_info(path) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_file_info(&self._engine, path) }
+                {
+                    crate::native::vfs::get_file_info(
+                        &self._engine,
+                        self._native_api,
+                        path,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27673,7 +30989,13 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::get_file_size(path) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_file_size(&self._engine, path) }
+                {
+                    crate::native::vfs::get_file_size(
+                        &self._engine,
+                        self._native_api,
+                        path,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27685,7 +31007,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::get_games(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_games(&self._engine) }
+                { crate::native::vfs::get_games(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -27697,7 +31019,12 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::get_loaded_archives(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_loaded_archives(&self._engine) }
+                {
+                    crate::native::vfs::get_loaded_archives(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27732,6 +31059,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::get_map_square_texture(
                         &self._engine,
+                        self._native_api,
                         tex_square_x,
                         tex_square_y,
                         lod_min,
@@ -27756,7 +31084,12 @@ pub mod vfs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_map_square_texture_info(&self._engine) }
+                {
+                    crate::native::vfs::get_map_square_texture_info(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27768,7 +31101,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::get_maps(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_maps(&self._engine) }
+                { crate::native::vfs::get_maps(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -27789,7 +31122,13 @@ pub mod vfs {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::get_name_from_rapid_tag(&self._engine, rapid_tag) }
+                {
+                    crate::native::vfs::get_name_from_rapid_tag(
+                        &self._engine,
+                        self._native_api,
+                        rapid_tag,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27806,7 +31145,13 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::has_archive(archive_name) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::has_archive(&self._engine, archive_name) }
+                {
+                    crate::native::vfs::has_archive(
+                        &self._engine,
+                        self._native_api,
+                        archive_name,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27823,7 +31168,13 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::is_directory(path) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::is_directory(&self._engine, path) }
+                {
+                    crate::native::vfs::is_directory(
+                        &self._engine,
+                        self._native_api,
+                        path,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27866,6 +31217,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::list_dir(
                         &self._engine,
+                        self._native_api,
                         path,
                         pattern,
                         mode,
@@ -27893,7 +31245,14 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::load_file(path, mode) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::load_file(&self._engine, path, mode) }
+                {
+                    crate::native::vfs::load_file(
+                        &self._engine,
+                        self._native_api,
+                        path,
+                        mode,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -27931,6 +31290,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::load_file_range(
                         &self._engine,
+                        self._native_api,
                         path,
                         mode,
                         offset,
@@ -27948,7 +31308,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::pack_f32(values) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::pack_f32(&self._engine, values) }
+                { crate::native::vfs::pack_f32(&self._engine, self._native_api, values) }
             };
             self._engine.finish(result)
         }
@@ -27960,7 +31320,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::pack_s16(values) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::pack_s16(&self._engine, values) }
+                { crate::native::vfs::pack_s16(&self._engine, self._native_api, values) }
             };
             self._engine.finish(result)
         }
@@ -27972,7 +31332,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::pack_s32(values) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::pack_s32(&self._engine, values) }
+                { crate::native::vfs::pack_s32(&self._engine, self._native_api, values) }
             };
             self._engine.finish(result)
         }
@@ -27984,7 +31344,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::pack_s8(values) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::pack_s8(&self._engine, values) }
+                { crate::native::vfs::pack_s8(&self._engine, self._native_api, values) }
             };
             self._engine.finish(result)
         }
@@ -27996,7 +31356,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::pack_u16(values) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::pack_u16(&self._engine, values) }
+                { crate::native::vfs::pack_u16(&self._engine, self._native_api, values) }
             };
             self._engine.finish(result)
         }
@@ -28008,7 +31368,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::pack_u32(values) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::pack_u32(&self._engine, values) }
+                { crate::native::vfs::pack_u32(&self._engine, self._native_api, values) }
             };
             self._engine.finish(result)
         }
@@ -28020,7 +31380,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::pack_u8(values) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::pack_u8(&self._engine, values) }
+                { crate::native::vfs::pack_u8(&self._engine, self._native_api, values) }
             };
             self._engine.finish(result)
         }
@@ -28037,7 +31397,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::read_file(path) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::read_file(&self._engine, path) }
+                { crate::native::vfs::read_file(&self._engine, self._native_api, path) }
             };
             self._engine.finish(result)
         }
@@ -28054,7 +31414,13 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::read_file_as_string(path) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::read_file_as_string(&self._engine, path) }
+                {
+                    crate::native::vfs::read_file_as_string(
+                        &self._engine,
+                        self._native_api,
+                        path,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -28066,7 +31432,7 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::scan_all_dirs(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::scan_all_dirs(&self._engine) }
+                { crate::native::vfs::scan_all_dirs(&self._engine, self._native_api) }
             };
             self._engine.finish(result)
         }
@@ -28097,6 +31463,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::set_map_square_texture(
                         &self._engine,
+                        self._native_api,
                         tex_square_x,
                         tex_square_y,
                         texture_name,
@@ -28144,6 +31511,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::sub_dirs(
                         &self._engine,
+                        self._native_api,
                         path,
                         pattern,
                         mode,
@@ -28175,6 +31543,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::unpack_f32(
                         &self._engine,
+                        self._native_api,
                         data,
                         byte_offset,
                         count,
@@ -28205,6 +31574,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::unpack_s16(
                         &self._engine,
+                        self._native_api,
                         data,
                         byte_offset,
                         count,
@@ -28235,6 +31605,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::unpack_s32(
                         &self._engine,
+                        self._native_api,
                         data,
                         byte_offset,
                         count,
@@ -28265,6 +31636,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::unpack_s8(
                         &self._engine,
+                        self._native_api,
                         data,
                         byte_offset,
                         count,
@@ -28295,6 +31667,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::unpack_u16(
                         &self._engine,
+                        self._native_api,
                         data,
                         byte_offset,
                         count,
@@ -28325,6 +31698,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::unpack_u32(
                         &self._engine,
+                        self._native_api,
                         data,
                         byte_offset,
                         count,
@@ -28355,6 +31729,7 @@ pub mod vfs {
                 {
                     crate::native::vfs::unpack_u8(
                         &self._engine,
+                        self._native_api,
                         data,
                         byte_offset,
                         count,
@@ -28389,7 +31764,7 @@ pub mod vfs {
                     crate::native::vfs::use_archive::<
                         E,
                         _,
-                    >(&self._engine, archive_name, callback)
+                    >(&self._engine, self._native_api, archive_name, callback)
                 }
             };
             self._engine.finish(result)
@@ -28402,7 +31777,13 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::zlib_compress(data) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::zlib_compress(&self._engine, data) }
+                {
+                    crate::native::vfs::zlib_compress(
+                        &self._engine,
+                        self._native_api,
+                        data,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -28414,7 +31795,13 @@ pub mod vfs {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::vfs::zlib_decompress(data) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::vfs::zlib_decompress(&self._engine, data) }
+                {
+                    crate::native::vfs::zlib_decompress(
+                        &self._engine,
+                        self._native_api,
+                        data,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -28427,12 +31814,19 @@ pub mod unsynced_read {
     use alloc::string::String;
     pub struct UnsyncedRead<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnsyncedReadApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn unsynced_read(&self) -> UnsyncedRead<'_, E> {
             UnsyncedRead {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.unsynced_read.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -28454,6 +31848,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_active_cmd_desc(
                         &self._engine,
+                        self._native_api,
                         cmd_index,
                     )
                 }
@@ -28472,7 +31867,12 @@ pub mod unsynced_read {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_read::get_active_cmd_descs(&self._engine) }
+                {
+                    crate::native::unsynced_read::get_active_cmd_descs(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -28491,6 +31891,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_box_selection_by_engine(
                         &self._engine,
+                        self._native_api,
                     )
                 }
             };
@@ -28508,7 +31909,12 @@ pub mod unsynced_read {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_read::get_build_facing(&self._engine) }
+                {
+                    crate::native::unsynced_read::get_build_facing(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -28524,7 +31930,12 @@ pub mod unsynced_read {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_read::get_build_spacing(&self._engine) }
+                {
+                    crate::native::unsynced_read::get_build_spacing(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -28540,7 +31951,12 @@ pub mod unsynced_read {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_read::get_clipboard(&self._engine) }
+                {
+                    crate::native::unsynced_read::get_clipboard(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -28559,6 +31975,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_cmd_desc_index(
                         &self._engine,
+                        self._native_api,
                         cmd_id,
                     )
                 }
@@ -28583,6 +32000,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_custom_palette_color(
                         &self._engine,
+                        self._native_api,
                         index,
                     )
                 }
@@ -28601,7 +32019,12 @@ pub mod unsynced_read {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_read::get_draw_selection_info(&self._engine) }
+                {
+                    crate::native::unsynced_read::get_draw_selection_info(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -28623,6 +32046,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_feature_palette_index(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -28644,6 +32068,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_game_seconds_interpolated(
                         &self._engine,
+                        self._native_api,
                     )
                 }
             };
@@ -28660,6 +32085,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_last_message_positions(
                         &self._engine,
+                        self._native_api,
                     )
                 }
             };
@@ -28682,6 +32108,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_nano_projectile_params(
                         &self._engine,
+                        self._native_api,
                     )
                 }
             };
@@ -28702,6 +32129,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_piece_projectile_name(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -28723,6 +32151,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_prev_frame_sync_checksum(
                         &self._engine,
+                        self._native_api,
                     )
                 }
             };
@@ -28746,6 +32175,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_team_damage_stats(
                         &self._engine,
+                        self._native_api,
                         team_id,
                     )
                 }
@@ -28770,6 +32200,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::get_unit_palette_index(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -28788,7 +32219,13 @@ pub mod unsynced_read {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_read::is_unit_allied(&self._engine, unit_id) }
+                {
+                    crate::native::unsynced_read::is_unit_allied(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -28807,6 +32244,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::is_unit_selected(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -28837,6 +32275,7 @@ pub mod unsynced_read {
                 {
                     crate::native::unsynced_read::solve_nurbs_curve(
                         &self._engine,
+                        self._native_api,
                         degree,
                         points,
                         knots,
@@ -28853,12 +32292,19 @@ pub mod team_control {
     use crate::Result;
     pub struct TeamControl<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::TeamControlApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn team_control(&self) -> TeamControl<'_, E> {
             TeamControl {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.team_control.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -28889,6 +32335,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::add_team_resource(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         resource_type,
                         amount,
@@ -28924,6 +32371,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::add_team_resource_excess_stats(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         resource_type,
                         amount,
@@ -28952,6 +32400,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::assign_player_to_team(
                         &self._engine,
+                        self._native_api,
                         player_id,
                         team_id,
                     )
@@ -28974,6 +32423,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::game_over(
                         &self._engine,
+                        self._native_api,
                         winning_ally_teams,
                     )
                 }
@@ -28992,7 +32442,13 @@ pub mod team_control {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::team_control::kill_team(&self._engine, team_id) }
+                {
+                    crate::native::team_control::kill_team(
+                        &self._engine,
+                        self._native_api,
+                        team_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -29018,6 +32474,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::set_ally(
                         &self._engine,
+                        self._native_api,
                         first_ally_team_id,
                         second_ally_team_id,
                         allied,
@@ -29052,6 +32509,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::set_ally_team_start_box(
                         &self._engine,
+                        self._native_api,
                         ally_team_id,
                         min_x,
                         min_z,
@@ -29078,6 +32536,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::set_global_los(
                         &self._engine,
+                        self._native_api,
                         ally_team_id,
                         enabled,
                     )
@@ -29105,6 +32564,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::set_player_ready_state(
                         &self._engine,
+                        self._native_api,
                         player_id,
                         ready,
                     )
@@ -29139,6 +32599,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::set_team_resource(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         resource_type,
                         amount,
@@ -29174,6 +32635,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::set_team_share_level(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         resource_type,
                         share_level,
@@ -29202,6 +32664,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::set_team_start_position(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         pos,
                     )
@@ -29238,6 +32701,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::share_team_resource(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         target_team_id,
                         resource_type,
@@ -29269,6 +32733,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::transfer_team_max_units(
                         &self._engine,
+                        self._native_api,
                         from_team_id,
                         to_team_id,
                         amount,
@@ -29304,6 +32769,7 @@ pub mod team_control {
                 {
                     crate::native::team_control::use_team_resource(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         resource_type,
                         amount,
@@ -29319,12 +32785,19 @@ pub mod unit_control {
     use crate::Result;
     pub struct UnitControl<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnitControlApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn unit_control(&self) -> UnitControl<'_, E> {
             UnitControl {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.unit_control.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -29340,7 +32813,13 @@ pub mod unit_control {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unit_control::add_object_decal(&self._engine, unit_id) }
+                {
+                    crate::native::unit_control::add_object_decal(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -29372,6 +32851,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::add_unit_damage(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         damage,
                         paralyze_time,
@@ -29403,6 +32883,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::add_unit_experience(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         experience,
                     )
@@ -29432,6 +32913,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::add_unit_impulse(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         impulse,
                         decay_rate,
@@ -29467,6 +32949,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::add_unit_resource(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         resource_type,
                         amount,
@@ -29495,6 +32978,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::add_unit_seismic_ping(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         ping_size,
                     )
@@ -29528,6 +33012,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::bugger_off(
                         &self._engine,
+                        self._native_api,
                         pos,
                         radius,
                         team_id,
@@ -29554,6 +33039,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::clear_unit_goal(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         cancel_raw,
                     )
@@ -29592,6 +33078,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::create_unit(
                         &self._engine,
+                        self._native_api,
                         unit_def,
                         pos,
                         facing,
@@ -29622,6 +33109,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::destroy_unit(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         options,
                     )
@@ -29683,6 +33171,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::edit_unit_cmd_desc(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         cmd_desc_index,
                         cmd_desc,
@@ -29706,6 +33195,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::force_unit_collision_update(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -29734,6 +33224,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::get_unit_feature_separation(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         feature_id,
                         ignore_y,
@@ -29757,6 +33248,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::get_unit_leaves_ghost(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -29778,6 +33270,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::get_unit_physical_state(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -29804,6 +33297,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::give_order_array_to_unit(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         commands,
                     )
@@ -29833,6 +33327,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::give_order_array_to_unit_array(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                         commands,
                         pairwise,
@@ -29867,6 +33362,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::give_order_to_unit(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         cmd_id,
                         params,
@@ -29903,6 +33399,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::give_order_to_unit_array(
                         &self._engine,
+                        self._native_api,
                         unit_i_ds,
                         cmd_id,
                         params,
@@ -29967,6 +33464,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::insert_unit_cmd_desc(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         cmd_desc_index,
                         cmd_desc,
@@ -29990,6 +33488,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::remove_object_decal(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -30016,6 +33515,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::remove_unit_cmd_desc(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         cmd_desc_index,
                     )
@@ -30043,6 +33543,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_factory_bugger_off(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         options,
                     )
@@ -30070,6 +33571,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_always_visible(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         always_visible,
                     )
@@ -30099,6 +33601,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_armored(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         armored_state,
                         armored_multiple,
@@ -30127,6 +33630,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_blocking(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         options,
                     )
@@ -30161,6 +33665,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_build_params(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         param_name,
                         value,
@@ -30199,6 +33704,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_build_speed(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         build_speed,
                         repair_speed,
@@ -30231,6 +33737,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_buildee_radius(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         radius,
                     )
@@ -30260,6 +33767,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_cloak(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         cloak,
                         cloak_arg,
@@ -30296,6 +33804,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_collision_volume_data(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         scales,
                         offsets,
@@ -30327,6 +33836,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_costs(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         costs,
                     )
@@ -30350,6 +33860,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_crashing(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         want_crash,
                     )
@@ -30379,6 +33890,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_direction(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         front_dir,
                         right_dir,
@@ -30407,6 +33919,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_experience(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         experience,
                     )
@@ -30441,6 +33954,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_flanking(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         type_,
                         args,
@@ -30475,6 +33989,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_harvest_storage(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         stored_metal,
                         max_stored_metal,
@@ -30507,6 +34022,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_heading(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         heading,
                         use_smoothing,
@@ -30537,6 +34053,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_heading_and_up_dir(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         heading,
                         up_dir,
@@ -30565,6 +34082,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_health(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         value,
                     )
@@ -30594,6 +34112,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_land_goal(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         pos,
                         radius_sq,
@@ -30622,6 +34141,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_leaves_ghost(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         options,
                     )
@@ -30649,6 +34169,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_loading_transport(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         transport_id,
                     )
@@ -30678,6 +34199,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_los_mask(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         ally_team_id,
                         los_mask,
@@ -30708,6 +34230,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_los_state(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         ally_team_id,
                         los_state,
@@ -30732,6 +34255,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_mass(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         mass,
                     )
@@ -30759,6 +34283,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_max_health(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         max_health,
                     )
@@ -30782,6 +34307,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_max_range(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         max_range,
                     )
@@ -30811,6 +34337,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_metal_extraction(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         depth,
                         range,
@@ -30843,6 +34370,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_mid_and_aim_pos(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         mid_pos,
                         aim_pos,
@@ -30878,6 +34406,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_move_goal(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         pos,
                         radius,
@@ -30908,6 +34437,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_nano_pieces(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         piece_indices,
                     )
@@ -30931,6 +34461,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_neutral(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         neutral,
                     )
@@ -30958,6 +34489,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_physical_state_bit(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         state_bit,
                     )
@@ -30991,6 +34523,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_physics(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         pos,
                         velocity,
@@ -31031,6 +34564,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_piece_collision_volume_data(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         piece_index,
                         enable,
@@ -31070,6 +34604,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_piece_matrix(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         piece_index,
                         matrix,
@@ -31100,6 +34635,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_piece_parent(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         child_piece_index,
                         parent_piece_index,
@@ -31130,6 +34666,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_piece_visible(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         piece_index,
                         visible,
@@ -31166,6 +34703,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_pos_error_params(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         pos_error_vector,
                         pos_error_delta,
@@ -31193,6 +34731,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_position(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         pos,
                     )
@@ -31222,6 +34761,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_radius_and_height(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         radius,
                         height,
@@ -31257,6 +34797,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_resourcing(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         type_,
                         amount,
@@ -31281,6 +34822,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_rotation(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         rotation,
                     )
@@ -31308,6 +34850,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_seismic_signature(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         seismic_signature,
                     )
@@ -31343,6 +34886,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_selection_volume_data(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         scales,
                         offsets,
@@ -31381,6 +34925,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_sensor_radius(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         sensor_type,
                         radius,
@@ -31411,6 +34956,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_shield_recharge_delay(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                         recharge_delay,
@@ -31443,6 +34989,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_shield_state(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                         enabled,
@@ -31472,6 +35019,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_sonar_stealth(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         sonar_stealth,
                     )
@@ -31495,6 +35043,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_stealth(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         stealth,
                     )
@@ -31524,6 +35073,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_stockpile(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         stockpile,
                         build_percent,
@@ -31559,6 +35109,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_storage(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         resource,
                         amount,
@@ -31591,6 +35142,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_target(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         target,
                         options,
@@ -31621,6 +35173,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_tooltip(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         tooltip,
                     )
@@ -31648,6 +35201,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_use_air_los(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         use_air_los,
                     )
@@ -31675,6 +35229,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_use_weapons(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         options,
                     )
@@ -31698,6 +35253,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_velocity(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         velocity,
                     )
@@ -31734,6 +35290,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_weapon_damages(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                         damage_key,
@@ -31772,6 +35329,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::set_unit_weapon_state(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                         key,
@@ -31805,6 +35363,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::transfer_unit(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         new_team_id,
                         given,
@@ -31836,6 +35395,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::unit_attach(
                         &self._engine,
+                        self._native_api,
                         transporter_id,
                         transportee_id,
                         piece_num,
@@ -31859,6 +35419,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::unit_detach(
                         &self._engine,
+                        self._native_api,
                         transportee_id,
                     )
                 }
@@ -31885,6 +35446,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::unit_detach_from_air(
                         &self._engine,
+                        self._native_api,
                         transportee_id,
                         pos,
                     )
@@ -31907,6 +35469,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::unit_finish_command(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -31929,6 +35492,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::unit_weapon_fire(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                     )
@@ -31956,6 +35520,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::unit_weapon_hold_fire(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         weapon_num,
                     )
@@ -31990,6 +35555,7 @@ pub mod unit_control {
                 {
                     crate::native::unit_control::use_unit_resource(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         resource_type,
                         amount,
@@ -32005,12 +35571,19 @@ pub mod feature_control {
     use crate::Result;
     pub struct FeatureControl<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::FeatureControlApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn feature_control(&self) -> FeatureControl<'_, E> {
             FeatureControl {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.feature_control.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -32042,6 +35615,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::add_feature_damage(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         damage,
                         paralyze_time,
@@ -32084,6 +35658,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::create_feature(
                         &self._engine,
+                        self._native_api,
                         feature_def,
                         pos,
                         heading,
@@ -32116,6 +35691,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::create_feature_wreck(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         wreck_level,
                         do_smoke,
@@ -32146,6 +35722,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::create_unit_wreck(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         wreck_level,
                         do_smoke,
@@ -32169,6 +35746,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::destroy_feature(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                     )
                 }
@@ -32195,6 +35773,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_always_visible(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         always_visible,
                     )
@@ -32222,6 +35801,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_blocking(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         options,
                     )
@@ -32257,6 +35837,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_collision_volume_data(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         scales,
                         offsets,
@@ -32290,6 +35871,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_direction(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         front_dir,
                         right_dir,
@@ -32318,6 +35900,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_fire_time(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         fire_time,
                     )
@@ -32347,6 +35930,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_heading_and_up_dir(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         heading,
                         up_dir,
@@ -32377,6 +35961,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_health(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         health,
                         check_destruction,
@@ -32401,6 +35986,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_mass(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         mass,
                     )
@@ -32428,6 +36014,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_max_health(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         max_health,
                     )
@@ -32459,6 +36046,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_mid_and_aim_pos(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         mid_pos,
                         aim_pos,
@@ -32494,6 +36082,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_move_ctrl(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         enable,
                         velocity_or_mask,
@@ -32524,6 +36113,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_no_select(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         no_select,
                     )
@@ -32557,6 +36147,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_physics(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         pos,
                         velocity,
@@ -32597,6 +36188,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_piece_collision_volume_data(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         piece_index,
                         enable,
@@ -32636,6 +36228,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_piece_matrix(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         piece_index,
                         matrix,
@@ -32666,6 +36259,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_piece_visible(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         piece_index,
                         visible,
@@ -32696,6 +36290,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_position(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         pos,
                         snap_to_ground,
@@ -32726,6 +36321,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_radius_and_height(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         radius,
                         height,
@@ -32754,6 +36350,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_reclaim(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         reclaim_left,
                     )
@@ -32791,6 +36388,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_resources(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         metal,
                         energy,
@@ -32832,6 +36430,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_resurrect(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         unit_def,
                         facing,
@@ -32861,6 +36460,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_rotation(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         rotation,
                     )
@@ -32896,6 +36496,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_selection_volume_data(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         scales,
                         offsets,
@@ -32927,6 +36528,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_smoke_time(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         smoke_time,
                     )
@@ -32954,6 +36556,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_use_air_los(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         use_air_los,
                     )
@@ -32981,6 +36584,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::set_feature_velocity(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         velocity,
                     )
@@ -33008,6 +36612,7 @@ pub mod feature_control {
                 {
                     crate::native::feature_control::transfer_feature(
                         &self._engine,
+                        self._native_api,
                         feature_id,
                         new_team_id,
                     )
@@ -33022,12 +36627,19 @@ pub mod terrain_control {
     use crate::Result;
     pub struct TerrainControl<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::TerrainControlApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn terrain_control(&self) -> TerrainControl<'_, E> {
             TerrainControl {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.terrain_control.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -33048,6 +36660,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::add_grass(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         grass_value,
@@ -33073,6 +36686,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::add_height_map(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         height,
@@ -33103,6 +36717,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::add_original_height_map(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         height,
@@ -33128,6 +36743,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::add_smooth_mesh(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         height,
@@ -33162,6 +36778,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::adjust_height_map(
                         &self._engine,
+                        self._native_api,
                         x1,
                         z1,
                         x2,
@@ -33198,6 +36815,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::adjust_original_height_map(
                         &self._engine,
+                        self._native_api,
                         x1,
                         z1,
                         x2,
@@ -33234,6 +36852,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::adjust_smooth_mesh(
                         &self._engine,
+                        self._native_api,
                         x1,
                         z1,
                         x2,
@@ -33270,6 +36889,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::level_height_map(
                         &self._engine,
+                        self._native_api,
                         x1,
                         z1,
                         x2,
@@ -33306,6 +36926,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::level_original_height_map(
                         &self._engine,
+                        self._native_api,
                         x1,
                         z1,
                         x2,
@@ -33342,6 +36963,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::level_smooth_mesh(
                         &self._engine,
+                        self._native_api,
                         x1,
                         z1,
                         x2,
@@ -33364,7 +36986,12 @@ pub mod terrain_control {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain_control::rebuild_smooth_mesh(&self._engine) }
+                {
+                    crate::native::terrain_control::rebuild_smooth_mesh(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -33381,7 +37008,14 @@ pub mod terrain_control {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain_control::remove_grass(&self._engine, x, z) }
+                {
+                    crate::native::terrain_control::remove_grass(
+                        &self._engine,
+                        self._native_api,
+                        x,
+                        z,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -33411,6 +37045,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::revert_height_map(
                         &self._engine,
+                        self._native_api,
                         x1,
                         z1,
                         x2,
@@ -33447,6 +37082,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::revert_original_height_map(
                         &self._engine,
+                        self._native_api,
                         x1,
                         z1,
                         x2,
@@ -33483,6 +37119,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::revert_smooth_mesh(
                         &self._engine,
+                        self._native_api,
                         x1,
                         z1,
                         x2,
@@ -33517,6 +37154,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::set_height_map(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         height,
@@ -33546,7 +37184,7 @@ pub mod terrain_control {
                     crate::native::terrain_control::set_height_map_func::<
                         E,
                         _,
-                    >(&self._engine, callback)
+                    >(&self._engine, self._native_api, callback)
                 }
             };
             self._engine.finish(result)
@@ -33573,6 +37211,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::set_map_square_terrain_type(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         terrain_type,
@@ -33605,6 +37244,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::set_original_height_map(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         height,
@@ -33633,7 +37273,7 @@ pub mod terrain_control {
                     crate::native::terrain_control::set_original_height_map_func::<
                         E,
                         _,
-                    >(&self._engine, callback)
+                    >(&self._engine, self._native_api, callback)
                 }
             };
             self._engine.finish(result)
@@ -33662,6 +37302,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::set_smooth_mesh(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         height,
@@ -33691,7 +37332,7 @@ pub mod terrain_control {
                     crate::native::terrain_control::set_smooth_mesh_func::<
                         E,
                         _,
-                    >(&self._engine, callback)
+                    >(&self._engine, self._native_api, callback)
                 }
             };
             self._engine.finish(result)
@@ -33733,6 +37374,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::set_terrain_type_data(
                         &self._engine,
+                        self._native_api,
                         type_index,
                         tank_speed,
                         kbot_speed,
@@ -33758,7 +37400,13 @@ pub mod terrain_control {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::terrain_control::set_tidal(&self._engine, tidal) }
+                {
+                    crate::native::terrain_control::set_tidal(
+                        &self._engine,
+                        self._native_api,
+                        tidal,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -33778,6 +37426,7 @@ pub mod terrain_control {
                 {
                     crate::native::terrain_control::set_wind(
                         &self._engine,
+                        self._native_api,
                         min_wind,
                         max_wind,
                     )
@@ -33792,12 +37441,19 @@ pub mod projectile_control {
     use crate::Result;
     pub struct ProjectileControl<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::ProjectileControlApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn projectile_control(&self) -> ProjectileControl<'_, E> {
             ProjectileControl {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.projectile_control.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -33816,6 +37472,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::delete_projectile(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -33848,6 +37505,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_piece_projectile_params(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         expl_flags,
                         spin_angle,
@@ -33878,6 +37536,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_always_visible(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         always_visible,
                     )
@@ -33910,6 +37569,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_ceg(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         ceg_name,
                     )
@@ -33932,6 +37592,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_collision(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                     )
                 }
@@ -33967,6 +37628,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_damages(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         unused,
                         damage_key,
@@ -33996,6 +37658,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_gravity(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         gravity,
                     )
@@ -34023,6 +37686,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_ignore_tracking_error(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         ignore,
                     )
@@ -34050,6 +37714,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_is_intercepted(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         intercepted,
                     )
@@ -34077,6 +37742,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_move_control(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         enable,
                     )
@@ -34104,6 +37770,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_position(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         pos,
                     )
@@ -34131,6 +37798,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_target(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         target,
                     )
@@ -34158,6 +37826,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_time_to_live(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         time_to_live,
                     )
@@ -34185,6 +37854,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_use_air_los(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         use_air_los,
                     )
@@ -34212,6 +37882,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::set_projectile_velocity(
                         &self._engine,
+                        self._native_api,
                         projectile_id,
                         velocity,
                     )
@@ -34249,6 +37920,7 @@ pub mod projectile_control {
                 {
                     crate::native::projectile_control::spawn_projectile(
                         &self._engine,
+                        self._native_api,
                         weapon_def_id,
                         projectile_params,
                     )
@@ -34263,12 +37935,19 @@ pub mod effects_control {
     use crate::Result;
     pub struct EffectsControl<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::EffectsControlApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn effects_control(&self) -> EffectsControl<'_, E> {
             EffectsControl {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.effects_control.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -34305,6 +37984,7 @@ pub mod effects_control {
                 {
                     crate::native::effects_control::spawn_ceg(
                         &self._engine,
+                        self._native_api,
                         ceg,
                         pos,
                         dir,
@@ -34338,6 +38018,7 @@ pub mod effects_control {
                 {
                     crate::native::effects_control::spawn_explosion(
                         &self._engine,
+                        self._native_api,
                         pos,
                         dir,
                         explosion_params,
@@ -34376,6 +38057,7 @@ pub mod effects_control {
                 {
                     crate::native::effects_control::spawn_sfx(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         sfx_id,
                         pos,
@@ -34395,12 +38077,19 @@ pub mod game_config {
     use crate::Result;
     pub struct GameConfig<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::GameConfigApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn game_config(&self) -> GameConfig<'_, E> {
             GameConfig {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.game_config.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -34419,6 +38108,7 @@ pub mod game_config {
                 {
                     crate::native::game_config::set_cheating_enabled(
                         &self._engine,
+                        self._native_api,
                         enabled,
                     )
                 }
@@ -34449,6 +38139,7 @@ pub mod game_config {
                 {
                     crate::native::game_config::set_experience_grade(
                         &self._engine,
+                        self._native_api,
                         exp_grade,
                         exp_power_scale,
                         exp_health_scale,
@@ -34470,7 +38161,13 @@ pub mod game_config {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game_config::set_god_mode(&self._engine, options) }
+                {
+                    crate::native::game_config::set_god_mode(
+                        &self._engine,
+                        self._native_api,
+                        options,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34486,7 +38183,13 @@ pub mod game_config {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::game_config::set_no_pause(&self._engine, no_pause) }
+                {
+                    crate::native::game_config::set_no_pause(
+                        &self._engine,
+                        self._native_api,
+                        no_pause,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34514,6 +38217,7 @@ pub mod game_config {
                 {
                     crate::native::game_config::set_radar_error_params(
                         &self._engine,
+                        self._native_api,
                         ally_team_id,
                         ally_team_error_size,
                         base_error_size,
@@ -34545,6 +38249,7 @@ pub mod game_config {
                 {
                     crate::native::game_config::set_square_building_mask(
                         &self._engine,
+                        self._native_api,
                         x,
                         z,
                         mask,
@@ -34560,12 +38265,19 @@ pub mod cob_script {
     use crate::Result;
     pub struct CobScript<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::COBScriptApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn cob_script(&self) -> CobScript<'_, E> {
             CobScript {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.cob_script.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -34598,6 +38310,7 @@ pub mod cob_script {
                 {
                     crate::native::cob_script::call_cob_script(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         func,
                         ret_args,
@@ -34628,6 +38341,7 @@ pub mod cob_script {
                 {
                     crate::native::cob_script::get_cob_script_id(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         func_name,
                     )
@@ -34642,12 +38356,19 @@ pub mod unit_script {
     use crate::Result;
     pub struct UnitScript<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnitScriptApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn unit_script(&self) -> UnitScript<'_, E> {
             UnitScript {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.unit_script.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -34680,6 +38401,7 @@ pub mod unit_script {
                 {
                     crate::native::unit_script::call_unit_script(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         function_name,
                         args,
@@ -34696,12 +38418,19 @@ pub mod synced_random {
     use crate::Result;
     pub struct SyncedRandom<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::SyncedRandomApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn synced_random(&self) -> SyncedRandom<'_, E> {
             SyncedRandom {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.synced_random.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -34713,7 +38442,12 @@ pub mod synced_random {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::synced_random::next_float(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::synced_random::next_float(&self._engine) }
+                {
+                    crate::native::synced_random::next_float(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34730,7 +38464,14 @@ pub mod synced_random {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::synced_random::next_int(&self._engine, lower, upper) }
+                {
+                    crate::native::synced_random::next_int(
+                        &self._engine,
+                        self._native_api,
+                        lower,
+                        upper,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34746,7 +38487,13 @@ pub mod synced_random {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::synced_random::next_int_up_to(&self._engine, upper) }
+                {
+                    crate::native::synced_random::next_int_up_to(
+                        &self._engine,
+                        self._native_api,
+                        upper,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34758,7 +38505,13 @@ pub mod synced_random {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::synced_random::set_seed(seed) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::synced_random::set_seed(&self._engine, seed) }
+                {
+                    crate::native::synced_random::set_seed(
+                        &self._engine,
+                        self._native_api,
+                        seed,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34769,12 +38522,19 @@ pub mod unsynced_random {
     use crate::Result;
     pub struct UnsyncedRandom<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnsyncedRandomApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn unsynced_random(&self) -> UnsyncedRandom<'_, E> {
             UnsyncedRandom {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.unsynced_random.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -34786,7 +38546,12 @@ pub mod unsynced_random {
                 #[cfg(target_arch = "wasm32")]
                 { spring_sdk_internal::generated::owned::unsynced_random::next_float(0) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_random::next_float(&self._engine) }
+                {
+                    crate::native::unsynced_random::next_float(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34803,7 +38568,14 @@ pub mod unsynced_random {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_random::next_int(&self._engine, lower, upper) }
+                {
+                    crate::native::unsynced_random::next_int(
+                        &self._engine,
+                        self._native_api,
+                        lower,
+                        upper,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34819,7 +38591,13 @@ pub mod unsynced_random {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_random::next_int_up_to(&self._engine, upper) }
+                {
+                    crate::native::unsynced_random::next_int_up_to(
+                        &self._engine,
+                        self._native_api,
+                        upper,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34835,7 +38613,13 @@ pub mod unsynced_random {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unsynced_random::set_seed(&self._engine, seed) }
+                {
+                    crate::native::unsynced_random::set_seed(
+                        &self._engine,
+                        self._native_api,
+                        seed,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34847,12 +38631,19 @@ pub mod unit_rendering {
     use alloc::vec::Vec;
     pub struct UnitRendering<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::UnitRenderingApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn unit_rendering(&self) -> UnitRendering<'_, E> {
             UnitRendering {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.unit_rendering.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -34868,7 +38659,12 @@ pub mod unit_rendering {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unit_rendering::get_camera_rotation(&self._engine) }
+                {
+                    crate::native::unit_rendering::get_camera_rotation(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34884,7 +38680,12 @@ pub mod unit_rendering {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unit_rendering::get_camera_vectors(&self._engine) }
+                {
+                    crate::native::unit_rendering::get_camera_vectors(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34912,6 +38713,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_features_in_screen_rectangle(
                         &self._engine,
+                        self._native_api,
                         left,
                         top,
                         right,
@@ -34933,7 +38735,12 @@ pub mod unit_rendering {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unit_rendering::get_frustum_planes(&self._engine) }
+                {
+                    crate::native::unit_rendering::get_frustum_planes(
+                        &self._engine,
+                        self._native_api,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -34952,6 +38759,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_always_update_matrix(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -34973,6 +38781,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_draw_flag(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -34994,6 +38803,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_engine_draw_mask(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -35008,7 +38818,13 @@ pub mod unit_rendering {
                 #[cfg(target_arch = "wasm32")]
                 { crate::wasm::unit_rendering::get_unit_icon(unit_id) }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unit_rendering::get_unit_icon(&self._engine, unit_id) }
+                {
+                    crate::native::unit_rendering::get_unit_icon(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -35027,6 +38843,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_icon_data(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         full_data,
                     )
@@ -35049,6 +38866,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_lua_draw(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -35070,6 +38888,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_no_draw(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -35091,6 +38910,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_no_group(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -35112,6 +38932,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_no_minimap(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -35133,6 +38954,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_no_select(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -35157,6 +38979,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_selection_volume_data(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -35178,6 +39001,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_transform_matrix(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -35204,6 +39028,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_unit_view_position(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         use_mid_pos,
                     )
@@ -35237,6 +39062,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_units_in_screen_rectangle(
                         &self._engine,
+                        self._native_api,
                         left,
                         top,
                         right,
@@ -35269,6 +39095,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_visible_features(
                         &self._engine,
+                        self._native_api,
                         ally_team_id,
                         radius,
                         options,
@@ -35297,6 +39124,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_visible_projectiles(
                         &self._engine,
+                        self._native_api,
                         ally_team_id,
                         options,
                     )
@@ -35326,6 +39154,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::get_visible_units(
                         &self._engine,
+                        self._native_api,
                         team_id,
                         radius,
                         include_icons,
@@ -35346,7 +39175,13 @@ pub mod unit_rendering {
                     )
                 }
                 #[cfg(not(target_arch = "wasm32"))]
-                { crate::native::unit_rendering::is_unit_icon(&self._engine, unit_id) }
+                {
+                    crate::native::unit_rendering::is_unit_icon(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                    )
+                }
             };
             self._engine.finish(result)
         }
@@ -35365,6 +39200,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::is_unit_in_view(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                     )
                 }
@@ -35393,6 +39229,7 @@ pub mod unit_rendering {
                 {
                     crate::native::unit_rendering::is_unit_visible(
                         &self._engine,
+                        self._native_api,
                         unit_id,
                         radius,
                         check_icon,
@@ -35408,12 +39245,19 @@ pub mod object_rendering {
     use crate::Result;
     pub struct ObjectRendering<'a, E> {
         pub(crate) _engine: crate::Backend<'a>,
+        #[cfg(not(target_arch = "wasm32"))]
+        _native_api: Option<&'a crate::__sys::ObjectRenderingApi>,
         pub(crate) environment: core::marker::PhantomData<E>,
     }
     impl<'a, E: crate::Environment> crate::Spring<'a, E> {
+        #[inline]
         pub fn object_rendering(&self) -> ObjectRendering<'_, E> {
             ObjectRendering {
                 _engine: self.engine.reborrow(),
+                #[cfg(not(target_arch = "wasm32"))]
+                _native_api: unsafe {
+                    self.engine.owner.native_tables.object_rendering.as_ref()
+                },
                 environment: core::marker::PhantomData,
             }
         }
@@ -35448,6 +39292,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::clear_deferred_material_uniform(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         material_type,
@@ -35489,6 +39334,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::clear_forward_material_uniform(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         material_type,
@@ -35519,6 +39365,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::get_lod(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                     )
@@ -35567,6 +39414,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::set_deferred_material_uniform(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         material_type,
@@ -35618,6 +39466,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::set_forward_material_uniform(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         material_type,
@@ -35650,6 +39499,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::set_lod_count(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         lod_count,
@@ -35682,6 +39532,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::set_lod_distance(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         lod_level,
@@ -35715,6 +39566,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::set_lod_length(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         lod_level,
@@ -35762,6 +39614,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::set_material(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         lod_level,
@@ -35800,6 +39653,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::set_material_display_lists(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         lod_level,
@@ -35835,6 +39689,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::set_material_last_lod(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         material_type,
@@ -35870,6 +39725,7 @@ pub mod object_rendering {
                 {
                     crate::native::object_rendering::set_piece_list(
                         &self._engine,
+                        self._native_api,
                         object_type,
                         object_id,
                         lod_level,
