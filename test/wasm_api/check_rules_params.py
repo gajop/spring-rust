@@ -57,7 +57,7 @@ end
     log = (output / "spring.log").read_text(encoding="utf-8", errors="replace")
     if code != 0 or "RULES_PARAMS_TYPED_PASS" not in log or "Wasm trap" in log:
         raise SystemExit(f"rules-param regression failed (exit {code}); see {output / 'spring.log'}")
-    print("PASS: five scopes; bool/float/empty and long UTF-8 strings; missing/hidden params; game float errors")
+    print("PASS: five scopes; bool/float/empty and long UTF-8 strings; missing/private params in synced context; game float errors")
 
 
 if __name__ == "__main__":

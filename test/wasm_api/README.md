@@ -66,5 +66,6 @@ python3 test/wasm_api/check_rules_params.py
 ```
 
 It covers bool/float/string round trips (including empty and long UTF-8 strings), missing and
-hidden values, size retries, and the allocation-free game float getter's value/type errors.
+private values in synced code, size retries, and the allocation-free game float getter's
+value/type errors. This synced fixture does not test UI visibility filtering.
 Use `--spring /path/to/spring-headless` to select another engine build.
