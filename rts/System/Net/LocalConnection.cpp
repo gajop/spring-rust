@@ -125,6 +125,12 @@ bool CLocalConnection::HasIncomingData() const
 	return (!pktQueues[instanceIdx].empty());
 }
 
+unsigned int CLocalConnection::GetNumQueuedPings() const
+{
+	std::lock_guard<spring::mutex> scoped_lock(mutexes[instanceIdx]);
+	return numPings;
+}
+
 unsigned int CLocalConnection::GetPacketQueueSize() const
 {
 	std::lock_guard<spring::mutex> scoped_lock(mutexes[instanceIdx]);

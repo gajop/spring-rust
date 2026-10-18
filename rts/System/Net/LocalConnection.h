@@ -45,6 +45,7 @@ public:
 	void Close(bool flush) override;
 	void SetLossFactor(int factor) override {}
 
+	unsigned int GetNumQueuedPings() const override;
 	unsigned int GetPacketQueueSize() const override;
 
 	std::string Statistics() const override;

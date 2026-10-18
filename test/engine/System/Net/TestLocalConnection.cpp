@@ -4,6 +4,9 @@
 #include "Net/Protocol/BaseNetProtocol.h"
 
 #include <catch_amalgamated.hpp>
+#include <algorithm>
+#include <atomic>
+#include <thread>
 
 TEST_CASE("Local connection reports queued packets without consuming them")
 {
@@ -77,4 +80,29 @@ TEST_CASE("Flushing a local connection also clears its queued ping count")
 	CHECK(client.GetNumQueuedPings() == 0);
 	CHECK(client.GetPacketQueueSize() == 0);
 	CHECK_FALSE(client.HasIncomingData());
+}
+
+TEST_CASE("Local ping counts can be observed while the server sends packets")
+{
+	netcode::CLocalConnection server;
+	netcode::CLocalConnection client;
+	const auto ping = CBaseNetProtocol::Get().SendPing(0, 1, 0.0f);
+	constexpr unsigned int packets = 4096;
+	std::atomic<bool> finished = false;
+	std::thread sender([&]() {
+		for (unsigned int i = 0; i < packets; ++i)
+			server.SendData(ping);
+		finished = true;
+	});
+	unsigned int received = 0;
+	unsigned int peak = 0;
+	while (!finished || client.HasIncomingData()) {
+		peak = std::max(peak, client.GetNumQueuedPings());
+		received += (client.GetData() != nullptr);
+	}
+	sender.join();
+	CHECK(received == packets);
+	CHECK(peak <= packets);
+	CHECK(client.GetNumQueuedPings() == 0);
+	CHECK(client.GetPacketQueueSize() == 0);
 }
