@@ -22,6 +22,12 @@ jobs:
         env:
           NEW_TAG: ${{ inputs.new-tag }}
         run: |
+          # UtilVersion.cmake accepts exactly three numeric release components.
+          # Reject unsupported tags before creating a ref or starting two builds.
+          if ! [[ "$NEW_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo 'Engine release tags need three numeric components (for example 2026.10.1801).' >&2
+            exit 1
+          fi
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git tag -a -m "Version $NEW_TAG" "$NEW_TAG"
