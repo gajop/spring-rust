@@ -75,33 +75,6 @@ impl NativeApiParity {
         writeln!(file, "{row}").map_err(|e| e.to_string())
     }
 
-    pub(crate) fn record_callin(&self, name: &str, arity: usize) {
-        if !record_callins_enabled() {
-            return;
-        }
-        if let Some(parent) = self.callin_trace_path.parent() {
-            let _ = fs::create_dir_all(parent);
-        }
-
-        let _record_guard = RECORD_LOCK.lock().expect("native callin recorder lock");
-        if let Ok(mut file) = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&self.callin_trace_path)
-        {
-            let row = serde_json::json!({
-                "context": "native_callin",
-                "name": name,
-                "arity": arity,
-            });
-            let _ = writeln!(file, "{row}");
-        }
-    }
-
-    pub(crate) fn record_callin_args(&self, name: &str, args: Vec<Value>) {
-        self.record_callin_args_result(name, args, Vec::new());
-    }
-
     pub(crate) fn record_callin_args_result(
         &self,
         name: &str,

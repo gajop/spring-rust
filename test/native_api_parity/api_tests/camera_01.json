@@ -114,11 +114,7 @@
         "ignoreWater": {"type": "bool", "fixed": false},
         "heightOffset": {"type": "f32", "fixed": 0}
       },
-      "lua_runtime": {
-        "call": "Spring.TraceScreenRay",
-        "args": ["value.screenX", "value.screenY", "value.onlyCoords", "value.useMinimap", "value.includeSky", "value.ignoreWater", "value.heightOffset"],
-        "returns": ["hitType", {"field": "x", "index": 2, "path": [1]}, {"field": "y", "index": 2, "path": [2]}, {"field": "z", "index": 2, "path": [3]}]
-      }
+      "lua_runtime": null
     }
   ]
 }

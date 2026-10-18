@@ -1498,6 +1498,34 @@ TEST_HOOKS[#TEST_HOOKS + 1] = {
 }
 
 TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "trace_screen_ray_ground",
+	payload = groundPayload,
+	readonly = true,
+	make = function()
+		-- A fixed upper-left pixel can see sky/off-map after earlier camera
+		-- tests. Find a real visible terrain point; never replace a miss with
+		-- made-up hit fields. The native API traces exactly this same pixel.
+		local width, height = Spring.GetViewGeometry()
+		for _, fractionY in ipairs({0.5, 0.75, 0.9, 0.25}) do
+			for _, fractionX in ipairs({0.5, 0.25, 0.75, 0.1, 0.9}) do
+				local x, y = math.floor(width * fractionX), math.floor(height * fractionY)
+				local hit, position = Spring.TraceScreenRay(x, y, true, false, false, false, 0)
+				if hit == "ground" and type(position) == "table" then
+					return {screenX = x, screenY = y, onlyCoords = true,
+						useMinimap = false, includeSky = false, ignoreWater = false, heightOffset = 0}
+				end
+			end
+		end
+		error("Ground-ray fixture has no visible terrain", 0)
+	end,
+	get = function(_, value)
+		local hit, position = Spring.TraceScreenRay(value.screenX, value.screenY, true, false, false, false, 0)
+		assert(hit == "ground" and type(position) == "table", "Ground-ray fixture stopped hitting terrain")
+		return {hitType = hit, x = position[1], y = position[2], z = position[3]}
+	end,
+}
+
+TEST_HOOKS[#TEST_HOOKS + 1] = {
 	name = "camera_state_roundtrip",
 	payload = groundPayload,
 	readonly = true,
