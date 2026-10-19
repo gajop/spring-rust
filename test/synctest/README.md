@@ -46,3 +46,166 @@ A trailing `quitforce` in the startscript's `debugcommands` is required so the e
 `debugcommands` disables LuaUI at frame 4, before any units are spawned. This is required for the test to be reproducible.
 
 BAR's LuaUI widgets are unsynced but issue orders into the simulation, so for example `unit_bombers_default_hold_fire.lua` calls `Spring.GiveOrderToUnit` for every bomber created. Orders issued from unsynced code become network commands, so the frame on which they take effect depends on wall-clock scheduling. Two runs with identical inputs then diverge: a bomber flips to Hold Fire on frame 53 in one run and frame 54 in the next, and everything downstream follows.
+
+## Wasm SDK adversarial tests
+
+See the engine [sync contract and verification guide](../../rts/wasm/docs/recoil_wasm_sync_verification.md)
+and [2026-10-19 measured evidence](../../rts/wasm/docs/recoil_wasm_sync_report_2026-10-19.md)
+for integration requirements, protections and remaining coverage.
+
+The [history-based follow-up plan](../../rts/wasm/docs/recoil_wasm_sync_plan.md)
+also covers repeated playback of one unchanged corpus, two-worker races, long
+pathfinding workloads, rendered/headless differences and actual Windows/ARM
+acceptance. The [historical review](../../rts/wasm/docs/recoil_sync_history_2026-10-19.md)
+separates merged fixes from unverified public reports. These additions are a plan,
+not results from the short fixture.
+
+`wasm_adversarial.py` builds an engine-owned guest against `spring-sdk` and
+uses the small public native-API parity fixture. No downstream game or map
+download is needed. It exercises unit queries, typed errors, complete player
+information, allocation/reuse, scalar NaNs/subnormals, copied job inputs and
+next-frame ordered job delivery with deliberately unequal worker durations.
+Synced memory remains fixed-size, as required by Core validation.
+
+Record one match, then compare every frame against playback with 1, 4 and 8
+workers:
+
+```sh
+python3 test/synctest/wasm_adversarial.py --frames 900 --output /tmp/wasm-replay
+```
+
+Compare real network-connected Linux host and guest processes:
+
+```sh
+python3 test/synctest/wasm_adversarial.py --live --frames 900 --output /tmp/wasm-live
+```
+
+For a Windows guest under Wine, add `--guest-spring /path/to/spring-headless.exe`,
+`--wine /path/to/wine64` and `--wine-prefix /path/to/dedicated-test-prefix`.
+The runner copies the engine and its sibling DLLs, pins the compiled Wasm,
+records hashes/source changes and checks the actual worker counts. Each output
+directory must be new; failed evidence is retained.
+
+The comparison includes complete linear memory, module identity, job state and
+engine checksums. Schema 2 also compares all globals and table entries, including unexported ones.
+Function references use module indices, never process addresses.
+It rejects missing frames, faulted modules, changes in the module set and
+missing expected modules, even when both peers lose the same module. Run the verifier's negative
+control too: identical guest code deliberately reads an explicitly enabled
+local clock at frame 7, and the comparison must identify that exact first
+Wasm divergence:
+
+```sh
+python3 test/synctest/wasm_adversarial.py --negative-control --frames 15 \
+  --workers 1 4 --output /tmp/wasm-clock-negative-control
+```
+
+Separate fresh matches are a diagnostic option (`--fresh-hosts`), not equivalent
+input streams: player ping/CPU updates are network inputs and can differ.
+The fixture retains these fields without filtering; recorded playback and
+live peers are the determinism gates.
+
+The C++ `test_WasmSyncedJobs` target additionally injects all four host rounding
+modes, with subnormal flushing both on and off, into real Wasmtime calls. It
+checks scalar/SIMD arithmetic and conversions, restores caller controls after
+success/traps, and includes an unprotected direct-call negative control. Catch's
+signal interception is disabled only for this target, so Wasmtime can handle
+its own JIT trap signals throughout the suite. Native crashes still fail it.
+
+```sh
+WASM_JOB_FIXTURE="$PWD/test/wasm_api/data/synced_jobs/worker.wat" \
+  build-amd64-linux/test/test_WasmSyncedJobs
+```
+
+
+### Repeatable deeper matrix
+
+The serial suite saves a `result.json` for each case and for the matrix. It
+retains failures and supports resuming after interruption. A resumed pass is
+accepted only if the source/build inputs and saved evidence hashes still match.
+Changed sources or engines require a new output directory. This is a local
+command; it does not dispatch workflows, publish artifacts or consume CI minutes.
+
+```sh
+python3 test/synctest/wasm_sync_suite.py \
+  --spring build-amd64-linux/install/spring-headless \
+  --profile deep --seeds 1 424242 16777215 --repeats 2 \
+  --frames 1800 --workers 1 4 8 --output /tmp/wasm-deep
+# Continue exactly the same matrix after interruption:
+# repeat that command with --resume
+```
+
+Each seed runs two Rules modules, then two Rules plus two Gaia modules, against
+recordings with the requested worker counts. The mixed case also opts into
+full-state network hashing every frame (`--hash-interval 1`). After full-state
+comparisons, an unlogged replay must retain the recorded network checksums;
+its result explicitly identifies this as a policy check, not a full-state
+comparison of the unlogged run. `--state-workload` adds a WAT
+module with hidden globals/tables, indirect calls, passive data/element
+initialization and drop, bulk copy/fill and rejected fixed-size growth. SDK
+modules include nested terrain callbacks, synced RNG, team resources, unit
+states, cross-module/cross-world worker jobs and jobs submitted from result
+callbacks. Both deliberate clock-memory and hidden-state desync controls must
+fail at exactly frame 7; the latter requires **identical linear memory**.
+
+Add `--guest-spring`, `--wine` and `--wine-prefix` to include a live
+Linux–Windows-under-Wine case per seed/repetition. Native Windows and ARM64
+still require their own hardware/runner evidence. Heavy cases run serially;
+engine copies are shared through an immutable, hash-checked artifact pool.
+Guest builds require Cargo's Wasm target; WAT workloads require `wat2wasm`.
+
+### Reuse the exact workload on another platform
+
+A successful recording creates `OUTPUT/corpus/`: prebuilt Wasm, the demo,
+reference per-frame hashes and hashed scenario metadata. The runner can replay
+it on Linux ARM64 or native Windows using Python and a matching engine build,
+with **no Rust or WAT compiler** on that machine. Use the same engine source
+checkout, including public fixture/base content and the test scripts:
+
+```sh
+python3 test/synctest/wasm_adversarial.py \
+  --spring /path/to/platform/spring-headless \
+  --corpus /path/to/recording/corpus --workers 1 4 8 \
+  --output /tmp/wasm-platform-check
+```
+
+On Windows use `py` and a native `spring-headless.exe` path. The replay must
+match the saved reference, not merely other runs on its own platform. Gaia map
+mount paths in the demo are relocated for the new machine; the network packet
+stream is preserved byte-for-byte and its SHA-256 recorded in `demo-input.json`.
+The corpus and public content are hash-checked before running. Copy the corpus
+and result directory through your own transport; the scripts perform no upload.
+
+For a failing frame, pass `--dump-frame F` and inspect memory offsets with
+`wasm_sync_replay.py memory-diff A.bin B.bin`. Globals/table dumps use the suffix
+`.state.bin`; `wasm_sync_replay.py decode-state SNAPSHOT` prints indexed values,
+exact float bits and function indices (zero is null, otherwise index plus one).
+
+The state scanner does not expose passive segment **drop status**: the bulk
+workload checks its subsequent effects, not immediate drop-flag equality.
+Non-null opaque host references fail state inspection rather than hashing
+addresses. This limitation and native hardware requirements remain explicit
+acceptance gaps; a finite seeded suite cannot prove every host API deterministic.
+
+
+To create a self-contained **local test kit** for the other PC, including its
+matching engine and DLLs:
+
+```sh
+python3 test/synctest/wasm_sync_bundle.py \
+  --corpus /path/to/recording/corpus \
+  --spring /path/to/windows-engine/spring-headless.exe \
+  --output /tmp/wasm-windows-test-kit
+```
+
+The kit contains only an allowlist of public engine fixture/base content,
+prebuilt test modules, the selected engine, scripts and source/build provenance.
+It includes a file-hash manifest and a run command in `README.txt`. Copy the
+folder privately, install Python 3.10+ if necessary, and run that command; no
+Git checkout, Rust compiler or WAT compiler is needed. Creating the folder
+performs no upload or release. Use a new results directory for every attempt.
+
+`--check-unlogged-replay` can be added to an ordinary replay/corpus command to
+check diagnostic-logging neutrality. A failed/trapped run or any recorded
+network desync warning fails it. Full-state comparisons remain mandatory for
+the logged runs; no old-demo-warning exemption is used by this suite.

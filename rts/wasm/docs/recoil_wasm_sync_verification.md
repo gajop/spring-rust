@@ -1,133 +1,256 @@
-# Recoil Wasm Sync Verification Plan
+# Synced Wasm: contract, evidence and verification
 
-Status: local Linux memory/checksum verification and deterministic jobs implemented
-(2026-10-12); see the [local report](recoil_wasm_synced_jobs_report_2026-10-12.md)
-and [API](recoil_wasm_synced_jobs.md). The cross-platform matrix and broader
-perturbations below remain planned.
+Lockstep sync is a required property of the Wasm backend. A RulesSynced or
+GaiaSynced module must produce the same simulation results on every peer when
+it receives the same module, engine configuration and simulation inputs.
+This requirement applies to guest arithmetic, engine callouts, callbacks and
+background jobs.
 
-Integration checked on 2026-10-18: `rust-wip` contains the jobs integration
-(`c24a0727aa`), opt-in memory-hashing correction (`4dc4e25e0d`), and engine
-follow-up fixes (`e36d269449`). The separate `codex/wasm-synced-jobs` development
-history was consolidated into the integration commit; it is not pending a merge.
-The broader matrix below is future engine verification work, beyond the completed
-local task. No GitHub Actions were run or added for that task. Ship Game adoption
-and gameplay work belong in Ship Game's own plans.
+The engine-owned tests now provide evidence for broader Wasm integration on
+x86-64 Linux and the Windows executable under Wine. They exercise the official
+`spring-sdk`, real networking and recorded playback independently of any game.
+The [2026-10-19 report](recoil_wasm_sync_report_2026-10-19.md) contains the measured
+matrix, a reproduced floating-point bug, its regression checks and portable
+raw evidence. The FP fix and test suite are committed locally in `5daee98e45`;
+they are not part of an already released engine.
 
-Goal: prove automatically, without playtesting, that every synced Wasm game stays in sync across the supported platforms (amd64-linux, arm64-linux, amd64-windows) and across machine conditions that must not matter. One binary per platform is shipped, so compiler variety is out of scope; operating system and CPU architecture are in scope.
+Native Windows hardware and ARM remain acceptance work for this suite. A
+passing finite fixture is evidence for the tested paths, not proof that every
+possible module or host call is deterministic.
 
-This plan implements the "Synced determinism tests" of [Parity & Testing](recoil_wasm_parity_testing.md) and the "Synced acceptance tests" of [Sandbox & Determinism](recoil_wasm_sandbox_determinism.md), and extends them from engine fixtures to real games.
+## Follow-up plan and historical engine failures
 
-## Why games, not only fixtures
+The [next test plan](recoil_wasm_sync_plan.md) adds immutable cross-platform replay
+corpora, repeated playback at the same worker count, long pathfinding stress and
+live reconnect coverage. Its [historical review](recoil_sync_history_2026-10-19.md)
+links actual engine fixes, public reports and current code-inspection findings.
+Those are planned tests and suspected host-engine gaps, not extra passing results.
 
-| Game | Role |
-|---|---|
-| Ship Game | Needs sync for its own multiplayer. Large synced Rust/Wasm rules, AI, flight, formations; long matches |
-| SpringCabal Wasm ports (Gravitas, Hunted, Area 17, Flove, Parts Needed, MyCube, To The Last Drop) | Single-player today; their value is coverage of engine and Wasm runtime behaviour that fixtures miss |
-| Engine fixtures (`test/native_api_parity`, BAR synctest) | Narrow, fast, run on every engine change |
+## What must agree
 
-A divergence in any of them is treated the same way: as an engine, runtime or host-API bug until shown to be game code.
+Peers need the same Wasm bytes, module names/order and execution environments;
+compatible engine builds with the same Wasmtime version and feature settings;
+the same memory/table limits and fuel/host-work budgets; and the same sequence
+of simulation events and network inputs. A module hash alone does not establish
+agreement on all those settings. Keep start scripts and engine configs with
+results.
 
-## What exists
+“Same inputs” includes recorded player-stat updates, player joins and commands,
+not just a random seed. Two fresh matches can legitimately differ. Replay the
+same recorded stream, or compare peers participating in the same live match.
+Unsynced UI/rendering instances have separate memory and may differ per client.
+The unrestricted `All` environment does not acquire a lockstep guarantee simply
+because it can access simulation APIs.
 
-| Facility | Where | Covers | Gap |
-|---|---|---|---|
-| Per-frame sync checksum | `rts/System/Sync/SyncChecker.h` (`SYNCCHECK`, on by default) | Running hash of synced engine assignments; the server compares clients' checksums live | Wasm linear memory is not hashed: a guest divergence is invisible until it changes engine state |
-| Demo desync detection | Server echoes sync responses every `syncResponseEchoInterval` frames (`rts/Net/GameServer.cpp`); replay compares and logs `[DESYNC WARNING]` (`rts/Net/NetCommands.cpp`) | Any recorded game, replayed anywhere | Nothing runs replays automatically; coarse interval |
-| Sync history | `SYNC_HISTORY` in `SyncChecker`, `SYNCDEBUG` builds | Per-assignment history for localisation | Manual, engine state only |
-| BAR synctest | `.github/workflows/synctest.yml`, `test/synctest` | One seeded BAR scenario on three platforms, digest compared | Lua game only; manual trigger |
-| Wasm Core parity | `.github/workflows/wasm-cross-platform.yml`, `test/native_api_parity` | Synced Wasm fixture: per-frame observations, FP edge cases, RNG, three platforms | Fixture only; manual trigger |
-| Float test | `.github/workflows/streflop-float-test.yml` | Engine C++ floating point | — |
-| Runtime determinism config | `rts/WasmInterface/runtime/WasmRuntime.cpp` | NaN canonicalisation, deterministic relaxed SIMD, no threads or shared memory in synced instances | — |
+## How the engine keeps execution deterministic
 
-## Engine work
-
-### 1. Hash synced Wasm state into the sync checksum
-
-After each simulation frame, synced module metadata and cached job digests are
-fed to `CSyncChecker::Sync`. Full linear-memory hashing uses XXH3-64 only when
-explicitly enabled, under the policy below.
-
-- **Implemented policy**: full-memory hashing is off in normal games (`system.WasmStateHashInterval = 0` by default). `WasmSyncLog` hashes every frame for local verification without changing the network checksum; a positive game-owned interval explicitly opts into network memory scans. Normal checks cover only module metadata and cached job digests. See [the cost report and fix](recoil_wasm_state_hash_cost_2026-10-12.md). Dirty-page tracking may support cheaper full-state coverage later.
-- **Unsynced instances are excluded**: they legitimately differ per client.
-- **Coverage**: with diagnostic logging enabled, a linear-memory divergence is visible on its first logged frame, without per-game code. Normal metadata checks do not detect arbitrary guest-memory changes. Opt-in network memory checks detect persistent differences on the next scan; transient differences between scans may escape them.
-- **Precondition**: no host call writes client-dependent data into synced guest memory. Any such write is itself a sync bug, and this hash will expose it.
-
-### 2. Sync log
-
-A start-script or command-line option writes one line per frame (or per interval): frame, engine checksum, and each synced instance's memory hash and size. Tests compare logs instead of relying on networked comparison or demo echoes.
-
-### 3. Divergence localisation
-
-On a mismatch between two logs:
-
-1. **First frame**: the earliest differing line.
-2. **Which part**: engine checksum or which Wasm instance.
-3. **Where in guest memory**: both platforms re-run deterministically to that frame and dump the instance's linear memory; a diff lists differing pages and offsets, mapped to symbols through the module's name section and DWARF where statics are involved.
-4. **Which game system**: optional per-game digests (below) narrow heap divergences to a subsystem.
-5. **Engine state**: `SYNC_HISTORY` / `SYNCDEBUG` builds for divergences in engine checksums.
-
-The tooling (log compare, dump, page diff, symbol map) lives in `test/synctest/` and runs locally and in CI.
-
-### 4. Perturbation runs on one machine
-
-Some sync bugs desync different machines but show on a single one when conditions change. Each scenario also runs twice locally with one condition varied, logs compared:
-
-| Varied | Catches |
-|---|---|
-| Fresh process (address layout) | Pointer-ordered iteration, uninitialised memory |
-| Frame pacing and simulation speed | Wall-clock or render-frame state leaking into synced code |
-| Headless vs rendered client | Unsynced code changing synced state |
-| Engine thread count (`PathingThreadCount`, future job workers) | Order-dependent parallel work |
-| Two processes over localhost (host plus client) | The live networked path; the server compares checksums as online |
-
-### 5. Demo replay checks
-
-A runner replays recorded demos headless with the sync log on, and fails on any `[DESYNC WARNING]` or log difference. Inputs: each game's recorded demos (Ship Game keeps a replay library; SpringCabal suites can record theirs). Runs on all three platforms against demos recorded on any one of them.
-
-### 6. Static checks for synced guest code
-
-Shared Clippy configuration for synced crates: disallowed types and methods (hash maps and sets with random state, `std::time`, OS entropy), and a check that synced crates link only synced API surfaces. The host API audit list in [Sandbox & Determinism](recoil_wasm_sandbox_determinism.md#host-api-determinism) becomes a checked inventory of synced callouts with their determinism status.
-
-### 7. CI
-
-| Workflow | Runs | Trigger |
+| Risk | Current Core Wasm behavior | Source |
 |---|---|---|
-| `wasm-cross-platform.yml`, `synctest.yml` (existing) | Fixtures, BAR | After every engine build, not only manual |
-| `wasm-games-synctest.yml` (new) | Platform × game matrix: each game's scenarios with the sync log, then a cross-platform log compare and, on failure, localisation artifacts | Every engine build on the default branch; nightly with longer scenarios |
-| Demo replay job (new) | Each platform replays the demo set | Nightly |
-| Perturbation job (new) | Linux, all games, every perturbation | Nightly |
+| Different NaN payloads or CPU instruction choices | NaN canonicalization enabled; relaxed SIMD disabled by default, with deterministic mode configured | [WasmRuntime.cpp](../../WasmInterface/runtime/WasmRuntime.cpp) |
+| Guest threads racing | Wasm threads/shared memory disabled by default | [WasmRuntime.h](../../WasmInterface/runtime/WasmRuntime.h) |
+| Memory/table growth depending on the machine | Synced memory and tables must declare equal minimum and maximum; Core start functions are rejected | [WasmCoreValidation.cpp](../../WasmInterface/core/host/WasmCoreValidation.cpp) |
+| Native FP settings changing guest calculations | Scoped guest FP controls at callins, helper exports and callbacks; restored on returning to the caller and from host imports | [WasmFloatEnvironment.h](../../WasmInterface/runtime/WasmFloatEnvironment.h), [FP regression](recoil_wasm_sync_report_2026-10-19.md#floating-point-regression) |
+| Local clocks/OS randomness driving simulation | No generic WASI/OS access; use agreed seeds or synced engine RNG. Synced timers require explicit diagnostic opt-in | [Sandbox policy](recoil_wasm_sandbox_determinism.md), [timer bindings](../../WasmInterface/core/bindings/WasmCoreDesyncBindings.cpp) |
+| Different thread counts moving job results between frames | Copied inputs, fresh worker instances, a next-frame barrier and delivery in global submission order | [Job contract](recoil_wasm_synced_jobs.md#execution-contract) |
+| Time-based execution limits | Instruction fuel and host-work counters; no wall-time budget for synced work | [Runtime settings](recoil_wasm_sandbox_determinism.md#execution-budget) |
 
-Pinned game versions per engine branch, as BAR's synctest pins its game: an engine change must not be blamed on a game change.
+These are engine responsibilities. A game still needs deterministic simulation
+logic and must use its synced entry points. The sandbox cannot make a local
+clock, client-specific input or an unstable iteration order into a valid synced
+input. Host APIs must preserve their synced behavior through the binding,
+including errors, list order, string contents and callback results.
 
-A local loop for developers: `just sync-check <game>` runs the scenarios natively and under Wine with the Windows build, and compares logs. arm64 stays in CI.
+### Floating-point boundaries
 
-## Per-game work
+The FP boundary fix selects nearest-even rounding and keeps subnormal values
+instead of inheriting arbitrary native rounding or flush-to-zero controls.
+It restores the caller's controls after guest execution. Host import scopes also
+restore the guest's controls before Wasm resumes, including nested callbacks.
+Workers use the same guarded helper-export path. This changes Wasm execution
+boundaries; it does not change the engine's global FP policy, networking or API.
 
-Kept small: the engine side (memory hash, sync log, replay runner, localisation) is generic.
+The regression changes native FP controls deliberately, then executes real
+Wasmtime scalar/SIMD arithmetic and conversions. It checks output bits and
+caller-control restoration after success and traps. A direct unprotected
+Wasmtime call must still expose the bad rounding/underflow behavior, proving
+that the inputs actually exercise the issue. See the [report](recoil_wasm_sync_report_2026-10-19.md).
 
-| Item | Ship Game | SpringCabal games |
-|---|---|---|
-| Seeded scenario ending at a fixed frame | AI-versus-AI skirmish with several AIs and doctrines; formation, flight and economy puzzles; long match nightly | Existing `verification` headless suites (`headless-integration` feature, scripted `e2e` scenarios); each needs a fixed seed and a fixed end frame |
-| Inputs only through synced paths | Scenarios drive teams by AI and synced commands; no unsynced widgets issuing orders by wall clock | Same; scripted UI input is replaced by demos or synced test commands |
-| Demos for replay checks | Replay library plus CI matches | One recorded playthrough per game |
-| Subsystem digests (optional) | Yes: economy, formations, AI knowledge, flight state, logged per interval | Not needed |
-| Pin file | Game version and map for each engine branch | Same |
+### Jobs and failures
 
-BAR's experience applies: unsynced code that issues orders makes runs irreproducible (its synctest disables LuaUI for that reason). Every scenario must pass the perturbation runs on one machine before its cross-platform result means anything.
+A worker gets copied bytes and a fresh instance, not the submitting module's
+live memory/globals. It cannot call engine imports, clocks, RNG or submit more
+jobs. Frame F jobs are sealed after that frame and delivered before ordinary
+frame F+1 updates, in submission order, even when later jobs finish first.
+Waiting may slow real time; it must not change the delivery frame.
 
-## Acceptance
+An isolated worker trap is an explicit job error. An engine/runtime allocation
+failure must not become a machine-dependent successful result. Ordinary Core
+module faults currently deregister the module; sync acceptance must reject
+faulted or missing required modules rather than treating their absence as a
+successful match. See [fault handling](../../WasmInterface/system/WasmInterfaceSystemCore.cpp)
+and the [job error contract](recoil_wasm_synced_jobs.md#execution-contract).
 
-- Identical sync logs (engine checksum and every synced instance hash, every frame) across the three platforms for every game scenario.
-- Identical logs across every perturbation on one machine.
-- No `[DESYNC WARNING]` replaying any demo in the set on any platform.
-- A deliberately injected divergence (a test-only build reading a platform value in synced code) is reported at the right frame, instance and memory offset.
+## What a matching hash establishes
 
-## Order of work
+[WasmSyncVerification.cpp](../../WasmInterface/system/WasmSyncVerification.cpp)
+records each synced module in name order. The
+[comparison tool](../../../test/synctest/wasm_sync_replay.py) checks its entire
+record and the engine checksums, frame by frame.
 
-1. Sync log and Wasm memory hashing in the engine; localisation tooling for two logs.
-2. Ship Game scenarios on Linux: perturbation runs until reproducible.
-3. Ship Game cross-platform: Wine locally, then the CI matrix.
-4. SpringCabal headless suites with fixed seeds and end frames, added to the matrix.
-5. Demo replay runner and nightly jobs.
-6. Static checks and the synced host API inventory.
-7. Thread-count perturbation becomes required once parallel synced work (pathfinding threads, job workers) exists.
+| Field | Compared data |
+|---|---|
+| `identity`, `name`, `environment` | Module SHA-512 identity and placement |
+| `bytes`, `hash` | Size and XXH3-64 hash of **all linear-memory bytes**, including unused heap/stack bytes |
+| `state_bytes`, `state_hash` (schema 2) | Canonical bytes/hash of all globals and table entries, including hidden ones |
+| `jobs_hash` | Synced queue digest, including admitted inputs and job metadata |
+| `faulted` | Module fault flag |
+| `engine`, `checksum` | Engine checksum before and after this frame's Wasm contribution |
+| `workers` | Actual pool size, checked against the requested size; it is allowed to differ between runs |
+
+The engine checksum is cumulative: `engine` can include earlier frames' Wasm
+contributions. These hashes are diagnostics, not a cryptographic proof of
+state equality.
+
+Schema 2 adds globals and tables. The loader validates the original module,
+then adds private export aliases without changing guest instructions, indices
+or public exports. All synced instances use this transformation, whether or
+not logging is enabled. Identity remains the hash of the original module.
+Numeric values keep exact bits; function references serialize as original
+module indices, not machine addresses or Wasmtime store IDs. Non-null opaque
+host references cause an explicit inspection error. See
+[WasmCoreState.cpp](../../WasmInterface/core/host/WasmCoreState.cpp).
+
+This adds module-load metadata and original-module validation, not per-call
+SDK work. State scans run only for the existing opt-in full-state diagnostics
+or game-requested hash interval. The public native/Wasm SDK API is unchanged.
+The scanner does not expose passive data/element segment drop status; the new
+bulk-operation workload checks later behavior, not immediate drop-flag equality.
+Old schema-1 evidence covers memory only and cannot be compared as schema 2.
+
+### Normal play and diagnostic checking
+
+| Mode | Cost and detection |
+|---|---|
+| Normal play: `system.WasmStateHashInterval = 0` | Existing engine sync checks plus module metadata and cached job digests; **no full guest-state scan** |
+| Game opts into `system.WasmStateHashInterval = N > 0` | Adds full memory plus globals/tables to the network checksum every N frames, including frame zero; differences between scans can escape detection |
+| Local `WasmSyncLog = /path/sync.jsonl` | Hashes full linear memory plus globals/tables every frame for offline comparison, without changing what is mixed into the network checksum |
+
+A client may enable logging while another does not. Logging must not cause a
+desync itself. Full-memory scans can be expensive for large modules; the
+[measured cost and policy](recoil_wasm_state_hash_cost_2026-10-12.md) explain why
+they are not enabled by default. Matching ordinary network checksums alone is
+weaker evidence than the full-memory diagnostic runs below.
+
+## Reproduce the engine-owned tests
+
+Run from the engine repository root. Use a fresh output directory for each
+command. The fixture uses public engine parity content and the official SDK;
+no downstream game, private assets, account or public service is needed.
+The engine must be built with Wasmtime and `SYNCCHECK`; Cargo and its
+`wasm32-unknown-unknown` target are needed to build the guest.
+
+Build the Linux engine and C++ regression executable using the normal
+[build instructions](../../../AGENTS.md#building-the-engine):
+
+```sh
+docker-build-v2/build.sh -j 2 linux -DBUILD_TESTING=ON
+docker-build-v2/build.sh --compile -j 2 linux -t test_WasmSyncedJobs
+WASM_JOB_FIXTURE="$PWD/test/wasm_api/data/synced_jobs/worker.wat" \
+  build-amd64-linux/test/test_WasmSyncedJobs
+```
+
+Record one match, then replay its exact input stream with 1, 4 and 8 workers:
+
+```sh
+python3 test/synctest/wasm_adversarial.py --frames 900 \
+  --output /tmp/wasm-sync-replay
+```
+
+Compare two real networked Linux processes (host: 1 worker; guest: 4):
+
+```sh
+python3 test/synctest/wasm_adversarial.py --live --frames 900 \
+  --output /tmp/wasm-sync-live
+```
+
+After building a matching Windows engine, run its executable under a working
+64-bit Wine installation with a **dedicated test prefix**:
+
+```sh
+python3 test/synctest/wasm_adversarial.py --live --frames 900 \
+  --guest-spring /path/to/windows-engine/spring-headless.exe \
+  --wine /path/to/wine64 --wine-prefix /path/to/test-prefix \
+  --output /tmp/wasm-sync-linux-wine
+```
+
+The runner pins copies of the engine, Windows DLLs and compiled guest before
+starting. It saves source/config provenance, start scripts, demos, logs and
+comparisons. `--frames 900` includes frames 0 through 900: **901 rows**. The
+runner rejects missing/noncontiguous frames, absent synced modules, faulted
+records, failed fixture assertions and incorrect actual worker counts. The
+runner checks the exact expected name/environment/identity set on every frame;
+losing the same module on both peers also fails.
+
+Check that a bad run is detected, using identical guest bytes in both runs:
+
+```sh
+python3 test/synctest/wasm_adversarial.py --negative-control --frames 15 \
+  --workers 1 4 --output /tmp/wasm-sync-clock-control
+```
+
+This explicitly enables a local-clock read at frame 7. Success means the tool
+finds the first difference in module `rules-0` at **frame 7**, not that the runs
+match. The runner removes `SPRING_ENABLE_SYNCED_TIMERS` from ordinary runs.
+Never enable that diagnostic clock in normal lockstep testing or gameplay.
+
+For another module/game, use the existing
+[replay runner](../../../test/synctest/README.md) and preserve its exact input
+stream. `--fresh-hosts` is diagnostic: fresh matches can have different player
+CPU/ping packets even when their seed and scripted unit commands agree.
+
+## Investigating a difference
+
+1. Keep both engines, guest bytes, configs, demos and unmodified logs. Record
+   artifact hashes and uncommitted source changes; a Git HEAD alone is not
+   enough for a dirty build.
+2. Run `wasm_sync_replay.py compare A.jsonl B.jsonl`. It identifies the first
+   differing frame/module or engine checksum. Do not compare only final state
+   or tolerate a percentage of different bytes.
+3. Rerun that same input stream with `WasmSyncDumpFrame` set to the first
+   differing frame and `WasmSyncLog` set. Memory files are named
+   `sync.jsonl.frame-F.module-I.bin`, with I in sorted module-name order.
+4. Use `wasm_sync_replay.py memory-diff A.bin B.bin` to list pages and offsets.
+   Use `decode-state SNAPSHOT.state.bin` for indexed globals/table values.
+   Trace them to the guest data or host result that changed. Recheck network
+   inputs before assuming a runtime error.
+5. Preserve the failing regression and add a passing fix plus a deliberate
+   failure check. Do not discard bytes, omit a faulted module, hide differences
+   behind rounded subsystem hashes or enable old-demo warning exceptions for
+   final acceptance.
+
+## Gates for broader integration
+
+The current evidence supports broader integration and testing of synced Wasm
+on the tested x86-64 paths. Maintain that evidence when the runtime, generated
+bindings, shared host adapters, FP handling, job ordering or synced APIs change:
+
+- Run the C++ arithmetic/job suite, the official-SDK live/replay cases and the
+  deliberate failure controls against the exact candidate artifacts.
+- Add a regression for each discovered sync failure and keep the per-frame logs.
+- Test native Windows hardware and Linux ARM64 for the same fixture; rerun the
+  arithmetic regression on ARM hardware. Wine cannot substitute for either.
+- Run the [seeded multi-module suite](../../../test/synctest/README.md#repeatable-deeper-matrix)
+  for Rules/Gaia, nested callbacks, cross-world jobs, hidden state and bulk
+  operations. Keep extending API/game scenarios; current fixtures are finite.
+- Use the [saved corpus](../../../test/synctest/README.md#reuse-the-exact-workload-on-another-platform)
+  to compare an additional platform against the same recorded inputs and
+  prebuilt modules, without requiring a Rust toolchain there.
+- Add routine cross-platform regression execution using existing engine build
+  artifacts. The local suite has not been added to or run through GitHub
+  Actions. Broad game replay matrices and long-running gates remain future work.
+
+The [sandbox policy](recoil_wasm_sandbox_determinism.md),
+[API parity tests](recoil_wasm_parity_testing.md) and
+[job contract](recoil_wasm_synced_jobs.md) complement these checks. They answer
+different questions: allowed access, equivalent API behavior and deterministic
+parallel work all matter to a reliable synced backend.

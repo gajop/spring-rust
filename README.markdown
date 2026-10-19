@@ -56,6 +56,15 @@ If you are just starting out and want to get an engine binary, we recommend usin
 
 If you want to compile the engine without Docker to use a different compiler, to have a better setup with code completion in an IDE, etc., you might want to follow the [building without Docker article](https://recoilengine.org/development/building-without-docker/).
 
+## Wasm modules
+
+Lockstep sync is a required property of synced Wasm integration. The engine
+[sync contract and verification guide](rts/wasm/docs/recoil_wasm_sync_verification.md)
+explains the runtime protections, reproducible official-SDK tests and current
+coverage. The [measured report](rts/wasm/docs/recoil_wasm_sync_report_2026-10-19.md)
+includes Linux/Windows-under-Wine and replay results, with remaining platform
+gates stated explicitly.
+
 ## License
 
 Our Terms are documented in the [LICENSE](LICENSE).

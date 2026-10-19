@@ -1,0 +1,1430 @@
+{
+  "schema": 2,
+  "base": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+  "cases": [
+    {
+      "case": "clock-negative",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 424242,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ]
+        },
+        "workers": [
+          1,
+          4
+        ],
+        "frames": 30,
+        "negative_control": true,
+        "hidden_state_control": false,
+        "live": false,
+        "fresh_hosts": false,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "f6e5b6f3765e82e793d55424e1a22f1ee97cf484918e9c82462217c4e3b2a028",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "cc18769aa130b988203b19aa2e88330fb0f1153677e26a68f87b57a848c2e4b4",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "87d09cd02604591e276314ef38bbc191e616be254753c27f9c2ffc0d81c0a0ee",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "host-1-workers-4",
+            "frame": 7,
+            "module": "rules-0",
+            "reason": "Wasm state or module identity",
+            "left": {
+              "name": "rules-0",
+              "identity": "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d",
+              "environment": "rules-synced",
+              "bytes": 16777216,
+              "hash": "75c9a3eb2e34a7de",
+              "state_bytes": 330,
+              "state_hash": "fc9015d49b06ff8a",
+              "jobs_hash": "294b7694dd912841",
+              "faulted": false
+            },
+            "right": {
+              "name": "rules-0",
+              "identity": "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d",
+              "environment": "rules-synced",
+              "bytes": 16777216,
+              "hash": "b9f77b1557b9b16e",
+              "state_bytes": 330,
+              "state_hash": "fc9015d49b06ff8a",
+              "jobs_hash": "294b7694dd912841",
+              "faulted": false
+            }
+          }
+        ],
+        "elapsed_seconds": 9.560104023985332
+      },
+      "logs": [
+        {
+          "file": "clock-negative-host-0-workers-1.jsonl.gz",
+          "uncompressed_sha256": "ee132f8a3826b29158acb44a978b143c46e46fac2ffd7231893533b094aa09b8",
+          "sha256": "410a518fded77a2e2d04ec2a986779d45fe370c2b065868bd87a0f3d00a190a9",
+          "rows": 31
+        },
+        {
+          "file": "clock-negative-host-1-workers-4.jsonl.gz",
+          "uncompressed_sha256": "049f101686c190d125f2f5b69861a2540730926e6ea0babe2e725c74c4ea374e",
+          "sha256": "a2f371a477606611fd4b4c5aa3f3f16f4679ffe95787123d082bcf403fccab69",
+          "rows": 31
+        }
+      ]
+    },
+    {
+      "case": "hidden-state-negative",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 424242,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "hidden-state": [
+            "rules-synced",
+            "51796594ce9d4aab6d85d5e4e1d54fbf072c7594a87d7eb0161f2643b5a29036492848c92e9be3948835ffa50136c2c84ccffcd3b82af6eeffab84c301e77c3b"
+          ]
+        },
+        "workers": [
+          1,
+          4
+        ],
+        "frames": 30,
+        "negative_control": false,
+        "hidden_state_control": true,
+        "live": false,
+        "fresh_hosts": false,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "f6e5b6f3765e82e793d55424e1a22f1ee97cf484918e9c82462217c4e3b2a028",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "cc18769aa130b988203b19aa2e88330fb0f1153677e26a68f87b57a848c2e4b4",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "87d09cd02604591e276314ef38bbc191e616be254753c27f9c2ffc0d81c0a0ee",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "host-1-workers-4",
+            "frame": 7,
+            "module": "hidden-state",
+            "reason": "Wasm state or module identity",
+            "left": {
+              "name": "hidden-state",
+              "identity": "51796594ce9d4aab6d85d5e4e1d54fbf072c7594a87d7eb0161f2643b5a29036492848c92e9be3948835ffa50136c2c84ccffcd3b82af6eeffab84c301e77c3b",
+              "environment": "rules-synced",
+              "bytes": 65536,
+              "hash": "33b202d302b65caa",
+              "state_bytes": 34,
+              "state_hash": "eac8572ab5b2a2f9",
+              "jobs_hash": "40049f0fa195d199",
+              "faulted": false
+            },
+            "right": {
+              "name": "hidden-state",
+              "identity": "51796594ce9d4aab6d85d5e4e1d54fbf072c7594a87d7eb0161f2643b5a29036492848c92e9be3948835ffa50136c2c84ccffcd3b82af6eeffab84c301e77c3b",
+              "environment": "rules-synced",
+              "bytes": 65536,
+              "hash": "33b202d302b65caa",
+              "state_bytes": 34,
+              "state_hash": "f1a4d0cc5f673857",
+              "jobs_hash": "40049f0fa195d199",
+              "faulted": false
+            }
+          }
+        ],
+        "elapsed_seconds": 9.497684745001607
+      },
+      "logs": [
+        {
+          "file": "hidden-state-negative-host-0-workers-1.jsonl.gz",
+          "uncompressed_sha256": "22766e18b266e604d220de7f6671ad57739e7a3772471dcfe9d43befb05d0852",
+          "sha256": "b4e906b49579233fa462e5b032808d1628fda624af775028e5c02b650580a240",
+          "rows": 31
+        },
+        {
+          "file": "hidden-state-negative-host-1-workers-4.jsonl.gz",
+          "uncompressed_sha256": "f2cf5b1eae3368a63072f6cc1c3aee882a62c9470887830193bff9518dc84278",
+          "sha256": "73518c2b0cb3afd6ecf84a6597127dd2094492002c8e592a9434d94aed785bbc",
+          "rows": 31
+        }
+      ]
+    },
+    {
+      "case": "live-seed-1-repeat-0",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 1,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "rules-1": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "gaia-0": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "gaia-1": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "state-workload": [
+            "rules-synced",
+            "c59c8ba5c15431a7eaabdf12e580b0edaf3b2e8f5e526b280e2cb411e97fc115c906333691fadce3878c1e119d4d764061e0a1f6a1aa5baaf9e4151190983ae5"
+          ]
+        },
+        "workers": [
+          1,
+          4,
+          8
+        ],
+        "frames": 900,
+        "negative_control": false,
+        "hidden_state_control": false,
+        "live": true,
+        "fresh_hosts": false,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "4ccb06afbe369334541402b5902febbfed9c7b746e5ff8ea769ba6cf31385e91",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "cc18769aa130b988203b19aa2e88330fb0f1153677e26a68f87b57a848c2e4b4",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "87d09cd02604591e276314ef38bbc191e616be254753c27f9c2ffc0d81c0a0ee",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        },
+        "guest_engine_sha256": "b7b512a61492ba53717a98b26ac14d0b5a705a3d229b9fd0d838ac54a7476a77",
+        "guest_dlls": {
+          "libvorbisenc-2.dll": "3fdbd2d1d71f41ade560b2c135360636033572a5382bb64cf1a8a655ac9f9aac",
+          "libintl-8.dll": "1794bff5cc99ad41948d34a3960592e3cece15c14412a21c3bfb9f1f111c0435",
+          "unitsync.dll": "12672e44edf4a4f139ef05e9bc304169d7586c972f31d3bf29ca87993057398c",
+          "libiconv-2.dll": "3bc4984b5dda9ba9131a97a450bf0ef7d4f59c460d9900949e2ae3159925762a",
+          "libharfbuzz-0.dll": "5c3dedccf1114dbeda58f7724f63e2ee4018ac25b0ae189deb54c7f9c018a40f",
+          "libfreetype-6.dll": "960eba9ec9e66317a81c84cabbddd8d1f34acc3d11f3ebb62fb6896e2f203f96",
+          "zlib1.dll": "55eff295e3f33163e423ee91bfc2836388c783178dde73538e2fbd9f7d8c88b1",
+          "OpenAL32.dll": "02ad96c9f48cae63d142f206ec7f8a5207de9ecdbd9a4860114f515b4a90cf02",
+          "libwinpthread-1.dll": "ecda15494e204e84083cd63f5117551755223ea6a7af2272faf4f97a16cf4eb7",
+          "libcurl.dll": "39b0dd2b354a4379a1e3dd6344997888eb3fc0694f1baa6ea9877868c47f975a",
+          "libexpat-1.dll": "8eab6605178b69d1f2ffb2b51d25b10e9f02eeddcd2431bfac5e9ab5bf907f47",
+          "libILU.dll": "22770e626b52bd8a051dd0ebd4894690b24217592779354482fb739b484e696e",
+          "libpng16-16.dll": "42cd9db8f0c0cafd73fa0a5262ca08a83e328351cc4f6f5c2416ca780714ec5c",
+          "glew32.dll": "f81af02afdc4363bb98454b7d8ff398c39ed7a0dce216a2ae381e3c14f5b4b82",
+          "libglib-2.0-0.dll": "181ef789081403b2042a2708992844237aa6c8167cc6ead744162d603c657291",
+          "libogg-0.dll": "0c130b1a192898983ccc78005fa2c452fb730f8172c3ca6a59a82eb21e152b82",
+          "libvorbis-0.dll": "0aa71dad2b2fbdba449d5c6bccafe209835fc6591407d6411ad16fb0cb66e3e6",
+          "libIL.dll": "e457a493406456276eb1d3b872f0e7b26e4146edf252a33babbefbfae1fff179",
+          "wasmtime.dll": "2aeabb0e290dd647bf5d82813e116e3c0f92514c24ab4d1d91877beda454fc6e",
+          "SDL2.dll": "bcb038d773ccdfb5766d69c24279dda615a8052836ee3ed8f26129b82e50b9f7",
+          "libvorbisfile-3.dll": "5c4e67beadd0dd7400107f9afaa72530b4cfc6ece51aaa44bc5b0737e3e7209a",
+          "libfontconfig-1.dll": "9b1b4c3665dbfa180300cbb8e0b029cbb98911e1553068916dcf75a80d96e572",
+          "libbz2.dll": "5ddcbb72e7b5dc4e8a825f092d5cbfa50244e46a94cf74898e9c0eba2e298865",
+          "libgcc_s_seh-1.dll": "7340c8231b65c0c30235bf4d586d8482b499d73eadcb3565b21396812d13d345",
+          "libpcre-1.dll": "8cf8ad92ef014a650b26742133bba64960aac23b3199080c5779a555a998a4c0"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "live-guest",
+            "equal": true,
+            "frames": 901
+          }
+        ],
+        "elapsed_seconds": 40.08741782701691
+      },
+      "logs": [
+        {
+          "file": "live-seed-1-repeat-0-live-guest.jsonl.gz",
+          "uncompressed_sha256": "a272a7f2cd358dfc0eece2788f1d1657edbc1d43449d97341ea0414932311d05",
+          "sha256": "f1a31066a148af24240795d8693dab746fefb3369a429f932c69717654d23aa0",
+          "rows": 901
+        },
+        {
+          "file": "live-seed-1-repeat-0-live-host.jsonl.gz",
+          "uncompressed_sha256": "b6cec629819fb17a8aec59fd5924e175e174d166d5e4a3d28e2901dd36a80589",
+          "sha256": "a1f9f0c942c72d27eec4503d348f24a9ec1add619ea659eb000c03e408a9ba37",
+          "rows": 901
+        }
+      ]
+    },
+    {
+      "case": "live-seed-16777215-repeat-0",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 16777215,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "rules-1": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "gaia-0": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "gaia-1": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "state-workload": [
+            "rules-synced",
+            "c59c8ba5c15431a7eaabdf12e580b0edaf3b2e8f5e526b280e2cb411e97fc115c906333691fadce3878c1e119d4d764061e0a1f6a1aa5baaf9e4151190983ae5"
+          ]
+        },
+        "workers": [
+          1,
+          4,
+          8
+        ],
+        "frames": 900,
+        "negative_control": false,
+        "hidden_state_control": false,
+        "live": true,
+        "fresh_hosts": false,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "f6e5b6f3765e82e793d55424e1a22f1ee97cf484918e9c82462217c4e3b2a028",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "cc18769aa130b988203b19aa2e88330fb0f1153677e26a68f87b57a848c2e4b4",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "87d09cd02604591e276314ef38bbc191e616be254753c27f9c2ffc0d81c0a0ee",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        },
+        "guest_engine_sha256": "b7b512a61492ba53717a98b26ac14d0b5a705a3d229b9fd0d838ac54a7476a77",
+        "guest_dlls": {
+          "libvorbisenc-2.dll": "3fdbd2d1d71f41ade560b2c135360636033572a5382bb64cf1a8a655ac9f9aac",
+          "libintl-8.dll": "1794bff5cc99ad41948d34a3960592e3cece15c14412a21c3bfb9f1f111c0435",
+          "unitsync.dll": "12672e44edf4a4f139ef05e9bc304169d7586c972f31d3bf29ca87993057398c",
+          "libiconv-2.dll": "3bc4984b5dda9ba9131a97a450bf0ef7d4f59c460d9900949e2ae3159925762a",
+          "libharfbuzz-0.dll": "5c3dedccf1114dbeda58f7724f63e2ee4018ac25b0ae189deb54c7f9c018a40f",
+          "libfreetype-6.dll": "960eba9ec9e66317a81c84cabbddd8d1f34acc3d11f3ebb62fb6896e2f203f96",
+          "zlib1.dll": "55eff295e3f33163e423ee91bfc2836388c783178dde73538e2fbd9f7d8c88b1",
+          "OpenAL32.dll": "02ad96c9f48cae63d142f206ec7f8a5207de9ecdbd9a4860114f515b4a90cf02",
+          "libwinpthread-1.dll": "ecda15494e204e84083cd63f5117551755223ea6a7af2272faf4f97a16cf4eb7",
+          "libcurl.dll": "39b0dd2b354a4379a1e3dd6344997888eb3fc0694f1baa6ea9877868c47f975a",
+          "libexpat-1.dll": "8eab6605178b69d1f2ffb2b51d25b10e9f02eeddcd2431bfac5e9ab5bf907f47",
+          "libILU.dll": "22770e626b52bd8a051dd0ebd4894690b24217592779354482fb739b484e696e",
+          "libpng16-16.dll": "42cd9db8f0c0cafd73fa0a5262ca08a83e328351cc4f6f5c2416ca780714ec5c",
+          "glew32.dll": "f81af02afdc4363bb98454b7d8ff398c39ed7a0dce216a2ae381e3c14f5b4b82",
+          "libglib-2.0-0.dll": "181ef789081403b2042a2708992844237aa6c8167cc6ead744162d603c657291",
+          "libogg-0.dll": "0c130b1a192898983ccc78005fa2c452fb730f8172c3ca6a59a82eb21e152b82",
+          "libvorbis-0.dll": "0aa71dad2b2fbdba449d5c6bccafe209835fc6591407d6411ad16fb0cb66e3e6",
+          "libIL.dll": "e457a493406456276eb1d3b872f0e7b26e4146edf252a33babbefbfae1fff179",
+          "wasmtime.dll": "2aeabb0e290dd647bf5d82813e116e3c0f92514c24ab4d1d91877beda454fc6e",
+          "SDL2.dll": "bcb038d773ccdfb5766d69c24279dda615a8052836ee3ed8f26129b82e50b9f7",
+          "libvorbisfile-3.dll": "5c4e67beadd0dd7400107f9afaa72530b4cfc6ece51aaa44bc5b0737e3e7209a",
+          "libfontconfig-1.dll": "9b1b4c3665dbfa180300cbb8e0b029cbb98911e1553068916dcf75a80d96e572",
+          "libbz2.dll": "5ddcbb72e7b5dc4e8a825f092d5cbfa50244e46a94cf74898e9c0eba2e298865",
+          "libgcc_s_seh-1.dll": "7340c8231b65c0c30235bf4d586d8482b499d73eadcb3565b21396812d13d345",
+          "libpcre-1.dll": "8cf8ad92ef014a650b26742133bba64960aac23b3199080c5779a555a998a4c0"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "live-guest",
+            "equal": true,
+            "frames": 901
+          }
+        ],
+        "elapsed_seconds": 40.71167159199831
+      },
+      "logs": [
+        {
+          "file": "live-seed-16777215-repeat-0-live-guest.jsonl.gz",
+          "uncompressed_sha256": "7dd09e2f732b6c5735d3983720b031404a8534dd94acdf5a75005e76acf474ea",
+          "sha256": "1c04843df83c3749765e5fc05d5bb4829adabc46d1b483119927edb64cd04c72",
+          "rows": 901
+        },
+        {
+          "file": "live-seed-16777215-repeat-0-live-host.jsonl.gz",
+          "uncompressed_sha256": "0ba23afa8a8788d36194184d3a51f14e5ce4d4da088d3b9cf88bd2da89d97bed",
+          "sha256": "b4d5ab386aa6228d0bdf35651586f0f3fb372553a05f9bc74ffa19509ac00eb5",
+          "rows": 901
+        }
+      ]
+    },
+    {
+      "case": "mixed-seed-1-repeat-0",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 1,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "rules-1": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "gaia-0": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "gaia-1": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "state-workload": [
+            "rules-synced",
+            "c59c8ba5c15431a7eaabdf12e580b0edaf3b2e8f5e526b280e2cb411e97fc115c906333691fadce3878c1e119d4d764061e0a1f6a1aa5baaf9e4151190983ae5"
+          ]
+        },
+        "workers": [
+          1,
+          4,
+          8
+        ],
+        "frames": 900,
+        "negative_control": false,
+        "hidden_state_control": false,
+        "live": false,
+        "fresh_hosts": false,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "4ccb06afbe369334541402b5902febbfed9c7b746e5ff8ea769ba6cf31385e91",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "cc18769aa130b988203b19aa2e88330fb0f1153677e26a68f87b57a848c2e4b4",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "87d09cd02604591e276314ef38bbc191e616be254753c27f9c2ffc0d81c0a0ee",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "replay-workers-1",
+            "equal": true,
+            "frames": 901
+          },
+          {
+            "run": "replay-workers-4",
+            "equal": true,
+            "frames": 901
+          },
+          {
+            "run": "replay-workers-8",
+            "equal": true,
+            "frames": 901
+          }
+        ],
+        "elapsed_seconds": 140.89599801800796
+      },
+      "logs": [
+        {
+          "file": "mixed-seed-1-repeat-0-host-0-workers-1.jsonl.gz",
+          "uncompressed_sha256": "047811835b743f041fc065c2d7a1bfe34faaac63a24c79b63ded5d8f7cee3ceb",
+          "sha256": "f7b5cbae889a72ad98799719420c115c89753d790aba1446eb0b93711acaa070",
+          "rows": 901
+        },
+        {
+          "file": "mixed-seed-1-repeat-0-replay-workers-1.jsonl.gz",
+          "uncompressed_sha256": "047811835b743f041fc065c2d7a1bfe34faaac63a24c79b63ded5d8f7cee3ceb",
+          "sha256": "f7b5cbae889a72ad98799719420c115c89753d790aba1446eb0b93711acaa070",
+          "rows": 901
+        },
+        {
+          "file": "mixed-seed-1-repeat-0-replay-workers-4.jsonl.gz",
+          "uncompressed_sha256": "f0ce69252b03aeb3743e51f849dcb975383e1f7156d41e59b628c5d7cc1f6d24",
+          "sha256": "9924ea7253cfb4952a9eee32ecc4bbe7a942bb92e19f2217e05705c2d6bf30d8",
+          "rows": 901
+        },
+        {
+          "file": "mixed-seed-1-repeat-0-replay-workers-8.jsonl.gz",
+          "uncompressed_sha256": "e39766cdc56afb91173db064a1a831a85c0270e920aa21eadc5ec7d40f04e522",
+          "sha256": "f8001ec0172c74d6c6cdeb80cd537692718064f25d3dce287693d31fce688fd5",
+          "rows": 901
+        }
+      ]
+    },
+    {
+      "case": "mixed-seed-16777215-repeat-0",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 16777215,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "rules-1": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "gaia-0": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "gaia-1": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "state-workload": [
+            "rules-synced",
+            "c59c8ba5c15431a7eaabdf12e580b0edaf3b2e8f5e526b280e2cb411e97fc115c906333691fadce3878c1e119d4d764061e0a1f6a1aa5baaf9e4151190983ae5"
+          ]
+        },
+        "workers": [
+          1,
+          4,
+          8
+        ],
+        "frames": 900,
+        "negative_control": false,
+        "hidden_state_control": false,
+        "live": false,
+        "fresh_hosts": false,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "f6e5b6f3765e82e793d55424e1a22f1ee97cf484918e9c82462217c4e3b2a028",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "cc18769aa130b988203b19aa2e88330fb0f1153677e26a68f87b57a848c2e4b4",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "87d09cd02604591e276314ef38bbc191e616be254753c27f9c2ffc0d81c0a0ee",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "replay-workers-1",
+            "equal": true,
+            "frames": 901
+          },
+          {
+            "run": "replay-workers-4",
+            "equal": true,
+            "frames": 901
+          },
+          {
+            "run": "replay-workers-8",
+            "equal": true,
+            "frames": 901
+          }
+        ],
+        "elapsed_seconds": 142.77965385498828
+      },
+      "logs": [
+        {
+          "file": "mixed-seed-16777215-repeat-0-host-0-workers-1.jsonl.gz",
+          "uncompressed_sha256": "f1d5c27d196113e083ed9a3064813f9d505d03dd7d50a1b8c621ff56afed7df1",
+          "sha256": "1b3267f70d20f0b2dc579b7c3ef0a92bf3d1b29915c9b16834b12c860011757f",
+          "rows": 901
+        },
+        {
+          "file": "mixed-seed-16777215-repeat-0-replay-workers-1.jsonl.gz",
+          "uncompressed_sha256": "f1d5c27d196113e083ed9a3064813f9d505d03dd7d50a1b8c621ff56afed7df1",
+          "sha256": "1b3267f70d20f0b2dc579b7c3ef0a92bf3d1b29915c9b16834b12c860011757f",
+          "rows": 901
+        },
+        {
+          "file": "mixed-seed-16777215-repeat-0-replay-workers-4.jsonl.gz",
+          "uncompressed_sha256": "b8aafc0138b1841b20b12a2b218a28f0ba9fd44e483e263db3c52f725cc44d2b",
+          "sha256": "878065dd78b7ac10072d8a7a23c3b4661097622ec1eceb8020ba227fcd476ad3",
+          "rows": 901
+        },
+        {
+          "file": "mixed-seed-16777215-repeat-0-replay-workers-8.jsonl.gz",
+          "uncompressed_sha256": "2259c8e1b33bef79c22cf1dafa93da61d71db08596ba6b997cb0b63edde4ea65",
+          "sha256": "3f2700bc0d8d3c251fa9e51aa7cfdc69f3c36b71849470da7777e75d48f02f26",
+          "rows": 901
+        }
+      ]
+    },
+    {
+      "case": "rules-seed-1-repeat-0",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 1,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "rules-1": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "state-workload": [
+            "rules-synced",
+            "c59c8ba5c15431a7eaabdf12e580b0edaf3b2e8f5e526b280e2cb411e97fc115c906333691fadce3878c1e119d4d764061e0a1f6a1aa5baaf9e4151190983ae5"
+          ]
+        },
+        "workers": [
+          1,
+          4,
+          8
+        ],
+        "frames": 900,
+        "negative_control": false,
+        "hidden_state_control": false,
+        "live": false,
+        "fresh_hosts": false,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "4ccb06afbe369334541402b5902febbfed9c7b746e5ff8ea769ba6cf31385e91",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "cc18769aa130b988203b19aa2e88330fb0f1153677e26a68f87b57a848c2e4b4",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "87d09cd02604591e276314ef38bbc191e616be254753c27f9c2ffc0d81c0a0ee",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "replay-workers-1",
+            "equal": true,
+            "frames": 901
+          },
+          {
+            "run": "replay-workers-4",
+            "equal": true,
+            "frames": 901
+          },
+          {
+            "run": "replay-workers-8",
+            "equal": true,
+            "frames": 901
+          }
+        ],
+        "elapsed_seconds": 140.2749750899966
+      },
+      "logs": [
+        {
+          "file": "rules-seed-1-repeat-0-host-0-workers-1.jsonl.gz",
+          "uncompressed_sha256": "fc8ee90ea2dfc66a88ae32bf03f81b16670f23c53e834ac30339393daca08e3e",
+          "sha256": "26e931907294ffbcf58b6ec3c76700f0e0c742d1c951206a1e747c6fa4d32719",
+          "rows": 901
+        },
+        {
+          "file": "rules-seed-1-repeat-0-replay-workers-1.jsonl.gz",
+          "uncompressed_sha256": "fc8ee90ea2dfc66a88ae32bf03f81b16670f23c53e834ac30339393daca08e3e",
+          "sha256": "26e931907294ffbcf58b6ec3c76700f0e0c742d1c951206a1e747c6fa4d32719",
+          "rows": 901
+        },
+        {
+          "file": "rules-seed-1-repeat-0-replay-workers-4.jsonl.gz",
+          "uncompressed_sha256": "e2d261512ee022e5c9baeb85808eb1af051ac56850dfa8a4c27d63aca34b74e7",
+          "sha256": "4ed79db372d0d7e2c4e6020784c05b1afd9c5f0fed644f9808e9e2f3d1359531",
+          "rows": 901
+        },
+        {
+          "file": "rules-seed-1-repeat-0-replay-workers-8.jsonl.gz",
+          "uncompressed_sha256": "7e049129c0bf0f0687153566973088736fc3249011a64c9fc825e65d06366993",
+          "sha256": "103555e5e087d91dc11053f892a5ecb04e317da841cf10f4ef4f61761c966d53",
+          "rows": 901
+        }
+      ]
+    },
+    {
+      "case": "rules-seed-16777215-repeat-0",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 16777215,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "rules-1": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "state-workload": [
+            "rules-synced",
+            "c59c8ba5c15431a7eaabdf12e580b0edaf3b2e8f5e526b280e2cb411e97fc115c906333691fadce3878c1e119d4d764061e0a1f6a1aa5baaf9e4151190983ae5"
+          ]
+        },
+        "workers": [
+          1,
+          4,
+          8
+        ],
+        "frames": 900,
+        "negative_control": false,
+        "hidden_state_control": false,
+        "live": false,
+        "fresh_hosts": false,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "4ccb06afbe369334541402b5902febbfed9c7b746e5ff8ea769ba6cf31385e91",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "cc18769aa130b988203b19aa2e88330fb0f1153677e26a68f87b57a848c2e4b4",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "87d09cd02604591e276314ef38bbc191e616be254753c27f9c2ffc0d81c0a0ee",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "replay-workers-1",
+            "equal": true,
+            "frames": 901
+          },
+          {
+            "run": "replay-workers-4",
+            "equal": true,
+            "frames": 901
+          },
+          {
+            "run": "replay-workers-8",
+            "equal": true,
+            "frames": 901
+          }
+        ],
+        "elapsed_seconds": 139.51620234901202
+      },
+      "logs": [
+        {
+          "file": "rules-seed-16777215-repeat-0-host-0-workers-1.jsonl.gz",
+          "uncompressed_sha256": "67431ba224196a1c8642e83e9db41f7ff414db0746573f6e96b6041927210298",
+          "sha256": "7df9cd47b6b02e131d29c53640ced8045a6ba41d8e8724aae7e70ccee9fc7b80",
+          "rows": 901
+        },
+        {
+          "file": "rules-seed-16777215-repeat-0-replay-workers-1.jsonl.gz",
+          "uncompressed_sha256": "67431ba224196a1c8642e83e9db41f7ff414db0746573f6e96b6041927210298",
+          "sha256": "7df9cd47b6b02e131d29c53640ced8045a6ba41d8e8724aae7e70ccee9fc7b80",
+          "rows": 901
+        },
+        {
+          "file": "rules-seed-16777215-repeat-0-replay-workers-4.jsonl.gz",
+          "uncompressed_sha256": "433ad10e82be9f336023ea92384eb33db7b8172b88159064e8c5bf804a9d6010",
+          "sha256": "08cda7bf0575b894caea1536845ad25f7b8be37d4165908f32a2fcd91d8dc5bc",
+          "rows": 901
+        },
+        {
+          "file": "rules-seed-16777215-repeat-0-replay-workers-8.jsonl.gz",
+          "uncompressed_sha256": "dc78de41b7640f9da488ccf33f3441303a9e35173fd160350e3a2131526d172f",
+          "sha256": "4395e13396b2ea19dab5598c62e9b845ac2372c5b560ea2989f3f24c15413911",
+          "rows": 901
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Engine-only public parity fixture; no downstream game content",
+    "Source patch/source snapshots and pinned binaries retained in private local evidence",
+    "Deep matrix source version preceded additional unlogged replay and standalone kit support; guest and engine artifacts unchanged"
+  ],
+  "automation_and_portable_cases": [
+    {
+      "case": "automation-clock-negative",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 424242,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ]
+        },
+        "workers": [
+          1,
+          4
+        ],
+        "frames": 30,
+        "negative_control": true,
+        "hidden_state_control": false,
+        "live": false,
+        "fresh_hosts": false,
+        "hash_interval": 0,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "579c719ab7c6ee3c05008f54703a5711d5c8270d5ca4a8ac5169753b942fab6a",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "78461ea90baa9bc1046cb7088e6bc1e0c94fb30645ac52fa1f083443b3454945",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "004a24f664803028cb089241bb40d6c73cd629860925ae354aade023b8969901",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "host-1-workers-4",
+            "frame": 7,
+            "module": "rules-0",
+            "reason": "Wasm state or module identity",
+            "left": {
+              "name": "rules-0",
+              "identity": "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d",
+              "environment": "rules-synced",
+              "bytes": 16777216,
+              "hash": "b98770319f0a42bd",
+              "state_bytes": 330,
+              "state_hash": "fc9015d49b06ff8a",
+              "jobs_hash": "294b7694dd912841",
+              "faulted": false
+            },
+            "right": {
+              "name": "rules-0",
+              "identity": "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d",
+              "environment": "rules-synced",
+              "bytes": 16777216,
+              "hash": "23f53bb748b750c6",
+              "state_bytes": 330,
+              "state_hash": "fc9015d49b06ff8a",
+              "jobs_hash": "294b7694dd912841",
+              "faulted": false
+            }
+          }
+        ],
+        "logging_policy": null,
+        "elapsed_seconds": 9.291463396017207
+      },
+      "logs": [
+        {
+          "file": "automation-clock-negative-host-0-workers-1.jsonl.gz",
+          "uncompressed_sha256": "6e8dedcb62bba072df30a19054271e3eaa85c0844b6f6f22760b27cab854a5ee",
+          "sha256": "afdf2ef62010bc94f8d0d1d48d004364a6a2a3ce634fd3d51cbfb39571aa2e84",
+          "rows": 31
+        },
+        {
+          "file": "automation-clock-negative-host-1-workers-4.jsonl.gz",
+          "uncompressed_sha256": "6609b5d8638dbbd50b339da5f720d9ff82e415cc085793c95900d710a1faa506",
+          "sha256": "5b96d5c5730d4b521f8f035abd3b97b32ae0f1039f5f2cc24e85ca1b7a91e57e",
+          "rows": 31
+        }
+      ],
+      "policy_logs": []
+    },
+    {
+      "case": "automation-hidden-state-negative",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 424242,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "hidden-state": [
+            "rules-synced",
+            "51796594ce9d4aab6d85d5e4e1d54fbf072c7594a87d7eb0161f2643b5a29036492848c92e9be3948835ffa50136c2c84ccffcd3b82af6eeffab84c301e77c3b"
+          ]
+        },
+        "workers": [
+          1,
+          4
+        ],
+        "frames": 30,
+        "negative_control": false,
+        "hidden_state_control": true,
+        "live": false,
+        "fresh_hosts": false,
+        "hash_interval": 0,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "579c719ab7c6ee3c05008f54703a5711d5c8270d5ca4a8ac5169753b942fab6a",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "78461ea90baa9bc1046cb7088e6bc1e0c94fb30645ac52fa1f083443b3454945",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "004a24f664803028cb089241bb40d6c73cd629860925ae354aade023b8969901",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "host-1-workers-4",
+            "frame": 7,
+            "module": "hidden-state",
+            "reason": "Wasm state or module identity",
+            "left": {
+              "name": "hidden-state",
+              "identity": "51796594ce9d4aab6d85d5e4e1d54fbf072c7594a87d7eb0161f2643b5a29036492848c92e9be3948835ffa50136c2c84ccffcd3b82af6eeffab84c301e77c3b",
+              "environment": "rules-synced",
+              "bytes": 65536,
+              "hash": "33b202d302b65caa",
+              "state_bytes": 34,
+              "state_hash": "8d3495e61017597f",
+              "jobs_hash": "40049f0fa195d199",
+              "faulted": false
+            },
+            "right": {
+              "name": "hidden-state",
+              "identity": "51796594ce9d4aab6d85d5e4e1d54fbf072c7594a87d7eb0161f2643b5a29036492848c92e9be3948835ffa50136c2c84ccffcd3b82af6eeffab84c301e77c3b",
+              "environment": "rules-synced",
+              "bytes": 65536,
+              "hash": "33b202d302b65caa",
+              "state_bytes": 34,
+              "state_hash": "de1676faf862fe2f",
+              "jobs_hash": "40049f0fa195d199",
+              "faulted": false
+            }
+          }
+        ],
+        "logging_policy": null,
+        "elapsed_seconds": 8.953168854990508
+      },
+      "logs": [
+        {
+          "file": "automation-hidden-state-negative-host-0-workers-1.jsonl.gz",
+          "uncompressed_sha256": "d6f6ba52dd6ef57cc913b590d51ff4679a11c13666c56d5a80d610862a0dd4a5",
+          "sha256": "57bee9dce7bb4cb00774d1abdfae003be9fca84317446372816b9e4a9318605e",
+          "rows": 31
+        },
+        {
+          "file": "automation-hidden-state-negative-host-1-workers-4.jsonl.gz",
+          "uncompressed_sha256": "a24989d73a88b59616509f565da8251c7f67205bc2c1dd2d3f8dceff1747f30d",
+          "sha256": "40275e73ef53fe96d9e9c9f728209d7511d63f21c1b3d0429bf96c785a05b1fe",
+          "rows": 31
+        }
+      ],
+      "policy_logs": []
+    },
+    {
+      "case": "automation-mixed-seed-424242-repeat-0",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 424242,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "rules-1": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "gaia-0": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "gaia-1": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "state-workload": [
+            "rules-synced",
+            "c59c8ba5c15431a7eaabdf12e580b0edaf3b2e8f5e526b280e2cb411e97fc115c906333691fadce3878c1e119d4d764061e0a1f6a1aa5baaf9e4151190983ae5"
+          ]
+        },
+        "workers": [
+          1,
+          4,
+          8
+        ],
+        "frames": 90,
+        "negative_control": false,
+        "hidden_state_control": false,
+        "live": false,
+        "fresh_hosts": false,
+        "hash_interval": 1,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "579c719ab7c6ee3c05008f54703a5711d5c8270d5ca4a8ac5169753b942fab6a",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "78461ea90baa9bc1046cb7088e6bc1e0c94fb30645ac52fa1f083443b3454945",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "004a24f664803028cb089241bb40d6c73cd629860925ae354aade023b8969901",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "replay-workers-1",
+            "equal": true,
+            "frames": 91
+          },
+          {
+            "run": "replay-workers-4",
+            "equal": true,
+            "frames": 91
+          },
+          {
+            "run": "replay-workers-8",
+            "equal": true,
+            "frames": 91
+          }
+        ],
+        "logging_policy": {
+          "passed": true,
+          "kind": "recorded network checksums with diagnostic logging disabled",
+          "full_state_compared": false,
+          "hash_interval": 1
+        },
+        "elapsed_seconds": 43.43920868600253
+      },
+      "logs": [
+        {
+          "file": "automation-mixed-seed-424242-repeat-0-host-0-workers-1.jsonl.gz",
+          "uncompressed_sha256": "4e3c508838792673ee413133dc4427c918b5383ad11b8c65e4bd9cf188dd308d",
+          "sha256": "bc21af5a465668e318742e7073a4503877afebabe541e6c0c2705f0aa7d5410f",
+          "rows": 91
+        },
+        {
+          "file": "automation-mixed-seed-424242-repeat-0-replay-workers-1.jsonl.gz",
+          "uncompressed_sha256": "4e3c508838792673ee413133dc4427c918b5383ad11b8c65e4bd9cf188dd308d",
+          "sha256": "bc21af5a465668e318742e7073a4503877afebabe541e6c0c2705f0aa7d5410f",
+          "rows": 91
+        },
+        {
+          "file": "automation-mixed-seed-424242-repeat-0-replay-workers-4.jsonl.gz",
+          "uncompressed_sha256": "f41264bed896850bd5d3c026059d1b108dfd4fdd3590e26ff3ea9bb18ea5b074",
+          "sha256": "cec89243fbeaf8e4fb2cc4ff5a7de834fad771e9829b9b26331e5a89fee3cdf6",
+          "rows": 91
+        },
+        {
+          "file": "automation-mixed-seed-424242-repeat-0-replay-workers-8.jsonl.gz",
+          "uncompressed_sha256": "11d1b253e9d6a67f460fce8ff240c87d01bb451536632a0e51da2fcc5fabc1f8",
+          "sha256": "5b02ec857b86177fece2b9f29253eb32c52eb5be53f7c6c6bfc1ab15ec81f5aa",
+          "rows": 91
+        }
+      ],
+      "policy_logs": [
+        {
+          "file": "automation-mixed-seed-424242-repeat-0-unlogged-console.log.gz",
+          "sha256": "017107a3a15c8f50bde5b0454d82405842a43d8f9df89b93b019cbbb9fd7853c"
+        }
+      ]
+    },
+    {
+      "case": "automation-rules-seed-424242-repeat-0",
+      "provenance": {
+        "engine_sha256": "a992d617d348ba45387b711c9a113b7a72526e0e8ec95a0525f1834f04469c49",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 424242,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "rules-1": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "state-workload": [
+            "rules-synced",
+            "c59c8ba5c15431a7eaabdf12e580b0edaf3b2e8f5e526b280e2cb411e97fc115c906333691fadce3878c1e119d4d764061e0a1f6a1aa5baaf9e4151190983ae5"
+          ]
+        },
+        "workers": [
+          1,
+          4,
+          8
+        ],
+        "frames": 90,
+        "negative_control": false,
+        "hidden_state_control": false,
+        "live": false,
+        "fresh_hosts": false,
+        "hash_interval": 0,
+        "head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+        "tracked_patch_sha256": "6886b6db13e6b9aa245aa8185d29885ec72a5a1cb358afb750b9e00a793d341e",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "78461ea90baa9bc1046cb7088e6bc1e0c94fb30645ac52fa1f083443b3454945",
+          "test/wasm_api/guests/sync_adversarial/Cargo.toml": "28ad9b143c5c07fee06354aa3e71aaf9d8492800d2b3f40d8fd11828182aa076",
+          "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+          "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+          "test/wasm_api/guests/sync_adversarial/src/lib.rs": "ebabe10fb2dfa084c80643070c343bcf590b7a627196db0db4ea800d480eaf69",
+          "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+          "rts/WasmInterface/core/host/WasmCoreState.cpp": "4b596edc9178b7f7dfbe8b6f65f9dc5693bbb4fce746050e5fa406e67dab9885",
+          "rts/WasmInterface/core/host/WasmCoreState.h": "a4bd6421222d438c2190e0733a4fbbb824e30d3e3841f320597af4c37e3dde1d",
+          "test/synctest/wasm_sync_replay.py": "004a24f664803028cb089241bb40d6c73cd629860925ae354aade023b8969901",
+          "test/wasm_api/data/sync_adversarial/hidden_state.wat": "123edc6fc614176f8f8d433e2f8ce14e81f60c920c71aec21bb82a171e0e4eaf",
+          "test/wasm_api/data/sync_adversarial/state_workload.wat": "70bdf800cb0960112c417a2b430d73c18d48f60c576c8c02f07e3af96e7796fa"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "replay-workers-1",
+            "equal": true,
+            "frames": 91
+          },
+          {
+            "run": "replay-workers-4",
+            "equal": true,
+            "frames": 91
+          },
+          {
+            "run": "replay-workers-8",
+            "equal": true,
+            "frames": 91
+          }
+        ],
+        "logging_policy": {
+          "passed": true,
+          "kind": "recorded network checksums with diagnostic logging disabled",
+          "full_state_compared": false,
+          "hash_interval": 0
+        },
+        "elapsed_seconds": 41.02870639701723
+      },
+      "logs": [
+        {
+          "file": "automation-rules-seed-424242-repeat-0-host-0-workers-1.jsonl.gz",
+          "uncompressed_sha256": "ed0acde6c3cd724e3d6b35c594920cd3552358a6c2e3991c897e2bd4b6e4de28",
+          "sha256": "042eeaa34a14568aa99d7fcbbe881f25394151c31f46108cf46c937ec0768b57",
+          "rows": 91
+        },
+        {
+          "file": "automation-rules-seed-424242-repeat-0-replay-workers-1.jsonl.gz",
+          "uncompressed_sha256": "ed0acde6c3cd724e3d6b35c594920cd3552358a6c2e3991c897e2bd4b6e4de28",
+          "sha256": "042eeaa34a14568aa99d7fcbbe881f25394151c31f46108cf46c937ec0768b57",
+          "rows": 91
+        },
+        {
+          "file": "automation-rules-seed-424242-repeat-0-replay-workers-4.jsonl.gz",
+          "uncompressed_sha256": "16dab20acb9a6fc88db0ce9ee1f741af443bf30a2eaf1436efe23451bb0ef0ef",
+          "sha256": "87590c061ae5f8c44523ef684e160b73ddb48ed211fe420d8fa5f219b0c5c3b0",
+          "rows": 91
+        },
+        {
+          "file": "automation-rules-seed-424242-repeat-0-replay-workers-8.jsonl.gz",
+          "uncompressed_sha256": "b29ec9e0fab120e2b2b79baae9edd38067a7d9788463057da49894f5531ff80a",
+          "sha256": "a733ac2a518c61efc2fe36b0b0d8822febd184152ec7f86524f5be9aa3043edd",
+          "rows": 91
+        }
+      ],
+      "policy_logs": [
+        {
+          "file": "automation-rules-seed-424242-repeat-0-unlogged-console.log.gz",
+          "sha256": "b57bcc1afe0978456c30deedf74665f886573674f67cd9172ff0de8a7e811a2d"
+        }
+      ]
+    },
+    {
+      "case": "portable-windows-replay",
+      "provenance": {
+        "engine_sha256": "b7b512a61492ba53717a98b26ac14d0b5a705a3d229b9fd0d838ac54a7476a77",
+        "guest_sha256": "a1a88a01c20b02cd37e99df5bf97a7b09cfc214ef1454ac44b539624d3fc34bd",
+        "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "seed": 1,
+        "public_content_sha256": "9b006cdc3722be5a1db9cacd78552dd26d97d21ee99f3a5add9e5cfb4f47cd1a",
+        "expected_modules": {
+          "rules-0": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "rules-1": [
+            "rules-synced",
+            "4259e12860984483212b8c5fc9d803f0be32e851d69a773b2942f529ba26943f620a6e05af13fc68087c2479d39816389bcf476fd7747dd6c1fd55207070fd6d"
+          ],
+          "gaia-0": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "gaia-1": [
+            "gaia-synced",
+            "99a7d05e678ba40dc796a228b2f6f6a75610060c13cbe85ad09b8ed9ef6c6c6a8ff6ff361b9950c1625ef7c031fede20ce6c078251eff91d7e04b59524890aac"
+          ],
+          "state-workload": [
+            "rules-synced",
+            "c59c8ba5c15431a7eaabdf12e580b0edaf3b2e8f5e526b280e2cb411e97fc115c906333691fadce3878c1e119d4d764061e0a1f6a1aa5baaf9e4151190983ae5"
+          ]
+        },
+        "workers": [
+          1,
+          4,
+          8
+        ],
+        "frames": 900,
+        "negative_control": false,
+        "hidden_state_control": false,
+        "live": false,
+        "fresh_hosts": false,
+        "hash_interval": 0,
+        "head": null,
+        "source_note": "Portable test bundle; no Git checkout/tool required",
+        "bundle_manifest_sha256": "894ff1d7080d3aa39e60a5cbc43c51ccaf8de93f490cd58ddb94babe559a9d5e",
+        "tracked_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sources": {
+          "test/synctest/wasm_adversarial.py": "6208f570d8128543317a3ea09d2a131845a4327919f256c2a2c20f278785969e",
+          "test/synctest/wasm_sync_replay.py": "004a24f664803028cb089241bb40d6c73cd629860925ae354aade023b8969901"
+        }
+      },
+      "result": {
+        "passed": true,
+        "comparisons": [
+          {
+            "run": "replay-workers-1",
+            "equal": true,
+            "frames": 901
+          },
+          {
+            "run": "replay-workers-4",
+            "equal": true,
+            "frames": 901
+          },
+          {
+            "run": "replay-workers-8",
+            "equal": true,
+            "frames": 901
+          }
+        ],
+        "logging_policy": {
+          "passed": true,
+          "kind": "recorded network checksums with diagnostic logging disabled",
+          "full_state_compared": false,
+          "hash_interval": 0,
+          "reached_frame": 900
+        },
+        "elapsed_seconds": 143.16002487399965
+      },
+      "logs": [
+        {
+          "file": "portable-windows-replay-replay-workers-1.jsonl.gz",
+          "uncompressed_sha256": "1b96a699d50e16cb70762a2c23a7e6cbbbe7905854510c82583c620272ecea07",
+          "sha256": "b6278b7be7c3aa59c8b8e9643d85220a97148f6c128d6a2e53adff54ad47dc1f",
+          "rows": 901
+        },
+        {
+          "file": "portable-windows-replay-replay-workers-4.jsonl.gz",
+          "uncompressed_sha256": "bcffbc2aceb9b2f1dd2b502edd57a1a8aba5365e7205fe2a650d2a370c77ba5f",
+          "sha256": "f788023293b6322da9139a27e7b40594bb7d648015e3523c37ed933768e544ab",
+          "rows": 901
+        },
+        {
+          "file": "portable-windows-replay-replay-workers-8.jsonl.gz",
+          "uncompressed_sha256": "ecb39960dbd55a620f8ca12d04b7b0ec8bd93dadd57556c3c9cf22f8649a595f",
+          "sha256": "c24f7783182dcc8db3188d333cbe7f47a116de6f9df099966cf5e9905e52d2fd",
+          "rows": 901
+        }
+      ],
+      "policy_logs": [
+        {
+          "file": "portable-windows-replay-unlogged-console.log.gz",
+          "sha256": "c52fb3ccb76418f16f12217530948c905ee150a8f380e8e799260190f61eff3c"
+        }
+      ]
+    }
+  ],
+  "resume_results": {
+    "resume-deep-result.json": {
+      "passed": true,
+      "complete": true,
+      "cases": [
+        {
+          "case": "rules-seed-1-repeat-0",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        },
+        {
+          "case": "mixed-seed-1-repeat-0",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        },
+        {
+          "case": "live-seed-1-repeat-0",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        },
+        {
+          "case": "rules-seed-16777215-repeat-0",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        },
+        {
+          "case": "mixed-seed-16777215-repeat-0",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        },
+        {
+          "case": "live-seed-16777215-repeat-0",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        },
+        {
+          "case": "hidden-state-negative",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        },
+        {
+          "case": "clock-negative",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        }
+      ]
+    },
+    "resume-automation-result.json": {
+      "passed": true,
+      "complete": true,
+      "cases": [
+        {
+          "case": "rules-seed-424242-repeat-0",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        },
+        {
+          "case": "mixed-seed-424242-repeat-0",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        },
+        {
+          "case": "hidden-state-negative",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        },
+        {
+          "case": "clock-negative",
+          "attempt": "attempt-0000",
+          "passed": true,
+          "resumed": true
+        }
+      ]
+    }
+  },
+  "python_tests": 21
+}

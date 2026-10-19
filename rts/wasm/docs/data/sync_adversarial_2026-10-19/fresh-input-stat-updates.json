@@ -1,0 +1,16 @@
+{
+  "host-0-workers-1": {
+    "original_console_sha256": "45dd87058c09fe9b68b0653d77942489fd2372e536078f3bbb3e1ff538a41fc1",
+    "player_info_updates": [
+      "[t=00:00:00.590233][f=0000000] [SyncAdversarial] player-frame=0 PlayerInfo { player_id: 0, name: \"NativeApiParity\", is_active: true, is_ai: false, is_spec: false, team_id: 0, ally_team_id: 0, ping_time: 0.0, cpu_usage: 0.0, country: \"\", rank: -1, has_skirmish_a_is_in_team: false, custom_keys: \"{}\", desynced: false } ",
+      "[t=00:00:02.090759][f=0000045] [SyncAdversarial] player-frame=45 PlayerInfo { player_id: 0, name: \"NativeApiParity\", is_active: true, is_ai: false, is_spec: false, team_id: 0, ally_team_id: 0, ping_time: 0.0, cpu_usage: 0.022637796, country: \"\", rank: -1, has_skirmish_a_is_in_team: false, custom_keys: \"{}\", desynced: false } "
+    ]
+  },
+  "host-1-workers-4": {
+    "original_console_sha256": "2646be8cdc35651696efd82aca35ec48d2e00169595cdb6c486ea0631a6c289b",
+    "player_info_updates": [
+      "[t=00:00:00.755313][f=0000000] [SyncAdversarial] player-frame=0 PlayerInfo { player_id: 0, name: \"NativeApiParity\", is_active: true, is_ai: false, is_spec: false, team_id: 0, ally_team_id: 0, ping_time: 0.0, cpu_usage: 0.0, country: \"\", rank: -1, has_skirmish_a_is_in_team: false, custom_keys: \"{}\", desynced: false } ",
+      "[t=00:00:02.054306][f=0000039] [SyncAdversarial] player-frame=39 PlayerInfo { player_id: 0, name: \"NativeApiParity\", is_active: true, is_ai: false, is_spec: false, team_id: 0, ally_team_id: 0, ping_time: 0.0, cpu_usage: 0.040314652, country: \"\", rank: -1, has_skirmish_a_is_in_team: false, custom_keys: \"{}\", desynced: false } "
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+............replaying with 1 workers (including sim thread)
+replaying with 4 workers (including sim thread)
+{
+  "frame": 2,
+  "module": "rules",
+  "reason": "Wasm state or module identity",
+  "left": {
+    "name": "rules",
+    "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "environment": "rules-synced",
+    "bytes": 65536,
+    "hash": "0000000000000002",
+    "faulted": false
+  },
+  "right": {
+    "name": "rules",
+    "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "environment": "rules-synced",
+    "bytes": 65536,
+    "hash": "ffffffffffffffff",
+    "faulted": false
+  }
+}
+.replaying with 1 workers (including sim thread)
+replaying with 4 workers (including sim thread)
+{
+  "equal": true,
+  "frames": 4
+}
+.recording a fresh demo from the pinned scenario on this engine
+replaying with 1 workers (including sim thread)
+{
+  "frame": 2,
+  "module": "rules",
+  "reason": "Wasm state or module identity",
+  "left": {
+    "name": "rules",
+    "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "environment": "rules-synced",
+    "bytes": 65536,
+    "hash": "0000000000000002",
+    "faulted": false
+  },
+  "right": {
+    "name": "rules",
+    "identity": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "environment": "rules-synced",
+    "bytes": 65536,
+    "hash": "ffffffffffffffff",
+    "faulted": false
+  },
+  "comparison": "recording versus playback"
+}
+.Running rules-seed-424242-repeat-0; evidence: /tmp/tmp20a5lt4p/results/rules-seed-424242-repeat-0/attempt-0000
+Running mixed-seed-424242-repeat-0; evidence: /tmp/tmp20a5lt4p/results/mixed-seed-424242-repeat-0/attempt-0000
+Running hidden-state-negative; evidence: /tmp/tmp20a5lt4p/results/hidden-state-negative/attempt-0000
+Running clock-negative; evidence: /tmp/tmp20a5lt4p/results/clock-negative/attempt-0000
+Running rules-seed-424242-repeat-0; evidence: /tmp/tmp20a5lt4p/results/rules-seed-424242-repeat-0/attempt-0001
+Running mixed-seed-424242-repeat-0; evidence: /tmp/tmp20a5lt4p/results/mixed-seed-424242-repeat-0/attempt-0001
+Running hidden-state-negative; evidence: /tmp/tmp20a5lt4p/results/hidden-state-negative/attempt-0001
+Running clock-negative; evidence: /tmp/tmp20a5lt4p/results/clock-negative/attempt-0001
+.Running rules-seed-424242-repeat-0; evidence: /tmp/tmp7b0t0_ip/results/rules-seed-424242-repeat-0/attempt-0000
+Running mixed-seed-424242-repeat-0; evidence: /tmp/tmp7b0t0_ip/results/mixed-seed-424242-repeat-0/attempt-0000
+Running hidden-state-negative; evidence: /tmp/tmp7b0t0_ip/results/hidden-state-negative/attempt-0000
+Running clock-negative; evidence: /tmp/tmp7b0t0_ip/results/clock-negative/attempt-0000
+Running rules-seed-424242-repeat-0; evidence: /tmp/tmp7b0t0_ip/results/rules-seed-424242-repeat-0/attempt-0001
+.Running rules-seed-424242-repeat-0; evidence: /tmp/tmp_5ewv2vf/results/rules-seed-424242-repeat-0/attempt-0000
+Running mixed-seed-424242-repeat-0; evidence: /tmp/tmp_5ewv2vf/results/mixed-seed-424242-repeat-0/attempt-0000
+Running hidden-state-negative; evidence: /tmp/tmp_5ewv2vf/results/hidden-state-negative/attempt-0000
+Running clock-negative; evidence: /tmp/tmp_5ewv2vf/results/clock-negative/attempt-0000
+usage: suite [-h] --spring SPRING [--guest-spring GUEST_SPRING] [--wine WINE]
+             [--wine-prefix WINE_PREFIX] --output OUTPUT
+             [--profile {smoke,deep}] [--seeds SEEDS [SEEDS ...]]
+             [--repeats REPEATS] [--frames FRAMES]
+             [--workers WORKERS [WORKERS ...]] [--timeout TIMEOUT] [--resume]
+suite: error: resume inputs changed; use a new output directory
+.Running rules-seed-424242-repeat-0; evidence: /tmp/tmpcdpnzwdt/results/rules-seed-424242-repeat-0/attempt-0000
+...
+----------------------------------------------------------------------
+Ran 21 tests in 0.029s
+
+OK

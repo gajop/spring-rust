@@ -6,6 +6,14 @@ measurements, provenance, and remaining verification limits. The
 [all-environment/profiling follow-up](recoil_wasm_jobs_followup_2026-10-12.md)
 records the newer code checkpoint and acceptance checks.
 
+The current game-independent fixture uses the official `spring-sdk`:
+[guest source](../../../test/wasm_api/guests/sync_adversarial/src/lib.rs),
+[reproduction guide](recoil_wasm_sync_verification.md) and
+[measured cross-platform evidence](recoil_wasm_sync_report_2026-10-19.md).
+The low-level ABI and older `spring` helper examples below remain useful for
+binding maintenance; the unified SDK exposes submission through `spring.jobs()`
+and delivery through `Module::job_result`.
+
 ## Getting started
 
 1. Choose the submitting module's world and package it in the usual Wasm
@@ -88,17 +96,18 @@ Rml context ownership are preserved during result callbacks.
 Each job creates a fresh Wasmtime store, linker, and instance. Only immutable
 compiled code is reused. Linear memory, mutable globals, and tables are private
 and start from the module's initial contents, **not the live rules instance's
-state**. Per-job instances do not run the rules initialization callback. A Wasm `start`
-function still runs during instantiation under the job fuel budget and cannot
-call host imports. Include all required state in the input bytes. Workers cannot call any
+state**. Per-job instances do not run the rules initialization callback. Core
+validation rejects Wasm `start` functions, including in modules compiled for
+jobs. Include all required state in the input bytes. Workers cannot call any
 host import: imported functions are linked as traps, including engine queries,
 clocks, RNG, and job submission. The submitting instance's result callback can
 use its usual synced imports.
 
 The worker owns a reference to the source runtime's engine and compiled module.
 It inherits the same deterministic engine settings, memory/table limits, result
-limit, and instruction-fuel configuration. NaNs are canonicalized, relaxed SIMD
-uses deterministic settings, and Wasm threads/shared memory remain disabled.
+limit, and instruction-fuel configuration. NaNs are canonicalized; relaxed SIMD is disabled by default, with deterministic
+settings configured if enabled. Wasm threads/shared memory remain disabled in
+the default runtime policy.
 Each job receives a fresh configured fuel allowance covering its helpers and
 computation. Fuel zero retains the runtime's existing unlimited policy. Synced
 result callbacks and that frame's other callbacks share one ordinary frame
@@ -240,7 +249,7 @@ hitches; see the [cost report](recoil_wasm_state_hash_cost_2026-10-12.md).
 Client-local settings cannot change the network hashing policy. Without
 `SYNCCHECK`, an interval alone does not trigger useless scans.
 
-Setting `WasmSyncLog` explicitly enables **full-memory diagnostic hashing every
+Setting `WasmSyncLog` explicitly enables **full-state diagnostic hashing every
 frame**, regardless of the game's interval, and dumps can request a scan at a
 selected frame. These local diagnostics do not change the network checksum;
 one peer may log while another does not. Leave them disabled in normal play.
@@ -252,15 +261,19 @@ Local configuration settings:
 |---|---|---|
 | `WasmSyncLog` | empty | JSONL filename; if set, inspect every frame regardless of network cadence |
 | `WasmSyncDumpFrame` | -1 | With logging enabled, dump all synced memories at this frame beside the log |
-| `WasmSyncStopFrame` | -1 | With logging enabled, diagnostic exit after the selected frame |
+| `WasmSyncStopFrame` | -1 | Diagnostic exit after the selected frame |
 
 Each row contains `frame`, actual pool `workers`, `engine` (checksum before this
 frame's Wasm mix), `checksum` (after it), `synccheck`, and per-module `name`,
-`identity`, `environment`, `bytes`, `hash`, `jobs_hash`, `faulted`. The engine
+`identity`, `environment`, `bytes`, `hash`, `state_bytes`, `state_hash`,
+`jobs_hash`, `faulted` (schema 2). The engine
 checksum is cumulative and therefore includes earlier frames' Wasm contributions.
 Memory dumps use `.frame-F.module-I.bin`, where I is the sorted module index.
-Linear-memory hashing does not inspect live globals/tables; those are outside
-this verification scope. Private worker globals are separately tested for reset.
+Schema 2 also hashes canonical globals/table contents, including hidden state;
+`.state.bin` dumps can be decoded by the comparison tool. Passive segment drop
+flags are not exposed by the runtime API. See the current
+[sync verification guide](recoil_wasm_sync_verification.md#what-a-matching-hash-establishes).
+Private worker globals are separately tested for reset.
 
 The local runner rejects gaps/truncation, faults, absent required modules, builds
 without SYNCCHECK, unexpected worker counts, and recorded desync warnings. It

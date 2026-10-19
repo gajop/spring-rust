@@ -1,0 +1,917 @@
+{
+  "review_date": "2026-10-19",
+  "purpose": "History/source review to guide future sync testing; not a reproduction or new acceptance run.",
+  "refs": {
+    "local": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+    "upstream": "57a2de17c87078027b345f5557f06dd330108110",
+    "common_ancestor": "a863df099b943f2c485d52f20a7d48277e7f9027",
+    "local_only_commit_count": 391,
+    "upstream_only_commit_count": 107,
+    "upstream_url": "https://github.com/beyond-all-reason/RecoilEngine",
+    "patch_equivalent_upstream_commits": 0
+  },
+  "method": {
+    "history_keywords": [
+      "desync",
+      "determinism",
+      "race"
+    ],
+    "upstream_only_subjects_screened": 107,
+    "selected_commit_patch_files_saved": 43,
+    "public_sources_saved": 54,
+    "public_search_scope": [
+      "beyond-all-reason/RecoilEngine",
+      "ZeroK-RTS/Zero-K",
+      "beyond-all-reason/Beyond-All-Reason"
+    ],
+    "caveats": [
+      "Targeted patch/source inspection, not every historical diff.",
+      "Issue/PR statements can be wrong; open PRs have not been independently reproduced here.",
+      "Archive/superseded SHAs are retained to avoid mistaking old duplicate commits for missing current fixes.",
+      "Raw issue/comment responses and patches stay in local research state, not committed into this inventory."
+    ]
+  },
+  "commits": [
+    {
+      "sha": "939ead8181afc50d4d733664c360d3a900c1b13b",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "* fix #1919 (LuaUnitScript desync, sleeping threads were being woken up in non-deterministic order)",
+      "date": "2010-07-22",
+      "status": "shared",
+      "patch_sha256": "0d5afe206f65e6f7d2d1ed1489f9c97819a669e92293e7605dfe53d93c687ed2"
+    },
+    {
+      "sha": "91a728c24aa075c4bf3cf8706ba76b3ae2a8e802",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "fix desync (due to uninitialized UnitDef members being read as default values for other tags)",
+      "date": "2011-11-30",
+      "status": "shared",
+      "patch_sha256": "fc7403d7eca3490d3b1ede295d6b3a746d8fbb1839e9435bff71e92a1eb39318"
+    },
+    {
+      "sha": "ed20e0c68d8720b352f90e158a3e1cd426c88203",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Fix #4833 deleting the synced projectile was originally based on when there are no more unsynced subparticles, which led to desyncs if they weren't created due to hitting the limit This was changed to deleting the projectile after ttl+ParticleTTL",
+      "date": "2015-06-25",
+      "status": "shared",
+      "patch_sha256": "8218914c7a2586282d1c7c46bc84094ef726ec48408b3b9292c72d84bd1b0e0a"
+    },
+    {
+      "sha": "871896dc7bbbf3e1a675ee3996e0a6746d141efd",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "make path cache part of synced state -> desync right from the start when one client got invalid one",
+      "date": "2015-06-26",
+      "status": "shared",
+      "patch_sha256": "70e325ef07c1b64a16f5b3090e5334f71e5a284b719ef8c0ca0a5c597090bb47"
+    },
+    {
+      "sha": "98a5a80ca83a923288ed54c2f73f0cb19710e8cb",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "sort can be implemented differently on different compilers",
+      "date": "2016-07-27",
+      "status": "shared",
+      "patch_sha256": "4c5db37fe79737b01f4ce49d8227d25f610019d120c769587946e82b1683e0d2"
+    },
+    {
+      "sha": "ddf580c3294df8784af64d82aa751d58d6b147af",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "fix gsRNG.Next*() eval-order desync",
+      "date": "2017-06-03",
+      "status": "shared",
+      "patch_sha256": "c3fd512c35384bea93201cfc535faae0af3c65329e51bb7f7d4cb852e29521ce"
+    },
+    {
+      "sha": "c484c104f54af0cdd7ccd349b28e6c30376bece9",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "fix #6007 / #5989 unload desyncs lurking since g8824791533 (90.0)",
+      "date": "2018-06-27",
+      "status": "shared",
+      "patch_sha256": "d120929e72bc488286165661eb4902a2ff82a7659f1aeb7a4a7bd292b2b953c7"
+    },
+    {
+      "sha": "6f8370082151a34275eac18f0f635a8da70fb6a7",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Fixed strcoll() and locale driven desync",
+      "date": "2021-08-22",
+      "status": "shared",
+      "patch_sha256": "383a14ccfb45aa1e270f44ba52ad8f2b3f5cb3cd642ac19a6d5670f294860b1f"
+    },
+    {
+      "sha": "e00938fb4f1730ac893250312cfc97284fb37bb7",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Fix desync related to the synced projectile size dependency on \"MaxParticles\"",
+      "date": "2022-09-11",
+      "status": "shared",
+      "patch_sha256": "78129e47b326d5de715383e3dc4b55d58bc1f651eea7c451873649b5e12fabdd"
+    },
+    {
+      "sha": "b57b40cda165234ec24d430ed58d60feed761726",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Remove apparently false assumption that base model name is unique per game & map. This led to content driven desyncs in TAP",
+      "date": "2023-03-27",
+      "status": "shared",
+      "patch_sha256": "ccb3cf1066310986676ff7a141e1a9b6fb20503588f4fdf9e1e301f5936bbaa3"
+    },
+    {
+      "sha": "192c9dd028a0ce7683ae4f7c6f9ba52fee4c7e1c",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Fix a rare, but nasty desync caused by a unit selection (or lack thereof) (#1174)",
+      "date": "2024-01-03",
+      "status": "shared",
+      "patch_sha256": "bed945d00f407c70e5aa87e7eef08471d229cf82c58d4cf5680dd36cf529b0cf"
+    },
+    {
+      "sha": "e4d0e47d45f5f7ef2f77e042621f57588c35b127",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Stablize sorts used by path finders (#1805)",
+      "date": "2024-12-16",
+      "status": "shared",
+      "patch_sha256": "1d74813b96148575f5ae319ecc8b8c000082849cf907065561d835fdce969ba3"
+    },
+    {
+      "sha": "72b9ec29917fd17ba1c67b53c35ee178b92bc3dc",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Lightweight sync history log and dump system v2 (#2202)",
+      "date": "2025-04-26",
+      "status": "shared",
+      "patch_sha256": "9561ea37a3ce8c2e619c7f061b1f63102e03cfcb8aaaa8505b2c18f0beaf212e"
+    },
+    {
+      "sha": "0b153ad93b6737c6b78a9a884010a1a58130c9c5",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Fix desyncs caused by unsynced pathing requests (#2279)",
+      "date": "2025-05-18",
+      "status": "shared",
+      "patch_sha256": "e06064a7242ffd56b51ddeffe734ecdfcaf1c562fe80e9ffbec4bf9d7ccc78b5"
+    },
+    {
+      "sha": "a134a1f73d4138aa5073b1ba315b2e4778b722e9",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Address QTPFS desync (#2370)",
+      "date": "2025-06-08",
+      "status": "shared",
+      "patch_sha256": "a14241b7022c6b113b7a90db47ec68de3a3be19d0a5da9b951b8e4e7c2106c9c"
+    },
+    {
+      "sha": "c19c879a4adc195c905edd1406d4231635b74c5c",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Fix desync in CCobInstance::AimShieldWeapon.",
+      "date": "2025-12-16",
+      "status": "shared",
+      "patch_sha256": "2d84bd78f05bb5b5cb99d8919059e389ced929d642267dd91cdcc421b2ffef24"
+    },
+    {
+      "sha": "385c6eb819eccfe149d60b5a52785a59d9ada0b0",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Part 2 of QTPFS dealing with Lua GC non-determinism (#2695)",
+      "date": "2025-12-18",
+      "status": "shared",
+      "patch_sha256": "74c48ae497c18a13fc0891d4a3dfa14afec42d7fefbb0ae824c234fdd6ee5a75"
+    },
+    {
+      "sha": "81fc6fa28d7096f88412d9feda8067a14a773bc6",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Fix QTPFS desync caused by lua gc-triggered path delete (#2691)",
+      "date": "2025-12-18",
+      "status": "shared",
+      "patch_sha256": "d3c6853794b23ef32117f4b17b0b702acad6cdc7e4256ae195d15ba12bd8251f"
+    },
+    {
+      "sha": "5ed2647d2d80775c45742ab87a019a1b6e6e3983",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Add ARM64 platform support with deterministic floating-point (#2819)",
+      "date": "2026-03-22",
+      "status": "shared",
+      "patch_sha256": "2231a49e0bd84c10bbb2bbbd10be35a0f08955268dfbcd6d664dfdb3cbe648ed"
+    },
+    {
+      "sha": "cad2efa127761d492cc3913cfc61c04f36a1852d",
+      "local_ancestor": false,
+      "upstream_ancestor": false,
+      "subject": "Address desync related to path repair",
+      "date": "2026-06-03",
+      "status": "archive_or_superseded_not_in_either_reviewed_head",
+      "patch_sha256": "70b0535e6e9bee832fd2d98b4380de18488bcb6701d371c7bbbd846c1c189104"
+    },
+    {
+      "sha": "8e8dbb1540aa40e9735e2b8e3707ea8b3d979566",
+      "local_ancestor": false,
+      "upstream_ancestor": false,
+      "subject": "fix potential desyncs around path sharing.",
+      "date": "2026-06-06",
+      "status": "archive_or_superseded_not_in_either_reviewed_head",
+      "patch_sha256": "0e731dec0e1b2d751e7758f441751e76cc6cdd9c4bf6c86dcd91a5d60ff995ee"
+    },
+    {
+      "sha": "ae1db84a3ddd9b6750ec46b933ccd3c7d256c99e",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Address desync related to path repair",
+      "date": "2026-06-07",
+      "status": "shared",
+      "patch_sha256": "6b629913cac19b2852b6f9268145c40fce9ff503271127b6b3514765d83b42d2"
+    },
+    {
+      "sha": "10ff7b0523e1254d27004f32e9cb21f4c6c98b83",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "fix potential desyncs around path sharing.",
+      "date": "2026-06-07",
+      "status": "shared",
+      "patch_sha256": "ac6d9bf3dc8214f9201fc1a411e77bd61d9c64d2ab42e72bfe396ec2fa1f5ce3"
+    },
+    {
+      "sha": "223bfb596c2fcc68d2c8a1c1fd9f669cbddc116e",
+      "local_ancestor": false,
+      "upstream_ancestor": false,
+      "subject": "fix desync",
+      "date": "2026-07-06",
+      "status": "archive_or_superseded_not_in_either_reviewed_head",
+      "patch_sha256": "693de93d6565a0927c2acad13057a2c331d161f6d99f13866e54d27495819d74"
+    },
+    {
+      "sha": "615d257c1293af91df4c0aff1b563c1eb9f0d248",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "fix desync",
+      "date": "2026-07-06",
+      "status": "shared",
+      "patch_sha256": "01380dc2206c8a1e2f957294e1dca291b90196f3ab94ff9a61459194389cd3d4"
+    },
+    {
+      "sha": "1f5323a2c9294d84655f407c1f52fb79708844a2",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "fix(synctest): workaround widget timing nondeterminism (#3124)",
+      "date": "2026-07-25",
+      "status": "shared",
+      "patch_sha256": "92096c0b3b690c4bbeccc5b53cf9d7d65793fd438be8c2971e095e0b9099eab0"
+    },
+    {
+      "sha": "7104ab1f76d9fe6823016dcb5561e179174e39a2",
+      "local_ancestor": true,
+      "upstream_ancestor": true,
+      "subject": "Sim/COB: avoid UB in float-to-short angle casts (fixes arm64/x86 desync) (#3075)",
+      "date": "2026-07-28",
+      "status": "shared",
+      "patch_sha256": "f0b08acf72802d420113174c81bc5865d2eb123db5ace5829effe5ca94e4c7de"
+    },
+    {
+      "sha": "1b14f1601d476db5c8cbe20a6acb578204efc125",
+      "local_ancestor": false,
+      "upstream_ancestor": false,
+      "subject": "wasm: reject reentrant variable scratch use deterministically",
+      "date": "2026-08-20",
+      "status": "archive_or_superseded_not_in_either_reviewed_head",
+      "patch_sha256": "da42fc2f27a560008f7d79cff7cd036712961c19be3fa76e6a87df775844e3f9"
+    },
+    {
+      "sha": "d70fe6ea9570a3d6258009f554197e99672a20dd",
+      "local_ancestor": false,
+      "upstream_ancestor": false,
+      "subject": "Order Core host dispatch deterministically",
+      "date": "2026-08-20",
+      "status": "archive_or_superseded_not_in_either_reviewed_head",
+      "patch_sha256": "5cf6b4303107d44733f52f035039f1cba4aa0d3578b1352e4c90f0b1e1ee81c0"
+    },
+    {
+      "sha": "37911da24dc5587bd7900d9f88eae5a5148ab6af",
+      "local_ancestor": false,
+      "upstream_ancestor": true,
+      "subject": "Ensure consistent timestamp reading in ITaskGroup::GetDeltaTime (#3297)",
+      "date": "2026-09-01",
+      "status": "upstream_only",
+      "patch_sha256": "8e14dc0d67a7a61a9255c29ccc03fbf56be09609ddc068647fc00f0264382844"
+    },
+    {
+      "sha": "219eec4aa500f09255783f88c460bc7172601198",
+      "local_ancestor": false,
+      "upstream_ancestor": true,
+      "subject": "Integrated BAR's nano particle gl4 gadget into engine (default disabled) (#3191)",
+      "date": "2026-09-10",
+      "status": "upstream_only",
+      "patch_sha256": "811a678d8f91714fcda6fa6d11fc176da628729e5c7749cd5008aa85270265b9"
+    },
+    {
+      "sha": "da974d379b613f024859292da0e000d9d2a4280c",
+      "local_ancestor": false,
+      "upstream_ancestor": true,
+      "subject": "Sim: avoid UB in float-to-short heading casts (#3342)",
+      "date": "2026-09-11",
+      "status": "upstream_only",
+      "patch_sha256": "ce7ad0155cb68a8e637734a2ce3c4c5c3de7891eaa3514021ef38cfd454ec359"
+    },
+    {
+      "sha": "b1ac6daf87a0ca3334307e97ba0ab6c2154862c7",
+      "local_ancestor": false,
+      "upstream_ancestor": true,
+      "subject": "Fix QTPFS entity storage type in PathManager.cpp after EnTT update (#3375)",
+      "date": "2026-09-16",
+      "status": "upstream_only",
+      "patch_sha256": "705ca1f084e274bc16f3e71ba3c324901c91505c3e689e38b7f1884e2946016a"
+    },
+    {
+      "sha": "f013c51423d0d23e4fa94195e0f4b2f94eca3d69",
+      "local_ancestor": true,
+      "upstream_ancestor": false,
+      "subject": "spring-native: deterministic f32 maths for synced native code",
+      "date": "2026-09-23",
+      "status": "local_only",
+      "patch_sha256": "a4e27f3685fb314ee09cec1865657663207e83f615e48e13a6b917a00558c69e"
+    },
+    {
+      "sha": "b78c3e5ba317a0f7fc49e84b51a7d96a28b62bc7",
+      "local_ancestor": false,
+      "upstream_ancestor": true,
+      "subject": "Balance the UpdateWeaponVectors pass across worker threads (#3427)",
+      "date": "2026-10-04",
+      "status": "upstream_only",
+      "patch_sha256": "dedcce7985a3e91f813333c3a0063fc82592296cbdec671c2c230156763479f0"
+    },
+    {
+      "sha": "0e2d799e0b6a3c652ebee0b43428a2457d5526f1",
+      "local_ancestor": false,
+      "upstream_ancestor": true,
+      "subject": "QuadField: copy quad lists instead of moving the pooled query vector (#3452)",
+      "date": "2026-10-08",
+      "status": "upstream_only",
+      "patch_sha256": "c8546dbfa06648fdb53a4de36a9982abbcd986180a31c552af9d92beac7693a6"
+    },
+    {
+      "sha": "854eeec45a5703c938c0dad57a537ce7d4efcafa",
+      "local_ancestor": false,
+      "upstream_ancestor": true,
+      "subject": "Update unit state in the parallel weapon vector pass",
+      "date": "2026-10-08",
+      "status": "upstream_only",
+      "patch_sha256": "27293da317a5a3b14a1b8d744f25da15086af34f8de22888489ae280242ab572"
+    },
+    {
+      "sha": "a7c55e6ab5f1efbe707955d0d75abcbd2233bbf6",
+      "local_ancestor": false,
+      "upstream_ancestor": true,
+      "subject": "Check the collision map update rate before touching the move type",
+      "date": "2026-10-08",
+      "status": "upstream_only",
+      "patch_sha256": "9c0e1c6bd93bc959099e0d24c6212c6f0cbb6ae9fa3245bb1a5fb6e282d079ad"
+    },
+    {
+      "sha": "c24a0727aad445b65816bce9c8ea9ad09f000e1e",
+      "local_ancestor": true,
+      "upstream_ancestor": false,
+      "subject": "Add deterministic Wasm jobs across all environments with local verification and profiling",
+      "date": "2026-10-12",
+      "status": "local_only",
+      "patch_sha256": "67ed8654d58242cf6c00ea657932e9bf2379e290a2e6711e46b3512cea848559"
+    },
+    {
+      "sha": "5689978a8c49278189dd9089fb185595017eed83",
+      "local_ancestor": true,
+      "upstream_ancestor": false,
+      "subject": "Keep local connection ping counts consistent after deletion and flush",
+      "date": "2026-10-19",
+      "status": "local_only",
+      "patch_sha256": "7918b8c4fcfc7f6a3bf058de3d2e36415e0e6842783289103469dec88ff4193a"
+    },
+    {
+      "sha": "c43c5ce56c7aa8660c7b183bed723dad9e2b6940",
+      "local_ancestor": true,
+      "upstream_ancestor": false,
+      "subject": "Synchronize local connection ping-count reads",
+      "date": "2026-10-19",
+      "status": "local_only",
+      "patch_sha256": "42a62b1f3d02f1534cde8df0bfae4e807f57ee80b1ec0da03ff04c1113087086"
+    },
+    {
+      "sha": "c61f2a18bc09734c6a01c26dbf9fb040c2ed8839",
+      "local_ancestor": true,
+      "upstream_ancestor": false,
+      "subject": "Avoid headless frame sleeps while network packets are queued",
+      "date": "2026-10-19",
+      "status": "local_only",
+      "patch_sha256": "b72e04eea9d645cf19e3dc7e5fa8c5d82c085a51e3bdb3bef0df97c110fd6526"
+    }
+  ],
+  "public_sources": [
+    {
+      "url": "https://github.com/beyond-all-reason/Beyond-All-Reason/pull/352",
+      "title": "Bugfix: Change ipairs to pairs to fix scav desync",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2021-06-27T23:38:02Z",
+      "comment_count_saved": 0,
+      "pull_metadata_saved": true,
+      "merged": true,
+      "head_sha": "866cefd2b9270c45a3b78af4b68863250eb2d7e3"
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/Beyond-All-Reason/pull/3855",
+      "title": "Desync revert",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2024-10-16T10:53:39Z",
+      "comment_count_saved": 0,
+      "pull_metadata_saved": true,
+      "merged": true,
+      "head_sha": "7a4076723b9226152dda152be5b228bb9e5e5a3e"
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/Beyond-All-Reason/pull/3869",
+      "title": "Desync pattern fixed",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2024-12-23T12:09:24Z",
+      "comment_count_saved": 0,
+      "pull_metadata_saved": true,
+      "merged": true,
+      "head_sha": "9e87b5e41c7244fde80a756012bc91bc042f2ebd"
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/Beyond-All-Reason/issues/4645",
+      "title": "Command \"Luarules /profile\" causing desync while watching a replay",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2025-03-31T16:38:04Z",
+      "comment_count_saved": 1
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/Beyond-All-Reason/pull/7444",
+      "title": "feat: add hardware information to desync detection",
+      "state": "open",
+      "kind": "pull_request",
+      "updated_at": "2026-04-16T12:20:15Z",
+      "comment_count_saved": 1
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/1006",
+      "title": "Investigate desync further",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-02-20T14:34:16Z",
+      "comment_count_saved": 1
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/1174",
+      "title": "Fix a rare, but nasty desync caused by a unit selection (or lack thereof)",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2024-01-10T21:47:43Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/1805",
+      "title": "Stablize sorts used by path finders",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2024-12-16T18:16:02Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/1906",
+      "title": "Perhaps nan/inf protection should be more comprehensive",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2025-01-24T14:01:11Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2211",
+      "title": "2025.04.01 with QTPFS widespread early desync in two out of two games",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2026-02-20T12:35:28Z",
+      "comment_count_saved": 5
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2223",
+      "title": "`gadget:AllowUnitTransport` can technically desync",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2025-04-30T12:00:59Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/2279",
+      "title": "Fix desyncs caused by unsynced pathing requests",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2025-11-01T00:52:39Z",
+      "comment_count_saved": 1
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2344",
+      "title": "Investigate userdata safety in synced",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2025-05-30T18:48:53Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/2370",
+      "title": "Address QTPFS desync",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2025-06-08T17:54:33Z",
+      "comment_count_saved": 2
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/2395",
+      "title": "QTPFS Background Threaded Pathing",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2026-03-03T15:02:39Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2415",
+      "title": "2025.04.10 Quite a few desyncs in one game",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-03-04T17:07:43Z",
+      "comment_count_saved": 8
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2434",
+      "title": "2025.04.10 QTPFS Spring.RequestPath desync",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2026-02-19T18:56:53Z",
+      "comment_count_saved": 4
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/2508",
+      "title": "Separate unsynced path searches from synced path searches in QTPFS",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2025-11-01T00:52:49Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/2687",
+      "title": "Fix desync in CCobInstance::AimShieldWeapon.",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2025-12-16T11:42:12Z",
+      "comment_count_saved": 2
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/2691",
+      "title": "Fix QTPFS desync caused by lua gc-triggered path delete",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2025-12-18T15:11:01Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/2695",
+      "title": "Part 2 of QTPFS dealing with Lua GC non-determinism",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2026-02-19T18:57:02Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2906",
+      "title": "Implement multi-platform CI sync testing",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-06-17T16:55:26Z",
+      "comment_count_saved": 4
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2908",
+      "title": "Add floating point \"kitchen sink\" sync tests",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-05-25T12:08:25Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2909",
+      "title": "Idea: can we auto generate a sync testing suite?",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-05-25T12:08:48Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2910",
+      "title": "Add fightertest sync test to engine CI/CD",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-05-25T12:08:45Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2928",
+      "title": "Expand unit coverage in the every-commit fightertest sync testing",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-05-25T12:07:57Z",
+      "comment_count_saved": 1
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/2982",
+      "title": "Fix pathfinding desync causing premature waypoint popping in 2026.06.04",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2026-06-09T02:46:21Z",
+      "comment_count_saved": 1
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/3075",
+      "title": "Sim/COB: avoid UB in float-to-short angle casts (fixes arm64/x86 desync)",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2026-07-28T12:55:20Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/3079",
+      "title": "ci: cross-architecture streflop/sim determinism gate (x86 vs arm64)",
+      "state": "open",
+      "kind": "pull_request",
+      "updated_at": "2026-08-04T15:57:08Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/3222",
+      "title": "2025.06.21 Sync error with log and client game state",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-08-15T17:35:06Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/3342",
+      "title": "Sim: avoid UB in float-to-short heading casts",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2026-09-14T10:53:33Z",
+      "comment_count_saved": 5,
+      "pull_metadata_saved": true,
+      "merged": true,
+      "head_sha": "3f139a12774b98c0f413ef834715a6ec9f416c5c"
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/3373",
+      "title": "Callout for unit current build speed",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-09-15T19:58:28Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/3419",
+      "title": "Faster unit updates: reuse quad buffers, update unit state in parallel",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2026-10-08T12:14:06Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/3423",
+      "title": "Spring.RequestPath causes a crash",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-10-03T12:07:49Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/3429",
+      "title": "ThreadPool: wake sleeping workers for every for_mt",
+      "state": "open",
+      "kind": "pull_request",
+      "updated_at": "2026-10-12T08:30:55Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/3448",
+      "title": "QTPFS: wait for the background path searches before changing the registry",
+      "state": "open",
+      "kind": "pull_request",
+      "updated_at": "2026-10-12T04:52:44Z",
+      "comment_count_saved": 1,
+      "pull_metadata_saved": true,
+      "merged": false,
+      "head_sha": "dfa752c93968f050f00601eed97ad1fa55c58025"
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/3452",
+      "title": "QuadField: copy quad lists instead of moving the pooled query vector",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2026-10-08T18:28:56Z",
+      "comment_count_saved": 9
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/3459",
+      "title": "QTPFS: no null write for synced Spring.RequestPath",
+      "state": "open",
+      "kind": "pull_request",
+      "updated_at": "2026-10-10T14:33:29Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/3524",
+      "title": "Desync in a 2-player game (2026.09.01), and two replays of its demo on one machine diverge from each other: single moving ground units, nothing else",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-10-16T22:53:37Z",
+      "comment_count_saved": 5
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/3530",
+      "title": "HAPFS: key vertex cost update scratch on the real thread number",
+      "state": "open",
+      "kind": "pull_request",
+      "updated_at": "2026-10-16T17:11:19Z",
+      "comment_count_saved": 0,
+      "pull_metadata_saved": true,
+      "merged": false,
+      "head_sha": "0ff30d5ee122c27d45c161555e6d3816d615a263"
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/pull/3531",
+      "title": "HAPFS: two small path request fixes found while reading for #3524",
+      "state": "open",
+      "kind": "pull_request",
+      "updated_at": "2026-10-16T17:14:05Z",
+      "comment_count_saved": 0,
+      "pull_metadata_saved": true,
+      "merged": false,
+      "head_sha": "4282724f717fea3cad5640e695aa5481d1b67d4a"
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/399",
+      "title": "Headless desyncs on maps with mapinfo defined typemaps instead of smf compiled ones",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2022-11-07T14:28:26Z",
+      "comment_count_saved": 4
+    },
+    {
+      "url": "https://github.com/beyond-all-reason/RecoilEngine/issues/480",
+      "title": "Investigate immediate desync between headless and normal engine on Moose maps",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2022-11-06T11:55:15Z",
+      "comment_count_saved": 1
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/issues/1069",
+      "title": "Metal spot finding code causes a desync between Windows and Linux64 players!",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2016-01-17T05:46:48Z",
+      "comment_count_saved": 7
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/pull/1075",
+      "title": "Add a fake movedef to help desyncs by forcing path cache recalculation",
+      "state": "closed",
+      "kind": "pull_request",
+      "updated_at": "2015-10-01T11:58:17Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/issues/1496",
+      "title": "Lua NAN in terraform",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2017-07-03T08:37:14Z",
+      "comment_count_saved": 7
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/issues/2118",
+      "title": "LogicDaemon Desync",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2019-10-30T01:31:12Z",
+      "comment_count_saved": 17
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/issues/2387",
+      "title": "103.0.1-1169 Lua OOM Desync",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2019-11-26T11:16:02Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/issues/25",
+      "title": "unit_attributes.lua causes a SIGFPE (=possible desync)",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2014-06-24T10:09:17Z",
+      "comment_count_saved": 2
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/issues/2588",
+      "title": "Content error desync",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2017-11-08T14:30:37Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/issues/3185",
+      "title": "LuaRules Errors lead to desync",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2019-03-28T12:49:48Z",
+      "comment_count_saved": 5
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/issues/5512",
+      "title": "Lua errors from post engine change",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2025-12-09T17:57:39Z",
+      "comment_count_saved": 3
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/issues/5814",
+      "title": "Sync errors in B2487067",
+      "state": "open",
+      "kind": "issue",
+      "updated_at": "2026-08-14T23:56:37Z",
+      "comment_count_saved": 0
+    },
+    {
+      "url": "https://github.com/ZeroK-RTS/Zero-K/issues/838",
+      "title": "Consider invalidate path cache for all players in-game and rebuild it if one of in-game players have staled path cache",
+      "state": "closed",
+      "kind": "issue",
+      "updated_at": "2016-02-01T20:33:32Z",
+      "comment_count_saved": 2
+    }
+  ],
+  "inspection_targets": [
+    {
+      "case": "hapfs-worker-slot",
+      "files": [
+        "rts/Sim/Path/HAPFS/PathingState.cpp",
+        "rts/Sim/Path/HAPFS/PathFinder.cpp",
+        "rts/Sim/MoveTypes/MoveMath/MoveMath.cpp",
+        "rts/System/Threading/ThreadPool.h"
+      ],
+      "assessment": "Current local iteration-index vs worker-ID mismatch confirmed by inspection; concurrent scratch-slot aliasing remains an unreproduced hypothesis."
+    },
+    {
+      "case": "qtpfs-registry",
+      "files": [
+        "rts/Sim/Path/QTPFS/PathManager.cpp",
+        "rts/Sim/Path/QTPFS/Systems/SyncUpdatedPathsSystem.cpp"
+      ],
+      "assessment": "Launch/wait/mutation access pattern present locally; reported race not independently reproduced."
+    },
+    {
+      "case": "external-path",
+      "files": [
+        "rts/Sim/Path/QTPFS/PathManager.cpp",
+        "rts/Sim/Path/HAPFS/PathManager.h",
+        "rts/Sim/Path/HAPFS/PathManager.cpp"
+      ],
+      "assessment": "Null search-copy write path and uninitialized default searchResult present locally; reproduce each separately."
+    },
+    {
+      "case": "heading-boundary",
+      "files": [
+        "rts/Sim/Path/IPathController.cpp",
+        "rts/Sim/MoveTypes/GroundMoveType.cpp"
+      ],
+      "assessment": "Additional upstream #3342 absent locally; old float-to-short expressions remain."
+    },
+    {
+      "case": "nano-renderer",
+      "revision": "57a2de17c87078027b345f5557f06dd330108110",
+      "files": [
+        "rts/Rendering/Env/NanoParticles/NanoParticleEmitter.cpp",
+        "rts/Sim/Units/UnitTypes/Builder.cpp",
+        "rts/Sim/Units/UnitTypes/Factory.cpp",
+        "rts/Sim/Misc/NanoPieceCache.cpp"
+      ],
+      "assessment": "Pinned emitter polls GetNanoPiece before early exits; issue #3373 alone does not prove a current renderer-dependent skipped call."
+    }
+  ]
+}

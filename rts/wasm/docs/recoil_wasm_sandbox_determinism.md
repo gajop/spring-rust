@@ -1,5 +1,10 @@
 # Recoil Wasm Sandbox & Synced Determinism
 
+The current [sync contract and verification guide](recoil_wasm_sync_verification.md)
+and [measured report](recoil_wasm_sync_report_2026-10-19.md) describe what is
+implemented and tested, including the locally committed FP boundary fix. Sync is a
+required integration property; sandbox isolation alone does not establish it.
+
 ## Security goal
 
 Wasm modules are sandboxed engine modules.
@@ -49,7 +54,7 @@ Compile only after validation.
 
 For synced execution, explicitly configure/disable features that could introduce unsupported nondeterminism or resource behavior.
 
-Initial conservative policy:
+Current default policy:
 
 - no threads/shared memory;
 - no WASI;
@@ -67,8 +72,9 @@ Synced and unsynced instances never share mutable guest memory.
 
 For synced modules:
 
-- configure deterministic maximum memory;
-- pre-reserve where practical so `memory.grow` success does not depend on local machine pressure;
+- require equal declared minimum/maximum memory and table sizes for synced Core modules;
+- reject Core start functions before instantiation;
+- reject growth-capable synced declarations rather than let machine memory pressure choose a result;
 - bound variable-size host results;
 - do not expose host memory pointers.
 
@@ -93,7 +99,9 @@ benchmark must measure completion rather than an accidental policy limit.
 Peers must use the same values for synced modules, and the selected policy is
 part of the synced runtime identity.
 
-Phase 2 must determine the exact safe integration with Wasmtime fuel/canonical lowering rather than assume that debiting fuel inside a host callback has the desired fault point.
+Core budget enforcement is implemented by `WasmExecutionBudget` and host-import
+guards. Changes to fuel or host-work accounting must preserve deterministic
+fault points and pass the resource-limit regressions.
 
 ## Host-call validation
 
@@ -134,7 +142,8 @@ Requirements:
 - identical runtime feature configuration;
 - no relaxed SIMD until validated;
 - canonicalize/handle NaNs consistently where observable;
-- retain the engine's required FPU environment when entering JIT guest code;
+- establish nearest-even rounding and gradual underflow at Core guest entry/callback boundaries;
+- restore caller FP controls on exit and guest controls after native host imports;
 - assert/check the engine FP control state in debug/sync builds;
 - audit synced host math APIs that call engine/platform math.
 
@@ -172,23 +181,29 @@ A failure dependent on local machine conditions must not masquerade as a determi
 
 ## Sync checking
 
-Do not hash the entire Wasm linear memory every frame.
+Normal games do not scan full linear memory every frame. They use existing
+engine sync checks plus synced module metadata and cached job digests.
+`system.WasmStateHashInterval > 0` explicitly opts into network memory checks;
+local `WasmSyncLog` independently hashes every frame without changing the
+network checksum. Leave diagnostic scans off for ordinary play unless the game
+has deliberately selected and measured that cost.
 
-Use existing engine sync checking for simulation state mutations.
-
-Optionally include a full guest-memory/global digest in `SYNCDEBUG`-style tooling for diagnosing a divergence.
-
-If a guest return value directly controls synchronized simulation without passing through an existing synced primitive, consider including that observable decision in sync checking.
+The current memory digest covers every linear-memory byte. It does **not**
+inspect live mutable globals or tables. A diagnostic match therefore establishes
+the compared memory/job/engine state for the tested inputs, not a complete proof
+of every hidden Wasm state value. See the [coverage table and reproduction steps](recoil_wasm_sync_verification.md#what-a-matching-hash-establishes).
 
 ## Traps/faults
 
-A deterministic trap in synced Wasm is match-fatal for the initial design.
+Current Core module faults mark and deregister the affected module. This applies
+to synced modules too; it is not an implemented match-fatal trap guarantee.
+Sync acceptance must reject faulted or missing required modules, even if both
+peers remove the same broken module and continue with equal checksums.
 
-Reason: a trapped guest may have partially updated its own private state, so continuing to execute it cannot be assumed safe.
-
-A future alternative is synchronized module disable at the same simulation frame on every peer.
-
-Unsynced module faults can disable/unload that instance without affecting other instances.
+Isolated job traps have a separate contract: they deliver an explicit worker
+error at the ordered result boundary. Host/runtime allocation failures terminate
+synced execution before publishing that batch's results instead of returning
+machine-dependent successful work. See the [job contract](recoil_wasm_synced_jobs.md#execution-contract).
 
 ## AOT cache safety
 

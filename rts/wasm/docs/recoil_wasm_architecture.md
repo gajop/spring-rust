@@ -20,6 +20,17 @@ The important properties are:
 
 Wasm is the portable/sandboxed module format. Native-module loading policy is a separate engine concern and is not part of this design.
 
+## Sync is an integration requirement
+
+Synced Wasm must preserve lockstep across peers, including guest arithmetic,
+engine callouts and background jobs. The engine-owned official-SDK tests now
+compare real Linux/Windows-under-Wine peers and recorded playback with different
+worker counts. Read the [current contract and verification guide](recoil_wasm_sync_verification.md)
+and [measured evidence](recoil_wasm_sync_report_2026-10-19.md) before expanding
+integration. They distinguish passing x86-64 paths from pending native Windows,
+ARM and broader state/API coverage; the FP boundary fix is committed locally
+but has not been released.
+
 ## Core design
 
 ```mermaid
@@ -229,6 +240,8 @@ Out of scope for this design:
 - [Runtime & ABI](recoil_wasm_runtime_abi.md)
 - [Sandbox & Determinism](recoil_wasm_sandbox_determinism.md)
 - [Parity & Testing](recoil_wasm_parity_testing.md)
+- [Synced Wasm Contract & Verification](recoil_wasm_sync_verification.md)
+- [Sync Evidence, 2026-10-19](recoil_wasm_sync_report_2026-10-19.md)
 - [Wasm Jobs & Local Sync Verification](recoil_wasm_synced_jobs.md)
 - [Profiling Wasm Jobs](recoil_wasm_jobs_profiling.md)
 - [Implementation Plan](recoil_wasm_implementation_plan.md)

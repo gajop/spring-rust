@@ -1,0 +1,436 @@
+{
+  "date": "2026-10-19",
+  "scope": "Engine-owned official spring-sdk fixture only; no downstream game assets or binaries",
+  "source_status": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9 plus uncommitted Wasm FP guard and tests; not a release",
+  "runtime": "Wasmtime 42.0.1",
+  "fixture_memory_bytes": 16777216,
+  "hash_coverage": [
+    "module SHA-512 identity",
+    "complete linear memory XXH3-64",
+    "synced job digest",
+    "engine pre/post Wasm checksums"
+  ],
+  "not_hashed": [
+    "unexported mutable Wasm globals",
+    "Wasm tables"
+  ],
+  "platform_limits": [
+    "Windows executable under Wine on Linux; not a native Windows hardware acceptance run",
+    "No ARM hardware run in this batch"
+  ],
+  "cases": {
+    "live-linux-wine": {
+      "engine_sha256": "67eff45fb4fe281a57a150025028be2f8b5b928f41586670d19ae4a5b35e8814",
+      "guest_sha256": "09616e5e48abe85d5653196515ff7e10e9268d2ebb5951c3a6c899d07f67be25",
+      "base_head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+      "recorded_tracked_patch_sha256": "a39361a0e67f44b1ab024dc3ff1cb3ac75c23928328d92bf3ca4521d6de4f775",
+      "recorded_source_sha256": {
+        "test/synctest/wasm_adversarial.py": "4dd839c04ac8cf875d4a0d19f6becd5e8fd68c74e897100f45435b3c0b329949",
+        "test/wasm_api/guests/sync_adversarial/Cargo.toml": "04e33bf65cc310e540745e34278b0b9ca438800225e0e6979221025e62286a75",
+        "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+        "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+        "test/wasm_api/guests/sync_adversarial/src/lib.rs": "3d9c06a230ab4b444b09e4bdb8ec4495923382dfcbb3dbc71913eb4fb9b8f5ca",
+        "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782"
+      },
+      "comparisons": [
+        {
+          "run": "live-guest",
+          "equal": true,
+          "frames": 901
+        }
+      ],
+      "runs": {
+        "live-host": {
+          "log": "live-linux-wine-live-host.jsonl.gz",
+          "frames": 901,
+          "first_frame": 0,
+          "last_frame": 900,
+          "actual_workers": [
+            1
+          ],
+          "module_identities": [
+            "869e07b5a74da1cb4f17c16aa86e4759e0568d6589aabfb927eccc3aa4cbe3d4db19d6eb3de3203441d616ba29236adf89c769cac0975b5c87ee6325291a4be9"
+          ]
+        },
+        "live-guest": {
+          "log": "live-linux-wine-live-guest.jsonl.gz",
+          "frames": 901,
+          "first_frame": 0,
+          "last_frame": 900,
+          "actual_workers": [
+            4
+          ],
+          "module_identities": [
+            "869e07b5a74da1cb4f17c16aa86e4759e0568d6589aabfb927eccc3aa4cbe3d4db19d6eb3de3203441d616ba29236adf89c769cac0975b5c87ee6325291a4be9"
+          ]
+        }
+      },
+      "windows_engine_sha256": "a24430d901dd5970e82b25dd6fe35216a867198acd8e71b9061dde2a1f1d6e88",
+      "windows_dll_sha256": {
+        "libvorbisenc-2.dll": "3fdbd2d1d71f41ade560b2c135360636033572a5382bb64cf1a8a655ac9f9aac",
+        "libintl-8.dll": "21f8083fbb1c300e34a37769e4f9b77cc11aea01a0ad6dcde0aa7267bcff9560",
+        "unitsync.dll": "37c1ee2658c4536bfd5f4d84d72cd0b25b8f2db24952fe81ba6ee3febec4a335",
+        "libiconv-2.dll": "a4f353cf9adf2497475d8841433277f037a43ad9f96aadec08d5e3264beb8f49",
+        "libharfbuzz-0.dll": "14634703dc4126f382d0aadab119df9e02a024140c63537cec4157625ec56e94",
+        "libfreetype-6.dll": "e312193b9e232ec5fc42005cdd8347d7e48511b44027e83affef734dde6c1324",
+        "zlib1.dll": "55eff295e3f33163e423ee91bfc2836388c783178dde73538e2fbd9f7d8c88b1",
+        "OpenAL32.dll": "3ca9519a6c40a7d1dc703575a6e9e3562c44120cc9e2fb7a2c9ceab1f7c949b3",
+        "libwinpthread-1.dll": "ecda15494e204e84083cd63f5117551755223ea6a7af2272faf4f97a16cf4eb7",
+        "libcurl.dll": "39b0dd2b354a4379a1e3dd6344997888eb3fc0694f1baa6ea9877868c47f975a",
+        "libexpat-1.dll": "9fba5c12a4fb40b5e48b8c0084ebfff8f41d77c6827803da10fbb51ffebd556c",
+        "libILU.dll": "22770e626b52bd8a051dd0ebd4894690b24217592779354482fb739b484e696e",
+        "libpng16-16.dll": "0672489a2f8f3b5c7ac232094dda2dc241838607530944433e32a05cc8dcb7f1",
+        "glew32.dll": "f81af02afdc4363bb98454b7d8ff398c39ed7a0dce216a2ae381e3c14f5b4b82",
+        "libglib-2.0-0.dll": "ed7f4eb5b04228584ad8a9196169a494a883fb2e2886f93a3bcc27398d4842bf",
+        "libogg-0.dll": "0c130b1a192898983ccc78005fa2c452fb730f8172c3ca6a59a82eb21e152b82",
+        "libvorbis-0.dll": "0aa71dad2b2fbdba449d5c6bccafe209835fc6591407d6411ad16fb0cb66e3e6",
+        "libIL.dll": "e457a493406456276eb1d3b872f0e7b26e4146edf252a33babbefbfae1fff179",
+        "wasmtime.dll": "2aeabb0e290dd647bf5d82813e116e3c0f92514c24ab4d1d91877beda454fc6e",
+        "SDL2.dll": "bcb038d773ccdfb5766d69c24279dda615a8052836ee3ed8f26129b82e50b9f7",
+        "libvorbisfile-3.dll": "5c4e67beadd0dd7400107f9afaa72530b4cfc6ece51aaa44bc5b0737e3e7209a",
+        "libfontconfig-1.dll": "46836e2de427ecee55b1115f3d2ca25ae293e609bd79a283b16bd11a8444b24f",
+        "libbz2.dll": "55dec42b9359d9877dc7a9a7a15528e9a314404f1ed10d4dacad5ccf9cbe643d",
+        "libgcc_s_seh-1.dll": "9b42adfcf21c4249cc8b06d0447f2b26b3e9bf2ed0ad27b65f86eba79a843342",
+        "libpcre-1.dll": "dc3d62a31444dc95577b1c7c665850ae62da5a5d24b4c9b9961296e9877eae43"
+      }
+    },
+    "replay-final": {
+      "engine_sha256": "67eff45fb4fe281a57a150025028be2f8b5b928f41586670d19ae4a5b35e8814",
+      "guest_sha256": "09616e5e48abe85d5653196515ff7e10e9268d2ebb5951c3a6c899d07f67be25",
+      "base_head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+      "recorded_tracked_patch_sha256": "a39361a0e67f44b1ab024dc3ff1cb3ac75c23928328d92bf3ca4521d6de4f775",
+      "recorded_source_sha256": {
+        "test/synctest/wasm_adversarial.py": "4dd839c04ac8cf875d4a0d19f6becd5e8fd68c74e897100f45435b3c0b329949",
+        "test/wasm_api/guests/sync_adversarial/Cargo.toml": "04e33bf65cc310e540745e34278b0b9ca438800225e0e6979221025e62286a75",
+        "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+        "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+        "test/wasm_api/guests/sync_adversarial/src/lib.rs": "3d9c06a230ab4b444b09e4bdb8ec4495923382dfcbb3dbc71913eb4fb9b8f5ca",
+        "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782"
+      },
+      "comparisons": [
+        {
+          "run": "replay-workers-1",
+          "equal": true,
+          "frames": 241
+        },
+        {
+          "run": "replay-workers-4",
+          "equal": true,
+          "frames": 241
+        },
+        {
+          "run": "replay-workers-8",
+          "equal": true,
+          "frames": 241
+        }
+      ],
+      "runs": {
+        "host-0-workers-1": {
+          "log": "replay-final-host-0-workers-1.jsonl.gz",
+          "frames": 241,
+          "first_frame": 0,
+          "last_frame": 240,
+          "actual_workers": [
+            1
+          ],
+          "module_identities": [
+            "869e07b5a74da1cb4f17c16aa86e4759e0568d6589aabfb927eccc3aa4cbe3d4db19d6eb3de3203441d616ba29236adf89c769cac0975b5c87ee6325291a4be9"
+          ]
+        },
+        "replay-workers-1": {
+          "log": "replay-final-replay-workers-1.jsonl.gz",
+          "frames": 241,
+          "first_frame": 0,
+          "last_frame": 240,
+          "actual_workers": [
+            1
+          ],
+          "module_identities": [
+            "869e07b5a74da1cb4f17c16aa86e4759e0568d6589aabfb927eccc3aa4cbe3d4db19d6eb3de3203441d616ba29236adf89c769cac0975b5c87ee6325291a4be9"
+          ]
+        },
+        "replay-workers-4": {
+          "log": "replay-final-replay-workers-4.jsonl.gz",
+          "frames": 241,
+          "first_frame": 0,
+          "last_frame": 240,
+          "actual_workers": [
+            4
+          ],
+          "module_identities": [
+            "869e07b5a74da1cb4f17c16aa86e4759e0568d6589aabfb927eccc3aa4cbe3d4db19d6eb3de3203441d616ba29236adf89c769cac0975b5c87ee6325291a4be9"
+          ]
+        },
+        "replay-workers-8": {
+          "log": "replay-final-replay-workers-8.jsonl.gz",
+          "frames": 241,
+          "first_frame": 0,
+          "last_frame": 240,
+          "actual_workers": [
+            8
+          ],
+          "module_identities": [
+            "869e07b5a74da1cb4f17c16aa86e4759e0568d6589aabfb927eccc3aa4cbe3d4db19d6eb3de3203441d616ba29236adf89c769cac0975b5c87ee6325291a4be9"
+          ]
+        }
+      }
+    },
+    "replay-long": {
+      "engine_sha256": "67eff45fb4fe281a57a150025028be2f8b5b928f41586670d19ae4a5b35e8814",
+      "guest_sha256": "4778fce13de6f68defc55e86c3279111a14b7104da74eaf54123477668e93347",
+      "base_head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+      "recorded_tracked_patch_sha256": "5c5cce0b001b3b0425360a36c5aa2d02dc265342b302e9c848bba567a736d86a",
+      "recorded_source_sha256": {
+        "test/synctest/wasm_adversarial.py": "04ed54aae341c73d3eae7fed4fdeae06e4968588887a74867f576027813d5c73",
+        "test/wasm_api/guests/sync_adversarial/Cargo.toml": "04e33bf65cc310e540745e34278b0b9ca438800225e0e6979221025e62286a75",
+        "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+        "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+        "test/wasm_api/guests/sync_adversarial/src/lib.rs": "c47fd752c3bd21f780c9c0de0cdbf02e1242c3b887889d89b497318da8d7b34e",
+        "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782"
+      },
+      "comparisons": [
+        {
+          "run": "replay-workers-1",
+          "equal": true,
+          "frames": 901
+        },
+        {
+          "run": "replay-workers-4",
+          "equal": true,
+          "frames": 901
+        },
+        {
+          "run": "replay-workers-8",
+          "equal": true,
+          "frames": 901
+        }
+      ],
+      "runs": {
+        "host-0-workers-1": {
+          "log": "replay-long-host-0-workers-1.jsonl.gz",
+          "frames": 901,
+          "first_frame": 0,
+          "last_frame": 900,
+          "actual_workers": [
+            1
+          ],
+          "module_identities": [
+            "e46a7d4e82413e3eb1199685f30532e39eae96b61f674e4574d51a0771e1e26bc78ae2fd8095ffc09d4d38bba1bc3cc63d350ceda0b30b9e2dc1e2f1076f48b9"
+          ]
+        },
+        "replay-workers-1": {
+          "log": "replay-long-replay-workers-1.jsonl.gz",
+          "frames": 901,
+          "first_frame": 0,
+          "last_frame": 900,
+          "actual_workers": [
+            1
+          ],
+          "module_identities": [
+            "e46a7d4e82413e3eb1199685f30532e39eae96b61f674e4574d51a0771e1e26bc78ae2fd8095ffc09d4d38bba1bc3cc63d350ceda0b30b9e2dc1e2f1076f48b9"
+          ]
+        },
+        "replay-workers-4": {
+          "log": "replay-long-replay-workers-4.jsonl.gz",
+          "frames": 901,
+          "first_frame": 0,
+          "last_frame": 900,
+          "actual_workers": [
+            4
+          ],
+          "module_identities": [
+            "e46a7d4e82413e3eb1199685f30532e39eae96b61f674e4574d51a0771e1e26bc78ae2fd8095ffc09d4d38bba1bc3cc63d350ceda0b30b9e2dc1e2f1076f48b9"
+          ]
+        },
+        "replay-workers-8": {
+          "log": "replay-long-replay-workers-8.jsonl.gz",
+          "frames": 901,
+          "first_frame": 0,
+          "last_frame": 900,
+          "actual_workers": [
+            8
+          ],
+          "module_identities": [
+            "e46a7d4e82413e3eb1199685f30532e39eae96b61f674e4574d51a0771e1e26bc78ae2fd8095ffc09d4d38bba1bc3cc63d350ceda0b30b9e2dc1e2f1076f48b9"
+          ]
+        }
+      }
+    },
+    "clock-negative-control": {
+      "engine_sha256": "67eff45fb4fe281a57a150025028be2f8b5b928f41586670d19ae4a5b35e8814",
+      "guest_sha256": "09616e5e48abe85d5653196515ff7e10e9268d2ebb5951c3a6c899d07f67be25",
+      "base_head": "6cedf0cde7f9e6f542bfb80ad7c6935fe5ff77b9",
+      "recorded_tracked_patch_sha256": "a39361a0e67f44b1ab024dc3ff1cb3ac75c23928328d92bf3ca4521d6de4f775",
+      "recorded_source_sha256": {
+        "test/synctest/wasm_adversarial.py": "4dd839c04ac8cf875d4a0d19f6becd5e8fd68c74e897100f45435b3c0b329949",
+        "test/wasm_api/guests/sync_adversarial/Cargo.toml": "04e33bf65cc310e540745e34278b0b9ca438800225e0e6979221025e62286a75",
+        "test/wasm_api/guests/sync_adversarial/Cargo.lock": "7de4333147cdceab66437154e868d2c403dbc36165ba8e73aa8788d0309507be",
+        "test/wasm_api/guests/sync_adversarial/.cargo/config.toml": "4992a922cb466a3dd8c5d8716a861ab2507a8b6df144bffeb78fcb374c8c85eb",
+        "test/wasm_api/guests/sync_adversarial/src/lib.rs": "3d9c06a230ab4b444b09e4bdb8ec4495923382dfcbb3dbc71913eb4fb9b8f5ca",
+        "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782"
+      },
+      "comparisons": [
+        {
+          "run": "host-1-workers-4",
+          "frame": 7,
+          "module": "parity",
+          "reason": "Wasm state or module identity",
+          "left": {
+            "name": "parity",
+            "identity": "869e07b5a74da1cb4f17c16aa86e4759e0568d6589aabfb927eccc3aa4cbe3d4db19d6eb3de3203441d616ba29236adf89c769cac0975b5c87ee6325291a4be9",
+            "environment": "rules-synced",
+            "bytes": 16777216,
+            "hash": "3216583af422c38b",
+            "jobs_hash": "f8f190f8a7c5348c",
+            "faulted": false
+          },
+          "right": {
+            "name": "parity",
+            "identity": "869e07b5a74da1cb4f17c16aa86e4759e0568d6589aabfb927eccc3aa4cbe3d4db19d6eb3de3203441d616ba29236adf89c769cac0975b5c87ee6325291a4be9",
+            "environment": "rules-synced",
+            "bytes": 16777216,
+            "hash": "360c23828c306f52",
+            "jobs_hash": "f8f190f8a7c5348c",
+            "faulted": false
+          }
+        }
+      ],
+      "runs": {
+        "host-0-workers-1": {
+          "log": "clock-negative-control-host-0-workers-1.jsonl.gz",
+          "frames": 16,
+          "first_frame": 0,
+          "last_frame": 15,
+          "actual_workers": [
+            1
+          ],
+          "module_identities": [
+            "869e07b5a74da1cb4f17c16aa86e4759e0568d6589aabfb927eccc3aa4cbe3d4db19d6eb3de3203441d616ba29236adf89c769cac0975b5c87ee6325291a4be9"
+          ]
+        },
+        "host-1-workers-4": {
+          "log": "clock-negative-control-host-1-workers-4.jsonl.gz",
+          "frames": 16,
+          "first_frame": 0,
+          "last_frame": 15,
+          "actual_workers": [
+            4
+          ],
+          "module_identities": [
+            "869e07b5a74da1cb4f17c16aa86e4759e0568d6589aabfb927eccc3aa4cbe3d4db19d6eb3de3203441d616ba29236adf89c769cac0975b5c87ee6325291a4be9"
+          ]
+        }
+      }
+    }
+  },
+  "files": {
+    "live-linux-wine-live-host.jsonl.gz": {
+      "sha256": "20d36beb13e5613327638f443947a6495488da4383f26e3c4187967d99ec3529",
+      "bytes": 30024,
+      "uncompressed_sha256": "b207605c2edb0a88ea6e2329fbde055c52af43ed2368fa234226b0dbfa1b5620",
+      "uncompressed_bytes": 338245
+    },
+    "live-linux-wine-live-guest.jsonl.gz": {
+      "sha256": "d0c71a6e77251c5dab6cff26404279c2afedd2ee5b75c3b4ad27f96d61258b6b",
+      "bytes": 30034,
+      "uncompressed_sha256": "03601a62a852b980d64a6cc9dc34a9438f9eda79b159da928df5f8e2790888ac",
+      "uncompressed_bytes": 339146
+    },
+    "replay-final-host-0-workers-1.jsonl.gz": {
+      "sha256": "dd0ca9417c6cd7a5203876e2f1844755704131aec230a9b88a7c8798f1054cbd",
+      "bytes": 8260,
+      "uncompressed_sha256": "9b8356a96498f3ef45bc3d038c0dd2a86e43c0b07d3cfc8e9952b4ac70784bd5",
+      "uncompressed_bytes": 90395
+    },
+    "replay-final-replay-workers-1.jsonl.gz": {
+      "sha256": "dd0ca9417c6cd7a5203876e2f1844755704131aec230a9b88a7c8798f1054cbd",
+      "bytes": 8260,
+      "uncompressed_sha256": "9b8356a96498f3ef45bc3d038c0dd2a86e43c0b07d3cfc8e9952b4ac70784bd5",
+      "uncompressed_bytes": 90395
+    },
+    "replay-final-replay-workers-4.jsonl.gz": {
+      "sha256": "df1a0900f05fe2a0635e5527f665038a4522ae066a4d75801faaa9a9f40d94e5",
+      "bytes": 8259,
+      "uncompressed_sha256": "677f95bcaa551f88d625297484681625537d6b1b7c1cd616efbd5791bed12d01",
+      "uncompressed_bytes": 90395
+    },
+    "replay-final-replay-workers-8.jsonl.gz": {
+      "sha256": "87a1dc7b512712c24b366740c754847e8c4c5a7f4189b9e218ee63c30afdaf4b",
+      "bytes": 8260,
+      "uncompressed_sha256": "0d409371c860b36e5d17627adb1f6ed7459657b4357ca6ca5ff9a603c2d940e0",
+      "uncompressed_bytes": 90395
+    },
+    "replay-long-host-0-workers-1.jsonl.gz": {
+      "sha256": "8af24a0ce857bc1b586fb268648f3735276abac685e063490784105cda792079",
+      "bytes": 29936,
+      "uncompressed_sha256": "f7270e98a2d5b0ecd9ec131aba8dc47efc05ba8fa50f99f12729ccb5d1991023",
+      "uncompressed_bytes": 338225
+    },
+    "replay-long-replay-workers-1.jsonl.gz": {
+      "sha256": "8af24a0ce857bc1b586fb268648f3735276abac685e063490784105cda792079",
+      "bytes": 29936,
+      "uncompressed_sha256": "f7270e98a2d5b0ecd9ec131aba8dc47efc05ba8fa50f99f12729ccb5d1991023",
+      "uncompressed_bytes": 338225
+    },
+    "replay-long-replay-workers-4.jsonl.gz": {
+      "sha256": "b8d609f9ee30ec9f27a3179c1200f85a41fdf2330ea1e4f284b6832a72347607",
+      "bytes": 29937,
+      "uncompressed_sha256": "de84a936313b26f3b6bd8cc4053b0048248f0016b4b6a948d932d00bf408837a",
+      "uncompressed_bytes": 338225
+    },
+    "replay-long-replay-workers-8.jsonl.gz": {
+      "sha256": "f091b2771996dbef98cbb457db8caa502b36e3e61ff73103e36f0d744e71daa6",
+      "bytes": 29938,
+      "uncompressed_sha256": "25c674ab88b4640cb9d01afc051719bc758f27d4b50a2b12e0da9c8c182ba522",
+      "uncompressed_bytes": 338225
+    },
+    "clock-negative-control-host-0-workers-1.jsonl.gz": {
+      "sha256": "6c399f6b3a9edc96921a3c249de1062ea4487ca2a6831db9b6673636732aa482",
+      "bytes": 810,
+      "uncompressed_sha256": "c7674b93b99089b8a29af6bb6c8020431258a794cd1a9a22426577c3b1d81eba",
+      "uncompressed_bytes": 5983
+    },
+    "clock-negative-control-host-1-workers-4.jsonl.gz": {
+      "sha256": "b0b6b2ce219d2f9d49c7c65769ffdcfcccce3bd0e62080ffcb98725ef96648c3",
+      "bytes": 814,
+      "uncompressed_sha256": "7668317e7eebfafe3244f16f26232a18d281df2525b2a01528ac820f68e38407",
+      "uncompressed_bytes": 5983
+    },
+    "fp-before.log.gz": {
+      "sha256": "744afbb7fd60fc621ef86e8d1c1cc882d7981a0c07a9caaf8897a377fdcf1a92",
+      "bytes": 462,
+      "uncompressed_sha256": "94c3501f823c894d995c476038cefd1b500c19e28e705c60c3586da3c6e3790e",
+      "uncompressed_bytes": 2503
+    },
+    "fp-initial-after.log": {
+      "sha256": "b8cfed0d31072f197515051363500b4f0700a41900634cb9ebd9c603c290c94b",
+      "bytes": 184
+    },
+    "cpp-jobs-final.log": {
+      "sha256": "66aa2884f9269ecdc86b0cd89add7c85fa4cba604153c2e84c17f5c3bde489ae",
+      "bytes": 166
+    },
+    "fresh-input-stat-updates.json": {
+      "sha256": "b2135f0168a0e566e98bbb717e07a941270ed619defe6657f6b6731c4384cca5",
+      "bytes": 1681
+    }
+  },
+  "cpp_suite": {
+    "test_cases": 11,
+    "assertions": 5321,
+    "failed": 0,
+    "pre_fix_failures": 5,
+    "note": "The initial before/after FP regression had 42 assertions; the final suite adds SIMD, conversion, trap and unprotected-call checks."
+  },
+  "evidence_note": "Frame logs are byte-for-byte copies compressed with gzip mtime=0. No private game material, machine credentials, engine binaries or downstream test results are included.",
+  "production_source_sha256": {
+    "rts/WasmInterface/core/host/WasmCoreAbi.cpp": "40649be4d4c29e90b357923c4bf1a4c2e4fee262f70f2db005e22979cbad2acd",
+    "rts/WasmInterface/core/host/WasmCoreHost.cpp": "dc9db9b5ff42c188b19854a64b2c8e6f6e3c2ded1ec1e1bc23332c37476c7c6b",
+    "rts/WasmInterface/core/host/WasmCoreGeneratedSupport.h": "f9555c79bccf385bdc8a0c897edde91db49fe2ff823b61fb91210832559e2e7a",
+    "rts/WasmInterface/runtime/WasmFloatEnvironment.h": "c762274f9593f9755d6a32601899ad94a2a6371e0c038275cc0a84b2cc0a7782",
+    "rts/WasmInterface/runtime/WasmRuntime.cpp": "59e2fc02d01aab063715b6108f61dadfb04175cd0041937805a53175051d76c0",
+    "rts/WasmInterface/core/host/WasmCoreValidation.cpp": "6f936c371de7b7bcf7384f50c43cd9122fcabbc37f8251098aa0dc8a7bf9d660",
+    "rts/WasmInterface/jobs/WasmJobProgram.cpp": "8381c8ac364e060e1fa198cc7c6409812c5898e242093437b6f901ee566a3374"
+  },
+  "source_check": "Documentation export verified that current tracked FP boundary diffs occur verbatim in the recorded final-run patch; the new guard hash matches recorded provenance."
+}

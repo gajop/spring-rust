@@ -548,7 +548,7 @@ Unsynced view globals add `camera->` 527 in 85 files, `minimap->` 119, `camHandl
 
 | Check | Tool | Pass |
 |---|---|---|
-| Sync | Per-frame sync log and demo replay runner (items 2 and 5 of `rts/wasm/docs/recoil_wasm_sync_verification.md`, built first); demos recorded on the base commit, replayed on base and on each refactor commit (the demo engine-version check must accept the test build) | Identical sync logs on every frame; no `[DESYNC WARNING]` |
+| Sync | Implemented per-frame sync log and demo replay runner ([contract and verification](../../rts/wasm/docs/recoil_wasm_sync_verification.md)); demos recorded on the base commit, replayed on base and on each refactor commit (the demo engine-version check must accept the test build) | Identical sync logs on every frame; no `[DESYNC WARNING]` |
 | Coverage | BAR synctest (`test/synctest`), Wasm Core parity (`test/native_api_parity`), BAR and Zero-K demos with nukes, terraform, transports and air; Ship Game's replay library on a null map | All identical |
 | Performance | Same demos headless, Tracy zones and wall time | Frame time, boot time and resident memory within the spread of repeated base runs |
 | Behaviour outside sync | Captures of the same demo frames at RTS height and close zoom | Pixel-identical, or differences explained by draw-order-independent effects |

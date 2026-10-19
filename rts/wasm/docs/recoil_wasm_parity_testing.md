@@ -147,9 +147,15 @@ Differential fuzzing can compare native semantic conversion and Wasm conversion 
 
 Reuse the existing cross-platform sync test infrastructure.
 
-The plan for verifying real games, not only fixtures, is [Sync Verification](recoil_wasm_sync_verification.md).
+The [sync contract and verification guide](recoil_wasm_sync_verification.md)
+records implemented engine-owned official-SDK live/replay tests and the remaining
+platform/game gates. The [2026-10-19 evidence](recoil_wasm_sync_report_2026-10-19.md)
+includes a reproduced FP bug, guarded arithmetic regression and deliberate
+frame-7 desync detection. API-result parity and matching full-memory sync logs
+are separate checks; neither replaces the other.
 
-Add a Wasm synced scenario to the platform matrix.
+The new adversarial suite is local. Adding it to the existing full platform
+matrix remains follow-up work; no workflow execution is implied by this document.
 
 Verify:
 
