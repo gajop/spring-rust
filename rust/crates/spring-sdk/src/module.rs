@@ -338,8 +338,10 @@ pub fn command_payload(bytes: &[u8]) -> Result<(i32, i32, u32, u32, u8, Vec<f32>
     }
     let options = word(bytes, 20)?.try_into().map_err(|_| invalid())?;
     let params = bytes[24..]
-        .chunks_exact(4)
-        .map(|b| f32::from_le_bytes(b.try_into().unwrap()))
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .map(|b| f32::from_le_bytes(*b))
         .collect();
     Ok((
         word(bytes, 0)? as i32,

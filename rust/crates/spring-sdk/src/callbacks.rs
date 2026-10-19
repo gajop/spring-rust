@@ -89,9 +89,16 @@ where
     if schema.is_some_and(|s| s.iter().any(|&t| t > 6)) {
         return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
     }
-    let id = NEXT_ID
-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
-        .map_err(|_| ApiError::new(ErrorCode::OutOfBounds as i32))?;
+    let mut id = NEXT_ID.load(Ordering::Relaxed);
+    loop {
+        let next = id
+            .checked_add(1)
+            .ok_or(ApiError::new(ErrorCode::OutOfBounds as i32))?;
+        match NEXT_ID.compare_exchange_weak(id, next, Ordering::Relaxed, Ordering::Relaxed) {
+            Ok(_) => break,
+            Err(current) => id = current,
+        }
+    }
     let owner = engine
         .owner
         .identity
