@@ -93,7 +93,12 @@ macro (add_spring_test target sources libraries flags)
 	add_dependencies(check test_${target})
 	add_dependencies(install-tests test_${target})
 	add_executable(test_${target} ${sources})
-	target_link_libraries(test_${target} ${libraries} ${test_common_libraries})
+	set(test_libraries ${test_common_libraries})
+	if(${ARGC} GREATER 4)
+		list(REMOVE_ITEM test_libraries Catch2)
+		list(APPEND test_libraries ${ARGV4})
+	endif()
+	target_link_libraries(test_${target} ${libraries} ${test_libraries})
 	set_target_properties(test_${target} PROPERTIES COMPILE_FLAGS "${flags}")
 	#install(TARGETS test_${target} DESTINATION ${BINDIR})
 endmacro()
@@ -115,6 +120,16 @@ endmacro()
 
 ################################################################################
 ### Deterministic Wasm jobs: use the real engine pool, not std::thread mocks.
+	# Wasmtime owns SIGILL/SEGV (or SEH) while executing JIT code. Catch's
+	# per-test handlers replace those after the first case and mistake a later
+	# intentional guest trap for a native crash. Keep this setting local to the
+	# JIT tests; genuine native crashes still terminate the process and fail CTest.
+	add_library(Catch2Wasm STATIC lib/catch2/catch_amalgamated.cpp)
+	target_include_directories(Catch2Wasm PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/catch2)
+	target_compile_definitions(Catch2Wasm PUBLIC CATCH_CONFIG_NO_POSIX_SIGNALS CATCH_CONFIG_NO_WINDOWS_SEH)
+	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		target_compile_options(Catch2Wasm PRIVATE -fno-single-precision-constant)
+	endif()
 	set(test_name WasmSyncedJobs)
 	set(test_src
 		"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmSyncedJobs.cpp"
@@ -123,6 +138,7 @@ endmacro()
 		"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmRuntime.cpp"
 		"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmEnvironment.cpp"
 		"${ENGINE_SOURCE_DIR}/WasmInterface/core/host/WasmCoreValidation.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/core/host/WasmCoreState.cpp"
 		"${ENGINE_SOURCE_DIR}/WasmInterface/core/host/WasmCoreAbi.cpp"
 		"${ENGINE_SOURCE_DIR}/System/Sync/SHA512.cpp"
 		"${ENGINE_SOURCE_DIR}/System/Threading/ThreadPool.cpp"
@@ -139,7 +155,7 @@ endmacro()
 		list(APPEND test_src "${ENGINE_SOURCE_DIR}/System/Platform/Linux/CpuTopology.cpp")
 	endif()
 	add_spring_test(${test_name} "${test_src}" "recoil-wasmtime;${WINMM_LIBRARY}"
-		"-DTHREADPOOL -DUNITSYNC -DNOT_USING_CREG -DNOT_USING_STREFLOP")
+		"-DTHREADPOOL -DUNITSYNC -DNOT_USING_CREG -DNOT_USING_STREFLOP" Catch2Wasm)
 	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/wasm)
 	target_compile_definitions(test_${test_name} PRIVATE
 		WASM_JOB_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/wasm_api/data/synced_jobs/worker.wat")

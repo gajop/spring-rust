@@ -22,12 +22,20 @@ class VerificationError(RuntimeError):
     pass
 
 
-def load_rows(path: Path):
+def load_rows(path: Path, *, expected_modules=None, require_state=False):
     previous = -1
+    cohort = None
+    schema = None
     with path.open() as stream:
         for number, line in enumerate(stream, 1):
             try:
                 row = json.loads(line)
+                version = row.get('schema', 1)
+                if version not in (1, 2) or (require_state and version != 2):
+                    raise ValueError('unsupported schema or missing globals/table inspection')
+                if schema is not None and schema != version:
+                    raise ValueError('schema changed during run')
+                schema = version
                 frame = row['frame']
                 if type(frame) is not int or frame != previous + 1:
                     raise ValueError(f'expected contiguous frame {previous + 1}, got {frame}')
@@ -38,15 +46,31 @@ def load_rows(path: Path):
                 names = [m['name'] for m in row['modules']]
                 if names != sorted(set(names)):
                     raise ValueError('module names must be unique and sorted')
+                current = {m['name']: (m['environment'], m['identity']) for m in row['modules']}
+                if cohort is None:
+                    cohort = current
+                if current != cohort:
+                    raise ValueError('module set, environment or identity changed during run')
+                if expected_modules is not None and current != expected_modules:
+                    raise ValueError(f'expected modules {expected_modules}, got {current}')
                 for module in row['modules']:
-                    if module['faulted']:
+                    if module['faulted'] is not False:
                         raise ValueError(f"module faulted: {module['name']}")
                     if module['environment'] not in ('rules-synced', 'gaia-synced'):
                         raise ValueError('unsynced module in verification stream')
                     if type(module['bytes']) is not int or module['bytes'] <= 0:
                         raise ValueError('invalid memory size')
-                    if len(module['hash']) != 16 or len(module['identity']) != 128:
+                    if not re.fullmatch('[0-9a-f]{16}', module['hash']) or not re.fullmatch('[0-9a-f]{128}', module['identity']):
                         raise ValueError('invalid hash or module identity')
+                    if version == 2:
+                        if not re.fullmatch('[0-9a-f]{16}', module['jobs_hash']):
+                            raise ValueError('invalid jobs hash')
+                        if type(row['workers']) is not int or row['workers'] < 1:
+                            raise ValueError('invalid worker count')
+                        if type(module['state_bytes']) is not int or module['state_bytes'] < 12:
+                            raise ValueError('invalid globals/table state size')
+                        if not re.fullmatch('[0-9a-f]{16}', module['state_hash']):
+                            raise ValueError('invalid globals/table state hash')
                 if type(row['engine']) is not int or type(row['checksum']) is not int:
                     raise ValueError('invalid engine checksum')
             except (ValueError, TypeError, KeyError) as error:
@@ -64,6 +88,8 @@ def first_difference(left: Path, right: Path):
             row = a if a is not None else b
             return dict(frame=row['frame'], module='stream', reason='missing frame')
         count += 1
+        if a.get('schema', 1) != b.get('schema', 1):
+            raise VerificationError('cannot compare different state coverage schemas')
         ma = {m['name']: m for m in a['modules']}
         mb = {m['name']: m for m in b['modules']}
         for name in sorted(ma.keys() | mb.keys()):
@@ -82,6 +108,36 @@ def memory_difference(left: Path, right: Path):
     offsets = [i for i, (x, y) in enumerate(itertools.zip_longest(a, b)) if x != y]
     return dict(left_bytes=len(a), right_bytes=len(b), differing_bytes=len(offsets),
                 pages=sorted({i // 65536 for i in offsets}), first_offsets=offsets[:64])
+
+
+def decode_state(path: Path):
+    data = path.read_bytes()
+    offset = 0
+    def number(width):
+        nonlocal offset
+        if offset + width > len(data):
+            raise VerificationError('truncated globals/table snapshot')
+        value = int.from_bytes(data[offset:offset + width], 'little')
+        offset += width
+        return value
+    def value():
+        kind = number(1)
+        types = {0: ('i32', 4), 1: ('i64', 8), 2: ('f32', 4), 3: ('f64', 8),
+                 4: ('v128', 16), 5: ('funcref', 4), 6: ('externref', 1)}
+        if kind not in types:
+            raise VerificationError(f'unsupported snapshot value kind {kind}')
+        name, width = types[kind]
+        bits = number(width)
+        if name == 'externref' and bits:
+            raise VerificationError('nonportable externref in snapshot')
+        return dict(type=name, bits=f'{bits:0{width * 2}x}')
+    if number(4) != 1:
+        raise VerificationError('unsupported globals/table snapshot version')
+    globals_ = [value() for _ in range(number(4))]
+    tables = [[value() for _ in range(number(8))] for _ in range(number(4))]
+    if offset != len(data):
+        raise VerificationError('trailing globals/table snapshot bytes')
+    return dict(globals=globals_, tables=tables)
 
 
 def sha256(path: Path):
@@ -204,6 +260,8 @@ def main():
     compare = sub.add_parser('compare')
     compare.add_argument('left', type=Path)
     compare.add_argument('right', type=Path)
+    state = sub.add_parser('decode-state')
+    state.add_argument('snapshot', type=Path)
     memory = sub.add_parser('memory-diff')
     memory.add_argument('left', type=Path)
     memory.add_argument('right', type=Path)
@@ -225,6 +283,9 @@ def main():
     run.add_argument('--expect-desync-frame', type=int)
     run.add_argument('--expect-desync-module', default='sync-jobs-test')
     args = parser.parse_args()
+    if args.mode == 'decode-state':
+        print(json.dumps(decode_state(args.snapshot), indent=2))
+        return 0
     if args.mode == 'memory-diff':
         print(json.dumps(memory_difference(args.left, args.right), indent=2))
         return 0

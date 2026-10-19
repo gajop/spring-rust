@@ -11,6 +11,7 @@
 #include "NativeInterface/WasmUiVisibility.h"
 #include "NativeInterface/WasmSyncedContext.h"
 #include "WasmCoreBindings.h"
+#include "WasmFloatEnvironment.h"
 
 namespace recoil::wasm::core::generated {
 
@@ -25,6 +26,7 @@ inline std::int32_t NativeErrorCode(const Error* error)
 }
 
 class ImportGuard {
+	WasmFloatEnvironment floatEnvironment;
 	spring::game_perf::Scope perfScope{spring::game_perf::Kind::Import};
 public:
 	ImportGuard(HostState* state, std::uint64_t work)
@@ -211,6 +213,7 @@ inline bool DispatchCallback(HostState& state, wasmtime_caller_t* caller,
 	std::array<wasmtime_val_raw_t, 2> slots{};
 	slots[0].i32 = static_cast<std::int32_t>(callbackID);
 	slots[1].i32 = static_cast<std::int32_t>(userData);
+	const WasmFloatEnvironment floatEnvironment;
 	wasm_trap_t* trap = nullptr;
 	if (wasmtime_error_t* callError = wasmtime_func_call_unchecked(
 			state.context, &state.callbackDispatch, slots.data(), slots.size(), &trap);
@@ -244,6 +247,7 @@ inline bool DispatchRetainedCallback(HostState& state, std::uint32_t callbackID,
 	std::array<wasmtime_val_raw_t, 2> slots{};
 	slots[0].i32 = static_cast<std::int32_t>(callbackID);
 	slots[1].i32 = static_cast<std::int32_t>(userData);
+	const WasmFloatEnvironment floatEnvironment;
 	wasm_trap_t* trap = nullptr;
 	if (wasmtime_error_t* callError = wasmtime_func_call_unchecked(
 			state.context, &state.callbackDispatch, slots.data(), slots.size(), &trap);

@@ -138,10 +138,13 @@ public:
 		std::uint64_t memoryBytes = 0;
 		std::uint64_t memoryHash = 0;
 		std::uint64_t jobsHash = 0;
+		std::uint64_t stateBytes = 0;
+		std::uint64_t stateHash = 0;
 		bool faulted = false;
 	};
 	// Metadata mode never reads linear-memory bytes. Full scans are opt-in.
 	static std::vector<SyncState> SyncedStates(bool hashMemory);
+	static bool DumpSyncedState(std::string_view moduleName, const std::string& path);
 	static bool DumpSyncedMemory(std::string_view moduleName, const std::string& path);
 	// Explicit simulation boundaries, independent of whether a guest exports
 	// GameFrame. Results precede all frame callbacks and share their budget.

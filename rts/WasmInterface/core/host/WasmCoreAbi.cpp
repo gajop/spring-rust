@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "WasmCoreAbi.h"
+#include "WasmFloatEnvironment.h"
 
 #include <algorithm>
 #include <limits>
@@ -277,6 +278,7 @@ bool RawExport::Call(wasmtime_context_t* context, wasmtime_val_raw_t* slots,
 		error = "core Wasm export raw slot count does not match its bound signature";
 		return false;
 	}
+	const WasmFloatEnvironment floatEnvironment;
 	wasm_trap_t* trap = nullptr;
 	if (wasmtime_error_t* callError = wasmtime_func_call_unchecked(
 			context, &function, slots, providedSlotCount, &trap);

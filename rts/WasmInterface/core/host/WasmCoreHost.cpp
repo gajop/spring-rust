@@ -21,6 +21,8 @@
 #include "Sim/Units/Unit.h"
 #include "Sim/Units/Scripts/UnitScriptEngine.h"
 #include "WasmCoreAbi.h"
+#include "WasmCoreState.h"
+#include "WasmFloatEnvironment.h"
 #include "WasmCoreBindings.h"
 #include "WasmCoreCallinPolicy.h"
 #include "WasmCoreValidation.h"
@@ -227,6 +229,8 @@ struct WasmCoreHost::Backend {
 	wasmtime_linker_t* linker = nullptr;
 	wasmtime_module_t* module = nullptr;
 	wasmtime_instance_t instance{};
+	recoil::wasm::core::StateExports stateExports;
+	recoil::wasm::core::StateInspector stateInspector;
 	recoil::wasm::core::RawExport jobResult;
 	recoil::wasm::core::RawExport jobResultBuffer;
 	recoil::wasm::core::RawExport jobResultCapacity;
@@ -483,6 +487,12 @@ std::vector<WasmCoreHost::SyncState> WasmCoreHost::SyncedStates(bool hashMemory)
 			if (!memory.View(0, state.memoryBytes, bytes))
 				throw std::runtime_error("Cannot inspect synced Wasm memory: " + host->moduleName);
 			state.memoryHash = XXH3_64bits(bytes.data(), bytes.size());
+			std::vector<std::uint8_t> extra;
+			std::string error;
+			if (!host->backend->stateInspector.Snapshot(extra, error))
+				throw std::runtime_error("Cannot inspect synced Wasm state: " + host->moduleName + ": " + error);
+			state.stateBytes = extra.size();
+			state.stateHash = XXH3_64bits(extra.data(), extra.size());
 		}
 #endif
 		states.push_back(std::move(state));
@@ -491,6 +501,22 @@ std::vector<WasmCoreHost::SyncState> WasmCoreHost::SyncedStates(bool hashMemory)
 		return a.name < b.name;
 	});
 	return states;
+}
+
+bool WasmCoreHost::DumpSyncedState(std::string_view moduleName, const std::string& path)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const auto* host = Find(moduleName);
+	if (!host || !WasmEnvironmentMatrix::Policy(host->environment).synced) return false;
+	std::vector<std::uint8_t> bytes;
+	std::string error;
+	if (!host->backend->stateInspector.Snapshot(bytes, error)) return false;
+	std::ofstream out(path, std::ios::binary | std::ios::trunc);
+	out.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+	return out.good();
+#else
+	return false;
+#endif
 }
 
 bool WasmCoreHost::DumpSyncedMemory(std::string_view moduleName, const std::string& path)
@@ -564,8 +590,21 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		}
 	}
 
-	if (wasmtime_error_t* compileError = wasmtime_module_new(engine, moduleBytes.data(),
-			moduleBytes.size(), &backend->module);
+	std::vector<std::uint8_t> inspectedBytes;
+	const auto* compileBytes = &moduleBytes;
+	if (WasmEnvironmentMatrix::Policy(environment).synced) {
+		// Validate ORIGINAL semantics first: adding exports must not accidentally
+		// make an invalid ref.func declaration valid. Identity is also original.
+		if (auto* failure = wasmtime_module_validate(engine, moduleBytes.data(), moduleBytes.size())) {
+			error = "Core Wasm validation failed: " + recoil::wasm::core::ErrorMessage(failure);
+			return false;
+		}
+		if (!recoil::wasm::core::StateExports::Prepare(moduleBytes, inspectedBytes, backend->stateExports, error))
+			return false;
+		compileBytes = &inspectedBytes;
+	}
+	if (wasmtime_error_t* compileError = wasmtime_module_new(engine, compileBytes->data(),
+			compileBytes->size(), &backend->module);
 		compileError != nullptr) {
 		error = "Core Wasm compilation failed: " +
 			recoil::wasm::core::ErrorMessage(compileError);
@@ -604,6 +643,9 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		return false;
 	}
 	auto* context = wasmtime_store_context(backend->store);
+	if (WasmEnvironmentMatrix::Policy(environment).synced &&
+		!backend->stateInspector.Bind(context, backend->instance, backend->stateExports, error))
+		return false;
 	recoil::wasm::core::RawExport environmentMarker;
 	recoil::wasm::core::RawExport sdkInitialize;
 	constexpr char sdkInitializeName[] = "spring:module/initialize";
@@ -1500,6 +1542,7 @@ bool CallPlan(const WasmCoreDispatchPlan& plan, wasmtime_val_raw_t* slots,
 {
 	const auto entryStage = spring::benchmark_callins::BeginStage(
 		spring::benchmark_callins::Stage::WasmtimeEntry);
+	const WasmFloatEnvironment floatEnvironment;
 	bool success = true;
 	wasm_trap_t* trap = nullptr;
 	if (wasmtime_error_t* callError = wasmtime_func_call_unchecked(

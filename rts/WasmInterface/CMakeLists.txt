@@ -6,6 +6,7 @@ set(sources_engine_WasmInterface
 	${CMAKE_CURRENT_SOURCE_DIR}/jobs/WasmJobProgram.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/jobs/WasmSyncedJobs.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreJobsBindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core/host/WasmCoreState.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/core/host/WasmCoreAbi.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreBindings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/core/bindings/WasmCoreUnitsInfoVariableBindings.cpp

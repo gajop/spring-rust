@@ -60,6 +60,65 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(first_difference(self.write('a', self.rows), self.write('b', self.rows)),
                          dict(equal=True, frames=4))
 
+    def modern_rows(self):
+        rows = copy.deepcopy(self.rows)
+        for row in rows:
+            row['schema'] = 2
+            row['workers'] = 1
+            row['modules'][0]['jobs_hash'] = '3' * 16
+            row['modules'][0].update(state_bytes=12, state_hash='1' * 16)
+        return rows
+
+    def test_hidden_state_difference_with_identical_memory(self):
+        rows = self.modern_rows()
+        other = copy.deepcopy(rows)
+        other[2]['modules'][0]['state_hash'] = '2' * 16
+        result = first_difference(self.write('a', rows), self.write('b', other))
+        self.assertEqual((result['frame'], result['module']), (2, 'rules'))
+        self.assertEqual(result['left']['hash'], result['right']['hash'])
+
+    def test_strict_coverage_rejects_old_or_incomplete_state(self):
+        with self.assertRaises(VerificationError):
+            list(load_rows(self.write('old', self.rows), require_state=True))
+        for field, value in [('state_bytes', 0), ('state_hash', 'z' * 16), ('jobs_hash', 'z' * 16)]:
+            rows = self.modern_rows()
+            rows[2]['modules'][0][field] = value
+            with self.assertRaises(VerificationError):
+                list(load_rows(self.write('bad', rows), require_state=True))
+
+    def test_module_disappearance_on_both_peers_is_not_a_pass(self):
+        rows = self.modern_rows()
+        for row in rows:
+            second = dict(row['modules'][0], name='second')
+            row['modules'].append(second)
+        rows[2]['modules'].pop()
+        with self.assertRaisesRegex(VerificationError, 'module set'):
+            first_difference(self.write('a', rows), self.write('b', rows))
+        with self.assertRaisesRegex(VerificationError, 'expected modules'):
+            list(load_rows(self.write('absent', self.modern_rows()),
+                expected_modules={'missing': ('gaia-synced', 'a' * 128)}, require_state=True))
+
+    def test_state_schema_cannot_change_or_be_mixed_with_old_coverage(self):
+        with self.assertRaises(VerificationError):
+            first_difference(self.write('old', self.rows), self.write('new', self.modern_rows()))
+        rows = self.modern_rows()
+        rows[2]['schema'] = 3
+        with self.assertRaises(VerificationError):
+            list(load_rows(self.write('future', rows)))
+
+    def test_state_dump_decoder_preserves_bits_and_function_indices(self):
+        import struct
+        path = self.root / 'state.bin'
+        path.write_bytes(struct.pack('<II', 1, 1) + bytes([2]) + struct.pack('<I', 0x7fc12345)
+                         + struct.pack('<IQ', 1, 2) + bytes([5]) + struct.pack('<I', 7)
+                         + bytes([5]) + struct.pack('<I', 0))
+        self.assertEqual(wasm_sync_replay.decode_state(path), dict(
+            globals=[dict(type='f32', bits='7fc12345')],
+            tables=[[dict(type='funcref', bits='00000007'), dict(type='funcref', bits='00000000')]]))
+        path.write_bytes(path.read_bytes()[:-1])
+        with self.assertRaises(VerificationError):
+            wasm_sync_replay.decode_state(path)
+
     def test_memory_offsets_and_pages(self):
         a, b = self.root / 'a', self.root / 'b'
         a.write_bytes(bytes(65537))
@@ -91,10 +150,6 @@ class CompareTest(unittest.TestCase):
         self.assertEqual((mounted / 'sync-jobs-worker.wasm').read_bytes(), b'new worker')
         self.assertIn('module(sync-jobs-worker,', (mounted / 'manifest.txt').read_text())
         self.assertIn('module(sync-jobs-test,', (mounted / 'manifest.txt').read_text())
-
-
-if __name__ == '__main__':
-    unittest.main()
 
 
 class RunnerDiagnosticTest(unittest.TestCase):
@@ -137,3 +192,7 @@ class RunnerDiagnosticTest(unittest.TestCase):
         status, result, calls = self.invoke(different=True, record=True)
         self.assertEqual((status, result['frame'], result['module'], calls), (1, 2, 'rules', 2))
         self.assertEqual(result['comparison'], 'recording versus playback')
+
+
+if __name__ == '__main__':
+    unittest.main()

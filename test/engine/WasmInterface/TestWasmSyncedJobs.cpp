@@ -8,6 +8,10 @@
 #include <mutex>
 #include <chrono>
 #include <cstdlib>
+#include <cfenv>
+#if defined(__SSE__) || defined(_M_X64)
+#include <xmmintrin.h>
+#endif
 #include <fstream>
 #include <stdexcept>
 #include <string>
@@ -16,6 +20,7 @@
 #include "WasmInterface/jobs/WasmJobProgram.h"
 #include "WasmInterface/jobs/WasmSyncedJobs.h"
 #include "WasmCoreAbi.h"
+#include "WasmCoreState.h"
 #include "WasmRuntime.h"
 #include "System/Misc/SpringTime.h"
 #include "System/Threading/ThreadPool.h"
@@ -364,7 +369,7 @@ TEST_CASE("Local job queues progress without simulation and isolate IDs and quot
 	}
 }
 
-// Only this local benchmark can obtain the runtime's native engine. The guest
+// Test-only access for the benchmark and unprotected negative control. The guest
 // never sees it. Both inline and isolated work use exactly this engine/config.
 class WasmJobBenchmark {
 public:
@@ -505,4 +510,243 @@ TEST_CASE("Measure Wasm job setup, copies, dispatch and inline work", "[.benchma
 			}
 		}
 	}
+}
+
+namespace {
+struct RestoreFloatEnvironment {
+	std::fenv_t saved;
+#if defined(__SSE__) || defined(_M_X64)
+	unsigned savedSse = _mm_getcsr();
+#endif
+	RestoreFloatEnvironment() { std::fegetenv(&saved); }
+	~RestoreFloatEnvironment() {
+		std::fesetenv(&saved);
+#if defined(__SSE__) || defined(_M_X64)
+		_mm_setcsr(savedSse);
+#endif
+	}
+};
+
+std::vector<std::uint8_t> FloatInput()
+{
+	const std::uint32_t words[] = {
+		0x3f800000, 0x33800000, 0x00800000, 0x3f000000,
+		0, 0x3ff00000, 0, 0x3ca00000, 0, 0x00100000, 0, 0x3fe00000,
+	};
+	std::vector<std::uint8_t> input;
+	for (const auto word: words)
+		for (unsigned byte = 0; byte < 4; ++byte) input.push_back(word >> (byte * 8));
+	return input;
+}
+}
+
+TEST_CASE("Wasm arithmetic cannot inherit caller rounding or denormal flushing", "[adversarial]")
+{
+	WasmRuntime runtime;
+	auto program = Program(runtime);
+	WasmJobResult baseline;
+	WasmJobResult vectorBaseline;
+	{
+		RestoreFloatEnvironment restore;
+		REQUIRE(std::fesetround(FE_TONEAREST) == 0);
+#if defined(__SSE__) || defined(_M_X64)
+		_mm_setcsr(_mm_getcsr() & ~((1u << 15) | (1u << 6)));
+#endif
+		baseline = program->Run("adversarial-float", FloatInput());
+		vectorBaseline = program->Run("adversarial-simd", FloatInput());
+	}
+	REQUIRE(baseline.status == WasmJobStatus::Ok);
+	REQUIRE(baseline.bytes.size() == 24);
+	CHECK(Word(baseline.bytes, 0) == 0x3f800000u);
+	CHECK(Word(baseline.bytes, 4) == 0x00400000u);
+	CHECK(Word(baseline.bytes, 12) == 0x3ff00000u);
+	CHECK(Word(baseline.bytes, 20) == 0x00080000u);
+	REQUIRE(vectorBaseline.status == WasmJobStatus::Ok);
+	REQUIRE(vectorBaseline.bytes.size() == 24);
+	CHECK(Word(vectorBaseline.bytes, 0) == 0x3f000000u);
+	CHECK(Word(vectorBaseline.bytes, 4) == 0x33000000u);
+	CHECK(Word(vectorBaseline.bytes, 8) == 0x00400000u);
+	CHECK(Word(vectorBaseline.bytes, 12) == 0x3e800000u);
+	CHECK(Word(vectorBaseline.bytes, 16) == 0x3f800000u);
+	CHECK(Word(vectorBaseline.bytes, 20) == 0x4b800000u);
+	for (int rounding: {FE_TONEAREST, FE_UPWARD, FE_DOWNWARD, FE_TOWARDZERO}) {
+		for (bool flush: {false, true}) {
+			INFO("rounding=" << rounding << " flush=" << flush);
+			WasmJobResult actual;
+			bool retained = false;
+			{
+				RestoreFloatEnvironment restore;
+				REQUIRE(std::fesetround(rounding) == 0);
+#if defined(__SSE__) || defined(_M_X64)
+				const auto flags = (1u << 15) | (1u << 6);
+				_mm_setcsr(flush ? (_mm_getcsr() | flags) : (_mm_getcsr() & ~flags));
+				const auto control = _mm_getcsr();
+#endif
+				actual = program->Run("adversarial-float", FloatInput());
+				CHECK(program->Run("adversarial-simd", FloatInput()).bytes == vectorBaseline.bytes);
+				CHECK(program->Run("trap", {}).status == WasmJobStatus::Trapped);
+				// A trapped call must not poison the next invocation's controls.
+				CHECK(program->Run("adversarial-float", FloatInput()).bytes == baseline.bytes);
+				retained = std::fegetround() == rounding;
+#if defined(__SSE__) || defined(_M_X64)
+				// Ignore sticky arithmetic exception flags; preserve control bits.
+				retained = retained && ((_mm_getcsr() & ~0x3fu) == (control & ~0x3fu));
+#endif
+			}
+			CHECK(retained);
+			REQUIRE(actual.status == WasmJobStatus::Ok);
+			CHECK(actual.bytes == baseline.bytes);
+		}
+	}
+}
+
+TEST_CASE("Unprotected Wasmtime calls expose the adversarial floating-point inputs", "[adversarial]")
+{
+	// Negative control: call Wasmtime directly, deliberately bypassing Spring's
+	// entry guard. This must disagree, proving that the fixture is sensitive to
+	// the injected native controls rather than merely checking constant output.
+	using namespace recoil::wasm::core;
+	WasmRuntimeConfig config;
+	config.instructionFuel = 100000;
+	WasmRuntime runtime(config);
+	auto* engine = WasmJobBenchmark::Engine(runtime);
+	const auto bytes = ReadFixture();
+	wasmtime_module_t* rawModule = nullptr;
+	REQUIRE(wasmtime_module_new(engine, bytes.data(), bytes.size(), &rawModule) == nullptr);
+	std::unique_ptr<wasmtime_module_t, decltype(&wasmtime_module_delete)> module(rawModule, wasmtime_module_delete);
+	std::unique_ptr<wasmtime_store_t, decltype(&wasmtime_store_delete)> store(
+		wasmtime_store_new(engine, nullptr, nullptr), wasmtime_store_delete);
+	std::unique_ptr<wasmtime_linker_t, decltype(&wasmtime_linker_delete)> linker(wasmtime_linker_new(engine), wasmtime_linker_delete);
+	REQUIRE(wasmtime_linker_define_unknown_imports_as_traps(linker.get(), module.get()) == nullptr);
+	auto* context = wasmtime_store_context(store.get());
+	REQUIRE(wasmtime_context_set_fuel(context, 100000) == nullptr);
+	wasmtime_instance_t instance{};
+	wasm_trap_t* trap = nullptr;
+	REQUIRE(wasmtime_linker_instantiate(linker.get(), context, module.get(), &instance, &trap) == nullptr);
+	REQUIRE(trap == nullptr);
+	Memory memory;
+	std::string error;
+	REQUIRE(memory.BindFromInstance(context, instance, error));
+	const auto input = FloatInput();
+	REQUIRE(memory.Write(1024, input.data(), input.size()));
+	wasmtime_extern_t exported;
+	REQUIRE(wasmtime_instance_export_get(context, &instance, "adversarial-float", 17, &exported));
+	REQUIRE(exported.kind == WASMTIME_EXTERN_FUNC);
+	std::array<wasmtime_val_raw_t, 2> slots{};
+	slots[0].i32 = 1024;
+	slots[1].i32 = input.size();
+	wasmtime_error_t* failure = nullptr;
+	{
+		RestoreFloatEnvironment restore;
+		REQUIRE(std::fesetround(FE_UPWARD) == 0);
+#if defined(__SSE__) || defined(_M_X64)
+		_mm_setcsr(_mm_getcsr() | (1u << 15) | (1u << 6));
+#endif
+		failure = wasmtime_func_call_unchecked(context, &exported.of.func, slots.data(), slots.size(), &trap);
+	}
+	REQUIRE(failure == nullptr);
+	REQUIRE(trap == nullptr);
+	std::vector<std::uint8_t> output(24);
+	REQUIRE(memory.Read(32, output.data(), output.size()));
+	CHECK(Word(output, 0) == 0x3f800001u); // upward rounding changed the tie
+#if defined(__SSE__) || defined(_M_X64)
+	CHECK(Word(output, 4) == 0u); // FTZ discarded a required subnormal
+#endif
+}
+
+TEST_CASE("Synced inspection detects hidden globals and table changes without memory writes", "[adversarial]")
+{
+	using namespace recoil::wasm::core;
+	const std::string wat = R"((module
+		(memory (export "memory") 1 1)
+		(global $counter (mut i32) (i32.const 0))
+		(global (mut f32) (f32.const nan:0x123456))
+		(global (mut f64) (f64.const -0))
+		(global (mut v128) (v128.const i32x4 1 2 3 4))
+		(global (mut externref) (ref.null extern))
+		(table 2 2 funcref)
+		(func $first (result i32) i32.const 11)
+		(func $second (result i32) i32.const 22)
+		(elem (i32.const 0) $first $second)
+		(func $env (export "SPRING_ENV_MASK") (result i32) i32.const 1)
+		(export "__spring_state_0_f0" (func $env))
+		(func (export "mutate-global") global.get $counter i32.const 1 i32.add global.set $counter)
+		(func (export "mutate-table") i32.const 0 ref.func $second table.set 0)
+	))";
+	wasm_byte_vec_t wasm;
+	REQUIRE(wasmtime_wat2wasm(wat.data(), wat.size(), &wasm) == nullptr);
+	const std::vector<std::uint8_t> original(wasm.data, wasm.data + wasm.size);
+	wasm_byte_vec_delete(&wasm);
+	WasmRuntime runtime;
+	auto* engine = WasmJobBenchmark::Engine(runtime);
+	REQUIRE(wasmtime_module_validate(engine, original.data(), original.size()) == nullptr);
+	StateExports aliases;
+	std::vector<std::uint8_t> compiled;
+	std::string error;
+	REQUIRE(StateExports::Prepare(original, compiled, aliases, error));
+	CHECK(aliases.prefix == "__spring_state_1_");
+	CHECK(aliases.globals == 5);
+	CHECK(aliases.tables == 1);
+	wasmtime_module_t* rawModule = nullptr;
+	REQUIRE(wasmtime_module_new(engine, compiled.data(), compiled.size(), &rawModule) == nullptr);
+	std::unique_ptr<wasmtime_module_t, decltype(&wasmtime_module_delete)> module(rawModule, wasmtime_module_delete);
+	std::vector<std::vector<std::uint8_t>> expected;
+	for (unsigned repeat = 0; repeat < 2; ++repeat) {
+		std::unique_ptr<wasmtime_store_t, decltype(&wasmtime_store_delete)> store(
+			wasmtime_store_new(engine, nullptr, nullptr), wasmtime_store_delete);
+		std::unique_ptr<wasmtime_linker_t, decltype(&wasmtime_linker_delete)> linker(wasmtime_linker_new(engine), wasmtime_linker_delete);
+		auto* context = wasmtime_store_context(store.get());
+		wasmtime_instance_t instance{};
+		wasm_trap_t* trap = nullptr;
+		REQUIRE(wasmtime_linker_instantiate(linker.get(), context, module.get(), &instance, &trap) == nullptr);
+		REQUIRE(trap == nullptr);
+		StateInspector inspector;
+		REQUIRE(inspector.Bind(context, instance, aliases, error));
+		Memory memory;
+		REQUIRE(memory.BindFromInstance(context, instance, error));
+		std::vector<std::uint8_t> originalMemory(memory.Size()), currentMemory(memory.Size());
+		REQUIRE(memory.Read(0, originalMemory.data(), originalMemory.size()));
+		std::vector<std::uint8_t> previous;
+		for (unsigned phase = 0; phase < 3; ++phase) {
+			if (phase) {
+				RawExport mutation;
+				const std::string name = phase == 1 ? "mutate-global" : "mutate-table";
+				REQUIRE(mutation.Resolve(context, instance, name.data(), name.size(), {}, {}, false, error));
+				REQUIRE(mutation.Call(context, nullptr, 0, error));
+			}
+			std::vector<std::uint8_t> state;
+			REQUIRE(inspector.Snapshot(state, error));
+			if (phase) CHECK(state != previous);
+			if (!repeat) expected.push_back(state);
+			CHECK(state == expected[phase]); // no store IDs or native code addresses
+			previous = state;
+			REQUIRE(memory.Read(0, currentMemory.data(), currentMemory.size()));
+			CHECK(currentMemory == originalMemory); // old memory-only checks miss both changes
+		}
+		// Opaque host references must fail inspection, never hash a pointer.
+		wasmtime_extern_t external;
+		const auto name = aliases.Name('g', 4);
+		REQUIRE(wasmtime_instance_export_get(context, &instance, name.data(), name.size(), &external));
+		wasmtime_val_t reference{};
+		reference.kind = WASMTIME_EXTERNREF;
+		REQUIRE(wasmtime_externref_new(context, nullptr, nullptr, &reference.of.externref));
+		REQUIRE(wasmtime_global_set(context, &external.of.global, &reference) == nullptr);
+		wasmtime_val_unroot(&reference);
+		std::vector<std::uint8_t> unsupported;
+		CHECK_FALSE(inspector.Snapshot(unsupported, error));
+		CHECK(error.find("nonportable reference") != std::string::npos);
+	}
+}
+
+TEST_CASE("State export preparation rejects malformed and unbounded metadata", "[adversarial]")
+{
+	using namespace recoil::wasm::core;
+	StateExports aliases;
+	std::vector<std::uint8_t> output;
+	std::string error;
+	CHECK_FALSE(StateExports::Prepare({}, output, aliases, error));
+	const std::vector<std::uint8_t> truncated = {0,97,115,109,1,0,0,0,7,99};
+	CHECK_FALSE(StateExports::Prepare(truncated, output, aliases, error));
+	const std::vector<std::uint8_t> oversized = {0,97,115,109,1,0,0,0,6,3,129,128,4};
+	CHECK_FALSE(StateExports::Prepare(oversized, output, aliases, error));
 }

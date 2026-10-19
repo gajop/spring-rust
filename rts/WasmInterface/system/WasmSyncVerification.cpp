@@ -86,8 +86,10 @@ void WasmSyncVerification::EndFrame(int frame)
 			CSyncChecker::Sync(static_cast<std::uint32_t>(state.environment));
 			CSyncChecker::Sync(static_cast<std::uint32_t>(state.faulted));
 			Sync64(state.memoryBytes);
-			if (mixMemory)
+			if (mixMemory) {
 				Sync64(state.memoryHash);
+				Sync64(state.stateHash);
+			}
 			Sync64(state.jobsHash);
 		}
 	}
@@ -97,7 +99,7 @@ void WasmSyncVerification::EndFrame(int frame)
 	const unsigned checksum = 0;
 #endif
 	if (log.is_open()) {
-		log << "{\"frame\":" << frame << ",\"engine\":" << engineChecksum
+		log << "{\"schema\":2,\"frame\":" << frame << ",\"engine\":" << engineChecksum
 			<< ",\"workers\":" << ThreadPool::GetNumThreads()
 			<< ",\"checksum\":" << checksum << ",\"synccheck\":"
 #ifdef SYNCCHECK
@@ -114,11 +116,16 @@ void WasmSyncVerification::EndFrame(int frame)
 				<< ",\"environment\":" << JsonString(WasmEnvironmentMatrix::Name(state.environment))
 				<< ",\"bytes\":" << state.memoryBytes << ",\"hash\":\""
 				<< std::hex << std::setw(16) << std::setfill('0') << state.memoryHash << std::dec
+				<< "\",\"state_bytes\":" << state.stateBytes
+				<< ",\"state_hash\":\"" << std::hex << std::setw(16) << state.stateHash << std::dec
 				<< "\",\"jobs_hash\":\"" << std::hex << std::setw(16) << state.jobsHash << std::dec
 				<< "\",\"faulted\":" << (state.faulted ? "true" : "false") << '}';
 			if (dump && !WasmCoreHost::DumpSyncedMemory(state.name,
 					path + ".frame-" + std::to_string(frame) + ".module-" + std::to_string(i) + ".bin"))
 				throw std::runtime_error("Cannot dump synced Wasm memory: " + state.name);
+			if (dump && !WasmCoreHost::DumpSyncedState(state.name,
+					path + ".frame-" + std::to_string(frame) + ".module-" + std::to_string(i) + ".state.bin"))
+				throw std::runtime_error("Cannot dump synced Wasm globals/tables: " + state.name);
 		}
 		log << "]}\n";
 		log.flush();

@@ -54,4 +54,17 @@
   (func (export "bad-output") (param i32 i32) (result i64) i64.const -1)
   (func (export "grow") (param i32 i32) (result i64)
     i32.const 32 i32.const 1 memory.grow i32.store i64.const 17179869216)
+  ;; Inputs are raw IEEE words: ties and subnormals expose inherited host FP state.
+  (func (export "adversarial-float") (param $p i32) (param i32) (result i64)
+    i32.const 32 local.get $p f32.load local.get $p f32.load offset=4 f32.add f32.store
+    i32.const 36 local.get $p f32.load offset=8 local.get $p f32.load offset=12 f32.mul f32.store
+    i32.const 40 local.get $p f64.load offset=16 local.get $p f64.load offset=24 f64.add f64.store
+    i32.const 48 local.get $p f64.load offset=32 local.get $p f64.load offset=40 f64.mul f64.store
+    i64.const 103079215136) ;; 24 bytes at offset 32
+  (func (export "adversarial-simd") (param $p i32) (param i32) (result i64)
+    i32.const 64 local.get $p v128.load f32.const 0.5 f32x4.splat f32x4.mul v128.store
+    ;; f64->f32 demotion and i32->f32 conversion must also round nearest-even.
+    i32.const 80 local.get $p f64.load offset=16 f64.const 0x1p-24 f64.add f32.demote_f64 f32.store
+    i32.const 84 i32.const 16777217 f32.convert_i32_s f32.store
+    i64.const 103079215168) ;; 24 bytes at offset 64
 )
