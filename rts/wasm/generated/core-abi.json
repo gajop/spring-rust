@@ -3595,7 +3595,7 @@
       "function": "GetModOption",
       "import_module": "spring:game",
       "import_name": "get-mod-option",
-      "environment_mask": 31,
+      "environment_mask": 95,
       "mutating": false,
       "visibility_sensitive": false,
       "source_status": "automatic",

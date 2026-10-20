@@ -7007,7 +7007,7 @@ pub mod game {
             self._engine.finish(result)
         }
     }
-    impl<E: crate::capabilities::Game> Game<'_, E> {
+    impl<E: crate::capabilities::World> Game<'_, E> {
         pub fn get_mod_option(&self, key: &str) -> Result<GetModOptionValue> {
             self._engine.check()?;
             if (key).as_bytes().contains(&0) {

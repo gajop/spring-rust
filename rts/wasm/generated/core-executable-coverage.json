@@ -4363,9 +4363,9 @@
       "grandfathered": true,
       "production_import_allowed": true,
       "production_process_safe": true,
-      "production_sync_environment_mask": 31,
-      "production_visibility_environment_mask": 31,
-      "production_environment_mask": 31,
+      "production_sync_environment_mask": 95,
+      "production_visibility_environment_mask": 95,
+      "production_environment_mask": 95,
       "reason": null
     },
     {

@@ -171,7 +171,7 @@ inline constexpr Candidate kCandidates[] = {
 	{"spring:game", "get-map-option", "i32,i32->i32", 31u, Strategy::variableInput},
 	{"spring:game", "get-map-options", "i32,i32->i32", 95u, Strategy::manual},
 	{"spring:game", "get-map-start-positions", "i32,i32->i32", 31u, Strategy::manual},
-	{"spring:game", "get-mod-option", "i32,i32->i32", 31u, Strategy::variableInput},
+	{"spring:game", "get-mod-option", "i32,i32->i32", 95u, Strategy::variableInput},
 	{"spring:game", "get-mod-options", "i32,i32->i32", 95u, Strategy::manual},
 	{"spring:game", "get-side-data", "i32,i32->i32", 95u, Strategy::variableInput},
 	{"spring:game", "get-side-data-by-index", "i32,i32->i32", 31u, Strategy::variableOutput},

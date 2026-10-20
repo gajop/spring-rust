@@ -269,7 +269,8 @@ static void NativeGetMapOptions(const GetMapOptionsQuery* query, GetMapOptionsRe
 
 static void NativeGetModOption(const GetModOptionQuery* query, GetModOptionResult* result) {
 	bufferPos = 0;
-	if (!GameReady() || !gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
+	// The start script is available to Intro before the game world exists.
+	if (!gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
 	const auto& options = gameSetup->GetModOptions();
 	auto it = options.find(query->key);
 	result->error = nullptr;
@@ -283,7 +284,7 @@ static void NativeGetModOption(const GetModOptionQuery* query, GetModOptionResul
 
 static void NativeGetModOptions(const GetModOptionsQuery* query, GetModOptionsResult* result) {
 	bufferPos = 0;
-	if (!GameReady() || !gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
+	if (!gameSetup) { result->error = &GAME_NOT_READY_ERROR; return; }
 	const auto& options = gameSetup->GetModOptions();
 
 	modOptionKeys.clear();

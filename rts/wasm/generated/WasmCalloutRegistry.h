@@ -284,7 +284,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"game", "GetMapOption", 31u, false, false, LoweringStatus::automatic},
 	{"game", "GetMapOptions", 95u, false, false, LoweringStatus::annotated},
 	{"game", "GetMapStartPositions", 31u, false, false, LoweringStatus::annotated},
-	{"game", "GetModOption", 31u, false, false, LoweringStatus::automatic},
+	{"game", "GetModOption", 95u, false, false, LoweringStatus::automatic},
 	{"game", "GetModOptions", 95u, false, false, LoweringStatus::annotated},
 	{"game", "GetSideData", 95u, false, false, LoweringStatus::automatic},
 	{"game", "GetSideDataByIndex", 31u, false, false, LoweringStatus::automatic},

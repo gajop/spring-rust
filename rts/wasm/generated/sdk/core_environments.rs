@@ -7265,6 +7265,7 @@ pub mod intro {
         pub use super::super::owned::game::get_ally_team_start_box;
         pub use super::super::owned::game::get_gaia_team_id;
         pub use super::super::owned::game::get_map_options;
+        pub use super::super::owned::game::get_mod_option;
         pub use super::super::owned::game::get_mod_options;
         pub use super::super::owned::game::get_side_data;
         pub use super::super::owned::game::get_team_start_position;

@@ -22,6 +22,7 @@
 namespace fs = std::filesystem;
 
 extern const DisplayApi DISPLAY_API;
+extern const GameApi GAME_API;
 extern const ConfigApi CONFIG_API;
 extern const VFSApi VFS_API;
 extern const GfxApi GFX_API;
@@ -144,6 +145,9 @@ std::unique_ptr<WasmStandaloneEnvironment> WasmStandaloneEnvironment::Create()
 
 	env->m_nativeInterface->memory = &MEMORY_API;
 	env->m_nativeInterface->display = &DISPLAY_API;
+	// Intro can read the received start-script options before a game world exists.
+	// The generated environment matrix still limits which Game calls it may use.
+	env->m_nativeInterface->game = &GAME_API;
 	env->m_nativeInterface->config = &CONFIG_API;
 	env->m_nativeInterface->vfs = &VFS_API;
 	env->m_nativeInterface->gfx = &GFX_API;
@@ -162,7 +166,11 @@ std::unique_ptr<WasmStandaloneEnvironment> WasmStandaloneEnvironment::Create()
 	env->m_nativeInterface->tracing = &TRACING_API;
 	env->m_nativeInterface->rmlUi = &RMLUI_API;
 
-	env->m_wasmSystem = std::make_unique<WasmInterfaceSystem>(env->m_nativeInterface.get());
+	// Menu and Intro are local rendering environments, outside the synced
+	// world's modrules configuration. Accept fixed-width SIMD Rust builds.
+	WasmRuntimeConfig runtimeConfig;
+	runtimeConfig.allowSimd = true;
+	env->m_wasmSystem = std::make_unique<WasmInterfaceSystem>(env->m_nativeInterface.get(), runtimeConfig);
 
 	return env;
 }

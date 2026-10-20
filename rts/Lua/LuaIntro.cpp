@@ -255,6 +255,7 @@ bool CLuaIntro::LoadSyncedReadFunctions(lua_State* L)
 	REGISTER_SCOPED_LUA_CFUNC(LuaSyncedRead, GetGaiaTeamID);
 
 	REGISTER_SCOPED_LUA_CFUNC(LuaSyncedRead, GetMapOptions);
+	REGISTER_SCOPED_LUA_CFUNC(LuaSyncedRead, GetModOption);
 	REGISTER_SCOPED_LUA_CFUNC(LuaSyncedRead, GetModOptions);
 
 	REGISTER_SCOPED_LUA_CFUNC(LuaSyncedRead, GetSideData);

@@ -13,6 +13,7 @@
 #include "ExternalAI/SkirmishAIHandler.h"
 #include "Lua/LuaIntro.h"
 #include "Lua/LuaMenu.h"
+#include "Lua/LuaOpenGL.h"
 #include "Menu/LuaMenuController.h"
 #include "NativeInterface/api/Callins.h"
 #include "Rml/Backends/RmlUi_Backend.h"
@@ -146,8 +147,11 @@ bool CLoadScreen::Init()
 	// the global font), the latter will cause problems in GL4
 	{
 		auto lock = CLoadLock::GetUniqueLock();
-		CLuaIntro::LoadFreeHandler();
 		InitWasmIntro();
+		// A game-supplied Rust/Wasm loader replaces the default LuaIntro widgets.
+		// Keep the existing Lua screen as the fallback for games without one.
+		if (!HasWasmIntro())
+			CLuaIntro::LoadFreeHandler();
 	}
 
 	if (mtLoading)
@@ -386,6 +390,8 @@ void CLoadScreen::DispatchWasmDrawLoadScreen()
 {
 	if (!HasWasmIntro())
 		return;
+	// Establish the same screen state as LuaIntro, even when no Lua loader ran.
+	LuaOpenGL::EnableDrawScreenCommon();
 	SimpleCallinQuery query = {};
 	bool handled = false;
 	std::string error;
@@ -394,6 +400,7 @@ void CLoadScreen::DispatchWasmDrawLoadScreen()
 		if (!error.empty())
 			LOG_L(L_ERROR, "WasmIntro DrawLoadScreen failed: %s", error.c_str());
 	}
+	LuaOpenGL::DisableDrawScreenCommon();
 }
 
 void CLoadScreen::DispatchWasmLoadProgress(const std::string& msg, bool replaceLastLine)
