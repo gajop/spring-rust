@@ -1,0 +1,999 @@
+{
+  "scope": "Selected session-owned integration commits; excludes unrelated interleaved main history. Reverted experiments remain listed as history; file lists are touched-path unions, not current net diffs.",
+  "repositories": {
+    "game": {
+      "path": "/home/gajop/projects/spring-projects/ship-game.sdd",
+      "commits": [
+        {
+          "commit": "93f93b52b8e0b076ec9c698883b7f3c84ecd4e07",
+          "subject": "Integrate Roman Triarii plasma assault ship and measured duels",
+          "files": [
+            ".shipassets/install-state.json",
+            "LuaRules/configs/shipassets/collision.lua",
+            "LuaRules/configs/shipassets/gen_triarii.lua",
+            "LuaRules/main.lua",
+            "LuaRules/recording/observer.lua",
+            "LuaRules/shipassets/triarii_tuning.lua",
+            "LuaRules/shipassets/upgrades_tuning.lua",
+            "LuaRules/triarii_probe.lua",
+            "LuaUI/wasm/portraits/triarii.png",
+            "bitmaps/strategic/triarii.png",
+            "bitmaps/strategic/triarii.svg",
+            "docs/ai/design/tactical-flight.md",
+            "docs/ai/guides/source-map.md",
+            "docs/design/triarii.md",
+            "docs/reports/duels/triarii-2026-10-19/collision.json",
+            "docs/reports/duels/triarii-2026-10-19/comparison.png",
+            "docs/reports/duels/triarii-2026-10-19/engine.png",
+            "docs/reports/duels/triarii-2026-10-19/final-provenance.json",
+            "docs/reports/duels/triarii-2026-10-19/final-smoke.json",
+            "docs/reports/duels/triarii-2026-10-19/firing.png",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-final-hastatus-side0-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-final-phalanx-side0-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-hastatus-side0-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-hastatus-side0-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-hastatus-side1-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-hastatus-side1-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-hypaspist-side0-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-hypaspist-side0-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-hypaspist-side1-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-hypaspist-side1-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-lancer-pincered-side1-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-lancer-pincered-side1-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-lancer-side0-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-lancer-side0-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-lancer-side1-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-lancer-side1-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-peltast-side0-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-peltast-side0-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-peltast-side1-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-peltast-side1-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-phalanx-pincered-side1-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-phalanx-pincered-side1-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-phalanx-rear-side1-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-phalanx-rear-side1-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-phalanx-side0-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-phalanx-side0-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-phalanx-side1-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-phalanx-side1-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-shield-side0-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-shield-side0-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-shield-side1-seed19.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/logs/triarii-shield-side1-seed7.log.gz",
+            "docs/reports/duels/triarii-2026-10-19/matrix-provenance.json",
+            "docs/reports/duels/triarii-2026-10-19/model.png",
+            "docs/reports/duels/triarii-2026-10-19/rejected-rear-ready.json",
+            "docs/reports/duels/triarii-2026-10-19/report.md",
+            "docs/reports/duels/triarii-2026-10-19/runs.json",
+            "docs/reports/duels/triarii-2026-10-19/summary.md",
+            "docs/reports/duels/triarii-2026-10-19/validation.json",
+            "features/gen_triarii.lua",
+            "features/gen_triarii_chunk_0_0.lua",
+            "features/gen_triarii_chunk_0_1.lua",
+            "features/gen_triarii_chunk_1_0.lua",
+            "features/gen_triarii_chunk_1_1.lua",
+            "features/gen_triarii_chunk_2_0.lua",
+            "features/gen_triarii_chunk_2_1.lua",
+            "features/gen_triarii_chunk_3_0.lua",
+            "features/gen_triarii_chunk_3_1.lua",
+            "features/gen_triarii_part_0.lua",
+            "features/gen_triarii_wreck.lua",
+            "fx/shots.lua",
+            "objects3d/gen_triarii.colmesh",
+            "objects3d/gen_triarii.fxshape",
+            "objects3d/gen_triarii.glb",
+            "objects3d/gen_triarii_chunk_0_0.fxshape",
+            "objects3d/gen_triarii_chunk_0_0.glb",
+            "objects3d/gen_triarii_chunk_0_1.fxshape",
+            "objects3d/gen_triarii_chunk_0_1.glb",
+            "objects3d/gen_triarii_chunk_1_0.fxshape",
+            "objects3d/gen_triarii_chunk_1_0.glb",
+            "objects3d/gen_triarii_chunk_1_1.fxshape",
+            "objects3d/gen_triarii_chunk_1_1.glb",
+            "objects3d/gen_triarii_chunk_2_0.fxshape",
+            "objects3d/gen_triarii_chunk_2_0.glb",
+            "objects3d/gen_triarii_chunk_2_1.fxshape",
+            "objects3d/gen_triarii_chunk_2_1.glb",
+            "objects3d/gen_triarii_chunk_3_0.fxshape",
+            "objects3d/gen_triarii_chunk_3_0.glb",
+            "objects3d/gen_triarii_chunk_3_1.fxshape",
+            "objects3d/gen_triarii_chunk_3_1.glb",
+            "objects3d/gen_triarii_part_0.fxshape",
+            "objects3d/gen_triarii_part_0.glb",
+            "objects3d/gen_triarii_wreck.fxshape",
+            "objects3d/gen_triarii_wreck.glb",
+            "tools/duel_matrix.py",
+            "tools/render_hud_icons.py",
+            "tools/scenarios.py",
+            "units/gen_triarii.lua",
+            "unittextures/gen_triarii.dds",
+            "unittextures/gen_triarii_finish_colour.dds",
+            "unittextures/gen_triarii_finish_finish.dds",
+            "unittextures/gen_triarii_finish_relief.dds",
+            "unittextures/gen_triarii_material.dds",
+            "unittextures/gen_triarii_metallic.dds",
+            "unittextures/gen_triarii_normal_ag.dds",
+            "unittextures/gen_triarii_remains_tex2.dds",
+            "unittextures/gen_triarii_surface_mask.dds",
+            "unittextures/gen_triarii_tex2.dds",
+            "wasm-src/crates/shipcore/src/data/tuning.rs",
+            "wasm-src/crates/shipcore/src/economy.rs",
+            "wasm-src/crates/shipcore/src/faction.rs",
+            "wasm-src/crates/shipcore/src/scene/layout.rs",
+            "wasm-src/crates/shipcore/src/ships.rs",
+            "wasm-src/rules-synced/src/catalog.rs",
+            "wasm-src/rules-synced/src/ships.rs",
+            "wasm-src/rules-synced/src/ships/armour.rs",
+            "wasm-src/rules-synced/src/ships/dispatch.rs",
+            "wasm-src/rules-synced/src/ships/heavy.rs",
+            "wasm-src/rules-synced/src/ships/heavy/station.rs",
+            "wasm-src/rules-synced/src/ships/triarii.rs",
+            "wasm-src/rules-synced/src/world.rs",
+            "weapons/gen_triarii.lua"
+          ]
+        },
+        {
+          "commit": "80f8705e96db634747c9fe4eec87343d7446697a",
+          "subject": "Preserve Triarii live probe and validation receipts",
+          "files": [
+            "docs/reports/duels/triarii-2026-10-19/clippy.log",
+            "docs/reports/duels/triarii-2026-10-19/controlled-probe.log",
+            "docs/reports/duels/triarii-2026-10-19/core-tests.log",
+            "docs/reports/duels/triarii-2026-10-19/docs-build.log",
+            "docs/reports/duels/triarii-2026-10-19/docs-check.log",
+            "docs/reports/duels/triarii-2026-10-19/docs-diagrams.log",
+            "docs/reports/duels/triarii-2026-10-19/geometry-tests.log",
+            "docs/reports/duels/triarii-2026-10-19/python-tests.log"
+          ]
+        },
+        {
+          "commit": "8d099f0035743036041506ca3e3758db5ec47f89",
+          "subject": "Install polished Triarii assets and record final duels",
+          "files": [
+            ".shipassets/install-state.json",
+            "LuaRules/configs/shipassets/collision.lua",
+            "LuaRules/configs/shipassets/gen_triarii.lua",
+            "LuaUI/wasm/portraits/triarii.png",
+            "docs/design/triarii.md",
+            "docs/reports/duels/triarii-2026-10-19-polish/cleanup-ledger.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/collision-trials.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/collision.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/comparison.png",
+            "docs/reports/duels/triarii-2026-10-19-polish/controlled-probe.log",
+            "docs/reports/duels/triarii-2026-10-19-polish/docs-build.log",
+            "docs/reports/duels/triarii-2026-10-19-polish/engine.png",
+            "docs/reports/duels/triarii-2026-10-19-polish/final-runtime-hashes.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/final-smoke.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/firing.png",
+            "docs/reports/duels/triarii-2026-10-19-polish/handoff-checks.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/lod.png",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/controlled-probe.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-hastatus-side0-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-hastatus-side0-seed7.final.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-hastatus-side0-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-hastatus-side1-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-hastatus-side1-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-hypaspist-side0-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-hypaspist-side0-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-hypaspist-side1-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-hypaspist-side1-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-lancer-pincered-side1-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-lancer-pincered-side1-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-lancer-side0-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-lancer-side0-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-lancer-side1-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-lancer-side1-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-peltast-side0-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-peltast-side0-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-peltast-side1-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-peltast-side1-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-phalanx-pincered-side1-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-phalanx-pincered-side1-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-phalanx-rear-side1-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-phalanx-rear-side1-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-phalanx-side0-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-phalanx-side0-seed7.final.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-phalanx-side0-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-phalanx-side1-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-phalanx-side1-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-shield-side0-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-shield-side0-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-shield-side1-seed19.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/logs/triarii-shield-side1-seed7.stdout.gz",
+            "docs/reports/duels/triarii-2026-10-19-polish/model.png",
+            "docs/reports/duels/triarii-2026-10-19-polish/motion.png",
+            "docs/reports/duels/triarii-2026-10-19-polish/post-matrix-byte-delta.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/provenance.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/quality-all-glbs.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/quality-bottom-final.log",
+            "docs/reports/duels/triarii-2026-10-19-polish/quality-build-05.log",
+            "docs/reports/duels/triarii-2026-10-19-polish/quality-geometry.log",
+            "docs/reports/duels/triarii-2026-10-19-polish/quality-lod-final.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/quality-pass12-final.log",
+            "docs/reports/duels/triarii-2026-10-19-polish/quality-post-matrix-tangents.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/quality-side-baked-final.log",
+            "docs/reports/duels/triarii-2026-10-19-polish/quality-source.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/report.md",
+            "docs/reports/duels/triarii-2026-10-19-polish/ruff-final.txt",
+            "docs/reports/duels/triarii-2026-10-19-polish/runs.json",
+            "docs/reports/duels/triarii-2026-10-19-polish/shadow-resolution.png",
+            "docs/reports/duels/triarii-2026-10-19-polish/summary.md",
+            "docs/reports/duels/triarii-2026-10-19-polish/views.png",
+            "features/gen_triarii.lua",
+            "objects3d/gen_triarii.colmesh",
+            "objects3d/gen_triarii.fxshape",
+            "objects3d/gen_triarii.glb",
+            "objects3d/gen_triarii_chunk_0_0.fxshape",
+            "objects3d/gen_triarii_chunk_0_0.glb",
+            "objects3d/gen_triarii_chunk_0_1.fxshape",
+            "objects3d/gen_triarii_chunk_0_1.glb",
+            "objects3d/gen_triarii_chunk_1_0.fxshape",
+            "objects3d/gen_triarii_chunk_1_0.glb",
+            "objects3d/gen_triarii_chunk_1_1.fxshape",
+            "objects3d/gen_triarii_chunk_1_1.glb",
+            "objects3d/gen_triarii_chunk_2_0.fxshape",
+            "objects3d/gen_triarii_chunk_2_0.glb",
+            "objects3d/gen_triarii_chunk_2_1.fxshape",
+            "objects3d/gen_triarii_chunk_2_1.glb",
+            "objects3d/gen_triarii_chunk_3_0.fxshape",
+            "objects3d/gen_triarii_chunk_3_0.glb",
+            "objects3d/gen_triarii_chunk_3_1.fxshape",
+            "objects3d/gen_triarii_chunk_3_1.glb",
+            "objects3d/gen_triarii_part_0.fxshape",
+            "objects3d/gen_triarii_part_0.glb",
+            "objects3d/gen_triarii_wreck.fxshape",
+            "objects3d/gen_triarii_wreck.glb",
+            "unittextures/gen_triarii.dds",
+            "unittextures/gen_triarii_material.dds",
+            "unittextures/gen_triarii_metallic.dds",
+            "unittextures/gen_triarii_normal_ag.dds",
+            "unittextures/gen_triarii_remains_tex2.dds",
+            "unittextures/gen_triarii_surface_mask.dds",
+            "unittextures/gen_triarii_tex2.dds"
+          ]
+        },
+        {
+          "commit": "080a2f2b1870c6287e22c40181af67405a5c0ad4",
+          "subject": "Fix Escape playtest rendering, encounter and HUD issues",
+          "files": [
+            "LuaUI/wasm/shipgame.rml",
+            "docs/ai/design/diagrams/gauntlet-flow.diagram.yaml",
+            "docs/ai/design/diagrams/gauntlet-flow.png",
+            "docs/ai/design/gauntlet.md",
+            "docs/ai/guides/source-map.md",
+            "docs/design/gauntlet.md",
+            "docs/reports/2026-10-19-escape-fixes.md",
+            "docs/reports/escape-fixes-2026-10-19/collectors-4/result.json",
+            "docs/reports/escape-fixes-2026-10-19/collectors-4/start.txt",
+            "docs/reports/escape-fixes-2026-10-19/collectors-4/stdout.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/collectors.png",
+            "docs/reports/escape-fixes-2026-10-19/crossfire-2/result.json",
+            "docs/reports/escape-fixes-2026-10-19/crossfire-2/start.txt",
+            "docs/reports/escape-fixes-2026-10-19/crossfire-2/stdout.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/crossfire.png",
+            "docs/reports/escape-fixes-2026-10-19/docs-build.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/docs-check.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/docs-diagrams.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/docs-final-check.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/engine-reload-final-build.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/final-crossfire-test.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/hud/result.json",
+            "docs/reports/escape-fixes-2026-10-19/hud/start.txt",
+            "docs/reports/escape-fixes-2026-10-19/hud/stdout.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/look-build.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/missiles-2/result.json",
+            "docs/reports/escape-fixes-2026-10-19/missiles-2/start.txt",
+            "docs/reports/escape-fixes-2026-10-19/missiles-2/stdout.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/missiles.png",
+            "docs/reports/escape-fixes-2026-10-19/net-after.png",
+            "docs/reports/escape-fixes-2026-10-19/net-before.png",
+            "docs/reports/escape-fixes-2026-10-19/net-fixed/result.json",
+            "docs/reports/escape-fixes-2026-10-19/net-fixed/start.txt",
+            "docs/reports/escape-fixes-2026-10-19/net-fixed/stdout.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/net-repro4/result.json",
+            "docs/reports/escape-fixes-2026-10-19/net-repro4/start.txt",
+            "docs/reports/escape-fixes-2026-10-19/net-repro4/stdout.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/portal-high.png",
+            "docs/reports/escape-fixes-2026-10-19/portal-high/result.json",
+            "docs/reports/escape-fixes-2026-10-19/portal-high/start.txt",
+            "docs/reports/escape-fixes-2026-10-19/portal-high/stdout.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/portal-low.png",
+            "docs/reports/escape-fixes-2026-10-19/portal-low/result.json",
+            "docs/reports/escape-fixes-2026-10-19/portal-low/start.txt",
+            "docs/reports/escape-fixes-2026-10-19/portal-low/stdout.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/provenance.json",
+            "docs/reports/escape-fixes-2026-10-19/python-tests.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/rules-final-build.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/rust-tests.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/selection-2/result.json",
+            "docs/reports/escape-fixes-2026-10-19/selection-2/start.txt",
+            "docs/reports/escape-fixes-2026-10-19/selection-2/stdout.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/selection.png",
+            "docs/reports/escape-fixes-2026-10-19/shipgame-crossfire-check.py",
+            "docs/reports/escape-fixes-2026-10-19/shipgame-render-regression.py",
+            "docs/reports/escape-fixes-2026-10-19/shipgame-triarii-bugcheck.py",
+            "docs/reports/escape-fixes-2026-10-19/shipgame-wasm-reload-check.py",
+            "docs/reports/escape-fixes-2026-10-19/staged-core-test.log.gz",
+            "docs/reports/escape-fixes-2026-10-19/triarii-menu.png",
+            "docs/reports/escape-fixes-2026-10-19/wasm-reload-2/result.json",
+            "docs/reports/escape-fixes-2026-10-19/wasm-reload-2/start.txt",
+            "docs/reports/escape-fixes-2026-10-19/wasm-reload-2/stdout.log.gz",
+            "fx/effects/wormhole_mouth.lua",
+            "fx/wormhole_disc.glsl",
+            "tools/engine.py",
+            "tools/hud_skin_test.py",
+            "wasm-src/crates/fx-recoil/src/bound.rs",
+            "wasm-src/crates/fx-recoil/src/ribbons.rs",
+            "wasm-src/crates/launch/src/escape.rs",
+            "wasm-src/crates/launch/src/gauntlet.rs",
+            "wasm-src/crates/launch/src/script.rs",
+            "wasm-src/crates/shipcore/src/gauntlet.rs",
+            "wasm-src/rules-synced/src/gauntlet.rs",
+            "wasm-src/rules-synced/src/gauntlet/sources.rs",
+            "wasm-src/rules-unsynced/src/effects/trails.rs",
+            "wasm-src/ui/src/gui_hud.rs",
+            "wasm-src/ui/src/hud/economy.rs",
+            "wasm-src/ui/src/hud/model.rs",
+            "wasm-src/ui/src/strategic.rs"
+          ]
+        },
+        {
+          "commit": "da4c41a9fd60bcd41e7b0b692842573db4c03b9b",
+          "subject": "Record completed Escape fix documentation build",
+          "files": [
+            "docs/reports/escape-fixes-2026-10-19/docs-build.log.gz"
+          ]
+        },
+        {
+          "commit": "8ea9d3dfea3b4f11594d65b60c72a14236e0692a",
+          "subject": "Document combined-fleet simulation profiling and hotspots",
+          "files": [
+            "docs/reports/2026-10-19-simulation-profile.json",
+            "docs/reports/2026-10-19-simulation-profile.md"
+          ]
+        },
+        {
+          "commit": "9384afa109f90f706458f5fdacf6d29c90bfed98",
+          "subject": "Reconcile navigation optimization plans and split implementation lanes",
+          "files": [
+            "docs/ai/proposals/README.md",
+            "docs/ai/proposals/navigation.md",
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/ai/reports/engine-jobs-2026-10-12.md",
+            "docs/plans/README.md"
+          ]
+        },
+        {
+          "commit": "712b3cabab90fd8307c07169a7802a0f7db962cd",
+          "subject": "Clarify navigation acceptance and current system status",
+          "files": [
+            "docs/ai/proposals/navigation.md"
+          ]
+        },
+        {
+          "commit": "965b64b5469ae3a6505782e5a2198a218e5cc04a",
+          "subject": "Record optimization candidates and headless measurement limits",
+          "files": [
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/guides/profiling-reference.md",
+            "docs/plans/README.md",
+            "docs/reports/2026-10-19-opt-heavy.json",
+            "docs/reports/2026-10-19-opt-heavy.md",
+            "docs/reports/2026-10-19-opt-lancer.json",
+            "docs/reports/2026-10-19-opt-lancer.md",
+            "docs/reports/2026-10-19-optimization-review.md"
+          ]
+        },
+        {
+          "commit": "9c75d2e4ec0bbcd11c38b9a2fb70f2701568d7b0",
+          "subject": "Benchmark fixed headless completion time before and after optimization",
+          "files": [
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/guides/profiling-reference.md",
+            "docs/reports/2026-10-19-optimization-review.md",
+            "docs/reports/2026-10-19-wall-benchmark.json",
+            "docs/reports/2026-10-19-wall-benchmark.md"
+          ]
+        },
+        {
+          "commit": "2350163132618aab621fe9aee3de66c86c0f9c5d",
+          "subject": "Document remaining fleet CPU costs and crowd planning budgets",
+          "files": [
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/reports/2026-10-19-optimization-review.md",
+            "docs/reports/2026-10-19-remaining-cpu-profile.json",
+            "docs/reports/2026-10-19-remaining-cpu-profile.md"
+          ]
+        },
+        {
+          "commit": "b24117fe1a465becf10f952072ee19a8509de890",
+          "subject": "Bound crowd planning work and share ship motion preparation",
+          "files": [
+            "docs/ai/design/diagrams/crowd-planning.diagram.yaml",
+            "docs/ai/design/diagrams/crowd-planning.png",
+            "docs/ai/design/diagrams/lancer-movement.diagram.yaml",
+            "docs/ai/design/diagrams/lancer-movement.png",
+            "docs/ai/design/lancer-flight.md",
+            "docs/ai/design/occupancy-navigator.md",
+            "docs/ai/design/tactical-flight.md",
+            "docs/ai/guides/source-map.md",
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/guides/profiling.md",
+            "docs/plans/README.md",
+            "docs/reports/2026-10-19-crowd-scaling.json",
+            "docs/reports/2026-10-19-crowd-scaling.md",
+            "justfile",
+            "tools/cus_tracking_harness.rs",
+            "tools/fleet_benchmark.py",
+            "tools/heavy_proximity_harness.rs",
+            "tools/lancer_forecast_harness.rs",
+            "tools/lancer_observations_harness.rs",
+            "tools/test_cus_tracking.py",
+            "tools/test_fleet_benchmark.py",
+            "tools/test_heavy_proximity.py",
+            "tools/test_lancer_forecast.py",
+            "tools/test_lancer_observations.py",
+            "wasm-src/crates/shipcore/examples/heavy_proximity_cost.rs",
+            "wasm-src/crates/shipcore/examples/lancer_navigation_cost.rs",
+            "wasm-src/crates/shipcore/src/flight/avoidance.rs",
+            "wasm-src/crates/shipcore/src/flight/cells.rs",
+            "wasm-src/crates/shipcore/src/flight/heavy.rs",
+            "wasm-src/crates/shipcore/src/flight/hulls.rs",
+            "wasm-src/crates/shipcore/src/flight/lancer.rs",
+            "wasm-src/crates/shipcore/src/flight/navigation.rs",
+            "wasm-src/crates/shipcore/src/flight/navmesh.rs",
+            "wasm-src/crates/shipcore/src/flight/occupancy/navigator.rs",
+            "wasm-src/crates/shipcore/src/flight/routes/drives.rs",
+            "wasm-src/crates/shipcore/src/flight/spacing.rs",
+            "wasm-src/rules-synced/src/host.rs",
+            "wasm-src/rules-synced/src/host/target_frame.rs",
+            "wasm-src/rules-synced/src/host/target_frame/cache.rs",
+            "wasm-src/rules-synced/src/scripts/module.rs",
+            "wasm-src/rules-synced/src/scripts/tracking.rs",
+            "wasm-src/rules-synced/src/ships/cavalry.rs",
+            "wasm-src/rules-synced/src/ships/heavy.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot.rs",
+            "wasm-src/rules-synced/src/ships/lancer.rs",
+            "wasm-src/rules-synced/src/ships/occupancy.rs"
+          ]
+        },
+        {
+          "commit": "b99270f501f165a9cfc6ee201b33753b2bb2d611",
+          "subject": "Record measured crowd experiments and controlled fleet benchmark options",
+          "files": [
+            "docs/ai/guides/source-map.md",
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/guides/profiling.md",
+            "docs/reports/2026-10-19-crowd-scaling.json",
+            "docs/reports/2026-10-19-crowd-scaling.md",
+            "tools/fleet_benchmark.py",
+            "tools/test_fleet_benchmark.py"
+          ]
+        },
+        {
+          "commit": "dde8fc6d001924b1917231e156caf6f83b7552a0",
+          "subject": "Read weapon range through the scalar definition API",
+          "files": [
+            "wasm-src/rules-synced/src/host/defs.rs"
+          ]
+        },
+        {
+          "commit": "1571977395698da5d5df70862925fd7ab64dfec7",
+          "subject": "perf(lancer): reuse lazy launch context across clearance attempts",
+          "files": [
+            "tools/lancer_launch_harness.rs",
+            "tools/test_lancer_launch.py",
+            "wasm-src/rules-synced/src/ships/lancer.rs"
+          ]
+        },
+        {
+          "commit": "fc6fce1e238a3642b69ef9abc5650d9091fde7db",
+          "subject": "Reduce idle traffic and Mantis maintenance without changing motion",
+          "files": [
+            "docs/ai/guides/source-map.md",
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/plans/README.md",
+            "docs/reports/2026-10-20-idle-simulation.md",
+            "wasm-src/crates/shipcore/src/flight/spacing.rs",
+            "wasm-src/crates/shipcore/src/flight/spacing/steering_tests.rs",
+            "wasm-src/rules-synced/src/ships/mantis.rs"
+          ]
+        },
+        {
+          "commit": "c159125c29de38a58d077670b72f9008a267d8aa",
+          "subject": "Reuse pure steering results for unchanged allied observations",
+          "files": [
+            "wasm-src/crates/shipcore/src/flight/spacing.rs",
+            "wasm-src/crates/shipcore/src/flight/spacing/steering_tests.rs",
+            "wasm-src/rules-synced/src/world.rs"
+          ]
+        },
+        {
+          "commit": "6900b23964698219630a562bc743198646fbe35b",
+          "subject": "Avoid cache maintenance for changing allied traffic",
+          "files": [
+            "wasm-src/crates/shipcore/src/flight/spacing.rs",
+            "wasm-src/crates/shipcore/src/flight/spacing/steering_tests.rs"
+          ]
+        },
+        {
+          "commit": "937bbda2382116fe88d817a178110ebe283df8ba",
+          "subject": "Record unchanged-behavior idle results and rejected experiments",
+          "files": [
+            "docs/ai/guides/source-map.md",
+            "docs/reports/2026-10-20-idle-simulation.md"
+          ]
+        },
+        {
+          "commit": "5e4b567d478a05d871cdf4f4cd34b8287c8215a3",
+          "subject": "Record integrated default-stance benchmarks and acceptance limits",
+          "files": [
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/reports/2026-10-20-idle-simulation.md"
+          ]
+        },
+        {
+          "commit": "ed93568f92b0f15e16ae783e7dbd8f8ce4020e7c",
+          "subject": "Retain exact contact membership across immutable snapshots",
+          "files": [
+            "tools/heavy_proximity_harness.rs",
+            "tools/test_heavy_proximity.py",
+            "wasm-src/crates/shipcore/src/flight/cells.rs",
+            "wasm-src/rules-synced/src/ships/heavy.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot/membership.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot/membership_tests.rs"
+          ]
+        },
+        {
+          "commit": "49461b88570996e1e185d305b69f5507e1c6740f",
+          "subject": "Read station permissions only when they affect its goal",
+          "files": [
+            "wasm-src/rules-synced/src/ships/heavy/station.rs"
+          ]
+        },
+        {
+          "commit": "4d626c70a14caefdcfe641ac52186bc05d3302e3",
+          "subject": "Finalize the live snapshot ship grid after contact assembly",
+          "files": [
+            "tools/heavy_proximity_harness.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot.rs",
+            "wasm-src/rules-synced/src/world.rs"
+          ]
+        },
+        {
+          "commit": "0ed9c07632608aa84006c3669f014ec6e38cf99a",
+          "subject": "Index compact cell spans with bounded row and column prefixes",
+          "files": [
+            "wasm-src/crates/shipcore/src/flight/cells.rs",
+            "wasm-src/crates/shipcore/src/flight/cells/prefix_reference.rs",
+            "wasm-src/crates/shipcore/src/flight/cells/prefix_tests.rs"
+          ]
+        },
+        {
+          "commit": "88afe50e2b36ef701adb50fa11f6b37dcdee4d96",
+          "subject": "Prepare live spacing inputs only for consumers and reuse phase observations",
+          "files": [
+            "tools/heavy_proximity_harness.rs",
+            "tools/test_heavy_proximity.py",
+            "wasm-src/rules-synced/src/economy/haul.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot.rs",
+            "wasm-src/rules-synced/src/world.rs"
+          ]
+        },
+        {
+          "commit": "e6086c801c90c2449b140a2337d6fb43ca9e361f",
+          "subject": "Borrow heavy contact rows from the current snapshot",
+          "files": [
+            "wasm-src/crates/shipcore/src/flight/heavy.rs",
+            "wasm-src/crates/shipcore/src/flight/heavy/rows_reference.rs",
+            "wasm-src/crates/shipcore/src/flight/heavy/rows_tests.rs",
+            "wasm-src/crates/shipcore/src/flight/hulls.rs",
+            "wasm-src/crates/shipcore/src/flight/hulls/rows.rs",
+            "wasm-src/crates/shipcore/src/flight/hulls/rows_reference.rs",
+            "wasm-src/crates/shipcore/src/flight/hulls/rows_tests.rs",
+            "wasm-src/rules-synced/src/dbg/flight_probe.rs",
+            "wasm-src/rules-synced/src/ships/heavy.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot/rows_reference.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot/rows_tests.rs"
+          ]
+        },
+        {
+          "commit": "7a0f96df6d390c03e5f7db8bf667d8295dcdb771",
+          "subject": "Reuse traffic preparation for identical body observations",
+          "files": [
+            "docs/ai/guides/source-map.md",
+            "docs/ai/reports/2026-10-20-traffic-preparation.md",
+            "wasm-src/crates/shipcore/src/flight/spacing.rs",
+            "wasm-src/crates/shipcore/src/flight/spacing/refresh_original.rs",
+            "wasm-src/crates/shipcore/src/flight/spacing/refresh_tests.rs"
+          ]
+        },
+        {
+          "commit": "ca28805f9751851fde479136614e14ef99d925d0",
+          "subject": "Build occupancy steering indices only when queried",
+          "files": [
+            "tools/idle_occupancy_harness.rs",
+            "tools/idle_occupancy_probe.rs",
+            "tools/test_idle_occupancy.py",
+            "wasm-src/rules-synced/src/ships/occupancy.rs"
+          ]
+        },
+        {
+          "commit": "852b5a5526221dc2280695bbb0640908c78f2e49",
+          "subject": "Record idle subsystem attribution and exact-frame comparison harness",
+          "files": [
+            "docs/ai/guides/source-map.md",
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/reports/2026-10-20-idle-attribution.md",
+            "tools/idle_parity.lua",
+            "tools/idle_parity.py"
+          ]
+        },
+        {
+          "commit": "85e57c69d508dcaed2a331a3fd9070e0bf74a5bf",
+          "subject": "Record combat gates and bounded optimization experiments",
+          "files": [
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/reports/2026-10-20-idle-attribution.md"
+          ]
+        },
+        {
+          "commit": "0e79730a2caa0bf697de61e4b067c8deea24fba2",
+          "subject": "Report installed-engine cost shares after game integration",
+          "files": [
+            "docs/reports/2026-10-20-idle-attribution.md"
+          ]
+        },
+        {
+          "commit": "99f667179f7190742b5e1118f64df8dec6e200a3",
+          "subject": "Retain navigation shortcuts alongside bounded crowd planning",
+          "files": [
+            "docs/ai/design/tactical-flight.md",
+            "docs/ai/guides/source-map.md",
+            "docs/ai/reports/navigation-integration-2026-10-19.md",
+            "docs/reports/multiplayer-main-integration-2026-10-19.md",
+            "wasm-src/crates/shipcore/src/flight/navigation.rs"
+          ]
+        },
+        {
+          "commit": "b55760a1048ace053f54e337aeab74a2a53a8f84",
+          "subject": "Reuse admitted launch path sweeps across nearby ships",
+          "files": [
+            "wasm-src/crates/shipcore/src/flight/spacing.rs",
+            "wasm-src/crates/shipcore/src/flight/spacing/trajectory_tests.rs"
+          ]
+        },
+        {
+          "commit": "8714a27067162a09eec4d6977bd1f9b1dc7ab82e",
+          "subject": "Record launch reuse benchmarks and continue focused crowd optimization",
+          "files": [
+            "docs/ai/guides/source-map.md",
+            "docs/ai/proposals/simulation-performance.md",
+            "docs/reports/2026-10-20-navigation-preparation.json",
+            "docs/reports/2026-10-20-navigation-preparation.md",
+            "tools/synced-imports.txt"
+          ]
+        },
+        {
+          "commit": "a71635e802b5399dc30d0975f507c2b9d2971ec1",
+          "subject": "Link staged runtime assets from a read-only content-addressed store",
+          "files": [
+            "docs/ai/guides/captures.md",
+            "tools/asset_store.py",
+            "tools/lobby_check.py",
+            "tools/multiplayer_check.py",
+            "tools/package.py",
+            "tools/runtime_snapshot.py",
+            "tools/test_multiplayer.py",
+            "tools/test_runtime_snapshot.py"
+          ]
+        },
+        {
+          "commit": "a22841ee41da87653ea1917a2e1226093c6be800",
+          "subject": "Add disk usage and worktree cleanup rules for agents",
+          "files": [
+            "AGENTS.md"
+          ]
+        },
+        {
+          "commit": "734617a505efa5f0bab287fa28492e20f5df3b2b",
+          "subject": "Revert \"Retain exact contact membership across immutable snapshots\"",
+          "files": [
+            "tools/heavy_proximity_harness.rs",
+            "tools/test_heavy_proximity.py",
+            "wasm-src/crates/shipcore/src/flight/cells.rs",
+            "wasm-src/rules-synced/src/ships/heavy.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot/membership.rs",
+            "wasm-src/rules-synced/src/ships/heavy/snapshot/membership_tests.rs"
+          ]
+        }
+      ]
+    },
+    "assets": {
+      "path": "/home/gajop/projects/spring-projects/ship-game-assets",
+      "commits": [
+        {
+          "commit": "4a2bc9498ee4aced6c395b601a295bfa6609477a",
+          "subject": "Build reference A Triarii plasma ship and reviewed asset package",
+          "files": [
+            ".gitignore",
+            "references/triarii/brief.json",
+            "references/triarii/triarii-v2-prompt.txt",
+            "references/triarii/triarii-v2.png",
+            "references/triarii/triarii-v3-prompt.txt",
+            "references/triarii/triarii-v3.png",
+            "references/triarii/triarii-v4-prompt.txt",
+            "references/triarii/triarii-v4.png",
+            "references/triarii/triarii-v5-prompt.txt",
+            "references/triarii/triarii-v5.png",
+            "references/triarii/triarii-weapon-a-plasma.png",
+            "references/triarii/triarii-weapon-b-scatter.png",
+            "references/triarii/triarii-weapon-c-compression.png",
+            "references/triarii/weapon-variations-prompts.json",
+            "shipassets/strategic_icons.py",
+            "shipassets/triarii/__init__.py",
+            "shipassets/triarii/model.py",
+            "shipassets/triarii/pipeline.py",
+            "tests/test_triarii_blender.py",
+            "triarii/README.md",
+            "triarii/review/engine-orbit.png",
+            "triarii/review/engine/00.png",
+            "triarii/review/engine/01.png",
+            "triarii/review/engine/02.png",
+            "triarii/review/engine/03.png",
+            "triarii/review/final-multiview.png",
+            "triarii/review/final/front.png",
+            "triarii/review/final/gun-detail.png",
+            "triarii/review/final/perspective.png",
+            "triarii/review/final/top.png",
+            "triarii/review/plasma.png",
+            "triarii/review/reference-comparison-final.png"
+          ]
+        },
+        {
+          "commit": "388cb6a1169971e5a878942285a8bb8dc02e9f20",
+          "subject": "Polish Triarii A geometry and review gallery",
+          "files": [
+            "shipassets/triarii/cannon.py",
+            "shipassets/triarii/hull.py",
+            "shipassets/triarii/model.py",
+            "shipassets/triarii/pipeline.py",
+            "shipassets/triarii/plates.py",
+            "shipassets/triarii/propulsion.py",
+            "tests/test_triarii_blender.py",
+            "triarii/README.md",
+            "triarii/cleanup.json",
+            "triarii/quality-session.json",
+            "triarii/review/checks/quality-all-glbs.json",
+            "triarii/review/checks/quality-bottom-final.log",
+            "triarii/review/checks/quality-build-05.log",
+            "triarii/review/checks/quality-geometry.log",
+            "triarii/review/checks/quality-lod-final.json",
+            "triarii/review/checks/quality-pass12-final.log",
+            "triarii/review/checks/quality-post-matrix-tangents.json",
+            "triarii/review/checks/quality-side-baked-final.log",
+            "triarii/review/checks/quality-source.json",
+            "triarii/review/checks/ruff-final.txt",
+            "triarii/review/engine-orbit.png",
+            "triarii/review/engine/00.png",
+            "triarii/review/engine/01.png",
+            "triarii/review/engine/02.png",
+            "triarii/review/engine/03.png",
+            "triarii/review/final-multiview.png",
+            "triarii/review/final/back.png",
+            "triarii/review/final/bottom.png",
+            "triarii/review/final/bridge-detail.png",
+            "triarii/review/final/front.png",
+            "triarii/review/final/gun-detail.png",
+            "triarii/review/final/left.png",
+            "triarii/review/final/muzzle-detail.png",
+            "triarii/review/final/perspective.png",
+            "triarii/review/final/rear-quarter.png",
+            "triarii/review/final/reference.png",
+            "triarii/review/final/right.png",
+            "triarii/review/final/rts.png",
+            "triarii/review/final/shield-detail.png",
+            "triarii/review/final/top.png",
+            "triarii/review/lod-comparison-final.png",
+            "triarii/review/motion.png",
+            "triarii/review/plasma.png",
+            "triarii/review/reference-comparison-final.png",
+            "triarii/review/reference-comparison-polish.png",
+            "triarii/review/shadow-resolution.png"
+          ]
+        }
+      ]
+    },
+    "engine": {
+      "path": "/home/gajop/projects/spring-projects/spring-bar",
+      "commits": [
+        {
+          "group": "wasm-reload",
+          "commit": "aa052ea6a954a802329778f6844879bc138ffdb9",
+          "files": [
+            "rts/Game/UnsyncedGameCommands.cpp",
+            "rts/NativeInterface/NativeInterfaceSystem.cpp",
+            "rts/NativeInterface/NativeInterfaceSystem.h",
+            "rts/WasmInterface/system/WasmInterfaceSystem.cpp",
+            "rts/WasmInterface/system/WasmInterfaceSystem.h",
+            "rts/wasm/docs/hot_reload.md"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/wasm-reload-commit.txt"
+        },
+        {
+          "group": "lua-layout",
+          "commit": "37267cf583f5c697f118ce0055e42f4b139bf0ce",
+          "files": [
+            "rts/Lua/LuaUI.cpp"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/lua-layout-commit.txt"
+        },
+        {
+          "group": "command-fallback",
+          "commit": "554ac8bb95413092294390f034edcea0c08395dc",
+          "files": [
+            "rts/NativeInterface/NativeInterfaceEventClient.cpp"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/command-fallback-commit.txt"
+        },
+        {
+          "group": "muzzle-bounds",
+          "commit": "8df3d71eb16bb1f12d8843dc0a7dcda70b7e120a",
+          "files": [
+            "rts/Rendering/Env/Particles/Classes/BitmapMuzzleFlame.cpp",
+            "rts/Rendering/Env/Particles/Classes/BitmapMuzzleFlame.h"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/muzzle-bounds-commit.txt"
+        },
+        {
+          "group": "headless-preparation",
+          "commit": "cb275dc375f559ce1a1e08368079167242e738b4",
+          "files": [
+            "rts/Rendering/Common/ModelDrawerData.h",
+            "rts/Rendering/Env/Particles/ProjectileDrawer.cpp",
+            "rts/Rendering/Units/UnitDrawer.cpp",
+            "rts/wasm/docs/headless_cpu_2026-10-19.md",
+            "rts/wasm/docs/headless_icon_draw_2026-10-19.md"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/headless-preparation-commit.txt"
+        },
+        {
+          "group": "icon-projection",
+          "commit": "03816baff1a669ddba0d75228ac69a9e06f96351",
+          "files": [
+            "rts/Rendering/Units/UnitDrawerData.cpp",
+            "rts/Rendering/Units/UnitDrawerData.h",
+            "rts/Rendering/Units/UnitIconProjection.h",
+            "test/engine/Rendering/testUnitIconProjection.cpp",
+            "test/CMakeLists.txt",
+            "rts/wasm/docs/common_icon_cpu_2026-10-19.md"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/icon-projection-commit.txt"
+        },
+        {
+          "group": "model-transforms",
+          "commit": "3579f904bfacda8ea6cee4d6e9e68d0bbce085af",
+          "files": [
+            "rts/Rendering/Models/LocalModel.cpp",
+            "rts/Rendering/Models/LocalModel.hpp",
+            "rts/Rendering/Models/LocalModelPiece.cpp",
+            "rts/Rendering/Models/LocalModelPiece.hpp",
+            "rts/Sim/Objects/SolidObject.cpp",
+            "rts/Sim/Units/Scripts/UnitScript.cpp",
+            "test/validation/local_model_transforms/README.md",
+            "test/validation/local_model_transforms/check.py",
+            "test/validation/local_model_transforms/trace.cpp"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/model-transforms-commit.txt"
+        },
+        {
+          "group": "target-queries",
+          "commit": "319718ab950064df1bb951135a9036b1fef09eeb",
+          "files": [
+            "rts/Game/GameHelper.cpp",
+            "rts/Sim/Misc/QuadField.cpp",
+            "rts/Sim/Misc/QuadFieldUnitMembership.h",
+            "test/engine/Sim/Misc/testQuadField.cpp"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/target-queries-commit.txt"
+        },
+        {
+          "group": "profiling-timing",
+          "commit": "ecb5d1071d5da010be787000da3a1f9000a46258",
+          "files": [
+            "rts/System/Threading/ThreadPool.cpp",
+            "test/validation/threadpool_task_timing/README.md",
+            "test/validation/threadpool_task_timing/check.py",
+            "test/validation/threadpool_task_timing/trace.cpp",
+            "rts/System/Log/TracySink.cpp"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/profiling-timing-commit.txt"
+        },
+        {
+          "group": "wasm-teardown",
+          "commit": "e793464cf4b5e89dc68631168e21a3c3bba46936",
+          "files": [
+            "rts/WasmInterface/system/WasmInterfaceSystem.cpp",
+            "rts/lib/CMakeLists.txt",
+            "docker-build-v2/build-variants.sh"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/wasm-teardown-commit.txt"
+        },
+        {
+          "group": "same-frame-jobs",
+          "commit": "3b0d656fd02fc0b1483afd2f4ce056e2b170b572",
+          "files": [
+            "rts/WasmInterface/core/bindings/WasmCoreJobsBindings.cpp",
+            "rts/WasmInterface/core/host/WasmCoreHost.cpp",
+            "rts/WasmInterface/core/host/WasmCoreHost.h",
+            "rts/WasmInterface/core/host/WasmCoreRegistry.h",
+            "rts/WasmInterface/jobs/WasmJobProgram.cpp",
+            "rts/WasmInterface/jobs/WasmJobProgram.h",
+            "rts/WasmInterface/jobs/WasmSyncedJobs.cpp",
+            "rts/WasmInterface/jobs/WasmSyncedJobs.h",
+            "rust/crates/spring-addons/tests/jobs_exports.rs",
+            "rust/crates/spring-sdk-internal/src/jobs.rs",
+            "rust/crates/spring-sdk-internal/src/lib.rs",
+            "rust/crates/spring-sdk/README.md",
+            "rust/crates/spring-sdk/src/jobs.rs",
+            "test/engine/WasmInterface/TestWasmSyncedJobs.cpp",
+            "rts/WasmInterface/jobs/WasmJobBatch.h",
+            "rust/crates/spring-sdk-internal/src/job_batch.rs",
+            "test/wasm_api/check_job_batches.py",
+            "test/wasm_api/data/synced_jobs/batch_in_game.wat",
+            "rts/wasm/docs/same_frame_jobs_2026-10-19.md"
+          ],
+          "message_file": "/home/gajop/.local/share/ship-game-verify/2026-10-20-engine-commit/same-frame-jobs-commit.txt"
+        }
+      ]
+    }
+  },
+  "engine_integration": {
+    "base": "1b036dd893e17a6e092df37b8fe0e739a7f98511",
+    "head": "3b0d656fd02fc0b1483afd2f4ce056e2b170b572",
+    "branch": "rust-wip",
+    "commit_count": 11,
+    "committed_distinct_paths": 60,
+    "preserved_foreign_paths": [
+      "cont/base/springcontent/shaders/GLSL/SMFFragProg.glsl",
+      "rts/Map/SMF/SMFRenderState.cpp",
+      "rts/Rendering/CommandDrawer.cpp",
+      "rts/wasm/docs/recoil_rust_sdk_unification.md",
+      "rts/wasm/docs/recoil_wasm_architecture.md",
+      "rts/wasm/docs/recoil_wasm_execution_environments.md",
+      "rts/wasm/docs/requests_from_ship_game.md"
+    ],
+    "remaining_status": [
+      " M cont/base/springcontent/shaders/GLSL/SMFFragProg.glsl",
+      " M rts/Map/SMF/SMFRenderState.cpp",
+      " M rts/Rendering/CommandDrawer.cpp",
+      " M rts/wasm/docs/recoil_rust_sdk_unification.md",
+      " M rts/wasm/docs/recoil_wasm_architecture.md",
+      " M rts/wasm/docs/recoil_wasm_execution_environments.md",
+      " M rts/wasm/docs/requests_from_ship_game.md"
+    ],
+    "binary_installation": false,
+    "pushed": false
+  },
+  "latest_idle_pass": {
+    "base": "5e4b567d",
+    "head": "0e79730a",
+    "commits": 12,
+    "distinct_paths": 33,
+    "runtime_paths": 12,
+    "tests_benchmarks": 17,
+    "docs": 4
+  },
+  "excluded": [
+    "Optional bulk unit observations: engine/SDK source and four game paths remain experimental.",
+    "Persistent icon-projection cache.",
+    "Rejected common weapon aim-origin reuse and prototype-specific harness.",
+    "Rejected game contact-membership history cache; reverted in main.",
+    "Unrelated primary-engine seven paths preserved byte-for-byte."
+  ],
+  "no_push": true,
+  "no_binary_installation_in_commit_transaction": true
+}
