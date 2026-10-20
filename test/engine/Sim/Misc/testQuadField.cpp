@@ -1,18 +1,141 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "Sim/Misc/QuadField.h"
+#include "Sim/Misc/QuadFieldUnitMembership.h"
 #include "System/float3.h"
 #include "System/SpringMath.h"
 #include <stdlib.h>
 #include <time.h>
 #include <chrono>
 #include <iostream>
+#include <limits>
 
 #include <catch_amalgamated.hpp>
 
 static inline float randf()
 {
 	return rand() / float(RAND_MAX);
+}
+
+TEST_CASE("Quad membership rejects only known empty allyteams", "[quad-membership]")
+{
+	QuadFieldUnitMembership membership;
+	CHECK(membership.MayHaveUnits(0)); // not initialized: use the original query
+	membership.Reset(3);
+	CHECK_FALSE(membership.MayHaveUnits(0));
+	CHECK_FALSE(membership.MayHaveUnits(1));
+	membership.Add(1, 3); // one hull overlaps three quads
+	CHECK(membership.MayHaveUnits(1));
+	membership.Remove(1);
+	membership.Remove(1);
+	CHECK(membership.MayHaveUnits(1));
+	membership.Remove(1);
+	CHECK_FALSE(membership.MayHaveUnits(1));
+	CHECK(membership.MayHaveUnits(-1));
+	CHECK(membership.MayHaveUnits(3));
+
+	SECTION("Inconsistent removals and counts cannot certify emptiness") {
+		membership.Remove(1);
+		CHECK(membership.MayHaveUnits(0));
+		membership.Reset(3);
+		membership.Add(2, std::numeric_limits<std::size_t>::max());
+		membership.Add(2);
+		CHECK(membership.MayHaveUnits(0));
+	}
+	SECTION("Unknown load state remains conservative until rebuilt") {
+		membership.Invalidate();
+		membership.Add(1);
+		membership.Remove(1);
+		CHECK(membership.MayHaveUnits(0));
+		CHECK(membership.MayHaveUnits(1));
+		membership.Reset(3);
+		CHECK_FALSE(membership.MayHaveUnits(1));
+	}
+}
+
+TEST_CASE("Quad membership follows destructor and team-change visibility", "[quad-membership]")
+{
+	QuadFieldUnitMembership membership;
+	membership.Reset(3);
+	membership.Add(1, 2);
+	// Removing the unit from UnitHandler is deliberately irrelevant: its two
+	// quad entries still exist throughout script destruction callbacks.
+	bool inUnitHandler = false;
+	CHECK_FALSE(inUnitHandler);
+	CHECK(membership.MayHaveUnits(1));
+	membership.Remove(1);
+	CHECK(membership.MayHaveUnits(1));
+	membership.Remove(1);
+	CHECK_FALSE(membership.MayHaveUnits(1));
+	// Team transfer removes old memberships before publishing the new allyteam.
+	membership.Add(2, 2);
+	CHECK_FALSE(membership.MayHaveUnits(1));
+	CHECK(membership.MayHaveUnits(2));
+}
+
+TEST_CASE("Quad load rebuild permits either parent-child PostLoad order", "[quad-membership]")
+{
+	for (const int prefix: {0, 1, 2, 3}) {
+		QuadFieldUnitMembership membership;
+		membership.Invalidate();
+		std::array<std::size_t, 3> materialized = {};
+		auto quadPostLoad = [&](int team) {
+			++materialized[team];
+			membership.Add(team);
+		};
+		const std::array<int, 3> teams = {1, 2, 1};
+		for (int i = 0; i < prefix; ++i)
+			quadPostLoad(teams[i]);
+		CHECK(membership.MayHaveUnits(0)); // unknown cannot reject during loading
+		membership.Reset(3);
+		for (int team = 0; team < 3; ++team)
+			membership.Add(team, materialized[team]);
+		for (int i = prefix; i < 3; ++i)
+			quadPostLoad(teams[i]);
+		CHECK_FALSE(membership.MayHaveUnits(0));
+		CHECK(membership.MayHaveUnits(1));
+		CHECK(membership.MayHaveUnits(2));
+		membership.Remove(1);
+		CHECK(membership.MayHaveUnits(1));
+		membership.Remove(1);
+		CHECK_FALSE(membership.MayHaveUnits(1));
+		membership.Remove(2);
+		CHECK_FALSE(membership.MayHaveUnits(2));
+	}
+}
+
+TEST_CASE("Quad membership regions expand until empty", "[quad-membership]")
+{
+	QuadFieldUnitMembership membership;
+	const QuadFieldUnitQueryRectangle origin = {0, 0, 1, 1};
+	const QuadFieldUnitQueryRectangle distant = {10, 20, 10, 20};
+	membership.Reset(3);
+	membership.AddAt(1, 10, 20, 2);
+	CHECK_FALSE(membership.MayHaveUnits(1, origin));
+	CHECK(membership.MayHaveUnits(1, distant));
+	membership.AddAt(1, 0, 0);
+	CHECK(membership.MayHaveUnits(1, origin));
+	membership.Remove(1); // no shrinking: deletion cannot make the bounds too small
+	CHECK(membership.MayHaveUnits(1, origin));
+	membership.Remove(1);
+	CHECK(membership.MayHaveUnits(1, distant));
+	membership.Remove(1);
+	CHECK_FALSE(membership.MayHaveUnits(1, origin));
+	CHECK_FALSE(membership.MayHaveUnits(1, distant));
+	membership.AddAt(1, 10, 20);
+	CHECK_FALSE(membership.MayHaveUnits(1, origin));
+	membership.Add(1); // a PostLoad addition without its quad index fails open
+	CHECK(membership.MayHaveUnits(1, origin));
+	CHECK(membership.MayHaveUnits(1, distant));
+	membership.Remove(1);
+	CHECK(membership.MayHaveUnits(1, origin));
+	membership.Remove(1);
+	membership.AddAt(1, 10, 20);
+	CHECK_FALSE(membership.MayHaveUnits(1, origin));
+	CHECK(membership.MayHaveUnits(-1, origin));
+	CHECK(membership.MayHaveUnits(3, origin));
+	membership.Invalidate();
+	CHECK(membership.MayHaveUnits(0, origin));
 }
 
 // Container-only diagnostic: no renderer, simulation, or CUnit allocations.

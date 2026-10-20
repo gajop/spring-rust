@@ -2,6 +2,8 @@
 
 #include "GameHelper.h"
 
+#include <cmath>
+
 #include "Camera.h"
 #include "GameSetup.h"
 #include "Game/GlobalUnsynced.h"
@@ -20,6 +22,7 @@
 #include "Sim/Misc/GroundBlockingObjectMap.h"
 #include "Sim/Misc/LosHandler.h"
 #include "Sim/Misc/QuadField.h"
+#include "Sim/Misc/QuadFieldUnitMembership.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Misc/ModInfo.h"
 #include "Sim/MoveTypes/MoveType.h"
@@ -375,9 +378,41 @@ void CGameHelper::Explosion(const CExplosionParams& params) {
  * should be implemented in the Query object if desired.
  * (It isn't necessary for e.g. GetClosest** methods.)
  */
-template<typename TFilter, typename TQuery>
+static bool SupportedEmptyUnitQuery(const float3& pos, float radius)
+{
+	return std::isfinite(pos.x) && std::isfinite(pos.y) && std::isfinite(pos.z) && std::isfinite(radius) && radius >= 0.0f;
+}
+
+template<typename TFilter>
+static bool HasEligibleQuadUnits(TFilter& filter, const float3& pos, float radius)
+{
+	QuadFieldUnitQueryRectangle region;
+	bool regionPrepared = false;
+	bool regionSupported = false;
+	for (int t = 0; t < teamHandler.ActiveAllyTeams(); ++t) {
+		if (!filter.Team(t) || !QuadFieldMayHaveUnitsInAllyTeam(quadField, t))
+			continue;
+		if (!regionPrepared) {
+			regionSupported = QuadFieldGetUnitQueryRectangle(quadField, pos, radius, region);
+			regionPrepared = true;
+		}
+		if (!regionSupported || QuadFieldMayHaveUnitsInAllyTeam(quadField, t, region))
+			return true;
+	}
+	return false;
+}
+
+template<bool rejectEmptyTeams = false, typename TFilter, typename TQuery>
 static inline void QueryUnits(TFilter filter, TQuery& query)
 {
+	if constexpr (rejectEmptyTeams) {
+		if (SupportedEmptyUnitQuery(query.pos, query.radius) && !HasEligibleQuadUnits(filter, query.pos, query.radius)) {
+			// Keep the original query generation, including for an empty search.
+			gs->GetTempNum();
+			return;
+		}
+	}
+
 	QuadFieldQuery qfQuery;
 	quadField.GetQuads(qfQuery, query.pos, query.radius);
 	const int tempNum = gs->GetTempNum();
@@ -705,6 +740,14 @@ size_t CGameHelper::GenerateWeaponTargets(const CWeapon* weapon, const CUnit* av
 
 	const bool paralyzer = (weaponDmg->paralyzeDamageTime != 0);
 
+	auto enemyTeams = Filter::Enemy(nullptr, weaponOwner->allyteam);
+	if (SupportedEmptyUnitQuery(ownerPos, scanRadius) && !HasEligibleQuadUnits(enemyTeams, ownerPos, scanRadius)) {
+		targets.clear();
+		targets.reserve(32);
+		gs->GetTempNum();
+		return 0;
+	}
+
 	// copy on purpose since the below calls lua
 	QuadFieldQuery qfQuery;
 	quadField.GetQuads(qfQuery, ownerPos, scanRadius);
@@ -818,7 +861,7 @@ CUnit* CGameHelper::GetClosestEnemyUnit(const CUnit* excludeUnit, const float3& 
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	Query::ClosestUnit q(pos, searchRadius);
-	QueryUnits(Filter::Enemy_InLos(excludeUnit, searchAllyteam), q);
+	QueryUnits<true>(Filter::Enemy_InLos(excludeUnit, searchAllyteam), q);
 	return q.GetClosestUnit();
 }
 
@@ -826,7 +869,7 @@ CUnit* CGameHelper::GetClosestValidTarget(const float3& pos, float searchRadius,
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	Query::ClosestUnit q(pos, searchRadius);
-	QueryUnits(Filter::Enemy_InLos_ValidTarget(searchAllyteam, cai), q);
+	QueryUnits<true>(Filter::Enemy_InLos_ValidTarget(searchAllyteam, cai), q);
 	return q.GetClosestUnit();
 }
 
@@ -844,12 +887,12 @@ CUnit* CGameHelper::GetClosestEnemyUnitNoLosTest(
 	if (sphereDistTest) {
 		// includes target radius
 		Query::ClosestUnit_InLos q(searchPos, searchRadius, checkSightDist);
-		QueryUnits(Filter::Enemy(excludeUnit, searchAllyteam), q);
+		QueryUnits<true>(Filter::Enemy(excludeUnit, searchAllyteam), q);
 		closestUnit = q.GetClosestUnit();
 	} else {
 		// excludes target radius
 		Query::ClosestUnit_InLos_Cylinder q(searchPos, searchRadius, checkSightDist);
-		QueryUnits(Filter::Enemy(excludeUnit, searchAllyteam), q);
+		QueryUnits<true>(Filter::Enemy(excludeUnit, searchAllyteam), q);
 		closestUnit = q.GetClosestUnit();
 	}
 

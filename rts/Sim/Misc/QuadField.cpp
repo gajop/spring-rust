@@ -1,8 +1,10 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include <algorithm>
+#include <cmath>
 
 #include "QuadField.h"
+#include "QuadFieldUnitMembership.h"
 #include "Map/ReadMap.h"
 #include "Sim/Misc/CollisionVolume.h"
 #include "Sim/Misc/GlobalSynced.h"
@@ -50,6 +52,83 @@ CR_REG_METADATA_SUB(CQuadField, Quad, (
 
 
 CQuadField quadField;
+namespace {
+	QuadFieldUnitMembership unitMembership;
+	const CQuadField* unitMembershipOwner = nullptr;
+
+	void AddUnitMembership(const CQuadField& field, int team, int quad = -1) {
+		if (unitMembershipOwner != &field) {
+			unitMembership.Invalidate();
+			return;
+		}
+		if (quad < 0) {
+			// Quad::PostLoad has no parent/index. Keep its exact count, but
+			// fail open for regional queries until a rebuild or zero count.
+			unitMembership.Add(team);
+			return;
+		}
+		unitMembership.AddAt(team, quad % field.GetNumQuadsX(), quad / field.GetNumQuadsX());
+	}
+	void RemoveUnitMembership(const CQuadField& field, int team) {
+		if (unitMembershipOwner != &field) {
+			unitMembership.Invalidate();
+			return;
+		}
+		unitMembership.Remove(team);
+	}
+	void RebuildUnitMembership(const CQuadField& field, std::size_t teams) {
+		unitMembershipOwner = &field;
+		unitMembership.Reset(teams);
+		for (std::size_t i = 0, n = std::size_t(field.GetNumQuadsX()) * field.GetNumQuadsZ(); i < n; ++i) {
+			const auto& members = field.GetQuad(i).teamUnits;
+			for (std::size_t team = 0; team < members.size(); ++team)
+				unitMembership.AddAt(team, i % field.GetNumQuadsX(), i / field.GetNumQuadsX(), members[team].size());
+		}
+	}
+}
+
+bool QuadFieldMayHaveUnitsInAllyTeam(const CQuadField& field, int team)
+{
+	return unitMembershipOwner != &field || unitMembership.MayHaveUnits(team);
+}
+
+bool QuadFieldMayHaveUnitsInAllyTeam(const CQuadField& field, int team, const QuadFieldUnitQueryRectangle& query)
+{
+	return unitMembershipOwner != &field || unitMembership.MayHaveUnits(team, query);
+}
+
+bool QuadFieldGetUnitQueryRectangle(const CQuadField& field, float3 pos, float radius, QuadFieldUnitQueryRectangle& query)
+{
+	if (!std::isfinite(pos.x) || !std::isfinite(pos.y) || !std::isfinite(pos.z) || !std::isfinite(radius) || radius < 0.0f)
+		return false;
+	if (field.GetNumQuadsX() <= 0 || field.GetNumQuadsZ() <= 0 || field.GetQuadSizeX() <= 0 || field.GetQuadSizeZ() <= 0)
+		return false;
+	if (!std::isfinite(float3::maxxpos) || !std::isfinite(float3::maxzpos) || float3::maxxpos <= 0.0f || float3::maxzpos <= 0.0f)
+		return false;
+
+	// GetQuads clamps its center before converting pos +/- radius. Preserve
+	// its arithmetic and truncation, including at map and cell boundaries.
+	pos.ClampInBounds();
+	const float3 lower = pos - radius;
+	const float3 upper = pos + radius;
+	const float coordinates[] = {
+		lower.x / field.GetQuadSizeX(), lower.z / field.GetQuadSizeZ(),
+		upper.x / field.GetQuadSizeX(), upper.z / field.GetQuadSizeZ()
+	};
+	for (const float value: coordinates) {
+		// GetQuads' float-to-int conversion is outside this shortcut's
+		// supported domain if the quotient is nonfinite or out of range.
+		if (!std::isfinite(value) || double(value) < std::numeric_limits<int>::min() || double(value) > std::numeric_limits<int>::max())
+			return false;
+	}
+	query = {
+		std::clamp(int(coordinates[0]), 0, field.GetNumQuadsX() - 1),
+		std::clamp(int(coordinates[1]), 0, field.GetNumQuadsZ() - 1),
+		std::clamp(int(coordinates[2]), 0, field.GetNumQuadsX() - 1),
+		std::clamp(int(coordinates[3]), 0, field.GetNumQuadsZ() - 1)
+	};
+	return true;
+}
 //#define DEBUG_QUADFIELD
 
 void CQuadField::Quad::PostLoad()
@@ -59,7 +138,8 @@ void CQuadField::Quad::PostLoad()
 	Resize(teamHandler.ActiveAllyTeams());
 
 	for (CUnit* unit: units) {
-		spring::VectorInsertUnique(teamUnits[unit->allyteam], unit, false);
+		if (spring::VectorInsertUnique(teamUnits[unit->allyteam], unit, false))
+			AddUnitMembership(quadField, unit->allyteam);
 	}
 #endif
 }
@@ -81,8 +161,10 @@ void CQuadField::Init(int2 mapDims, int quadSize, bool sparse)
 
 #ifndef UNIT_TEST
 	baseQuads.Init(size_t(numQuadsX) * numQuadsZ, teamHandler.ActiveAllyTeams(), sparse);
+	RebuildUnitMembership(*this, teamHandler.ActiveAllyTeams());
 #else
 	baseQuads.Init(size_t(numQuadsX) * numQuadsZ, 0, sparse);
+	RebuildUnitMembership(*this, 0);
 #endif
 
 	size_t threadCount = ThreadPool::GetNumThreads();
@@ -129,6 +211,14 @@ void CQuadField::QuadStore::Clear()
 #ifdef USING_CREG
 void CQuadField::Serialize(creg::ISerializer* s)
 {
+	if (!s->IsWriting()) {
+		unitMembership.Invalidate();
+		// Registered callbacks run before class PostLoad functions. Count any
+		// existing materialized entries; Quad::PostLoad records later additions.
+		s->AddPostLoadCallback([](void* data) {
+			RebuildUnitMembership(*static_cast<CQuadField*>(data), teamHandler.ActiveAllyTeams());
+		}, this);
+	}
 	// every quad, empty or not, as when they were a plain array
 	int count = int(baseQuads.size());
 	s->SerializeInt(&count, sizeof(count));
@@ -144,6 +234,7 @@ void CQuadField::Kill()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	baseQuads.Clear();
+	unitMembership.Invalidate();
 
 	for (auto cache : tempUnits)
 		cache.ReleaseAll();
@@ -433,7 +524,8 @@ bool CQuadField::InsertUnitIf(CUnit* unit, const float3& wpos)
 		return false;
 
 	spring::VectorInsertUnique(baseQuads.Write(wposQuadIdx).units, unit, false);
-	spring::VectorInsertUnique(baseQuads.Write(wposQuadIdx).teamUnits[unit->allyteam], unit, false);
+	if (spring::VectorInsertUnique(baseQuads.Write(wposQuadIdx).teamUnits[unit->allyteam], unit, false))
+		AddUnitMembership(*this, unit->allyteam, wposQuadIdx);
 	return true;
 }
 
@@ -464,7 +556,8 @@ bool CQuadField::RemoveUnitIf(CUnit* unit, const float3& wpos)
 		return false;
 
 	spring::VectorErase(baseQuads.Write(wposQuadIdx).units, unit);
-	spring::VectorErase(baseQuads.Write(wposQuadIdx).teamUnits[unit->allyteam], unit);
+	if (spring::VectorErase(baseQuads.Write(wposQuadIdx).teamUnits[unit->allyteam], unit))
+		RemoveUnitMembership(*this, unit->allyteam);
 	return true;
 }
 #endif
@@ -486,12 +579,14 @@ void CQuadField::MovedUnit(CUnit* unit)
 
 	for (const int qi: unit->quads) {
 		spring::VectorErase(baseQuads.Write(qi).units, unit);
-		spring::VectorErase(baseQuads.Write(qi).teamUnits[unit->allyteam], unit);
+		if (spring::VectorErase(baseQuads.Write(qi).teamUnits[unit->allyteam], unit))
+			RemoveUnitMembership(*this, unit->allyteam);
 	}
 
 	for (const int qi: *qfQuery.quads) {
 		spring::VectorInsertUnique(baseQuads.Write(qi).units, unit, false);
-		spring::VectorInsertUnique(baseQuads.Write(qi).teamUnits[unit->allyteam], unit, false);
+		if (spring::VectorInsertUnique(baseQuads.Write(qi).teamUnits[unit->allyteam], unit, false))
+			AddUnitMembership(*this, unit->allyteam, qi);
 	}
 
 	unit->quads = std::move(*qfQuery.quads);
@@ -502,7 +597,8 @@ void CQuadField::RemoveUnit(CUnit* unit)
 	RECOIL_DETAILED_TRACY_ZONE;
 	for (const int qi: unit->quads) {
 		spring::VectorErase(baseQuads.Write(qi).units, unit);
-		spring::VectorErase(baseQuads.Write(qi).teamUnits[unit->allyteam], unit);
+		if (spring::VectorErase(baseQuads.Write(qi).teamUnits[unit->allyteam], unit))
+			RemoveUnitMembership(*this, unit->allyteam);
 	}
 
 	unit->quads.clear();
