@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #pragma once
 
 #include <vector>
@@ -224,8 +226,12 @@ inline void CModelDrawerDataBase<T>::UpdateCommon(T* o)
 	o->previousDrawFlag = o->drawFlag;
 	UpdateObjectDrawFlags(o);
 
+#ifndef HEADLESS
+	// These arrays only feed GPU buffers. Keep the public draw flags above,
+	// but do not build model uploads in an engine without a renderer.
 	if (o->alwaysUpdateMat || (o->drawFlag > DrawFlags::SO_NODRAW_FLAG && o->drawFlag < DrawFlags::SO_DRICON_FLAG))
 		UpdateObjectTrasform(o);
 
 	UpdateObjectUniforms(o);
+#endif
 }

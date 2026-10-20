@@ -390,6 +390,13 @@ void CProjectileDrawer::UpdateDrawFlags()
 		p->previousDrawFlag = p->drawFlag;
 		p->ResetDrawFlag();
 
+#ifdef HEADLESS
+		// Model projectiles can opt into Lua's DrawProjectile callback. Keep
+		// their pass selection, but skip culling and sorting other visuals.
+		if (!p->luaDraw)
+			return;
+#endif
+
 		if (!CanDrawProjectile(p, p->GetAllyteamID()))
 			return;
 

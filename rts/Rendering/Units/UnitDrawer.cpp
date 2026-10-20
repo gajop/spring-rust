@@ -382,6 +382,10 @@ void CUnitDrawerGLSL::DrawUnitMiniMapIcon(TypedRenderBuffer<VA_TYPE_2DTC3>& rb, 
 void CUnitDrawerGLSL::DrawUnitMiniMapIcons() const
 {
 	ZoneScoped;
+#ifdef HEADLESS
+	// Icon state is maintained by Update; this pass only builds render buffers.
+	return;
+#endif
 
 	static auto& rb = RenderBuffer::GetTypedRenderBuffer<VA_TYPE_2DTC3>();
 	rb.AssertSubmission();
@@ -651,6 +655,10 @@ void CUnitDrawerGLSL::DrawUnitIconScreen(TypedRenderBuffer<VA_TYPE_2DTC3>& rb, s
 void CUnitDrawerGLSL::DrawUnitIconsScreen() const
 {
 	ZoneScoped;
+#ifdef HEADLESS
+	// Icon state and picking radii are maintained by Update, before this draw pass.
+	return;
+#endif
 
 	if (game->hideInterface && modelDrawerData->iconHideWithUI)
 		return;
