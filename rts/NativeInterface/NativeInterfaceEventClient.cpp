@@ -1206,7 +1206,9 @@ bool NativeInterfaceEventClient::CommandFallback(const CUnit* unit, const Comman
 	bool wasmValue = false;
 	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("CommandFallback"), &query, true, wasmValue);
 	if (m_CommandFallbackFuncPtr == nullptr)
-		return hasWasmValue && wasmValue;
+		// An absent handler must not veto Lua's command completion. The engine
+		// combines event clients with AND; false keeps the command queued.
+		return !hasWasmValue || wasmValue;
 
 	BoolCallinResult result = {.value = false};
 	INVOKE_NATIVE(m_CommandFallbackFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
