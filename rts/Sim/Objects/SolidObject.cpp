@@ -467,9 +467,7 @@ void CSolidObject::CondUpdatePrevTransform()
 
 void CSolidObject::UpdatePrevFrameTransform()
 {
-	for (auto& lmp : localModel.pieces) {
-		lmp.SavePrevModelSpaceTransform();
-	}
+	localModel.SavePrevModelSpaceTransforms();
 
 	preFrameTra = Transform{ CQuaternion::MakeFrom(GetTransformMatrix(true)), pos };
 }

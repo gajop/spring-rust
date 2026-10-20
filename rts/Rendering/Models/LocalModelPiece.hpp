@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #pragma once
 
 #include <vector>
@@ -29,10 +31,10 @@ struct LocalModelPiece
 	LocalModelPiece(const S3DModelPiece* piece);
 	~LocalModelPiece();
 
-	void AddChild(LocalModelPiece* c) { children.push_back(c); }
-	void RemoveChild(LocalModelPiece* c) { children.erase(std::find(children.begin(), children.end(), c)); }
-	void SetParent(LocalModelPiece* p) { parent = p; }
-	void SetLocalModel(LocalModel* lm) { localModel = lm; }
+	void AddChild(LocalModelPiece* c) { children.push_back(c); SetDirtySubtree(); }
+	void RemoveChild(LocalModelPiece* c) { children.erase(std::find(children.begin(), children.end(), c)); SetDirtySubtree(); }
+	void SetParent(LocalModelPiece* p) { parent = p; SetDirtySubtree(); }
+	void SetLocalModel(LocalModel* lm) { localModel = lm; SetPrevModelSpaceNeedsUpdate(); }
 
 	void SetLModelPieceIndex(uint32_t idx) { lmodelPieceIndex = idx; }
 	void SetScriptPieceIndex(uint32_t idx) { scriptPieceIndex = idx; }
@@ -45,7 +47,8 @@ struct LocalModelPiece
 
 
 	// on-demand functions
-	void UpdatePieceSpaceTransform();
+	void UpdatePieceSpaceTransform() const;
+	void InvalidatePieceSpaceTransform() { pieceSpaceDirty = true; }
 	void UpdateModelSpaceTransform(const Transform& pTra);
 	void UpdateModelSpaceTransform(const LocalModelPiece* parent);
 	void UpdateChildTransformRec(bool updateChildMatrices) const;
@@ -59,9 +62,18 @@ struct LocalModelPiece
 
 	bool GetEmitDirPos(float3& emitPos, float3& emitDir) const;
 
-	void SetDirtyRaw(bool state) { dirty = state; }
+	void SetDirtyRaw(bool state) {
+		dirty = state;
+		if (state) {
+			pieceSpaceDirty = true;
+			SetDirtySubtree();
+			SetPrevModelSpaceNeedsUpdate();
+		}
+	}
 	void SetDirty();
 	bool GetDirty() const { return dirty; }
+	bool GetDirtySubtree() const { return dirtySubtree; }
+	void ResetDirtySubtree() { dirtySubtree = false; } // animation hierarchy traversal only
 	void SetFloat3(const float3& src, float3& dst); // anim-script only
 	void SetFloat(const float& src, float& dst); // anim-script only
 	void SetPosition(const float3& p) { SetFloat3(p, pos); } // anim-script only
@@ -99,6 +111,10 @@ struct LocalModelPiece
 
 	void PostLoad();
 private:
+	void SetModelSpaceDirty();
+	void SetDirtySubtree() const;
+	void SetPrevModelSpaceNeedsUpdate() const;
+
 	mutable CMatrix44f modelSpaceMat; // transform relative to root LMP (SYNCED), chained pieceSpaceMat's
 	mutable Transform pieceSpaceTra;  // transform relative to parent LMP (SYNCED), combines <pos> and <rot>
 	mutable Transform modelSpaceTra;  // transform relative to root LMP (SYNCED), chained pieceSpaceTra's
@@ -124,10 +140,18 @@ public:
 	int32_t scriptPieceIndex; // index of this piece into UnitScript::pieces
 
 	std::vector<LocalModelPiece*> children;
-	LocalModelPiece* parent;
+	LocalModelPiece* parent = nullptr;
 
 	std::vector<uint32_t> lodDispLists;
 	const S3DModelPiece* original;
 
-	LocalModel* localModel;
+	LocalModel* localModel = nullptr;
+
+private:
+	// Keep new state after the existing fields; on x86-64 it uses tail padding.
+	// Ancestor movement dirties model space without changing this piece's inputs.
+	mutable bool pieceSpaceDirty = true;
+	// Separate from the renderer's two-frame wasUpdated/interpolation lifetime.
+	mutable bool prevModelSpaceNeedsUpdate = true;
+	mutable bool dirtySubtree = true;
 };

@@ -229,12 +229,14 @@ void CUnitScript::TickAllAnims(int deltaTime)
 #if 1
 	// BFS pass
 	std::deque<std::pair<LocalModelPiece*, Transform>> q;
-	q.push_front({ rootPiece, Transform{} });
+	if (rootPiece->GetDirtySubtree())
+		q.push_front({ rootPiece, Transform{} });
 
 	while (!q.empty()) {
 		// copy
 		auto [lmp, pTra] = q.front();
 		q.pop_front();
+		lmp->ResetDirtySubtree();
 
 		if (lmp->GetDirty()) {
 			lmp->SetDirtyRaw(false);
@@ -246,12 +248,17 @@ void CUnitScript::TickAllAnims(int deltaTime)
 		const Transform& modelTra = lmp->GetModelSpaceTransformRaw();
 
 		for (auto* child : lmp->children) {
-			q.push_back({ child, modelTra });
+			if (child->GetDirtySubtree())
+				q.push_back({ child, modelTra });
 		}
 	}
 #else
 	// DFS pass
 	auto WalkDFS = [](this auto&& self, LocalModelPiece* lmp, const Transform& pTra) -> void {
+		if (!lmp->GetDirtySubtree())
+			return;
+		lmp->ResetDirtySubtree();
+
 		if (lmp->GetDirty()) {
 			lmp->SetDirtyRaw(false);
 			lmp->SetWasUpdatedRaw(true);

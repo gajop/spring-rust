@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "LocalModelPiece.hpp"
 
 #include "3DModelPiece.hpp"
@@ -22,6 +24,9 @@ CR_REG_METADATA(LocalModelPiece, (
 	CR_IGNORED(wasUpdated),
 	CR_MEMBER(noInterpolation),
 	CR_MEMBER(dirty),
+	CR_IGNORED(pieceSpaceDirty),
+	CR_IGNORED(prevModelSpaceNeedsUpdate),
+	CR_IGNORED(dirtySubtree),
 
 	CR_MEMBER(scriptSetVisible),
 	CR_MEMBER(blockScriptAnims),
@@ -77,20 +82,46 @@ LocalModelPiece::~LocalModelPiece()
 }
 
 void LocalModelPiece::SetDirty() {
+	pieceSpaceDirty = true;
+	SetModelSpaceDirty();
+}
+
+void LocalModelPiece::SetModelSpaceDirty() {
 	RECOIL_DETAILED_TRACY_ZONE;
 	dirty = true;
+	SetDirtySubtree();
+	SetPrevModelSpaceNeedsUpdate();
 
 	for (LocalModelPiece* child: children) {
 		if (child->dirty)
 			continue;
-		child->SetDirty();
+		child->SetModelSpaceDirty();
 	}
+}
+
+void LocalModelPiece::SetDirtySubtree() const
+{
+	dirtySubtree = true;
+	for (const LocalModelPiece* ancestor = parent; ancestor != nullptr && !ancestor->dirtySubtree; ancestor = ancestor->parent) {
+		ancestor->dirtySubtree = true;
+	}
+}
+
+void LocalModelPiece::SetPrevModelSpaceNeedsUpdate() const
+{
+	prevModelSpaceNeedsUpdate = true;
+	if (localModel != nullptr)
+		localModel->SetPrevModelSpaceNeedsUpdate(this);
 }
 
 void LocalModelPiece::SetFloat3(const float3& src, float3& dst) {
 	RECOIL_DETAILED_TRACY_ZONE;
 	if (blockScriptAnims)
 		return;
+
+	// Even equal inputs are assigned below (including signed zero). Retain them
+	// for the next recomposition without changing the existing dirty semantics.
+	pieceSpaceDirty = true;
 
 	if (!dirty && !dst.same(src)) {
 		SetDirty();
@@ -106,6 +137,8 @@ void LocalModelPiece::SetFloat(const float& src, float& dst)
 	RECOIL_DETAILED_TRACY_ZONE;
 	if (blockScriptAnims)
 		return;
+
+	pieceSpaceDirty = true;
 
 	if (!dirty && !(dst == src)) {
 		SetDirty();
@@ -161,7 +194,12 @@ void LocalModelPiece::SetScriptVisible(bool b)
 
 void LocalModelPiece::SavePrevModelSpaceTransform()
 {
-	prevModelSpaceTra = GetModelSpaceTransform();
+	if (!dirty && !prevModelSpaceNeedsUpdate)
+		return;
+
+	const Transform& tra = GetModelSpaceTransform();
+	prevModelSpaceTra = tra;
+	prevModelSpaceNeedsUpdate = false;
 }
 
 Transform LocalModelPiece::GetEffectivePrevModelSpaceTransform() const
@@ -177,15 +215,20 @@ Transform LocalModelPiece::GetEffectivePrevModelSpaceTransform() const
 	};
 }
 
-void LocalModelPiece::UpdatePieceSpaceTransform()
+void LocalModelPiece::UpdatePieceSpaceTransform() const
 {
+	if (!pieceSpaceDirty || blockScriptAnims)
+		return;
+
 	pieceSpaceTra = CalcPieceSpaceTransform(pos, rot, scale);
+	pieceSpaceDirty = false;
 }
 
 void LocalModelPiece::UpdateModelSpaceTransform(const Transform& pTra)
 {
 	modelSpaceTra = pTra * pieceSpaceTra;
 	modelSpaceMat = modelSpaceTra.ToMatrix();
+	SetPrevModelSpaceNeedsUpdate();
 }
 
 void LocalModelPiece::UpdateModelSpaceTransform(const LocalModelPiece* parent)
@@ -196,6 +239,7 @@ void LocalModelPiece::UpdateModelSpaceTransform(const LocalModelPiece* parent)
 		modelSpaceTra = pieceSpaceTra;
 
 	modelSpaceMat = modelSpaceTra.ToMatrix();
+	SetPrevModelSpaceNeedsUpdate();
 }
 
 void LocalModelPiece::UpdateChildTransformRec(bool updateChildTransform) const
@@ -207,7 +251,7 @@ void LocalModelPiece::UpdateChildTransformRec(bool updateChildTransform) const
 		wasUpdated[0] = true;  //update for current frame
 		updateChildTransform = true;
 
-		pieceSpaceTra = CalcPieceSpaceTransform(pos, rot, scale);
+		UpdatePieceSpaceTransform();
 	}
 
 	if (updateChildTransform) {
@@ -217,6 +261,7 @@ void LocalModelPiece::UpdateChildTransformRec(bool updateChildTransform) const
 			modelSpaceTra = pieceSpaceTra;
 
 		modelSpaceMat = modelSpaceTra.ToMatrix();
+		SetPrevModelSpaceNeedsUpdate();
 	}
 
 	for (auto& child : children) {
@@ -233,7 +278,7 @@ void LocalModelPiece::UpdateParentMatricesRec() const
 	dirty = false;
 	wasUpdated[0] = true;  //update for current frame
 
-	pieceSpaceTra = CalcPieceSpaceTransform(pos, rot, scale);
+	UpdatePieceSpaceTransform();
 
 	if (parent != nullptr)
 		modelSpaceTra = parent->modelSpaceTra * pieceSpaceTra;
@@ -241,6 +286,7 @@ void LocalModelPiece::UpdateParentMatricesRec() const
 		modelSpaceTra = pieceSpaceTra;
 
 	modelSpaceMat = modelSpaceTra.ToMatrix();
+	SetPrevModelSpaceNeedsUpdate();
 }
 
 Transform LocalModelPiece::CalcPieceSpaceTransformOrig(const float3& p, const float3& r, float s) const
@@ -317,12 +363,16 @@ bool LocalModelPiece::GetEmitDirPos(float3& emitPos, float3& emitDir) const
 		return false;
 
 	// note: actually OBJECT_TO_WORLD but transform is the same
-	emitPos = GetModelSpaceTransform() *        original->GetEmitPos()        * WORLD_TO_OBJECT_SPACE;
-	emitDir = GetModelSpaceTransform() * float4(original->GetEmitDir(), 0.0f) * WORLD_TO_OBJECT_SPACE;
+	const Transform& tra = GetModelSpaceTransform();
+	emitPos = tra *        original->GetEmitPos()        * WORLD_TO_OBJECT_SPACE;
+	emitDir = tra * float4(original->GetEmitDir(), 0.0f) * WORLD_TO_OBJECT_SPACE;
 	return true;
 }
 
 void LocalModelPiece::PostLoad()
 {
 	wasUpdated = { true };
+	pieceSpaceDirty = true;
+	SetDirtySubtree();
+	SetPrevModelSpaceNeedsUpdate();
 }

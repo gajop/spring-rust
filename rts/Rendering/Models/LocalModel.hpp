@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #pragma once
 
 #include <vector>
@@ -52,6 +54,10 @@ struct LocalModel
 	void SetModel(const S3DModel* model, bool initialize = true);
 	void SetLODCount(unsigned int lodCount);
 	void UpdateBoundingVolume();
+	void SavePrevModelSpaceTransforms();
+	void SetPrevModelSpaceNeedsUpdate() const { prevModelSpaceNeedsUpdate = true; prevModelSpaceFullSweep = true; }
+	void SetPrevModelSpaceNeedsUpdate(const LocalModelPiece* piece) const;
+	void PostLoad() { SetPrevModelSpaceNeedsUpdate(); }
 
 	void GetBoundingBoxVerts(std::vector<float3>& verts) const {
 		verts.resize(8 + 2); GetBoundingBoxVerts(&verts[0]);
@@ -95,4 +101,10 @@ private:
 	LuaObjectMaterialData luaMaterialData;
 
 	bool needsBoundariesRecalc = true;
+	mutable bool prevModelSpaceNeedsUpdate = true;
+	// Conservative inclusive piece-index interval; oversized/unknown inputs use
+	// a full sweep. These fields fit existing x86-64 LocalModel tail padding.
+	mutable uint16_t prevModelSpaceBegin = 0;
+	mutable uint16_t prevModelSpaceEnd = 0;
+	mutable bool prevModelSpaceFullSweep = true;
 };

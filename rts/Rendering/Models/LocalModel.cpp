@@ -1,3 +1,5 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+
 #include "LocalModel.hpp"
 
 #include "3DModel.hpp"
@@ -11,7 +13,12 @@ CR_REG_METADATA(LocalModel, (
 
 	CR_MEMBER(boundingVolume),
 	CR_IGNORED(luaMaterialData),
-	CR_MEMBER(needsBoundariesRecalc)
+	CR_MEMBER(needsBoundariesRecalc),
+	CR_IGNORED(prevModelSpaceNeedsUpdate),
+	CR_IGNORED(prevModelSpaceBegin),
+	CR_IGNORED(prevModelSpaceEnd),
+	CR_IGNORED(prevModelSpaceFullSweep),
+	CR_POSTLOAD(PostLoad)
 ))
 
 /** ****************************************************************************************************
@@ -50,6 +57,7 @@ void LocalModel::SetLODCount(uint32_t lodCount)
 void LocalModel::SetModel(const S3DModel* model, bool initialize)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	SetPrevModelSpaceNeedsUpdate();
 	// make sure we do not get called for trees, etc
 	assert(model != nullptr);
 	assert(model->numPieces >= 1);
@@ -62,6 +70,7 @@ void LocalModel::SetModel(const S3DModel* model, bool initialize)
 			S3DModelPiece* omp = model->GetPiece(n);
 
 			pieces[n].original = omp;
+			pieces[n].InvalidatePieceSpaceTransform();
 		}
 
 		pieces[0].UpdateChildTransformRec(true);
@@ -88,6 +97,57 @@ void LocalModel::SetModel(const S3DModel* model, bool initialize)
 	UpdateBoundingVolume();
 
 	assert(pieces.size() == model->numPieces);
+}
+
+
+void LocalModel::SavePrevModelSpaceTransforms()
+{
+	if (!prevModelSpaceNeedsUpdate)
+		return;
+
+	size_t begin = 0;
+	size_t end = pieces.size();
+	if (!prevModelSpaceFullSweep && prevModelSpaceBegin <= prevModelSpaceEnd && prevModelSpaceEnd < pieces.size()) {
+		begin = prevModelSpaceBegin;
+		end = size_t(prevModelSpaceEnd) + 1;
+	}
+
+	// Any lazy transform update during this sweep may conservatively request
+	// another interval. Freeze the current range and retain original index order.
+	prevModelSpaceNeedsUpdate = false;
+	prevModelSpaceFullSweep = false;
+	for (size_t index = begin; index < end; ++index) {
+		pieces[index].SavePrevModelSpaceTransform();
+	}
+}
+
+void LocalModel::SetPrevModelSpaceNeedsUpdate(const LocalModelPiece* piece) const
+{
+	const bool hadPending = prevModelSpaceNeedsUpdate;
+	prevModelSpaceNeedsUpdate = true;
+	if (prevModelSpaceFullSweep)
+		return;
+
+	// Address membership is independent of script indices and hierarchy order.
+	// Do not subtract unrelated C++ pointers; validate the integer byte range.
+	constexpr size_t MAX_INTERVAL_PIECES = size_t(UINT16_MAX) + 1;
+	const uintptr_t address = reinterpret_cast<uintptr_t>(piece);
+	const uintptr_t base = reinterpret_cast<uintptr_t>(pieces.data());
+	if (pieces.size() > MAX_INTERVAL_PIECES || address < base ||
+		address - base >= pieces.size() * sizeof(LocalModelPiece) ||
+		(address - base) % sizeof(LocalModelPiece) != 0) {
+		prevModelSpaceFullSweep = true;
+		return;
+	}
+
+	const auto index = static_cast<uint16_t>((address - base) / sizeof(LocalModelPiece));
+	if (!hadPending) {
+		prevModelSpaceBegin = prevModelSpaceEnd = index;
+		return;
+	}
+
+	prevModelSpaceBegin = std::min(prevModelSpaceBegin, index);
+	prevModelSpaceEnd = std::max(prevModelSpaceEnd, index);
 }
 
 LocalModelPiece* LocalModel::CreateLocalModelPieces(const S3DModelPiece* mpParent)
