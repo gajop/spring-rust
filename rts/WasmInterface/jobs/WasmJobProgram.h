@@ -46,7 +46,7 @@ public:
 	~WasmJobProgram();
 	const std::string& Identity() const;
 	WasmJobResult Run(std::string_view exportName, std::span<const std::uint8_t> input,
-		WasmJobTiming* timing = nullptr) const;
+		WasmJobTiming* timing = nullptr, std::size_t maxOutputBytes = 1024 * 1024) const;
 
 private:
 	struct Backend;

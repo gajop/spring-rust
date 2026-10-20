@@ -13,6 +13,9 @@ pub struct JobId(pub u32);
 
 /// A worker execution failure, delivered deterministically rather than faulting
 /// the rules instance. Host resource failures terminate simulation separately.
+#[cfg(feature = "alloc")]
+pub use crate::job_batch::JobError;
+#[cfg(not(feature = "alloc"))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct JobError(pub u32);
 
@@ -30,7 +33,58 @@ mod raw {
             input: i32,
             input_bytes: i32,
         ) -> i64;
+        #[cfg(feature = "alloc")]
+        #[link_name = "run-batch-to"]
+        pub safe fn run_batch_to(
+            module: i32,
+            module_bytes: i32,
+            name: i32,
+            name_bytes: i32,
+            input: i32,
+            input_bytes: i32,
+            output: i32,
+            output_bytes: i32,
+        ) -> i64;
     }
+}
+
+/// Synchronous ordered pure jobs, returning owned bytes directly. An empty
+/// module name means this module. No result scratch export/callback is needed.
+#[cfg(feature = "alloc")]
+pub fn run_batch_to(
+    module_name: &str,
+    export_name: &str,
+    jobs: &[crate::job_batch::BatchJob<'_>],
+) -> Result<alloc::vec::Vec<crate::job_batch::OwnedJobResult>> {
+    if module_name.len() > 256 || export_name.is_empty() || export_name.len() > 256 {
+        return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
+    }
+    let (input, capacity) = crate::job_batch::encode(jobs)?;
+    let mut output = alloc::vec![0u8; capacity];
+    let (module, module_bytes) = wasm_slice_parts(module_name.as_bytes())?;
+    let (name, name_bytes) = wasm_slice_parts(export_name.as_bytes())?;
+    let (input, input_bytes) = wasm_slice_parts(&input)?;
+    let (pointer, output_bytes) = crate::wasm_mut_slice_parts(&mut output)?;
+    let packed = raw::run_batch_to(
+        module,
+        module_bytes,
+        name,
+        name_bytes,
+        input,
+        input_bytes,
+        pointer,
+        output_bytes,
+    ) as u64;
+    let status = (packed >> 32) as i32;
+    if status != 0 {
+        return Err(ApiError::new(status));
+    }
+    let size = packed as u32 as usize;
+    if size > output.len() {
+        return Err(ApiError::new(ErrorCode::InvalidState as i32));
+    }
+    output.truncate(size);
+    crate::job_batch::decode(&output, jobs)
 }
 
 /// Submit a named `(input_ptr: i32, input_len: i32) -> i64` worker export.

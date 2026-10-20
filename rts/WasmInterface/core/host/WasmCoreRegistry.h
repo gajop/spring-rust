@@ -81,6 +81,7 @@ inline constexpr std::uint32_t RmlEnvironmentMask = UnsyncedEnvironmentMask |
 inline constexpr ImportDescriptor kImports[] = {
 	{"spring:jobs", "submit", "i32,i32,i32,i32->i64", AllEnvironmentMask},
 	{"spring:jobs", "submit-to", "i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
+	{"spring:jobs", "run-batch-to", "i32,i32,i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
 	{UnitsInfoModule, "get-unit-def-id", "i32->i64", AllEnvironmentMask},
 	{UnitsInfoModule, "get-unit-team", "i32->i64", AllEnvironmentMask},
 	{UnitsInfoModule, "get-unit-is-dead", "i32->i64", AllEnvironmentMask},

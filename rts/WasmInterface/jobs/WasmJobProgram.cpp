@@ -75,7 +75,7 @@ std::shared_ptr<WasmJobProgram> WasmJobProgram::Compile(const WasmRuntime& runti
 }
 
 WasmJobResult WasmJobProgram::Run(std::string_view exportName,
-	std::span<const std::uint8_t> input, WasmJobTiming* timing) const
+	std::span<const std::uint8_t> input, WasmJobTiming* timing, std::size_t maxOutputBytes) const
 {
 	WasmJobResult result;
 #if defined(RECOIL_WASMTIME_AVAILABLE)
@@ -159,7 +159,7 @@ WasmJobResult WasmJobProgram::Run(std::string_view exportName,
 	const auto packed = static_cast<std::uint64_t>(slots[0].i64);
 	const auto outputPointer = static_cast<std::uint32_t>(packed);
 	const auto outputBytes = static_cast<std::uint32_t>(packed >> 32);
-	if (outputBytes > backend->config.resultBytesLimit || outputBytes > 1024u * 1024u ||
+	if (outputBytes > maxOutputBytes || outputBytes > backend->config.resultBytesLimit || outputBytes > 1024u * 1024u ||
 		!memory.Contains(outputPointer, outputBytes))
 		return fail(WasmJobStatus::InvalidOutput, "Job output range or byte limit exceeded");
 	result.bytes.resize(outputBytes);

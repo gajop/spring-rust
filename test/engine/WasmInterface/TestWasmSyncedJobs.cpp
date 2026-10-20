@@ -104,7 +104,217 @@ std::shared_ptr<WasmJobProgram> Program(WasmRuntime& runtime)
 	return program;
 }
 
-struct StopThreads { ~StopThreads() { ThreadPool::SetThreadCount(1); } };
+struct StopThreads {
+	bool priorMtSection = ThreadPool::IsInMultiThreadedSection();
+	~StopThreads() {
+		ThreadPool::SetInMultiThreadedSection(priorMtSection);
+		ThreadPool::SetThreadCount(1);
+	}
+};
+}
+
+TEST_CASE("Synchronous Wasm batches join ordered fresh jobs without consuming deferred delivery")
+{
+	StopThreads stop;
+	std::shared_ptr<WasmJobProgram> program;
+	{
+		WasmRuntimeConfig config;
+		config.instructionFuel = 100000000;
+		WasmRuntime runtime(config);
+		program = Program(runtime);
+	} // source runtime can unload: the batch retains compiled code/engine
+	int owner = 0;
+	std::vector<std::vector<std::uint8_t>> expected;
+	for (int threads: {1, 2, 4, 8}) {
+		ThreadPool::SetThreadCount(threads);
+		WasmSyncedJobs queue;
+		std::vector<WasmJobResult> results;
+		std::vector<WasmJobBatchInput> inputs;
+		for (int i = 0; i < 24; ++i)
+			inputs.push_back({Input(i, i == 0 ? 1000000 : 100 + i), 12});
+		CHECK(queue.RunBatch(&owner, program, "work", inputs, results) == WasmSyncedJobs::BatchStatus::InvalidState);
+		queue.BeginFrame(0);
+		REQUIRE(queue.Submit(&owner, program, "work", Input(99, 20)) == 1);
+		REQUIRE(queue.RunBatch(&owner, program, "work", inputs, results) == WasmSyncedJobs::BatchStatus::Ok);
+		REQUIRE(results.size() == inputs.size());
+		CHECK(queue.Accepting());
+		for (int i = 0; i < results.size(); ++i) {
+			REQUIRE(results[i].status == WasmJobStatus::Ok);
+			REQUIRE(results[i].bytes.size() == 12);
+			CHECK(Word(results[i].bytes, 0) == Work(i, i == 0 ? 1000000 : 100 + i));
+			CHECK(Word(results[i].bytes, 4) == 1);
+			if (threads == 1) expected.push_back(results[i].bytes);
+			CHECK(results[i].bytes == expected[i]);
+		}
+		// Synchronous work neither allocates deferred IDs nor delivers callbacks.
+		CHECK(queue.Submit(&owner, program, "work", Input(100, 20)) == 2);
+		queue.EndFrame();
+		auto deferred = queue.BeginFrame(1);
+		REQUIRE(deferred.size() == 2);
+		CHECK(deferred[0].id == 1);
+		CHECK(deferred[1].id == 2);
+		CHECK(Word(deferred[0].result.bytes, 0) == Work(99, 20));
+		// Caller deletion after the barrier needs no retained input/result state.
+		queue.CancelOwner(&owner);
+		queue.EndFrame();
+		CHECK(queue.BeginFrame(2).empty());
+	}
+}
+
+TEST_CASE("Synchronous Wasm admission preflights every member and shares deterministic window quotas")
+{
+	WasmRuntime runtime;
+	auto program = Program(runtime);
+	int owner = 0;
+	WasmSyncedJobs queue;
+	queue.BeginFrame(0);
+	std::vector<WasmJobResult> results;
+	const std::vector<WasmJobBatchInput> one{{Input(2, 0), 12}};
+	const auto initial = queue.StateHash(&owner);
+	CHECK(queue.RunBatch(nullptr, program, "work", one, results) == WasmSyncedJobs::BatchStatus::InvalidArgument);
+	CHECK(queue.RunBatch(&owner, program, "work", {}, results) == WasmSyncedJobs::BatchStatus::InvalidArgument);
+	auto malformed = one;
+	malformed.push_back({{}, WasmJobBatch::MAX_BYTES + 1});
+	CHECK(queue.RunBatch(&owner, program, "work", malformed, results) == WasmSyncedJobs::BatchStatus::InvalidArgument);
+	CHECK(results.empty());
+	CHECK(queue.StateHash(&owner) == initial);
+	for (int i = 0; i < 255; ++i) REQUIRE(queue.Submit(&owner, program, "work", Input(i, 0)) != 0);
+	const auto before = queue.StateHash(&owner);
+	CHECK(queue.RunBatch(&owner, program, "work", {one[0], one[0]}, results) == WasmSyncedJobs::BatchStatus::BufferOverflow);
+	CHECK(queue.StateHash(&owner) == before);
+	REQUIRE(queue.RunBatch(&owner, program, "work", one, results) == WasmSyncedJobs::BatchStatus::Ok);
+	CHECK(queue.Submit(&owner, program, "work", Input(0, 0)) == 0);
+	CHECK(queue.RunBatch(&owner, program, "work", one, results) == WasmSyncedJobs::BatchStatus::BufferOverflow);
+	queue.Reset();
+	queue.BeginFrame(0);
+	const auto large = Input(0, 0, WasmSyncedJobs::MAX_INPUT_BYTES);
+	for (int i = 0; i < 15; ++i) REQUIRE(queue.Submit(&owner, program, "work", large) != 0);
+	REQUIRE(queue.RunBatch(&owner, program, "echo", {{large, 0}}, results) == WasmSyncedJobs::BatchStatus::Ok);
+	CHECK(results[0].status == WasmJobStatus::InputTooLarge); // fixture scratch is 64 KiB
+	CHECK(queue.Submit(&owner, program, "work", Input(0, 0)) == 0);
+	queue.Reset();
+	queue.BeginFrame(0);
+	std::vector<WasmJobBatchInput> outputQuota(16, {{}, WasmJobBatch::MAX_BYTES});
+	REQUIRE(queue.RunBatch(&owner, program, "echo", outputQuota, results) == WasmSyncedJobs::BatchStatus::Ok);
+	CHECK(queue.RunBatch(&owner, program, "echo", {{{}, 1}}, results) == WasmSyncedJobs::BatchStatus::BufferOverflow);
+	queue.EndFrame();
+	queue.BeginFrame(1);
+	CHECK(queue.RunBatch(&owner, program, "work", one, results) == WasmSyncedJobs::BatchStatus::Ok);
+}
+
+TEST_CASE("Synchronous Wasm guest failures remain per-job results and output reservations precede copying")
+{
+	WasmRuntime runtime;
+	auto program = Program(runtime);
+	WasmSyncedJobs queue;
+	int owner = 0;
+	queue.BeginFrame(0);
+	std::vector<WasmJobResult> results;
+	for (const auto& [name, status]: std::vector<std::pair<std::string, WasmJobStatus>>{
+		{"trap", WasmJobStatus::Trapped}, {"host-call", WasmJobStatus::Trapped},
+		{"missing", WasmJobStatus::InvalidExport}, {"bad-output", WasmJobStatus::InvalidOutput}}) {
+		REQUIRE(queue.RunBatch(&owner, program, name, {{Input(1, 2), 12}, {Input(2, 3), 12}}, results) == WasmSyncedJobs::BatchStatus::Ok);
+		REQUIRE(results.size() == 2);
+		for (const auto& result: results) {
+			CHECK(result.status == status);
+			CHECK(result.bytes.empty());
+		}
+		CHECK(queue.Accepting()); // failures do not leave the running-batch flag set
+	}
+	REQUIRE(queue.RunBatch(&owner, program, "work", {{Input(1, 2), 11}, {Input(2, 3), 12}}, results) == WasmSyncedJobs::BatchStatus::Ok);
+	CHECK(results[0].status == WasmJobStatus::InvalidOutput);
+	CHECK(results[0].bytes.empty());
+	CHECK(results[1].status == WasmJobStatus::Ok);
+	CHECK(Word(results[1].bytes, 0) == Work(2, 3));
+}
+
+TEST_CASE("Local synchronous Wasm quotas follow the Update window including between-callback submissions")
+{
+	WasmRuntime runtime;
+	auto program = Program(runtime);
+	WasmSyncedJobs queue(WasmSyncedJobs::Mode::Update);
+	int owner = 0;
+	std::vector<WasmJobResult> results;
+	const std::vector<WasmJobBatchInput> one{{{}, 0}};
+	REQUIRE(queue.RunBatch(&owner, program, "echo", one, results) == WasmSyncedJobs::BatchStatus::Ok);
+	queue.EndUpdate();
+	std::vector<WasmJobBatchInput> full(WasmSyncedJobs::MAX_JOBS_PER_FRAME, {{}, 0});
+	REQUIRE(queue.RunBatch(&owner, program, "echo", full, results) == WasmSyncedJobs::BatchStatus::Ok);
+	CHECK(queue.BeginUpdate().empty());
+	// Beginning Update does not reset work admitted since the prior EndUpdate.
+	CHECK(queue.RunBatch(&owner, program, "echo", one, results) == WasmSyncedJobs::BatchStatus::BufferOverflow);
+	queue.EndUpdate();
+	REQUIRE(queue.RunBatch(&owner, program, "echo", one, results) == WasmSyncedJobs::BatchStatus::Ok);
+	queue.Reset();
+	CHECK(queue.Accepting());
+}
+
+TEST_CASE("Synchronous Wasm batch envelopes reject malformed descriptors before owning inputs")
+{
+	std::vector<std::uint8_t> wire;
+	for (auto word: {1u, 2u, 2u, 3u}) WasmJobBatch::WriteWord(wire, word);
+	wire.insert(wire.end(), {7, 8});
+	WasmJobBatch::WriteWord(wire, 0);
+	WasmJobBatch::WriteWord(wire, 0);
+	std::vector<WasmJobBatchInput> inputs;
+	std::size_t capacity = 0;
+	REQUIRE(WasmJobBatch::Decode(wire, inputs, capacity));
+	REQUIRE(inputs.size() == 2);
+	CHECK(inputs[0].bytes == std::vector<std::uint8_t>{7, 8});
+	CHECK(inputs[0].maxOutputBytes == 3);
+	CHECK(capacity == 27);
+	for (std::size_t len = 0; len < wire.size(); ++len) {
+		capacity = 123;
+		CHECK_FALSE(WasmJobBatch::Decode(std::span(wire).first(len), inputs, capacity));
+		CHECK(inputs.size() == 2);
+		CHECK(capacity == 123);
+	}
+	for (const auto& [offset, value]: std::vector<std::pair<int, std::uint32_t>>{{0,2}, {4,0}, {4,257}, {8,0xffffffff}, {12,0xffffffff}, {18,1}}) {
+		INFO("offset=" << offset << " value=" << value);
+		auto changed = wire;
+		for (int i = 0; i < 4; ++i) changed[offset+i] = value >> (8*i);
+		CHECK_FALSE(WasmJobBatch::Decode(changed, inputs, capacity));
+	}
+	wire.push_back(0);
+	CHECK_FALSE(WasmJobBatch::Decode(wire, inputs, capacity));
+	CHECK(inputs[0].bytes == std::vector<std::uint8_t>{7, 8}); // immutable copy
+	const auto resultWire = WasmJobBatch::Encode(std::vector<WasmJobResult>{{WasmJobStatus::Ok, {10,11}, {}}, {WasmJobStatus::Trapped, {}, {}}});
+	CHECK(resultWire == std::vector<std::uint8_t>{1,0,0,0, 2,0,0,0, 0,0,0,0, 2,0,0,0, 10,11, 2,0,0,0, 0,0,0,0});
+}
+
+TEST_CASE("Synchronous Wasm calls restore MT nesting and host failures survive the C ABI trap boundary")
+{
+	StopThreads stop;
+	WasmRuntime runtime;
+	auto program = Program(runtime);
+	int owner = 0;
+	WasmSyncedJobs queue;
+	queue.BeginFrame(0);
+	std::vector<WasmJobResult> results;
+	for (int threads: {1, 4}) {
+		ThreadPool::SetThreadCount(threads);
+		for (bool prior: {false, true}) {
+			ThreadPool::SetInMultiThreadedSection(prior);
+			REQUIRE(queue.RunBatch(&owner, program, "work", {{Input(1, 2), 12}}, results) == WasmSyncedJobs::BatchStatus::Ok);
+			CHECK(bool(ThreadPool::IsInMultiThreadedSection()) == prior);
+			REQUIRE(queue.RunBatch(&owner, program, "host-call", {{Input(1, 2), 12}}, results) == WasmSyncedJobs::BatchStatus::Ok);
+			CHECK(results[0].status == WasmJobStatus::Trapped);
+			CHECK(bool(ThreadPool::IsInMultiThreadedSection()) == prior);
+		}
+	}
+	ThreadPool::SetInMultiThreadedSection(false);
+	// Model a host allocation/runtime exception caught by an import callback.
+	// It must not become a successful simulation frame with a missing module.
+	queue.FailBatch(std::make_exception_ptr(std::runtime_error("test host failure")));
+	CHECK_FALSE(queue.Accepting());
+	CHECK(queue.Submit(&owner, program, "work", Input(1, 2)) == 0);
+	CHECK_THROWS_WITH(queue.EndFrame(), "test host failure");
+	CHECK_THROWS_WITH(queue.BeginFrame(1), "test host failure");
+	queue.CancelOwner(&owner);
+	CHECK_THROWS_WITH(queue.EndFrame(), "test host failure");
+	queue.Reset();
+	queue.BeginFrame(0);
+	CHECK(queue.RunBatch(&owner, program, "work", {{Input(1, 2), 12}}, results) == WasmSyncedJobs::BatchStatus::Ok);
 }
 
 TEST_CASE("Wasm jobs have fresh memory/globals, fixed limits and no engine imports")

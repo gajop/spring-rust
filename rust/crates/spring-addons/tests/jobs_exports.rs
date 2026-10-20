@@ -25,7 +25,7 @@ impl Widget<State, All> for Probe {
         "job probe"
     }
     fn init(&self, ctx: &AddonContext<'_, State, All>) {
-        ctx.spring().jobs().submit(DOUBLE, &[3]).unwrap();
+        ctx.spring().jobs().run_next_tick(DOUBLE, &[3]).unwrap();
     }
     fn update(&self, ctx: &AddonContext<'_, State, All>, _: f32) {
         let previous = ctx.global().updates.get();

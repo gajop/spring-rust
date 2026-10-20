@@ -36,6 +36,11 @@ struct WasmSyncedJobs::State {
 	std::shared_ptr<Batch> active;
 	std::uint32_t nextId = 1;
 	std::size_t inputBytes = 0;
+	std::size_t batchJobs = 0;
+	std::size_t batchInputBytes = 0;
+	std::size_t batchOutputBytes = 0;
+	bool runningBatch = false;
+	std::exception_ptr batchFailure;
 	int frame = -1;
 	bool accepting = false;
 #if defined(THREADPOOL)
@@ -69,9 +74,9 @@ std::uint32_t WasmSyncedJobs::Submit(void* owner,
 )
 {
 	ZoneScopedN("Wasm::Jobs::Admission");
-	if (!state->accepting || state->frame < 0 || owner == nullptr || !program || exportName.empty() || exportName.size() > 256 ||
-		state->nextId == 0 || state->pending.size() >= MAX_JOBS_PER_FRAME ||
-		input.size() > MAX_INPUT_BYTES || input.size() > MAX_FRAME_INPUT_BYTES - state->inputBytes)
+	if (!Accepting() || state->frame < 0 || owner == nullptr || !program || exportName.empty() || exportName.size() > 256 ||
+		state->nextId == 0 || state->pending.size() + state->batchJobs >= MAX_JOBS_PER_FRAME ||
+		input.size() > MAX_INPUT_BYTES || input.size() > MAX_FRAME_INPUT_BYTES - state->inputBytes - state->batchInputBytes)
 		return 0;
 	const auto id = state->nextId++;
 	ZoneValue(id);
@@ -93,6 +98,9 @@ std::uint32_t WasmSyncedJobs::Submit(void* owner,
 
 std::vector<WasmSyncedJobs::Delivery> WasmSyncedJobs::BeginFrame(int frame)
 {
+	if (state->runningBatch)
+		throw std::logic_error("Cannot advance Wasm jobs during a synchronous batch");
+	if (state->batchFailure) std::rethrow_exception(state->batchFailure);
 	{
 		ZoneNamedN(barrier, "Wasm::Jobs::Barrier", state->active != nullptr);
 		ZoneValueV(barrier, frame);
@@ -124,10 +132,87 @@ std::vector<WasmSyncedJobs::Delivery> WasmSyncedJobs::BeginFrame(int frame)
 	}
 	state->frame = frame;
 	state->accepting = true;
+	if (state->mode == Mode::Synced) {
+		state->batchJobs = 0;
+		state->batchInputBytes = 0;
+		state->batchOutputBytes = 0;
+	}
 	return deliveries;
 }
 
-bool WasmSyncedJobs::Accepting() const { return state->accepting; }
+bool WasmSyncedJobs::Accepting() const { return state->accepting && !state->runningBatch && !state->batchFailure; }
+
+void WasmSyncedJobs::FailBatch(std::exception_ptr failure)
+{
+	if (!state->batchFailure) state->batchFailure = std::move(failure);
+}
+
+WasmSyncedJobs::BatchStatus WasmSyncedJobs::RunBatch(void* owner,
+	std::shared_ptr<const WasmJobProgram> program, std::string exportName,
+	std::vector<WasmJobBatchInput> inputs, std::vector<WasmJobResult>& results) try
+{
+	if (!Accepting() || state->frame < 0)
+		return BatchStatus::InvalidState;
+	if (!owner || !program || exportName.empty() || exportName.size() > 256 || inputs.empty())
+		return BatchStatus::InvalidArgument;
+	if (inputs.size() > MAX_JOBS_PER_FRAME - state->pending.size() - state->batchJobs)
+		return BatchStatus::BufferOverflow;
+	std::size_t inputBytes = 0, outputBytes = 0;
+	for (const auto& input: inputs) {
+		if (input.bytes.size() > MAX_INPUT_BYTES || input.maxOutputBytes > WasmJobBatch::MAX_BYTES)
+			return BatchStatus::InvalidArgument;
+		if (input.bytes.size() > MAX_FRAME_INPUT_BYTES - inputBytes ||
+			input.maxOutputBytes > WasmJobBatch::MAX_TOTAL_BYTES - outputBytes)
+			return BatchStatus::BufferOverflow;
+		inputBytes += input.bytes.size();
+		outputBytes += input.maxOutputBytes;
+	}
+	if (inputBytes > MAX_FRAME_INPUT_BYTES - state->inputBytes - state->batchInputBytes ||
+		outputBytes > WasmJobBatch::MAX_TOTAL_BYTES - state->batchOutputBytes)
+		return BatchStatus::BufferOverflow;
+
+	// Allocate every result/exception slot before committing admission. Nothing
+	// below refers to caller memory or mutable host/queue state in workers.
+	std::vector<WasmJobResult> completed(inputs.size());
+	std::vector<std::exception_ptr> exceptions(inputs.size());
+	state->batchJobs += inputs.size();
+	state->batchInputBytes += inputBytes;
+	state->batchOutputBytes += outputBytes;
+	state->runningBatch = true;
+	struct Scope {
+		bool& running;
+		bool priorMtSection;
+		~Scope() {
+			ThreadPool::SetInMultiThreadedSection(priorMtSection);
+			running = false;
+		}
+	} scope{state->runningBatch, bool(ThreadPool::IsInMultiThreadedSection())};
+	ZoneScopedN("Wasm::Jobs::RunBatch");
+	ZoneValue(inputs.size());
+	if (ZoneIsActive)
+		ZoneTextF("frame=%d jobs=%zu input=%zu output-reserved=%zu threads=%d export=%s",
+			state->frame, inputs.size(), inputBytes, outputBytes, ThreadPool::GetNumThreads(), exportName.c_str());
+	for_mt(0, inputs.size(), 1, [&](int index) {
+		ZoneScopedN("Wasm::Jobs::BatchWorker");
+		ZoneValue(index);
+		try {
+			completed[index] = program->Run(exportName, inputs[index].bytes, nullptr, inputs[index].maxOutputBytes);
+		} catch (...) {
+			exceptions[index] = std::current_exception();
+		}
+	});
+	// The whole barrier completes before publishing even the first result.
+	for (std::size_t i = 0; i < completed.size(); ++i) {
+		if (exceptions[i]) std::rethrow_exception(exceptions[i]);
+		if (completed[i].status == WasmJobStatus::RuntimeFailure)
+			throw std::runtime_error("Wasm batch host failure: " + completed[i].diagnostic);
+	}
+	results = std::move(completed);
+	return BatchStatus::Ok;
+} catch (...) {
+	FailBatch(std::current_exception());
+	throw;
+}
 
 std::vector<WasmSyncedJobs::Delivery> WasmSyncedJobs::BeginUpdate()
 {
@@ -144,11 +229,17 @@ void WasmSyncedJobs::EndUpdate()
 	if (state->frame == std::numeric_limits<int>::max())
 		throw std::overflow_error("Wasm job update sequence exhausted");
 	++state->frame;
+	state->batchJobs = 0;
+	state->batchInputBytes = 0;
+	state->batchOutputBytes = 0;
 	state->accepting = true;
 }
 
 void WasmSyncedJobs::EndFrame()
 {
+	if (state->runningBatch)
+		throw std::logic_error("Cannot seal Wasm jobs during a synchronous batch");
+	if (state->batchFailure) std::rethrow_exception(state->batchFailure);
 	state->accepting = false;
 	if (state->active)
 		throw std::logic_error("Prior Wasm job batch was not consumed");
@@ -194,6 +285,8 @@ void WasmSyncedJobs::EndFrame()
 
 void WasmSyncedJobs::CancelOwner(void* owner)
 {
+	if (state->runningBatch)
+		throw std::logic_error("Cannot remove a Wasm batch caller during its active callback");
 	// Drain before removing this owner's result slots. Workers never read the
 	// owner pointer; their programs independently retain the runtime engine.
 	state->Wait();
@@ -212,6 +305,8 @@ void WasmSyncedJobs::CancelOwner(void* owner)
 
 void WasmSyncedJobs::Reset()
 {
+	if (state->runningBatch)
+		throw std::logic_error("Cannot reset Wasm jobs during a synchronous batch");
 	state->Wait();
 	state = std::make_unique<State>(state->mode);
 	if (state->mode == Mode::Update) BeginFrame(0);
@@ -228,6 +323,14 @@ std::uint64_t WasmSyncedJobs::StateHash(void* owner) const
 		hash = XXH3_64bits_withSeed(bytes, sizeof(bytes), hash);
 	};
 	addWord(state->nextId);
+	// Completed synchronous work leaves only deterministic admission counters.
+	// Keep the original checksum unchanged for users of the deferred API alone.
+	if (state->batchJobs != 0) {
+		addWord(0x42415443);
+		addWord(state->batchJobs);
+		addWord(state->batchInputBytes);
+		addWord(state->batchOutputBytes);
+	}
 	const auto addJob = [&](const auto& job) {
 		if (job.owner != owner) return;
 		addWord(job.id);

@@ -333,6 +333,48 @@ std::uint64_t WasmCoreHost::SubmitJob(std::string exportName, std::span<const st
 #endif
 }
 
+std::int32_t WasmCoreHost::RunJobBatch(std::string exportName,
+	std::vector<WasmJobBatchInput> inputs, std::vector<WasmJobResult>& results,
+	std::string_view workerModule)
+{
+	using namespace recoil::wasm::core;
+	if (!backend || backend->hot.faulted)
+		return static_cast<std::int32_t>(Status::InvalidState);
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const bool synced = WasmEnvironmentMatrix::Policy(environment).synced;
+	auto* jobs = synced ? &SyncedJobs() : backend->localJobs.get();
+	if (!jobs) return static_cast<std::int32_t>(Status::NotAvailable);
+	if (!jobs->Accepting()) return static_cast<std::int32_t>(Status::InvalidState);
+	std::shared_ptr<const WasmJobProgram> program;
+	{
+		std::lock_guard registryLock(RegistryMutex());
+		const auto* worker = (workerModule.empty() || workerModule == moduleName) ? this : Find(workerModule);
+		if (!worker || (synced ? !WasmEnvironmentMatrix::Policy(worker->environment).synced
+			: (worker->environment != environment || worker->backend->bindings.Host().native != backend->bindings.Host().native)) ||
+			worker->backend->hot.faulted || !worker->backend->jobProgram)
+			return static_cast<std::int32_t>(Status::NotFound);
+		program = worker->backend->jobProgram;
+	}
+	// The compiled program retains its engine/module independently of the target
+	// owner. Do not hold the registry lock, call guest exports or mutate callback,
+	// CUS or UI nesting flags while workers run. The caller's import stays active
+	// until this direct return; no result callback can re-enter its application.
+	switch (jobs->RunBatch(this, std::move(program), std::move(exportName), std::move(inputs), results)) {
+		case WasmSyncedJobs::BatchStatus::Ok: return static_cast<std::int32_t>(Status::Ok);
+		case WasmSyncedJobs::BatchStatus::InvalidState: return static_cast<std::int32_t>(Status::InvalidState);
+		case WasmSyncedJobs::BatchStatus::InvalidArgument: return static_cast<std::int32_t>(Status::InvalidArgument);
+		case WasmSyncedJobs::BatchStatus::BufferOverflow: return static_cast<std::int32_t>(Status::BufferOverflow);
+	}
+#endif
+	return static_cast<std::int32_t>(Status::NotAvailable);
+}
+
+void WasmCoreHost::FailJobBatch(std::exception_ptr failure)
+{
+	if (WasmEnvironmentMatrix::Policy(environment).synced)
+		SyncedJobs().FailBatch(std::move(failure));
+}
+
 void WasmCoreHost::BeginSyncedJobsFrame(int frame)
 {
 	std::lock_guard registryLock(RegistryMutex());

@@ -156,6 +156,9 @@ public:
 	static void ShutdownSyncedJobs();
 	std::uint64_t SubmitJob(std::string exportName, std::span<const std::uint8_t> input,
 		std::string_view workerModule = {});
+	std::int32_t RunJobBatch(std::string exportName, std::vector<WasmJobBatchInput> inputs,
+		std::vector<WasmJobResult>& results, std::string_view workerModule = {});
+	void FailJobBatch(std::exception_ptr failure);
 
 	// NativeUnitScriptBackend implementation for CUS instances owned by this
 	// Core guest. The module-level scheduler is ticked after engine animation

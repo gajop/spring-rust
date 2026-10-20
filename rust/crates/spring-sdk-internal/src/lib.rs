@@ -80,6 +80,8 @@ pub mod desync;
 pub mod game_options;
 #[cfg(target_arch = "wasm32")]
 pub mod gfx;
+#[cfg(feature = "alloc")]
+pub mod job_batch;
 #[cfg(target_arch = "wasm32")]
 pub mod jobs;
 #[cfg(target_arch = "wasm32")]
