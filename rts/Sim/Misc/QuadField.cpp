@@ -69,16 +69,16 @@ namespace {
 		}
 		unitMembership.AddAt(team, quad % field.GetNumQuadsX(), quad / field.GetNumQuadsX());
 	}
-	void RemoveUnitMembership(const CQuadField& field, int team) {
+	void RemoveUnitMembership(const CQuadField& field, int team, int quad) {
 		if (unitMembershipOwner != &field) {
 			unitMembership.Invalidate();
 			return;
 		}
-		unitMembership.Remove(team);
+		unitMembership.Remove(team, quad % field.GetNumQuadsX(), quad / field.GetNumQuadsX());
 	}
 	void RebuildUnitMembership(const CQuadField& field, std::size_t teams) {
 		unitMembershipOwner = &field;
-		unitMembership.Reset(teams);
+		unitMembership.Reset(teams, field.GetNumQuadsX(), field.GetNumQuadsZ());
 		for (std::size_t i = 0, n = std::size_t(field.GetNumQuadsX()) * field.GetNumQuadsZ(); i < n; ++i) {
 			const auto& members = field.GetQuad(i).teamUnits;
 			for (std::size_t team = 0; team < members.size(); ++team)
@@ -94,7 +94,12 @@ bool QuadFieldMayHaveUnitsInAllyTeam(const CQuadField& field, int team)
 
 bool QuadFieldMayHaveUnitsInAllyTeam(const CQuadField& field, int team, const QuadFieldUnitQueryRectangle& query)
 {
-	return unitMembershipOwner != &field || unitMembership.MayHaveUnits(team, query);
+	if (unitMembershipOwner != &field)
+		return true;
+	// Quad::PostLoad records entries without their quad; recount once from the live vectors.
+	if (unitMembership.NeedsRebuild())
+		RebuildUnitMembership(field, unitMembership.Teams());
+	return unitMembership.MayHaveUnits(team, query);
 }
 
 bool QuadFieldGetUnitQueryRectangle(const CQuadField& field, float3 pos, float radius, QuadFieldUnitQueryRectangle& query)
@@ -557,7 +562,7 @@ bool CQuadField::RemoveUnitIf(CUnit* unit, const float3& wpos)
 
 	spring::VectorErase(baseQuads.Write(wposQuadIdx).units, unit);
 	if (spring::VectorErase(baseQuads.Write(wposQuadIdx).teamUnits[unit->allyteam], unit))
-		RemoveUnitMembership(*this, unit->allyteam);
+		RemoveUnitMembership(*this, unit->allyteam, wposQuadIdx);
 	return true;
 }
 #endif
@@ -580,7 +585,7 @@ void CQuadField::MovedUnit(CUnit* unit)
 	for (const int qi: unit->quads) {
 		spring::VectorErase(baseQuads.Write(qi).units, unit);
 		if (spring::VectorErase(baseQuads.Write(qi).teamUnits[unit->allyteam], unit))
-			RemoveUnitMembership(*this, unit->allyteam);
+			RemoveUnitMembership(*this, unit->allyteam, qi);
 	}
 
 	for (const int qi: *qfQuery.quads) {
@@ -598,7 +603,7 @@ void CQuadField::RemoveUnit(CUnit* unit)
 	for (const int qi: unit->quads) {
 		spring::VectorErase(baseQuads.Write(qi).units, unit);
 		if (spring::VectorErase(baseQuads.Write(qi).teamUnits[unit->allyteam], unit))
-			RemoveUnitMembership(*this, unit->allyteam);
+			RemoveUnitMembership(*this, unit->allyteam, qi);
 	}
 
 	unit->quads.clear();

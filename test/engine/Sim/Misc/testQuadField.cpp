@@ -104,38 +104,66 @@ TEST_CASE("Quad load rebuild permits either parent-child PostLoad order", "[quad
 	}
 }
 
-TEST_CASE("Quad membership regions expand until empty", "[quad-membership]")
+TEST_CASE("Quad membership regions are exact per coarse cell", "[quad-membership]")
 {
+	constexpr int C = QuadFieldUnitMembership::CELL;
 	QuadFieldUnitMembership membership;
 	const QuadFieldUnitQueryRectangle origin = {0, 0, 1, 1};
 	const QuadFieldUnitQueryRectangle distant = {10, 20, 10, 20};
-	membership.Reset(3);
+	membership.Reset(3, 32, 32);
 	membership.AddAt(1, 10, 20, 2);
 	CHECK_FALSE(membership.MayHaveUnits(1, origin));
 	CHECK(membership.MayHaveUnits(1, distant));
 	membership.AddAt(1, 0, 0);
 	CHECK(membership.MayHaveUnits(1, origin));
-	membership.Remove(1); // no shrinking: deletion cannot make the bounds too small
-	CHECK(membership.MayHaveUnits(1, origin));
-	membership.Remove(1);
-	CHECK(membership.MayHaveUnits(1, distant));
-	membership.Remove(1);
+	membership.Remove(1, 0, 0); // the cell empties again: no stale bounds
 	CHECK_FALSE(membership.MayHaveUnits(1, origin));
+	CHECK(membership.MayHaveUnits(1, distant));
+	membership.Remove(1, 10, 20);
+	membership.Remove(1, 10, 20);
 	CHECK_FALSE(membership.MayHaveUnits(1, distant));
 	membership.AddAt(1, 10, 20);
-	CHECK_FALSE(membership.MayHaveUnits(1, origin));
 	membership.Add(1); // a PostLoad addition without its quad index fails open
 	CHECK(membership.MayHaveUnits(1, origin));
-	CHECK(membership.MayHaveUnits(1, distant));
-	membership.Remove(1);
-	CHECK(membership.MayHaveUnits(1, origin));
-	membership.Remove(1);
-	membership.AddAt(1, 10, 20);
-	CHECK_FALSE(membership.MayHaveUnits(1, origin));
+	CHECK(membership.NeedsRebuild());
 	CHECK(membership.MayHaveUnits(-1, origin));
 	CHECK(membership.MayHaveUnits(3, origin));
 	membership.Invalidate();
 	CHECK(membership.MayHaveUnits(0, origin));
+
+	SECTION("Randomized mutations: sound, and exact at cell granularity") {
+		srand(7);
+		const int nx = 37, nz = 29, teams = 3;
+		membership.Reset(teams, nx, nz);
+		std::vector<int> quads(size_t(teams) * nx * nz, 0);
+		for (int step = 0; step < 20000; ++step) {
+			const int team = rand() % teams, x = rand() % nx, z = rand() % nz;
+			int& n = quads[(size_t(team) * nz + z) * nx + x];
+			if (n > 0 && rand() % 2) {
+				--n;
+				membership.Remove(team, x, z);
+			} else {
+				++n;
+				membership.AddAt(team, x, z);
+			}
+			const int x0 = rand() % nx, z0 = rand() % nz;
+			const QuadFieldUnitQueryRectangle q = {x0, z0, std::min(nx - 1, x0 + rand() % 12), std::min(nz - 1, z0 + rand() % 12)};
+			const int qt = rand() % teams;
+			bool inQuads = false, inCells = false;
+			for (int zz = 0; zz < nz; ++zz) {
+				for (int xx = 0; xx < nx; ++xx) {
+					const int count = quads[(size_t(qt) * nz + zz) * nx + xx];
+					if (count == 0)
+						continue;
+					inQuads |= xx >= q.minX && xx <= q.maxX && zz >= q.minZ && zz <= q.maxZ;
+					inCells |= xx / C >= q.minX / C && xx / C <= q.maxX / C && zz / C >= q.minZ / C && zz / C <= q.maxZ / C;
+				}
+			}
+			const bool may = membership.MayHaveUnits(qt, q);
+			REQUIRE((may || !inQuads)); // never rejects a region with an entry
+			REQUIRE(may == inCells);    // rejects exactly the regions whose cells are empty
+		}
+	}
 }
 
 // Container-only diagnostic: no renderer, simulation, or CUnit allocations.
