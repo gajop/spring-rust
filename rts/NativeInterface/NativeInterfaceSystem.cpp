@@ -419,9 +419,35 @@ public:
 			ReloadNow();
 		}
 		wasmSystem->Update();
+		if (wasmReloadRequested) {
+			wasmReloadRequested = false;
+			std::string error;
+			const bool loaded = wasmSystem->ReloadLocalModules(wasmReloadSelection,
+				[](const WasmModuleDescriptor& descriptor, std::vector<std::uint8_t>& bytes, std::string& error) {
+					const auto section = descriptor.environment == WasmEnvironment::GaiaUnsynced ?
+						CVFSHandler::Section::Map : CVFSHandler::Section::Mod;
+					if (!descriptor.archive.empty() && vfsHandler != nullptr) {
+						if (vfsHandler->LoadFileFromArchive(descriptor.archive, descriptor.source, bytes, section) == 1)
+							return true;
+					} else {
+						CFileHandler file(descriptor.source, section == CVFSHandler::Section::Map ? SPRING_VFS_MAP : SPRING_VFS_MOD);
+						std::string data;
+						if (file.FileExists() && file.LoadStringData(data)) {
+							bytes.assign(data.begin(), data.end());
+							return true;
+						}
+					}
+					error = "could not reread Wasm module " + descriptor.source + " from its original archive";
+					return false;
+				}, error);
+			if (!loaded)
+				LOG_L(L_ERROR, "[ReloadWasmModules] %s", error.c_str());
+		}
 	}
 
 	bool reloadRequested = false;
+	bool wasmReloadRequested = false;
+	WasmEnvironment wasmReloadSelection = WasmEnvironment::All;
 };
 
 NativeInterfaceSystem::NativeInterfaceSystem()
@@ -447,6 +473,20 @@ void NativeInterfaceSystem::ShutdownModules() {
 
 void NativeInterfaceSystem::Reload() {
 	pImpl->RequestReload();
+}
+
+bool NativeInterfaceSystem::ReloadWasmModules(std::string_view selection)
+{
+	WasmEnvironment environment = WasmEnvironment::All;
+	if ((!selection.empty() && !WasmEnvironmentMatrix::Parse(selection, environment)) ||
+		(environment != WasmEnvironment::All && environment != WasmEnvironment::UI &&
+		 environment != WasmEnvironment::RulesUnsynced && environment != WasmEnvironment::GaiaUnsynced)) {
+		LOG_L(L_WARNING, "Usage: /reloadwasmmodules [ui|rules-unsynced|gaia-unsynced|all]. Synced guests require a new match.");
+		return false;
+	}
+	pImpl->wasmReloadSelection = environment;
+	pImpl->wasmReloadRequested = true;
+	return true;
 }
 
 void NativeInterfaceSystem::Update() {

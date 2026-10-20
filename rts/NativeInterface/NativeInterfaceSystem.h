@@ -32,6 +32,8 @@ public:
 	// Request a module reload. Once a module is active, the reload is delayed
 	// until Update() so no native callback can unload its own code or data.
 	void Reload();
+	// Queued until Update, like native reload. Synced guests cannot be selected.
+	bool ReloadWasmModules(std::string_view selection);
 	// Called by CGame after eventHandler.Update(), when native callbacks have
 	// returned and it is safe to unload a module.
 	void Update();

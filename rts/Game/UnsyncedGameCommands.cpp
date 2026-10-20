@@ -2473,6 +2473,16 @@ public:
 	}
 };
 
+class ReloadWasmModules : public IUnsyncedActionExecutor {
+public:
+	ReloadWasmModules() : IUnsyncedActionExecutor("ReloadWasmModules", "Reloads local Wasm modules [ui|rules-unsynced|gaia-unsynced|all]") {}
+	bool Execute(const UnsyncedAction& action) const final {
+		if (NativeInterfaceSystem::s_instance)
+			return NativeInterfaceSystem::s_instance->ReloadWasmModules(action.GetArgs());
+		return false;
+	}
+};
+
 
 class IncreaseGUIOpacityActionExecutor : public IUnsyncedActionExecutor {
 public:
@@ -4193,6 +4203,7 @@ void UnsyncedGameCommands::AddDefaultActionExecutors()
 	AddActionExecutor(AllocActionExecutor<QuitActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<ReloadActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<ReloadNativeModules>());
+	AddActionExecutor(AllocActionExecutor<ReloadWasmModules>());
 	AddActionExecutor(AllocActionExecutor<IncreaseGUIOpacityActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<DecreaseGUIOpacityActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<ScreenShotActionExecutor>());

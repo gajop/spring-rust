@@ -40,6 +40,12 @@ public:
 	bool LoadManifests(const std::vector<WasmManifestSource>& sources,
 		const ArchiveModuleBytesProvider& bytesProvider, std::string& error);
 	bool UnloadModule(std::string_view moduleName);
+	// Local development reload. All selects only UI/RulesUnsynced/GaiaUnsynced;
+	// simulation-capable guests are never restarted from an unsynced command.
+	using ReloadBytesProvider = std::function<bool(const WasmModuleDescriptor&,
+		std::vector<std::uint8_t>&, std::string&)>;
+	bool ReloadLocalModules(WasmEnvironment selection, const ReloadBytesProvider& provider,
+		std::string& error);
 	void UnloadAll();
 	void Update();
 	// Advance every synced Core guest exactly once at the simulation frame
@@ -149,6 +155,8 @@ private:
 	std::unique_ptr<WasmRuntime> runtime;
 	NativeInterface* nativeInterface = nullptr;
 	std::vector<CoreModuleRecord> coreModules;
+	// Keep the last good binaries after a fault so a developer can repair and reload them.
+	std::vector<WasmModuleDescriptor> localReloadModules;
 	std::vector<void*> deferredRmlOwners;
 	CoreSubscriberIndex coreSubscribers;
 	bool coreSubscribersDirty = true;

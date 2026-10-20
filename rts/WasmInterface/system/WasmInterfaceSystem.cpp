@@ -11,6 +11,7 @@
 #include "Sim/Units/Scripts/UnitScriptEngine.h"
 #include "System/Log/ILog.h"
 #include "WasmCoreHost.h"
+#include "WasmInterface/core/host/WasmCoreValidation.h"
 #include "NativeInterface/api/RmlUi.h"
 #include "Rml/Backends/RmlUi_Backend.h"
 
@@ -37,6 +38,11 @@ namespace {
 		if (left.archive != right.archive)
 			return left.archive < right.archive;
 		return left.name < right.name;
+	}
+	bool LocalReloadable(WasmEnvironment environment)
+	{
+		return environment == WasmEnvironment::UI || environment == WasmEnvironment::RulesUnsynced ||
+			environment == WasmEnvironment::GaiaUnsynced;
 	}
 }
 
@@ -101,6 +107,10 @@ bool WasmInterfaceSystem::LoadModule(WasmModuleDescriptor descriptor, std::strin
 	}
 	if (unitScriptEngine != nullptr)
 		unitScriptEngine->AddCusBackend(module.host);
+	if (LocalReloadable(module.descriptor.environment)) {
+		std::erase_if(localReloadModules, [&](const auto& old) { return old.name == module.descriptor.name; });
+		localReloadModules.push_back(module.descriptor);
+	}
 	coreModules.push_back(std::move(module));
 	std::stable_sort(coreModules.begin(), coreModules.end(),
 		[](const CoreModuleRecord& left, const CoreModuleRecord& right) {
@@ -198,6 +208,7 @@ bool WasmInterfaceSystem::LoadManifests(const std::vector<WasmManifestSource>& s
 
 bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 {
+	std::erase_if(localReloadModules, [moduleName](const auto& module) { return module.name == moduleName; });
 	const auto iter = std::find_if(coreModules.begin(), coreModules.end(),
 		[moduleName](const CoreModuleRecord& module) {
 			return module.descriptor.name == moduleName;
@@ -215,6 +226,7 @@ bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 
 void WasmInterfaceSystem::UnloadAll()
 {
+	localReloadModules.clear();
 	for (CoreModuleRecord& module : coreModules) {
 		ShutdownAndClearModule(module);
 		if (unitScriptEngine != nullptr)
@@ -223,6 +235,60 @@ void WasmInterfaceSystem::UnloadAll()
 	}
 	coreModules.clear();
 	InvalidateSubscribers();
+}
+
+bool WasmInterfaceSystem::ReloadLocalModules(WasmEnvironment selection,
+	const ReloadBytesProvider& provider, std::string& error)
+{
+	if ((selection != WasmEnvironment::All && !LocalReloadable(selection)) || !provider) {
+		error = "reloadwasmmodules accepts ui, rules-unsynced, gaia-unsynced or all (local worlds only)";
+		return false;
+	}
+	ProcessDeferredRmlCleanup();
+	std::vector<WasmModuleDescriptor> previous;
+	for (const auto& descriptor : localReloadModules) {
+		if (selection == WasmEnvironment::All || descriptor.environment == selection)
+			previous.push_back(descriptor);
+	}
+	std::stable_sort(previous.begin(), previous.end(), DescriptorLess);
+	if (previous.empty()) {
+		error = "no local Wasm modules match this reload";
+		return false;
+	}
+	// Read and validate every replacement before tearing down any working UI.
+	auto replacements = previous;
+	for (auto& descriptor : replacements) {
+		if (!provider(descriptor, descriptor.bytes, error))
+			return false;
+		const auto validation = recoil::wasm::core::ValidateModule(descriptor.bytes,
+			descriptor.environment, descriptor.interfaceVersion, runtime->Config());
+		if (!validation.valid) {
+			error = descriptor.name + ": " + validation.error;
+			return false;
+		}
+	}
+	for (const auto& descriptor : previous)
+		UnloadModule(descriptor.name);
+	for (const auto& descriptor : replacements) {
+		if (LoadModule(descriptor, error))
+			continue;
+		const std::string reloadError = error;
+		for (const auto& loaded : replacements)
+			UnloadModule(loaded.name);
+		bool restored = true;
+		for (const auto& old : previous) {
+			std::string restoreError;
+			if (!LoadModule(old, restoreError)) {
+				restored = false;
+				LOG_L(L_ERROR, "[ReloadWasmModules] Could not restore %s: %s", old.name.c_str(), restoreError.c_str());
+			}
+		}
+		error = (restored ? "replacement failed; restored previous binaries: " :
+			"replacement failed; could not restore every previous module: ") + reloadError;
+		return false;
+	}
+	LOG_L(L_NOTICE, "[ReloadWasmModules] Reloaded %zu local module(s); guest state reinitialized", replacements.size());
+	return true;
 }
 
 void WasmInterfaceSystem::Update()
