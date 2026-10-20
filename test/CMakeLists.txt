@@ -619,6 +619,7 @@ endif()
 			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Sim/Misc/testQuadField.cpp"
 			"${ENGINE_SOURCE_DIR}/Sim/Misc/QuadField.cpp"
 			"${ENGINE_SOURCE_DIR}/System/MemoryOverride.cpp"
+			"${ENGINE_SOURCE_DIR}/System/float3.cpp"
 			${test_Common_sources}
 		)
 	set(test_libs
