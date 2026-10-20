@@ -141,10 +141,6 @@ bool HasThreads() { return !workerThreads[false].empty(); }
 
 static bool DoTask(int tid, bool async)
 {
-	#ifndef UNIT_TEST
-	SCOPED_MT_TIMER("ThreadPool::RunTask");
-	#endif
-
 	ITaskGroup* tg = nullptr;
 
 	// any external thread calling WaitForFinished will have
@@ -172,6 +168,12 @@ static bool DoTask(int tid, bool async)
 		#else
 		if (tryDequeue(tg)) {
 		#endif
+			// Measure dequeued work, not empty scheduler polls. The latter can
+			// spin very frequently and the timer itself reads the clock.
+			#ifndef UNIT_TEST
+			SCOPED_MT_TIMER("ThreadPool::RunTask");
+			#endif
+
 			// inform other workers when there is global work to do
 			// waking is an expensive kernel-syscall, so better shift this
 			// cost to the workers too (the main thread only wakes when ALL
@@ -210,6 +212,10 @@ static bool DoTask(int tid, bool async)
 		#else
 		while (tryDequeue(tg)) {
 		#endif
+			#ifndef UNIT_TEST
+			SCOPED_MT_TIMER("ThreadPool::RunTask");
+			#endif
+
 			assert(!async || tg->IsAsyncTask());
 
 			const bool queuedSlice = tg->IsSliceTask() && !tg->SelfDelete();

@@ -1,23 +1,21 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
-#ifdef TRACY_ENABLE
-
 #include "Backend.h"
 #include "LogUtil.h"
 #include "Level.h"
+#ifdef TRACY_ENABLE
 #include <fmt/format.h>
+#include "System/Misc/TracyDefs.h"
+#endif
 
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include "System/Misc/TracyDefs.h"
 
 static void log_sink_record_tracy(int level, const char* section, const char* record)
 {
-	auto buf = fmt::format("[{}:{}][{}] {}", log_util_levelToString(log_util_getNearestLevel(level)),
-	                       level, section, record);
 	// Profile-window messages bridge perf's monotonic clock and Tracy's clock.
 	// Opt-in and local to the launched process; no synchronized state is changed.
 	static const char* const markersPath = std::getenv("SPRING_PROFILE_MARKERS");
@@ -31,6 +29,11 @@ static void log_sink_record_tracy(int level, const char* section, const char* re
 				std::fclose(file);
 			}
 		}
+	}
+#ifdef TRACY_ENABLE
+	auto buf = fmt::format("[{}:{}][{}] {}", log_util_levelToString(log_util_getNearestLevel(level)),
+	                       level, section, record);
+	if (markersPath != nullptr) {
 		// Routine diagnostic logs must not generate thousands of symbol requests.
 		// Preserve stack capture for warnings/errors and outside profile mode.
 		if (level < LOG_LEVEL_WARNING) {
@@ -39,6 +42,10 @@ static void log_sink_record_tracy(int level, const char* section, const char* re
 		}
 	}
 	TracyMessageS(buf.c_str(), buf.size(), 30);
+#else
+	(void)level;
+	(void)section;
+#endif
 }
 
 namespace {
@@ -46,6 +53,10 @@ namespace {
 /// Auto-registers the sink defined in this file before main() is called
 struct TracySinkRegistrator {
 	TracySinkRegistrator() {
+#ifndef TRACY_ENABLE
+		if (std::getenv("SPRING_PROFILE_MARKERS") == nullptr)
+			return;
+#endif
 		log_backend_registerSink(&log_sink_record_tracy);
 	}
 	~TracySinkRegistrator() {
@@ -54,5 +65,3 @@ struct TracySinkRegistrator {
 } tracySinkRegistrator;
 
 }
-
-#endif
