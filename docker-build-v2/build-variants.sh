@@ -39,7 +39,7 @@ declare -A VARIANT_FLAGS=(
 	# Frame pointers let perf unwind with --call-graph fp through Wasm JIT
 	# frames (Cranelift keeps frame pointers; DWARF unwinding has no tables
 	# for JIT code), at a small cost that only this variant pays.
-	[tracy]="-DTRACY_ENABLE=ON -DTRACY_ON_DEMAND=ON -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O3\ -g\ -DNDEBUG\ -fno-omit-frame-pointer\ -mno-omit-leaf-frame-pointer -DCMAKE_C_FLAGS_RELWITHDEBINFO=-O3\ -g\ -DNDEBUG\ -fno-omit-frame-pointer\ -mno-omit-leaf-frame-pointer"
+	[tracy]="-DTRACY_ENABLE=ON -DTRACY_ON_DEMAND=ON -DTRACY_NO_CRASH_HANDLER=ON -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O3\ -g\ -DNDEBUG\ -fno-omit-frame-pointer\ -mno-omit-leaf-frame-pointer -DCMAKE_C_FLAGS_RELWITHDEBINFO=-O3\ -g\ -DNDEBUG\ -fno-omit-frame-pointer\ -mno-omit-leaf-frame-pointer"
 	[asan]="-DUSE_ASAN=ON -DUSE_MIMALLOC=OFF -DTRACY_ENABLE=OFF"
 )
 

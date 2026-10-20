@@ -178,6 +178,10 @@ option(TRACY_ON_DEMAND "Enable tracy profiling" ON)
 # raw malloc have to be used with care.
 option(TRACY_PROFILE_MEMORY "Profile memory allocations" OFF)
 
+# Wasmtime uses fault signals for guest traps. On-demand Tracy connects after
+# runtime initialization, so its non-chaining crash handler must stay disabled.
+option(TRACY_NO_CRASH_HANDLER "Disable Tracy crash handling for Wasmtime signal traps" ON)
+
 add_subdirectory(tracy)
 
 if (TRACY_ENABLE AND TRACY_PROFILE_MEMORY)

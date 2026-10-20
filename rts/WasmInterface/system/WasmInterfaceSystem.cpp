@@ -215,9 +215,11 @@ bool WasmInterfaceSystem::UnloadModule(std::string_view moduleName)
 		});
 	if (iter == coreModules.end())
 		return false;
-	ShutdownAndClearModule(*iter);
+	// CUS detach is a guest call: finish it before SDK Shutdown releases the
+	// module instance. Keep the host, module record and Rml services alive.
 	if (unitScriptEngine != nullptr)
 		unitScriptEngine->RemoveCusBackend(iter->host);
+	ShutdownAndClearModule(*iter);
 	coreModules.erase(iter);
 	WasmCoreHost::Unload(moduleName);
 	InvalidateSubscribers();
@@ -228,9 +230,10 @@ void WasmInterfaceSystem::UnloadAll()
 {
 	localReloadModules.clear();
 	for (CoreModuleRecord& module : coreModules) {
-		ShutdownAndClearModule(module);
+		// Match native event-client teardown: detach CUS while its guest lives.
 		if (unitScriptEngine != nullptr)
 			unitScriptEngine->RemoveCusBackend(module.host);
+		ShutdownAndClearModule(module);
 		WasmCoreHost::Unload(module.descriptor.name);
 	}
 	coreModules.clear();
