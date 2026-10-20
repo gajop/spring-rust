@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "UnitDrawerData.h"
+#include "UnitIconProjection.h"
 
 #include "System/MemPoolTypes.h"
 #include "System/ContainerUtil.h"
@@ -230,11 +231,12 @@ void CUnitDrawerData::Update()
 
 	iconZoomDist = dist;
 
-	const auto updateBody = [this](CUnit* u) {
+	const UnitIconProjection iconProjection(camera->GetViewProjectionMatrix(), camera->GetRight(), camera->viewport[2]);
+	const auto updateBody = [this, &iconProjection](CUnit* u) {
 		UpdateDrawPos(u);
 
 		if (useScreenIcons)
-			UpdateUnitIconStateScreen(u);
+			UpdateUnitIconStateScreen(u, iconProjection);
 		else
 			UpdateUnitIconState(u);
 
@@ -356,7 +358,7 @@ void CUnitDrawerData::UpdateUnitIconState(CUnit* unit)
 	}
 }
 
-void CUnitDrawerData::UpdateUnitIconStateScreen(CUnit* unit)
+void CUnitDrawerData::UpdateUnitIconStateScreen(CUnit* unit, const UnitIconProjection& projection)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	if (game->hideInterface && iconHideWithUI) // icons are hidden with UI
@@ -383,13 +385,9 @@ void CUnitDrawerData::UpdateUnitIconStateScreen(CUnit* unit)
 	float limit = iconSizeBase / 2 * iconSizeMult;
 
 	// calculate unit's radius in screen space and compare with the size of the icon
-	float3 pos = unit->pos;
-	float3 radiusPos = pos + camera->right * unit->radius;
+	const float projectedRadius = projection.GetProjectedRadius(unit->pos, unit->radius);
 
-	pos = camera->CalcViewPortCoordinates(pos);
-	radiusPos = camera->CalcViewPortCoordinates(radiusPos);
-
-	unit->iconRadius = unit->radius * ((limit * 0.9) / std::abs(pos.x - radiusPos.x)); // used for clicking on iconified units (world space!!!)
+	unit->iconRadius = unit->radius * ((limit * 0.9) / projectedRadius); // used for clicking on iconified units (world space!!!)
 
 	if (!(losStatus & LOS_INLOS) && !gu->spectatingFullView) // no LOS on unit
 	{
@@ -399,7 +397,7 @@ void CUnitDrawerData::UpdateUnitIconStateScreen(CUnit* unit)
 
 	// don't render unit's model if it is smaller than icon by 10% in screen space
 	// render it anyway in case icon isn't completely opaque (below FadeStart distance)
-	unit->SetIsIcon(iconZoomDist / iconSizeMult > iconFadeStart && std::abs(pos.x - radiusPos.x) < limit * 0.9);
+	unit->SetIsIcon(iconZoomDist / iconSizeMult > iconFadeStart && projectedRadius < limit * 0.9);
 }
 
 void CUnitDrawerData::UpdateDrawPos(CUnit* u)
@@ -431,6 +429,12 @@ void CUnitDrawerData::UpdateObjectDrawFlags(CSolidObject* o) const
 	if (!worldDrawBounds::Contains(u->drawPos))
 		return;
 
+	// These filters do not depend on the render pass or camera.
+	if (u->noDraw || u->GetIsIcon() || u->IsInVoid())
+		return;
+	if (!(u->losStatus[gu->myAllyTeam] & LOS_INLOS) && !gu->spectatingFullView)
+		return;
+
 	for (uint32_t camType = CCamera::CAMTYPE_PLAYER; camType < CCamera::CAMTYPE_ENVMAP; ++camType) {
 		if (camType == CCamera::CAMTYPE_UWREFL && !IWater::GetWater()->CanDrawReflectionPass())
 			continue;
@@ -439,19 +443,6 @@ void CUnitDrawerData::UpdateObjectDrawFlags(CSolidObject* o) const
 			continue;
 
 		const CCamera* cam = CCameraHandler::GetCamera(camType);
-
-		if (u->noDraw)
-			continue;
-
-		// unit will be drawn as icon instead
-		if (u->GetIsIcon())
-			continue;
-
-		if (u->IsInVoid())
-			continue;
-
-		if (!(u->losStatus[gu->myAllyTeam] & LOS_INLOS) && !gu->spectatingFullView)
-			continue;
 
 		if (!cam->InView(u->drawMidPos, u->GetDrawRadius()))
 			continue;

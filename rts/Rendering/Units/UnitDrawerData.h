@@ -10,6 +10,7 @@
 
 struct S3DModel;
 class CUnitDrawer;
+class UnitIconProjection;
 struct UnitDef;
 
 namespace GL {
@@ -185,7 +186,7 @@ private:
 	void UpdateTempDrawUnits(std::vector<TempDrawUnit>& tempDrawUnits);
 
 	void UpdateUnitIconState(CUnit* unit);
-	void UpdateUnitIconStateScreen(CUnit* unit);
+	void UpdateUnitIconStateScreen(CUnit* unit, const UnitIconProjection& projection);
 	static void UpdateDrawPos(CUnit* unit);
 
 	/// Returns true if the given unit should be drawn as icon in the current frame.
