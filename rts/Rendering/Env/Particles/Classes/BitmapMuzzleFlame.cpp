@@ -2,6 +2,8 @@
 
 #include "BitmapMuzzleFlame.h"
 
+#include <cmath>
+
 #include "Sim/Misc/GlobalSynced.h"
 #include "Game/GlobalUnsynced.h"
 #include "Game/Camera.h"
@@ -78,6 +80,19 @@ void CBitmapMuzzleFlame::Serialize(creg::ISerializer* s)
 	}
 }
 
+float CBitmapMuzzleFlame::GetDrawRadius() const
+{
+	// Negative dimensions reverse texture orientation; they still occupy space.
+	// Compute this before culling, including growth while the effect is offscreen.
+	const float life = (gs->frameNum - createFrame + globalRendering->timeOffset) * invttl;
+	const float growth = 1.0f + sizeGrowth * (1.0f - Square(1.0f - life));
+	const float halfWidth = std::fabs(size * growth);
+	const float extent = std::fabs(length * growth);
+	const float sideRadius = std::hypot(halfWidth, extent);
+	const float frontRadius = std::hypot(halfWidth, halfWidth) + std::fabs(frontOffset) * extent;
+	return std::max(sideRadius, frontRadius);
+}
+
 void CBitmapMuzzleFlame::Draw()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -92,8 +107,6 @@ void CBitmapMuzzleFlame::Draw()
 
 	const float isize = size * (igrowth + 1.0f);
 	const float ilength = length * (igrowth + 1.0f);
-
-	SetDrawRadius(std::max(isize, ilength));
 
 	unsigned char col[4];
 	colorMap->GetColor(col, life);
@@ -185,8 +198,6 @@ void CBitmapMuzzleFlame::Init(const CUnit* owner, const float3& offset)
 	CProjectile::Init(owner, offset);
 
 	invttl = 1.0f / ttl;
-
-	SetDrawRadius(std::max(size, length));
 
 	validTextures[1] = IsValidTexture(frontTexture);
 	validTextures[2] = IsValidTexture(sideTexture);

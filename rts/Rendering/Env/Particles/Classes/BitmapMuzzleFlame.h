@@ -1,7 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
-#ifndef BITMAP_MUZZLE_FLAME_H
-#define BITMAP_MUZZLE_FLAME_H
+#pragma once
 
 #include "Sim/Projectiles/Projectile.h"
 
@@ -23,6 +22,7 @@ public:
 	void Init(const CUnit* owner, const float3& offset) override;
 
 	int GetProjectilesCount() const override;
+	float GetDrawRadius() const override;
 
 	static bool GetMemberInfo(SExpGenSpawnableMemberInfo& memberInfo);
 
@@ -46,5 +46,3 @@ private:
 
 	bool fixedSideDir;
 };
-
-#endif // BITMAP_MUZZLE_FLAME_H
