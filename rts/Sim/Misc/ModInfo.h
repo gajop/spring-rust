@@ -261,6 +261,9 @@ public:
 	int wasmMemoryLimitMiB;
 	/// Game-owned checksum cadence; diagnostics still log every frame.
 	int wasmStateHashInterval;
+	/// Wasm modules may use fixed-width SIMD (simd128): system.WasmSimd in
+	/// gamedata/modrules.lua; default off. Relaxed SIMD is never enabled here.
+	bool wasmSimd;
 	static constexpr int WASM_MEMORY_LIMIT_MIB_DEFAULT = 512;
 	static constexpr int WASM_MEMORY_LIMIT_MIB_MAX = 4096;
 

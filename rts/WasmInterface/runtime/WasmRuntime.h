@@ -51,6 +51,11 @@ struct WasmRuntimeConfig {
 	std::uint64_t hostWorkLimit = 10'000'000;
 	std::size_t resultBytesLimit = 16u * 1024u * 1024u;
 	bool allowThreads = false;
+	// Fixed-width SIMD (simd128). Its lane arithmetic is IEEE-exact and NaN
+	// payloads are canonicalized, so it is deterministic; a game opts in with
+	// modrules system.WasmSimd. Off, a module using SIMD fails validation.
+	bool allowSimd = false;
+	// Relaxed SIMD has implementation-defined results; synced games keep it off.
 	bool allowRelaxedSimd = false;
 	bool allowWasi = false;
 	bool allowAotDeserialization = false;

@@ -76,6 +76,8 @@ namespace {
 		config.maxMemoryPages = static_cast<std::uint32_t>(modInfo.wasmMemoryLimitMiB) * 16u;
 		LOG("[Wasm] linear memory limit per module: %d MiB (modrules system.WasmMemoryLimit)",
 			modInfo.wasmMemoryLimitMiB);
+		config.allowSimd = modInfo.wasmSimd;
+		LOG("[Wasm] fixed-width SIMD: %s (modrules system.WasmSimd)", config.allowSimd ? "allowed" : "off");
 		config.instructionFuel = ReadWasmLimitOption("wasm_instruction_fuel", config.instructionFuel);
 		config.hostWorkLimit = ReadWasmLimitOption("wasm_host_work_limit", config.hostWorkLimit);
 		return config;

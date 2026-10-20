@@ -147,6 +147,7 @@ void CModInfo::ResetState()
 		SLuaAllocLimit::MAX_ALLOC_BYTES = SLuaAllocLimit::MAX_ALLOC_BYTES_DEFAULT;
 		wasmMemoryLimitMiB = WASM_MEMORY_LIMIT_MIB_DEFAULT;
 		wasmStateHashInterval = 0; // Full-memory scans are diagnostic work, opt-in only.
+		wasmSimd = false;
 
 		prefaultObjectPools = true;
 
@@ -219,6 +220,7 @@ void CModInfo::Init(const std::string& modFileName)
 		// Per Core Wasm module, in megabytes; wasm32 addresses at most 4 GiB.
 		wasmMemoryLimitMiB = system.GetInt("WasmMemoryLimit", wasmMemoryLimitMiB);
 		wasmStateHashInterval = std::max(0, system.GetInt("WasmStateHashInterval", wasmStateHashInterval));
+		wasmSimd = system.GetBool("WasmSimd", wasmSimd);
 		if (wasmMemoryLimitMiB < 1 || wasmMemoryLimitMiB > WASM_MEMORY_LIMIT_MIB_MAX) {
 			LOG_L(L_WARNING, "[ModInfo] modrules system.WasmMemoryLimit=%d is outside 1..%d MiB; using %d",
 				wasmMemoryLimitMiB, WASM_MEMORY_LIMIT_MIB_MAX, WASM_MEMORY_LIMIT_MIB_DEFAULT);

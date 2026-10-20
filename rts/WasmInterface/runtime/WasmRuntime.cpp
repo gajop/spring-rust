@@ -601,6 +601,8 @@ WasmRuntime::WasmRuntime(WasmRuntimeConfig config)
 		wasmtime_config_signals_based_traps_set(wasmtimeConfig, true);
 		wasmtime_config_wasm_threads_set(wasmtimeConfig, config.allowThreads);
 		wasmtime_config_shared_memory_set(wasmtimeConfig, config.allowThreads);
+			// Explicit rather than Wasmtime's default: SIMD is a per-game choice.
+			wasmtime_config_wasm_simd_set(wasmtimeConfig, config.allowSimd || config.allowRelaxedSimd);
 			wasmtime_config_wasm_relaxed_simd_set(wasmtimeConfig, config.allowRelaxedSimd);
 			wasmtime_config_wasm_relaxed_simd_deterministic_set(wasmtimeConfig, true);
 			wasmtime_config_cranelift_nan_canonicalization_set(wasmtimeConfig, true);
@@ -802,6 +804,7 @@ std::string WasmRuntime::ConfigurationIdentity() const
 		";host-work=" + std::to_string(config.hostWorkLimit) +
 		";result-bytes=" + std::to_string(config.resultBytesLimit) +
 		";threads=" + std::to_string(config.allowThreads ? 1 : 0) +
+		";simd=" + std::to_string(config.allowSimd ? 1 : 0) +
 		";relaxed-simd=" + std::to_string(config.allowRelaxedSimd ? 1 : 0) +
 		";nan-canonicalization=1" +
 		";wasi=" + std::to_string(config.allowWasi ? 1 : 0) +
