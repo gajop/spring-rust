@@ -5,6 +5,7 @@
 #include "Game/GameHelper.h"
 #include "Game/UI/CommandColors.h"
 #include "Game/WaitCommandsAI.h"
+#include "Game/WorldDrawBounds.h"
 #include "Map/Ground.h"
 #include "Rendering/GL/glExtra.h"
 #include "Rendering/GL/myGL.h"
@@ -43,6 +44,9 @@ CommandDrawer* CommandDrawer::GetInstance() {
 
 
 void CommandDrawer::Draw(const CCommandAI* cai, int queueDrawDepth) const {
+	if (!worldDrawBounds::Contains(cai->owner->drawPos))
+		return;
+
 	// note: {Air,Builder}CAI inherit from MobileCAI, so test that last
 	if ((dynamic_cast<const     CAirCAI*>(cai)) != nullptr) {     DrawAirCAICommands(static_cast<const     CAirCAI*>(cai), queueDrawDepth); return; }
 	if ((dynamic_cast<const CBuilderCAI*>(cai)) != nullptr) { DrawBuilderCAICommands(static_cast<const CBuilderCAI*>(cai), queueDrawDepth); return; }
