@@ -127,3 +127,5 @@ Differences belong mainly in build/configuration:
 - module packaging.
 
 The same gameplay code should not need to understand NativeInterface query/result structs or WIT transport mechanics.
+
+Proposal for one Rust SDK with per-environment crates: [Rust SDK: one crate, per-environment surfaces](recoil_rust_sdk_unification.md).

@@ -1,318 +1,270 @@
-# One Rust SDK for native and Wasm
+# Rust SDK: one crate, per-environment surfaces
 
-The optional `spring-sdk` crate lives on `sdk-unification`, separate from
-`rust-wip`. Consumer ports live in dedicated worktrees. Original game,
-SpringBoard and menu checkouts retain their current APIs. Native loading supports
-menus and in-game `All` modules, including initialization on the loading thread.
+**2026-10-17**
 
-## Using it
+Status: proposal. Docs only; no code changed. Counts below were taken at `rust-wip` `d56809ab2d` from `rts/wasm/generated/model.json` and `rts/wasm/generated/sdk/core_environments.rs`.
 
-```rust
-fn update(
-    app: &App,
-    spring: &mut Spring<'_, Menu>,
-    delta_seconds: f32,
-) -> Result<()> {
-    app.update(spring, delta_seconds)
-}
-spring_sdk::export_update!(APP, update);
+**Summary.** NativeInterface is already one semantic API, and the Wasm adapters are generated from it ([architecture](recoil_wasm_architecture.md), "Rust module API"). The Rust layer is still split in two. `spring`, the Wasm guest SDK, gates almost every module on `target_arch = "wasm32"`. `spring-native` is a different API: it uses handles instead of free functions, raw `i32` IDs instead of typed IDs, a `NativeModule` trait instead of exported callins, and its own typed RmlUi data model. This proposal does three things:
+
+- It makes `spring` the one SDK, with the backend chosen by target: Wasm imports on `wasm32`, `spring-native-sys` elsewhere.
+- It moves the per-environment namespaces that codegen already emits into their own crates: `spring-synced`, `spring-unsynced`, `spring-ui`, `spring-menu`, `spring-intro`, plus `spring-all` for tools. Code in one environment then cannot name another environment's calls.
+- **Target and environment are independent.** Every environment crate, `spring-all` included, builds for both `wasm32` and native. Whether a module ships as Wasm or native is a per-module build choice, for example a native UI with Wasm rules. It never follows from its environment.
+- **The crates are generated, not hand-maintained.** The generator writes them from the function and environment sets in `model.json`, the same way it writes today's SDK; only the core types and the shared typed layers are written by hand.
+- It generates sealed capability traits from the environment sets, so that shared crates are generic over the environment and the check reaches through them.
+
+Ship Game's menu, built both ways from one source, is the gate before the menu goes native (Ship Game's [LAN proposal](/home/gajop/projects/spring-projects/ship-game.sdd/docs/proposals/multiplayer/lan.md), items U1 and N1).
+
+No dedicated doc existed before this one. Earlier docs state the goal without a design:
+
+- [Execution Environments](recoil_wasm_execution_environments.md), "Native versus Wasm source experience";
+- [Architecture](recoil_wasm_architecture.md) §4;
+- the optional `spring-module/` façade in the [Implementation Plan](recoil_wasm_implementation_plan.md) layout.
+
+This doc extends them and does not restate them.
+
+## Current state
+
+### Crates (`rust/crates`)
+
+| Crate | Role today | Fate |
+|---|---|---|
+| `spring` | Wasm guest SDK, `no_std` with an `alloc` feature. Hand-written fast helpers (`units_query.rs`, `rml_ui.rs`, …). Generated Core-ABI imports and owned wrappers come in through `build.rs` from `rts/wasm/generated/sdk/*`. The flat surface re-exports every function. `spring::{rules_synced, rules_unsynced, gaia_synced, gaia_unsynced, ui, menu, intro}` are per-environment re-export modules. Most modules are `#[cfg(target_arch = "wasm32")]`; a native build of `spring` contains only `cus`, `callback`, constants and types. | Becomes the core crate: types plus both backends |
+| `spring-native` | Safe façade over `spring-native-sys`. `NativeInterfaceRef` handle methods (`interface.units_query().get_team_units(0)`), `Result<_, Error{code,message}>`, `sys::Float3` in results, `NativeModule` trait plus `export_module!`, typed `RmlDataModel::bind::<T>()`. Depends on `spring` only for `cus`. | Compatibility shim over `spring-all`, then removed |
+| `spring-native-sys` | bindgen over `NativeInterface.h` | Unchanged; becomes the native backend's only dependency |
+| `spring-native-codegen`, `spring-api-codegen` | libclang model plus renderers: `render_core_native.rs` for native Rust, `render_core_wasm_*.rs` for the guest SDK, host adapters and registry. `spring-api-codegen` is the facade. | One `render_rust_sdk` renderer emits both backends (below) |
+| `spring-addons` | Gadget, widget and unsynced-addon handlers, `export_rules_gadgets!` / `export_ui_widgets!` / `export_rules_unsynced_addons!`, which also emit `SPRING_ENV_MASK` | Generic over the environment; builds natively |
+| `spring-skirmish-ai(-sys)` | Native C AI interface, not NativeInterface | Out of scope |
+| `spring-wasm-typed-host` | Only a stale `target/` directory | Out of scope |
+
+### Environment boundaries
+
+- **Per-function environment sets come from the model.** `spring-native-codegen/src/lua_loader.rs` derives `environments` for each function from the Lua loaders, and `model.rs` rejects mutating functions in unsynced environments. In the model, 1,425 functions fall into only **9 distinct environment sets**, and 132 callins into 10. Rules and Gaia always appear together.
+
+  | Environment set | Functions | Main families |
+  |---|---|---|
+  | all 7 | 69 | vfs, math_extra, debug_input, encoding |
+  | all except intro | 3 | system_control |
+  | in-game: rules, gaia (synced and unsynced) and ui | 483 | unsynced_ctrl, units_info, game, features |
+  | synced (rules, gaia) | 229 | unit_control, feature_control, move_ctrl, terrain_control |
+  | unsynced and ui | 187 | display, unit_rendering, input, unsynced_read |
+  | unsynced, ui, menu and intro | 266 | gfx, vfs |
+  | unsynced, ui and menu | 184 | rml_ui |
+  | menu and ui | 3 | vfs |
+  | unsynced, ui and intro | 1 | system_control |
+
+  Family names do not tell you the environment. For example, `unsynced_ctrl::set_unit_no_draw` is legal in synced code, because the synced Lua state also loads `LuaUnsyncedCtrl` (`rts/Lua/LuaHandleSynced.cpp:533`). Surfaces must therefore be cut by environment set, not by NativeInterface header.
+
+- **The UI surface is the unsynced surface plus 3 VFS calls** (1,196 against 1,193). What separates UI from unsynced is the host's LOS-filtered reads (`WasmUiVisibility`) and the callins it receives, not the call surface.
+
+- **Host backstop for Wasm.** `rts/WasmInterface/core/host/WasmCoreRegistry.h` gives every import an `environmentMask`, and `WasmCoreRegistryPolicy.h` adjusts the hand-written ones. The guest must export `SPRING_ENV_MASK` (`WasmCoreValidation.cpp`), and `WasmCoreHost.cpp` requires it to equal the manifest's environment.
+
+- **Native has no per-function backstop.**
+  - The menu and intro get a family-level table: `WasmStandaloneEnvironment::Create` fills in only the menu's families and leaves the rest null.
+  - In-game native modules receive the whole `NativeInterface`.
+  - Native modules export no environment marker.
+
+- **Entry points differ by backend.**
+  - Wasm: one generated `export_<callin>!` macro per callin (`core_callins.rs`), which exports `spring:callin/<name>`; plus `export_callin_scratch!`, `export_callback_dispatch!` and `export_environment_mask!`.
+  - Native: `NativeModuleApiVersion` and `InitializeNativeModule` from `export_module!`, and C symbols that `NativeInterfaceEventClient::LoadSymbols` resolves.
+
+### How Ship Game uses it (`/home/gajop/projects/spring-projects/ship-game.sdd/wasm-src`)
+
+| Crate | Environment | `spring` use |
+|---|---|---|
+| `rules-synced` | rules synced | Flat `spring::*` and `spring::rules_synced::*` mixed; `spring-addons` gadgets; `export_core_cus!`; `export_allow_*!` |
+| `rules-unsynced` | rules unsynced | Flat and `spring::rules_unsynced::*`; `fx`, `fx-recoil` |
+| `ui` | UI | Flat `gfx`, `camera`, `selection`, `rml_ui`; `export_ui_widgets!` |
+| `menu` | menu | `use spring::{gfx, rml_ui as rml, system_control}`. Flat RmlUi handle calls (`data_model_bind_{int,bool,string,rows,event}`, `data_model_set_*`, `data_model_current_value`); its own `export_callback_dispatch!(dispatch)` and per-callin exports. Every module sits behind `cfg(target_arch = "wasm32")` (`menu/src/lib.rs:7-11`) |
+| `shipcore` | shared | `spring` is optional behind feature `engine`. With it on, the build includes unsynced and UI calls (`visibility_view.rs`, `region_sky.rs`); rules-synced turns it on too, though it only needs `options` and `drawn` |
+| `fx-recoil` | unsynced or UI | Picks the environment with a Cargo feature: `use spring::rules_unsynced as env` or `use spring::ui as env` (`crates/fx-recoil/src/lib.rs:35-38`) |
+| `fx`, `launch` | pure | No `spring` |
+
+Cross-environment use today. Each one compiles, and the host accepts it because the import is legal in both environments:
+
+- `ui/src/navigation.rs:4` and `ui/src/nav_debug.rs:10` use `spring::rules_unsynced::gfx` from the UI module.
+- `ui/src/hud/selection.rs:338` hand-rolls `#[unsafe(export_name = "spring:callin/command-notify")]`, because the widget SDK lacks CommandNotify.
+
+The flat surface makes every environment's calls nameable everywhere. The per-environment modules only help where people use them.
+
+The engine crates are pinned in two places:
+
+- `wasm-src/Cargo.toml` takes `spring` and `spring-addons` from git `gajop/spring-rust` branch `rust-wip`, with `features = ["alloc"]`.
+- The gitignored root `/home/gajop/projects/spring-projects/ship-game.sdd/.cargo/config.toml`, written by `just setup-dev-engine`, patches them to the local `spring-bar` paths.
+
+`wasm-src/.cargo/config.toml` sets `[build] target = "wasm32-unknown-unknown"`, and only for that target sets the cfgs `spring_gfx_readback` and `spring_vfs_range`. The release profile has `panic = "abort"`.
+
+### Where the two APIs differ
+
+| Concern | `spring` (Wasm) | `spring-native` | Unified rule |
+|---|---|---|---|
+| Call style | Free functions | Methods on `NativeInterfaceRef` sub-handles | Free functions. The native backend keeps the interface pointer in a process global set by `InitializeNativeModule` |
+| IDs | `impl Into<UnitId>` / `TeamId` | `i32` | Typed IDs |
+| Lists | `_into(&mut [T]) -> BufferFill` (no_std) plus owned `Vec` under `alloc` | `Vec<T>` only | Both forms on both targets. Natively, `_into` copies from the result scratch with the same truncation and `BufferFill` semantics |
+| Strings out | Length-prefixed bytes, `String::from_utf8` (invalid UTF-8 is an error) | `CStr::from_ptr(..).to_string_lossy()` (stops at NUL, lossy) | One rule from the model: length-delimited on both, with the same invalid-UTF-8 handling. The native backend must not use `CStr` where the result has a length. [Core ABI contract](impl/core_abi_contract.md) goal 7 keeps byte semantics |
+| Errors | `ApiError { code }`, `ErrorCode` | `Error { code, message }` | `spring::Error { code: ErrorCode }`; `message()` returns `Option`, which only native fills |
+| Records | Generated semantic structs | Some `sys::*` records (`sys::Float3`) | Semantic structs only, as [API & Code Generation](recoil_wasm_api_codegen.md) "Public Rust values" requires |
+| Callbacks | `RetainedCallback` ids routed through the game's `export_callback_dispatch!` | Rust closures (`bind_event<F>`) | Closures on both. On Wasm the SDK keeps the closure table and owns the dispatch export |
+| RmlUi data model | Flat handle calls generated from the model | Hand-written typed `RmlDataModel`, `RmlDataVariable<T>`, `bind_rows`, `RmlValueRef` | Generated flat calls on both, with one typed layer written once on top of them in backend-agnostic code. Native `rml_ui.rs` is retired |
+| Callins | `export_<callin>!(handler)` per callin | `NativeModule` trait, `export_module!` | Per-callin macros on both; per-environment crates only export the callins in their set |
+| Module marker | `SPRING_ENV_MASK` export | None | Both export it, and the native loader checks it |
+| Unverified API | Withheld from production imports | `unverified-api` feature | `unverified-api` on both targets, so a call cannot compile natively and fail on Wasm |
+| Panics | Trap; module unloaded | `catch_unwind` at the FFI boundary, returned as an error | Open question 4. Native needs `panic = "unwind"` |
+| Threads | One thread | Any thread can hold the pointer | Engine calls are allowed only on the engine thread. The native backend checks a thread-local flag that `InitializeNativeModule` sets and returns `ErrorCode::InvalidState` off-thread |
+
+## Design
+
+```mermaid
+flowchart TB
+    M["model.json<br/>functions, callins, env sets"] --> R["render_rust_sdk"]
+    R --> C["spring (core)<br/>types, errors, capability traits,<br/>wasm32 backend | native backend<br/>(every crate builds on both)"]
+    R --> E["spring-synced / -unsynced / -ui / -menu / -intro<br/>free functions + env marker + callin macros"]
+    R --> A["spring-all (tools)"]
+    C --> E
+    C --> A
+    E --> G["game env crate<br/>(rules-synced, ui, menu)"]
+    S["shared crate<br/>generic over E: Gfx + Game"] --> C
+    G --> S
 ```
 
-Handlers take ordinary arguments: `&str` for strings, slices for lists,
-`Float3` for positions and a command struct for commands. They return
-`Result<()>`, a value such as `Result<bool>`/`Result<String>`, or a tuple for
-multiple answers. ABI query/result structs, dummy arguments and redundant
-lengths stay inside the adapters.
+### 1. One SDK, backend chosen by target
 
-`spring` gives the handler access to engine calls, such as
-`spring.units().get_all_units()`. Native code calls the C API tables;
-Wasm code uses Core-Wasm imports. Both expose the same Rust-facing API.
-API families take `&self`, so a handler can hold `spring.units()` and
-`spring.game()` together, including across an immediate nested callin.
+- **`spring` (core)** holds:
+  - types, IDs, errors, constants (`gl`, `cmd`), logging macros and `cus`;
+  - the generated capability traits (§2);
+  - both backends behind `cfg(target_arch = "wasm32")`.
 
-## Compile time or runtime?
+  Game code never calls a backend directly. The backend modules are `#[doc(hidden)] pub mod __backend`, and a CI grep forbids that path outside the SDK crates.
+- **One renderer.** `spring-api-codegen` gains `render_rust_sdk`, which emits each function's public signature once from the semantic model, with two bodies:
+  - wasm32: today's owned wrapper over the Core-ABI import (`render_core_wasm_owned_guest.rs` and the borrowed, variable and dynamic renderers);
+  - native: today's `render_core_native.rs` body, changed to the unified types (typed IDs, semantic records, `_into`, the string rule).
 
-| Mistake or condition | Check |
-| --- | --- |
-| Synced code tries to draw | Compile time |
-| UI code tries to change synced unit state | Compile time |
-| Handler exported for the wrong environment | Compile time |
-| Borrowed Spring handle saved past its callin or sent to a worker | Compile time |
-| Wrong native interface version | Runtime, during initialization |
-| Native callback on the wrong thread | Runtime, before user code runs |
-| Use after shutdown or typed Rml model close | Runtime |
-| Team permissions, LOS and engine state | Existing engine runtime checks |
+  Signatures are identical by construction. The test is that `cargo public-api` for each environment crate shows no diff between `--target wasm32-unknown-unknown` and the host.
+- **Hand-written helpers** in `spring/src/*.rs` (for example `ground_heights` and the borrowed unit queries) get classified:
+  - (a) generate it;
+  - (b) rewrite it over public generated functions, which makes it backend-agnostic;
+  - (c) keep a Wasm fast path, but only alongside a native twin and a unit test that compares the two.
 
-Rust types distinguish rules synced/unsynced, gaia synced/unsynced, UI, menu
-and intro. `All` is available on native and Wasm: it combines these APIs and
-callins for editors, tools, single-player games and games with their own
-synchronization. It does not make arbitrary simulation changes deterministic.
-The engine still validates a compiled module's declared environment
-when loading it; a loaded file need not have been written using this SDK.
+  The generator's report lists each helper's class.
+- **`std` and `alloc`.** The native backend uses `std` internally (panic hook, thread flag). The public `alloc` feature means the same thing on both targets.
+- **Entry points.** Each environment crate provides `spring_<env>::module! { init: …, shutdown: … }`:
+  - Natively it emits `NativeModuleApiVersion` and `InitializeNativeModule`. These store the interface pointer, set the engine-thread flag and install the panic hook.
+  - On Wasm it emits nothing beyond the marker.
 
-The native adapter checks for null API tables/function pointers. This covers
-incomplete test interfaces and invalid integrations. No adapter is intentionally
-unimplemented. A matching, fully initialized engine should provide the required
-entries. A missing entry returns `NotAvailable` and should be investigated.
+  Per-callin `export_<callin>!` macros expand to the `spring:callin/<name>` export on Wasm and to the C symbol that `NativeInterfaceEventClient` loads natively, with the conversion between query/result records and semantic types. `export_callin_scratch!` does nothing natively. `spring-addons` handlers use these macros, so gadgets, widgets and the menu are written once.
+- **RmlUi.** The generated flat calls (`context_create_data_model`, `data_model_bind_*`, `data_model_set_*`, `data_model_set_rows`, `data_model_current_value`, the event-listener calls) become the shared surface. `spring::rml::DataModel` (typed `bind::<T>`, `bind_rows`, closures for `bind_event`) is written once over that surface and replaces both the native typed layer and game-side wrappers such as Ship Game's `menu/src/model.rs`.
+  - Closures on Wasm: the SDK maps `RetainedCallback` ids to boxed closures and exports `spring:callback/dispatch` itself.
+  - The listener transports registered by hand in `WasmCoreRmlUiBindings.cpp` keep their Core signatures.
+- **Migration.**
+  1. The new crates ship alongside the old surface. The flat `spring::*` surface stays behind a `legacy-flat` feature for one migration window.
+  2. `spring-native` becomes a shim: `NativeInterfaceRef` handle methods that call `spring-all`, plus a `NativeModule` adapter, so SpringBoard's native crate (`/home/gajop/projects/spring-projects/SBC.sdd/native`, about 190 files) keeps building.
+  3. SpringBoard migrates to `spring-all`; then the shim and `legacy-flat` are deleted.
 
-## Reentry and threads
+### 2. Per-environment surfaces enforced at compile time
 
-Engine calls can immediately call back into the module. The SDK preserves
-that behavior, without queuing calls or returning invented default answers.
+**Recommendation: per-environment crates for environment code, and generated sealed capability traits for shared code.** The environment marker types live only in the environment crates. The host masks stay as the runtime backstop.
 
-Handlers receive `&App` rather than one `&mut App` covering the entire module.
-Otherwise a nested callin could create a second mutable reference to the same
-state. Use separate state fields with `Cell`, `RefCell` or existing resource
-helpers, and release conflicting borrows before reentrant engine calls.
+- **Environment crates.**
+  - Each of `spring-synced` (rules and gaia), `spring-unsynced` (rules and gaia), `spring-ui`, `spring-menu` and `spring-intro` re-exports the core types. It also exposes the functions in its environment set as free functions, grouped by family as `core_environments.rs` already does (`spring_ui::gfx::begin_end`), plus only the callin macros its environment receives.
+  - The crate defines its marker type (`spring_ui::Ui`) and implements the capability traits that its set includes. It also exports `SPRING_ENV_MASK` itself, so the environment is chosen by the dependency and not by a macro the game must remember.
+  - Rules and Gaia share a crate. The marker carries the mask for both, and the host changes from "marker equals the manifest environment" to "the marker contains the manifest environment".
+- **Migration costs one line per crate.** `spring = { package = "spring-ui", … }` keeps the `spring::gfx::…` paths in game code, and the compiler then reports every cross-environment use. In Ship Game that is `ui/src/navigation.rs:4` (`spring::rules_unsynced::gfx` → `spring::gfx`).
+- **Capability traits.** There is one sealed trait per environment set (`Common`, `Game`, `SyncedCtrl`, `Local`, `Render`, `Rml`, plus names for the three small sets). Each has the set's functions as associated functions with default bodies that call the backend. The generator fails on a new set that has no name.
+  - Shared code is generic: `fn draw<E: Render + Game>(…) { E::begin_end(…) }`. The environment crate instantiates it with its own marker: `fx_recoil::draw::<spring_unsynced::Unsynced>()`. A synced crate calling it fails with "the trait bound `Synced: Render` is not satisfied".
+  - The check therefore reaches into shared crates with no runtime token and no threaded context value; monomorphisation makes it free.
+  - `fx-recoil` replaces its `ui` feature with a type parameter. `shipcore`'s engine half becomes generic, or splits into a synced-safe part and an unsynced part, so rules-synced stops compiling camera, player and unsynced-ctrl calls.
+  - Pure crates (`fx`, `launch`, and `shipcore` without `engine`) depend on nothing, or only on core types.
+- **Sealing.** The traits require `spring::__private::Sealed`. Accidental misuse cannot compile; a deliberate bypass has to spell `__private`, which is easy to see in review and CI greps for it.
+- **`spring-all`** builds on both targets, like every other crate. Its marker implements every trait and exports the union of callins. It is for editors and tools: SpringBoard today mixes `synced_ctrl()`, `unsynced_ctrl()`, `gfx()`, RmlUi and input in one module. It makes no sync guarantee (open question 3). On Wasm it needs one engine addition: a tool environment whose import mask is the union, loaded only for tool and editor launches. Natively, the loader gives an all-environment module the full table under the same launch rule.
+- **Two environment crates in one artifact** are a link error: both export the `#[no_mangle]` marker symbol. A library crate that depends on an environment crate is therefore unusable from another environment, which forces shared crates onto the traits.
+- **Host backstop, unchanged for Wasm.** Import masks plus `SPRING_ENV_MASK` still reject a module whose imports leave its environment, for example through the `__private` bypass or a stale build. Two additions:
+  - a build-time import audit: a small tool that checks a built `.wasm`'s imports against `WasmCoreGeneratedRegistry.h` for its declared environment, so the game build fails before the engine does;
+  - per-function native tables: each environment gets a generated `NativeInterface` table whose out-of-environment entries return `NotAvailable`, and the native loader checks the module's marker.
 
-Arguments and engine results are copied before user code runs or another call
-can overwrite engine scratch storage. No SDK module/callback-registry borrow
-is held across user code. The same Rml listener can reenter if its application
-state allows it; a synchronous `FnMut` callback rejects recursion into itself.
+#### Options considered
 
-Native module state and retained callback captures must be `Send`: the engine
-can initialize on its loading thread and invoke later callins on another thread.
-It does not require the application state to be `Sync`. Native entries are
-serialized per module, and same-thread reentry runs immediately. Typed Rml
-bindings are transferable identifiers and still need a fresh Spring reference
-for every engine operation. Use `Arc` and synchronized shared state for captures
-that need sharing; Wasm-only captures can still use `Rc`.
+| Option | Verdict |
+|---|---|
+| **Cargo features per environment on one crate, `compile_error!` on conflicts** | Rejected. Ship Game builds all four cdylibs with `cargo build --workspace`, and Cargo unifies `spring`'s features across them, so `synced` + `ui` would always conflict. Each environment would need a separate cargo invocation or workspace. Shared crates would also see the union. |
+| **Runtime capability tokens (`&Synced` passed to every call)** | Sound, but every one of the hundreds of Ship Game call sites and every helper would need a context threaded through. Marker *types* get the same guarantee for shared code without values; environment code keeps free functions. |
+| **Today's namespaces inside one crate (`spring::rules_synced::…`)** | Rejected. Nothing stops synced code from naming `spring::ui::…` or the flat surface, and it already happens (`ui/src/navigation.rs:4`). |
+| **Per-environment crates only, shared code depending on an environment crate** | Shared crates would have to pick one environment. `fx-recoil` serves unsynced and UI, `shipcore` serves three. Kept for environment code; traits cover shared code. |
 
-Spring references stay on the engine thread. Workers receive copied data and
-send results back. This does not enable arbitrary worker-thread engine calls
-or change SpringBoard's existing threading assumptions. Drawing still belongs
-in the appropriate draw callin.
+#### Codegen
 
-Models that previously stored engine references can keep a `ModuleRef<E>`.
-`with_spring` supplies a fresh scoped reference, and succeeds only while this
-same module is already in a live callin. On native it also checks the thread;
-workers can carry an identifier but cannot open an engine scope. No engine calls
-run when the identifier is dropped.
+- `model.json` already carries `environments` for every function and callin. The renderer groups functions by set, then emits:
+  - the traits into `spring`;
+  - one generated `src/generated.rs` per environment crate, holding the free functions as one-line calls through the marker's trait (`<Ui as Render>::begin_end(…)`), the marker, the trait impls, the mask and the callin macros;
+  - `spring-all`.
+- Generated sources stay committed and snapshot-checked, as the Wasm SDK in `rts/wasm/generated/sdk` and `spring-native/generated` are today.
+- `generation-report.json` gains a count of functions per environment set and per environment crate. Those counts must equal the host registry's masks, which is checked by test.
 
-`commands::Queue<E>` holds owned closures taking Spring when executed. It
-flushes FIFO; continuations run before the next command, and nested callins
-can append work. Addon handlers drain delayed actions before queued commands,
-after the outermost handler returns. Both receive fresh Spring references.
-The queue holds no engine reference. `Spring::reborrow()` lets helpers share
-a shorter scope.
+## Verification
 
-Native panics are caught before crossing the C ABI; native builds require
-`panic=unwind`. Failed handlers stop subsequent use of the module. Wasm failures
-trap and follow the engine's module-fault handling.
+1. **Ship Game menu, one source, two builds (the gate for U1 → N1).**
+   - Remove the `cfg(target_arch = "wasm32")` gates in `/home/gajop/projects/spring-projects/ship-game.sdd/wasm-src/menu/src/lib.rs`.
+   - Build `shipgame-menu` for `wasm32-unknown-unknown` (to `menu/WasmMenu/shipgame-menu.wasm`) and for the host (to `menu/WasmMenu/libNativeMenu.so`).
+   - Code that only the native menu has (networking) is the only `cfg` left in the menu crate.
+   - Native builds need a profile with `panic = "unwind"`, and the `spring_gfx_readback` / `spring_vfs_range` cfgs set for the host target too (`wasm-src/.cargo/config.toml`).
+   - Required checks:
+     - `cargo test -p launch` (`wasm-src/crates/launch/tests/parity.rs`) passes. It is host-only and backend-independent.
+     - A checked-in tour file, which does not exist today, runs through `/home/gajop/projects/spring-projects/ship-game.sdd/tools/menu.py --offscreen --tour FILE --out DIR` against each build. `menu.py` gains `--native`, which packages `libNativeMenu.so` (when both are present, `LuaMenuController::InitWasmMenu` prefers the native module).
+     - Tour screenshots match between builds within a stated tolerance.
+     - The start script that each build passes to `system_control::reload` for the same tour steps is byte-identical, and matches `tools/launch_script.py`.
+2. **Compile-fail tests.** A `rust/tests/env-surfaces` crate uses `trybuild`, with pinned toolchain and normalized stderr:
+   - a synced crate naming `spring_synced::gfx` or `rml`;
+   - UI calling `unit_control::create_unit`;
+   - menu exporting `export_game_frame!`;
+   - a synced instantiation of a `<E: Render>` helper;
+   - implementing a capability trait outside the SDK;
+   - an environment crate built for one target only (each must pass on both).
 
-## Background jobs
+   A CI script expects the link of two environment crates into one cdylib to fail, which trybuild cannot express. Matching pass cases cover every environment.
+3. **Surface identity.** For each environment crate and each target, a generated smoke crate references every function and callin macro. `cargo public-api` must show no difference between the wasm32 and host builds.
+4. **Wasm import audit.** Ship Game's `just build` runs the audit on all four modules. A fixture module with an out-of-environment import must fail it.
+5. **No stubs and parity** ([No Stubs Plan](recoil_wasm_no_stubs_plan.md), [Parity & Testing](recoil_wasm_parity_testing.md)):
+   - The native backend is generated, so `check_native_stubs.py` and the generated mutants keep covering the C++ implementations it calls.
+   - The "Codegen prevention" rule applies to both targets through `unverified-api`.
+   - Parity & Testing §3, the native ↔ Wasm signature gate, is met by construction and checked by item 3.
+   - §5/§7 runtime parity becomes one parity guest crate built both ways, replacing the separate native parity crate and Wasm probe. Results are compared per environment against the matching Lua role.
+   - New environment-guard entries in the native tables are reviewed exemptions (they return `NotAvailable`), not stubs.
 
-Workers are ordinary `fn(&[u8]) -> Vec<u8>` functions. Declare them once with
-`export_jobs!`, submit with `spring.jobs().submit(WORKER, &input)`, and consume
-the result in `Module::job_result`. Widget, gadget, and unsynced addon traits
-also have `job_result`; `spring_addons::export_jobs!` declares their workers.
-Addon results use the normal context and command queue.
+## Work items
 
-Pass all inputs explicitly. Workers must not use mutable globals or engine
-calls. Native uses up to four background threads per module, created on first
-use. Wasm uses the existing engine job scheduler and a fresh private instance
-for each job. `WORKER.in_wasm_module("navigation-worker")` selects a separately
-loaded small Wasm module; native still calls the same linked Rust function.
+| # | Item | Effort | Depends on |
+|---|---|---|---|
+| W1 | `render_rust_sdk`: one signature per function, wasm32 and native bodies; unified IDs, records, errors, `_into`, string rule; engine-thread flag | L | — |
+| W2 | Classify and port the hand-written helpers in `spring/src` (generate, rewrite over generated calls, or fast path with a native twin and a test) | M | W1 |
+| W3 | Environment sets → sealed capability traits; generate `spring-{synced,unsynced,ui,menu,intro,all}` with markers, masks and callin subsets; `legacy-flat` feature | M | W1 |
+| W4 | Entry points: `module!`, native per-callin macros, `spring-addons` generic over the environment and native-buildable | M | W1, W3 |
+| W5 | RmlUi: flat calls on both targets, SDK-owned closure dispatch on Wasm, one typed `rml::DataModel`; retire `spring-native/src/rml_ui.rs` | M | W1, W4 |
+| W6 | Host: marker contains the environment (rules and gaia share a crate); native loader checks the marker; per-environment native tables | S | W3 |
+| W7 | Tests: trybuild compile-fail, link-conflict script, per-environment smoke crates, `cargo public-api` diff, Wasm import audit tool | M | W3 |
+| W8 | Ship Game migration: dependency renames, fix `ui/src/navigation.rs` and `nav_debug.rs`, make `fx-recoil` and `shipcore`'s engine half generic, drop the hand-rolled CommandNotify export, publish the new crates to the `gajop/spring-rust` mirror and add them to the `setup-dev-engine` patch | M | W3, W4 |
+| W9 | Menu dual build and gate: native profile and cfgs, checked-in tour, `menu.py --native`, screenshot and start-script comparison. **Completes U1.** | M | W5, W8 |
+| W10 | `spring-native` shim over `spring-all`; migrate SpringBoard's native crate; delete the shim and `legacy-flat` | M | W3, W4 |
+| W11 | One parity guest built both ways; per-environment runtime parity | M | W1, W3 |
 
-Native Menu and All jobs submitted before or during Update are sealed after
-that Update. Results arrive in submission order before the following Update,
-even when workers finish in a different order. Synced Wasm jobs retain the
-engine's global ordering and next-GameFrame delivery. Native synced module
-loading is not supported. Jobs receive copied input and return owned output;
-the result callback gets a fresh Spring reference and may submit more jobs.
-Shutdown joins native workers before releasing module state or code.
+Order:
 
-Each input/output is limited to 1 MiB. Native queues allow 256 jobs and 16 MiB
-of input per module per Update, matching local Wasm limits. Synced Wasm limits
-are shared across synced modules, as before. Worker panics/traps and oversized
-outputs become job errors; host resource failures stop the module. The live
-fixture checks ordered output, an empty result, an oversized output, work
-submitted from a result callback, and a separate Wasm worker module.
+1. W1 → W3 → W4 → W5. W6 and W7 can run in parallel once W3 lands.
+2. W8 → W9: the menu gate, so N1 can start.
+3. W10 and W11 last; they are not on the menu's critical path.
 
-## Rml and loading
+## Risks
 
-Typed Rml variables, rows and events share one implementation. Their operations
-take the current Spring reference. Closing a model invalidates its bindings.
-Use explicit `close`/`unbind`; Rust `Drop` makes no engine calls. Unloading a
-module also removes its remaining UI resources.
+- **Native hot paths.** The native backend converts at the public-signature level. Wasm fast paths in hand-written helpers lean on Core-ABI layout. Class (c) helpers need a measured native twin.
+- **Link-conflict detection.** Whether `#[no_mangle]` markers in two rlibs reliably collide in a cdylib, on all three platforms and with LTO, is unproven. W7 checks it. The fallback is a build-script check over `cargo metadata`.
+- **trybuild drift.** Diagnostics change with the toolchain. Pin the toolchain and assert on the error code and trait name, not the full text.
+- **Feature unification.** `alloc` and `unverified-api` must mean the same thing on both targets, or code compiles in one build only.
+- **SpringBoard churn.** About 190 files use handle-style calls. The shim keeps them building; the migration can be partly mechanical.
+- **Synced native modules** get the same API but not Wasm's determinism (NaN canonicalization, fixed memory). This proposal targets native menus and tools. Native in-game modules keep today's status.
+- **`panic = "abort"`** in Ship Game's release profile would let a native menu panic take the engine down.
 
-New Wasm modules initialize before normal callins, with the engine's Rml
-ownership and execution limits set. Initialization retains the existing
-recursive loader lock to prevent concurrent unload; same-thread callbacks can
-reenter. Failure rejects the module and removes its UI. Existing Wasm modules
-keep their startup path.
+## Open questions
 
-## Compatibility and remaining work
-
-The consumer ports live in dedicated worktrees. The original game, menu, and
-tool checkouts have not been edited. SDK changes remain on `sdk-unification`,
-separate from `rust-wip`.
-
-The SDK has adapters for all 1,425 callouts; this is not exhaustive behavioral
-testing. All 38 engine suites and legacy native/Wasm parity checks pass,
-including 429 selected synced Wasm probes. SDK tests also run under Wine.
-
-The [menu fixture](../../../test/wasm_api/data/scoped_sdk_menu/README.md) uses
-one Rust/RML source for native and Wasm. It tests typed events, reentry, two
-game launches and failed-initialization cleanup. Both render identical pixels:
-[results](data/scoped-sdk-2026-10-17/results.json),
-[native](data/scoped-sdk-2026-10-17/native.png),
-[Wasm](data/scoped-sdk-2026-10-17/wasm.png).
-
-Both production menus have native/Wasm ports. The Cabal menu launches and
-returns from Lua Gravitas on Linux and Wine. The other menu completes its
-interaction tour and actual game launch/return on Linux and Wine, with
-matching rendered screens.
-
-SpringBoard uses `All` and keeps `ModuleRef<All>` in its existing models. Its
-background I/O workers still receive data rather than Spring references.
-Shared UI state permits overlapping reads and rejects conflicting writes
-immediately. Shutdown closes UI models and joins owned workers.
-
-SpringBoard's full lint chain, 110 Rust unit tests, 85 in-engine integration
-tests (including slow tests), 8 smoke checks, 19 E2E-driver regression tests,
-and Windows cross-check pass. Its 53-case E2E run has 38 complete cases and 15
-screenshot failures; all functional assertions pass. The pre-port snapshot,
-tested with the same renderer and driver, reproduces those visual failures
-and additionally fails the brush, project-info, and numeric-drag assertions
-fixed in the port. Checked paired screenshots match within the existing
-tolerance. Expected screenshots and tolerances were not changed. The visual
-suite is still failing. The Windows editor DLL also passes all 85 integration
-tests and eight smoke checks under Wine, including compilation and export.
-
-The addon handlers and shared Cabal libraries now use the SDK on native and
-Wasm. The shared library's 44 unit tests pass. Widgets and helpers receive
-Spring explicitly; definition caches accept a resolver closure. Unit scripts
-use the same scheduler source on both backends, and native task captures must
-be `Send`. Their host belongs to the addon module and permits callbacks during
-attachment without borrowing the entire host. Engine operations resolve a
-fresh scope through the owning module. Missing or rejected CUS operations
-produce errors. The same-source native/Wasm fixture also tests a real unit,
-piece animation, a suspended task and a named engine-to-CUS call on Linux and
-Wine. Addon tests cover native CUS reentry during
-attachment, named results, task wakeups, unit-ID reuse, addon job results and
-shutdown. All 12 addon tests pass on Linux and Wine. The SDK
-has 51 unit tests, an export test, and 8 compile-fail checks. These checks do
-not replace actual game execution.
-
-`UnitCtx::with_spring` gives a unit-script task a fresh synced Spring reference
-for one operation. It rejects workers and detached scripts. Suspended tasks
-retain only the checked module identifier. The SDK also provides scoped frame,
-numeric rules-param, and screen-picking helpers used by the game ports. Default
-unit creation requests automatic IDs on both backends.
-
-`spring.unsynced_random().float()`/`int()` preserve the former module-local
-PCG stream, seeded once from the engine. The generated `next_float()`/`next_int()`
-methods draw directly from the engine's unsynced RNG. Game ports must retain
-that distinction so rendering cannot change a module's random sequence.
-
-MyCube's Wasm game code now uses the SDK. Its existing 32-check integration
-suite passes on Linux and Wine, including unit scripts, UI messages and restart.
-All workspace features pass strict Clippy. Its five-shot visual scenario
-completes; manually measured pixels meet all six existing tolerances. The
-visual suite still rejects the installed Mesa Ubuntu package revision `.4`
-versus the recorded `.2`. No golden images or tolerances changed.
-
-Actual game loading caught two callback defects: UI addons must not export
-`DrawUnit`, which the engine only supports in unsynced gadgets, and the Wasm
-`DrawWorld` callback must have zero arguments. Both are fixed in the source
-generator/addon exports, with a real cdylib example and ABI compile check.
-Unit-script callbacks also participate in the addon's command queue, so queued
-work waits until the callback returns. Tasks started by `Create` now update
-the scheduler's next deadline immediately.
-
-Game teardown now shuts down native/Wasm modules before destroying GUI and
-sound services, allowing addons to restore UI state and stop music cleanly.
-The existing 38 engine suites, native/Wasm launch-and-return fixtures on Linux
-and Wine, and SpringBoard's full test command pass with that change.
-
-Flove's Wasm port passes all 84 existing integration assertions on Linux and
-Wine, and its Lua/Rust unit animations agree within the existing tolerance.
-Its visual run caught a real SDK bug: fixed-capacity graphics arrays rejected
-scalar, vec2 and vec3 inputs. Both backends now accept and zero-fill those
-prefixes, matching the old Wasm adapter. A native ABI regression test verifies
-the exact values passed to the engine and rejects oversized arrays. Black
-outlines and mouse-over highlights are restored. All nine captures complete;
-measured differences against the pre-port code on the same renderer are
-0–2.08%. Four later images exceed the old golden limit in both versions, and
-the renderer revision gate remains red. No expected images or limits changed.
-
-Hunted's Wasm port passes strict default/all-feature Clippy and 30 common unit
-tests. All 35 integration assertions pass on Linux and Wine. The nearby-shot
-fear test sometimes killed its subject before checking fear; the same failure
-reproduced in the pre-port build. The fixture now chooses among the same nearby
-aim offsets using the actual muzzle position. All fear, ammunition and damage
-assertions remain unchanged. It passes at three different Linux run speeds and
-under Wine. The visual scenario and HUD/restart checks complete, with all eight
-measured images/crops within their existing limits. The Mesa revision gate
-remains red.
-
-Area 17's Wasm port passes 22 Rust and six Lua gameplay checks on Linux and
-Wine, its technology UI fixture, strict default/all-feature Clippy, six shared
-unit tests and installed-module/static verification. The visual scenario
-checks the Rml callbacks, four weapons/abilities and crater, and all three
-measured images meet the existing 8% limit. Its renderer revision gate is
-still red. Diagnostic builds now explicitly enable their INFO sections so
-verification markers remain visible with the engine's default NOTICE filter.
-
-Parts Needed's Wasm port passes 70 gameplay assertions and its UI handshake
-on Linux and Wine, strict default/all-feature Clippy and four shared unit
-tests. Its live Lua/Wasm unit-script comparison passes across 3,498 samples
-(maximum transform difference 0.00003384, existing limit 0.0001), alongside
-the source/keyframe comparison. All six visual captures complete, including
-the non-black and settled-camera checks; every manually measured image/crop
-meets its existing limit. The Mesa package revision gate remains red.
-
-Gravitas's Wasm port passes all 19 in-game cases on Linux and Wine, nine shared
-unit tests and strict default/all-feature Clippy. Its normal build completes
-the real level with no test cases or runtime warnings. Real input verifies
-movement, four jump controls, push, pull, shooting just beyond weapon range,
-and return to the menu on both platforms. The last case exposed a pre-port
-Rust aiming bug: clamping a distant target dropped its height and used only a
-horizontal range check. The fix restores the Lua gun's 3D aim and weapon range
-query. The existing test is unchanged. Manually measured arena/HUD images meet
-their limits; the Mesa revision gate remains red. Wine control testing passes
-with software OpenGL; Zink crashes before gameplay and remains unresolved.
-
-To the Last Drop's Wasm port passes all 54 gameplay assertions on Linux and
-Wine, ten shared unit tests and strict default/all-feature Clippy. Live Lua/Rust
-animation comparison is exact across 105 samples. All three visual captures
-complete, and both boss models render. The first two images are pixel-identical
-to the pre-port build on the same renderer; both versions slightly exceed the
-old 1% limit. The third image meets its 3% limit. No goldens or limits changed;
-the renderer gate and visual suite remain red.
-
-Custom CUS tick and detach callbacks receive Spring explicitly, just like
-invoke and named calls. Addons can optionally use `create: make_state` when
-state construction needs engine resources. It receives Spring and returns
-`Result<State>`; existing addons can keep `Default` construction.
-
-All seven Cabal game-code ports are locally committed. The other game-code
-port passes Linux gameplay, rendering and full HUD controls, plus actual
-menu launch/return on both platforms. Its Linux/Wine match passes 901 frames
-with movement, production, formations and ownership checks, comparing engine
-and full Wasm memory checksums on every frame. A second 901-frame run passes
-the actual HUD pause/speed controls and host exit confirmation, with the same
-sync checks. Discovery, rooms, and reconnect UI remain separate work.
-No private game content has been uploaded or released.
-A live native/Wasm `All` fixture also tests terrain mutation and drawing in one
-module, two launches, shutdown, and native loading-thread handoff
-([results](data/scoped-sdk-2026-10-17/all-results.json)). Consumer ports
-are still in progress; the fixture is not a claim that every game has migrated.
-The Windows engine and same-source menu/game fixture pass under Wine,
-including `All`, loading-thread handoff, live CUS, ordered job results and a
-separate Wasm worker module. Native Windows hardware remains untested.
-Packaging keeps using independently built engine releases.
-
-The ordinary engine fixes are also prepared on `ship-game-multiplayer`, without
-the new SDK: worktree version tracking, optional Windows storage diagnostics,
-rules-param visibility outside UI, shutdown before host services disappear,
-strict-Clippy fixes in the legacy Wasm adapters and command helper, and valid
-path-cache ZIP checksums when movement data is empty. The live fixture checks
-those archives with an independent ZIP reader and rejects warnings/errors.
-Its 38 engine suites, strict generation and legacy Wasm Clippy pass.
-
-An isolated copy of the recorded Mesa `.2` renderer removes the Cabal renderer
-mismatch without changing system packages or expectations. Flove still fails
-four of nine comparisons (5.1–5.7%, limit 5%), consistent with the pre-port
-results. The matching-renderer experiment is not a visual-suite pass.
+1. **Crate names.** Should the core stay `spring` (keeps Ship Game's git pin and SpringBoard's paths stable), with environment crates `spring-<env>`? Or should the core be renamed `spring-core` and `spring` become a re-export?
+2. **Rollout order.** Every environment adopts the crates on both targets eventually, since target and environment are independent. Which first: the menu (the native-menu gate), then UI, then rules?
+3. **`spring-all` in multiplayer.** Should the engine refuse an all-environment module, Wasm or native, when `IsHost` has more than one player, or only warn?
+4. **Panic policy.** Should a native callin panic unload the module, as a Wasm trap does, or be reported and continue?
+5. **Strings.** Should results with invalid UTF-8 be an error on both targets (today's Wasm behaviour), or should the SDK return bytes for the calls the model marks as raw?
+6. **Callbacks.** Should the menu's manual `export_callback_dispatch!` stay available next to SDK-owned closures, or be removed?

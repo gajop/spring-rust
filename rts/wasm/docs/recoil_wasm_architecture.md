@@ -245,3 +245,4 @@ Out of scope for this design:
 - [Wasm Jobs & Local Sync Verification](recoil_wasm_synced_jobs.md)
 - [Profiling Wasm Jobs](recoil_wasm_jobs_profiling.md)
 - [Implementation Plan](recoil_wasm_implementation_plan.md)
+- [Rust SDK: one crate, per-environment surfaces](recoil_rust_sdk_unification.md) (proposal)
