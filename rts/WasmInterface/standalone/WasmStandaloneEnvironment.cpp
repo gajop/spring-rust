@@ -23,6 +23,7 @@ namespace fs = std::filesystem;
 
 extern const DisplayApi DISPLAY_API;
 extern const GameApi GAME_API;
+extern const TeamsApi TEAMS_API;
 extern const ConfigApi CONFIG_API;
 extern const VFSApi VFS_API;
 extern const GfxApi GFX_API;
@@ -148,6 +149,9 @@ std::unique_ptr<WasmStandaloneEnvironment> WasmStandaloneEnvironment::Create()
 	// Intro can read the received start-script options before a game world exists.
 	// The generated environment matrix still limits which Game calls it may use.
 	env->m_nativeInterface->game = &GAME_API;
+	// Intro's read-only team queries identify the local start-script Side.
+	// The API's readiness checks still reject calls before teams exist.
+	env->m_nativeInterface->teams = &TEAMS_API;
 	env->m_nativeInterface->config = &CONFIG_API;
 	env->m_nativeInterface->vfs = &VFS_API;
 	env->m_nativeInterface->gfx = &GFX_API;
