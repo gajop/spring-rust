@@ -186,12 +186,15 @@ static void NativeWorldToScreenCoords(const WorldToScreenCoordsQuery* query, Wor
 
 	const float3 pos(query->worldPos.x, query->worldPos.y, query->worldPos.z);
 	const float3 vpPos = camera->CalcViewPortCoordinates(pos);
+	// A point behind the camera (clip w <= 0) still divides into a screen
+	// position, mirrored through the view centre; it has no valid one.
+	const float clipW = (camera->GetViewProjectionMatrix() * float4(pos, 1.0f)).w;
 
 	result->error = nullptr;
 	result->screenPos.x = vpPos.x;
 	result->screenPos.y = vpPos.y;
 	result->screenPos.z = vpPos.z;
-	result->valid = true;
+	result->valid = clipW > 0.0f;
 }
 
 static void NativeTraceScreenRay(const TraceScreenRayQuery* query, TraceScreenRayResult* result)
