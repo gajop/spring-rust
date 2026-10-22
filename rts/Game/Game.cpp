@@ -1856,6 +1856,7 @@ void CGame::SimFrame() {
 
 			eventHandler.GameFrame(gs->frameNum);
 		}
+		WasmCoreHost::FlushSyncedJobs();
 
 		helper->Update();
 		readMap->Update();

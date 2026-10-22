@@ -70,8 +70,11 @@ result callbacks; synced initialization and between-frame callbacks cannot submi
 Local submissions are accepted during initialization and between local updates,
 including input/draw callbacks. There is no polling or readiness API.
 
-For synced owners, at the end of frame F, after `GameFramePost`, the engine seals the batch and
-dispatches it through its existing background thread pool. At the start of F+1,
+For synced owners, the engine seals what frame F submitted so far right after the `GameFrame`
+event and dispatches it through its existing background thread pool, so those jobs run while the
+engine's own unit, projectile and LOS updates do; what is submitted later in F (unit events,
+`GameFramePost`) is sealed and dispatched after `GameFramePost`. Admission quotas count the whole
+frame either way. At the start of F+1,
 after advancing the frame number and before ordinary simulation updates or
 `GameFrame`, it waits for the entire batch and invokes result callbacks on the
 simulation thread in **global submission order**, including submissions from

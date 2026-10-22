@@ -150,6 +150,9 @@ public:
 	// GameFrame. Results precede all frame callbacks and share their budget.
 	static void BeginSyncedJobsFrame(int frame);
 	static void EndSyncedJobsFrame();
+	// After GameFrame: next-frame jobs submitted so far start while the engine's own
+	// simulation runs. Delivery stays at the next BeginSyncedJobsFrame.
+	static void FlushSyncedJobs();
 	static bool BeginUnsyncedJobsUpdate(WasmCoreHost* host, std::string& error);
 	static void EndUnsyncedJobsUpdate(WasmCoreHost* host);
 	// Drain and cancel before the engine stops/recreates its worker pool.

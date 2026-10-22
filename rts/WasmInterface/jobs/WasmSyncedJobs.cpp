@@ -33,9 +33,13 @@ struct WasmSyncedJobs::State {
 		std::vector<std::exception_ptr> exceptions;
 	};
 	std::vector<Job> pending;
-	std::shared_ptr<Batch> active;
+	// Sealed batches of this window in submission order; Flush seals early ones.
+	std::vector<std::shared_ptr<Batch>> active;
 	std::uint32_t nextId = 1;
 	std::size_t inputBytes = 0;
+	// Admission already sealed by Flush this window, so quotas match one batch.
+	std::size_t sealedJobs = 0;
+	std::size_t sealedInputBytes = 0;
 	std::size_t batchJobs = 0;
 	std::size_t batchInputBytes = 0;
 	std::size_t batchOutputBytes = 0;
@@ -45,18 +49,18 @@ struct WasmSyncedJobs::State {
 	bool accepting = false;
 #if defined(THREADPOOL)
 	using Work = std::function<void(int)>;
-	std::shared_ptr<ForBackgroundTaskGroup<Work>> background;
+	std::vector<std::shared_ptr<ForBackgroundTaskGroup<Work>>> background;
 #endif
 
 	void Wait()
 	{
 #if defined(THREADPOOL)
-		if (background) {
-			wait_for_mt_background(background);
-			background.reset();
-		}
+		for (auto& group: background)
+			wait_for_mt_background(group);
+		background.clear();
 #endif
 	}
+	void Seal();
 };
 
 WasmSyncedJobs::WasmSyncedJobs(Mode mode): state(std::make_unique<State>(mode))
@@ -75,8 +79,9 @@ std::uint32_t WasmSyncedJobs::Submit(void* owner,
 {
 	ZoneScopedN("Wasm::Jobs::Admission");
 	if (!Accepting() || state->frame < 0 || owner == nullptr || !program || exportName.empty() || exportName.size() > 256 ||
-		state->nextId == 0 || state->pending.size() + state->batchJobs >= MAX_JOBS_PER_FRAME ||
-		input.size() > MAX_INPUT_BYTES || input.size() > MAX_FRAME_INPUT_BYTES - state->inputBytes - state->batchInputBytes)
+		state->nextId == 0 || state->pending.size() + state->sealedJobs + state->batchJobs >= MAX_JOBS_PER_FRAME ||
+		input.size() > MAX_INPUT_BYTES ||
+		input.size() > MAX_FRAME_INPUT_BYTES - state->inputBytes - state->sealedInputBytes - state->batchInputBytes)
 		return 0;
 	const auto id = state->nextId++;
 	ZoneValue(id);
@@ -112,24 +117,27 @@ std::vector<WasmSyncedJobs::Delivery> WasmSyncedJobs::BeginFrame(int frame)
 		std::any_of(state->pending.begin(), state->pending.end(), [frame](const auto& job) { return job.frame != frame; })))
 		throw std::logic_error("Wasm job submissions were not sealed at the prior frame boundary");
 	std::vector<Delivery> deliveries;
-	if (state->active) {
-		const auto& batch = *state->active;
-		// Complete the whole barrier before publishing any result. Host resource
-		// failure terminates simulation instead of silently becoming game state.
-		for (std::size_t i = 0; i < batch.jobs.size(); ++i) {
-			if (batch.jobs[i].frame + 1 != frame)
+	// Complete the whole barrier before publishing any result. Host resource
+	// failure terminates simulation instead of silently becoming game state.
+	for (const auto& batch: state->active) {
+		for (std::size_t i = 0; i < batch->jobs.size(); ++i) {
+			if (batch->jobs[i].frame + 1 != frame)
 				throw std::logic_error("Wasm job missed its fixed next-frame delivery boundary");
-			if (batch.exceptions[i])
-				std::rethrow_exception(batch.exceptions[i]);
-			if (batch.results[i].status == WasmJobStatus::RuntimeFailure)
-				throw std::runtime_error("Wasm job host failure: " + batch.results[i].diagnostic);
+			if (batch->exceptions[i])
+				std::rethrow_exception(batch->exceptions[i]);
+			if (batch->results[i].status == WasmJobStatus::RuntimeFailure)
+				throw std::runtime_error("Wasm job host failure: " + batch->results[i].diagnostic);
 		}
-		for (std::size_t i = 0; i < batch.jobs.size(); ++i) {
-			auto& job = state->active->jobs[i];
-			deliveries.push_back({job.owner, job.id, job.frame, std::move(state->active->results[i])});
-		}
-		state->active.reset();
 	}
+	for (const auto& batch: state->active) {
+		for (std::size_t i = 0; i < batch->jobs.size(); ++i) {
+			auto& job = batch->jobs[i];
+			deliveries.push_back({job.owner, job.id, job.frame, std::move(batch->results[i])});
+		}
+	}
+	state->active.clear();
+	state->sealedJobs = 0;
+	state->sealedInputBytes = 0;
 	state->frame = frame;
 	state->accepting = true;
 	if (state->mode == Mode::Synced) {
@@ -155,7 +163,7 @@ WasmSyncedJobs::BatchStatus WasmSyncedJobs::RunBatch(void* owner,
 		return BatchStatus::InvalidState;
 	if (!owner || !program || exportName.empty() || exportName.size() > 256 || inputs.empty())
 		return BatchStatus::InvalidArgument;
-	if (inputs.size() > MAX_JOBS_PER_FRAME - state->pending.size() - state->batchJobs)
+	if (inputs.size() > MAX_JOBS_PER_FRAME - state->pending.size() - state->sealedJobs - state->batchJobs)
 		return BatchStatus::BufferOverflow;
 	std::size_t inputBytes = 0, outputBytes = 0;
 	for (const auto& input: inputs) {
@@ -167,7 +175,7 @@ WasmSyncedJobs::BatchStatus WasmSyncedJobs::RunBatch(void* owner,
 		inputBytes += input.bytes.size();
 		outputBytes += input.maxOutputBytes;
 	}
-	if (inputBytes > MAX_FRAME_INPUT_BYTES - state->inputBytes - state->batchInputBytes ||
+	if (inputBytes > MAX_FRAME_INPUT_BYTES - state->inputBytes - state->sealedInputBytes - state->batchInputBytes ||
 		outputBytes > WasmJobBatch::MAX_TOTAL_BYTES - state->batchOutputBytes)
 		return BatchStatus::BufferOverflow;
 
@@ -241,22 +249,39 @@ void WasmSyncedJobs::EndFrame()
 		throw std::logic_error("Cannot seal Wasm jobs during a synchronous batch");
 	if (state->batchFailure) std::rethrow_exception(state->batchFailure);
 	state->accepting = false;
-	if (state->active)
+	if (!state->active.empty() && state->active.front()->jobs.front().frame != state->frame)
 		throw std::logic_error("Prior Wasm job batch was not consumed");
-	if (state->pending.empty())
+	state->Seal();
+}
+
+void WasmSyncedJobs::Flush()
+{
+	if (state->mode != Mode::Synced || !Accepting())
+		return;
+	state->Seal();
+}
+
+// Dispatch what is pending as one background batch. Results still wait for the
+// next BeginFrame and arrive in submission order, so when a batch is sealed only
+// moves its work earlier in wall time.
+void WasmSyncedJobs::State::Seal()
+{
+	if (pending.empty())
 		return;
 	ZoneScopedN("Wasm::Jobs::Seal");
-	ZoneValue(state->frame);
+	ZoneValue(frame);
 	if (ZoneIsActive)
-		ZoneTextF("frame=%d jobs=%zu input=%zu threads=%d", state->frame,
-		state->pending.size(), state->inputBytes, ThreadPool::GetNumThreads());
-	auto batch = std::make_shared<State::Batch>();
-	batch->jobs = std::move(state->pending);
-	state->pending.clear();
-	state->inputBytes = 0;
+		ZoneTextF("frame=%d jobs=%zu input=%zu threads=%d", frame,
+		pending.size(), inputBytes, ThreadPool::GetNumThreads());
+	auto batch = std::make_shared<Batch>();
+	batch->jobs = std::move(pending);
+	pending.clear();
+	sealedJobs += batch->jobs.size();
+	sealedInputBytes += inputBytes;
+	inputBytes = 0;
 	batch->results.resize(batch->jobs.size());
 	batch->exceptions.resize(batch->jobs.size());
-	state->active = batch;
+	active.push_back(batch);
 	// The queue owns this batch until Wait completes. Do not capture a shared
 	// pointer: the engine pools 256 task groups and retains their last callable.
 	std::function<void(int)> work = [batch = batch.get()](int index) {
@@ -277,7 +302,7 @@ void WasmSyncedJobs::EndFrame()
 				batch->results[index].bytes.size(), int(batch->exceptions[index] != nullptr));
 	};
 #if defined(THREADPOOL)
-	state->background = for_mt_background(0, batch->jobs.size(), 1, std::move(work));
+	background.push_back(for_mt_background(0, batch->jobs.size(), 1, std::move(work)));
 #else
 	for (int i = 0; i < batch->jobs.size(); ++i) work(i);
 #endif
@@ -293,14 +318,15 @@ void WasmSyncedJobs::CancelOwner(void* owner)
 	std::erase_if(state->pending, [owner](const auto& job) { return job.owner == owner; });
 	state->inputBytes = 0;
 	for (const auto& job: state->pending) state->inputBytes += job.input.size();
-	if (state->active) {
-		for (std::size_t i = state->active->jobs.size(); i-- > 0;) {
-			if (state->active->jobs[i].owner != owner) continue;
-			state->active->jobs.erase(state->active->jobs.begin() + i);
-			state->active->results.erase(state->active->results.begin() + i);
-			state->active->exceptions.erase(state->active->exceptions.begin() + i);
+	for (const auto& batch: state->active) {
+		for (std::size_t i = batch->jobs.size(); i-- > 0;) {
+			if (batch->jobs[i].owner != owner) continue;
+			batch->jobs.erase(batch->jobs.begin() + i);
+			batch->results.erase(batch->results.begin() + i);
+			batch->exceptions.erase(batch->exceptions.begin() + i);
 		}
 	}
+	std::erase_if(state->active, [](const auto& batch) { return batch->jobs.empty(); });
 }
 
 void WasmSyncedJobs::Reset()
@@ -342,8 +368,8 @@ std::uint64_t WasmSyncedJobs::StateHash(void* owner) const
 		addWord(static_cast<std::uint32_t>(job.inputHash));
 		addWord(static_cast<std::uint32_t>(job.inputHash >> 32));
 	};
-	if (state->active)
-		for (const auto& job: state->active->jobs) addJob(job);
+	for (const auto& batch: state->active)
+		for (const auto& job: batch->jobs) addJob(job);
 	for (const auto& job: state->pending) addJob(job);
 	return hash;
 }

@@ -498,6 +498,11 @@ void WasmCoreHost::EndSyncedJobsFrame()
 	SyncedJobs().EndFrame();
 }
 
+void WasmCoreHost::FlushSyncedJobs()
+{
+	SyncedJobs().Flush();
+}
+
 void WasmCoreHost::ShutdownSyncedJobs()
 {
 	std::lock_guard registryLock(RegistryMutex());

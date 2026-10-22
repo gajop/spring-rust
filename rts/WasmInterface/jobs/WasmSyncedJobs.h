@@ -40,6 +40,10 @@ public:
 	);
 	std::vector<Delivery> BeginFrame(int frame);
 	void EndFrame();
+	// Dispatch the next-frame jobs submitted so far, while the window stays open.
+	// Delivery is unchanged (next BeginFrame, submission order); only wall-clock
+	// overlap with the rest of the frame changes.
+	void Flush();
 	// Local update queues stay open between Update calls (input/draw/init may
 	// submit). EndUpdate seals that window and opens the following window.
 	std::vector<Delivery> BeginUpdate();

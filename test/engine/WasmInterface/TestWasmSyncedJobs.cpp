@@ -59,6 +59,14 @@ namespace {
 InitSpringTime springTime;
 struct Cores { Cores() { Threading::DetectCores(); } } cores;
 
+// The fixture has SIMD functions, which a runtime validates only when a game opts in.
+WasmRuntimeConfig FixtureConfig()
+{
+	WasmRuntimeConfig config;
+	config.allowSimd = true;
+	return config;
+}
+
 std::vector<std::uint8_t> ReadFixture()
 {
 	const char* fixture = std::getenv("WASM_JOB_FIXTURE");
@@ -118,7 +126,7 @@ TEST_CASE("Synchronous Wasm batches join ordered fresh jobs without consuming de
 	StopThreads stop;
 	std::shared_ptr<WasmJobProgram> program;
 	{
-		WasmRuntimeConfig config;
+		WasmRuntimeConfig config = FixtureConfig();
 		config.instructionFuel = 100000000;
 		WasmRuntime runtime(config);
 		program = Program(runtime);
@@ -163,7 +171,7 @@ TEST_CASE("Synchronous Wasm batches join ordered fresh jobs without consuming de
 
 TEST_CASE("Synchronous Wasm admission preflights every member and shares deterministic window quotas")
 {
-	WasmRuntime runtime;
+	WasmRuntime runtime(FixtureConfig());
 	auto program = Program(runtime);
 	int owner = 0;
 	WasmSyncedJobs queue;
@@ -204,7 +212,7 @@ TEST_CASE("Synchronous Wasm admission preflights every member and shares determi
 
 TEST_CASE("Synchronous Wasm guest failures remain per-job results and output reservations precede copying")
 {
-	WasmRuntime runtime;
+	WasmRuntime runtime(FixtureConfig());
 	auto program = Program(runtime);
 	WasmSyncedJobs queue;
 	int owner = 0;
@@ -230,7 +238,7 @@ TEST_CASE("Synchronous Wasm guest failures remain per-job results and output res
 
 TEST_CASE("Local synchronous Wasm quotas follow the Update window including between-callback submissions")
 {
-	WasmRuntime runtime;
+	WasmRuntime runtime(FixtureConfig());
 	auto program = Program(runtime);
 	WasmSyncedJobs queue(WasmSyncedJobs::Mode::Update);
 	int owner = 0;
@@ -285,7 +293,7 @@ TEST_CASE("Synchronous Wasm batch envelopes reject malformed descriptors before 
 TEST_CASE("Synchronous Wasm calls restore MT nesting and host failures survive the C ABI trap boundary")
 {
 	StopThreads stop;
-	WasmRuntime runtime;
+	WasmRuntime runtime(FixtureConfig());
 	auto program = Program(runtime);
 	int owner = 0;
 	WasmSyncedJobs queue;
@@ -319,7 +327,7 @@ TEST_CASE("Synchronous Wasm calls restore MT nesting and host failures survive t
 
 TEST_CASE("Wasm jobs have fresh memory/globals, fixed limits and no engine imports")
 {
-	WasmRuntimeConfig config;
+	WasmRuntimeConfig config = FixtureConfig();
 	config.instructionFuel = 100000;
 	WasmRuntime runtime(config);
 	auto program = Program(runtime);
@@ -350,7 +358,7 @@ TEST_CASE("Accepted Wasm job programs own their runtime engine after the source 
 {
 	std::shared_ptr<WasmJobProgram> program;
 	{
-		WasmRuntime runtime;
+		WasmRuntime runtime(FixtureConfig());
 		program = Program(runtime);
 	}
 	const auto result = program->Run("work", Input(9, 10));
@@ -360,7 +368,7 @@ TEST_CASE("Accepted Wasm job programs own their runtime engine after the source 
 
 TEST_CASE("Wasm jobs have the configured deterministic fuel budget on every invocation")
 {
-	WasmRuntimeConfig config;
+	WasmRuntimeConfig config = FixtureConfig();
 	config.instructionFuel = 1000;
 	WasmRuntime runtime(config);
 	auto program = Program(runtime);
@@ -373,7 +381,7 @@ TEST_CASE("Wasm jobs have the configured deterministic fuel budget on every invo
 
 TEST_CASE("Wasm job checksums retain the entire copied input without rescanning payloads")
 {
-	WasmRuntime runtime;
+	WasmRuntime runtime(FixtureConfig());
 	auto program = Program(runtime);
 	int owner = 0;
 	WasmSyncedJobs first, identical, different;
@@ -394,7 +402,7 @@ TEST_CASE("Wasm job checksums retain the entire copied input without rescanning 
 TEST_CASE("Wasm jobs merge globally in submission order at the next frame across thread counts")
 {
 	StopThreads stop;
-	WasmRuntimeConfig config;
+	WasmRuntimeConfig config = FixtureConfig();
 	config.instructionFuel = 100000000;
 	WasmRuntime runtime(config);
 	auto program = Program(runtime);
@@ -433,11 +441,69 @@ TEST_CASE("Wasm jobs merge globally in submission order at the next frame across
 	}
 }
 
+TEST_CASE("Flushed Wasm jobs start early but deliver and hash as one next-frame batch")
+{
+	StopThreads stop;
+	WasmRuntimeConfig config = FixtureConfig();
+	config.instructionFuel = 100000000;
+	WasmRuntime runtime(config);
+	auto program = Program(runtime);
+	int owner = 0;
+	std::vector<std::vector<std::uint8_t>> expected;
+	std::uint64_t expectedHash = 0;
+	for (const int threads: {1, 4}) {
+		for (const int flushes: {0, 1, 3}) {
+			ThreadPool::SetThreadCount(threads);
+			WasmSyncedJobs queue;
+			REQUIRE(queue.BeginFrame(0).empty());
+			for (int i = 0; i < 12; ++i) {
+				REQUIRE(queue.Submit(&owner, program, "work", Input(i, 1000 + i)) == i + 1);
+				if (flushes != 0 && i % (12 / flushes) == 12 / flushes - 1)
+					queue.Flush();
+			}
+			queue.EndFrame();
+			queue.Flush(); // a closed window has nothing to seal and stays closed
+			CHECK(queue.Submit(&owner, program, "work", Input(0, 0)) == 0);
+			const auto hash = queue.StateHash(&owner);
+			if (expected.empty()) expectedHash = hash;
+			CHECK(hash == expectedHash);
+			auto results = queue.BeginFrame(1);
+			REQUIRE(results.size() == 12);
+			for (int i = 0; i < 12; ++i) {
+				CHECK(results[i].id == i + 1);
+				CHECK(results[i].submittedFrame == 0);
+				REQUIRE(results[i].result.status == WasmJobStatus::Ok);
+				if (expected.size() < 12) expected.push_back(results[i].result.bytes);
+				CHECK(results[i].result.bytes == expected[i]);
+			}
+			queue.EndFrame();
+			CHECK(queue.BeginFrame(2).empty());
+		}
+	}
+}
+
+TEST_CASE("Flushed Wasm jobs share the window's admission quota")
+{
+	WasmRuntimeConfig config = FixtureConfig();
+	WasmRuntime runtime(config);
+	auto program = Program(runtime);
+	int owner = 0;
+	WasmSyncedJobs queue;
+	REQUIRE(queue.BeginFrame(0).empty());
+	for (std::size_t i = 0; i < WasmSyncedJobs::MAX_JOBS_PER_FRAME; ++i) {
+		REQUIRE(queue.Submit(&owner, program, "work", Input(i, 1)) != 0);
+		if (i % 64 == 63) queue.Flush();
+	}
+	CHECK(queue.Submit(&owner, program, "work", Input(0, 1)) == 0);
+	queue.EndFrame();
+	CHECK(queue.BeginFrame(1).size() == WasmSyncedJobs::MAX_JOBS_PER_FRAME);
+}
+
 TEST_CASE("Wasm job admission is bounded and teardown drains workers before removing an owner")
 {
 	StopThreads stop;
 	ThreadPool::SetThreadCount(4);
-	WasmRuntime runtime;
+	WasmRuntime runtime(FixtureConfig());
 	auto program = Program(runtime);
 	int ownerA = 0, ownerB = 0;
 	WasmSyncedJobs queue;
@@ -469,7 +535,7 @@ TEST_CASE("Wasm guest failures retain their IDs and ordered next-frame delivery"
 {
 	StopThreads stop;
 	ThreadPool::SetThreadCount(4);
-	WasmRuntimeConfig config;
+	WasmRuntimeConfig config = FixtureConfig();
 	config.instructionFuel = 1000;
 	WasmRuntime runtime(config);
 	auto program = Program(runtime);
@@ -505,7 +571,7 @@ TEST_CASE("Wasm guest failures retain their IDs and ordered next-frame delivery"
 TEST_CASE("Wasm shutdown drains before pool recreation and resets IDs across cached task-group reuse")
 {
 	StopThreads stop;
-	WasmRuntime runtime;
+	WasmRuntime runtime(FixtureConfig());
 	auto program = Program(runtime);
 	int owner = 0;
 	WasmSyncedJobs queue;
@@ -533,7 +599,7 @@ TEST_CASE("Wasm shutdown drains before pool recreation and resets IDs across cac
 // Only this local benchmark can obtain the runtime's native engine. The guest
 TEST_CASE("Local job queues progress without simulation and isolate IDs and quotas")
 {
-	WasmRuntimeConfig config;
+	WasmRuntimeConfig config = FixtureConfig();
 	config.instructionFuel = 1000000;
 	WasmRuntime runtime(config);
 	auto program = Program(runtime);
@@ -602,7 +668,7 @@ TEST_CASE("Measure Wasm job setup, copies, dispatch and inline work", "[.benchma
 	};
 	StopThreads stop;
 	for (const std::uint64_t fuel: {0ull, 1000000000ull}) {
-		WasmRuntimeConfig config;
+		WasmRuntimeConfig config = FixtureConfig();
 		config.instructionFuel = fuel;
 		WasmRuntime runtime(config);
 		const auto compileStart = Clock::now();
@@ -752,7 +818,7 @@ std::vector<std::uint8_t> FloatInput()
 
 TEST_CASE("Wasm arithmetic cannot inherit caller rounding or denormal flushing", "[adversarial]")
 {
-	WasmRuntime runtime;
+	WasmRuntime runtime(FixtureConfig());
 	auto program = Program(runtime);
 	WasmJobResult baseline;
 	WasmJobResult vectorBaseline;
@@ -816,7 +882,7 @@ TEST_CASE("Unprotected Wasmtime calls expose the adversarial floating-point inpu
 	// entry guard. This must disagree, proving that the fixture is sensitive to
 	// the injected native controls rather than merely checking constant output.
 	using namespace recoil::wasm::core;
-	WasmRuntimeConfig config;
+	WasmRuntimeConfig config = FixtureConfig();
 	config.instructionFuel = 100000;
 	WasmRuntime runtime(config);
 	auto* engine = WasmJobBenchmark::Engine(runtime);
@@ -887,7 +953,7 @@ TEST_CASE("Synced inspection detects hidden globals and table changes without me
 	REQUIRE(wasmtime_wat2wasm(wat.data(), wat.size(), &wasm) == nullptr);
 	const std::vector<std::uint8_t> original(wasm.data, wasm.data + wasm.size);
 	wasm_byte_vec_delete(&wasm);
-	WasmRuntime runtime;
+	WasmRuntime runtime(FixtureConfig());
 	auto* engine = WasmJobBenchmark::Engine(runtime);
 	REQUIRE(wasmtime_module_validate(engine, original.data(), original.size()) == nullptr);
 	StateExports aliases;
