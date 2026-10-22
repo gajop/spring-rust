@@ -329,8 +329,11 @@ void WasmInterfaceSystem::ProcessDeferredRmlCleanup()
 
 void WasmInterfaceSystem::Tick(std::uint32_t frame)
 {
+	// A host the unit script engine drives is ticked there, before piece animations are
+	// integrated; ticking it here too ran every CUS script twice a frame.
 	for (const CoreModuleRecord& module : coreModules) {
-		if (module.host != nullptr)
+		if (module.host != nullptr &&
+			(unitScriptEngine == nullptr || !unitScriptEngine->HasCusBackend(module.host)))
 			module.host->Tick(frame);
 	}
 }

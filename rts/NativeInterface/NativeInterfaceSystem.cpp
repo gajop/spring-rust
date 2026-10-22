@@ -497,10 +497,15 @@ void NativeInterfaceSystem::Update() {
 
 void NativeInterfaceSystem::Tick(std::uint32_t frame)
 {
-	if (pImpl->eventClient)
-		pImpl->eventClient->Tick(frame);
+	// Clients the unit script engine drives as CUS backends are ticked there; ticking them here
+	// too ran every CUS script twice a frame.
+	const auto tick = [frame](auto& client) {
+		if (client && (unitScriptEngine == nullptr || !unitScriptEngine->HasCusBackend(client->CusBackend())))
+			client->Tick(frame);
+	};
+	tick(pImpl->eventClient);
 	for (auto& client : pImpl->benchmarkEventClients)
-		client->Tick(frame);
+		tick(client);
 	pImpl->wasmSystem->Tick(frame);
 }
 

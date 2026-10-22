@@ -28,6 +28,8 @@ public:
 	void AddCusBackend(NativeUnitScriptBackend* backend);
 	void RemoveCusBackend(NativeUnitScriptBackend* backend);
 	void CancelCusBackend(NativeUnitScriptBackend* backend);
+	// Whether Tick already drives `backend` each simulation frame.
+	bool HasCusBackend(const NativeUnitScriptBackend* backend) const;
 
 	void Init() { animating.reserve(256); }
 	void Kill();

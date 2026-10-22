@@ -153,6 +153,11 @@ void CUnitScriptEngine::AddCusBackend(NativeUnitScriptBackend* backend)
 	cusBackends.push_back(backend);
 }
 
+bool CUnitScriptEngine::HasCusBackend(const NativeUnitScriptBackend* backend) const
+{
+	return std::find(cusBackends.begin(), cusBackends.end(), backend) != cusBackends.end();
+}
+
 void CUnitScriptEngine::RemoveCusBackend(NativeUnitScriptBackend* backend)
 {
 	if (backend == nullptr)
