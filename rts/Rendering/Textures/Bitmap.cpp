@@ -31,6 +31,7 @@
 #include "System/Threading/SpringThreading.h"
 
 #include "System/Misc/TracyDefs.h"
+#include "System/Config/ConfigHandler.h"
 
 struct InitializeOpenIL {
 	InitializeOpenIL() { ilInit(); }
@@ -1756,6 +1757,28 @@ uint32_t CBitmap::CreateTexture(const GL::TextureCreationParams& tcp) const
 }
 
 
+CONFIG(int, TextureMipSkip)
+	.defaultValue(0)
+	.minimumValue(0)
+	.maximumValue(3)
+	.description("Leave out this many of the finest levels of mipmapped DDS textures larger than 1024 texels a side, never going below 1024: each step quarters their memory.");
+
+// Levels of a mipmapped 2D DDS texture to leave out under TextureMipSkip.
+static unsigned int DDSSkipLevels(const nv_dds::CDDSImage& image)
+{
+	if (image.get_num_mipmaps() == 0)
+		return 0;
+
+	const unsigned int wanted = configHandler->GetInt("TextureMipSkip");
+	const unsigned int side = std::max(image.get_width(), image.get_height());
+	unsigned int skip = 0;
+
+	while (skip < wanted && (side >> (skip + 1)) >= 1024)
+		skip++;
+
+	return skip;
+}
+
 static void HandleDDSMipmap(GLenum target, int32_t numEmbeddedLevels, uint32_t minFilter)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -1785,7 +1808,7 @@ uint32_t CBitmap::CreateDDSTexture(const GL::TextureCreationParams& tcp) const
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, texID);
 
-			if (!ddsimage.upload_texture2D(0, GL_TEXTURE_2D)) {
+			if (!ddsimage.upload_texture2D(0, GL_TEXTURE_2D, DDSSkipLevels(ddsimage))) {
 				glDeleteTextures(1, &texID);
 				texID = 0;
 				break;
@@ -1796,7 +1819,7 @@ uint32_t CBitmap::CreateDDSTexture(const GL::TextureCreationParams& tcp) const
 			if (tcp.aniso > 0.0f)
 				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, tcp.aniso);
 
-			HandleDDSMipmap(GL_TEXTURE_2D, ddsimage.get_num_mipmaps(), tcp.GetMinFilter(ddsimage.get_num_mipmaps()));
+			HandleDDSMipmap(GL_TEXTURE_2D, ddsimage.get_num_mipmaps() - DDSSkipLevels(ddsimage), tcp.GetMinFilter(ddsimage.get_num_mipmaps()));
 			break;
 
 		case nv_dds::Texture3D:

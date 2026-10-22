@@ -798,7 +798,9 @@ bool CDDSImage::upload_texture1D() const
 //              the 2D texture such as a specific face of a cubemap
 //
 //              default: GL_TEXTURE_2D
-bool CDDSImage::upload_texture2D(unsigned int imageIndex, int target) const
+// skipLevels: that many of the finest levels are left out, the next one uploaded as level 0
+// (at most the embedded mipmaps, so the smallest level always remains).
+bool CDDSImage::upload_texture2D(unsigned int imageIndex, int target, unsigned int skipLevels) const
 {
 	RECOIL_DETAILED_TRACY_ZONE;
     assert(m_valid);
@@ -815,18 +817,22 @@ bool CDDSImage::upload_texture2D(unsigned int imageIndex, int target) const
         (target >= GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB &&
          target <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB));
 
+    const unsigned int skip = std::min(skipLevels, image.get_num_mipmaps());
+    // Level `level` of what is uploaded: the image itself, or one of its mipmaps.
+    const auto source = [&](unsigned int level) -> const CSurface& {
+        const unsigned int at = level + skip;
+        return at == 0 ? static_cast<const CSurface&>(image) : image.get_mipmap(at - 1);
+    };
+    const unsigned int levels = image.get_num_mipmaps() + 1 - skip;
+
     if (is_compressed())
     {
-        glCompressedTexImage2DARB(target, 0, m_format, image.get_width(),
-            image.get_height(), 0, image.get_size(), image);
-
-        // load all mipmaps
-        for (unsigned int i = 0; i < image.get_num_mipmaps(); i++)
+        for (unsigned int level = 0; level < levels; level++)
         {
-            const CSurface &mipmap = image.get_mipmap(i);
-            glCompressedTexImage2DARB(target, i+1, m_format,
-                mipmap.get_width(), mipmap.get_height(), 0,
-                mipmap.get_size(), mipmap);
+            const CSurface &surface = source(level);
+            glCompressedTexImage2DARB(target, level, m_format,
+                surface.get_width(), surface.get_height(), 0,
+                surface.get_size(), surface);
         }
     }
     else
@@ -838,17 +844,11 @@ bool CDDSImage::upload_texture2D(unsigned int imageIndex, int target) const
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         }
 
-        glTexImage2D(target, 0, m_components, image.get_width(),
-            image.get_height(), 0, m_format, GL_UNSIGNED_BYTE,
-            image);
-
-        // load all mipmaps
-        for (unsigned int i = 0; i < image.get_num_mipmaps(); i++)
+        for (unsigned int level = 0; level < levels; level++)
         {
-            const CSurface &mipmap = image.get_mipmap(i);
-
-            glTexImage2D(target, i+1, m_components, mipmap.get_width(),
-                mipmap.get_height(), 0, m_format, GL_UNSIGNED_BYTE, mipmap);
+            const CSurface &surface = source(level);
+            glTexImage2D(target, level, m_components, surface.get_width(),
+                surface.get_height(), 0, m_format, GL_UNSIGNED_BYTE, surface);
         }
 
         if (alignment != -1)

@@ -222,7 +222,7 @@ namespace nv_dds
             bool save(std::string filename, bool flipImage = true) const;
 
             bool upload_texture1D() const;
-            bool upload_texture2D(unsigned int imageIndex, int target) const;
+            bool upload_texture2D(unsigned int imageIndex, int target, unsigned int skipLevels = 0) const;
             bool upload_texture3D() const;
             bool upload_textureRectangle() const;
             bool upload_textureCubemap() const;
