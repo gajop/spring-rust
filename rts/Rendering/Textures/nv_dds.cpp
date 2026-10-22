@@ -402,6 +402,16 @@ bool CDDSImage::load(string filename, bool flipImage)
 				m_format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				m_components = 4;
 				break;
+			case FOURCC_ATI1:
+			case FOURCC_BC4U:
+				m_format = GL_COMPRESSED_RED_RGTC1;
+				m_components = 1;
+				break;
+			case FOURCC_ATI2:
+			case FOURCC_BC5U:
+				m_format = GL_COMPRESSED_RG_RGTC2;
+				m_components = 2;
+				break;
 			default:
 				//fclose(fp);
 				return false;
@@ -727,7 +737,9 @@ bool CDDSImage::is_compressed() const
 	RECOIL_DETAILED_TRACY_ZONE;
 	return ((m_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ||
 		   (m_format == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT) ||
-		   (m_format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT));
+		   (m_format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) ||
+		   (m_format == GL_COMPRESSED_RED_RGTC1) ||
+		   (m_format == GL_COMPRESSED_RG_RGTC2));
 }
 
 #ifndef HEADLESS
@@ -968,8 +980,8 @@ inline unsigned int CDDSImage::clamp_size(unsigned int size) const
 inline unsigned int CDDSImage::size_dxtc(unsigned int width, unsigned int height) const
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-    return ((width+3)/4)*((height+3)/4)*
-        (m_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16);
+    const bool half = (m_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT || m_format == GL_COMPRESSED_RED_RGTC1);
+    return ((width+3)/4)*((height+3)/4)*(half ? 8 : 16);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1029,6 +1041,14 @@ void CDDSImage::flip(CSurface &surface) const
             case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
                 blocksize = 16;
                 flipblocks = &CDDSImage::flip_blocks_dxtc5;
+                break;
+            case GL_COMPRESSED_RED_RGTC1:
+                blocksize = 8;
+                flipblocks = &CDDSImage::flip_blocks_bc4;
+                break;
+            case GL_COMPRESSED_RG_RGTC2:
+                blocksize = 16;
+                flipblocks = &CDDSImage::flip_blocks_bc5;
                 break;
             default:
                 return;
@@ -1217,6 +1237,28 @@ void CDDSImage::flip_blocks_dxtc5(DXTColBlock *line, unsigned int numBlocks) con
 
         curblock++;
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// flip BC4 blocks: each is laid out as a DXT5 alpha block
+void CDDSImage::flip_blocks_bc4(DXTColBlock *line, unsigned int numBlocks) const
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+    DXT5AlphaBlock *block = reinterpret_cast<DXT5AlphaBlock*>(line);
+
+    for (unsigned int i = 0; i < numBlocks; i++)
+        flip_dxt5_alpha(block + i);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// flip BC5 blocks: two BC4 blocks each, red then green
+void CDDSImage::flip_blocks_bc5(DXTColBlock *line, unsigned int numBlocks) const
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+    DXT5AlphaBlock *block = reinterpret_cast<DXT5AlphaBlock*>(line);
+
+    for (unsigned int i = 0; i < numBlocks * 2; i++)
+        flip_dxt5_alpha(block + i);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
