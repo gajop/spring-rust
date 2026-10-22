@@ -3912,6 +3912,32 @@ wasm_trap_t* Core_gfx_push_matrix(void* environment, wasmtime_caller_t* caller,
     return nullptr;
 }
 
+wasm_trap_t* Core_gfx_query_counter(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->QueryCounter == nullptr)
+        return Trap("QueryCounter generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("QueryCounter generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("QueryCounter generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GfxUIntQuery query{};
+    query.value = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.value)>>>(slots[0].i32);
+    GfxEmptyResult result{};
+    state->native->gfx->QueryCounter(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i32 = errorCode;
+    return nullptr;
+}
+
 wasm_trap_t* Core_gfx_raw_bind_fbo(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -6201,6 +6227,13 @@ bool RegisterGeneratedImports_gfx(wasmtime_linker_t* linker, HostState* state, s
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGenerated(linker, "spring:gfx", "query-counter",
+                MakeFuncType(params, 1, results, 1), Core_gfx_query_counter, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32, WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGenerated(linker, "spring:gfx", "raw-bind-fbo",
@@ -6519,6 +6552,6 @@ bool RegisterGeneratedImports_gfx(wasmtime_linker_t* linker, HostState* state, s
     return true;
 }
 
-static_assert(165 >= 0, "generated Core Wasm callback count");
+static_assert(166 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

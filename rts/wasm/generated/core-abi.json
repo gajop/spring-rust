@@ -8117,6 +8117,26 @@
     },
     {
       "module": "gfx",
+      "function": "QueryCounter",
+      "import_module": "spring:gfx",
+      "import_name": "query-counter",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "status",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32->i32",
+      "notes": []
+    },
+    {
+      "module": "gfx",
       "function": "RawBindFBO",
       "import_module": "spring:gfx",
       "import_name": "raw-bind-fbo",
@@ -31702,7 +31722,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1206,
+  "automatic_count": 1207,
   "manual_count": 202,
   "unsupported_count": 17
 }

@@ -17256,6 +17256,26 @@
       "required_returns_mapped": false,
       "runs": []
     },
+    "gfx.QueryCounter": {
+      "level": "exempt",
+      "reason": "No Lua equivalent: glQueryCounter(GL_TIMESTAMP) into a CreateQuery handle. The value is a GPU clock reading that differs per run and machine, so there is nothing to compare between native and Wasm beyond the handle lookup it shares with GetQuery.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu",
+        "intro"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
     "gfx.ReadPixels": {
       "level": "untested",
       "grandfathered": true,

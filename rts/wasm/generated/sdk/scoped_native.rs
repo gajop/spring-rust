@@ -24911,6 +24911,29 @@ pub(crate) mod gfx {
             },
         )
     }
+    pub(crate) fn query_counter(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::GfxApi>,
+        value: u32,
+    ) -> Result<()> {
+        let native_value = (value) as _;
+        let query = sys::GfxUIntQuery {
+            value: native_value,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .QueryCounter
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<sys::GfxEmptyResult>::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok(())
+    }
     pub(crate) fn raw_bind_fbo(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::GfxApi>,

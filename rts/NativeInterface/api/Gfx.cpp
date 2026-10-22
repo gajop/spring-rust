@@ -4250,6 +4250,19 @@ static void GetQuery(const GfxUIntQuery* query, GfxUInt64Result* result)
 	glGetQueryObjectui64v(it->second.id, GL_QUERY_RESULT, &result->value);
 }
 
+static void QueryCounter(const GfxUIntQuery* query, GfxEmptyResult* result)
+{
+	result->error = nullptr;
+
+	const auto it = nativeQueries.find(query->value);
+	if (it == nativeQueries.end()) {
+		result->error = &NOT_FOUND_ERROR;
+		return;
+	}
+
+	glQueryCounter(it->second.id, GL_TIMESTAMP);
+}
+
 static void IsQueryAvailable(const GfxUIntQuery* query, GfxBoolResult* result)
 {
 	result->error = nullptr;
@@ -5949,4 +5962,5 @@ const GfxApi GFX_API = {
 	.CopyVBOToReadback = CopyVBOToReadback,
 	.ReadReadback = ReadReadback,
 	.DeleteReadback = DeleteReadback,
+	.QueryCounter = QueryCounter,
 };

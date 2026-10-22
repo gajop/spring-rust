@@ -808,6 +808,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"gfx", "PushDebugGroup", 122u, false, false, LoweringStatus::automatic},
 	{"gfx", "PushMatrix", 122u, false, false, LoweringStatus::automatic},
 	{"gfx", "PushPopMatrix", 122u, false, false, LoweringStatus::manual},
+	{"gfx", "QueryCounter", 122u, false, false, LoweringStatus::automatic},
 	{"gfx", "RawBindFBO", 122u, false, false, LoweringStatus::automatic},
 	{"gfx", "ReadPixels", 122u, false, false, LoweringStatus::annotated},
 	{"gfx", "ReadReadback", 122u, false, false, LoweringStatus::annotated},

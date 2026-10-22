@@ -1,12 +1,12 @@
 {
   "annotated": 191,
-  "automatic": 1206,
-  "functions": 1425,
+  "automatic": 1207,
+  "functions": 1426,
   "manual": 28,
   "modules": 59,
   "parity": {
     "behavioural": 0,
-    "exempt": 0,
+    "exempt": 1,
     "exercised": 14,
     "grandfathered": 1425,
     "untested": 1411,
@@ -14,15 +14,15 @@
   },
   "per_environment": {
     "gaia-synced": 784,
-    "gaia-unsynced": 1193,
-    "intro": 405,
-    "menu": 576,
+    "gaia-unsynced": 1194,
+    "intro": 406,
+    "menu": 577,
     "rules-synced": 784,
-    "rules-unsynced": 1193,
-    "ui": 1196
+    "rules-unsynced": 1194,
+    "ui": 1197
   },
   "unsupported": 0
 }
 
 # core-wasm planning
-automatic=1206 manual=202 unsupported=17
+automatic=1207 manual=202 unsupported=17

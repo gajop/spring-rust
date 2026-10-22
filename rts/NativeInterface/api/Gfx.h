@@ -720,6 +720,13 @@ struct GfxApi {
 	void (*CopyVBOToReadback)(const GfxReadbackCopyQuery* query, GfxEmptyResult* result);
 	void (*ReadReadback)(const GfxReadbackReadQuery* query, GfxVBODownloadResult* result);
 	void (*DeleteReadback)(const GfxUIntQuery* query, GfxEmptyResult* result);
+
+	// NEW (no Lua equivalent): a GPU timestamp (glQueryCounter, GL_TIMESTAMP)
+	// into a query made by CreateQuery. Read it with GetQuery (or once
+	// IsQueryAvailable) as nanoseconds on the GPU's clock. Timestamps taken in
+	// different callins of one frame time the GPU work between them, which
+	// RunQuery's elapsed time cannot span.
+	void (*QueryCounter)(const GfxUIntQuery* query, GfxEmptyResult* result);
 };
 
 extern const GfxApi GFX_API;

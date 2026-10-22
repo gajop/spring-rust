@@ -119,6 +119,10 @@ def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--run',type=Path,action='append',default=[])
  p.add_argument('--native-audit-log',type=Path,action='append',default=[]);p.add_argument('--baseline',type=Path,default=ROOT/'test/native_api_parity/parity_ledger.json');p.add_argument('--output',type=Path,required=True);p.add_argument('--gate',action='store_true')
  a=p.parse_args();model=json.loads((a.root/'rts/wasm/generated/model.json').read_text());ledger=inventory(a.root,model)
+ # A reviewed exemption is the baseline's decision, not evidence a run produces: carry it over.
+ for identity,entry in json.loads(a.baseline.read_text())['functions'].items():
+  if entry.get('level')=='exempt' and identity in ledger['functions']:ledger['functions'][identity].update(level='exempt',reason=entry.get('reason'),grandfathered=False)
+ ledger['counts']=dict(Counter(f['level'] for f in ledger['functions'].values()))
  for run in a.run:observe(ledger,specs(a.root),run.resolve())
  for log in a.native_audit_log:observe_native_audit(ledger,log.resolve())
  a.output.write_text(json.dumps(ledger,indent=2)+'\n')

@@ -364,6 +364,7 @@
   "gfx.PushDebugGroup": "generated",
   "gfx.PushMatrix": "generated",
   "gfx.PushPopMatrix": "generated",
+  "gfx.QueryCounter": "generated",
   "gfx.RawBindFBO": "generated",
   "gfx.ReadPixels": "generated",
   "gfx.ReadReadback": "generated",

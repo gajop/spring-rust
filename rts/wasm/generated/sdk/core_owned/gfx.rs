@@ -3380,6 +3380,12 @@
         }
 
         #[inline]
+        pub fn query_counter(value: u32) -> Result<()> {
+            crate::generated::gfx::query_counter(value)?;
+            Ok(())
+        }
+
+        #[inline]
         pub fn raw_bind_fbo(bind_default: bool, fbo_id: u32, target: u32, raw_fbo_id: u32) -> Result<RawBindFBOValue> {
             let value = crate::generated::gfx::raw_bind_fbo(bind_default, fbo_id, target, raw_fbo_id)?;
             Ok(RawBindFBOValue {

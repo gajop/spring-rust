@@ -20830,6 +20830,24 @@ pub mod gfx {
         }
     }
     impl<E: crate::capabilities::Render> Gfx<'_, E> {
+        pub fn query_counter(&self, value: u32) -> Result<()> {
+            self._engine.check()?;
+            let result = {
+                #[cfg(target_arch = "wasm32")]
+                { spring_sdk_internal::generated::owned::gfx::query_counter(value) }
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    crate::native::gfx::query_counter(
+                        &self._engine,
+                        self._native_api,
+                        value,
+                    )
+                }
+            };
+            self._engine.finish(result)
+        }
+    }
+    impl<E: crate::capabilities::Render> Gfx<'_, E> {
         pub fn raw_bind_fbo(
             &self,
             bind_default: bool,

@@ -1936,6 +1936,7 @@ pub mod rules_unsynced {
         pub use super::super::owned::gfx::push_debug_group;
         pub use super::super::owned::gfx::push_matrix;
         pub use super::super::owned::gfx::push_pop_matrix;
+        pub use super::super::owned::gfx::query_counter;
         pub use super::super::owned::gfx::raw_bind_fbo;
         pub use super::super::owned::gfx::read_pixels;
         pub use super::super::owned::gfx::read_readback;
@@ -4401,6 +4402,7 @@ pub mod gaia_unsynced {
         pub use super::super::owned::gfx::push_debug_group;
         pub use super::super::owned::gfx::push_matrix;
         pub use super::super::owned::gfx::push_pop_matrix;
+        pub use super::super::owned::gfx::query_counter;
         pub use super::super::owned::gfx::raw_bind_fbo;
         pub use super::super::owned::gfx::read_pixels;
         pub use super::super::owned::gfx::read_readback;
@@ -5838,6 +5840,7 @@ pub mod ui {
         pub use super::super::owned::gfx::push_debug_group;
         pub use super::super::owned::gfx::push_matrix;
         pub use super::super::owned::gfx::push_pop_matrix;
+        pub use super::super::owned::gfx::query_counter;
         pub use super::super::owned::gfx::raw_bind_fbo;
         pub use super::super::owned::gfx::read_pixels;
         pub use super::super::owned::gfx::read_readback;
@@ -6792,6 +6795,7 @@ pub mod menu {
         pub use super::super::owned::gfx::push_debug_group;
         pub use super::super::owned::gfx::push_matrix;
         pub use super::super::owned::gfx::push_pop_matrix;
+        pub use super::super::owned::gfx::query_counter;
         pub use super::super::owned::gfx::raw_bind_fbo;
         pub use super::super::owned::gfx::read_pixels;
         pub use super::super::owned::gfx::read_readback;
@@ -7631,6 +7635,7 @@ pub mod intro {
         pub use super::super::owned::gfx::push_debug_group;
         pub use super::super::owned::gfx::push_matrix;
         pub use super::super::owned::gfx::push_pop_matrix;
+        pub use super::super::owned::gfx::query_counter;
         pub use super::super::owned::gfx::raw_bind_fbo;
         pub use super::super::owned::gfx::read_pixels;
         pub use super::super::owned::gfx::read_readback;

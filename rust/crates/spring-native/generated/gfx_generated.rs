@@ -4359,4 +4359,17 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    pub fn query_counter(&self, value: u32) -> Result<(), Error> {
+        unsafe {
+            let query = sys::GfxUIntQuery {
+                value,
+            };
+            let mut result = MaybeUninit::<sys::GfxEmptyResult>::zeroed();
+            let func = self.api.QueryCounter.expect("QueryCounter function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, ())
+        }
+    }
+
 }

@@ -762,6 +762,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:gfx", "push-attrib", "i32->i32", 122u},
     {"spring:gfx", "push-debug-group", "i32,i32,i32->i32", 122u},
     {"spring:gfx", "push-matrix", "i32->i32", 122u},
+    {"spring:gfx", "query-counter", "i32->i32", 122u},
     {"spring:gfx", "raw-bind-fbo", "i32,i32,i32,i32,i32->i32", 122u},
     {"spring:gfx", "read-pixels", "i32,i32,i32,i32,i32,i32->i32", 122u},
     {"spring:gfx", "read-readback", "i32,i32,i32,i32->i32", 122u},

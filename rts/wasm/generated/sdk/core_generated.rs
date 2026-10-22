@@ -13051,6 +13051,11 @@ pub mod gfx {
         }
         #[link(wasm_import_module = "spring:gfx")]
         unsafe extern "C" {
+            #[link_name = "query-counter"]
+            pub safe fn core_query_counter(p0: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:gfx")]
+        unsafe extern "C" {
             #[link_name = "raw-bind-fbo"]
             pub safe fn core_raw_bind_fbo(p0: i32, p1: i32, p2: i32, p3: i32, p4: i32) -> i32;
         }
@@ -15401,6 +15406,20 @@ pub mod gfx {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (unused,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn query_counter(value: u32) -> Result<()> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let status = raw::core_query_counter(value as i32);
+            if status == 0 { Ok(()) } else { Err(ApiError::new(status)) }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (value,);
             Err(unreachable!())
         }
     }
