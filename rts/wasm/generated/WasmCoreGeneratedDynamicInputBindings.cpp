@@ -13518,6 +13518,49 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_weapon_damages(void* environ
     return nullptr;
 }
 
+wasm_trap_t* CoreDynamicInput_unit_control_set_unit_weapon_damages_zero_based(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->syncedCtrl == nullptr || state->native->syncedCtrl->unit == nullptr ||
+        state->native->syncedCtrl->unit->SetUnitWeaponDamagesZeroBased == nullptr)
+        return Trap("SetUnitWeaponDamagesZeroBased dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 4u)
+        return Trap("SetUnitWeaponDamagesZeroBased dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 5u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    SetUnitWeaponDamagesZeroBasedQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.weaponNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponNum)>>>(slots[1].i32);
+    std::uint32_t damageKeyPointer = 0, damageKeyBytes = 0;
+    if (!inputControl.U32(damageKeyPointer) || !inputControl.U32(damageKeyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!guard.Charge(damageKeyBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> damageKeyWire;
+    if (!state->memory.View(damageKeyPointer, damageKeyBytes, damageKeyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader damageKeyReader(damageKeyWire);
+    std::string damageKeyStorage;
+    { std::uint32_t coreLength = 0; if (!damageKeyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!damageKeyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } damageKeyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.damageKey = damageKeyStorage.data(); }
+    if (!damageKeyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    query.damageValue = slots[2].f32;
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+
+    SetUnitWeaponDamagesZeroBasedResult result{};
+    state->native->syncedCtrl->unit->SetUnitWeaponDamagesZeroBased(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreDynamicInput_unit_control_set_unit_weapon_state(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -13556,6 +13599,49 @@ wasm_trap_t* CoreDynamicInput_unit_control_set_unit_weapon_state(void* environme
 
     SetUnitWeaponStateResult result{};
     state->native->syncedCtrl->unit->SetUnitWeaponState(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_unit_control_set_unit_weapon_state_zero_based(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->syncedCtrl == nullptr || state->native->syncedCtrl->unit == nullptr ||
+        state->native->syncedCtrl->unit->SetUnitWeaponStateZeroBased == nullptr)
+        return Trap("SetUnitWeaponStateZeroBased dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 4u)
+        return Trap("SetUnitWeaponStateZeroBased dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 5u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[3].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    SetUnitWeaponStateZeroBasedQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.weaponNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponNum)>>>(slots[1].i32);
+    std::uint32_t keyPointer = 0, keyBytes = 0;
+    if (!inputControl.U32(keyPointer) || !inputControl.U32(keyBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!guard.Charge(keyBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> keyWire;
+    if (!state->memory.View(keyPointer, keyBytes, keyWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader keyReader(keyWire);
+    std::string keyStorage;
+    { std::uint32_t coreLength = 0; if (!keyReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!keyReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } keyStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.key = keyStorage.data(); }
+    if (!keyReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    query.value = slots[2].f32;
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+
+    SetUnitWeaponStateZeroBasedResult result{};
+    state->native->syncedCtrl->unit->SetUnitWeaponStateZeroBased(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
     return nullptr;
@@ -13874,6 +13960,48 @@ wasm_trap_t* CoreDynamicInput_projectile_control_spawn_projectile(void* environm
 
     SpawnProjectileResult result{};
     state->native->syncedCtrl->projectile->SpawnProjectile(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.projectileID), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_projectile_control_spawn_projectile_zero_based(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->syncedCtrl == nullptr || state->native->syncedCtrl->projectile == nullptr ||
+        state->native->syncedCtrl->projectile->SpawnProjectileZeroBased == nullptr)
+        return Trap("SpawnProjectileZeroBased dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("SpawnProjectileZeroBased dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    SpawnProjectileZeroBasedQuery query{};
+    query.weaponDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponDefID)>>>(slots[0].i32);
+    std::uint32_t projectileParamsPointer = 0, projectileParamsBytes = 0;
+    if (!inputControl.U32(projectileParamsPointer) || !inputControl.U32(projectileParamsBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!guard.Charge(projectileParamsBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> projectileParamsWire;
+    if (!state->memory.View(projectileParamsPointer, projectileParamsBytes, projectileParamsWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader projectileParamsReader(projectileParamsWire);
+    CoreOwned_NativeProjectileParams projectileParamsOwner;
+    if (!projectileParamsOwner.Decode(state, projectileParamsReader)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    query.projectileParams = projectileParamsOwner.value;
+    if (!projectileParamsReader.Finish(4u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+
+    SpawnProjectileZeroBasedResult result{};
+    state->native->syncedCtrl->projectile->SpawnProjectileZeroBased(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.projectileID), errorCode));
     return nullptr;
@@ -15016,8 +15144,15 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedDynamicInput(linker, "spring:projectile-control", "spawn-projectile",
+        if (!DefineGeneratedDynamicInput(linker, "spring:projectile-control", "spawn-projectile-v2",
                 MakeFuncType(params, 2, results, 1), CoreDynamicInput_projectile_control_spawn_projectile, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedDynamicInput(linker, "spring:projectile-control", "spawn-projectile",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_projectile_control_spawn_projectile_zero_based, state, error))
             return false;
     }
     {
@@ -15052,6 +15187,6 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
     return true;
 }
 
-static_assert(277u >= 0u, "generated dynamic-input Core callback count");
+static_assert(280u >= 0u, "generated dynamic-input Core callback count");
 
 } // namespace recoil::wasm::core::generated

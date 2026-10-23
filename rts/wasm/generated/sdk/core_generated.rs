@@ -21959,13 +21959,23 @@ pub mod unit_control {
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
-            #[link_name = "unit-weapon-fire"]
+            #[link_name = "unit-weapon-fire-v2"]
             pub safe fn core_unit_weapon_fire(p0: i32, p1: i32) -> i64;
         }
         #[link(wasm_import_module = "spring:unit-control")]
         unsafe extern "C" {
-            #[link_name = "unit-weapon-hold-fire"]
+            #[link_name = "unit-weapon-fire"]
+            pub safe fn core_unit_weapon_fire_zero_based(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:unit-control")]
+        unsafe extern "C" {
+            #[link_name = "unit-weapon-hold-fire-v2"]
             pub safe fn core_unit_weapon_hold_fire(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:unit-control")]
+        unsafe extern "C" {
+            #[link_name = "unit-weapon-hold-fire"]
+            pub safe fn core_unit_weapon_hold_fire_zero_based(p0: i32, p1: i32) -> i64;
         }
     }
 
@@ -23784,10 +23794,54 @@ pub mod unit_control {
     }
 
     #[inline]
+    pub fn unit_weapon_fire_zero_based(unit_id: i32, weapon_num: i32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_unit_weapon_fire_zero_based(unit_id, weapon_num) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, weapon_num);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn unit_weapon_hold_fire(unit_id: i32, weapon_num: i32) -> Result<bool> {
         #[cfg(target_arch = "wasm32")]
         {
             let packed = raw::core_unit_weapon_hold_fire(unit_id, weapon_num) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unit_id, weapon_num);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn unit_weapon_hold_fire_zero_based(unit_id: i32, weapon_num: i32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_unit_weapon_hold_fire_zero_based(unit_id, weapon_num) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 {
                 return Err(ApiError::new(status));

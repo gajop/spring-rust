@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
+#include <limits>
 #include <vector>
 
 #include "Sim/Units/Unit.h"
@@ -2043,6 +2044,14 @@ static int WeaponIndexFromOneBasedNumber(int32_t weaponNum)
 	return static_cast<int>(weaponNum) - 1;
 }
 
+// Engines up to 2026.10.2401 counted the weapon setters (and SpawnProjectile's owner weapon)
+// from 0. Their old Wasm imports keep that meaning through the *ZeroBased calls, which
+// renumber and forward. Anything below 0 maps to 0, which no weapon has.
+static int32_t OneBasedFromZeroBasedNumber(int32_t weaponIndex)
+{
+	return (weaponIndex >= 0 && weaponIndex < std::numeric_limits<int32_t>::max()) ? weaponIndex + 1 : 0;
+}
+
 static void NativeSetUnitTarget(const SetUnitTargetQuery* query, SetUnitTargetResult* result)
 {
 	bufferPos = 0;
@@ -2691,9 +2700,7 @@ static void NativeSetUnitWeaponState(const SetUnitWeaponStateQuery* query, SetUn
 		return;
 	}
 
-	// UnitControl's weapon control calls use zero-based native indices.  The
-	// Lua parity adapter converts Lua's one-based number before reaching here.
-	const int weaponIndex = query->weaponNum;
+	const int weaponIndex = WeaponIndexFromOneBasedNumber(query->weaponNum);
 	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 		result->error = MakeError(native_error::InvalidArgument, "Invalid weapon number");
 		return;
@@ -2728,9 +2735,7 @@ static void NativeUnitWeaponFire(const UnitWeaponFireQuery* query, UnitWeaponFir
 		return;
 	}
 
-	// UnitControl's weapon control calls use zero-based native indices.  The
-	// Lua parity adapter converts Lua's one-based number before reaching here.
-	const int weaponIndex = query->weaponNum;
+	const int weaponIndex = WeaponIndexFromOneBasedNumber(query->weaponNum);
 	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 		result->error = MakeError(native_error::InvalidArgument, "Invalid weapon number");
 		return;
@@ -2757,9 +2762,7 @@ static void NativeUnitWeaponHoldFire(const UnitWeaponHoldFireQuery* query, UnitW
 		return;
 	}
 
-	// UnitControl's weapon control calls use zero-based native indices.  The
-	// Lua parity adapter converts Lua's one-based number before reaching here.
-	const int weaponIndex = query->weaponNum;
+	const int weaponIndex = WeaponIndexFromOneBasedNumber(query->weaponNum);
 	if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 		result->error = MakeError(native_error::InvalidArgument, "Invalid weapon number");
 		return;
@@ -2767,6 +2770,30 @@ static void NativeUnitWeaponHoldFire(const UnitWeaponHoldFireQuery* query, UnitW
 
 	unit->weapons[weaponIndex]->DropCurrentTarget();
 	result->success = true;
+}
+
+static void NativeSetUnitWeaponStateZeroBased(const SetUnitWeaponStateZeroBasedQuery* query, SetUnitWeaponStateZeroBasedResult* result)
+{
+	const SetUnitWeaponStateQuery numbered = {query->unitID, OneBasedFromZeroBasedNumber(query->weaponNum), query->key, query->value};
+	SetUnitWeaponStateResult forwarded = {};
+	NativeSetUnitWeaponState(&numbered, &forwarded);
+	*result = {forwarded.error, forwarded.success};
+}
+
+static void NativeUnitWeaponFireZeroBased(const UnitWeaponFireZeroBasedQuery* query, UnitWeaponFireZeroBasedResult* result)
+{
+	const UnitWeaponFireQuery numbered = {query->unitID, OneBasedFromZeroBasedNumber(query->weaponNum)};
+	UnitWeaponFireResult forwarded = {};
+	NativeUnitWeaponFire(&numbered, &forwarded);
+	*result = {forwarded.error, forwarded.success};
+}
+
+static void NativeUnitWeaponHoldFireZeroBased(const UnitWeaponHoldFireZeroBasedQuery* query, UnitWeaponHoldFireZeroBasedResult* result)
+{
+	const UnitWeaponHoldFireQuery numbered = {query->unitID, OneBasedFromZeroBasedNumber(query->weaponNum)};
+	UnitWeaponHoldFireResult forwarded = {};
+	NativeUnitWeaponHoldFire(&numbered, &forwarded);
+	*result = {forwarded.error, forwarded.success};
 }
 
 static void NativeSetUnitUseWeapons(const SetUnitUseWeaponsQuery* query, SetUnitUseWeaponsResult* result)
@@ -2941,9 +2968,7 @@ static void NativeSetUnitWeaponDamages(const SetUnitWeaponDamagesQuery* query, S
 		// "selfDestruct"
 		damages = DynDamageArray::GetMutable(unit->selfdExpDamages);
 	} else {
-		// UnitControl's weapon control calls use zero-based native indices.  The
-		// Lua parity adapter converts Lua's one-based number before reaching here.
-		const int weaponIndex = query->weaponNum;
+		const int weaponIndex = WeaponIndexFromOneBasedNumber(query->weaponNum);
 		if (weaponIndex < 0 || static_cast<size_t>(weaponIndex) >= unit->weapons.size()) {
 			result->error = MakeError(native_error::InvalidArgument, "Invalid weapon number");
 			return;
@@ -2980,6 +3005,16 @@ static void NativeSetUnitWeaponDamages(const SetUnitWeaponDamagesQuery* query, S
 	if (!result->success) {
 		result->error = MakeError(native_error::InvalidArgument, "Unknown damage key");
 	}
+}
+
+static void NativeSetUnitWeaponDamagesZeroBased(const SetUnitWeaponDamagesZeroBasedQuery* query, SetUnitWeaponDamagesZeroBasedResult* result)
+{
+	// -1 ("explode") and -2 ("selfDestruct") mean the same in both forms.
+	const int32_t weaponNum = (query->weaponNum == -1 || query->weaponNum == -2) ? query->weaponNum : OneBasedFromZeroBasedNumber(query->weaponNum);
+	const SetUnitWeaponDamagesQuery numbered = {query->unitID, weaponNum, query->damageKey, query->damageValue};
+	SetUnitWeaponDamagesResult forwarded = {};
+	NativeSetUnitWeaponDamages(&numbered, &forwarded);
+	*result = {forwarded.error, forwarded.success};
 }
 
 static void NativeForceUnitCollisionUpdate(const ForceUnitCollisionUpdateQuery* query, ForceUnitCollisionUpdateResult* result)
@@ -3789,7 +3824,11 @@ static const UnitControlApi UNIT_CONTROL_API = {
 	.SetUnitPieceVisible = NativeSetUnitPieceVisible,
 	.SetUnitPieceParent = NativeSetUnitPieceParent,
 	.SetUnitPieceMatrix = NativeSetUnitPieceMatrix,
-	.SetUnitNanoPieces = NativeSetUnitNanoPieces
+	.SetUnitNanoPieces = NativeSetUnitNanoPieces,
+	.SetUnitWeaponStateZeroBased = NativeSetUnitWeaponStateZeroBased,
+	.UnitWeaponFireZeroBased = NativeUnitWeaponFireZeroBased,
+	.UnitWeaponHoldFireZeroBased = NativeUnitWeaponHoldFireZeroBased,
+	.SetUnitWeaponDamagesZeroBased = NativeSetUnitWeaponDamagesZeroBased
 };
 
 // ============================================================================
@@ -5640,7 +5679,7 @@ static void NativeSpawnProjectile(const SpawnProjectileQuery* query, SpawnProjec
 	params.error = float3(nativeParams.error.x, nativeParams.error.y, nativeParams.error.z);
 	params.ownerID = (nativeParams.owner >= 0) ? static_cast<unsigned int>(nativeParams.owner) : -1u;
 	params.teamID = (nativeParams.team >= 0) ? static_cast<unsigned int>(nativeParams.team) : teamHandler.GaiaTeamID();
-	params.weaponNum = (nativeParams.weaponNum >= 0) ? static_cast<unsigned int>(nativeParams.weaponNum) : -1u;
+	params.weaponNum = (nativeParams.weaponNum >= 1) ? static_cast<unsigned int>(WeaponIndexFromOneBasedNumber(nativeParams.weaponNum)) : -1u;
 	params.ttl = static_cast<int>(nativeParams.ttl);
 	params.gravity = nativeParams.gravity;
 	params.tracking = nativeParams.tracking;
@@ -5657,6 +5696,15 @@ static void NativeSpawnProjectile(const SpawnProjectileQuery* query, SpawnProjec
 
 	const unsigned int projectileID = WeaponProjectileFactory::LoadProjectile(params);
 	result->projectileID = static_cast<int32_t>(projectileID);
+}
+
+static void NativeSpawnProjectileZeroBased(const SpawnProjectileZeroBasedQuery* query, SpawnProjectileZeroBasedResult* result)
+{
+	SpawnProjectileQuery numbered = {query->weaponDefID, query->projectileParams};
+	numbered.projectileParams.weaponNum = OneBasedFromZeroBasedNumber(query->projectileParams.weaponNum);
+	SpawnProjectileResult forwarded = {};
+	NativeSpawnProjectile(&numbered, &forwarded);
+	*result = {forwarded.error, forwarded.projectileID};
 }
 
 static void NativeDeleteProjectile(const DeleteProjectileQuery* query, DeleteProjectileResult* result)
@@ -6089,7 +6137,8 @@ static const ProjectileControlApi PROJECTILE_CONTROL_API = {
 	.SetProjectileUseAirLos = NativeSetProjectileUseAirLos,
 	.SetProjectileMoveControl = NativeSetProjectileMoveControl,
 	.SetProjectileIgnoreTrackingError = NativeSetProjectileIgnoreTrackingError,
-	.SetPieceProjectileParams = NativeSetPieceProjectileParams
+	.SetPieceProjectileParams = NativeSetPieceProjectileParams,
+	.SpawnProjectileZeroBased = NativeSpawnProjectileZeroBased
 };
 
 // ============================================================================

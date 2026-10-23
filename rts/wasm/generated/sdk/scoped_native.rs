@@ -40607,6 +40607,42 @@ pub(crate) mod unit_control {
         }
         Ok((result.success) as _)
     }
+    pub(crate) fn set_unit_weapon_damages_zero_based(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::UnitControlApi>,
+        unit_id: i32,
+        weapon_num: i32,
+        damage_key: &str,
+        damage_value: f32,
+    ) -> Result<bool> {
+        let native_unit_id = (unit_id) as _;
+        let native_weapon_num = (weapon_num) as _;
+        let storage_damage_key = std::ffi::CString::new(damage_key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_damage_key = storage_damage_key.as_ptr() as _;
+        let native_damage_value = (damage_value) as _;
+        let query = sys::SetUnitWeaponDamagesZeroBasedQuery {
+            unitID: native_unit_id,
+            weaponNum: native_weapon_num,
+            damageKey: native_damage_key,
+            damageValue: native_damage_value,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .SetUnitWeaponDamagesZeroBased
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::SetUnitWeaponDamagesZeroBasedResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.success) as _)
+    }
     pub(crate) fn set_unit_weapon_state(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::UnitControlApi>,
@@ -40633,6 +40669,42 @@ pub(crate) mod unit_control {
             .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
         let mut result = core::mem::MaybeUninit::<
             sys::SetUnitWeaponStateResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.success) as _)
+    }
+    pub(crate) fn set_unit_weapon_state_zero_based(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::UnitControlApi>,
+        unit_id: i32,
+        weapon_num: i32,
+        key: &str,
+        value: f32,
+    ) -> Result<bool> {
+        let native_unit_id = (unit_id) as _;
+        let native_weapon_num = (weapon_num) as _;
+        let storage_key = std::ffi::CString::new(key)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_key = storage_key.as_ptr() as _;
+        let native_value = (value) as _;
+        let query = sys::SetUnitWeaponStateZeroBasedQuery {
+            unitID: native_unit_id,
+            weaponNum: native_weapon_num,
+            key: native_key,
+            value: native_value,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .SetUnitWeaponStateZeroBased
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::SetUnitWeaponStateZeroBasedResult,
         >::zeroed();
         unsafe {
             call(&query, result.as_mut_ptr());
@@ -40807,6 +40879,34 @@ pub(crate) mod unit_control {
         }
         Ok((result.success) as _)
     }
+    pub(crate) fn unit_weapon_fire_zero_based(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::UnitControlApi>,
+        unit_id: i32,
+        weapon_num: i32,
+    ) -> Result<bool> {
+        let native_unit_id = (unit_id) as _;
+        let native_weapon_num = (weapon_num) as _;
+        let query = sys::UnitWeaponFireZeroBasedQuery {
+            unitID: native_unit_id,
+            weaponNum: native_weapon_num,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .UnitWeaponFireZeroBased
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::UnitWeaponFireZeroBasedResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.success) as _)
+    }
     pub(crate) fn unit_weapon_hold_fire(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::UnitControlApi>,
@@ -40825,6 +40925,34 @@ pub(crate) mod unit_control {
             .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
         let mut result = core::mem::MaybeUninit::<
             sys::UnitWeaponHoldFireResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.success) as _)
+    }
+    pub(crate) fn unit_weapon_hold_fire_zero_based(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::UnitControlApi>,
+        unit_id: i32,
+        weapon_num: i32,
+    ) -> Result<bool> {
+        let native_unit_id = (unit_id) as _;
+        let native_weapon_num = (weapon_num) as _;
+        let query = sys::UnitWeaponHoldFireZeroBasedQuery {
+            unitID: native_unit_id,
+            weaponNum: native_weapon_num,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .UnitWeaponHoldFireZeroBased
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::UnitWeaponHoldFireZeroBasedResult,
         >::zeroed();
         unsafe {
             call(&query, result.as_mut_ptr());
@@ -43499,6 +43627,38 @@ pub(crate) mod projectile_control {
             .SpawnProjectile
             .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
         let mut result = core::mem::MaybeUninit::<sys::SpawnProjectileResult>::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.projectileID) as _)
+    }
+    pub(crate) fn spawn_projectile_zero_based(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::ProjectileControlApi>,
+        weapon_def_id: i32,
+        projectile_params: &NativeProjectileParams,
+    ) -> Result<i32> {
+        let mut inputs = Inputs::default();
+        let native_weapon_def_id = (weapon_def_id) as _;
+        let native_projectile_params = to_native_projectile_params(
+            projectile_params,
+            &mut inputs,
+        )?;
+        let query = sys::SpawnProjectileZeroBasedQuery {
+            weaponDefID: native_weapon_def_id,
+            projectileParams: native_projectile_params,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .SpawnProjectileZeroBased
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::SpawnProjectileZeroBasedResult,
+        >::zeroed();
         unsafe {
             call(&query, result.as_mut_ptr());
         }

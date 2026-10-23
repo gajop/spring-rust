@@ -4551,7 +4551,7 @@ fn probe_unit_set_shield_recharge_delay(fixture: &super::Fixture) -> String {
 }
 
 fn probe_unit_weapon_fire(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unit_control::unit_weapon_fire((fixture.unit_id) as i32, ((1i32) - 1) as i32);
+    let result = crate::bindings::recoil::spring_api::unit_control::unit_weapon_fire((fixture.unit_id) as i32, (1i32) as i32);
     let fields = match result {
         Ok(_value) => {
             let output_fields: Vec<String> = vec![encode_u32("returnCount", 0u32)];
@@ -4563,7 +4563,7 @@ fn probe_unit_weapon_fire(fixture: &super::Fixture) -> String {
 }
 
 fn probe_unit_weapon_hold_fire(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unit_control::unit_weapon_hold_fire((fixture.unit_id) as i32, ((1i32) - 1) as i32);
+    let result = crate::bindings::recoil::spring_api::unit_control::unit_weapon_hold_fire((fixture.unit_id) as i32, (1i32) as i32);
     let fields = match result {
         Ok(_value) => {
             let output_fields: Vec<String> = vec![encode_u32("returnCount", 0u32)];
@@ -4635,7 +4635,7 @@ fn probe_unit_set_loading_transport_clear(fixture: &super::Fixture) -> String {
 }
 
 fn probe_unit_set_weapon_state(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unit_control::set_unit_weapon_state((fixture.unit_id) as i32, (0i32) as i32, &"range", (256f32) as f32);
+    let result = crate::bindings::recoil::spring_api::unit_control::set_unit_weapon_state((fixture.unit_id) as i32, (1i32) as i32, &"range", (256f32) as f32);
     let fields = match result {
         Ok(_value) => {
             let output_fields: Vec<String> = vec![encode_u32("returnCount", 0u32)];
@@ -4647,7 +4647,7 @@ fn probe_unit_set_weapon_state(fixture: &super::Fixture) -> String {
 }
 
 fn probe_unit_set_weapon_damages(fixture: &super::Fixture) -> String {
-    let result = crate::bindings::recoil::spring_api::unit_control::set_unit_weapon_damages((fixture.unit_id) as i32, (0i32) as i32, &"impulseFactor", (1.5f32) as f32);
+    let result = crate::bindings::recoil::spring_api::unit_control::set_unit_weapon_damages((fixture.unit_id) as i32, (1i32) as i32, &"impulseFactor", (1.5f32) as f32);
     let fields = match result {
         Ok(_value) => {
             let output_fields: Vec<String> = vec![encode_u32("returnCount", 0u32)];

@@ -27545,6 +27545,23 @@
       "required_returns_mapped": false,
       "runs": []
     },
+    "unit_control.SetUnitWeaponDamagesZeroBased": {
+      "level": "exempt",
+      "reason": "Legacy zero-based form of SetUnitWeaponDamages, kept under the import name engines up to 2026.10.2401 gave it. No Lua equivalent: it renumbers the weapon from 0 to 1 and forwards to SetUnitWeaponDamages, which carries the parity evidence.",
+      "required_environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
     "unit_control.SetUnitWeaponState": {
       "level": "untested",
       "grandfathered": true,
@@ -27561,6 +27578,23 @@
       "required_mutants": [
         "zero",
         "noop"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
+    "unit_control.SetUnitWeaponStateZeroBased": {
+      "level": "exempt",
+      "reason": "Legacy zero-based form of SetUnitWeaponState, kept under the import name engines up to 2026.10.2401 gave it. No Lua equivalent: it renumbers the weapon from 0 to 1 and forwards to SetUnitWeaponState, which carries the parity evidence.",
+      "required_environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
       ],
       "required_returns_mapped": false,
       "runs": []
@@ -27688,6 +27722,23 @@
       "required_returns_mapped": false,
       "runs": []
     },
+    "unit_control.UnitWeaponFireZeroBased": {
+      "level": "exempt",
+      "reason": "Legacy zero-based form of UnitWeaponFire, kept under the import name engines up to 2026.10.2401 gave it. No Lua equivalent: it renumbers the weapon from 0 to 1 and forwards to UnitWeaponFire, which carries the parity evidence.",
+      "required_environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
     "unit_control.UnitWeaponHoldFire": {
       "level": "untested",
       "grandfathered": true,
@@ -27704,6 +27755,23 @@
       "required_mutants": [
         "zero",
         "noop"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
+    "unit_control.UnitWeaponHoldFireZeroBased": {
+      "level": "exempt",
+      "reason": "Legacy zero-based form of UnitWeaponHoldFire, kept under the import name engines up to 2026.10.2401 gave it. No Lua equivalent: it renumbers the weapon from 0 to 1 and forwards to UnitWeaponHoldFire, which carries the parity evidence.",
+      "required_environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
       ],
       "required_returns_mapped": false,
       "runs": []
@@ -29199,6 +29267,23 @@
       "required_returns_mapped": false,
       "runs": []
     },
+    "projectile_control.SpawnProjectileZeroBased": {
+      "level": "exempt",
+      "reason": "Legacy zero-based form of SpawnProjectile, kept under the import name engines up to 2026.10.2401 gave it. No Lua equivalent: it renumbers the weapon from 0 to 1 and forwards to SpawnProjectile, which carries the parity evidence.",
+      "required_environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
     "effects_control.SpawnCEG": {
       "level": "untested",
       "grandfathered": true,
@@ -30292,6 +30377,7 @@
   },
   "counts": {
     "untested": 1411,
-    "exercised": 14
+    "exercised": 14,
+    "exempt": 6
   }
 }

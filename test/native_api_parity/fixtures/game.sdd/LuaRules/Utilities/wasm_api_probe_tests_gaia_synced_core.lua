@@ -1782,13 +1782,11 @@ return {
 		},
 		["unit_set_weapon_state"] = {
 			weaponNum = 1,
-			wasmWeaponNum = 0,
 			key = "range",
 			value = 256,
 		},
 		["unit_set_weapon_damages"] = {
 			weaponNum = 1,
-			wasmWeaponNum = 0,
 			damageKey = "impulseFactor",
 			damageValue = 1.5,
 		},

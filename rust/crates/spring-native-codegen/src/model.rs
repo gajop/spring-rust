@@ -210,6 +210,21 @@ pub struct FunctionModel {
     pub status: LoweringStatus,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub notes: Vec<String>,
+    /// The Wasm import name, when it is not the kebab-case function name. Set by an
+    /// `IMPORT_NAME` annotation: a call whose arguments changed meaning takes a new import name,
+    /// and the old name stays with a legacy function that keeps the old meaning.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub import_name: Option<String>,
+}
+
+impl FunctionModel {
+    /// The name the function is imported under from its `spring:<module>` Wasm interface.
+    pub fn wasm_import_name(&self) -> String {
+        use heck::ToKebabCase;
+        self.import_name
+            .clone()
+            .unwrap_or_else(|| self.name.to_kebab_case())
+    }
 }
 
 /// One coherent API module.  Its `name` is the stable C header/module name,
@@ -483,6 +498,7 @@ pub(crate) fn from_legacy_spec(
             visibility_sensitive,
             status,
             notes,
+            import_name: None,
         });
     }
 

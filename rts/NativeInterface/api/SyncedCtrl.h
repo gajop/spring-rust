@@ -432,10 +432,12 @@ struct SetUnitCrashingQuery {
 };
 struct SetUnitCrashingResult { const Error* error; bool stateChanged; };
 
-// Unit weapon control queries
+// Unit weapon control queries. Weapon numbers count from 1, as in Lua and in every
+// weapon read. Engines up to 2026.10.2401 counted these setters from 0; their old Wasm
+// imports keep that meaning through the *ZeroBased functions at the end of the table.
 struct SetUnitWeaponStateQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // zero-based native index; Lua callers convert from one-based
+	int32_t weaponNum;          // 1-indexed as in Lua
 	const char* key;
 	float value;
 };
@@ -443,15 +445,36 @@ struct SetUnitWeaponStateResult { const Error* error; bool success; };
 
 struct UnitWeaponFireQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // zero-based native index; Lua callers convert from one-based
+	int32_t weaponNum;          // 1-indexed as in Lua
 };
 struct UnitWeaponFireResult { const Error* error; bool success; };
 
 struct UnitWeaponHoldFireQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // zero-based native index; Lua callers convert from one-based
+	int32_t weaponNum;          // 1-indexed as in Lua
 };
 struct UnitWeaponHoldFireResult { const Error* error; bool success; };
+
+// Legacy zero-based forms, for modules built for engines up to 2026.10.2401.
+struct SetUnitWeaponStateZeroBasedQuery {
+	int32_t unitID;
+	int32_t weaponNum;          // zero-based
+	const char* key;
+	float value;
+};
+struct SetUnitWeaponStateZeroBasedResult { const Error* error; bool success; };
+
+struct UnitWeaponFireZeroBasedQuery {
+	int32_t unitID;
+	int32_t weaponNum;          // zero-based
+};
+struct UnitWeaponFireZeroBasedResult { const Error* error; bool success; };
+
+struct UnitWeaponHoldFireZeroBasedQuery {
+	int32_t unitID;
+	int32_t weaponNum;          // zero-based
+};
+struct UnitWeaponHoldFireZeroBasedResult { const Error* error; bool success; };
 
 struct SetUnitUseWeaponsOptions { bool forceUseWeapons; bool allowUseWeapons; };
 struct SetUnitUseWeaponsQuery { int32_t unitID; SetUnitUseWeaponsOptions options; };
@@ -479,11 +502,20 @@ struct SetUnitPosErrorParamsResult { const Error* error; bool success; };
 // Unit weapon damages query
 struct SetUnitWeaponDamagesQuery {
 	int32_t unitID;
-	int32_t weaponNum;          // zero-based native index, -1 for "explode", -2 for "selfDestruct"
+	int32_t weaponNum;          // 1-indexed as in Lua, -1 for "explode", -2 for "selfDestruct"
 	const char* damageKey;      // damage type key (e.g., "paralyzeDamageTime", armor type index)
 	float damageValue;
 };
 struct SetUnitWeaponDamagesResult { const Error* error; bool success; };
+
+// Legacy zero-based form, for modules built for engines up to 2026.10.2401.
+struct SetUnitWeaponDamagesZeroBasedQuery {
+	int32_t unitID;
+	int32_t weaponNum;          // zero-based, -1 for "explode", -2 for "selfDestruct"
+	const char* damageKey;
+	float damageValue;
+};
+struct SetUnitWeaponDamagesZeroBasedResult { const Error* error; bool success; };
 
 // Force unit collision update query
 struct ForceUnitCollisionUpdateQuery { int32_t unitID; };
@@ -741,6 +773,11 @@ struct UnitControlApi {
 	void (*SetUnitPieceParent)(const SetUnitPieceParentQuery* query, SetUnitPieceParentResult* result);
 	void (*SetUnitPieceMatrix)(const SetUnitPieceMatrixQuery* query, SetUnitPieceMatrixResult* result);
 	void (*SetUnitNanoPieces)(const SetUnitNanoPiecesQuery* query, SetUnitNanoPiecesResult* result);
+	// Appended so earlier native modules keep their table layout.
+	void (*SetUnitWeaponStateZeroBased)(const SetUnitWeaponStateZeroBasedQuery* query, SetUnitWeaponStateZeroBasedResult* result);
+	void (*UnitWeaponFireZeroBased)(const UnitWeaponFireZeroBasedQuery* query, UnitWeaponFireZeroBasedResult* result);
+	void (*UnitWeaponHoldFireZeroBased)(const UnitWeaponHoldFireZeroBasedQuery* query, UnitWeaponHoldFireZeroBasedResult* result);
+	void (*SetUnitWeaponDamagesZeroBased)(const SetUnitWeaponDamagesZeroBasedQuery* query, SetUnitWeaponDamagesZeroBasedResult* result);
 };
 
 // ============================================================================
@@ -1046,6 +1083,10 @@ struct TerrainControlApi {
 // Queries - Projectile Control
 struct SpawnProjectileQuery { int32_t weaponDefID; NativeProjectileParams projectileParams; };
 struct SpawnProjectileResult { const Error* error; int32_t projectileID; };
+// Legacy form whose projectileParams.weaponNum counts from 0 (-1 for none), for modules
+// built for engines up to 2026.10.2401.
+struct SpawnProjectileZeroBasedQuery { int32_t weaponDefID; NativeProjectileParams projectileParams; };
+struct SpawnProjectileZeroBasedResult { const Error* error; int32_t projectileID; };
 
 struct DeleteProjectileQuery { int32_t projectileID; };
 struct DeleteProjectileResult { const Error* error; bool success; };
@@ -1116,6 +1157,8 @@ struct ProjectileControlApi {
 	void (*SetProjectileMoveControl)(const SetProjectileMoveControlQuery* query, SetProjectileMoveControlResult* result);
 	void (*SetProjectileIgnoreTrackingError)(const SetProjectileIgnoreTrackingErrorQuery* query, SetProjectileIgnoreTrackingErrorResult* result);
 	void (*SetPieceProjectileParams)(const SetPieceProjectileParamsQuery* query, SetPieceProjectileParamsResult* result);
+	// Appended so earlier native modules keep their table layout.
+	void (*SpawnProjectileZeroBased)(const SpawnProjectileZeroBasedQuery* query, SpawnProjectileZeroBasedResult* result);
 };
 
 // ============================================================================

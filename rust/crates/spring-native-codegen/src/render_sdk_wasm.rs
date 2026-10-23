@@ -698,6 +698,7 @@ mod routing_tests {
             visibility_sensitive: false,
             status: LoweringStatus::Automatic,
             notes: Vec::new(),
+            import_name: None,
         }
     }
     #[test]

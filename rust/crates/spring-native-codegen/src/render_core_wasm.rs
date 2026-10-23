@@ -4,7 +4,6 @@
 //! model into a runtime-neutral Core ABI plan which later renderers can use for
 //! C++ host callbacks, validation metadata and guest SDK bindings.
 
-use heck::ToKebabCase;
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -220,7 +219,7 @@ fn plan_function(
         module: module.to_owned(),
         function: function.name.clone(),
         import_module: format!("spring:{}", module.replace('_', "-")),
-        import_name: function.name.to_kebab_case(),
+        import_name: function.wasm_import_name(),
         environment_mask: environment_mask(&function.environments),
         mutating: function.mutating,
         visibility_sensitive: function.visibility_sensitive,
@@ -605,6 +604,7 @@ mod tests {
             visibility_sensitive: false,
             status: LoweringStatus::Annotated,
             notes: vec!["reviewed mutating variable-size-result exception".to_owned()],
+            import_name: None,
         };
 
         let plan = plan_function("unit_script", &function, &BTreeMap::new());

@@ -9,6 +9,7 @@
 # MANUAL(module, function, reason)
 # EXCLUDE(module, function, reason)
 # SYNCED_ONLY(module, function, reason)
+# IMPORT_NAME(module, function, kebab-case-wasm-import-name)
 
 MANUAL(rml_ui, DataModelBindEvent, synchronous guest callback and host resource)
 MANUAL(rml_ui, DataModelUnbindEvent, synchronous guest callback and host resource)
@@ -47,3 +48,17 @@ EXCLUDE(memory, FreeUInt32Array, native pointer-management API is never exposed 
 SYNCED_ONLY(messages, SendToUnsynced, bridge from a deterministic synced module to the unsynced Lua handle)
 
 EXCLUDE(los, GetClosestValidPosition, Lua and native implementations are unsupported; no callable production import)
+
+# Weapon numbers count from 1 in every call. Engines up to 2026.10.2401 counted these setters
+# from 0 under the plain import names; those names stay with the legacy *ZeroBased functions,
+# and the one-based functions take new names, so a module never gets the other meaning.
+IMPORT_NAME(unit_control, SetUnitWeaponState, set-unit-weapon-state-v2)
+IMPORT_NAME(unit_control, UnitWeaponFire, unit-weapon-fire-v2)
+IMPORT_NAME(unit_control, UnitWeaponHoldFire, unit-weapon-hold-fire-v2)
+IMPORT_NAME(unit_control, SetUnitWeaponDamages, set-unit-weapon-damages-v2)
+IMPORT_NAME(unit_control, SetUnitWeaponStateZeroBased, set-unit-weapon-state)
+IMPORT_NAME(unit_control, UnitWeaponFireZeroBased, unit-weapon-fire)
+IMPORT_NAME(unit_control, UnitWeaponHoldFireZeroBased, unit-weapon-hold-fire)
+IMPORT_NAME(unit_control, SetUnitWeaponDamagesZeroBased, set-unit-weapon-damages)
+IMPORT_NAME(projectile_control, SpawnProjectile, spawn-projectile-v2)
+IMPORT_NAME(projectile_control, SpawnProjectileZeroBased, spawn-projectile)

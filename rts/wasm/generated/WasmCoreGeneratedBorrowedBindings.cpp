@@ -13491,6 +13491,65 @@ wasm_trap_t* CoreBorrowed_unit_control_set_unit_weapon_damages(void* environment
     return nullptr;
 }
 
+wasm_trap_t* CoreBorrowed_unit_control_set_unit_weapon_damages_zero_based(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->syncedCtrl == nullptr || state->native->syncedCtrl->unit == nullptr ||
+        state->native->syncedCtrl->unit->SetUnitWeaponDamagesZeroBased == nullptr)
+        return Trap("SetUnitWeaponDamagesZeroBased borrowed Core binding is unavailable");
+    if (slots == nullptr || slotCount != 4u)
+        return Trap("SetUnitWeaponDamagesZeroBased borrowed Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 5u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[3].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    SetUnitWeaponDamagesZeroBasedQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.weaponNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponNum)>>>(slots[1].i32);
+    std::uint32_t damageKeyPointer = 0;
+    std::uint32_t damageKeyCount = 0;
+    if (!reader.U32(damageKeyPointer) || !reader.U32(damageKeyCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    if (damageKeyCount == std::numeric_limits<std::uint32_t>::max()) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> damageKeyBytes;
+    if (!state->memory.View(damageKeyPointer, static_cast<std::size_t>(damageKeyCount) + 1u, damageKeyBytes)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    if (damageKeyBytes[damageKeyCount] != 0) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.damageKey = reinterpret_cast<const char*>(damageKeyBytes.data());
+    query.damageValue = slots[2].f32;
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    SetUnitWeaponDamagesZeroBasedResult result{};
+    state->native->syncedCtrl->unit->SetUnitWeaponDamagesZeroBased(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreBorrowed_unit_control_set_unit_weapon_state(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -13545,6 +13604,65 @@ wasm_trap_t* CoreBorrowed_unit_control_set_unit_weapon_state(void* environment, 
     }
     SetUnitWeaponStateResult result{};
     state->native->syncedCtrl->unit->SetUnitWeaponState(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreBorrowed_unit_control_set_unit_weapon_state_zero_based(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->syncedCtrl == nullptr || state->native->syncedCtrl->unit == nullptr ||
+        state->native->syncedCtrl->unit->SetUnitWeaponStateZeroBased == nullptr)
+        return Trap("SetUnitWeaponStateZeroBased borrowed Core binding is unavailable");
+    if (slots == nullptr || slotCount != 4u)
+        return Trap("SetUnitWeaponStateZeroBased borrowed Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 5u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[3].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    SetUnitWeaponStateZeroBasedQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.weaponNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponNum)>>>(slots[1].i32);
+    std::uint32_t keyPointer = 0;
+    std::uint32_t keyCount = 0;
+    if (!reader.U32(keyPointer) || !reader.U32(keyCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    if (keyCount == std::numeric_limits<std::uint32_t>::max()) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> keyBytes;
+    if (!state->memory.View(keyPointer, static_cast<std::size_t>(keyCount) + 1u, keyBytes)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    if (keyBytes[keyCount] != 0) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.key = reinterpret_cast<const char*>(keyBytes.data());
+    query.value = slots[2].f32;
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    SetUnitWeaponStateZeroBasedResult result{};
+    state->native->syncedCtrl->unit->SetUnitWeaponStateZeroBased(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
     return nullptr;
@@ -15097,15 +15215,29 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_F32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:unit-control", "set-unit-weapon-damages",
+        if (!DefineGeneratedBorrowed(linker, "spring:unit-control", "set-unit-weapon-damages-v2",
                 MakeFuncType(params, 4, results, 1), CoreBorrowed_unit_control_set_unit_weapon_damages, state, error))
             return false;
     }
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_F32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGeneratedBorrowed(linker, "spring:unit-control", "set-unit-weapon-state",
+        if (!DefineGeneratedBorrowed(linker, "spring:unit-control", "set-unit-weapon-damages",
+                MakeFuncType(params, 4, results, 1), CoreBorrowed_unit_control_set_unit_weapon_damages_zero_based, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_F32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:unit-control", "set-unit-weapon-state-v2",
                 MakeFuncType(params, 4, results, 1), CoreBorrowed_unit_control_set_unit_weapon_state, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_F32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:unit-control", "set-unit-weapon-state",
+                MakeFuncType(params, 4, results, 1), CoreBorrowed_unit_control_set_unit_weapon_state_zero_based, state, error))
             return false;
     }
     {
@@ -15161,6 +15293,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(213u >= 0u, "generated borrowed Core callback count");
+static_assert(215u >= 0u, "generated borrowed Core callback count");
 
 } // namespace recoil::wasm::core::generated

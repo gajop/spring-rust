@@ -1800,6 +1800,7 @@
             pub set_projectile_move_control: u32,
             pub set_projectile_ignore_tracking_error: u32,
             pub set_piece_projectile_params: u32,
+            pub spawn_projectile_zero_based: u32,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -4131,6 +4132,19 @@
         }
 
         #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetUnitWeaponDamagesZeroBasedQuery {
+            pub unit_id: i32,
+            pub weapon_num: i32,
+            pub damage_key: String,
+            pub damage_value: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitWeaponDamagesZeroBasedResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SetUnitWeaponStateQuery {
             pub unit_id: i32,
             pub weapon_num: i32,
@@ -4140,6 +4154,19 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetUnitWeaponStateResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct SetUnitWeaponStateZeroBasedQuery {
+            pub unit_id: i32,
+            pub weapon_num: i32,
+            pub key: String,
+            pub value: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetUnitWeaponStateZeroBasedResult {
             pub success: bool,
         }
 
@@ -4326,6 +4353,17 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SpawnProjectileResult {
+            pub projectile_id: i32,
+        }
+
+        #[derive(Debug, Clone, PartialEq)]
+        pub struct SpawnProjectileZeroBasedQuery {
+            pub weapon_def_id: i32,
+            pub projectile_params: NativeProjectileParams,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SpawnProjectileZeroBasedResult {
             pub projectile_id: i32,
         }
 
@@ -4621,6 +4659,10 @@
             pub set_unit_piece_parent: u32,
             pub set_unit_piece_matrix: u32,
             pub set_unit_nano_pieces: u32,
+            pub set_unit_weapon_state_zero_based: u32,
+            pub unit_weapon_fire_zero_based: u32,
+            pub unit_weapon_hold_fire_zero_based: u32,
+            pub set_unit_weapon_damages_zero_based: u32,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -4707,6 +4749,17 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct UnitWeaponFireZeroBasedQuery {
+            pub unit_id: i32,
+            pub weapon_num: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct UnitWeaponFireZeroBasedResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitWeaponHoldFireQuery {
             pub unit_id: i32,
             pub weapon_num: i32,
@@ -4714,6 +4767,17 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct UnitWeaponHoldFireResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct UnitWeaponHoldFireZeroBasedQuery {
+            pub unit_id: i32,
+            pub weapon_num: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct UnitWeaponHoldFireZeroBasedResult {
             pub success: bool,
         }
 

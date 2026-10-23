@@ -35320,6 +35320,45 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
+        pub fn set_unit_weapon_damages_zero_based(
+            &self,
+            unit_id: i32,
+            weapon_num: i32,
+            damage_key: &str,
+            damage_value: f32,
+        ) -> Result<bool> {
+            self._engine.check()?;
+            if (damage_key).as_bytes().contains(&0) {
+                return Err(
+                    crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
+                );
+            }
+            let result = {
+                #[cfg(target_arch = "wasm32")]
+                {
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_weapon_damages_zero_based(
+                        unit_id,
+                        weapon_num,
+                        damage_key,
+                        damage_value,
+                    )
+                }
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    crate::native::unit_control::set_unit_weapon_damages_zero_based(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        weapon_num,
+                        damage_key,
+                        damage_value,
+                    )
+                }
+            };
+            self._engine.finish(result)
+        }
+    }
+    impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn set_unit_weapon_state(
             &self,
             unit_id: i32,
@@ -35346,6 +35385,45 @@ pub mod unit_control {
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_control::set_unit_weapon_state(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        weapon_num,
+                        key,
+                        value,
+                    )
+                }
+            };
+            self._engine.finish(result)
+        }
+    }
+    impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
+        pub fn set_unit_weapon_state_zero_based(
+            &self,
+            unit_id: i32,
+            weapon_num: i32,
+            key: &str,
+            value: f32,
+        ) -> Result<bool> {
+            self._engine.check()?;
+            if (key).as_bytes().contains(&0) {
+                return Err(
+                    crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
+                );
+            }
+            let result = {
+                #[cfg(target_arch = "wasm32")]
+                {
+                    spring_sdk_internal::generated::owned::unit_control::set_unit_weapon_state_zero_based(
+                        unit_id,
+                        weapon_num,
+                        key,
+                        value,
+                    )
+                }
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    crate::native::unit_control::set_unit_weapon_state_zero_based(
                         &self._engine,
                         self._native_api,
                         unit_id,
@@ -35520,6 +35598,34 @@ pub mod unit_control {
         }
     }
     impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
+        pub fn unit_weapon_fire_zero_based(
+            &self,
+            unit_id: i32,
+            weapon_num: i32,
+        ) -> Result<bool> {
+            self._engine.check()?;
+            let result = {
+                #[cfg(target_arch = "wasm32")]
+                {
+                    spring_sdk_internal::generated::owned::unit_control::unit_weapon_fire_zero_based(
+                        unit_id,
+                        weapon_num,
+                    )
+                }
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    crate::native::unit_control::unit_weapon_fire_zero_based(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        weapon_num,
+                    )
+                }
+            };
+            self._engine.finish(result)
+        }
+    }
+    impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
         pub fn unit_weapon_hold_fire(
             &self,
             unit_id: i32,
@@ -35537,6 +35643,34 @@ pub mod unit_control {
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::unit_control::unit_weapon_hold_fire(
+                        &self._engine,
+                        self._native_api,
+                        unit_id,
+                        weapon_num,
+                    )
+                }
+            };
+            self._engine.finish(result)
+        }
+    }
+    impl<E: crate::capabilities::Synced> UnitControl<'_, E> {
+        pub fn unit_weapon_hold_fire_zero_based(
+            &self,
+            unit_id: i32,
+            weapon_num: i32,
+        ) -> Result<bool> {
+            self._engine.check()?;
+            let result = {
+                #[cfg(target_arch = "wasm32")]
+                {
+                    spring_sdk_internal::generated::owned::unit_control::unit_weapon_hold_fire_zero_based(
+                        unit_id,
+                        weapon_num,
+                    )
+                }
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    crate::native::unit_control::unit_weapon_hold_fire_zero_based(
                         &self._engine,
                         self._native_api,
                         unit_id,
@@ -37937,6 +38071,44 @@ pub mod projectile_control {
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     crate::native::projectile_control::spawn_projectile(
+                        &self._engine,
+                        self._native_api,
+                        weapon_def_id,
+                        projectile_params,
+                    )
+                }
+            };
+            self._engine.finish(result)
+        }
+    }
+    impl<E: crate::capabilities::Synced> ProjectileControl<'_, E> {
+        pub fn spawn_projectile_zero_based(
+            &self,
+            weapon_def_id: i32,
+            projectile_params: &NativeProjectileParams,
+        ) -> Result<i32> {
+            self._engine.check()?;
+            if ((projectile_params).model).as_bytes().contains(&0) {
+                return Err(
+                    crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
+                );
+            }
+            if ((projectile_params).ceg_tag).as_bytes().contains(&0) {
+                return Err(
+                    crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
+                );
+            }
+            let result = {
+                #[cfg(target_arch = "wasm32")]
+                {
+                    spring_sdk_internal::generated::owned::projectile_control::spawn_projectile_zero_based(
+                        weapon_def_id,
+                        projectile_params,
+                    )
+                }
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    crate::native::projectile_control::spawn_projectile_zero_based(
                         &self._engine,
                         self._native_api,
                         weapon_def_id,

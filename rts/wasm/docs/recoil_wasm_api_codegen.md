@@ -196,6 +196,21 @@ The implementation must define:
 
 Version behavior must be verified in the runtime spike rather than inferred from semver names alone.
 
+### A call whose arguments change meaning
+
+An import name keeps its meaning for good: a module built for an older engine still calls it, and
+a module built for a newer engine must be refused by an engine that lacks the new meaning rather
+than run with the old one. When a call's arguments change meaning, the native function keeps its
+name and takes the new meaning under a new import name, and a legacy native function keeps the
+old meaning under the old import name. `IMPORT_NAME(module, function, import-name)` in
+`rts/NativeInterface/api/WasmAnnotations.def` sets both names; the generator refuses two functions
+of one module with the same import name.
+
+2026-10-24: weapon numbers count from 1 in every call, as in Lua and the weapon reads.
+`SetUnitWeaponState`, `UnitWeaponFire`, `UnitWeaponHoldFire`, `SetUnitWeaponDamages` and
+`SpawnProjectile`'s `weaponNum` counted from 0 up to engine `2026.10.2401`. They are imported as
+`…-v2`; the `…ZeroBased` functions keep the old import names and renumber before forwarding.
+
 ## Generator validation
 
 Generation should produce a summary:

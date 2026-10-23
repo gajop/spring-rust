@@ -984,6 +984,7 @@ struct NativeApiMutants {
 		if (module=="gfx" && function=="PushDebugGroup") { table55.PushDebugGroup=noop ? Noop<GfxPushDebugGroupQuery,GfxEmptyResult> : Zero<GfxPushDebugGroupQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="PushMatrix") { table55.PushMatrix=noop ? Noop<GfxEmptyQuery,GfxEmptyResult> : Zero<GfxEmptyQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="PushPopMatrix") { table55.PushPopMatrix=noop ? Noop<GfxCallbackQuery,GfxEmptyResult> : Zero<GfxCallbackQuery,GfxEmptyResult>; return true; }
+		if (module=="gfx" && function=="QueryCounter") { table55.QueryCounter=noop ? Noop<GfxUIntQuery,GfxEmptyResult> : Zero<GfxUIntQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="RawBindFBO") { table55.RawBindFBO=noop ? Noop<GfxRawBindFBOQuery,GfxRawBindFBOResult> : Zero<GfxRawBindFBOQuery,GfxRawBindFBOResult>; return true; }
 		if (module=="gfx" && function=="ReadPixels") { table55.ReadPixels=noop ? Noop<GfxReadPixelsQuery,GfxReadPixelsResult> : Zero<GfxReadPixelsQuery,GfxReadPixelsResult>; return true; }
 		if (module=="gfx" && function=="ReadReadback") { table55.ReadReadback=noop ? Noop<GfxReadbackReadQuery,GfxVBODownloadResult> : Zero<GfxReadbackReadQuery,GfxVBODownloadResult>; return true; }
@@ -1476,14 +1477,18 @@ struct NativeApiMutants {
 		if (module=="unit_control" && function=="SetUnitUseWeapons") { table24.SetUnitUseWeapons=noop ? Noop<SetUnitUseWeaponsQuery,SetUnitUseWeaponsResult> : Zero<SetUnitUseWeaponsQuery,SetUnitUseWeaponsResult>; return true; }
 		if (module=="unit_control" && function=="SetUnitVelocity") { table24.SetUnitVelocity=noop ? Noop<SetUnitVelocityQuery,SetUnitVelocityResult> : Zero<SetUnitVelocityQuery,SetUnitVelocityResult>; return true; }
 		if (module=="unit_control" && function=="SetUnitWeaponDamages") { table24.SetUnitWeaponDamages=noop ? Noop<SetUnitWeaponDamagesQuery,SetUnitWeaponDamagesResult> : Zero<SetUnitWeaponDamagesQuery,SetUnitWeaponDamagesResult>; return true; }
+		if (module=="unit_control" && function=="SetUnitWeaponDamagesZeroBased") { table24.SetUnitWeaponDamagesZeroBased=noop ? Noop<SetUnitWeaponDamagesZeroBasedQuery,SetUnitWeaponDamagesZeroBasedResult> : Zero<SetUnitWeaponDamagesZeroBasedQuery,SetUnitWeaponDamagesZeroBasedResult>; return true; }
 		if (module=="unit_control" && function=="SetUnitWeaponState") { table24.SetUnitWeaponState=noop ? Noop<SetUnitWeaponStateQuery,SetUnitWeaponStateResult> : Zero<SetUnitWeaponStateQuery,SetUnitWeaponStateResult>; return true; }
+		if (module=="unit_control" && function=="SetUnitWeaponStateZeroBased") { table24.SetUnitWeaponStateZeroBased=noop ? Noop<SetUnitWeaponStateZeroBasedQuery,SetUnitWeaponStateZeroBasedResult> : Zero<SetUnitWeaponStateZeroBasedQuery,SetUnitWeaponStateZeroBasedResult>; return true; }
 		if (module=="unit_control" && function=="TransferUnit") { table24.TransferUnit=noop ? Noop<TransferUnitQuery,TransferUnitResult> : Zero<TransferUnitQuery,TransferUnitResult>; return true; }
 		if (module=="unit_control" && function=="UnitAttach") { table24.UnitAttach=noop ? Noop<UnitAttachQuery,UnitAttachResult> : Zero<UnitAttachQuery,UnitAttachResult>; return true; }
 		if (module=="unit_control" && function=="UnitDetach") { table24.UnitDetach=noop ? Noop<UnitDetachQuery,UnitDetachResult> : Zero<UnitDetachQuery,UnitDetachResult>; return true; }
 		if (module=="unit_control" && function=="UnitDetachFromAir") { table24.UnitDetachFromAir=noop ? Noop<UnitDetachFromAirQuery,UnitDetachFromAirResult> : Zero<UnitDetachFromAirQuery,UnitDetachFromAirResult>; return true; }
 		if (module=="unit_control" && function=="UnitFinishCommand") { table24.UnitFinishCommand=noop ? Noop<UnitFinishCommandQuery,UnitFinishCommandResult> : Zero<UnitFinishCommandQuery,UnitFinishCommandResult>; return true; }
 		if (module=="unit_control" && function=="UnitWeaponFire") { table24.UnitWeaponFire=noop ? Noop<UnitWeaponFireQuery,UnitWeaponFireResult> : Zero<UnitWeaponFireQuery,UnitWeaponFireResult>; return true; }
+		if (module=="unit_control" && function=="UnitWeaponFireZeroBased") { table24.UnitWeaponFireZeroBased=noop ? Noop<UnitWeaponFireZeroBasedQuery,UnitWeaponFireZeroBasedResult> : Zero<UnitWeaponFireZeroBasedQuery,UnitWeaponFireZeroBasedResult>; return true; }
 		if (module=="unit_control" && function=="UnitWeaponHoldFire") { table24.UnitWeaponHoldFire=noop ? Noop<UnitWeaponHoldFireQuery,UnitWeaponHoldFireResult> : Zero<UnitWeaponHoldFireQuery,UnitWeaponHoldFireResult>; return true; }
+		if (module=="unit_control" && function=="UnitWeaponHoldFireZeroBased") { table24.UnitWeaponHoldFireZeroBased=noop ? Noop<UnitWeaponHoldFireZeroBasedQuery,UnitWeaponHoldFireZeroBasedResult> : Zero<UnitWeaponHoldFireZeroBasedQuery,UnitWeaponHoldFireZeroBasedResult>; return true; }
 		if (module=="unit_control" && function=="UseUnitResource") { table24.UseUnitResource=noop ? Noop<UseUnitResourceQuery,UseUnitResourceResult> : Zero<UseUnitResourceQuery,UseUnitResourceResult>; return true; }
 		if (module=="feature_control" && function=="AddFeatureDamage") { table25.AddFeatureDamage=noop ? Noop<AddFeatureDamageQuery,AddFeatureDamageResult> : Zero<AddFeatureDamageQuery,AddFeatureDamageResult>; return true; }
 		if (module=="feature_control" && function=="CreateFeature") { table25.CreateFeature=noop ? Noop<CreateFeatureQuery,CreateFeatureResult> : Zero<CreateFeatureQuery,CreateFeatureResult>; return true; }
@@ -1558,6 +1563,7 @@ struct NativeApiMutants {
 		if (module=="projectile_control" && function=="SetProjectileUseAirLos") { table27.SetProjectileUseAirLos=noop ? Noop<SetProjectileUseAirLosQuery,SetProjectileUseAirLosResult> : Zero<SetProjectileUseAirLosQuery,SetProjectileUseAirLosResult>; return true; }
 		if (module=="projectile_control" && function=="SetProjectileVelocity") { table27.SetProjectileVelocity=noop ? Noop<SetProjectileVelocityQuery,SetProjectileVelocityResult> : Zero<SetProjectileVelocityQuery,SetProjectileVelocityResult>; return true; }
 		if (module=="projectile_control" && function=="SpawnProjectile") { table27.SpawnProjectile=noop ? Noop<SpawnProjectileQuery,SpawnProjectileResult> : Zero<SpawnProjectileQuery,SpawnProjectileResult>; return true; }
+		if (module=="projectile_control" && function=="SpawnProjectileZeroBased") { table27.SpawnProjectileZeroBased=noop ? Noop<SpawnProjectileZeroBasedQuery,SpawnProjectileZeroBasedResult> : Zero<SpawnProjectileZeroBasedQuery,SpawnProjectileZeroBasedResult>; return true; }
 		if (module=="effects_control" && function=="SpawnCEG") { table28.SpawnCEG=noop ? Noop<SpawnCEGQuery,SpawnCEGResult> : Zero<SpawnCEGQuery,SpawnCEGResult>; return true; }
 		if (module=="effects_control" && function=="SpawnExplosion") { table28.SpawnExplosion=noop ? Noop<SpawnExplosionQuery,SpawnExplosionResult> : Zero<SpawnExplosionQuery,SpawnExplosionResult>; return true; }
 		if (module=="effects_control" && function=="SpawnSFX") { table28.SpawnSFX=noop ? Noop<SpawnSFXQuery,SpawnSFXResult> : Zero<SpawnSFXQuery,SpawnSFXResult>; return true; }
@@ -1616,5 +1622,5 @@ struct NativeApiMutants {
 		if (module=="object_rendering" && function=="SetPieceList") { table56.SetPieceList=noop ? Noop<SetObjectPieceListQuery,ObjectRenderingResult> : Zero<SetObjectPieceListQuery,ObjectRenderingResult>; return true; }
 		return false;
 	}
-	static constexpr unsigned FunctionCount=1425;
+	static constexpr unsigned FunctionCount=1431;
 };

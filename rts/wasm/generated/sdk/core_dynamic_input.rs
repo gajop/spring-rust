@@ -8467,13 +8467,23 @@ pub safe fn set_unit_tooltip(p0: i32, p1: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
-#[link_name = "set-unit-weapon-damages"]
+#[link_name = "set-unit-weapon-damages-v2"]
 pub safe fn set_unit_weapon_damages(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
-#[link_name = "set-unit-weapon-state"]
+#[link_name = "set-unit-weapon-damages"]
+pub safe fn set_unit_weapon_damages_zero_based(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:unit-control")]
+unsafe extern "C" {
+#[link_name = "set-unit-weapon-state-v2"]
 pub safe fn set_unit_weapon_state(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:unit-control")]
+unsafe extern "C" {
+#[link_name = "set-unit-weapon-state"]
+pub safe fn set_unit_weapon_state_zero_based(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:unit-control")]
 unsafe extern "C" {
@@ -8939,6 +8949,31 @@ Err(unreachable!())
 }
 
         #[inline]
+pub fn set_unit_weapon_damages_zero_based(p0: i32, p1: i32, p2: f32, blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_weapon_damages_zero_based(p0, p1, p2, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, p1, p2, blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
 pub fn set_unit_weapon_state(p0: i32, p1: i32, p2: f32, blob0: &[u8]) -> crate::Result<bool> {
 #[cfg(target_arch = "wasm32")]
 {
@@ -8955,6 +8990,31 @@ Ok(value) => value,
 Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
 };
 crate::unpack_bool(raw::set_unit_weapon_state(p0, p1, p2, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, p1, p2, blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn set_unit_weapon_state_zero_based(p0: i32, p1: i32, p2: f32, blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::set_unit_weapon_state_zero_based(p0, p1, p2, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -9116,8 +9176,13 @@ pub safe fn set_projectile_damages(p0: i32, p1: i32, p2: f32, p3: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:projectile-control")]
 unsafe extern "C" {
-#[link_name = "spawn-projectile"]
+#[link_name = "spawn-projectile-v2"]
 pub safe fn spawn_projectile(p0: i32, p1: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:projectile-control")]
+unsafe extern "C" {
+#[link_name = "spawn-projectile"]
+pub safe fn spawn_projectile_zero_based(p0: i32, p1: i32) -> i64;
 }
         }
 
@@ -9188,6 +9253,31 @@ Ok(value) => value,
 Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
 };
 crate::unpack_i32(raw::spawn_projectile(p0, descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (p0, blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn spawn_projectile_zero_based(p0: i32, blob0: &[u8]) -> crate::Result<i32> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_i32(raw::spawn_projectile_zero_based(p0, descriptor_ptr))
 }
 #[cfg(not(target_arch = "wasm32"))]
 {
@@ -9444,5 +9534,5 @@ Err(unreachable!())
     }
 
 #[doc(hidden)]
-pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 277;
+pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 280;
 }

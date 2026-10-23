@@ -2433,6 +2433,33 @@ wasm_trap_t* Core_unit_control_unit_weapon_fire(void* environment, wasmtime_call
     return nullptr;
 }
 
+wasm_trap_t* Core_unit_control_unit_weapon_fire_zero_based(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->syncedCtrl == nullptr || state->native->syncedCtrl->unit == nullptr ||
+        state->native->syncedCtrl->unit->UnitWeaponFireZeroBased == nullptr)
+        return Trap("UnitWeaponFireZeroBased generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("UnitWeaponFireZeroBased generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("UnitWeaponFireZeroBased generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    UnitWeaponFireZeroBasedQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.weaponNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponNum)>>>(slots[1].i32);
+    UnitWeaponFireZeroBasedResult result{};
+    state->native->syncedCtrl->unit->UnitWeaponFireZeroBased(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_unit_control_unit_weapon_hold_fire(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -2455,6 +2482,33 @@ wasm_trap_t* Core_unit_control_unit_weapon_hold_fire(void* environment, wasmtime
     query.weaponNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponNum)>>>(slots[1].i32);
     UnitWeaponHoldFireResult result{};
     state->native->syncedCtrl->unit->UnitWeaponHoldFire(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_unit_control_unit_weapon_hold_fire_zero_based(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->syncedCtrl == nullptr || state->native->syncedCtrl->unit == nullptr ||
+        state->native->syncedCtrl->unit->UnitWeaponHoldFireZeroBased == nullptr)
+        return Trap("UnitWeaponHoldFireZeroBased generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("UnitWeaponHoldFireZeroBased generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("UnitWeaponHoldFireZeroBased generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    UnitWeaponHoldFireZeroBasedQuery query{};
+    query.unitID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitID)>>>(slots[0].i32);
+    query.weaponNum = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.weaponNum)>>>(slots[1].i32);
+    UnitWeaponHoldFireZeroBasedResult result{};
+    state->native->syncedCtrl->unit->UnitWeaponHoldFireZeroBased(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
     return nullptr;
@@ -2941,21 +2995,35 @@ bool RegisterGeneratedImports_unit_control(wasmtime_linker_t* linker, HostState*
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGenerated(linker, "spring:unit-control", "unit-weapon-fire",
+        if (!DefineGenerated(linker, "spring:unit-control", "unit-weapon-fire-v2",
                 MakeFuncType(params, 2, results, 1), Core_unit_control_unit_weapon_fire, state, error))
             return false;
     }
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
-        if (!DefineGenerated(linker, "spring:unit-control", "unit-weapon-hold-fire",
+        if (!DefineGenerated(linker, "spring:unit-control", "unit-weapon-fire",
+                MakeFuncType(params, 2, results, 1), Core_unit_control_unit_weapon_fire_zero_based, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:unit-control", "unit-weapon-hold-fire-v2",
                 MakeFuncType(params, 2, results, 1), Core_unit_control_unit_weapon_hold_fire, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:unit-control", "unit-weapon-hold-fire",
+                MakeFuncType(params, 2, results, 1), Core_unit_control_unit_weapon_hold_fire_zero_based, state, error))
             return false;
     }
 
     return true;
 }
 
-static_assert(69 >= 0, "generated Core Wasm callback count");
+static_assert(71 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

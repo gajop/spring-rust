@@ -150,8 +150,8 @@
     },
     {
       "name": "projectile_control_generated.rs",
-      "sha256": "1b94b68f93e8aee56a248f3b44a2a41018229152eda6bb4ee83a00d992edafc5",
-      "bytes": 11572
+      "sha256": "eb341b2df8c0e5de65275be29d23c3a48f99892376395759e574929dacc0cd07",
+      "bytes": 12328
     },
     {
       "name": "projectiles_generated.rs",
@@ -220,8 +220,8 @@
     },
     {
       "name": "unit_control_generated.rs",
-      "sha256": "8f1abeb8245ec5d9ccc0b1aa5335b56719ec56f4777a040524a99a71410d0a51",
-      "bytes": 68002
+      "sha256": "0332bd6f3303ecf42becdff2182de9a8b9f14fa4f117b20daa41837dade5fb0b",
+      "bytes": 71261
     },
     {
       "name": "unit_defs_generated.rs",

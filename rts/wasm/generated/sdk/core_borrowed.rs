@@ -5682,13 +5682,23 @@ pub mod borrowed {
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
-                #[link_name = "set-unit-weapon-damages"]
+                #[link_name = "set-unit-weapon-damages-v2"]
                 pub safe fn set_unit_weapon_damages(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
-                #[link_name = "set-unit-weapon-state"]
+                #[link_name = "set-unit-weapon-damages"]
+                pub safe fn set_unit_weapon_damages_zero_based(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
+            }
+            #[link(wasm_import_module = "spring:unit-control")]
+            unsafe extern "C" {
+                #[link_name = "set-unit-weapon-state-v2"]
                 pub safe fn set_unit_weapon_state(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
+            }
+            #[link(wasm_import_module = "spring:unit-control")]
+            unsafe extern "C" {
+                #[link_name = "set-unit-weapon-state"]
+                pub safe fn set_unit_weapon_state_zero_based(arg0: i32, arg1: i32, arg2: f32, arg3: i32) -> i64;
             }
             #[link(wasm_import_module = "spring:unit-control")]
             unsafe extern "C" {
@@ -5950,6 +5960,28 @@ pub mod borrowed {
         }
 
         #[inline]
+        pub fn set_unit_weapon_damages_zero_based(unit_id: i32, weapon_num: i32, damage_key: &core::ffi::CStr, damage_value: f32) -> Result<bool> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut descriptor = [0u8; 8];
+            let mut cursor = 0usize;
+            let (core_ptr, core_len) = crate::wasm_slice_parts(damage_key.to_bytes())?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_weapon_damages_zero_based(unit_id, weapon_num, damage_value, descriptor_ptr) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok((packed as u32) != 0)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (unit_id, weapon_num, damage_key, damage_value);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
         pub fn set_unit_weapon_state(unit_id: i32, weapon_num: i32, key: &core::ffi::CStr, value: f32) -> Result<bool> {
             #[cfg(target_arch = "wasm32")]
             {
@@ -5960,6 +5992,28 @@ pub mod borrowed {
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
             let packed = raw::set_unit_weapon_state(unit_id, weapon_num, value, descriptor_ptr) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok((packed as u32) != 0)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (unit_id, weapon_num, key, value);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn set_unit_weapon_state_zero_based(unit_id: i32, weapon_num: i32, key: &core::ffi::CStr, value: f32) -> Result<bool> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut descriptor = [0u8; 8];
+            let mut cursor = 0usize;
+            let (core_ptr, core_len) = crate::wasm_slice_parts(key.to_bytes())?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::set_unit_weapon_state_zero_based(unit_id, weapon_num, value, descriptor_ptr) as u64;
             let status = (packed >> 32) as i32;
             if status != 0 { return Err(ApiError::new(status)); }
             Ok((packed as u32) != 0)
@@ -6194,5 +6248,5 @@ pub mod borrowed {
     }
 
 #[doc(hidden)]
-    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 213;
+    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 215;
 }

@@ -718,7 +718,7 @@ fn render_variable_list_raw(output: &mut String, function: &FunctionModel, modul
         .join(", ");
     output.push_str(&format!(
         "        #[cfg(target_arch = \"wasm32\")]\n        mod {raw_module} {{\n            #[link(wasm_import_module = \"spring:{module}\")]\n            extern \"C\" {{\n                #[link_name = \"{}\"]\n                pub fn call({params}) -> i32;\n            }}\n        }}\n\n",
-        function.name.to_kebab_case(),
+        function.wasm_import_name(),
         raw_module = raw_module,
         module = module.to_kebab_case(),
         params = params,

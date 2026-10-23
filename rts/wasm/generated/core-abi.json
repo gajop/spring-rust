@@ -14091,6 +14091,27 @@
       "module": "projectile_control",
       "function": "SpawnProjectile",
       "import_module": "spring:projectile-control",
+      "import_name": "spawn-projectile-v2",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "projectile_control",
+      "function": "SpawnProjectileZeroBased",
+      "import_module": "spring:projectile-control",
       "import_name": "spawn-projectile",
       "environment_mask": 5,
       "mutating": true,
@@ -23616,6 +23637,29 @@
       "module": "unit_control",
       "function": "SetUnitWeaponDamages",
       "import_module": "spring:unit-control",
+      "import_name": "set-unit-weapon-damages-v2",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "f32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,f32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unit_control",
+      "function": "SetUnitWeaponDamagesZeroBased",
+      "import_module": "spring:unit-control",
       "import_name": "set-unit-weapon-damages",
       "environment_mask": 5,
       "mutating": true,
@@ -23638,6 +23682,29 @@
     {
       "module": "unit_control",
       "function": "SetUnitWeaponState",
+      "import_module": "spring:unit-control",
+      "import_name": "set-unit-weapon-state-v2",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32",
+        "f32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32,f32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unit_control",
+      "function": "SetUnitWeaponStateZeroBased",
       "import_module": "spring:unit-control",
       "import_name": "set-unit-weapon-state",
       "environment_mask": 5,
@@ -23768,6 +23835,27 @@
       "module": "unit_control",
       "function": "UnitWeaponFire",
       "import_module": "spring:unit-control",
+      "import_name": "unit-weapon-fire-v2",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unit_control",
+      "function": "UnitWeaponFireZeroBased",
+      "import_module": "spring:unit-control",
       "import_name": "unit-weapon-fire",
       "environment_mask": 5,
       "mutating": true,
@@ -23788,6 +23876,27 @@
     {
       "module": "unit_control",
       "function": "UnitWeaponHoldFire",
+      "import_module": "spring:unit-control",
+      "import_name": "unit-weapon-hold-fire-v2",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unit_control",
+      "function": "UnitWeaponHoldFireZeroBased",
       "import_module": "spring:unit-control",
       "import_name": "unit-weapon-hold-fire",
       "environment_mask": 5,
@@ -31722,7 +31831,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1207,
+  "automatic_count": 1212,
   "manual_count": 202,
   "unsupported_count": 17
 }

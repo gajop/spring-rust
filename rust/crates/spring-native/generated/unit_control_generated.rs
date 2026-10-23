@@ -1653,4 +1653,74 @@ impl<'a> UnitControl<'a> {
         }
     }
 
+    pub fn set_unit_weapon_state_zero_based(&self, unit_id: i32, weapon_num: i32, key: &str, value: f32) -> Result<bool, Error> {
+        unsafe {
+            let key_cstr = std::ffi::CString::new(key).map_err(|_| Error::invalid_argument("key"))?;
+            let query = sys::SetUnitWeaponStateZeroBasedQuery {
+                unitID: unit_id,
+                weaponNum: weapon_num,
+                key: key_cstr.as_ptr(),
+                value,
+            };
+            let mut result = MaybeUninit::<sys::SetUnitWeaponStateZeroBasedResult>::zeroed();
+            let func = self.api.SetUnitWeaponStateZeroBased.expect("SetUnitWeaponStateZeroBased function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn unit_weapon_fire_zero_based(&self, unit_id: i32, weapon_num: i32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::UnitWeaponFireZeroBasedQuery {
+                unitID: unit_id,
+                weaponNum: weapon_num,
+            };
+            let mut result = MaybeUninit::<sys::UnitWeaponFireZeroBasedResult>::zeroed();
+            let func = self.api.UnitWeaponFireZeroBased.expect("UnitWeaponFireZeroBased function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn unit_weapon_hold_fire_zero_based(&self, unit_id: i32, weapon_num: i32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::UnitWeaponHoldFireZeroBasedQuery {
+                unitID: unit_id,
+                weaponNum: weapon_num,
+            };
+            let mut result = MaybeUninit::<sys::UnitWeaponHoldFireZeroBasedResult>::zeroed();
+            let func = self.api.UnitWeaponHoldFireZeroBased.expect("UnitWeaponHoldFireZeroBased function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn set_unit_weapon_damages_zero_based(&self, unit_id: i32, weapon_num: i32, damage_key: &str, damage_value: f32) -> Result<bool, Error> {
+        unsafe {
+            let damage_key_cstr = std::ffi::CString::new(damage_key).map_err(|_| Error::invalid_argument("damage_key"))?;
+            let query = sys::SetUnitWeaponDamagesZeroBasedQuery {
+                unitID: unit_id,
+                weaponNum: weapon_num,
+                damageKey: damage_key_cstr.as_ptr(),
+                damageValue: damage_value,
+            };
+            let mut result = MaybeUninit::<sys::SetUnitWeaponDamagesZeroBasedResult>::zeroed();
+            let func = self.api.SetUnitWeaponDamagesZeroBased.expect("SetUnitWeaponDamagesZeroBased function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
 }

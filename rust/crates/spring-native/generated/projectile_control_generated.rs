@@ -260,4 +260,20 @@ impl<'a> ProjectileControl<'a> {
         }
     }
 
+    pub fn spawn_projectile_zero_based(&self, weapon_def_id: i32, projectile_params: sys::NativeProjectileParams) -> Result<i32, Error> {
+        unsafe {
+            let query = sys::SpawnProjectileZeroBasedQuery {
+                weaponDefID: weapon_def_id,
+                projectileParams: projectile_params,
+            };
+            let mut result = MaybeUninit::<sys::SpawnProjectileZeroBasedResult>::zeroed();
+            let func = self.api.SpawnProjectileZeroBased.expect("SpawnProjectileZeroBased function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.projectileID
+            })
+        }
+    }
+
 }

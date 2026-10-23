@@ -2,7 +2,7 @@
 
 - source: `rts/wasm/generated/model.json`
 - coverage: `rts/wasm/generated/core-executable-coverage.json`
-- callouts: 1354
+- callouts: 1431
 
 ## Modules
 
@@ -11,17 +11,17 @@
 | `units_query` | 21 |
 | `units_info` | 57 |
 | `units_weapons` | 11 |
-| `units_commands` | 16 |
+| `units_commands` | 20 |
 | `units_pieces` | 21 |
 | `teams` | 19 |
 | `features` | 38 |
 | `projectiles` | 17 |
-| `los` | 10 |
+| `los` | 9 |
 | `unit_defs` | 19 |
 | `feature_defs` | 10 |
-| `weapon_defs` | 10 |
+| `weapon_defs` | 11 |
 | `game` | 33 |
-| `terrain` | 13 |
+| `terrain` | 14 |
 | `player` | 7 |
 | `math_extra` | 14 |
 | `encoding` | 6 |
@@ -29,19 +29,19 @@
 | `path_finder` | 10 |
 | `platform` | 2 |
 | `rules_params` | 15 |
-| `move_ctrl` | 5 |
+| `move_ctrl` | 31 |
 | `camera` | 10 |
 | `input` | 20 |
 | `debug_input` | 7 |
-| `display` | 24 |
+| `display` | 26 |
 | `selection` | 16 |
-| `sound` | 11 |
+| `sound` | 12 |
 | `messages` | 21 |
 | `config` | 9 |
 | `tracing` | 7 |
 | `utils` | 7 |
-| `unsynced_ctrl` | 82 |
-| `gfx` | 237 |
+| `unsynced_ctrl` | 88 |
+| `gfx` | 247 |
 | `lights` | 7 |
 | `icons` | 6 |
 | `markers` | 6 |
@@ -49,17 +49,21 @@
 | `system_control` | 22 |
 | `profiling` | 10 |
 | `rml_ui` | 180 |
-| `vfs` | 52 |
+| `vfs` | 53 |
 | `unsynced_read` | 20 |
 | `team_control` | 15 |
-| `unit_control` | 88 |
+| `unit_control` | 92 |
 | `feature_control` | 32 |
 | `terrain_control` | 25 |
-| `projectile_control` | 16 |
+| `projectile_control` | 17 |
 | `effects_control` | 3 |
 | `game_config` | 6 |
 | `cob_script` | 2 |
+| `unit_script` | 1 |
+| `synced_random` | 4 |
+| `unsynced_random` | 4 |
 | `unit_rendering` | 24 |
+| `object_rendering` | 12 |
 
 ## `units_query`
 
@@ -182,9 +186,13 @@
 | `GetUnitCommandCount` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `GetUnitCommands` | i32,i32,i32->i32 | x | x | x | x | x | synced-visible | handwritten-reviewed |
 | `GetUnitCurrentCommand` | i32,i32,i32->i32 | x | x | x | x | x | synced-visible | dynamic-output-caller-owned |
-| `GiveOrder` | i32,i32,i32,i32->i64 | x |  | x |  |  | synced-visible | handwritten-reviewed |
-| `GiveOrderArrayToUnitMap` | i32->i64 | x |  | x |  |  | synced-visible | variable-input-nested-adapted |
-| `GiveOrderToUnitMap` | i32,i32,i32,i32->i64 | x |  | x |  |  | synced-visible | handwritten-reviewed |
+| `GiveOrder` | i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | handwritten-reviewed |
+| `GiveOrderArrayToUnit` | i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-nested-adapted |
+| `GiveOrderArrayToUnitArray` | i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-nested-adapted |
+| `GiveOrderArrayToUnitMap` | i32->i64 |  | x |  | x | x | unsynced-only | variable-input-nested-adapted |
+| `GiveOrderToUnit` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `GiveOrderToUnitArray` | i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `GiveOrderToUnitMap` | i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | handwritten-reviewed |
 
 ## `units_pieces`
 
@@ -305,7 +313,6 @@
 
 | callout | signature | rules-synced | rules-unsynced | gaia-synced | gaia-unsynced | ui | sync | transport | mutating |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
-| `GetClosestValidPosition` | i32,f32,f32,f32,i32->i32 | x | x | x | x | x | synced-visible | fixed |
 | `GetPositionLosState` | i32,i32,i32->i32 | x | x | x | x | x | synced-visible | fixed |
 | `GetRadarErrorParams` | i32,i32->i32 | x | x | x | x | x | synced-visible | fixed |
 | `IsPosInAirLos` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
@@ -367,6 +374,7 @@
 | `GetWeaponDefID` | i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `GetWeaponDefIDs` | i32,i32->i32 | x | x | x | x | x | synced-visible | variable-output-caller-owned |
 | `GetWeaponDefName` | i32,i32->i32 | x | x | x | x | x | synced-visible | variable-output-caller-owned |
+| `GetWeaponDefProjectileParams` | i32,i32->i32 | x | x | x | x | x | synced-visible | fixed |
 | `GetWeaponDefRange` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `ValidWeaponDefID` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 
@@ -405,7 +413,7 @@
 | `IsDevLuaEnabled` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `IsEditDefsEnabled` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `IsGameOver` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
-| `IsGodModeEnabled` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `IsGodModeEnabled` | i32,i32->i32 | x | x | x | x | x | synced-visible | fixed |
 | `IsNoCostEnabled` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 
 ## `terrain`
@@ -416,6 +424,7 @@
 | `GetGroundBlocked` | f32,f32,f32,f32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `GetGroundExtremes` | i32,i32->i32 | x | x | x | x | x | synced-visible | handwritten-reviewed |
 | `GetGroundHeight` | f32,f32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `GetGroundHeights` | i32,i32->i32 | x | x | x | x | x | synced-visible | variable-io-borrowed-input-caller-owned-output |
 | `GetGroundInfo` | f32,f32,i32->i32 | x | x | x | x | x | synced-visible | variable-output-caller-owned |
 | `GetGroundNormal` | f32,f32,i32,i32->i32 | x | x | x | x | x | synced-visible | fixed |
 | `GetGroundOrigHeight` | f32,f32->i64 | x | x | x | x | x | synced-visible | fixed |
@@ -523,11 +532,37 @@
 
 | callout | signature | rules-synced | rules-unsynced | gaia-synced | gaia-unsynced | ui | sync | transport | mutating |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
+| `GetTag` | i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `GetUnitEstimatedPath` | i32,i32->i32 | x | x | x | x | x | synced-visible | variable-output-caller-owned |
 | `GetUnitMoveTypeData` | i32,i32->i32 | x | x | x | x | x | synced-visible | dynamic-output-caller-owned |
 | `IsMoveCtrlEnabled` | i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `MoveCtrl` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetCollideStop` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetDrag` | i32,f32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetExtrapolate` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetGravity` | i32,f32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetGroundMoveTypeMaxSpeed` | i32,f32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetGroundOffset` | i32,f32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetHeading` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetLimits` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetLimitsStop` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `SetMoveCtrlGravity` | i32,f32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetMoveDef` | i32,i32,i32->i64 | x |  | x |  |  | synced-visible | variable-input-borrowed-mixed-fixed |
+| `SetMoveTypeBoolean` | i32,i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetMoveTypeNumeric` | i32,i32,f32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetNoBlocking` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetPhysics` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetPosition` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetProgressState` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetRelativeVelocity` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetRotation` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetRotationVelocity` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetTag` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetTrackGround` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetTrackLimits` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetTrackSlope` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetVelocity` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetWindFactor` | i32,f32->i64 | x |  | x |  |  | synced-visible | fixed |
 
 ## `camera`
 
@@ -598,12 +633,14 @@
 | `GetMiniMapRotation` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `GetNumDisplays` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `GetScreenGeometry` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
+| `GetScreenGeometryFull` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed-option |
 | `GetTeamColor` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `GetTeamOrigColor` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `GetViewGeometry` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `GetWaterMode` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-output-caller-owned |
 | `GetWindowGeometry` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `HaveAdvShading` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `HaveAdvShadingFull` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `HaveShadows` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `IsAABBInView` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `IsGUIHidden` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
@@ -626,7 +663,7 @@
 | `GetSelectedUnitsCount` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `GetSelectedUnitsCounts` | i32,i32->i32 |  | x |  | x | x | unsynced-only | dynamic-output-caller-owned |
 | `GetSelectedUnitsSorted` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-output-caller-owned |
-| `GetUnitGroup` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `GetUnitGroup` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `SelectUnit` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SelectUnitArray` | i32,i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `SetUnitGroup` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
@@ -637,6 +674,7 @@
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
 | `GetSoundDevices` | i32,i32->i32 |  | x |  | x | x | unsynced-only | dynamic-output-caller-owned |
 | `GetSoundEffectParams` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `GetSoundStreamPlayTime` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `GetSoundStreamTime` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `LoadSoundDef` | i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `PauseSoundStream` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
@@ -744,6 +782,7 @@
 | `SetClipboard` | i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `SetCustomCommandDrawData` | i32,i32,i32->i64 | x | x | x | x | x | synced-visible | variable-input-nested-adapted |
 | `SetCustomPaletteColor` | i32,f32,f32,f32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `SetDefaultInterfaceVisible` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetDollyCameraCurve` | i32,i32->i64 | x | x | x | x | x | synced-visible | variable-input-adapted |
 | `SetDollyCameraLookCurve` | i32,i32->i64 | x | x | x | x | x | synced-visible | variable-input-adapted |
 | `SetDollyCameraLookPosition` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
@@ -761,6 +800,7 @@
 | `SetFeatureAlwaysUpdateMatrix` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetFeatureEngineDrawMask` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetFeatureFade` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `SetFeatureLuaDraw` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetFeatureNoDraw` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetFeaturePaletteIndex` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetLastMessagePosition` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
@@ -771,6 +811,7 @@
 | `SetMiniMapRotation` | f32,i32->i32 | x | x | x | x | x | synced-visible | fixed |
 | `SetMouseCursor` | f32,i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `SetNanoProjectileParams` | f32,f32,f32,f32,f32,f32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `SetProjectileLuaDraw` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetShockFrontFactors` | i32->i64 | x | x | x | x | x | synced-visible | fixed-option |
 | `SetSkyBoxTexture` | i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `SetSunDirection` | f32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
@@ -782,6 +823,7 @@
 | `SetUnitIcon` | i32,i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `SetUnitIconDraw` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetUnitLeaveTracks` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `SetUnitLuaDraw` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetUnitNoDraw` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetUnitNoGroup` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetUnitNoMinimap` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
@@ -796,6 +838,8 @@
 | `SetWindowGeometry` | i32,i32,i32,i32,i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetWindowMaximized` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetWindowMinimized` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `StopTrackingUnits` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `TrackUnits` | i32,i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `WarpMouse` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 
 ## `gfx`
@@ -842,20 +886,26 @@
 | `ConfigMiniMap` | i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `CopyToTexture` | i32,i32,i32,i32,i32,i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `CopyToVBO` | i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `CopyVBOToReadback` | i32,i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `CreateFBO` | i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-nested-adapted |
+| `CreateFence` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `CreateList` | i32->i64 |  | x |  | x | x | unsynced-only | handwritten-reviewed |
-| `CreateQuery` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `CreateQuery` | i32->i64 |  | x |  | x | x | unsynced-only | fixed-option |
 | `CreateRBO` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `CreateReadback` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `CreateShader` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed-mixed-fixed |
 | `CreateTexture` | i32,i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | handwritten-reviewed |
 | `CreateTextureAtlas` | i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | handwritten-reviewed |
+| `CullFace` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `Culling` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `DefineVBO` | i32,i32,i32,i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-adapted |
 | `DeleteFBO` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
+| `DeleteFence` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `DeleteFont` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `DeleteList` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `DeleteQuery` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `DeleteRBO` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
+| `DeleteReadback` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `DeleteShader` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `DeleteTexture` | i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `DeleteTextureAtlas` | i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
@@ -922,7 +972,7 @@
 | `GetMapRendering` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-io-borrowed-input-caller-owned-output |
 | `GetMatrixData` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `GetNumber` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
-| `GetQuery` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `GetQuery` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `GetRBOInfo` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `GetScreenViewTrans` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `GetShaderLog` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-output-caller-owned |
@@ -944,6 +994,8 @@
 | `InstanceDataFromFeaturesVBO` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `InstanceDataFromUnitDefsVBO` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `InstanceDataFromUnitsVBO` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `IsFenceSignaled` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `IsQueryAvailable` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `IsValidFBO` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `Light` | i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `Lighting` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
@@ -977,8 +1029,10 @@
 | `PushDebugGroup` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `PushMatrix` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `PushPopMatrix` | i32->i32 |  | x |  | x | x | unsynced-only | handwritten-reviewed |
+| `QueryCounter` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `RawBindFBO` | i32,i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `ReadPixels` | i32,i32,i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-output-caller-owned |
+| `ReadReadback` | i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-output-caller-owned |
 | `Rect` | f32,f32,f32,f32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `RemoveFromSubmissionVAO` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `RenderToTexture` | i32->i32 |  | x |  | x | x | unsynced-only | handwritten-reviewed |
@@ -1019,8 +1073,8 @@
 | `Translate` | f32,f32,f32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `UnbindBufferRangeVBO` | i32,i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `Uniform` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
-| `UniformArrayFloat` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
-| `UniformArrayInt` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `UniformArrayFloat` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `UniformArrayInt` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `UniformInt` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `UniformMatrix` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `UniformSubroutine` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
@@ -1371,6 +1425,7 @@
 | `IsDirectory` | i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `ListDir` | i32,i32,i32->i32 | x | x | x | x | x | synced-visible | dynamic-output-caller-owned |
 | `LoadFile` | i32,i32->i32 | x | x | x | x | x | synced-visible | variable-io-borrowed-input-caller-owned-output |
+| `LoadFileRange` | i32,i32,i32,i32->i32 | x | x | x | x | x | synced-visible | variable-io-borrowed-input-caller-owned-output |
 | `PackF32` | i32,i32->i32 | x | x | x | x | x | synced-visible | variable-io-borrowed-input-caller-owned-output |
 | `PackS16` | i32,i32->i32 | x | x | x | x | x | synced-visible | variable-io-borrowed-input-caller-owned-output |
 | `PackS32` | i32,i32->i32 | x | x | x | x | x | synced-visible | variable-io-borrowed-input-caller-owned-output |
@@ -1522,14 +1577,18 @@
 | `SetUnitUseWeapons` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `SetUnitVelocity` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `SetUnitWeaponDamages` | i32,i32,f32,i32->i64 | x |  | x |  |  | synced-visible | variable-input-borrowed |
+| `SetUnitWeaponDamagesZeroBased` | i32,i32,f32,i32->i64 | x |  | x |  |  | synced-visible | variable-input-borrowed |
 | `SetUnitWeaponState` | i32,i32,f32,i32->i64 | x |  | x |  |  | synced-visible | variable-input-borrowed |
+| `SetUnitWeaponStateZeroBased` | i32,i32,f32,i32->i64 | x |  | x |  |  | synced-visible | variable-input-borrowed |
 | `TransferUnit` | i32,i32,i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `UnitAttach` | i32,i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `UnitDetach` | i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `UnitDetachFromAir` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `UnitFinishCommand` | i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `UnitWeaponFire` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `UnitWeaponFireZeroBased` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `UnitWeaponHoldFire` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `UnitWeaponHoldFireZeroBased` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `UseUnitResource` | i32,f32,i32->i64 | x |  | x |  |  | synced-visible | variable-input-borrowed |
 
 ## `feature_control`
@@ -1619,6 +1678,7 @@
 | `SetProjectileUseAirLos` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `SetProjectileVelocity` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
 | `SpawnProjectile` | i32,i32->i64 | x |  | x |  |  | synced-visible | variable-input-nested-adapted |
+| `SpawnProjectileZeroBased` | i32,i32->i64 | x |  | x |  |  | synced-visible | variable-input-nested-adapted |
 
 ## `effects_control`
 
@@ -1645,6 +1705,30 @@
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
 | `CallCOBScript` | i32,i32,i32,i32->i32 | x |  | x |  |  | synced-visible | handwritten-reviewed |
 | `GetCOBScriptID` | i32,i32->i64 | x |  | x |  |  | synced-visible | variable-input-borrowed |
+
+## `unit_script`
+
+| callout | signature | rules-synced | rules-unsynced | gaia-synced | gaia-unsynced | ui | sync | transport | mutating |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
+| `CallUnitScript` | i32,i32,i32,i32->i32 | x |  | x |  |  | synced-visible | variable-io-borrowed-input-caller-owned-output |
+
+## `synced_random`
+
+| callout | signature | rules-synced | rules-unsynced | gaia-synced | gaia-unsynced | ui | sync | transport | mutating |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
+| `NextFloat` | i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `NextInt` | i32,i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `NextIntUpTo` | i32->i64 | x |  | x |  |  | synced-visible | fixed |
+| `SetSeed` | i32->i64 | x |  | x |  |  | synced-visible | fixed |
+
+## `unsynced_random`
+
+| callout | signature | rules-synced | rules-unsynced | gaia-synced | gaia-unsynced | ui | sync | transport | mutating |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
+| `NextFloat` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `NextInt` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `NextIntUpTo` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `SetSeed` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 
 ## `unit_rendering`
 
@@ -1674,3 +1758,20 @@
 | `IsUnitIcon` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `IsUnitInView` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `IsUnitVisible` | i32,f32,i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+
+## `object_rendering`
+
+| callout | signature | rules-synced | rules-unsynced | gaia-synced | gaia-unsynced | ui | sync | transport | mutating |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
+| `ClearDeferredMaterialUniform` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `ClearForwardMaterialUniform` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `GetLOD` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
+| `SetDeferredMaterialUniform` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-nested-adapted |
+| `SetForwardMaterialUniform` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-nested-adapted |
+| `SetLODCount` | i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `SetLODDistance` | i32,i32,i32,f32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `SetLODLength` | i32,i32,i32,f32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `SetMaterial` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-nested-adapted |
+| `SetMaterialDisplayLists` | i32,i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `SetMaterialLastLOD` | i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `SetPieceList` | i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | fixed |

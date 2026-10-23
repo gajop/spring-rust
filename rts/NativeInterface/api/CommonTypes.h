@@ -141,8 +141,9 @@ struct NativeProjectileParams {
 	Float3 end;
 	int32_t owner;
 	int32_t team;
-	// Zero-based weapon number used to inherit a live weapon's mutable
-	// projectile state. Use -1 when there is no firing weapon instance.
+	// Weapon number, counted from 1 as in Lua, used to inherit a live weapon's
+	// mutable projectile state. Use 0 when there is no firing weapon instance.
+	// (SpawnProjectileZeroBased reads it from 0, with -1 for none.)
 	int32_t weaponNum;
 	float ttl;
 	float gravity;

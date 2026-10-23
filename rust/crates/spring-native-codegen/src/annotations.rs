@@ -10,6 +10,8 @@ pub enum Kind {
     Manual,
     Exclude,
     SyncedOnly,
+    /// Import the function under another Wasm name, given in place of the reason.
+    ImportName,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -35,7 +37,7 @@ pub fn parse(path: &Path) -> Result<Vec<Annotation>> {
         }
         let (kind, body) = line.split_once('(').ok_or_else(|| {
             anyhow!(
-                "{}:{}: expected MANUAL(...), EXCLUDE(...) or SYNCED_ONLY(...)",
+                "{}:{}: expected MANUAL(...), EXCLUDE(...), SYNCED_ONLY(...) or IMPORT_NAME(...)",
                 path.display(),
                 line_number + 1
             )
@@ -57,6 +59,7 @@ pub fn parse(path: &Path) -> Result<Vec<Annotation>> {
             "MANUAL" => Kind::Manual,
             "EXCLUDE" => Kind::Exclude,
             "SYNCED_ONLY" => Kind::SyncedOnly,
+            "IMPORT_NAME" => Kind::ImportName,
             _ => {
                 return Err(anyhow!(
                     "{}:{}: unknown annotation {kind}",
@@ -127,12 +130,38 @@ pub fn apply(model: &mut ApiModel, annotations: &[Annotation]) -> Result<Vec<(St
                     .retain(|environment| environment.is_synced());
                 function.notes.push(annotation.reason.clone());
             }
+            Kind::ImportName => {
+                let name = &annotation.reason;
+                if !name
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+                {
+                    return Err(anyhow!(
+                        "IMPORT_NAME for {}::{} must be kebab-case, got {name}",
+                        annotation.module,
+                        annotation.function
+                    ));
+                }
+                function.import_name = Some(name.clone());
+            }
         }
     }
     for (module, function) in &excluded {
         if let Some(api) = model.modules.iter_mut().find(|api| api.name == *module) {
             api.functions
                 .retain(|candidate| candidate.name != *function);
+        }
+    }
+    for module in &model.modules {
+        let mut imports = BTreeSet::new();
+        for function in &module.functions {
+            if !imports.insert(function.wasm_import_name()) {
+                return Err(anyhow!(
+                    "two {} functions share the Wasm import name {}",
+                    module.name,
+                    function.wasm_import_name()
+                ));
+            }
         }
     }
     Ok(excluded)
@@ -174,12 +203,38 @@ mod tests {
                     visibility_sensitive: false,
                     status: LoweringStatus::Automatic,
                     notes: Vec::new(),
+                    import_name: None,
                 }],
                 records: Vec::new(),
                 enums: Vec::new(),
             }],
             callins: Vec::new(),
         }
+    }
+
+    #[test]
+    fn import_name_renames_the_import_and_rejects_clashes() {
+        let mut model = model_with_function();
+        let rename = |name: &str| Annotation {
+            kind: Kind::ImportName,
+            module: "synthetic".to_string(),
+            function: "Call".to_string(),
+            reason: name.to_string(),
+        };
+        apply(&mut model, &[rename("call-v2")]).unwrap();
+        assert_eq!(model.modules[0].functions[0].wasm_import_name(), "call-v2");
+
+        let mut model = model_with_function();
+        let mut legacy = model.modules[0].functions[0].clone();
+        legacy.name = "CallLegacy".to_string();
+        model.modules[0].functions.push(legacy);
+        let clash = Annotation {
+            function: "CallLegacy".to_string(),
+            ..rename("call")
+        };
+        let error = apply(&mut model, &[clash]).unwrap_err();
+        assert!(error.to_string().contains("share the Wasm import name"));
+        assert!(apply(&mut model_with_function(), &[rename("Call_2")]).is_err());
     }
 
     #[test]
