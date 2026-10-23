@@ -2,7 +2,10 @@
 
 Found while the seven SpringCabal WASM ports dropped their workarounds for the
 fixes in `6994406a6d`..`e2262a19fe`. Every fix from the previous TODO checked
-out in the games. Delete items as they are done.
+out in the games. Delete items as they are done. Done since: allegiance constants
+(`spring::allegiance`; the Wasm queries now honour my/ally/enemy, which they had treated as all
+units), the headless groundFX atlas error, `WeaponDefInfo` projectiles and spray (projectile
+params), `log_err_with` / `log_err_once_with`.
 
 ## 1. Rules modules have no pre-game Initialize
 
@@ -20,28 +23,6 @@ rules had set it (fixed in the game by starting the scenario at frame 1).
 
 Wanted: an `Initialize` callin delivered to Wasm modules when they load, like
 Lua's, and spring-addons running every addon's `init` from it.
-
-## 2. No named constants for the query allegiance
-
-`get_units_in_cylinder` / `_in_rectangle` / `_in_sphere` take Lua's
-allegiance argument: a team id, or -1 all units, -2 my allies, -3 my enemies,
--4 ... (see `LuaSyncedRead::GetUnitsIn*`). Games write `-1` or define their own
-`ALL_UNITS`. Wanted: `spring::allegiance::{ALL, ALLIED, ENEMY, ...}` (or an
-enum in the typed wrappers).
-
-## 3. Log noise: "Could not finalize groundFX texture atlas"
-
-Every headless verification run of every game logs
-`[f=-000001] Error: Could not finalize groundFX texture atlas. Use fewer/smaller textures.`
-It is the only engine error most suites see, so the suites have to allow one
-error. If headless can't build that atlas, it shouldn't report an error.
-
-## 4. `WeaponDefInfo` has no `projectiles` or `sprayAngle`
-
-Hunted's shotgun fires `projectiles` pellets spread by `sprayAngle`, as Lua's `shotgun.lua` reads
-them from `WeaponDefs`. The SDK's `WeaponDefInfo` has neither, so the port hard-codes 10 pellets and
-`2000 * PI / 0xafff`. Wanted: both fields, with `sprayAngle` as the engine stores it (the sine,
-`AccuracyToSin`) or as the def's raw value, documented either way.
 
 ## 5. A unit-script attach gadget in spring-addons
 
@@ -74,13 +55,6 @@ or a macro argument that registers it, with:
 Flove's copy also sets a `createdFrame` rules param in `unit_created`; that part
 stays in the game.
 
-## 6. `ResultExt` has no lazily built context
-
-`log_err(&format!("... {unit}"))` formats the context on every call, even when the
-call succeeds. Flove and Gravitas keep their own `check(result, || format!(...))`
-for calls made every frame or for every unit (publishing rules params, creating
-units). Wanted: `log_err_with(|| context)` / `log_err_once_with`.
-
 ## 7. `Wait*` completions resume one frame later than Lua
 
 In Lua, `WaitForMove`/`WaitForTurn` threads resume inside the engine's `AnimFinished` callin, in
@@ -94,11 +68,10 @@ frame"), so the task resumes on the next frame. Found in Hunted's rabbit hop (ro
 in the `AnimFinished` dispatch (or run a second drain after the animation tick) to match. This
 moves the anim goldens of any game whose scripts block on a `Wait*`.
 
-## 8. No typed getter for a game rules param
+## 8. No string getter for a game rules param
 
-The SDK has `rules_params::get_game_rules_param(p0: i32, p1: i32) -> i32` (the raw Core ABI
-entry, undocumented) and `get_game_rules_params`, but nothing like Lua's
-`Spring.GetGameRulesParam(name)` returning a number or string. Unit rules params have typed getters,
+`rules_params::get_game_rules_param_f32(name)` reads a number; nothing reads a string value like
+Lua's `Spring.GetGameRulesParam(name)`. Unit rules params have typed getters,
 so games publish game-wide state on a carrier unit instead (Flove's spire, MyCube's coal burner for
 its test handshake). Wanted: `get_game_rules_param(name) -> Result<Option<RulesParamValue>>`, like
 the unit version.
