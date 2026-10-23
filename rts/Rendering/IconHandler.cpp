@@ -228,6 +228,11 @@ bool CIconHandler::AddIcon(
 		float4{u0, v0, u1, v1}
 	};
 
+	// an icon added at runtime (Lua or Wasm, atlas 1) needs its atlas (re)built,
+	// otherwise it keeps raw texcoords into an atlas texture that never exists
+	if (atlasIndex < atlasNeedsUpdate.size())
+		atlasNeedsUpdate.set(atlasIndex);
+
 	// do basic check instead of the full load procedure
 	return CFileHandler::FileExists(texFileName, SPRING_VFS_ALL);
 }
