@@ -676,8 +676,10 @@ endif()
 
 ################################################################################
 ### RmlNativeElementRect
-	find_package(PNG REQUIRED)
-	find_package(ZLIB REQUIRED)
+# The Rml tests link the system PNG and zlib, which the Windows cross-build libraries lack.
+find_package(PNG QUIET)
+find_package(ZLIB QUIET)
+if (PNG_FOUND AND ZLIB_FOUND)
 
 	set(test_name RmlNativeElementRect)
 	set(test_src
@@ -770,8 +772,6 @@ endif()
 
 ################################################################################
 ### RmlSolLuaPluginShutdown
-	find_package(PNG REQUIRED)
-
 	set(test_name RmlSolLuaPluginShutdown)
 	set(test_src
 			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Rml/TestSolLuaPluginShutdown.cpp"
@@ -793,6 +793,7 @@ endif()
 	target_link_libraries(test_${test_name} ${FREETYPE_LIBRARY_RELEASE} PNG::PNG ZLIB::ZLIB)
 	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/lib/)
 	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/lib/lua/include)
+endif (PNG_FOUND AND ZLIB_FOUND)
 
 ################################################################################
 ### SerializeLuaState
