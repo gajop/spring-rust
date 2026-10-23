@@ -34,6 +34,7 @@ public:
 	static void SetUnitDefImage(const UnitDef* unitDef, uint32_t texID, int xsize, int ysize) { return modelDrawerData->SetUnitDefImage(unitDef, texID, xsize, ysize); }
 
 	static bool& UseScreenIcons() { return modelDrawerData->useScreenIcons; }
+	static bool& DrawScreenIcons() { return modelDrawerData->drawScreenIcons; }
 
 	static float GetUnitIconFadeStart() { return modelDrawerData->GetUnitIconFadeStart(); }
 	static void SetUnitIconFadeStart(float scale) { modelDrawerData->SetUnitIconFadeStart(scale); }

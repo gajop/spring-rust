@@ -1600,7 +1600,7 @@ bool CGame::Draw() {
 	{
 		SCOPED_TIMER("Draw::Screen");
 		SCOPED_GL_DEBUGGROUP("Draw::Screen");
-		if (CUnitDrawer::UseScreenIcons())
+		if (CUnitDrawer::UseScreenIcons() && CUnitDrawer::DrawScreenIcons())
 			unitDrawer->DrawUnitIconsScreen();
 
 		eventHandler.DrawScreenEffects();

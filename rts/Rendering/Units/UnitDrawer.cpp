@@ -65,6 +65,7 @@ CONFIG(float, UnitIconFadeStart).defaultValue(3000.0f).minimumValue(1.0f).maximu
 CONFIG(float, UnitIconFadeVanish).defaultValue(1000.0f).minimumValue(1.0f).maximumValue(10000.0f);
 CONFIG(float, UnitTransparency).defaultValue(0.7f);
 CONFIG(bool, UnitIconsAsUI).defaultValue(false).description("Draw unit icons like it is an UI element and not like unit's LOD.");
+CONFIG(bool, UnitIconsAsUIDraw).defaultValue(true).description("With UnitIconsAsUI, whether the engine draws the icons. Off keeps icon state (models hidden behind icons), icon picking and minimap icons, for a game that draws its own.");
 CONFIG(bool, UnitIconsHideWithUI).defaultValue(false).description("Hide unit icons when UI is hidden.");
 CONFIG(float, UnitGhostIconsDimming).defaultValue(0.8).minimumValue(0.0f).maximumValue(1.0f).description("Dimming multiplier for out of radar ghost icons. Setting to 0 disables them.");
 

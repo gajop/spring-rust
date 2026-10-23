@@ -3332,6 +3332,19 @@ public:
 	}
 };
 
+class IconsAsUIDrawActionExecutor : public IUnsyncedActionExecutor {
+public:
+	IconsAsUIDrawActionExecutor() : IUnsyncedActionExecutor("IconsAsUIDraw",
+			"Set whether the engine draws the UI unit icons (true, default). Off keeps icon state, icon picking and minimap icons, for a game that draws its own.") {}
+
+	bool Execute(const UnsyncedAction& action) const final {
+		InverseOrSetBool(CUnitDrawer::DrawScreenIcons(), action.GetArgs());
+		configHandler->Set("UnitIconsAsUIDraw", CUnitDrawer::DrawScreenIcons() ? 1 : 0);
+		LogSystemStatus("Draw UI unit icons: ", CUnitDrawer::DrawScreenIcons());
+		return true;
+	}
+};
+
 class IconScaleActionExecutor : public IUnsyncedActionExecutor {
 public:
 	IconScaleActionExecutor() : IUnsyncedActionExecutor("IconScaleUI",
@@ -4249,6 +4262,7 @@ void UnsyncedGameCommands::AddDefaultActionExecutors()
 	AddActionExecutor(AllocActionExecutor<InputTextGeoActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<DistIconActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<IconsAsUIActionExecutor>());
+	AddActionExecutor(AllocActionExecutor<IconsAsUIDrawActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<IconScaleActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<IconFadeStartActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<IconFadeVanishActionExecutor>());

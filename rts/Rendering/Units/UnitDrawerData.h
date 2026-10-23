@@ -203,6 +203,8 @@ public:
 
 	// IconsAsUI
 	bool useScreenIcons = false;
+	// Off: icon state, icon picking and minimap icons stay; the screen icons are left to the game.
+	bool drawScreenIcons = true;
 	float iconZoomDist;
 	float iconSizeBase = 32.0f;
 	float iconScale = 1.0f;

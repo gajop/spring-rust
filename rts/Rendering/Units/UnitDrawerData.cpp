@@ -159,6 +159,7 @@ CUnitDrawerData::CUnitDrawerData(bool& mtModelDrawer_)
 	iconFadeStart  = configHandler->GetFloat("UnitIconFadeStart");
 	iconFadeVanish = configHandler->GetFloat("UnitIconFadeVanish");
 	useScreenIcons = configHandler->GetBool("UnitIconsAsUI");
+	drawScreenIcons = configHandler->GetBool("UnitIconsAsUIDraw");
 	iconHideWithUI = configHandler->GetBool("UnitIconsHideWithUI");
 	ghostIconDimming = configHandler->GetFloat("UnitGhostIconsDimming");
 
