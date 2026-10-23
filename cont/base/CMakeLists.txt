@@ -18,6 +18,8 @@ macro(create_base_content_archive outputdir filename files)
 	set(outputfile "${Spring_BINARY_DIR}/${outputdir}/${filename}")
 	add_custom_command(
 		OUTPUT "${outputfile}"
+		# 7z adds to an existing archive: start afresh, or files removed from the list stay in it.
+		COMMAND ${CMAKE_COMMAND} -E rm -f ${outputfile}
 		COMMAND ${SEVENZIP_BIN} a -tzip ${outputfile} ${files} ${QUIET}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
 		COMMENT "Creating ${outputfile}"
