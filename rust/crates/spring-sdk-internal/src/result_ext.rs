@@ -21,6 +21,15 @@ pub trait ResultExt<T> {
     /// this call site.
     #[track_caller]
     fn log_err_once(self, context: &str) -> Option<T>;
+
+    /// Like [`log_err`](Self::log_err), with the context built only on failure: for calls
+    /// made every frame or for every unit.
+    fn log_err_with<C: core::fmt::Display>(self, context: impl FnOnce() -> C) -> Option<T>;
+
+    /// Like [`log_err_once`](Self::log_err_once), with the context built only on the first
+    /// failure at this call site.
+    #[track_caller]
+    fn log_err_once_with<C: core::fmt::Display>(self, context: impl FnOnce() -> C) -> Option<T>;
 }
 
 impl<T, E: core::fmt::Debug> ResultExt<T> for Result<T, E> {
@@ -36,11 +45,26 @@ impl<T, E: core::fmt::Debug> ResultExt<T> for Result<T, E> {
 
     #[track_caller]
     fn log_err_once(self, context: &str) -> Option<T> {
+        self.log_err_once_with(|| context)
+    }
+
+    fn log_err_with<C: core::fmt::Display>(self, context: impl FnOnce() -> C) -> Option<T> {
+        match self {
+            Ok(value) => Some(value),
+            Err(error) => {
+                crate::log_warning!("wasm", "{}: {error:?}", context());
+                None
+            }
+        }
+    }
+
+    #[track_caller]
+    fn log_err_once_with<C: core::fmt::Display>(self, context: impl FnOnce() -> C) -> Option<T> {
         match self {
             Ok(value) => Some(value),
             Err(error) => {
                 if first_failure_at(Location::caller()) {
-                    crate::log_warning!("wasm", "{context}: {error:?} (logged once)");
+                    crate::log_warning!("wasm", "{}: {error:?} (logged once)", context());
                 }
                 None
             }
@@ -65,3 +89,4 @@ fn first_failure_at(location: &'static Location<'static>) -> bool {
     sites.push(site);
     true
 }
+

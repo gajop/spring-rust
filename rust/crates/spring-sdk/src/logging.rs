@@ -8,6 +8,21 @@ pub trait ResultExt<T> {
     fn log_err<E: Common>(self, spring: &Spring<'_, E>, context: &str) -> Option<T>;
     #[track_caller]
     fn log_err_once<E: Common>(self, spring: &Spring<'_, E>, context: &str) -> Option<T>;
+    /// Like [`log_err`](Self::log_err), with the context built only on failure: for calls
+    /// made every frame or for every unit.
+    fn log_err_with<E: Common, C: core::fmt::Display>(
+        self,
+        spring: &Spring<'_, E>,
+        context: impl FnOnce() -> C,
+    ) -> Option<T>;
+    /// Like [`log_err_once`](Self::log_err_once), with the context built only on the first
+    /// failure at this call site.
+    #[track_caller]
+    fn log_err_once_with<E: Common, C: core::fmt::Display>(
+        self,
+        spring: &Spring<'_, E>,
+        context: impl FnOnce() -> C,
+    ) -> Option<T>;
 }
 impl<T, Error: Debug> ResultExt<T> for core::result::Result<T, Error> {
     fn log_err<E: Common>(self, spring: &Spring<'_, E>, context: &str) -> Option<T> {
@@ -21,6 +36,27 @@ impl<T, Error: Debug> ResultExt<T> for core::result::Result<T, Error> {
     }
     #[track_caller]
     fn log_err_once<E: Common>(self, spring: &Spring<'_, E>, context: &str) -> Option<T> {
+        self.log_err_once_with(spring, || context)
+    }
+    fn log_err_with<E: Common, C: core::fmt::Display>(
+        self,
+        spring: &Spring<'_, E>,
+        context: impl FnOnce() -> C,
+    ) -> Option<T> {
+        match self {
+            Ok(value) => Some(value),
+            Err(error) => {
+                crate::log_warning!(spring, "rust", "{}: {error:?}", context());
+                None
+            }
+        }
+    }
+    #[track_caller]
+    fn log_err_once_with<E: Common, C: core::fmt::Display>(
+        self,
+        spring: &Spring<'_, E>,
+        context: impl FnOnce() -> C,
+    ) -> Option<T> {
         static FAILED: Mutex<Vec<(&'static str, u32, u32)>> = Mutex::new(Vec::new());
         match self {
             Ok(value) => Some(value),
@@ -37,7 +73,7 @@ impl<T, Error: Debug> ResultExt<T> for core::result::Result<T, Error> {
                     }
                 };
                 if first {
-                    crate::log_warning!(spring, "rust", "{context}: {error:?} (logged once)");
+                    crate::log_warning!(spring, "rust", "{}: {error:?} (logged once)", context());
                 }
                 None
             }
