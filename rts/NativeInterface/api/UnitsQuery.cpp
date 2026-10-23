@@ -64,13 +64,20 @@ static bool UnitMatchesFilter(const CUnit* unit, const UnitFilterParams& filter)
 	}
 }
 
+// Lua's allegiance (LuaUtils): a team id, or all (-1), my (-2), ally (-3) and enemy (-4) units of
+// the reading module's perspective. A synced module reads as no team (-1).
 static bool UnitMatchesAllegiance(const CUnit* unit, int32_t allegiance)
 {
 	if (unit == nullptr)
 		return false;
 	if (allegiance >= 0)
 		return unit->team == allegiance;
-	return true;
+	switch (allegiance) {
+		case -2: return unit->team == WasmUiVisibility::ReadTeam();
+		case -3: return unit->allyteam == WasmUiVisibility::ReadAllyTeam();
+		case -4: return unit->allyteam != WasmUiVisibility::ReadAllyTeam();
+		default: return true;
+	}
 }
 
 static bool UnitInPlanes(const CUnit* unit, const PlanesQuery& planes)
