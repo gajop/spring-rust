@@ -122,11 +122,11 @@ std::vector<WasmSyncedJobs::Delivery> WasmSyncedJobs::BeginFrame(int frame)
 		throw std::logic_error("Cannot advance Wasm jobs during a synchronous batch");
 	if (state->batchFailure) std::rethrow_exception(state->batchFailure);
 	{
-		ZoneNamedN(barrier, "Wasm::Jobs::Barrier", state->active != nullptr);
+		ZoneNamedN(barrier, "Wasm::Jobs::Barrier", !state->active.empty());
 		ZoneValueV(barrier, frame);
 		state->Wait();
 	}
-	ZoneNamedN(collect, "Wasm::Jobs::Collect", state->active != nullptr);
+	ZoneNamedN(collect, "Wasm::Jobs::Collect", !state->active.empty());
 	ZoneValueV(collect, frame);
 	if (!state->pending.empty() && (state->mode != Mode::Update ||
 		std::any_of(state->pending.begin(), state->pending.end(), [frame](const auto& job) { return job.frame != frame; })))
