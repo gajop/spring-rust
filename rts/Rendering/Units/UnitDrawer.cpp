@@ -398,6 +398,13 @@ void CUnitDrawerGLSL::DrawUnitMiniMapIcons() const
 	const auto defIconIdx = icon::iconHandler.GetDefaultIconIdx();
 
 	for (auto* unit : modelDrawerData->GetUnsortedObjects()) {
+		// No current icon: the unit is neither in sight nor on radar, so it has no place on the
+		// minimap whichever icon the minimap draws. With minimap icons off (the default icon
+		// for all) it used to be drawn anyway, at a scale read from iconsData[INVALID_ICON_INDEX]:
+		// out of bounds, so garbage, now and then a quad over the whole minimap in its team colour.
+		if (unit->currentIconIndex == icon::INVALID_ICON_INDEX)
+			continue;
+
 		const size_t iconIndex = minimap->UseUnitIcons() ? unit->currentIconIndex : defIconIdx;
 
 		if (iconIndex == icon::INVALID_ICON_INDEX)
