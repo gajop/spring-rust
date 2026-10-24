@@ -31,12 +31,23 @@ class CSyncChecker {
 		 * Keeps a running checksum over all assignments to synced variables.
 		 */
 		static unsigned GetChecksum() { return g_checksum; }
+		/**
+		 * The same running checksum over the engine's own synced state only,
+		 * without what SyncMeta adds (the synced Wasm modules' identities,
+		 * memory sizes and job digests). Two builds of a module, or runs with
+		 * and without Wasm jobs, can be compared with it; GetChecksum differs
+		 * between them from the first frame that mixes those in.
+		 */
+		static unsigned GetEngineChecksum() { return g_engineChecksum; }
 		static unsigned GetPrevChecksum() { return g_prevChecksum; }
 		static void SetPrevChecksum(unsigned v) { g_prevChecksum = v; }
 		static void NewFrame();
 		static void debugSyncCheckThreading();
 		static void Sync(uint32_t val);
 		static void Sync(const void* p, unsigned size);
+		/** Mixed into GetChecksum only: metadata about the simulation, not its state. */
+		static void SyncMeta(uint32_t val);
+		static void SyncMeta(const void* p, unsigned size);
 		#ifdef SYNC_HISTORY
 		static std::tuple<unsigned, unsigned, unsigned*> GetFrameHistory(unsigned rewindFrames);
 		static std::pair<unsigned, unsigned*> GetHistory() { return std::make_pair(nextHistoryIndex, logs.data()); };
@@ -49,6 +60,11 @@ class CSyncChecker {
 		 * The sync checksum
 		 */
 		static unsigned g_checksum;
+
+		/**
+		 * The checksum without SyncMeta's contributions
+		 */
+		static unsigned g_engineChecksum;
 
 		/**
 		 * Final checksum of the previous simulation frame.

@@ -11,12 +11,14 @@
 
 
 unsigned CSyncChecker::g_checksum;
+unsigned CSyncChecker::g_engineChecksum;
 unsigned CSyncChecker::g_prevChecksum;
 int CSyncChecker::inSyncedCode;
 
 void CSyncChecker::NewFrame()
 {
 	g_checksum = 0xfade1eaf;
+	g_engineChecksum = 0xfade1eaf;
 #ifdef SYNC_HISTORY
 	LogHistory();
 #endif // SYNC_HISTORY
@@ -34,6 +36,7 @@ void CSyncChecker::Sync(uint32_t val)
 	debugSyncCheckThreading();
 #endif
 	g_checksum = spring::hash_combine(val, g_checksum);
+	g_engineChecksum = spring::hash_combine(val, g_engineChecksum);
 	//LOG("[Sync::Checker] chksum=%u\n", g_checksum);
 
 #ifdef SYNC_HISTORY
@@ -50,8 +53,25 @@ void CSyncChecker::Sync(const void* p, unsigned size)
 	// most common cases first, make it easy for compiler to optimize for it
 	// simple xor is not enough to detect multiple zeroes, e.g.
 	g_checksum = spring::LiteHash(p, size, g_checksum);
+	g_engineChecksum = spring::LiteHash(p, size, g_engineChecksum);
 	//LOG("[Sync::Checker] chksum=%u\n", g_checksum);
 
+#ifdef SYNC_HISTORY
+	LogHistory();
+#endif // SYNC_HISTORY
+}
+
+void CSyncChecker::SyncMeta(uint32_t val)
+{
+	g_checksum = spring::hash_combine(val, g_checksum);
+#ifdef SYNC_HISTORY
+	LogHistory();
+#endif // SYNC_HISTORY
+}
+
+void CSyncChecker::SyncMeta(const void* p, unsigned size)
+{
+	g_checksum = spring::LiteHash(p, size, g_checksum);
 #ifdef SYNC_HISTORY
 	LogHistory();
 #endif // SYNC_HISTORY

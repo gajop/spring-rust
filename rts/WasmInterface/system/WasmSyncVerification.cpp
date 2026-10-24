@@ -39,8 +39,8 @@ std::string JsonString(std::string_view value)
 void Sync64(std::uint64_t value)
 {
 #ifdef SYNCCHECK
-	CSyncChecker::Sync(static_cast<std::uint32_t>(value));
-	CSyncChecker::Sync(static_cast<std::uint32_t>(value >> 32));
+	CSyncChecker::SyncMeta(static_cast<std::uint32_t>(value));
+	CSyncChecker::SyncMeta(static_cast<std::uint32_t>(value >> 32));
 #endif
 }
 
@@ -77,14 +77,15 @@ void WasmSyncVerification::EndFrame(int frame)
 	const auto states = WasmCoreHost::SyncedStates(mixMemory || log.is_open() || dump);
 #ifdef SYNCCHECK
 	const unsigned engineChecksum = CSyncChecker::GetChecksum();
+	const unsigned simChecksum = CSyncChecker::GetEngineChecksum();
 	if (!states.empty()) {
-		CSyncChecker::Sync(0x5741534du);
-		CSyncChecker::Sync(static_cast<std::uint32_t>(states.size()));
+		CSyncChecker::SyncMeta(0x5741534du);
+		CSyncChecker::SyncMeta(static_cast<std::uint32_t>(states.size()));
 		for (const auto& state: states) {
-			CSyncChecker::Sync(state.name.data(), state.name.size());
-			CSyncChecker::Sync(state.identity.data(), state.identity.size());
-			CSyncChecker::Sync(static_cast<std::uint32_t>(state.environment));
-			CSyncChecker::Sync(static_cast<std::uint32_t>(state.faulted));
+			CSyncChecker::SyncMeta(state.name.data(), state.name.size());
+			CSyncChecker::SyncMeta(state.identity.data(), state.identity.size());
+			CSyncChecker::SyncMeta(static_cast<std::uint32_t>(state.environment));
+			CSyncChecker::SyncMeta(static_cast<std::uint32_t>(state.faulted));
 			Sync64(state.memoryBytes);
 			if (mixMemory) {
 				Sync64(state.memoryHash);
@@ -96,10 +97,12 @@ void WasmSyncVerification::EndFrame(int frame)
 	const unsigned checksum = CSyncChecker::GetChecksum();
 #else
 	const unsigned engineChecksum = 0;
+	const unsigned simChecksum = 0;
 	const unsigned checksum = 0;
 #endif
 	if (log.is_open()) {
 		log << "{\"schema\":2,\"frame\":" << frame << ",\"engine\":" << engineChecksum
+			<< ",\"sim\":" << simChecksum
 			<< ",\"workers\":" << ThreadPool::GetNumThreads()
 			<< ",\"checksum\":" << checksum << ",\"synccheck\":"
 #ifdef SYNCCHECK

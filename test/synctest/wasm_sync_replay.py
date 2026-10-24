@@ -22,7 +22,7 @@ class VerificationError(RuntimeError):
     pass
 
 
-def load_rows(path: Path, *, expected_modules=None, require_state=False):
+def load_rows(path: Path, *, expected_modules=None, require_state=False, allow_identity_change=False):
     previous = -1
     cohort = None
     schema = None
@@ -49,7 +49,7 @@ def load_rows(path: Path, *, expected_modules=None, require_state=False):
                 current = {m['name']: (m['environment'], m['identity']) for m in row['modules']}
                 if cohort is None:
                     cohort = current
-                if current != cohort:
+                if current != cohort and not allow_identity_change:
                     raise ValueError('module set, environment or identity changed during run')
                 if expected_modules is not None and current != expected_modules:
                     raise ValueError(f'expected modules {expected_modules}, got {current}')
@@ -73,6 +73,8 @@ def load_rows(path: Path, *, expected_modules=None, require_state=False):
                             raise ValueError('invalid globals/table state hash')
                 if type(row['engine']) is not int or type(row['checksum']) is not int:
                     raise ValueError('invalid engine checksum')
+                if 'sim' in row and type(row['sim']) is not int:
+                    raise ValueError('invalid engine state checksum')
             except (ValueError, TypeError, KeyError) as error:
                 raise VerificationError(f'{path}:{number}: {error}') from error
             previous = frame
@@ -81,13 +83,25 @@ def load_rows(path: Path, *, expected_modules=None, require_state=False):
         raise VerificationError(f'empty log: {path}')
 
 
-def first_difference(left: Path, right: Path):
+def first_difference(left: Path, right: Path, engine_state=False):
+    """The first frame at which two logs differ. With `engine_state`, only the engine's own
+    synced state (`sim`) is compared: for two builds of a module, or runs with and without Wasm
+    jobs, whose identities, memories and job digests differ by construction, and which the
+    cumulative `engine` and `checksum` carry from the first frame that mixes them in."""
     count = 0
-    for a, b in itertools.zip_longest(load_rows(left), load_rows(right)):
+    loader = (lambda path: load_rows(path, allow_identity_change=True)) if engine_state else load_rows
+    for a, b in itertools.zip_longest(loader(left), loader(right)):
         if a is None or b is None:
             row = a if a is not None else b
             return dict(frame=row['frame'], module='stream', reason='missing frame')
         count += 1
+        if engine_state:
+            if 'sim' not in a or 'sim' not in b:
+                raise VerificationError('engine state comparison needs logs with the sim checksum')
+            if a['sim'] != b['sim']:
+                return dict(frame=a['frame'], module='engine', reason='sim',
+                            left=a['sim'], right=b['sim'])
+            continue
         if a.get('schema', 1) != b.get('schema', 1):
             raise VerificationError('cannot compare different state coverage schemas')
         ma = {m['name']: m for m in a['modules']}
@@ -96,10 +110,10 @@ def first_difference(left: Path, right: Path):
             if ma.get(name) != mb.get(name):
                 return dict(frame=a['frame'], module=name, reason='Wasm state or module identity',
                             left=ma.get(name), right=mb.get(name))
-        for field in ('engine', 'checksum'):
-            if a[field] != b[field]:
+        for field in ('sim', 'engine', 'checksum'):
+            if a.get(field) != b.get(field):
                 return dict(frame=a['frame'], module='engine', reason=field,
-                            left=a[field], right=b[field])
+                            left=a.get(field), right=b.get(field))
     return dict(equal=True, frames=count)
 
 
@@ -260,6 +274,8 @@ def main():
     compare = sub.add_parser('compare')
     compare.add_argument('left', type=Path)
     compare.add_argument('right', type=Path)
+    compare.add_argument('--engine-state', action='store_true',
+                         help="compare only the engine's own state (sim): two module builds, or jobs against none")
     state = sub.add_parser('decode-state')
     state.add_argument('snapshot', type=Path)
     memory = sub.add_parser('memory-diff')
@@ -290,7 +306,7 @@ def main():
         print(json.dumps(memory_difference(args.left, args.right), indent=2))
         return 0
     if args.mode == 'compare':
-        result = first_difference(args.left, args.right)
+        result = first_difference(args.left, args.right, engine_state=args.engine_state)
         print(json.dumps(result, indent=2))
         return 0 if result.get('equal') else 1
     if len(args.threads) < 2 or any(t < 1 or t > 32 for t in args.threads):

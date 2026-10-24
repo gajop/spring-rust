@@ -56,6 +56,22 @@ class CompareTest(unittest.TestCase):
         with self.assertRaises(VerificationError):
             list(load_rows(self.write('empty', [])))
 
+    def test_engine_state_ignores_module_identity_and_jobs(self):
+        left, right = copy.deepcopy(self.rows), copy.deepcopy(self.rows)
+        for f, (a, b) in enumerate(zip(left, right)):
+            a['sim'] = b['sim'] = 10 + f
+            b['modules'][0]['identity'] = 'b' * 128
+            b['modules'][0]['hash'] = 'e' * 16
+            b['engine'] = b['checksum'] = 99
+        result = first_difference(self.write('a', left), self.write('b', right), engine_state=True)
+        self.assertEqual(result, dict(equal=True, frames=4))
+        self.assertEqual(first_difference(self.write('a', left), self.write('b', right))['module'], 'rules')
+        right[2]['sim'] = 7
+        result = first_difference(self.write('a', left), self.write('b', right), engine_state=True)
+        self.assertEqual((result['frame'], result['reason']), (2, 'sim'))
+        with self.assertRaises(VerificationError):
+            first_difference(self.write('a', self.rows), self.write('b', self.rows), engine_state=True)
+
     def test_equal(self):
         self.assertEqual(first_difference(self.write('a', self.rows), self.write('b', self.rows)),
                          dict(equal=True, frames=4))

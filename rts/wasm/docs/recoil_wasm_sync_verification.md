@@ -105,11 +105,20 @@ record and the engine checksums, frame by frame.
 | `jobs_hash` | Synced queue digest, including admitted inputs and job metadata |
 | `faulted` | Module fault flag |
 | `engine`, `checksum` | Engine checksum before and after this frame's Wasm contribution |
+| `sim` | The same running checksum over the engine's own synced state only, without any frame's Wasm contribution |
 | `workers` | Actual pool size, checked against the requested size; it is allowed to differ between runs |
 
 The engine checksum is cumulative: `engine` can include earlier frames' Wasm
 contributions. These hashes are diagnostics, not a cryptographic proof of
 state equality.
+
+The Wasm contribution holds each module's identity, memory size and job digest,
+so `engine` and `checksum` differ from the first frame that mixes it in whenever
+two runs use different builds of a module, or one runs Wasm jobs and the other
+their fallback, even when the simulation is the same. `sim` leaves that
+contribution out (`CSyncChecker::SyncMeta`): compare it with
+`wasm_sync_replay.py compare --engine-state A.jsonl B.jsonl` to ask whether two
+such runs simulate the same game. The network checksum is unchanged.
 
 Schema 2 adds globals and tables. The loader validates the original module,
 then adds private export aliases without changing guest instructions, indices
