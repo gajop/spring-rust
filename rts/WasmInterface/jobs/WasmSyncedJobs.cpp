@@ -8,9 +8,24 @@
 #include <limits>
 #include <stdexcept>
 
+#include "System/Log/ILog.h"
 #include "System/SpringHash.h"
 #include "System/Misc/TracyDefs.h"
 #include "System/Threading/ThreadPool.h"
+
+namespace {
+// A failed job's status reaches the game as synced bytes; its diagnostic (the
+// trap message) only this machine's log, so a game can tell a trap from a limit.
+void LogFailure(std::string_view kind, std::uint32_t id, int frame, const std::string& exportName,
+	std::size_t inputBytes, const WasmJobResult& result)
+{
+	if (result.status == WasmJobStatus::Ok)
+		return;
+	LOG_L(L_WARNING, "[Wasm jobs] %.*s job %u (frame %d, %s, %zu input bytes): status %u: %s",
+		static_cast<int>(kind.size()), kind.data(), id, frame, exportName.c_str(), inputBytes,
+		static_cast<unsigned>(result.status), result.diagnostic.c_str());
+}
+}
 
 struct WasmSyncedJobs::State {
 	explicit State(Mode mode): mode(mode) {}
@@ -132,6 +147,7 @@ std::vector<WasmSyncedJobs::Delivery> WasmSyncedJobs::BeginFrame(int frame)
 	for (const auto& batch: state->active) {
 		for (std::size_t i = 0; i < batch->jobs.size(); ++i) {
 			auto& job = batch->jobs[i];
+			LogFailure("next-frame", job.id, job.frame, job.exportName, job.input.size(), batch->results[i]);
 			deliveries.push_back({job.owner, job.id, job.frame, std::move(batch->results[i])});
 		}
 	}
@@ -214,6 +230,7 @@ WasmSyncedJobs::BatchStatus WasmSyncedJobs::RunBatch(void* owner,
 		if (exceptions[i]) std::rethrow_exception(exceptions[i]);
 		if (completed[i].status == WasmJobStatus::RuntimeFailure)
 			throw std::runtime_error("Wasm batch host failure: " + completed[i].diagnostic);
+		LogFailure("same-frame", static_cast<std::uint32_t>(i), state->frame, exportName, inputs[i].bytes.size(), completed[i]);
 	}
 	results = std::move(completed);
 	return BatchStatus::Ok;

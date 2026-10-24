@@ -185,7 +185,10 @@ Worker status has a separate namespace:
 | RuntimeFailure | 5 | Host/runtime failure; synced simulation terminates or the local owner faults before delivery |
 
 Guest execution errors deliver an empty output with the corresponding status.
-Human-readable trap diagnostics are not exposed as synced bytes. A result scratch
+Human-readable trap diagnostics are not exposed as synced bytes; each failed job's
+status, export, input size and diagnostic (the trap message and Wasm backtrace,
+for example an allocation failure in the worker's fixed memory) go to the local
+log as a `[Wasm jobs]` warning. A result scratch
 buffer that is too small or out of bounds, or a callback that traps/exhausts its
 budget, faults the submitting module.
 
