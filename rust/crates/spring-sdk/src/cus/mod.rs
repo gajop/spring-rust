@@ -5,6 +5,9 @@
 //!
 //! Add `cus: CusHost<MyScript>` to `export_rules_gadgets!`. The host then
 //! belongs to the same module as the gadgets and is dropped at shutdown.
+//! Register spring-addons' `CusHostGadget::new(with_cus_host)` to attach the
+//! scripts of `UnitDefScript` types and wake them each frame, as Lua's
+//! `unit_script.lua` does.
 //! `with_cus_module(|host, spring| ...)` supplies it alongside a fresh Spring
 //! reference. Attach, definition lookup, and named calls return engine errors
 //! normally. Script operations fail the module if the engine rejects them.

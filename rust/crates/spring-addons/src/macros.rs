@@ -587,7 +587,9 @@ macro_rules! __impl_ui_exports {
 }
 
 /// Export synced addons. Optional `create: make_state` receives Spring and
-/// returns `Result<State>`; otherwise state uses `Default`.
+/// returns `Result<State>`; otherwise state uses `Default`. Optional `cus: Host`
+/// adds the module's unit-script host; with a `CusHost`, register
+/// `CusHostGadget::new(with_cus_host)` to attach its scripts.
 #[macro_export]
 macro_rules! export_rules_gadgets {
     (state: $state_type:ty, $(create: $create:path,)? setup: $setup_fn:path, scratch: $scratch_size:expr, cus: $cus:ty $(,)?) => {
@@ -635,6 +637,19 @@ macro_rules! __impl_rules_exports {
                 module.handler.with_context(spring, |ctx| call(&module.cus, &mut ctx.spring().reborrow()))
             }
             $crate::reexports::export_core_cus!(HANDLER, $cus, __spring_addon_cus, $environment, __spring_addon_cus_entry);
+            /// Run `f` on the module's CUS host, from inside one of its callins; see
+            /// [`CusHostGadget`]($crate::CusHostGadget).
+            #[allow(dead_code)]
+            pub fn with_cus_host(f: &mut dyn FnMut(&$cus)) {
+                HANDLER
+                    .with(|slot| {
+                        slot.invoke(|module, _| {
+                            f(&module.cus);
+                            Ok(())
+                        })
+                    })
+                    .expect("addon handler is not available")
+            }
         )?
         fn __spring_addon_game_frame(
             module: &__SpringAddonModule,

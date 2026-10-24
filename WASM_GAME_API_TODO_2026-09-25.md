@@ -6,38 +6,10 @@ out in the games. Delete items as they are done. Done since: allegiance constant
 (`spring::allegiance`; the Wasm queries now honour my/ally/enemy, which they had treated as all
 units), the headless groundFX atlas error, `WeaponDefInfo` projectiles and spray (projectile
 params), `log_err_with` / `log_err_once_with`; a pre-game `Initialize` (item 1: `Module::start`
-runs when the module loads, and spring-addons runs every addon's `init` from it).
-
-## 5. A unit-script attach gadget in spring-addons
-
-Five SpringCabal ports (Area17, Flove, MyCube, Parts Needed, TTLD) each carry the
-same rules gadget around their `CusHost`, and Gravitas and Hunted do the same work
-inside other gadgets:
-
-```rust
-fn init(&self, _ctx)            { with_cus_module_or_defer(|host| host.attach_existing()); }
-fn game_frame(&self, _ctx, f)   { with_cus_module_or_defer(move |host| host.game_frame(f)); }
-fn unit_created(&self, _ctx, unit, def, _team, _builder) {
-    with_cus_module_or_defer(move |host| host.unit_created(UnitId(unit), def));
-}
-```
-
-`with_cus_module_or_defer` comes from `export_core_cus!`, so the gadget can't live
-in a game-side crate without knowing the module's type. Wanted: spring-addons (or
-`export_core_cus!`) provides it, e.g. `CusHostGadget::new(with_cus_module_or_defer)`
-or a macro argument that registers it, with:
-
-- `unit_created` attaching the new unit's script (deferred while the module is busy);
-- `game_frame` calling `CusHost::game_frame`, so sleeping tasks wake where Lua wakes
-  them (before the unit update), with a note that it should run after the gadgets
-  that create or order units that frame, as Lua's `unit_script.lua` runs late;
-- `init` calling `attach_existing()`, optional: on a normal start no game has units
-  at the rules' first callin except Parts Needed (the map's featureplacer units),
-  and after a rules reload every unit needs it;
-- `unit_destroyed` left to the host, as now.
-
-Flove's copy also sets a `createdFrame` rules param in `unit_created`; that part
-stays in the game.
+runs when the module loads, and spring-addons runs every addon's `init` from it); a unit-script
+attach gadget (item 5: `spring_addons::CusHostGadget::new(with_cus_host)` for a `cus: CusHost<S>`;
+`with_cus_host` comes from `export_rules_gadgets!`; ports on the legacy `spring` crate's
+`export_core_cus!` move to `spring-sdk`'s `CusHost` to use it).
 
 ## 7. `Wait*` completions resume one frame later than Lua
 

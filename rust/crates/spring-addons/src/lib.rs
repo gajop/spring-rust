@@ -5,6 +5,7 @@ extern crate alloc;
 
 extern crate std;
 
+pub mod cus;
 pub mod event;
 pub mod log;
 pub mod macros;
@@ -20,6 +21,7 @@ pub mod reexports {
     pub use std::thread_local;
 }
 
+pub use cus::CusHostGadget;
 pub use event::{CommandEvent, EventResult, KeyEvent, ViewGeometry, keys};
 pub use panic::{borrow_conflict, install_panic_hook};
 pub use rules::{Gadget, GadgetHandler, UnitDestroyedEvent, UnitPreDamagedEvent};
