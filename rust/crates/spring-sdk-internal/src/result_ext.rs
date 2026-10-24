@@ -89,4 +89,3 @@ fn first_failure_at(location: &'static Location<'static>) -> bool {
     sites.push(site);
     true
 }
-

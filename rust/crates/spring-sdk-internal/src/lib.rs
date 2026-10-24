@@ -20,6 +20,7 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+pub mod allegiance;
 /// Portable Rust implementation of the engine's unit-script model.
 ///
 /// The module is available on both wasm and native targets.  Its engine
@@ -27,7 +28,6 @@ extern crate alloc;
 /// independent of the transport used by the host.
 #[cfg(feature = "alloc")]
 pub mod cus;
-pub mod allegiance;
 pub mod rules_param_los;
 
 // Keep the exported Core-CUS ABI macro type-checked in the same target build
