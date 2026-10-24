@@ -1096,6 +1096,37 @@ fn module_slot_reenters_without_a_module_wide_borrow_and_contains_panics() {
     assert!(slot.validate_identity(identity).is_err());
 }
 
+struct StartedModule {
+    started: Cell<u32>,
+}
+impl module::Module<Menu> for StartedModule {
+    fn initialize(_: &mut Spring<'_, Menu>) -> Result<Self> {
+        Ok(Self {
+            started: Cell::new(0),
+        })
+    }
+    fn start(&self, _: &mut Spring<'_, Menu>) -> Result<()> {
+        self.started.set(self.started.get() + 1);
+        Ok(())
+    }
+}
+#[test]
+fn module_starts_once_when_initialized_before_any_callin() {
+    let interface = sys::NativeInterface::default();
+    let slot = module::ModuleSlot::<Menu, StartedModule>::new();
+    unsafe { slot.initialize_native(&interface) }.unwrap();
+    slot.invoke(|module, _| {
+        assert_eq!(module.started.get(), 1);
+        Ok(())
+    })
+    .unwrap();
+    slot.invoke(|module, _| {
+        assert_eq!(module.started.get(), 1);
+        Ok(())
+    })
+    .unwrap();
+}
+
 #[test]
 fn all_environment_combines_render_and_simulation_access() {
     fn capabilities<

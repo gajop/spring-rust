@@ -12,6 +12,12 @@ use std::{
 
 pub trait Module<E: Environment>: Sized + 'static {
     fn initialize(spring: &mut Spring<'_, E>) -> Result<Self>;
+    /// Runs once the module is installed, right after `initialize` and before any callin, while
+    /// the engine loads the module: Lua's `Initialize`. Unlike `initialize`, it may re-enter the
+    /// module (its slot, CUS host and addon state are reachable). An error unloads the module.
+    fn start(&self, _spring: &mut Spring<'_, E>) -> Result<()> {
+        Ok(())
+    }
     fn shutdown(&self, _spring: &mut Spring<'_, E>) -> Result<()> {
         Ok(())
     }
@@ -91,7 +97,8 @@ impl<E: Environment, T: Module<E>> ModuleSlot<E, T> {
             Ok(())
         });
         self.transitioning.set(false);
-        result
+        result?;
+        self.invoke(|module, spring| module.start(spring))
     }
 
     /// Run a callin. Clone the instance before invoking user code so nested

@@ -6,6 +6,7 @@ use std::cell::RefCell;
 use std::sync::atomic::{AtomicU32, Ordering};
 
 static SHUTDOWNS: AtomicU32 = AtomicU32::new(0);
+static INITS: AtomicU32 = AtomicU32::new(0);
 
 #[derive(Default)]
 pub struct State(RefCell<Vec<&'static str>>);
@@ -16,6 +17,9 @@ impl Gadget<State, All> for Probe {
     }
     fn init(&self, ctx: &AddonContext<'_, State, All>) {
         ctx.global().0.borrow_mut().push("init");
+        // Init runs once the module is installed, so it can re-enter it.
+        assert_eq!(with_global(|global| global.0.borrow().len()), 1);
+        INITS.fetch_add(1, Ordering::Relaxed);
     }
     fn game_frame(&self, ctx: &AddonContext<'_, State, All>, frame: i32) {
         assert_eq!(frame, 42);
@@ -90,7 +94,7 @@ spring_addons::export_rules_gadgets! {
 
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
-fn loading_thread_handoff_and_shutdown_use_the_same_handler() {
+fn init_runs_at_load_and_loading_thread_handoff_and_shutdown_use_the_same_handler() {
     use spring_addons::reexports::{__sys as sys, NATIVE_API_VERSION};
     let game = sys::GameApi {
         GetGameFrame: Some(frame_query),
@@ -118,6 +122,8 @@ fn loading_thread_handoff_and_shutdown_use_the_same_handler() {
     .join()
     .unwrap();
     assert_ne!(data, 0);
+    // Init ran when the module loaded, before its first callin.
+    assert_eq!(INITS.load(Ordering::Relaxed), 1);
     HOST.with(|host| host.set((pointer, data)));
     let mut result = sys::GameFrameResult::default();
     unsafe {
@@ -129,6 +135,7 @@ fn loading_thread_handoff_and_shutdown_use_the_same_handler() {
         );
     }
     assert!(result.error.is_null());
+    assert_eq!(INITS.load(Ordering::Relaxed), 1);
     with_global(|global| {
         assert_eq!(
             &*global.0.borrow(),

@@ -75,5 +75,7 @@ spring_addons::export_rules_gadgets! {
 
 The default environments of the Wasm macros remain `RulesSynced`, `Ui` and
 `RulesUnsynced`. An initialized handler receives shutdown before its state is
-dropped. Addon initialization runs after the module has been installed, so an
+dropped. Addon initialization (every addon's `init`) runs from `Module::start`,
+when the engine loads the module and before its first callin, as Lua runs a
+gadget's `Initialize`. It runs after the module has been installed, so an
 initialization callout can immediately reenter its callins.

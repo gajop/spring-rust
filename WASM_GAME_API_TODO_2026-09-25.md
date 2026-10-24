@@ -5,24 +5,8 @@ fixes in `6994406a6d`..`e2262a19fe`. Every fix from the previous TODO checked
 out in the games. Delete items as they are done. Done since: allegiance constants
 (`spring::allegiance`; the Wasm queries now honour my/ally/enemy, which they had treated as all
 units), the headless groundFX atlas error, `WeaponDefInfo` projectiles and spray (projectile
-params), `log_err_with` / `log_err_once_with`.
-
-## 1. Rules modules have no pre-game Initialize
-
-A Lua gadget's `Initialize` runs when LuaRules loads, before the first frame.
-A spring-addons rules module (and a bare Wasm rules module) runs nothing until
-its first callin, so a gadget's `init` only runs then. On a map without
-features that is the frame-0 `GameFrame`, after the Lua gadgets' frame-0
-`GameFrame`.
-
-It used to go unnoticed because a UI module's startup `SendLuaRulesMsg` was
-delivered locally before the first frame, which started the rules module
-early. Since `e2262a19fe` that message arrives over the network on frame 0,
-and Flove's test scenario (a Lua gadget) read a rules param before the Rust
-rules had set it (fixed in the game by starting the scenario at frame 1).
-
-Wanted: an `Initialize` callin delivered to Wasm modules when they load, like
-Lua's, and spring-addons running every addon's `init` from it.
+params), `log_err_with` / `log_err_once_with`; a pre-game `Initialize` (item 1: `Module::start`
+runs when the module loads, and spring-addons runs every addon's `init` from it).
 
 ## 5. A unit-script attach gadget in spring-addons
 

@@ -46,6 +46,9 @@ macro_rules! __addon_module {
             $(cus: $cus,)?
         }
         impl __SpringAddonModule {
+            /// Every addon's `init` runs once, when the module loads (`Module::start`); later
+            /// calls do nothing. Kept for modules that still call it from their own exports.
+            #[allow(dead_code)]
             fn ensure_initialized(&self, spring: &$crate::reexports::Spring<'_, $environment>) {
                 if !self.initialized.replace(true) {
                     self.handler.init(spring);
@@ -66,6 +69,13 @@ macro_rules! __addon_module {
                     $(cus: <$cus>::default(),)?
                 })
             }
+            fn start(
+                &self,
+                spring: &mut $crate::reexports::Spring<'_, $environment>,
+            ) -> $crate::reexports::Result<()> {
+                self.ensure_initialized(spring);
+                Ok(())
+            }
             fn shutdown(
                 &self,
                 spring: &mut $crate::reexports::Spring<'_, $environment>,
@@ -81,7 +91,6 @@ macro_rules! __addon_module {
                 id: $crate::reexports::jobs::JobId,
                 result: $crate::reexports::jobs::JobResult<'_>,
             ) -> $crate::reexports::Result<()> {
-                self.ensure_initialized(spring);
                 self.handler.job_result(spring, id, result);
                 Ok(())
             }
@@ -97,7 +106,6 @@ macro_rules! __addon_module {
             HANDLER
                 .with(|slot| {
                     slot.invoke(|module, spring| {
-                        module.ensure_initialized(spring);
                         Ok(f(&module.handler, spring))
                     })
                 })
@@ -155,7 +163,6 @@ macro_rules! __impl_ui_exports {
             spring: &mut $crate::reexports::Spring<'_, $environment>,
             dt: f32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.update(spring, dt);
@@ -170,7 +177,6 @@ macro_rules! __impl_ui_exports {
             t: i32,
             b: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_created(spring, u, d, t, b);
@@ -183,7 +189,6 @@ macro_rules! __impl_ui_exports {
             feature_id: i32,
             ally_team_id: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.feature_created(spring, feature_id, ally_team_id);
@@ -196,7 +201,6 @@ macro_rules! __impl_ui_exports {
             feature_id: i32,
             ally_team_id: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.feature_destroyed(spring, feature_id, ally_team_id);
@@ -214,7 +218,6 @@ macro_rules! __impl_ui_exports {
             at: i32,
             w: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 let event = $crate::event::UnitDestroyedEvent {
@@ -238,7 +241,6 @@ macro_rules! __impl_ui_exports {
             old_team: i32,
             new_team: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_given(spring, u, d, old_team, new_team);
@@ -253,7 +255,6 @@ macro_rules! __impl_ui_exports {
             old_team: i32,
             new_team: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_taken(spring, u, d, old_team, new_team);
@@ -268,7 +269,6 @@ macro_rules! __impl_ui_exports {
             t: i32,
             a: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_entered_los(spring, u, d, t, a);
@@ -283,7 +283,6 @@ macro_rules! __impl_ui_exports {
             t: i32,
             a: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_left_los(spring, u, d, t, a);
@@ -298,7 +297,6 @@ macro_rules! __impl_ui_exports {
             t: i32,
             a: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_entered_radar(spring, u, d, t, a);
@@ -313,7 +311,6 @@ macro_rules! __impl_ui_exports {
             t: i32,
             a: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_left_radar(spring, u, d, t, a);
@@ -327,7 +324,6 @@ macro_rules! __impl_ui_exports {
             o: i32,
             w: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.projectile_created(spring, p, o, w);
@@ -341,7 +337,6 @@ macro_rules! __impl_ui_exports {
             o: i32,
             w: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.projectile_destroyed(spring, p, o, w);
@@ -356,7 +351,6 @@ macro_rules! __impl_ui_exports {
             spring: &mut $crate::reexports::Spring<'_, $environment>,
             msg: &[u8],
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.recv_from_synced(spring, msg);
@@ -372,7 +366,6 @@ macro_rules! __impl_ui_exports {
             dy: i32,
             button: i32,
         ) -> $crate::reexports::Result<bool> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({ handler.mouse_move(spring, x, y, dx, dy, button) })
         }
@@ -384,7 +377,6 @@ macro_rules! __impl_ui_exports {
             y: i32,
             button: i32,
         ) -> $crate::reexports::Result<bool> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({ handler.mouse_press(spring, x, y, button) })
         }
@@ -396,7 +388,6 @@ macro_rules! __impl_ui_exports {
             y: i32,
             button: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.mouse_release(spring, x, y, button);
@@ -409,7 +400,6 @@ macro_rules! __impl_ui_exports {
             up: bool,
             value: f32,
         ) -> $crate::reexports::Result<bool> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({ handler.mouse_wheel(spring, up, value) })
         }
@@ -428,7 +418,6 @@ macro_rules! __impl_ui_exports {
             scan_code: i32,
             _action_list: &[$crate::reexports::types::callins::KeyAction],
         ) -> $crate::reexports::Result<bool> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 let event = $crate::event::KeyEvent {
@@ -459,7 +448,6 @@ macro_rules! __impl_ui_exports {
             scan_code: i32,
             _action_list: &[$crate::reexports::types::callins::KeyAction],
         ) -> $crate::reexports::Result<bool> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 let event = $crate::event::KeyEvent {
@@ -481,7 +469,6 @@ macro_rules! __impl_ui_exports {
             module: &__SpringAddonModule,
             spring: &mut $crate::reexports::Spring<'_, $environment>,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_world(spring);
@@ -492,7 +479,6 @@ macro_rules! __impl_ui_exports {
             module: &__SpringAddonModule,
             spring: &mut $crate::reexports::Spring<'_, $environment>,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_genesis(spring);
@@ -505,7 +491,6 @@ macro_rules! __impl_ui_exports {
             w: i32,
             h: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_screen(spring, w, h);
@@ -516,7 +501,6 @@ macro_rules! __impl_ui_exports {
             module: &__SpringAddonModule,
             spring: &mut $crate::reexports::Spring<'_, $environment>,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_world_pre_unit(spring);
@@ -527,7 +511,6 @@ macro_rules! __impl_ui_exports {
             module: &__SpringAddonModule,
             spring: &mut $crate::reexports::Spring<'_, $environment>,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_world_refraction(spring);
@@ -543,7 +526,6 @@ macro_rules! __impl_ui_exports {
             w: i32,
             h: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_screen_effects(spring, w, h);
@@ -555,7 +537,6 @@ macro_rules! __impl_ui_exports {
             spring: &mut $crate::reexports::Spring<'_, $environment>,
             winning_ally_teams: &[u8],
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.game_over(spring, winning_ally_teams);
@@ -582,7 +563,6 @@ macro_rules! __impl_ui_exports {
             view_pos_x: i32,
             view_pos_y: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 let geometry = $crate::event::ViewGeometry {
@@ -661,7 +641,6 @@ macro_rules! __impl_rules_exports {
             spring: &mut $crate::reexports::Spring<'_, $environment>,
             frame: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.game_frame(spring, frame);
@@ -676,7 +655,6 @@ macro_rules! __impl_rules_exports {
             m: i32,
             data: &[u8],
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.handle_lua_msg(spring, p, s, m, data);
@@ -691,7 +669,6 @@ macro_rules! __impl_rules_exports {
             t: i32,
             b: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 {
@@ -706,7 +683,6 @@ macro_rules! __impl_rules_exports {
             feature_id: i32,
             ally_team_id: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.feature_created(spring, feature_id, ally_team_id);
@@ -719,7 +695,6 @@ macro_rules! __impl_rules_exports {
             feature_id: i32,
             ally_team_id: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.feature_destroyed(spring, feature_id, ally_team_id);
@@ -737,7 +712,6 @@ macro_rules! __impl_rules_exports {
             at: i32,
             w: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 let event = $crate::rules::UnitDestroyedEvent {
@@ -760,7 +734,6 @@ macro_rules! __impl_rules_exports {
             d: i32,
             t: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_idle(spring, u, d, t);
@@ -774,7 +747,6 @@ macro_rules! __impl_rules_exports {
             o: i32,
             w: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.projectile_created(spring, p, o, w);
@@ -795,7 +767,6 @@ macro_rules! __impl_rules_exports {
             ad: i32,
             at: i32,
         ) -> $crate::reexports::Result<(f32, f32)> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             let result =
                 { { handler.unit_pre_damaged(spring, u, ud, ut, d, p, w, pr, a, ad, at) } };
@@ -810,7 +781,6 @@ macro_rules! __impl_rules_exports {
             o: i32,
             p: i32,
         ) -> $crate::reexports::Result<bool> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({ handler.explosion(spring, w, (pos.x, pos.y, pos.z), o, p) })
         }
@@ -822,7 +792,6 @@ macro_rules! __impl_rules_exports {
             o: i32,
             w: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.projectile_destroyed(spring, p, o, w);
@@ -837,7 +806,6 @@ macro_rules! __impl_rules_exports {
             spring: &mut $crate::reexports::Spring<'_, $environment>,
             winning_ally_teams: &[u8],
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.game_over(spring, winning_ally_teams);
@@ -852,7 +820,6 @@ macro_rules! __impl_rules_exports {
             unit_team: i32,
             command: &$crate::reexports::CallinCommand<'_>,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 let event = $crate::event::CommandEvent {
@@ -884,7 +851,6 @@ macro_rules! __impl_rules_exports {
             from_synced: bool,
             from_lua: bool,
         ) -> $crate::reexports::Result<bool> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 let event = $crate::event::CommandEvent {
@@ -944,7 +910,6 @@ macro_rules! __impl_unsynced_exports {
             spring: &mut $crate::reexports::Spring<'_, $environment>,
             frame: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.game_frame(spring, frame);
@@ -956,7 +921,6 @@ macro_rules! __impl_unsynced_exports {
             spring: &mut $crate::reexports::Spring<'_, $environment>,
             delta_seconds: f32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.update(spring, delta_seconds);
@@ -971,7 +935,6 @@ macro_rules! __impl_unsynced_exports {
             unit_team: i32,
             builder_id: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 {
@@ -987,7 +950,6 @@ macro_rules! __impl_unsynced_exports {
             unit_def_id: i32,
             unit_team: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_finished(spring, unit_id, unit_def_id, unit_team);
@@ -1005,7 +967,6 @@ macro_rules! __impl_unsynced_exports {
             attacker_team: i32,
             weapon_def_id: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 let event = $crate::event::UnitDestroyedEvent {
@@ -1029,7 +990,6 @@ macro_rules! __impl_unsynced_exports {
             old_team: i32,
             new_team: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_given(spring, unit_id, unit_def_id, old_team, new_team);
@@ -1044,7 +1004,6 @@ macro_rules! __impl_unsynced_exports {
             old_team: i32,
             new_team: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.unit_taken(spring, unit_id, unit_def_id, old_team, new_team);
@@ -1057,7 +1016,6 @@ macro_rules! __impl_unsynced_exports {
             feature_id: i32,
             ally_team_id: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.feature_created(spring, feature_id, ally_team_id);
@@ -1073,7 +1031,6 @@ macro_rules! __impl_unsynced_exports {
             feature_id: i32,
             ally_team_id: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.feature_destroyed(spring, feature_id, ally_team_id);
@@ -1090,7 +1047,6 @@ macro_rules! __impl_unsynced_exports {
             owner_id: i32,
             weapon_def_id: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 {
@@ -1109,7 +1065,6 @@ macro_rules! __impl_unsynced_exports {
             owner_id: i32,
             weapon_def_id: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 {
@@ -1126,7 +1081,6 @@ macro_rules! __impl_unsynced_exports {
             spring: &mut $crate::reexports::Spring<'_, $environment>,
             message: &[u8],
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.recv_from_synced(spring, message);
@@ -1142,7 +1096,6 @@ macro_rules! __impl_unsynced_exports {
             width: i32,
             height: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_screen(spring, width, height);
@@ -1153,7 +1106,6 @@ macro_rules! __impl_unsynced_exports {
             module: &__SpringAddonModule,
             spring: &mut $crate::reexports::Spring<'_, $environment>,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_world(spring);
@@ -1168,7 +1120,6 @@ macro_rules! __impl_unsynced_exports {
             draw_reflection: bool,
             draw_refraction: bool,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 {
@@ -1192,7 +1143,6 @@ macro_rules! __impl_unsynced_exports {
             width: i32,
             height: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_screen_effects(spring, width, height);
@@ -1208,7 +1158,6 @@ macro_rules! __impl_unsynced_exports {
             unit_id: i32,
             draw_mode: i32,
         ) -> $crate::reexports::Result<bool> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({ handler.draw_unit(spring, unit_id, draw_mode) })
         }
@@ -1219,7 +1168,6 @@ macro_rules! __impl_unsynced_exports {
             feature_id: i32,
             draw_mode: i32,
         ) -> $crate::reexports::Result<bool> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({ handler.draw_feature(spring, feature_id, draw_mode) })
         }
@@ -1228,7 +1176,6 @@ macro_rules! __impl_unsynced_exports {
             module: &__SpringAddonModule,
             spring: &mut $crate::reexports::Spring<'_, $environment>,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_world_pre_unit(spring);
@@ -1242,7 +1189,6 @@ macro_rules! __impl_unsynced_exports {
             module: &__SpringAddonModule,
             spring: &mut $crate::reexports::Spring<'_, $environment>,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 handler.draw_genesis(spring);
@@ -1269,7 +1215,6 @@ macro_rules! __impl_unsynced_exports {
             view_pos_x: i32,
             view_pos_y: i32,
         ) -> $crate::reexports::Result<()> {
-            module.ensure_initialized(spring);
             let handler = &module.handler;
             Ok({
                 let geometry = $crate::event::ViewGeometry {
