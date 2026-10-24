@@ -9,20 +9,9 @@ params), `log_err_with` / `log_err_once_with`; a pre-game `Initialize` (item 1: 
 runs when the module loads, and spring-addons runs every addon's `init` from it); a unit-script
 attach gadget (item 5: `spring_addons::CusHostGadget::new(with_cus_host)` for a `cus: CusHost<S>`;
 `with_cus_host` comes from `export_rules_gadgets!`; ports on the legacy `spring` crate's
-`export_core_cus!` move to `spring-sdk`'s `CusHost` to use it).
-
-## 7. `Wait*` completions resume one frame later than Lua
-
-In Lua, `WaitForMove`/`WaitForTurn` threads resume inside the engine's `AnimFinished` callin, in
-the frame's animation tick, so a following `Sleep(n)` counts from that frame.
-`CusScheduler::wake_animation` (`rust/crates/spring/src/cus/scheduler.rs`) only queues the task,
-and `tick` drains each frame once ("wakes that arrive after this pass are deferred until the next
-frame"), so the task resumes on the next frame. Found in Hunted's rabbit hop (round 7c):
-`Sleep(300)` + `WaitForMove(center)` over a 10-frame move, then `Sleep(100)`; Lua hops at frames
-633/666/699, the port at 633/667/701, 1 frame lost per blocking wait. Evidence:
-`~/worktrees/golden-diffs-2026-09-24/hunted/r7c-rabbit-controller/`. Poll animation-woken tasks
-in the `AnimFinished` dispatch (or run a second drain after the animation tick) to match. This
-moves the anim goldens of any game whose scripts block on a `Wait*`.
+`export_core_cus!` move to `spring-sdk`'s `CusHost` to use it); `Wait*` completions resuming a
+frame late (item 7, already fixed by `ca1985b144`, in releases from `2026.10.15`: animation waiters
+resume in the animation-finished dispatch, so a following sleep counts from that frame).
 
 ## 8. No string getter for a game rules param
 
