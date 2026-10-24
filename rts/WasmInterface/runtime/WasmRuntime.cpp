@@ -605,7 +605,12 @@ WasmRuntime::WasmRuntime(WasmRuntimeConfig config)
 			wasmtime_config_wasm_simd_set(wasmtimeConfig, config.allowSimd || config.allowRelaxedSimd);
 			wasmtime_config_wasm_relaxed_simd_set(wasmtimeConfig, config.allowRelaxedSimd);
 			wasmtime_config_wasm_relaxed_simd_deterministic_set(wasmtimeConfig, true);
-			wasmtime_config_cranelift_nan_canonicalization_set(wasmtimeConfig, true);
+			// Canonical NaN bits keep synced state the same on every architecture. Diagnostic-only
+			// opt-out, to measure what canonicalization costs: SPRING_WASM_NAN_CANONICALIZATION=0.
+			// Never in a match: NaN bits could then differ between x86 and ARM peers.
+			const char* nanCanonicalization = std::getenv("SPRING_WASM_NAN_CANONICALIZATION");
+			wasmtime_config_cranelift_nan_canonicalization_set(wasmtimeConfig,
+				nanCanonicalization == nullptr || std::string_view(nanCanonicalization) != "0");
 			wasmtime_config_wasm_multi_value_set(wasmtimeConfig, true);
 		wasmtime_config_wasm_bulk_memory_set(wasmtimeConfig, true);
 
