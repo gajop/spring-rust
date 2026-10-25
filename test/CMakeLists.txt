@@ -136,6 +136,7 @@ endmacro()
 		"${ENGINE_SOURCE_DIR}/WasmInterface/jobs/WasmJobProgram.cpp"
 		"${ENGINE_SOURCE_DIR}/WasmInterface/jobs/WasmSyncedJobs.cpp"
 		"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmRuntime.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmNanSinks.cpp"
 		"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmEnvironment.cpp"
 		"${ENGINE_SOURCE_DIR}/WasmInterface/core/host/WasmCoreValidation.cpp"
 		"${ENGINE_SOURCE_DIR}/WasmInterface/core/host/WasmCoreState.cpp"
@@ -167,6 +168,17 @@ endmacro()
 		target_link_options(test_${test_name} PRIVATE "LINKER:--wrap=wasm_engine_new_with_config"
 			"LINKER:--wrap=wasmtime_linker_instantiate" "LINKER:--wrap=wasmtime_store_delete")
 	endif()
+
+################################################################################
+### NaN canonicalization at sinks gives what global canonicalization gives.
+	set(test_name WasmNanSinks)
+	set(test_src
+		"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmNanSinks.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmNanSinks.cpp"
+		${test_Common_sources}
+	)
+	add_spring_test(${test_name} "${test_src}" "recoil-wasmtime;${WINMM_LIBRARY}"
+		"-DNOT_USING_CREG -DNOT_USING_STREFLOP" Catch2Wasm)
 
 ################################################################################
 ### Native errors must keep their ABI values in either platform-header order.

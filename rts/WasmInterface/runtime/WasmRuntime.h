@@ -68,6 +68,20 @@ struct WasmRuntimeConfig {
 #endif
 };
 
+// How synced guest float code gets architecture-independent NaN bits.
+// SPRING_WASM_NAN_CANONICALIZATION selects it: unset or "sinks", "all" (or "1"),
+// "none" (or "0"). Peers must agree; it is part of ConfigurationIdentity().
+enum class WasmNanCanonicalization : std::uint8_t {
+	// Synced Core modules are rewritten to canonicalize a NaN only where its
+	// bits become observable (WasmNanSinks.h). A module the rewrite does not
+	// model compiles with All instead.
+	Sinks,
+	// Cranelift canonicalizes the result of every float operation.
+	All,
+	// Diagnostic only, never for a match: NaN bits may differ between x86 and ARM.
+	None,
+};
+
 struct WasmModuleIdentity {
 	std::string sha512;
 	std::size_t byteSize = 0;
@@ -89,6 +103,7 @@ public:
 	WasmRuntime& operator=(const WasmRuntime&) = delete;
 
 	const WasmRuntimeConfig& Config() const { return config; }
+	WasmNanCanonicalization NanCanonicalization() const { return nanCanonicalization; }
 	WasmRuntimeBackend Backend() const { return backend; }
 	bool IsAvailable() const { return backend != WasmRuntimeBackend::Unavailable; }
 
@@ -112,8 +127,16 @@ private:
 
 	struct BackendState;
 	void* BackendEngine() const;
+	// The bytes and engine a synced Core module compiles with. Leaves `rewritten`
+	// empty when the original bytes are compiled. `sha512` is the module's
+	// identity, which keys a cache of rewrites. `note` describes the rewrite;
+	// `fallback` is set when the module compiles with canonicalization everywhere.
+	void* PrepareSyncedModule(const std::vector<std::uint8_t>& original, const std::string& sha512,
+		std::shared_ptr<const std::vector<std::uint8_t>>& rewritten, std::string& note,
+		bool& fallback) const;
 
 	WasmRuntimeConfig config;
 	WasmRuntimeBackend backend = WasmRuntimeBackend::Unavailable;
+	WasmNanCanonicalization nanCanonicalization = WasmNanCanonicalization::Sinks;
 	std::unique_ptr<BackendState> backendState;
 };

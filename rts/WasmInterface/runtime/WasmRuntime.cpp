@@ -6,14 +6,19 @@
 #include <array>
 #include <cctype>
 #include <charconv>
+#include <chrono>
+#include <cstdio>
 #include <cstdlib>
 #include <iomanip>
 #include <limits>
+#include <map>
+#include <mutex>
 #include <sstream>
 #include <span>
 #include <utility>
 
 #include "System/Sync/SHA512.hpp"
+#include "WasmNanSinks.h"
 #include "wasm/generated/WasmCalloutRegistry.h"
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
@@ -571,60 +576,154 @@ namespace {
 struct WasmRuntime::BackendState {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	wasm_engine_t* engine = nullptr;
+	// Sinks mode compiles a module the rewrite does not model with this one.
+	std::once_flag canonicalizingOnce;
+	wasm_engine_t* canonicalizingEngine = nullptr;
 
 	~BackendState()
 	{
 		if (engine != nullptr)
 			wasm_engine_delete(engine);
+		if (canonicalizingEngine != nullptr)
+			wasm_engine_delete(canonicalizingEngine);
 	}
 #endif
 };
 
+namespace {
+WasmNanCanonicalization NanCanonicalizationFromEnvironment()
+{
+	const char* value = std::getenv("SPRING_WASM_NAN_CANONICALIZATION");
+	if (value == nullptr)
+		return WasmNanCanonicalization::Sinks;
+	const std::string_view mode(value);
+	if (mode == "all" || mode == "1")
+		return WasmNanCanonicalization::All;
+	if (mode == "none" || mode == "0")
+		return WasmNanCanonicalization::None;
+	return WasmNanCanonicalization::Sinks;
+}
+
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+wasm_engine_t* NewEngine(const WasmRuntimeConfig& config, bool canonicalizeAll)
+{
+	wasm_config_t* wasmtimeConfig = wasm_config_new();
+	if (wasmtimeConfig == nullptr)
+		return nullptr;
+	// Diagnostic-only opt-in: preserve JIT names and unwind metadata for perf.
+	const char* profiling = std::getenv("SPRING_WASM_JITDUMP");
+	if (profiling != nullptr && std::string_view(profiling) == "1") {
+		wasmtime_config_profiler_set(wasmtimeConfig, WASMTIME_PROFILING_STRATEGY_JITDUMP);
+		wasmtime_config_debug_info_set(wasmtimeConfig, true);
+	}
+	wasmtime_config_consume_fuel_set(wasmtimeConfig, config.instructionFuel != 0);
+	wasmtime_config_wasm_component_model_set(wasmtimeConfig, true);
+	// Component canonical lowering can execute guest realloc while a host
+	// import is active. Keep Wasmtime's native trap handler explicit here:
+	// relying on the backend default lets a guest `unreachable` escape as
+	// SIGILL on some C-API builds instead of becoming a call error.
+	wasmtime_config_signals_based_traps_set(wasmtimeConfig, true);
+	wasmtime_config_wasm_threads_set(wasmtimeConfig, config.allowThreads);
+	wasmtime_config_shared_memory_set(wasmtimeConfig, config.allowThreads);
+	// Explicit rather than Wasmtime's default: SIMD is a per-game choice.
+	wasmtime_config_wasm_simd_set(wasmtimeConfig, config.allowSimd || config.allowRelaxedSimd);
+	wasmtime_config_wasm_relaxed_simd_set(wasmtimeConfig, config.allowRelaxedSimd);
+	wasmtime_config_wasm_relaxed_simd_deterministic_set(wasmtimeConfig, true);
+	// Canonical NaN bits keep synced state the same on every architecture: on
+	// every float result here, or only where they become visible (Sinks mode,
+	// which rewrites synced modules before they are compiled).
+	wasmtime_config_cranelift_nan_canonicalization_set(wasmtimeConfig, canonicalizeAll);
+	wasmtime_config_wasm_multi_value_set(wasmtimeConfig, true);
+	wasmtime_config_wasm_bulk_memory_set(wasmtimeConfig, true);
+	return wasm_engine_new_with_config(wasmtimeConfig);
+}
+
+struct CachedRewrite {
+	bool ok = false;
+	std::shared_ptr<const std::vector<std::uint8_t>> bytes;
+	std::string error;
+	recoil::wasm::NanSinkStats stats;
+	double milliseconds = 0;
+};
+#endif
+}
+
 WasmRuntime::WasmRuntime(WasmRuntimeConfig config)
 	: config(std::move(config))
+	, nanCanonicalization(NanCanonicalizationFromEnvironment())
 {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-	wasm_config_t* wasmtimeConfig = wasm_config_new();
-	if (wasmtimeConfig != nullptr) {
-		// Diagnostic-only opt-in: preserve JIT names and unwind metadata for perf.
-		const char* profiling = std::getenv("SPRING_WASM_JITDUMP");
-		if (profiling != nullptr && std::string_view(profiling) == "1") {
-			wasmtime_config_profiler_set(wasmtimeConfig, WASMTIME_PROFILING_STRATEGY_JITDUMP);
-			wasmtime_config_debug_info_set(wasmtimeConfig, true);
-		}
-		wasmtime_config_consume_fuel_set(wasmtimeConfig, config.instructionFuel != 0);
-		wasmtime_config_wasm_component_model_set(wasmtimeConfig, true);
-		// Component canonical lowering can execute guest realloc while a host
-		// import is active. Keep Wasmtime's native trap handler explicit here:
-		// relying on the backend default lets a guest `unreachable` escape as
-		// SIGILL on some C-API builds instead of becoming a call error.
-		wasmtime_config_signals_based_traps_set(wasmtimeConfig, true);
-		wasmtime_config_wasm_threads_set(wasmtimeConfig, config.allowThreads);
-		wasmtime_config_shared_memory_set(wasmtimeConfig, config.allowThreads);
-			// Explicit rather than Wasmtime's default: SIMD is a per-game choice.
-			wasmtime_config_wasm_simd_set(wasmtimeConfig, config.allowSimd || config.allowRelaxedSimd);
-			wasmtime_config_wasm_relaxed_simd_set(wasmtimeConfig, config.allowRelaxedSimd);
-			wasmtime_config_wasm_relaxed_simd_deterministic_set(wasmtimeConfig, true);
-			// Canonical NaN bits keep synced state the same on every architecture. Diagnostic-only
-			// opt-out, to measure what canonicalization costs: SPRING_WASM_NAN_CANONICALIZATION=0.
-			// Never in a match: NaN bits could then differ between x86 and ARM peers.
-			const char* nanCanonicalization = std::getenv("SPRING_WASM_NAN_CANONICALIZATION");
-			wasmtime_config_cranelift_nan_canonicalization_set(wasmtimeConfig,
-				nanCanonicalization == nullptr || std::string_view(nanCanonicalization) != "0");
-			wasmtime_config_wasm_multi_value_set(wasmtimeConfig, true);
-		wasmtime_config_wasm_bulk_memory_set(wasmtimeConfig, true);
-
-		backendState = std::make_unique<BackendState>();
-		backendState->engine = wasm_engine_new_with_config(wasmtimeConfig);
-		if (backendState->engine != nullptr)
-			backend = WasmRuntimeBackend::WasmtimeComponentModel;
-		else
-			backendState.reset();
-	}
+	backendState = std::make_unique<BackendState>();
+	backendState->engine = NewEngine(this->config,
+		nanCanonicalization == WasmNanCanonicalization::All);
+	if (backendState->engine != nullptr)
+		backend = WasmRuntimeBackend::WasmtimeComponentModel;
+	else
+		backendState.reset();
 #else
 	// The policy-only fallback is retained for source builds that deliberately
 	// disable external runtime dependencies. It never executes guest code.
 	backend = WasmRuntimeBackend::Unavailable;
+#endif
+}
+
+void* WasmRuntime::PrepareSyncedModule(const std::vector<std::uint8_t>& original,
+	const std::string& sha512, std::shared_ptr<const std::vector<std::uint8_t>>& rewritten,
+	std::string& note, bool& fallback) const
+{
+	rewritten.reset();
+	fallback = false;
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	if (backendState == nullptr)
+		return nullptr;
+	if (nanCanonicalization != WasmNanCanonicalization::Sinks)
+		return backendState->engine;
+	// The rewrite is a pure function of the bytes; reloading a module (a new
+	// match in the same process, job programs) reuses it.
+	static std::mutex cacheMutex;
+	static std::map<std::string, std::shared_ptr<const CachedRewrite>> cache;
+	std::shared_ptr<const CachedRewrite> entry;
+	{
+		std::lock_guard<std::mutex> lock(cacheMutex);
+		if (const auto it = cache.find(sha512); it != cache.end())
+			entry = it->second;
+	}
+	if (entry == nullptr) {
+		auto fresh = std::make_shared<CachedRewrite>();
+		std::vector<std::uint8_t> bytes;
+		const auto start = std::chrono::steady_clock::now();
+		fresh->ok = recoil::wasm::CanonicalizeNanAtSinks(original, bytes, &fresh->stats, fresh->error);
+		fresh->milliseconds = std::chrono::duration<double, std::milli>(
+			std::chrono::steady_clock::now() - start).count();
+		if (fresh->ok)
+			fresh->bytes = std::make_shared<const std::vector<std::uint8_t>>(std::move(bytes));
+		entry = fresh;
+		std::lock_guard<std::mutex> lock(cacheMutex);
+		if (cache.size() >= 16)
+			cache.clear();
+		cache.emplace(sha512, entry);
+	}
+	if (entry->ok) {
+		rewritten = entry->bytes;
+		char text[160];
+		std::snprintf(text, sizeof(text), "NaN canonicalization at sinks (%s): %u checks for %u float "
+			"results, rewritten in %.1f ms", recoil::wasm::NAN_SINKS_VERSION, entry->stats.Inserted(),
+			entry->stats.arithmeticSites, entry->milliseconds);
+		note = text;
+		return backendState->engine;
+	}
+	fallback = true;
+	note = "NaN canonicalization on every float operation for this module (the sink rewrite does "
+		"not model it: " + entry->error + ")";
+	std::call_once(backendState->canonicalizingOnce, [this] {
+		backendState->canonicalizingEngine = NewEngine(config, true);
+	});
+	return backendState->canonicalizingEngine;
+#else
+	(void)original;
+	(void)sha512;
+	(void)note;
+	return nullptr;
 #endif
 }
 
@@ -811,7 +910,9 @@ std::string WasmRuntime::ConfigurationIdentity() const
 		";threads=" + std::to_string(config.allowThreads ? 1 : 0) +
 		";simd=" + std::to_string(config.allowSimd ? 1 : 0) +
 		";relaxed-simd=" + std::to_string(config.allowRelaxedSimd ? 1 : 0) +
-		";nan-canonicalization=1" +
+		";nan-canonicalization=" + std::string(
+			nanCanonicalization == WasmNanCanonicalization::Sinks ? recoil::wasm::NAN_SINKS_VERSION :
+			nanCanonicalization == WasmNanCanonicalization::All ? "all" : "none") +
 		";wasi=" + std::to_string(config.allowWasi ? 1 : 0) +
 		";aot=" + std::to_string(config.allowAotDeserialization ? 1 : 0)
 #if defined(UNIT_TEST)

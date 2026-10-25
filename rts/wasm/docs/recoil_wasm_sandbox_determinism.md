@@ -59,7 +59,7 @@ Current default policy:
 - no threads/shared memory;
 - no WASI;
 - no relaxed SIMD until proven deterministic for supported targets;
-- deterministic NaN handling/canonicalization where required;
+- canonical NaN bits wherever a NaN's bits become observable (`WasmNanSinks.h`: synced modules are rewritten at load; observable behaviour equals Cranelift's canonicalization of every float result);
 - fixed runtime feature configuration across peers.
 
 The exact allowed Wasm feature set is part of the synced module identity/configuration contract.

@@ -41,8 +41,9 @@ public:
 	// and each Run creates and destroys its own store/instance/private memory.
 	static std::shared_ptr<WasmJobProgram> Compile(const WasmRuntime& runtime,
 		const std::vector<std::uint8_t>& bytes, std::string& error);
+	// `engine` is the one the module was compiled with (the runtime's by default).
 	static std::shared_ptr<WasmJobProgram> FromCompiled(const WasmRuntime& runtime,
-		void* compiledModule, std::string identity);
+		void* compiledModule, std::string identity, void* engine = nullptr);
 	~WasmJobProgram();
 	const std::string& Identity() const;
 	WasmJobResult Run(std::string_view exportName, std::span<const std::uint8_t> input,
