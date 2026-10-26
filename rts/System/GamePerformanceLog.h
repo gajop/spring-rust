@@ -24,6 +24,10 @@ inline bool Enabled() {
 	static const bool enabled = [] { const char* p = std::getenv("SPRING_PERF_LOG"); return p != nullptr && *p != '\0'; }();
 	return enabled;
 }
+inline bool CallbackTimersEnabled() {
+	static const bool enabled = [] { const char* p = std::getenv("SPRING_PERF_TIMERS"); return p == nullptr || std::string_view(p) != "0"; }();
+	return enabled;
+}
 struct Totals { std::array<double, 3> microseconds{}; std::array<std::uint64_t, 3> calls{}; };
 inline thread_local Totals totals;
 enum class Event { Created, Destroyed, Fired, Damaged, Commands, Ceg, Drawn };
@@ -37,7 +41,7 @@ inline void Count(Event event, double damage = 0) {
 inline thread_local unsigned depth[3]{};
 class Scope {
 public:
-	explicit Scope(Kind kind): kind(static_cast<unsigned>(kind)), active(Enabled()) {
+	explicit Scope(Kind kind): kind(static_cast<unsigned>(kind)), active(Enabled() && CallbackTimersEnabled()) {
 		if (!active) return;
 		++totals.calls[this->kind];
 		outer = depth[this->kind]++ == 0;
@@ -58,7 +62,7 @@ inline std::ofstream& Log() {
 	static std::ofstream log = [] {
 		std::ofstream stream(std::getenv("SPRING_PERF_LOG"), std::ios::trunc);
 		if (!stream) throw std::runtime_error("Cannot open SPRING_PERF_LOG");
-		stream << "kind,frame,elapsed_us,lua_us,wasm_us,import_us,lua_calls,wasm_calls,imports,units,projectiles,state_digest,created,destroyed,weapon_fires,damage_events,commands,cegs,drawn,damage_total,features,particles\n";
+		stream << "kind,frame,elapsed_us,lua_us,wasm_us,import_us,lua_calls,wasm_calls,imports,units,projectiles,state_digest,created,destroyed,weapon_fires,damage_events,commands,cegs,drawn,damage_total,features,particles,callback_timers\n";
 		return stream;
 	}();
 	return log;
@@ -74,7 +78,7 @@ inline void Row(std::string_view kind, int frame, double elapsed, const Totals& 
 	for (const auto value: delta.calls) log << ',' << value;
 	log << ',' << units << ',' << projectiles << ',' << digest;
 	for (auto n: eventDelta) log << ',' << n;
-	log << ',' << damage << ',' << features << ',' << particles << '\n';
+	log << ',' << damage << ',' << features << ',' << particles << ',' << CallbackTimersEnabled() << '\n';
 	if (frame % 30 == 0) log.flush();
 }
 class Frame {
