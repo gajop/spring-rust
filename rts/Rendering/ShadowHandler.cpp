@@ -1,5 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 #include <cfloat>
+#include <cmath>
 
 #include "ShadowHandler.h"
 #include "Game/Camera.h"
@@ -31,7 +32,7 @@
 
 CONFIG(int, Shadows).defaultValue(2).headlessValue(-1).minimumValue(-1).safemodeValue(-1).description("Sets whether shadows are rendered.\n-1:=forceoff, 0:=off, 1:=full, 2:=fast (skip terrain)"); //FIXME document bitmask
 CONFIG(int, ShadowMapSize).defaultValue(CShadowHandler::DEF_SHADOWMAP_SIZE).minimumValue(32).description("Sets the resolution of shadows. Higher numbers increase quality at the cost of performance.");
-CONFIG(int, ShadowProjectionMode).defaultValue(CShadowHandler::SHADOWPROMODE_CAM_CENTER);
+CONFIG(int, ShadowProjectionMode).defaultValue(CShadowHandler::SHADOWPROMODE_CAM_CENTER).minimumValue(CShadowHandler::SHADOWPROMODE_MAP_CENTER).maximumValue(CShadowHandler::SHADOWPROMODE_CAM_STABLE).description("How the shadow map is fitted.\n0:=whole map, 1:=camera frustum, 2:=whichever is smaller, 3:=camera frustum with axes fixed to the light, center snapped to whole texels and size in steps (edges do not crawl as the camera moves). Applies live.");
 CONFIG(bool, ShadowColorMode).defaultValue(true).description("Whether the colorbuffer of shadowmap FBO is RGB vs greyscale(to conserve some VRAM)");
 
 CShadowHandler shadowHandler;
@@ -52,7 +53,9 @@ void CShadowHandler::Reload(const char* argv)
 
 	configHandler->Set("Shadows", nextShadowConfig & 0xF);
 	configHandler->Set("ShadowMapSize", std::clamp(nextShadowMapSize, int(MIN_SHADOWMAP_SIZE), int(MAX_SHADOWMAP_SIZE)));
-	configHandler->Set("ShadowProjectionMode", std::clamp(nextShadowProMode, int(SHADOWPROMODE_MAP_CENTER), int(SHADOWPROMODE_MIX_CAMMAP)));
+	// only store a mode that was asked for: one set for this session (an overlay) stays unsaved
+	if (nextShadowProMode != shadowProMode)
+		configHandler->Set("ShadowProjectionMode", std::clamp(nextShadowProMode, int(SHADOWPROMODE_MAP_CENTER), int(SHADOWPROMODE_CAM_STABLE)));
 	configHandler->Set("ShadowColorMode", static_cast<bool>(nextShadowColorMode));
 
 	Kill();
@@ -69,6 +72,9 @@ void CShadowHandler::Init()
 	// disabled; other option usually produces worse resolution
 	shadowProMode = configHandler->GetInt("ShadowProjectionMode");
 	//shadowProMode = SHADOWPROMODE_CAM_CENTER;
+	stableProjDiameter = 0.0f;
+	// the fit is only matrices, so a game can change it live
+	configHandler->NotifyOnChange(this, {"ShadowProjectionMode"});
 	shadowColorMode = configHandler->GetInt("ShadowColorMode");
 	shadowGenBits = SHADOWGEN_BIT_NONE;
 
@@ -119,11 +125,23 @@ void CShadowHandler::Init()
 
 void CShadowHandler::Kill()
 {
+	configHandler->RemoveObserver(this);
 	FreeFBOAndTextures();
 	shaderHandler->ReleaseProgramObjects("[ShadowHandler]");
 	shadowGenProgs.fill(nullptr);
 }
 
+
+void CShadowHandler::ConfigNotify(const std::string& key, const std::string& value)
+{
+	const int nextShadowProMode = std::clamp(configHandler->GetInt("ShadowProjectionMode"), int(SHADOWPROMODE_MAP_CENTER), int(SHADOWPROMODE_CAM_STABLE));
+
+	if (nextShadowProMode != shadowProMode)
+		LOG("[%s] shadow projection mode %d", __func__, nextShadowProMode);
+
+	shadowProMode = nextShadowProMode;
+	stableProjDiameter = 0.0f;
+}
 
 void CShadowHandler::Update()
 {
@@ -521,6 +539,25 @@ static CMatrix44f ComposeLightMatrix(const CCamera* playerCam, const ISkyLight* 
 	return lightMatrix;
 }
 
+// Axes fixed to the light, whatever the camera does: x is world x (or z with the
+// light along x) made orthogonal to the light, so the texel grid does not turn.
+static CMatrix44f ComposeFixedLightMatrix(const ISkyLight* light)
+{
+	CMatrix44f lightMatrix;
+
+	const float3 zDir = -float3(light->GetLightDir());
+	const float3 xRef = (math::fabs(zDir.x) < 0.9f) ? RgtVector : FwdVector;
+
+	const float3 xDir = (xRef - xRef.dot(zDir) * zDir).ANormalize();
+	const float3 yDir = xDir.cross(zDir).ANormalize();
+
+	lightMatrix.SetZ(zDir);
+	lightMatrix.SetY(yDir);
+	lightMatrix.SetX(xDir);
+
+	return lightMatrix;
+}
+
 static CMatrix44f ComposeScaleMatrix(const float4 scales)
 {
 	// note: T is z-bias, scales.z is z-near
@@ -529,7 +566,9 @@ static CMatrix44f ComposeScaleMatrix(const float4 scales)
 
 void CShadowHandler::SetShadowMatrix(CCamera* playerCam, CCamera* shadowCam)
 {
-	const CMatrix44f lightMatrix = ComposeLightMatrix(playerCam, ISky::GetSky()->GetLight());
+	const CMatrix44f lightMatrix = (shadowProMode == SHADOWPROMODE_CAM_STABLE)?
+		ComposeFixedLightMatrix(ISky::GetSky()->GetLight()):
+		ComposeLightMatrix(playerCam, ISky::GetSky()->GetLight());
 	const CMatrix44f scaleMatrix = ComposeScaleMatrix(shadowProjScales = GetShadowProjectionScales(playerCam, lightMatrix));
 
 	// KISS; define only the world-to-light transform (P[CULLING] is unused anyway)
@@ -711,6 +750,12 @@ float4 CShadowHandler::GetShadowProjectionScales(CCamera* playerCam, const CMatr
 			// pick the center position (0 or 1) for which radius is smallest
 			projMidPos[2] = projMidPos[projRadius.x >= projRadius.y];
 		} break;
+		case SHADOWPROMODE_CAM_STABLE: {
+			projScales.x = GetStableProjectedFrustumDiameter(playerCam, lightViewMat, projMidPos[2]);
+		} break;
+		default: {
+			projScales.x = GetOrthoProjectedFrustumRadius(playerCam, lightViewMat, projMidPos[2]);
+		} break;
 	}
 
 	projScales.y = projScales.x;
@@ -824,6 +869,57 @@ float CShadowHandler::GetOrthoProjectedFrustumRadius(CCamera* playerCam, const C
 		return (std::min(readMap->GetBoundingRadius() * 2.0f, std::max(xbounds.y - xbounds.x, zbounds.y - zbounds.x)));
 	}
 	#endif
+}
+
+// The camera frustum's footprint (CalcShadowProjectionPos) bounded in light space,
+// as in CAM_CENTER, but stable while the camera moves: the width only changes in
+// steps of 2^(1/8), growing as soon as the view needs it and shrinking once the view
+// fits two steps less, and the center sits on a whole texel of the light's fixed axes.
+// A caster then always falls on the same texels and its edges keep their steps.
+float CShadowHandler::GetStableProjectedFrustumDiameter(CCamera* playerCam, const CMatrix44f& lightViewMat, float3& centerPos)
+{
+	constexpr float STEPS_PER_OCTAVE = 8.0f;
+	constexpr float SHRINK_STEPS = 2.0f;
+	constexpr float MIN_DIAMETER = 256.0f;
+
+	float3 frustumPoints[8];
+	const float3 frustumCenter = CalcShadowProjectionPos(playerCam, &frustumPoints[0]);
+
+	const float3 xDir = lightViewMat.GetX();
+	const float3 yDir = lightViewMat.GetY();
+	const float3 zDir = lightViewMat.GetZ();
+
+	float2 xbounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
+	float2 ybounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
+
+	for (const float3& p: frustumPoints) {
+		xbounds.x = std::min(xbounds.x, p.dot(xDir));
+		xbounds.y = std::max(xbounds.y, p.dot(xDir));
+		ybounds.x = std::min(ybounds.x, p.dot(yDir));
+		ybounds.y = std::max(ybounds.y, p.dot(yDir));
+	}
+
+	const float texels = std::max(float(shadowMapSize), 1.0f);
+	const float maxDiameter = readMap->GetBoundingRadius() * 2.0f;
+	// two texels of slack on each side for the snapped center
+	const float needDiameter = std::clamp(std::max(xbounds.y - xbounds.x, ybounds.y - ybounds.x) * (1.0f + 4.0f / texels), MIN_DIAMETER, maxDiameter);
+
+	const float stepped = std::exp2(std::ceil(std::log2(needDiameter) * STEPS_PER_OCTAVE) / STEPS_PER_OCTAVE);
+	const float shrinkBelow = stableProjDiameter * std::exp2(-SHRINK_STEPS / STEPS_PER_OCTAVE);
+
+	if (stableProjDiameter <= 0.0f || needDiameter > stableProjDiameter || needDiameter < shrinkBelow)
+		stableProjDiameter = stepped;
+
+	const float texelSize = stableProjDiameter / texels;
+
+	const float cx = std::round((xbounds.x + xbounds.y) * 0.5f / texelSize) * texelSize;
+	const float cy = std::round((ybounds.x + ybounds.y) * 0.5f / texelSize) * texelSize;
+	// depth along the light only shifts every depth value alike; whole elmos keep it steady
+	const float cz = std::round(frustumCenter.dot(zDir));
+
+	centerPos = xDir * cx + yDir * cy + zDir * cz;
+
+	return stableProjDiameter;
 }
 
 float3 CShadowHandler::CalcShadowProjectionPos(CCamera* playerCam, float3* frustumPoints)

@@ -5,6 +5,7 @@
 
 #include <array>
 #include <limits>
+#include <string>
 
 #include "Rendering/GL/FBO.h"
 #include "System/float4.h"
@@ -26,6 +27,7 @@ public:
 	void Kill();
 	void Reload(const char* argv);
 	void Update();
+	void ConfigNotify(const std::string& key, const std::string& value);
 
 	void SetupShadowTexSampler(unsigned int texUnit, bool enable = false) const;
 	void SetupShadowTexSamplerRaw() const;
@@ -46,6 +48,7 @@ public:
 		SHADOWPROMODE_MAP_CENTER = 0, // use center of map-geometry as projection target (constant res.)
 		SHADOWPROMODE_CAM_CENTER = 1, // use center of camera-frustum as projection target (variable res.)
 		SHADOWPROMODE_MIX_CAMMAP = 2, // use whichever mode maximizes resolution this frame
+		SHADOWPROMODE_CAM_STABLE = 3, // camera-frustum fit with light-fixed axes, texel-snapped center and stepped size
 	};
 	enum ShadowMapSizes {
 		MIN_SHADOWMAP_SIZE =   512,
@@ -109,6 +112,7 @@ private:
 
 	float GetOrthoProjectedMapRadius(const float3&, float3&);
 	float GetOrthoProjectedFrustumRadius(CCamera*, const CMatrix44f&, float3&);
+	float GetStableProjectedFrustumDiameter(CCamera*, const CMatrix44f&, float3&);
 
 public:
 	int shadowConfig;
@@ -133,6 +137,10 @@ private:
 	float3 sunProjDir;
 
 	float4 shadowProjScales;
+
+	// SHADOWPROMODE_CAM_STABLE: the map's current width in elmos, kept
+	// until the view needs a step more or fits in two steps less
+	float stableProjDiameter = 0.0f;
 
 	// culling and drawing versions of both matrices
 	CMatrix44f projMatrix[2];
