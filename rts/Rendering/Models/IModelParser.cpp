@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include <chrono>
+#include <limits>
 #include <string_view>
 #include <fmt/printf.h>
 
@@ -25,6 +26,7 @@
 #include "System/Threading/ThreadPool.h"
 #include "System/ContainerUtil.h"
 #include "System/LoadLock.h"
+#include "System/LoadingPump.h"
 // assimp public headers modify #pragma pack across includes (clang -Wpragma-pack)
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -393,10 +395,18 @@ void CModelLoader::DrainPreloadFutures(uint32_t numAllowed)
 	if (preloadFutures.size() <= numAllowed)
 		return;
 
+	// While the models load, the loading screen keeps drawing and shows the count.
+	const size_t total = preloadFutures.size();
+	size_t shown = std::numeric_limits<size_t>::max();
 	while (preloadFutures.size() > numAllowed) {
 		//drain queue until there are <= numAllowed items there
 		std::erase_if(preloadFutures, erasePredicate);
-		spring_sleep(spring_msecs(100));
+		if (const size_t done = total - preloadFutures.size(); done != shown && LoadingPump::Active()) {
+			shown = done;
+			LoadingPump::Progress(fmt::format("Loading models {}/{}", done, total).c_str());
+		}
+		LoadingPump::Pump();
+		spring_sleep(spring_msecs(LoadingPump::Active() ? 10 : 100));
 	}
 }
 

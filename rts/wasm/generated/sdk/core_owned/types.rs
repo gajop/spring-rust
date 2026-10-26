@@ -4299,6 +4299,16 @@
         }
 
         #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct ShowLoadProgressQuery {
+            pub text: String,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct ShowLoadProgressResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
         pub struct SolveNURBSCurveQuery {
             pub degree: i32,
             pub points: Vec<Float4>,

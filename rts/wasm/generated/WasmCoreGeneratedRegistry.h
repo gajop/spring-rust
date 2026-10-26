@@ -584,6 +584,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:unsynced-ctrl", "set-window-geometry", "i32,i32,i32,i32,i32,i32->i64", 127u},
     {"spring:unsynced-ctrl", "set-window-maximized", "i32->i64", 95u},
     {"spring:unsynced-ctrl", "set-window-minimized", "i32->i64", 95u},
+    {"spring:unsynced-ctrl", "show-load-progress", "i32->i64", 31u},
     {"spring:unsynced-ctrl", "stop-tracking-units", "i32->i64", 31u},
     {"spring:unsynced-ctrl", "track-units", "i32,i32->i64", 31u},
     {"spring:unsynced-ctrl", "warp-mouse", "i32,i32->i64", 127u},

@@ -19,6 +19,11 @@ class CLoadScreen : public CGameController
 {
 public:
 	void SetLoadMessage(const std::string& text, bool replaceLast = false);
+	// Replaces the last line without logging it; for counts posted many times per step.
+	void SetLoadProgress(const std::string& text);
+	// Single-threaded loading: draws the screen from inside a long step at most every
+	// PUMP_INTERVAL_MS and keeps the window responsive (see System/LoadingPump.h).
+	bool Pump(bool draw);
 
 	CLoadScreen(std::string&& mapFileName, std::string&& modFileName, ILoadSaveHandler* saveFile);
 	~CLoadScreen();
@@ -59,10 +64,21 @@ private:
 	CGameLoadThread gameLoadThread;
 
 	bool mtLoading;
+	bool drawing = false;
 
 	spring_time lastDrawTime;
+	// The longest stretch without a draw and the message shown through it, logged at the end.
+	spring_time longestDrawGap;
+	std::string lastMessage;
+	std::string drawnMessage;
+	std::string longestGapMessage;
+	spring_time pumpTime;
+	int pumpDraws = 0;
+	int swapInterval = 0;
 
 	std::unique_ptr<WasmStandaloneEnvironment> m_wasmEnv;
+
+	void DeliverMessages();
 
 	void InitWasmIntro();
 	bool HasWasmIntro() const;

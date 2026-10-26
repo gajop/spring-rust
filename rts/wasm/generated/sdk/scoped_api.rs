@@ -15992,6 +15992,33 @@ pub mod unsynced_ctrl {
         }
     }
     impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
+        pub fn show_load_progress(&self, text: &str) -> Result<bool> {
+            self._engine.check()?;
+            if (text).as_bytes().contains(&0) {
+                return Err(
+                    crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32),
+                );
+            }
+            let result = {
+                #[cfg(target_arch = "wasm32")]
+                {
+                    spring_sdk_internal::generated::owned::unsynced_ctrl::show_load_progress(
+                        text,
+                    )
+                }
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    crate::native::unsynced_ctrl::show_load_progress(
+                        &self._engine,
+                        self._native_api,
+                        text,
+                    )
+                }
+            };
+            self._engine.finish(result)
+        }
+    }
+    impl<E: crate::capabilities::Game> UnsyncedCtrl<'_, E> {
         pub fn stop_tracking_units(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {

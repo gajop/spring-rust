@@ -12,10 +12,20 @@ The standalone native interface includes `GameApi`. The generated availability m
 readers require the received `gameSetup`, rather than the later game-world objects. This lets a
 Rust loading screen choose its briefing from the current start script on a host or a client.
 
+Single-threaded loading (`LoadingMT=0`, the default) draws the screen on the loading thread, at
+each load message and, through `System/LoadingPump.h`, inside long steps: the model preload drain,
+the geometry upload, Wasm compilation (on a helper thread while the loading thread draws) and a
+module's own work that calls `UnsyncedCtrl.ShowLoadProgress`. Those draws come at most every 20 ms,
+the multi-threaded loader's 50 Hz; they skip vsync and read the window's events, so the window
+stays responsive. A progress line replaces the last message without logging it and reaches
+`LoadProgress` like one; counts end in `done/total` (`Loading models 12/40`). At the end the
+engine logs the longest stretch without a draw and what the pumped draws cost.
+
 Intro uses the standalone Wasm feature configuration, before the game's modrules are applied.
 Standalone Menu and Intro accept fixed-width SIMD Rust builds; relaxed SIMD stays off.
 Generic profiling timer imports are not available in the current Core
-standalone surface; animation can follow draws while progress follows `LoadProgress` messages.
+standalone surface; animation can follow draws (about 50 a second in either loading mode) while
+progress follows `LoadProgress` messages.
 
 Verification: regenerate and run `python3 rts/wasm/verify_codegen.py`, build `engine-legacy`,
 then exercise a real game archive with a Rust Intro. Ship Game's `tools/intro_test.py` captures

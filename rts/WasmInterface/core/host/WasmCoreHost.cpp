@@ -32,6 +32,7 @@
 #include "WasmInterface/jobs/WasmSyncedJobs.h"
 #include "System/Misc/TracyDefs.h"
 #include "WasmInterface/jobs/WasmJobProgram.h"
+#include "System/LoadingPump.h"
 #include "System/SpringHash.h"
 #include "NativeInterface/api/RmlUi.h"
 #include "Rml/Backends/RmlUi_Backend.h"
@@ -671,8 +672,11 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 			return false;
 		compileBytes = &inspectedBytes;
 	}
-	if (wasmtime_error_t* compileError = wasmtime_module_new(engine, compileBytes->data(),
-			compileBytes->size(), &backend->module);
+	// Compiling a large module takes seconds on a slow machine: on the loading screen, the
+	// compile runs beside the thread that keeps it drawing.
+	if (wasmtime_error_t* compileError = LoadingPump::RunPumped([&] {
+			return wasmtime_module_new(engine, compileBytes->data(), compileBytes->size(), &backend->module);
+		});
 		compileError != nullptr) {
 		error = "Core Wasm compilation failed: " +
 			recoil::wasm::core::ErrorMessage(compileError);
