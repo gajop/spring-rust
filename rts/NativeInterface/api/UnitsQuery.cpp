@@ -588,7 +588,9 @@ static void NativeGetUnitsInCylinder(const GetUnitsInCylinderQuery* query, GetUn
 		for (const CUnit* unit : *(qfq.units)) {
 			if (UnitMatchesAllegiance(unit, query->allegiance) &&
 				WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible)) {
-				const float3& pos = unit->pos;
+				// Lua GetFilteredUnits tests the midpoint, with the caller's radar error.
+                const bool fullRead = !WasmUiVisibility::Active() || WasmUiVisibility::FullRead();
+                const float3 pos = unit->midPos + unit->GetLuaErrorVector(WasmUiVisibility::ReadAllyTeam(), fullRead);
 				const float dx = pos.x - center.x;
 				const float dz = pos.z - center.z;
 				const float distXZSq = dx * dx + dz * dz;
