@@ -12,6 +12,7 @@
 #include "Sim/Misc/GlobalSynced.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Misc/QuadField.h"
+#include "Sim/Misc/LosHandler.h"
 #include "Game/GameHelper.h"
 #include "System/float3.h"
 #include "Rendering/Units/UnitDrawer.h"
@@ -418,6 +419,29 @@ static void NativeGetTeamUnitCount(const GetTeamUnitCountQuery* query, GetTeamUn
 		});
 }
 
+// Lua spatial queries filter radar-error-adjusted model midpoints, after
+// collecting candidates through the base-position rectangle broad phase.
+static float3 QueryUnitPosition(const CUnit* unit)
+{
+	const bool fullRead = !WasmUiVisibility::Active() || WasmUiVisibility::FullRead();
+	return unit->GetLuaErrorPos(WasmUiVisibility::ReadAllyTeam(), fullRead);
+}
+
+static void ExpandQueryBounds(int32_t allegiance, float3& mins, float3& maxs)
+{
+	if (!WasmUiVisibility::Active() || WasmUiVisibility::FullRead() || allegiance == -2 || allegiance == -3)
+		return;
+
+	const int allyTeam = WasmUiVisibility::ReadAllyTeam();
+	if (!teamHandler.IsValidAllyTeam(allyTeam))
+		return;
+
+	const float error = losHandler->GetAllyTeamRadarErrorSize(allyTeam);
+	const float3 offset(error, 0.0f, error);
+	mins -= offset;
+	maxs += offset;
+}
+
 // Spatial queries
 static void NativeGetUnitsInRectangle(const GetUnitsInRectangleQuery* query, GetUnitsInRectangleResult* result)
 {
@@ -431,9 +455,10 @@ static void NativeGetUnitsInRectangle(const GetUnitsInRectangleQuery* query, Get
 		return;
 	}
 
-	const float3 mins(query->xmin, 0.0f, query->zmin);
-	const float3 maxs(query->xmax, 0.0f, query->zmax);
+	float3 mins(query->xmin, 0.0f, query->zmin);
+	float3 maxs(query->xmax, 0.0f, query->zmax);
 
+	ExpandQueryBounds(query->allegiance, mins, maxs);
 	QuadFieldQuery qfq;
 	quadField.GetUnitsExact(qfq, mins, maxs);
 	const size_t capacity = (qfq.units == nullptr) ? 0 : qfq.units->size();
@@ -444,8 +469,12 @@ static void NativeGetUnitsInRectangle(const GetUnitsInRectangleQuery* query, Get
 	if (qfq.units != nullptr) {
 		for (const CUnit* unit : *(qfq.units)) {
 			if (UnitMatchesAllegiance(unit, query->allegiance) &&
-				WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible))
-				units[count++] = unit->id;
+				WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible)) {
+				const float3 pos = QueryUnitPosition(unit);
+				if (pos.x >= query->xmin && pos.x <= query->xmax &&
+					pos.z >= query->zmin && pos.z <= query->zmax)
+					units[count++] = unit->id;
+			}
 		}
 	}
 
@@ -465,9 +494,12 @@ static void NativeGetUnitsInBox(const GetUnitsInBoxQuery* query, GetUnitsInBoxRe
 		return;
 	}
 
-	const float3 mins(query->xmin, query->ymin, query->zmin);
-	const float3 maxs(query->xmax, query->ymax, query->zmax);
+	const float3 boxMin(query->xmin, query->ymin, query->zmin);
+	const float3 boxMax(query->xmax, query->ymax, query->zmax);
 
+	float3 mins = boxMin;
+	float3 maxs = boxMax;
+	ExpandQueryBounds(query->allegiance, mins, maxs);
 	QuadFieldQuery qfq;
 	quadField.GetUnitsExact(qfq, mins, maxs);
 	const size_t capacity = (qfq.units == nullptr) ? 0 : qfq.units->size();
@@ -479,10 +511,10 @@ static void NativeGetUnitsInBox(const GetUnitsInBoxQuery* query, GetUnitsInBoxRe
 		for (const CUnit* unit : *(qfq.units)) {
 			if (UnitMatchesAllegiance(unit, query->allegiance) &&
 				WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible)) {
-				const float3& pos = unit->pos;
-				if (pos.x >= mins.x && pos.x <= maxs.x &&
-					pos.y >= mins.y && pos.y <= maxs.y &&
-					pos.z >= mins.z && pos.z <= maxs.z)
+				const float3 pos = QueryUnitPosition(unit);
+				if (pos.x >= boxMin.x && pos.x <= boxMax.x &&
+					pos.y >= boxMin.y && pos.y <= boxMax.y &&
+					pos.z >= boxMin.z && pos.z <= boxMax.z)
 					units[count++] = unit->id;
 			}
 		}
@@ -535,8 +567,11 @@ static void NativeGetUnitsInSphere(const GetUnitsInSphereQuery* query, GetUnitsI
 	const float3 center(query->x, query->y, query->z);
 	const float radiusSq = query->radius * query->radius;
 
+	float3 mins(query->x - query->radius, 0.0f, query->z - query->radius);
+	float3 maxs(query->x + query->radius, 0.0f, query->z + query->radius);
+	ExpandQueryBounds(query->allegiance, mins, maxs);
 	QuadFieldQuery qfq;
-	quadField.GetUnitsExact(qfq, center, query->radius);
+	quadField.GetUnitsExact(qfq, mins, maxs);
 	const size_t capacity = (qfq.units == nullptr) ? 0 : qfq.units->size();
 	int32_t* units = AllocateResult<int32_t>(capacity, result->error);
 	if (result->error != nullptr)
@@ -546,7 +581,7 @@ static void NativeGetUnitsInSphere(const GetUnitsInSphereQuery* query, GetUnitsI
 		for (const CUnit* unit : *(qfq.units)) {
 			if (UnitMatchesAllegiance(unit, query->allegiance) &&
 				WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible)) {
-				const float distSq = unit->pos.SqDistance(center);
+				const float distSq = QueryUnitPosition(unit).SqDistance(center);
 				if (distSq <= radiusSq)
 					units[count++] = unit->id;
 			}
@@ -572,11 +607,10 @@ static void NativeGetUnitsInCylinder(const GetUnitsInCylinderQuery* query, GetUn
 	const float3 center(query->x, 0.0f, query->z);
 	const float radiusSq = query->radius * query->radius;
 
-	// Lua GetUnitsInCylinder uses this rectangle broad phase before its
-	// exact center-distance test. The radial overload has a different query
-	// order; that changes impulse-triggered RNG assignments between APIs.
-	const float3 mins(query->x - query->radius, 0.0f, query->z - query->radius);
-	const float3 maxs(query->x + query->radius, 0.0f, query->z + query->radius);
+	// Keep Lua's candidate traversal order before the midpoint circle test.
+	float3 mins(query->x - query->radius, 0.0f, query->z - query->radius);
+	float3 maxs(query->x + query->radius, 0.0f, query->z + query->radius);
+	ExpandQueryBounds(query->allegiance, mins, maxs);
 	QuadFieldQuery qfq;
 	quadField.GetUnitsExact(qfq, mins, maxs);
 	const size_t capacity = (qfq.units == nullptr) ? 0 : qfq.units->size();
@@ -588,9 +622,7 @@ static void NativeGetUnitsInCylinder(const GetUnitsInCylinderQuery* query, GetUn
 		for (const CUnit* unit : *(qfq.units)) {
 			if (UnitMatchesAllegiance(unit, query->allegiance) &&
 				WasmUiVisibility::UnitPasses(unit, WasmUiVisibility::UnitAccess::Visible)) {
-				// Lua GetFilteredUnits tests the midpoint, with the caller's radar error.
-                const bool fullRead = !WasmUiVisibility::Active() || WasmUiVisibility::FullRead();
-                const float3 pos = unit->midPos + unit->GetLuaErrorVector(WasmUiVisibility::ReadAllyTeam(), fullRead);
+				const float3 pos = QueryUnitPosition(unit);
 				const float dx = pos.x - center.x;
 				const float dz = pos.z - center.z;
 				const float distXZSq = dx * dx + dz * dz;

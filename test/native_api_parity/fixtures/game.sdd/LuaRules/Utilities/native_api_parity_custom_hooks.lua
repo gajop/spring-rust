@@ -2468,5 +2468,38 @@ TEST_HOOKS[#TEST_HOOKS + 1] = {
 }
 
 
+-- Cover both a broad query and boundaries where base and midpoint differ.
+-- These extend the existing query parity cases; Lua remains the oracle.
+for _, name in ipairs({"get_units_in_rectangle", "get_units_in_box", "get_units_in_sphere", "get_units_in_cylinder"}) do
+	local queryName, calls = name, 0
+	TEST_HOOKS[#TEST_HOOKS + 1] = {
+		name = queryName,
+		readonly = true,
+		payload = unitPayload,
+		make = function(ids)
+			calls = calls + 1
+			assert(Spring.SetUnitMidAndAimPos(ids.unitID, 32, 32, 32, 32, 32, 32, true))
+			local x, y, z = Spring.GetUnitPosition(ids.unitID)
+			local radius = calls == 1 and 99999 or calls == 2 and 1 or 64
+			return {x=x,y=y,z=z,radius=radius,allegiance=-1,
+				minX=x-radius,minY=y-radius,minZ=z-radius,
+				maxX=x+radius,maxY=y+radius,maxZ=z+radius}
+		end,
+		get = function(_, value)
+			local units
+			if queryName == "get_units_in_sphere" then
+				units = Spring.GetUnitsInSphere(value.x,value.y,value.z,value.radius,value.allegiance)
+			elseif queryName == "get_units_in_cylinder" then
+				units = Spring.GetUnitsInCylinder(value.x,value.z,value.radius,value.allegiance)
+			elseif queryName == "get_units_in_box" then
+				units = Spring.GetUnitsInBox(value.minX,value.minY,value.minZ,value.maxX,value.maxY,value.maxZ,value.allegiance)
+			else
+				units = Spring.GetUnitsInRectangle(value.minX,value.minZ,value.maxX,value.maxZ,value.allegiance)
+			end
+			return {unitIDs=units}
+		end,
+	}
+end
+
 	return TEST_HOOKS
 end
