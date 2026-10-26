@@ -572,8 +572,13 @@ static void NativeGetUnitsInCylinder(const GetUnitsInCylinderQuery* query, GetUn
 	const float3 center(query->x, 0.0f, query->z);
 	const float radiusSq = query->radius * query->radius;
 
+	// Lua GetUnitsInCylinder uses this rectangle broad phase before its
+	// exact center-distance test. The radial overload has a different query
+	// order; that changes impulse-triggered RNG assignments between APIs.
+	const float3 mins(query->x - query->radius, 0.0f, query->z - query->radius);
+	const float3 maxs(query->x + query->radius, 0.0f, query->z + query->radius);
 	QuadFieldQuery qfq;
-	quadField.GetUnitsExact(qfq, center, query->radius, false); // 2D, like Lua
+	quadField.GetUnitsExact(qfq, mins, maxs);
 	const size_t capacity = (qfq.units == nullptr) ? 0 : qfq.units->size();
 	int32_t* units = AllocateResult<int32_t>(capacity, result->error);
 	if (result->error != nullptr)
