@@ -2501,5 +2501,24 @@ for _, name in ipairs({"get_units_in_rectangle", "get_units_in_box", "get_units_
 	}
 end
 
+-- Do not let a preceding Lua velocity setter conceal a stale native speed
+-- cache: reset it to zero, write through native first, then read Lua's fourth
+-- GetUnitVelocity result. The native vector independently supplies its length.
+TEST_HOOKS[#TEST_HOOKS + 1] = {
+	name = "unit_velocity_speed_cache",
+	payload = unitPayload,
+	nativeFirst = true,
+	nativeSet = function(_, _, invoke) invoke() end,
+	make = function(ids)
+		Spring.SetUnitVelocity(ids.unitID, 0, 0, 0)
+		return {x=1.25, y=-0.25, z=0.625}
+	end,
+	set = function(ids, value) Spring.SetUnitVelocity(ids.unitID, value.x, value.y, value.z) end,
+	get = function(ids)
+		local x, y, z, speed = Spring.GetUnitVelocity(ids.unitID)
+		return {x=x, y=y, z=z, speed=speed}
+	end,
+}
+
 	return TEST_HOOKS
 end

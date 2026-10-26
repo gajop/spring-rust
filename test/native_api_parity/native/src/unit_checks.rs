@@ -797,7 +797,13 @@ impl NativeApiParity {
             .units_info()
             .get_unit_velocity(unit_id)
             .map_err(|err| format!("get_unit_velocity({unit_id}) failed: {err:?}"))?;
-        self.same_vec3(label, native, message)
+        self.same_vec3(label, native, message)?;
+        if message.get("speed").is_some() {
+            let speed = (native.x * native.x + native.y * native.y + native.z * native.z).sqrt();
+            self.same_if_present(label, message, "speed", speed)
+        } else {
+            Ok(())
+        }
     }
     pub(crate) fn check_unit_info_bool(
         &mut self,

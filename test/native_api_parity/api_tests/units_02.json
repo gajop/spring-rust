@@ -673,6 +673,63 @@
           "isBeingBuilt"
         ]
       }
+    },
+    {
+      "id": "unit_velocity_speed_cache",
+      "context": "synced_gadget",
+      "kind": "setter_getter",
+      "requires": [
+        "unit"
+      ],
+      "lua": {
+        "set": [
+          "Spring.SetUnitVelocity"
+        ],
+        "get": [
+          "Spring.GetUnitVelocity"
+        ]
+      },
+      "native": {
+        "set": [
+          "UnitControl.set_unit_velocity"
+        ],
+        "get": [
+          "units_info().get_unit_velocity"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "y",
+          "z",
+          "speed"
+        ]
+      },
+      "report": {
+        "lua_setter": "`Spring.SetUnitVelocity`",
+        "native_setter": "`UnitControl.set_unit_velocity`",
+        "lua_getter": "`Spring.GetUnitVelocity`",
+        "native_getter": "`units_info().get_unit_velocity`",
+        "fields": "`x`, `y`, `z`, and Lua cached `speed` after the native write"
+      },
+      "rust": {
+        "check": "check_unit_velocity",
+        "set": "set_unit_velocity"
+      },
+      "wasm_mutating": true,
+      "params": {
+        "velocity": {
+          "type": "float3",
+          "generator": "unit_velocity",
+          "expands_to": [
+            "x",
+            "y",
+            "z"
+          ]
+        }
+      }
     }
   ]
 }

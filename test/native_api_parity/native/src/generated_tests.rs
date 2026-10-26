@@ -319,6 +319,7 @@ native_tests! {
     get_unit_is_active { check = check_unit_info_bool, set = set_noop, required = ["isActive"], }
     get_unit_is_cloaked { check = check_unit_info_bool, set = set_noop, required = ["isCloaked"], }
     get_unit_is_being_built { check = check_unit_info_bool, set = set_noop, required = ["isBeingBuilt"], }
+    unit_velocity_speed_cache { check = check_unit_velocity, set = set_unit_velocity, required = ["x", "y", "z", "speed"], }
     get_unit_build_facing { check = check_unit_info_i32, set = set_noop, required = ["facing"], }
     get_unit_buildee_radius { check = check_unit_info_f32, set = set_noop, required = ["buildeeRadius"], }
     get_unit_resources { check = check_unit_resources, set = set_noop, required = ["metalMake", "metalUse", "energyMake", "energyUse"], }
