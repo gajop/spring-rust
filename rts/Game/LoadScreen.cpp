@@ -208,9 +208,10 @@ void CLoadScreen::Kill()
 		SDL_GL_SetSwapInterval(swapInterval);
 #endif
 	if (!mtLoading && spring_tomsecs(longestDrawGap) > 0) {
-		LOG("[LoadScreen::%s] longest time without a loading screen draw: %dms (during \"%s\"); %d draws inside long steps took %dms",
+		LOG("[LoadScreen::%s] longest time without a loading screen draw: %dms (during \"%s\"); %d draws inside long steps took %dms, the slowest %dms (during \"%s\")",
 			__func__, static_cast<int>(spring_tomsecs(longestDrawGap)), longestGapMessage.c_str(), pumpDraws,
-			static_cast<int>(spring_tomsecs(pumpTime)));
+			static_cast<int>(spring_tomsecs(pumpTime)), static_cast<int>(spring_tomsecs(slowestPump)),
+			slowestPumpMessage.c_str());
 	}
 
 	if (luaIntro != nullptr)
@@ -423,8 +424,14 @@ bool CLoadScreen::Pump(bool draw)
 	SDL_PumpEvents();
 	DeliverMessages();
 	Draw();
-	pumpTime += spring_gettime() - start;
+	const spring_time took = spring_gettime() - start;
+	pumpTime += took;
 	pumpDraws += 1;
+	if (took > slowestPump) {
+		slowestPump = took;
+		std::lock_guard<spring::recursive_mutex> lck(mutex);
+		slowestPumpMessage = drawnMessage;
+	}
 	return true;
 }
 

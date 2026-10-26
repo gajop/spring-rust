@@ -74,6 +74,8 @@ private:
 	std::string longestGapMessage;
 	spring_time pumpTime;
 	int pumpDraws = 0;
+	spring_time slowestPump;
+	std::string slowestPumpMessage;
 	int swapInterval = 0;
 
 	std::unique_ptr<WasmStandaloneEnvironment> m_wasmEnv;
