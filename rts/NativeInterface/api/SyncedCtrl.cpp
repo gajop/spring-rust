@@ -1252,9 +1252,13 @@ static void NativeSetUnitVelocity(const SetUnitVelocityQuery* query, SetUnitVelo
 		return;
 	}
 
-	unit->speed.x = query->velocity.x;
-	unit->speed.y = query->velocity.y;
-	unit->speed.z = query->velocity.z;
+	// Match Lua SetUnitVelocity: physics also consumes the cached speed.w.
+	const float3 speed(
+		std::clamp(query->velocity.x, -MAX_UNIT_SPEED, MAX_UNIT_SPEED),
+		std::clamp(query->velocity.y, -MAX_UNIT_SPEED, MAX_UNIT_SPEED),
+		std::clamp(query->velocity.z, -MAX_UNIT_SPEED, MAX_UNIT_SPEED)
+	);
+	unit->SetVelocityAndSpeed(speed);
 
 	result->success = true;
 }
