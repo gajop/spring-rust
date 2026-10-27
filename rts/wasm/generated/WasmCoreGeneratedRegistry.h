@@ -278,6 +278,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:game", "get-tidal", "i32->i64", 31u},
     {"spring:game", "get-vector-from-heading", "i32,i32->i32", 31u},
     {"spring:game", "get-wind", "i32,i32->i32", 31u},
+    {"spring:game", "get-wind-vector", "i32,i32->i32", 31u},
     {"spring:game", "is-cheating-enabled", "i32->i64", 31u},
     {"spring:game", "is-dev-lua-enabled", "i32->i64", 31u},
     {"spring:game", "is-edit-defs-enabled", "i32->i64", 31u},

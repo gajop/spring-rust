@@ -1,11 +1,11 @@
 {
-  "total": 1431,
-  "executable_total": 1431,
+  "total": 1432,
+  "executable_total": 1432,
   "verified_total": 0,
   "production_import_total": 1131,
   "by_class": {
     "dynamic-output-caller-owned": 89,
-    "fixed": 863,
+    "fixed": 864,
     "fixed-option": 15,
     "handwritten-reviewed": 71,
     "variable-input-adapted": 4,
@@ -4495,6 +4495,22 @@
       "production_visibility_environment_mask": 31,
       "production_environment_mask": 31,
       "reason": null
+    },
+    {
+      "module": "game",
+      "function": "GetWindVector",
+      "import_module": "spring:game",
+      "import_name": "get-wind-vector",
+      "class": "fixed",
+      "verified": false,
+      "parity_level": "untested",
+      "grandfathered": false,
+      "production_import_allowed": false,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 31,
+      "production_visibility_environment_mask": 31,
+      "production_environment_mask": 31,
+      "reason": "unverified: no parity evidence or reviewed exemption"
     },
     {
       "module": "game",

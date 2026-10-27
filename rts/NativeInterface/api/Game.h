@@ -195,6 +195,9 @@ struct GetTidalResult { const Error* error; float strength; };
 
 struct GetWindQuery { uint8_t _unused; };
 struct GetWindResult { const Error* error; WindData data; };
+// Current wind velocity, matching the first three Spring.GetWind results.
+struct GetWindVectorQuery { uint8_t _unused; };
+struct GetWindVectorResult { const Error* error; Float3 vector; };
 
 struct GetHeadingFromVectorQuery { float x; float z; };
 struct GetHeadingFromVectorResult { const Error* error; int32_t heading; };
@@ -264,6 +267,7 @@ struct GameApi {
 	void (*GetTeamStartPosition)(const GetTeamStartPositionQuery* query, GetTeamStartPositionResult* result);
 	void (*GetMapStartPositions)(const GetMapStartPositionsQuery* query, GetMapStartPositionsResult* result);
 	void (*GetGameRulesResourceInfo)(const GetGameRulesResourceInfoQuery* query, GetGameRulesResourceInfoResult* result);
+	void (*GetWindVector)(const GetWindVectorQuery* query, GetWindVectorResult* result);
 };
 
 extern const GameApi GAME_API;

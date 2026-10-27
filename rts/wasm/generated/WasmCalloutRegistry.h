@@ -293,6 +293,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"game", "GetTidal", 31u, false, false, LoweringStatus::automatic},
 	{"game", "GetVectorFromHeading", 31u, false, false, LoweringStatus::automatic},
 	{"game", "GetWind", 31u, false, false, LoweringStatus::automatic},
+	{"game", "GetWindVector", 31u, false, false, LoweringStatus::automatic},
 	{"game", "IsCheatingEnabled", 31u, false, false, LoweringStatus::automatic},
 	{"game", "IsDevLuaEnabled", 31u, false, false, LoweringStatus::automatic},
 	{"game", "IsEditDefsEnabled", 31u, false, false, LoweringStatus::automatic},

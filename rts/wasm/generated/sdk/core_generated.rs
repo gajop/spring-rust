@@ -5188,6 +5188,11 @@ pub mod game {
         }
         #[link(wasm_import_module = "spring:game")]
         unsafe extern "C" {
+            #[link_name = "get-wind-vector"]
+            pub safe fn core_get_wind_vector(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:game")]
+        unsafe extern "C" {
             #[link_name = "is-cheating-enabled"]
             pub safe fn core_is_cheating_enabled(p0: i32) -> i64;
         }
@@ -5562,6 +5567,30 @@ pub mod game {
             }
             let mut cursor = 0usize;
             let value = { let core_value = WindData { min: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, max: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, current: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (unused,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn get_wind_vector(unused: u8) -> Result<Float3> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut wire = [0u8; 12];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_get_wind_vector(unused as i32, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let mut cursor = 0usize;
+            let value = { let core_value = Float3 { x: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, y: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, z: super::__core_wire::f32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))? }; super::__core_wire::align(&wire, &mut cursor, 4).ok_or(ApiError::new(ErrorCode::Internal as i32))?; core_value };
             if !super::__core_wire::finish(&wire, &mut cursor, 4) {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }

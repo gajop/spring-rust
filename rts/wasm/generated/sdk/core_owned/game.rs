@@ -358,6 +358,16 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetWindVectorQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetWindVectorResult {
+            pub vector: Float3,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct IsCheatingEnabledQuery {
             pub unused: u8,
         }
@@ -827,6 +837,12 @@
         pub fn get_wind(unused: u8) -> Result<WindData> {
             let value = crate::generated::game::get_wind(unused)?;
             Ok(WindData { min: value.min, max: value.max, current: value.current })
+        }
+
+        #[inline]
+        pub fn get_wind_vector(unused: u8) -> Result<Float3> {
+            let value = crate::generated::game::get_wind_vector(unused)?;
+            Ok(Float3 { x: value.x, y: value.y, z: value.z })
         }
 
         #[inline]

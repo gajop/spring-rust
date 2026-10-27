@@ -8311,6 +8311,14 @@ pub mod game {
         pub data: WindData,
     }
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GetWindVectorQuery {
+        pub unused: u8,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GetWindVectorResult {
+        pub vector: Float3,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
     pub struct IsCheatingEnabledQuery {
         pub unused: u8,
     }

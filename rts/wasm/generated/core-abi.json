@@ -3796,6 +3796,32 @@
     },
     {
       "module": "game",
+      "function": "GetWindVector",
+      "import_module": "spring:game",
+      "import_name": "get-wind-vector",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 12,
+          "alignment": 4
+        }
+      },
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
+    },
+    {
+      "module": "game",
       "function": "IsCheatingEnabled",
       "import_module": "spring:game",
       "import_name": "is-cheating-enabled",
@@ -31831,7 +31857,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1212,
+  "automatic_count": 1213,
   "manual_count": 202,
   "unsupported_count": 17
 }
