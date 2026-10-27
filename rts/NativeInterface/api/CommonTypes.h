@@ -113,7 +113,7 @@ struct GiveOrderArrayToUnitArrayQuery {
 struct GiveOrderArrayToUnitArrayResult { const Error* error; int32_t unitsOrdered; };
 
 // Random draws with Lua math.random / math.randomseed semantics, shared by the
-// synced (SyncedRandomApi, gsRNG) and unsynced (UnsyncedRandomApi, guRNG) APIs.
+// synced (SyncedRandomApi, gsRNG) and unsynced (UnsyncedRandomApi, guScriptRNG) APIs.
 // math.random(): a float in [0, 1)
 struct NextFloatQuery { uint8_t _unused; };
 struct NextFloatResult { const Error* error; float value; };

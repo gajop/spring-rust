@@ -1,7 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
-#ifndef _GLOBAL_RNG_H
-#define _GLOBAL_RNG_H
+#pragma once
 
 #include <limits>
 
@@ -128,6 +127,13 @@ public:
 		}
 	}
 
+	// Explicit test/script seeds use a stable PCG stream. Ordinary Seed keeps
+	// its address-based unsynced stream for normal engine startup.
+	void SetDeterministicSeed(rng_val_type seed) {
+		AssureSyncedness();
+		gen.seed(lastSeed = seed, RNG::def_seq);
+	}
+
 	rng_val_type GetInitSeed() const { AssureSyncedness(); return initSeed; }
 	rng_val_type GetLastSeed() const { AssureSyncedness(); return lastSeed; }
 	rng_val_type GetGenState() const { AssureSyncedness(); return (gen.state()); }
@@ -187,6 +193,3 @@ private:
 // synced and unsynced RNG's no longer need to be different types
 typedef CGlobalRNG<PCG32, true , true > CGlobalSyncedRNG;
 typedef CGlobalRNG<PCG32, false, false> CGlobalUnsyncedRNG;
-
-#endif
-

@@ -1913,7 +1913,7 @@ static void NativeDrawUnitCommands(const DrawUnitCommandsQuery* query, DrawUnitC
 static void NativeUnsyncedNextFloat(const NextFloatQuery* /*query*/, NextFloatResult* result)
 {
 	result->error = nullptr;
-	result->value = guRNG.NextFloat();
+	result->value = guScriptRNG.NextFloat();
 }
 
 static void NativeUnsyncedNextIntUpTo(const NextIntUpToQuery* query, NextIntUpToResult* result)
@@ -1928,7 +1928,7 @@ static void NativeUnsyncedNextIntUpTo(const NextIntUpToQuery* query, NextIntUpTo
 		return;
 	}
 
-	result->value = 1 + guRNG.NextInt(query->upper);
+	result->value = 1 + guScriptRNG.NextInt(query->upper);
 }
 
 static void NativeUnsyncedNextInt(const NextIntQuery* query, NextIntResult* result)
@@ -1948,7 +1948,7 @@ static void NativeUnsyncedNextInt(const NextIntQuery* query, NextIntResult* resu
 	// 64-bit span: upper - lower overflows int for wide ranges such as
 	// [INT_MIN, INT_MAX]. Ranges that fit give the same results as before.
 	const float diff = static_cast<float>(int64_t(upper) - lower);
-	const float r = guRNG.NextFloat();
+	const float r = guScriptRNG.NextFloat();
 	const int64_t value = int64_t(lower) + int64_t(r * (diff + 1));
 	result->value = static_cast<int>(std::clamp<int64_t>(value, lower, upper));
 }
@@ -1956,7 +1956,7 @@ static void NativeUnsyncedNextInt(const NextIntQuery* query, NextIntResult* resu
 static void NativeUnsyncedSetSeed(const SetSeedQuery* query, SetSeedResult* result)
 {
 	result->error = nullptr;
-	guRNG.SetSeed(query->seed, false);
+	guScriptRNG.SetDeterministicSeed(query->seed);
 	result->success = true;
 }
 

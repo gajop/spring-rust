@@ -173,5 +173,6 @@ public:
 
 extern CGlobalUnsynced* gu;
 extern CGlobalUnsyncedRNG guRNG;
+extern CGlobalUnsyncedRNG guScriptRNG;
 
 #endif /* _GLOBAL_UNSYNCED_H */

@@ -30,6 +30,7 @@
 
 CGlobalUnsynced guOBJ;
 CGlobalUnsyncedRNG guRNG;
+CGlobalUnsyncedRNG guScriptRNG;
 
 CGlobalUnsynced* gu = &guOBJ;
 
@@ -85,6 +86,7 @@ void CGlobalUnsynced::ResetState()
 	globalReload = false;
 
 	guRNG.Seed(time(nullptr) % ((spring_gettime().toNanoSecsi() + 1) * 9007));
+	guScriptRNG.Seed(guRNG.GetLastSeed());
 	playerHandler.ResetState();
 }
 
@@ -96,8 +98,10 @@ void CGlobalUnsynced::LoadFromSetup(const CGameSetup* setup)
 	playerHandler.LoadFromSetup(setup);
 
 	// Reproducible unsynced effects for tests; only this client is affected.
-	if (setup->fixedUnsyncedRNGSeed != 0)
-		guRNG.Seed(setup->fixedUnsyncedRNGSeed);
+	if (setup->fixedUnsyncedRNGSeed != 0) {
+		guRNG.SetDeterministicSeed(setup->fixedUnsyncedRNGSeed);
+		guScriptRNG.SetDeterministicSeed(setup->fixedUnsyncedRNGSeed);
+	}
 }
 
 

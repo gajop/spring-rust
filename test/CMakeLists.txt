@@ -546,6 +546,17 @@ endif()
 	set_tests_properties(test${test_name} PROPERTIES ENVIRONMENT "SPRING_ISOLATED=${CMAKE_BINARY_DIR}")
 
 ################################################################################
+### GlobalRNG
+	set(test_name GlobalRNG)
+	set(test_src
+		"${CMAKE_CURRENT_SOURCE_DIR}/engine/System/testGlobalRNG.cpp"
+		${test_Common_sources}
+	)
+	set(test_libs "")
+	set(test_flags "-DNOT_USING_CREG -DNOT_USING_STREFLOP -DBUILDING_AI")
+	add_spring_test(${test_name} "${test_src}" "${test_libs}" "${test_flags}")
+
+################################################################################
 ### ThreadPool
 	set(test_name ThreadPool)
 	set(test_src

@@ -70,7 +70,7 @@ int spring_lua_unsynced_srand(lua_State* L) {
 	if (L == nullptr) {
 		lguRNG.Seed(CGlobalUnsyncedRNG::rng_val_type(&L)); // startup
 	} else {
-		lguRNG.Seed(luaL_checkint(L, 1));
+		lguRNG.SetDeterministicSeed(luaL_checkint(L, 1));
 	}
 
 	return 0;
