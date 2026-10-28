@@ -34,6 +34,18 @@ if    (PREFER_STATIC_LIBS)
 		set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    -static-libstdc++")
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++")
 		set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -static-libstdc++")
+
+		# The engine executables export their symbols (ENABLE_EXPORTS), which would include the
+		# static C++ runtime. System libraries built against the shared libstdc++/libgcc_s (e.g.
+		# libopenal) then bind __cxa_throw and __gxx_personality_v0 to the engine's copy, so their
+		# internal exceptions start in the engine's static unwinder and finish in libgcc_s: abort.
+		# Keep the static runtime private so they use the shared one consistently.
+		if    (UNIX AND NOT APPLE)
+			set(STATIC_RUNTIME_EXCLUDE_LIBS "-Wl,--exclude-libs,libstdc++.a:libsupc++.a:libgcc.a:libgcc_eh.a")
+			set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    ${STATIC_RUNTIME_EXCLUDE_LIBS}")
+			set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${STATIC_RUNTIME_EXCLUDE_LIBS}")
+			set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${STATIC_RUNTIME_EXCLUDE_LIBS}")
+		endif (UNIX AND NOT APPLE)
 	endif (HAVE_STATIC_LIBSTDCXX_FLAG)
 
 	macro    (PREFER_STATIC_LIBS)

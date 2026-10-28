@@ -685,6 +685,7 @@ void CSound::InitThread(int cfgMaxSounds)
 
 		if (curContext == nullptr) {
 			LOG_L(L_ERROR, "[Sound::%s][3] failed to create context", __func__);
+			LOG_L(L_WARNING, "[Sound::%s] no audio device could be opened, continuing without sound", __func__);
 
 			Cleanup();
 			soundThreadQuit = true;
