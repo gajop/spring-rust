@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "LuaObjectDrawer.h"
+
 #include "Features/FeatureDrawer.h"
 #include "Common/ModelDrawerHelpers.h"
 #include "Units/UnitDrawer.h"
@@ -113,6 +114,10 @@ static DECL_ARRAY(std::vector<const CSolidObject*>, objectBuckets, MAX_TEAMS);
 #endif
 
 
+
+CONFIG(bool, ModelDepthPrepass)
+	.defaultValue(false)
+	.description("Draw the opaque models' depth before shading them, through programs with a recoilDepthPrepass uniform: a model close up then shades each pixel once. Read every frame.");
 
 static float GetLODFloat(const std::string& name)
 {
@@ -353,6 +358,10 @@ void LuaObjectDrawer::DrawMaterialBins(LuaObjType objType, LuaMatType matType, b
 
 	const LuaMaterial* prevMat = &LuaMaterial::defMat;
 
+	if (matType == LUAMAT_OPAQUE && !deferredPass && configHandler->GetBool("ModelDepthPrepass")) {
+		prevMat = DrawDepthPrepass(bins, prevMat, objType, matType);
+	}
+
 	for (const auto& bin: bins) {
 		assert(matType == bin->type);
 		DrawMaterialBin(bin, prevMat, objType, matType, deferredPass, inAlphaBin);
@@ -366,6 +375,40 @@ void LuaObjectDrawer::DrawMaterialBins(LuaObjType objType, LuaMatType matType, b
 
 	inAlphaBin = false;
 	inDrawPass = false;
+}
+
+// The opaque bins' depth first, colour off, through each bin's own program told so by its
+// `recoilDepthPrepass` uniform (a program without one is left out): the shading pass then runs
+// only for the surface in front, where a large model close up would otherwise shade every layer
+// of itself it draws over. Pushed back by a polygon offset, so the shading pass's own depth
+// passes the test whatever rounding the two make.
+const LuaMaterial* LuaObjectDrawer::DrawDepthPrepass(const std::vector<LuaMatBin*>& bins, const LuaMaterial* prevMat,
+	LuaObjType objType, LuaMatType matType)
+{
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(1.0f, 1.0f);
+	for (const auto& bin: bins) {
+		const LuaMatShader& shader = bin->shaders[false];
+		if (!shader.IsCustomType() || shader.openglID == 0 || bin->HasDrawCall())
+			continue;
+		// Asked each frame: a program id can be reused by a new program.
+		const GLint location = glGetUniformLocation(shader.openglID, "recoilDepthPrepass");
+		if (location < 0)
+			continue;
+		bin->Execute(*prevMat, false);
+		prevMat = bin;
+		glUniform1f(location, 1.0f);
+		for (const CSolidObject* obj: bin->GetObjects(objType)) {
+			const LuaObjectLODMaterial* lodMat = obj->GetLuaMaterialData()->GetLuaLODMaterial(matType);
+			DrawBinObject(obj, objType, lodMat, bin, false, false, true, false);
+		}
+		glUniform1f(location, 0.0f);
+	}
+	glPolygonOffset(0.0f, 0.0f);
+	glDisable(GL_POLYGON_OFFSET_FILL);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	return prevMat;
 }
 
 void LuaObjectDrawer::DrawMaterialBin(

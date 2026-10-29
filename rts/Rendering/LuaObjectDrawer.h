@@ -4,6 +4,8 @@
 #define LUA_OBJECT_DRAWER_H
 
 // for LuaObjType and LuaMatType
+#include <vector>
+
 #include "Lua/LuaObjectMaterial.h"
 #include "Rendering/GL/GeometryBuffer.h"
 
@@ -71,6 +73,8 @@ public:
 
 private:
 	static void DrawMaterialBins(LuaObjType objType, LuaMatType matType, bool deferredPass);
+	static const LuaMaterial* DrawDepthPrepass(const std::vector<LuaMatBin*>& bins, const LuaMaterial* prevMat,
+		LuaObjType objType, LuaMatType matType);
 	static void DrawMaterialBin(
 		const LuaMatBin* currBin,
 		const LuaMaterial* prevMat,
