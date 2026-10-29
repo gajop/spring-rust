@@ -33,6 +33,7 @@
 #include <RmlUi/Core/Profiling.h>
 #include <RmlUi/Debugger.h>
 #include <SDL.h>
+#include <cstdlib>
 #include <functional>
 #include <ranges>
 #include <tracy/Tracy.hpp>
@@ -45,10 +46,13 @@
 #include "System/Log/ILog.h"
 #include "Lua/LuaUI.h"
 #include "Rendering/GlobalRendering.h"
+#include "Rendering/GL/myGL.h"
 #include "Rml/Components/ElementLuaTexture.h"
 #include "Rml/RmlInputReceiver.h"
 #include "Rml/SolLua/RmlSolLua.h"
 #include "RmlUi_Backend.h"
+
+#include <cstdlib>
 #include "Rml/SVG/SVGPlugin.h"
 
 #ifndef HEADLESS
@@ -830,6 +834,20 @@ void RmlGui::RenderFrame()
 	if (state->contexts.empty())
 		return;
 
+	// `SPRING_RML_GPU_TIME=1`: the GPU's time for the interface's draw, its mean over 120
+	// drawn frames logged (a diagnostic; read two frames late, so nothing waits).
+	static const bool timed = [] {
+		const char* value = std::getenv("SPRING_RML_GPU_TIME");
+		return value != nullptr && value[0] == '1';
+	}();
+	static GLuint queries[3] = {0, 0, 0};
+	static unsigned frame = 0;
+	static double sumMs = 0.0;
+	if (timed) {
+		if (queries[0] == 0)
+			glGenQueries(3, queries);
+		glBeginQuery(GL_TIME_ELAPSED, queries[frame % 3]);
+	}
 	RmlGui::BeginFrame();
 	// render back-to-front so that index 0 is atop index 1 and so on
 	for (auto& context: std::ranges::reverse_view(state->contexts)) {
@@ -839,6 +857,19 @@ void RmlGui::RenderFrame()
 		}
 	}
 	RmlGui::PresentFrame();
+	if (timed) {
+		glEndQuery(GL_TIME_ELAPSED);
+		if (++frame > 2) {
+			GLuint64 ns = 0;
+			glGetQueryObjectui64v(queries[frame % 3], GL_QUERY_RESULT, &ns);
+			sumMs += ns * 1e-6;
+			if (frame % 120 == 0) {
+				LOG("[rml-gpu] interface draw %.3f ms a frame on the GPU (mean of 120), its layer over %.1f%% of the screen in %d rectangles",
+					sumMs / 120.0, 100.0 * state->render_interface.LastDamageShare(), state->render_interface.LastDamageRects());
+				sumMs = 0.0;
+			}
+		}
+	}
 #endif
 }
 

@@ -36,6 +36,8 @@
 #include <RmlUi/Core/RenderInterface.h>
 #include <RmlUi/Core/Types.h>
 #include <bitset>
+#include <cstdint>
+#include <vector>
 
 enum class ProgramId;
 enum class UniformId;
@@ -124,6 +126,29 @@ private:
 	void DrawFullscreenQuad(Rml::Vector2f uv_offset, Rml::Vector2f uv_scaling = Rml::Vector2f(1.f));
 
 	void RenderBlur(float sigma, const Gfx::FramebufferData& source_destination, const Gfx::FramebufferData& temp, Rml::Rectanglei window_flipped);
+
+	// Damage tiles (`RmlDamageRects`): the base layer is cleared, resolved and laid over the
+	// screen only in the tiles something was drawn in this frame, and left transparent for the
+	// next one, instead of all three over the whole screen every frame. Anything that needs the
+	// whole layer (a pushed layer, a transform, a filter) falls back to the whole screen.
+public:
+	// The share of the screen the last frame's layer covered (1 without damage tiles).
+	float LastDamageShare() const { return damage_share; }
+	int LastDamageRects() const { return damage_rects; }
+private:
+	float damage_share = 1.0f;
+	int damage_rects = 0;
+	void MarkDamage(Rml::Vector2f lo, Rml::Vector2f hi, Rml::Vector2f translation);
+	std::vector<Rml::Rectanglei> DamageRects() const;
+	static constexpr int DamageTile = 64;
+	std::vector<std::uint8_t> damage_tiles;
+	int damage_cols = 0, damage_rows = 0;
+	int damage_width = 0, damage_height = 0;
+	bool damage_enabled = true;
+	bool damage_all = true;
+	bool layer_clean = false;
+	bool transform_set = false;
+	Rml::Rectanglei damage_scissor = Rml::Rectanglei::MakeInvalid();
 
 	static constexpr size_t MaxNumPrograms = 32;
 	std::bitset<MaxNumPrograms> program_transform_dirty;
