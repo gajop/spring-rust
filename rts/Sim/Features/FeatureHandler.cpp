@@ -130,6 +130,10 @@ void CFeatureHandler::InsertActiveFeature(CFeature* feature)
 	activeFeatureIDs.insert(feature->id);
 
 	features[feature->id] = feature;
+
+	// Its first previous-frame save: anything set before it had an ID was not listed.
+	feature->restless = false;
+	MarkRestless(feature);
 }
 
 
@@ -190,9 +194,41 @@ void CFeatureHandler::UpdatePreFrame()
 {
 	SCOPED_TIMER("Sim::Features::UpdatePreFrame");
 
-	for (auto fid : activeFeatureIDs) {
-		features[fid]->UpdatePrevFrameTransform();
+	// A feature that has not moved since its last save keeps it: saving is a matrix to
+	// quaternion and every piece's copy, for each of the many features that never move. Only
+	// those listed since (their transform or a piece changed) are saved again.
+	if (!CFeature::RestSkips()) {
+		for (auto fid : activeFeatureIDs) {
+			features[fid]->UpdatePrevFrameTransform();
+		}
+		return;
 	}
+
+	std::vector<int> listed;
+	listed.swap(restlessIDs);
+
+	for (const int fid : listed) {
+		CFeature* f = GetFeature(fid);
+
+		if (f == nullptr || !f->restless)
+			continue;
+
+		f->restless = false;
+		f->UpdatePrevFrameTransform();
+		f->prevFrameVersion = f->transformVersion;
+	}
+
+	restlessIDs.swap(listed);
+	restlessIDs.clear();
+}
+
+void CFeatureHandler::MarkRestless(CFeature* feature)
+{
+	if (feature->restless || feature->id < 0)
+		return;
+
+	feature->restless = true;
+	restlessIDs.push_back(feature->id);
 }
 
 void CFeatureHandler::Update()

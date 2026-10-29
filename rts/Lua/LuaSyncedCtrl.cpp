@@ -5378,7 +5378,11 @@ int LuaSyncedCtrl::SetFeaturePieceVisible(lua_State* L)
 int LuaSyncedCtrl::SetFeaturePieceMatrix(lua_State* L)
 {
 	CFeature* feature = ParseFeature(L, __func__, 1);
-	return Impl::SetObjectPieceMatrix(L, feature);
+	const int results = Impl::SetObjectPieceMatrix(L, feature);
+	// A piece moved: its previous-frame transform is saved again next frame.
+	if (feature != nullptr)
+		featureHandler.MarkRestless(feature);
+	return results;
 }
 
 

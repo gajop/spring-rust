@@ -218,6 +218,13 @@ void CFeatureDrawerData::UpdateObjectDrawFlags(CSolidObject* o) const
 void CFeatureDrawerData::UpdateDrawPos(CFeature* f)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	// At rest since it was last found, and not then between two frames' transforms: as it was.
+	if (f->drawPosSettled && f->drawPosVersion == f->transformVersion && CFeature::SameBits(f->drawPosAt, f->pos))
+		return;
+
 	f->drawPos    = f->GetDrawPos(globalRendering->timeOffset);
 	f->drawMidPos = f->GetMdlDrawMidPos();
+	f->drawPosVersion = f->transformVersion;
+	f->drawPosAt = f->pos;
+	f->drawPosSettled = f->PrevFrameTransformCurrent();
 }

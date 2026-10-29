@@ -3,6 +3,8 @@
 #ifndef _FEATURE_H
 #define _FEATURE_H
 
+#include <cstring>
+
 #include "System/Misc/NonCopyable.h"
 
 #include "Sim/Objects/SolidObject.h"
@@ -82,7 +84,7 @@ public:
 	bool UpdatePosition();
 	bool UpdateVelocity(const float3& dragAccel, const float3& gravAccel, const float3& movMask, const float3& velMask);
 
-	void SetTransform(const CMatrix44f& m, bool synced) { transMatrix[synced] = m; }
+	void SetTransform(const CMatrix44f& m, bool synced) { transMatrix[synced] = m; TransformChanged(synced); }
 	void UpdateTransform(const float3& p, bool synced);
 	void UpdateTransformAndPhysState();
 	void UpdateQuadFieldPosition(const float3& moveVec);
@@ -140,6 +142,31 @@ public:
 
 	/// object on top of us if we are a geothermal vent
 	CSolidObject* solidOnTop = nullptr;
+
+	/// Counts changes to the synced transform. Most features never move once laid: the
+	/// handler saves their previous-frame transform, and the drawer finds their draw position,
+	/// only when it or their position changed since it last did (not saved; a load redoes both).
+	uint32_t transformVersion = 0;
+	/// Listed for the handler's next previous-frame save (`CFeatureHandler::MarkRestless`).
+	bool restless = false;
+	uint32_t prevFrameVersion = ~0u;
+	uint32_t drawPosVersion = ~0u;
+	float3 drawPosAt;
+	/// Whether the draw position was found with the previous-frame transform equal to the
+	/// current one, so not between two.
+	bool drawPosSettled = false;
+
+	/// Whether the previous-frame transform is as it would be saved now. Always false with
+	/// SPRING_FEATURE_REST=0, which saves and finds them every frame as before.
+	bool PrevFrameTransformCurrent() const {
+		return RestSkips() && prevFrameVersion == transformVersion && SameBits(preFrameTra.t, pos) && !localModel.PrevModelSpaceNeedsUpdate();
+	}
+	static bool RestSkips();
+	/// The synced transform changed (or a piece's, `synced` true): saved again next frame.
+	void TransformChanged(bool synced);
+	static bool SameBits(const float3& a, const float3& b) {
+		return std::memcmp(&a.x, &b.x, sizeof(float) * 3) == 0;
+	}
 
 
 private:

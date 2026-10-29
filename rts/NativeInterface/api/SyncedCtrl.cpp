@@ -4716,6 +4716,8 @@ static void NativeSetFeaturePieceMatrix(const SetFeaturePieceMatrixQuery* query,
 	if (lmp->SetPieceSpaceMatrix(mat))
 		lmp->SetDirty();
 
+	// A piece moved: its previous-frame transform is saved again next frame.
+	featureHandler.MarkRestless(feature);
 	result->blockScriptAnims = lmp->blockScriptAnims;
 }
 
