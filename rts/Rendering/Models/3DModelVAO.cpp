@@ -14,6 +14,45 @@
 #include "Sim/Features/Feature.h"
 
 #include "System/Misc/TracyDefs.h"
+#include "System/Config/ConfigHandler.h"
+#include "System/StringUtil.h"
+
+#include <cstdlib>
+#include <string_view>
+#include <unordered_set>
+
+CONFIG(int, ModelLodSkip)
+	.defaultValue(0)
+	.minimumValue(0)
+	.maximumValue(8)
+	.description("Leave this many of the finest levels of detail out of the GPU's model buffers. A level is a piece named <name>_lod<k> (level k); a piece <name> beside a <name>_lod2 is level 1. Read when a model loads: a game that leaves levels out must not draw them.");
+
+namespace {
+// Whether a piece is one of the finest `skip` levels of detail (see ModelLodSkip).
+std::vector<bool> SkippedPieces(const S3DModel* model, int skip)
+{
+	std::vector<bool> skipped(model->pieceObjects.size(), false);
+	if (skip <= 0)
+		return skipped;
+	std::unordered_set<std::string_view> names;
+	for (const auto* piece: model->pieceObjects)
+		names.insert(piece->name);
+	for (size_t i = 0; i < model->pieceObjects.size(); ++i) {
+		const std::string& name = model->pieceObjects[i]->name;
+		int level = 0;
+		if (const auto at = name.rfind("_lod"); at != std::string::npos && at + 4 < name.size()) {
+			char* end = nullptr;
+			const long parsed = std::strtol(name.c_str() + at + 4, &end, 10);
+			if (end != nullptr && *end == '\0' && parsed >= 1)
+				level = int(parsed);
+		}
+		if (level == 0 && names.contains(name + "_lod2"))
+			level = 1;
+		skipped[i] = level >= 1 && level <= skip;
+	}
+	return skipped;
+}
+}
 
 
 void S3DModelVAO::EnableAttribs(bool inst) const
@@ -80,8 +119,12 @@ void S3DModelVAO::ProcessVertices(const S3DModel* model)
 		return;
 
 	uint32_t vertIndex = static_cast<uint32_t>(vertData.size());
-	for (auto* modelPiece : model->pieceObjects) {
+	const auto skipped = SkippedPieces(model, configHandler->GetInt("ModelLodSkip"));
+	for (size_t i = 0; i < model->pieceObjects.size(); ++i) {
+		auto* modelPiece = model->pieceObjects[i];
 		modelPiece->vertIndex = vertIndex;
+		if (skipped[i])
+			continue; // a level left out: no vertices on the GPU, and no indices (below)
 		const auto& modelPieceVerts = modelPiece->GetVerticesVec();
 		vertIndex += modelPieceVerts.size();
 		vertData.insert(vertData.end(), modelPieceVerts.begin(), modelPieceVerts.end()); //append
@@ -98,8 +141,10 @@ void S3DModelVAO::ProcessIndicies(S3DModel* model)
 	//models should know their index offset
 	model->indxStart = static_cast<uint32_t>(std::distance(indxData.cbegin(), indxData.cend()));
 
-	for (auto* modelPiece : model->pieceObjects) {
-		if (!modelPiece->HasGeometryData()) {
+	const auto skipped = SkippedPieces(model, configHandler->GetInt("ModelLodSkip"));
+	for (size_t i = 0; i < model->pieceObjects.size(); ++i) {
+		auto* modelPiece = model->pieceObjects[i];
+		if (!modelPiece->HasGeometryData() || skipped[i]) {
 			modelPiece->indxStart = static_cast<uint32_t>(indxData.size());
 			modelPiece->indxCount = 0;
 			continue;
@@ -123,8 +168,9 @@ void S3DModelVAO::ProcessIndicies(S3DModel* model)
 	model->indxCount = static_cast<uint32_t>(indxData.size() - model->indxStart);
 
 	//add shatter indices to the end of indxData
-	for (const auto* modelPiece : model->pieceObjects) {
-		if (!modelPiece->HasGeometryData())
+	for (size_t i = 0; i < model->pieceObjects.size(); ++i) {
+		const auto* modelPiece = model->pieceObjects[i];
+		if (!modelPiece->HasGeometryData() || skipped[i])
 			continue;
 
 		const auto& mdlPcsShatIndcs = modelPiece->GetShatterIndicesVec();

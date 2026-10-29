@@ -38,6 +38,11 @@
 #endif
 
 #include "System/Misc/TracyDefs.h"
+#include "System/Config/ConfigHandler.h"
+
+CONFIG(bool, ModelShatterPieces)
+	.defaultValue(true)
+	.description("Prepare the shattered variations of every model piece (two more copies of its indices on the GPU), for pieces thrown off shattered. A game that never shatters pieces can turn this off.");
 
 
 CModelLoader modelLoader;
@@ -453,11 +458,15 @@ void CModelLoader::PostProcessGeometry(S3DModel* model)
 	if (model->loadStatus == S3DModel::LoadStatus::LOADED)
 		return;
 
+	// Shatter variations are two more copies of every index, for pieces a unit throws off
+	// shattered; a game that never shatters pieces leaves them out (ModelShatterPieces = 0).
+	const bool shatterPieces = configHandler->GetBool("ModelShatterPieces");
 	// does quads and strips conversion sometimes. Need to run first
 	for (size_t i = 0; i < model->pieceObjects.size(); ++i) {
 		auto* p = model->pieceObjects[i];
 		p->PostProcessGeometry(static_cast<uint32_t>(i));
-		p->CreateShatterPieces();
+		if (shatterPieces)
+			p->CreateShatterPieces();
 	}
 	{
 		auto lock = CModelsLock::GetScopedLock(); // working with S3DModelVAO needs locking
