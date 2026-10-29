@@ -1761,7 +1761,7 @@ CONFIG(int, TextureMipSkip)
 	.defaultValue(0)
 	.minimumValue(0)
 	.maximumValue(3)
-	.description("Leave out this many of the finest levels of mipmapped DDS textures larger than 1024 texels a side, never going below 1024: each step quarters their memory.");
+	.description("Leave out this many of the finest levels of mipmapped DDS textures and mipmapped named images larger than 1024 texels a side, never going below 1024: each step quarters their memory.");
 
 // Levels of a mipmapped 2D DDS texture to leave out under TextureMipSkip.
 static unsigned int DDSSkipLevels(const nv_dds::CDDSImage& image)

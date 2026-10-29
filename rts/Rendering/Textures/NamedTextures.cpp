@@ -10,6 +10,7 @@
 #include "Rendering/GlobalRendering.h"
 #include "System/type2.h"
 #include "System/Log/ILog.h"
+#include "System/Config/ConfigHandler.h"
 #include "System/Threading/SpringThreading.h"
 #include "System/UnorderedMap.hpp"
 
@@ -248,7 +249,22 @@ namespace CNamedTextures {
 		if (bitmap.compressed) {
 			texID = bitmap.CreateDDSTexture(tcp);
 		} else {
-			if (resize) bitmap = bitmap.CreateRescaled(resizeDimensions.x,resizeDimensions.y);
+			if (resize) {
+				bitmap = bitmap.CreateRescaled(resizeDimensions.x,resizeDimensions.y);
+			}
+			#ifndef HEADLESS
+			else if (needMipMaps) {
+				// TextureMipSkip, as for DDS textures: the finest levels of a large image are
+				// left out (box-filtered down), never going below 1024 texels a side.
+				const int wanted = configHandler->GetInt("TextureMipSkip");
+				const int side = std::max(bitmap.xsize, bitmap.ysize);
+				int skip = 0;
+				while (skip < wanted && (side >> (skip + 1)) >= 1024)
+					skip++;
+				if (skip > 0)
+					bitmap = bitmap.CreateRescaled(std::max(1, bitmap.xsize >> skip), std::max(1, bitmap.ysize >> skip));
+			}
+			#endif
 			if (invert) bitmap.InvertColors();
 			if (greyed) bitmap.MakeGrayScale();
 			if (tint)   bitmap.Tint(tintColor);
