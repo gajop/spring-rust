@@ -3,6 +3,8 @@
 #ifdef THREADPOOL
 
 #include "ThreadPool.h"
+
+#include <cstdlib>
 #include "System/Exceptions.h"
 #include "System/SpringMath.h"
 #if (!defined(UNITSYNC) && !defined(UNIT_TEST))
@@ -283,8 +285,19 @@ static void WorkerLoop(int tid, bool async)
 
 
 
-void WaitForFinished(std::shared_ptr<ITaskGroup>&& taskGroup)
+bool DrainPooledGroups()
 {
+	static const bool drain = [] {
+		const char* value = std::getenv("SPRING_THREADPOOL_DRAIN");
+		return value != nullptr && value[0] == '1';
+	}();
+	return drain;
+}
+
+void WaitForFinished(std::shared_ptr<ITaskGroup>&& taskGroup, bool drain)
+{
+	// Only a pooled group can skip the drain: its pool will not reuse it while queued.
+	drain |= !taskGroup->IsInTaskPool();
 	// can be any worker-thread (for_mt inside another for_mt, etc)
 	const int tid = GetThreadNum();
 
@@ -305,6 +318,10 @@ void WaitForFinished(std::shared_ptr<ITaskGroup>&& taskGroup)
 	//   under that condition could cause the group to be deleted
 	//   or reassigned prematurely) --> wait
 	if (taskGroup->IsFinished()) {
+		if (!drain) {
+			taskGroup->ReleaseToPool();
+			return;
+		}
 		// Main-thread help may finish the callbacks before sleeping workers
 		// have drained their queue entries. Wake them before waiting for reuse.
 		NotifyWorkerThreads(true, false);
@@ -333,6 +350,10 @@ void WaitForFinished(std::shared_ptr<ITaskGroup>&& taskGroup)
 		}
 	} while (!taskGroup->IsFinished() && !exitFlags[tid]);
 
+	if (!drain) {
+		taskGroup->ReleaseToPool();
+		return;
+	}
 	while (taskGroup->IsInJobQueue()) {
 		DoTask(tid, false);
 	}
