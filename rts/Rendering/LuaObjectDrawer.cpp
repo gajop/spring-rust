@@ -14,6 +14,7 @@
 #include "Rendering/Common/ModelDrawerHelpers.h"
 #include "Rendering/Shaders/Shader.h"
 #include "Rendering/ShadowHandler.h"
+#include "Rendering/ShadowCasters.h"
 #include "Sim/Misc/GlobalConstants.h" // MAX_TEAMS
 #include "Sim/Objects/SolidObject.h"
 #include "Sim/Features/Feature.h"
@@ -693,9 +694,18 @@ bool LuaObjectDrawer::AddShadowMaterialObject(CSolidObject* obj, LuaObjType objT
 	LuaObjectMaterialData* matData = obj->GetLuaMaterialData();
 
 	const LuaMatType matType = GetDrawPassShadowMat();
-	const float      lodDist = camera->ProjectedDistance(obj->pos);
+	const float      length  = ShadowCasters::LevelLength(obj, objType);
 
-	return (matData->AddObjectForLOD(obj, objType, matType, lodDist));
+	if (length >= 0.0f) {
+		const bool added = matData->AddObjectForLength(obj, objType, matType, length);
+		ShadowCasters::CountLevel(matData->GetCurrentLOD());
+		return added;
+	}
+
+	const float lodDist = camera->ProjectedDistance(obj->pos);
+	const bool  added   = matData->AddObjectForLOD(obj, objType, matType, lodDist);
+	ShadowCasters::CountLevel(matData->GetCurrentLOD());
+	return added;
 }
 
 

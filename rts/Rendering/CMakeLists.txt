@@ -111,6 +111,7 @@ set(sources_engine_Rendering
 		"${CMAKE_CURRENT_SOURCE_DIR}/Shaders/Shader.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Shaders/ShaderHandler.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Shaders/ShaderStates.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/ShadowCasters.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/ShadowHandler.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/TeamHighlight.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/Textures/AtlasedTexture.cpp"

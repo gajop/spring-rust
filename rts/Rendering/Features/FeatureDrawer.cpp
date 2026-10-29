@@ -18,6 +18,7 @@
 #include "Rendering/GL/RenderBuffers.h"
 #include "Rendering/LuaObjectDrawer.h"
 #include "Rendering/ShadowHandler.h"
+#include "Rendering/ShadowCasters.h"
 #include "Rendering/Shaders/Shader.h"
 #include "Rendering/Common/ModelDrawerHelpers.h"
 #include "Rendering/Textures/S3OTextureHandler.h"
@@ -128,6 +129,9 @@ bool CFeatureDrawer::ShouldDrawFeatureShadow(CFeature* f)
 	static constexpr uint8_t thisPassMask = DrawFlags::SO_SHOPAQ_FLAG;
 
 	if (!f->HasDrawFlag(DrawFlags::SO_SHOPAQ_FLAG))
+		return false;
+
+	if (!ShadowCasters::Wanted(f))
 		return false;
 
 	if (LuaObjectDrawer::AddShadowMaterialObject(f, LUAOBJ_FEATURE))

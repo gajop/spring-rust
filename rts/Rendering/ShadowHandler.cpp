@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "ShadowHandler.h"
+#include "ShadowCasters.h"
 #include "Game/Camera.h"
 #include "Game/CameraHandler.h"
 #include "Game/GameVersion.h"
@@ -474,8 +475,10 @@ void CShadowHandler::DrawShadowPasses()
 		projectileDrawer->DrawShadowOpaque();
 	}
 	if ((shadowGenBits & SHADOWGEN_BIT_MODEL) != 0) {
+		ShadowCasters::Begin();
 		unitDrawer->DrawShadowPass();
 		featureDrawer->DrawShadowPass();
+		ShadowCasters::End();
 	}
 
 	// cull front-faces during the terrain shadow pass: sun direction

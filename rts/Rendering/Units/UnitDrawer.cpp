@@ -28,6 +28,7 @@
 #include "Rendering/IconHandler.h"
 #include "Rendering/LuaObjectDrawer.h"
 #include "Rendering/ShadowHandler.h"
+#include "Rendering/ShadowCasters.h"
 #include "Rendering/Textures/Bitmap.h"
 #include "Rendering/Textures/3DOTextureHandler.h"
 #include "Rendering/Textures/S3OTextureHandler.h"
@@ -268,6 +269,9 @@ bool CUnitDrawer::ShouldDrawUnitShadow(CUnit* u)
 	static constexpr uint8_t thisPassMask = DrawFlags::SO_SHOPAQ_FLAG;
 
 	if (!u->HasDrawFlag(DrawFlags::SO_SHOPAQ_FLAG))
+		return false;
+
+	if (!ShadowCasters::Wanted(u))
 		return false;
 
 	if (LuaObjectDrawer::AddShadowMaterialObject(u, LUAOBJ_UNIT))

@@ -163,6 +163,18 @@ public:
 		return lastLOD;
 	}
 
+	unsigned int CalcLODForLength(float length, unsigned int lastLOD) const {
+		if (lastLOD >= lodCount)
+			return 0;
+
+		const float lpp = std::max(0.0f, length);
+
+		for (/* no-op */; (lastLOD != 0 && lpp <= lodLengths[lastLOD]); lastLOD--) {
+		}
+
+		return lastLOD;
+	}
+
 	unsigned int SetCurrentLOD(unsigned int lod) { return (currentLOD = lod); }
 
 	unsigned int GetLODCount() const { return lodCount; }
@@ -208,6 +220,27 @@ public:
 				case LUAOBJ_UNIT   : { lodMat->AddUnit   (o); } break;
 				case LUAOBJ_FEATURE: { lodMat->AddFeature(o); } break;
 				default            : {         assert(false); } break; // gcc needs always a default case, else it's not able to optimize the switch
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	// As AddObjectForLOD, with the length per pixel (or texel) given outright.
+	bool AddObjectForLength(CSolidObject* o, LuaObjType objType, LuaMatType matType, float length) {
+		if (!Enabled())
+			return false;
+
+		LuaObjectMaterial* objMat = GetLuaMaterial(matType);
+		LuaObjectLODMaterial* lodMat = objMat->GetMaterial(SetCurrentLOD(CalcLODForLength(length, objMat->GetLastLOD())));
+
+		if ((lodMat != nullptr) && lodMat->IsActive()) {
+			switch (objType) {
+				case LUAOBJ_UNIT   : { lodMat->AddUnit   (o); } break;
+				case LUAOBJ_FEATURE: { lodMat->AddFeature(o); } break;
+				default            : {         assert(false); } break;
 			}
 
 			return true;
