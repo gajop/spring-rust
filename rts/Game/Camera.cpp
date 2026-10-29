@@ -318,8 +318,6 @@ void CCamera::UpdateViewRange()
 	#if 0
 	constexpr float SQ_MAX_VIEW_RANGE = Square(CGlobalRendering::MAX_VIEW_RANGE);
 	#endif
-	constexpr float ZFAR_ZNEAR_FACTOR = 0.001f;
-
 	const float maxEdgeDistX = std::max(pos.x, float3::maxxpos - pos.x);
 	const float maxEdgeDistZ = std::max(pos.z, float3::maxzpos - pos.z);
 	const float maxEdgeDist  = math::sqrt(Square(maxEdgeDistX) + Square(maxEdgeDistZ));
@@ -348,8 +346,13 @@ void CCamera::UpdateViewRange()
 	wantedViewRange = std::clamp(wantedViewRange, CGlobalRendering::MIN_ZNEAR_DIST, CGlobalRendering::MAX_VIEW_RANGE);
 	#endif
 
-	frustum.scales.z = std::max(wantedViewRange * ZFAR_ZNEAR_FACTOR, globalRendering->minViewRange);
-	frustum.scales.w = std::min(wantedViewRange                    , globalRendering->maxViewRange);
+	// the near plane follows the far plane in use: a far plane wanted beyond maxViewRange (the
+	// farthest map edge, hundreds of thousands of elmos away on a very large map) must not push
+	// the near plane out with it and clip units right in front of the camera
+	const float farPlaneDist = std::min(wantedViewRange, globalRendering->maxViewRange);
+
+	frustum.scales.z = std::max(farPlaneDist * globalRendering->zNearFarRatio, globalRendering->minViewRange);
+	frustum.scales.w = farPlaneDist;
 }
 
 bool CCamera::InView(const float3& point, float radius) const

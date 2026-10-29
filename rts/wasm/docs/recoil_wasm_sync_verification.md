@@ -46,7 +46,7 @@ because it can access simulation APIs.
 
 | Risk | Current Core Wasm behavior | Source |
 |---|---|---|
-| Different NaN payloads or CPU instruction choices | NaN canonicalization enabled; relaxed SIMD disabled by default, with deterministic mode configured | [WasmRuntime.cpp](../../WasmInterface/runtime/WasmRuntime.cpp) |
+| Different NaN payloads or CPU instruction choices | Synced Core modules are rewritten so a NaN is canonicalized where its bits become observable (stores, reinterpretation, sign operations, calls, results, globals, bit-level v128 use, merges with exact bits); a module the rewrite does not model compiles with Cranelift's canonicalization of every float result. `SPRING_WASM_NAN_CANONICALIZATION=all` selects the latter for every module; `none` is diagnostic only. The mode is part of the configuration identity. Relaxed SIMD disabled by default, with deterministic mode configured | [WasmNanSinks.h](../../WasmInterface/runtime/WasmNanSinks.h), [WasmRuntime.cpp](../../WasmInterface/runtime/WasmRuntime.cpp), test `test_WasmNanSinks` |
 | Guest threads racing | Wasm threads/shared memory disabled by default | [WasmRuntime.h](../../WasmInterface/runtime/WasmRuntime.h) |
 | Memory/table growth depending on the machine | Synced memory and tables must declare equal minimum and maximum; Core start functions are rejected | [WasmCoreValidation.cpp](../../WasmInterface/core/host/WasmCoreValidation.cpp) |
 | Native FP settings changing guest calculations | Scoped guest FP controls at callins, helper exports and callbacks; restored on returning to the caller and from host imports | [WasmFloatEnvironment.h](../../WasmInterface/runtime/WasmFloatEnvironment.h), [FP regression](recoil_wasm_sync_report_2026-10-19.md#floating-point-regression) |

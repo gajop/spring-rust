@@ -43,6 +43,7 @@
 #include "Game/Game.h"
 #include "Game/GlobalUnsynced.h"
 #include "Game/LoadScreen.h"
+#include "System/LoadingPump.h"
 #include "Game/UI/CommandColors.h"
 #include "Game/UI/GuiHandler.h"
 #include "System/EventHandler.h"
@@ -158,12 +159,15 @@ void CWorldDrawer::InitPost() const
 	{
 		loadscreen->SetLoadMessage("Finalizing Models");
 		modelLoader.DrainPreloadFutures(0);
+		// One upload of every model's geometry follows: show the final count before it.
+		LoadingPump::Pump();
 		auto& mv = S3DModelVAO::GetInstance();
 		if (preloadMode) {
 			{
 				auto lock = CLoadLock::GetUniqueLock();
 				mv.UploadVBOs();
 			}
+			LoadingPump::Pump();
 			mv.SetSafeToDeleteVectors();
 			modelLoader.LogErrors();
 			CModelsLock::SetThreadSafety(false); //all models are already preloaded

@@ -1499,4 +1499,20 @@ impl<'a> UnsyncedCtrl<'a> {
         }
     }
 
+    pub fn show_load_progress(&self, text: &str) -> Result<bool, Error> {
+        unsafe {
+            let text_cstr = std::ffi::CString::new(text).map_err(|_| Error::invalid_argument("text"))?;
+            let query = sys::ShowLoadProgressQuery {
+                text: text_cstr.as_ptr(),
+            };
+            let mut result = MaybeUninit::<sys::ShowLoadProgressResult>::zeroed();
+            let func = self.api.ShowLoadProgress.expect("ShowLoadProgress function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
 }

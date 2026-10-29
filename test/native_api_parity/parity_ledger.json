@@ -13165,6 +13165,26 @@
       "required_returns_mapped": false,
       "runs": []
     },
+    "unsynced_ctrl.ShowLoadProgress": {
+      "level": "exempt",
+      "reason": "No Lua equivalent: shows a progress line on the loading screen and redraws it during a module's own long loading step. Its only effect is what the loading screen draws, and outside loading it does nothing, so there is no state to compare between native and Wasm.",
+      "required_environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
     "unsynced_ctrl.TrackUnits": {
       "level": "untested",
       "grandfathered": true,
@@ -30378,6 +30398,6 @@
   "counts": {
     "untested": 1411,
     "exercised": 14,
-    "exempt": 6
+    "exempt": 7
   }
 }

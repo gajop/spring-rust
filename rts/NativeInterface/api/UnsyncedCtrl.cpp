@@ -57,6 +57,7 @@
 #include "System/Platform/WindowManagerHelper.h"
 #include "System/MathConstants.h"
 #include "Game/Action.h"
+#include "System/LoadingPump.h"
 #include "System/StringUtil.h"
 #include "Game/IVideoCapturing.h"
 #include "System/type2.h"
@@ -2005,6 +2006,19 @@ static void NativeStopTrackingUnits(const StopTrackingUnitsQuery* /*query*/, Sto
 	result->success = true;
 }
 
+static void NativeShowLoadProgress(const ShowLoadProgressQuery* query, ShowLoadProgressResult* result)
+{
+	result->error = nullptr;
+	result->success = false;
+	if (query->text == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+
+	LoadingPump::Progress(query->text);
+	result->success = true;
+}
+
 const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.SetUnitNoDraw = NativeSetUnitNoDraw,
 	.SetUnitEngineDrawMask = NativeSetUnitEngineDrawMask,
@@ -2095,4 +2109,5 @@ const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.SetProjectileLuaDraw = NativeSetProjectileLuaDraw,
 	.TrackUnits = NativeTrackUnits,
 	.StopTrackingUnits = NativeStopTrackingUnits,
+	.ShowLoadProgress = NativeShowLoadProgress,
 };

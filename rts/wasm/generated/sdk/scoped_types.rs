@@ -3598,6 +3598,14 @@ pub mod shared {
         pub success: bool,
     }
     #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct ShowLoadProgressQuery {
+        pub text: String,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct ShowLoadProgressResult {
+        pub success: bool,
+    }
+    #[derive(Debug, Clone, PartialEq, Default)]
     pub struct SolveNURBSCurveQuery {
         pub degree: i32,
         pub points: Vec<Float4>,
@@ -11674,9 +11682,10 @@ pub mod unsynced_ctrl {
         SetWaterTextureQuery, SetWaterTextureResult, SetWindowGeometryOptions,
         SetWindowGeometryQuery, SetWindowGeometryResult, SetWindowMaximizedQuery,
         SetWindowMaximizedResult, SetWindowMinimizedQuery, SetWindowMinimizedResult,
-        SoundEffectParams, StopTrackingUnitsQuery, StopTrackingUnitsResult, StringArray,
-        StringResult, SunLightingParams, TrackUnitsQuery, TrackUnitsResult, UInt32Array,
-        UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WarpMouseQuery,
+        ShowLoadProgressQuery, ShowLoadProgressResult, SoundEffectParams,
+        StopTrackingUnitsQuery, StopTrackingUnitsResult, StringArray, StringResult,
+        SunLightingParams, TrackUnitsQuery, TrackUnitsResult, UInt32Array, UInt32Result,
+        UnitCostOverrides, UnitHealthValue, UnitTargetRef, WarpMouseQuery,
         WarpMouseResult, WaterParams,
     };
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -17730,6 +17739,7 @@ pub mod unsynced_random {
         pub set_projectile_lua_draw: u32,
         pub track_units: u32,
         pub stop_tracking_units: u32,
+        pub show_load_progress: u32,
     }
     pub use super::shared::{
         AssignMouseCursorQuery, AssignMouseCursorResult, AtmosphereParams, BoolResult,
@@ -17807,9 +17817,10 @@ pub mod unsynced_random {
         SetWaterTextureQuery, SetWaterTextureResult, SetWindowGeometryOptions,
         SetWindowGeometryQuery, SetWindowGeometryResult, SetWindowMaximizedQuery,
         SetWindowMaximizedResult, SetWindowMinimizedQuery, SetWindowMinimizedResult,
-        SoundEffectParams, StopTrackingUnitsQuery, StopTrackingUnitsResult, StringArray,
-        StringResult, SunLightingParams, TrackUnitsQuery, TrackUnitsResult, UInt32Array,
-        UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WarpMouseQuery,
+        ShowLoadProgressQuery, ShowLoadProgressResult, SoundEffectParams,
+        StopTrackingUnitsQuery, StopTrackingUnitsResult, StringArray, StringResult,
+        SunLightingParams, TrackUnitsQuery, TrackUnitsResult, UInt32Array, UInt32Result,
+        UnitCostOverrides, UnitHealthValue, UnitTargetRef, WarpMouseQuery,
         WarpMouseResult, WaterParams,
     };
 }

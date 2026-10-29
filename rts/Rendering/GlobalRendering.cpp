@@ -62,6 +62,7 @@ CONFIG(int, ForceDisableGL4).defaultValue(0).safemodeValue(1).minimumValue(0).ma
 
 CONFIG(int, ForceCoreContext).defaultValue(0).minimumValue(0).maximumValue(1);
 CONFIG(int, ForceSwapBuffers).defaultValue(1).minimumValue(0).maximumValue(1);
+CONFIG(float, ViewNearFarRatio).defaultValue(0.001f).minimumValue(1.0f / 65536.0f).maximumValue(0.1f).description("The near clipping plane's distance as a share of the far plane's, never under the minimum view range. Lower lets the camera close in on units for some depth precision far away.");
 CONFIG(int, AtiHacks).defaultValue(-1).headlessValue(0).minimumValue(-1).maximumValue(1).description("Enables graphics drivers workarounds for users with AMD proprietary drivers.\n -1:=runtime detect, 0:=off, 1:=on");
 
 // enabled in safemode, far more likely the gpu runs out of memory than this extension causes crashes!
@@ -163,6 +164,7 @@ CR_REG_METADATA(CGlobalRendering, (
 
 	CR_IGNORED(minViewRange),
 	CR_IGNORED(maxViewRange),
+	CR_IGNORED(zNearFarRatio),
 	CR_IGNORED(aspectRatio),
 
 	CR_IGNORED(forceDisablePersistentMapping),
@@ -280,6 +282,7 @@ CGlobalRendering::CGlobalRendering()
 	// sane defaults
 	, minViewRange(MIN_ZNEAR_DIST * 8.0f)
 	, maxViewRange(MAX_VIEW_RANGE * 0.5f)
+	, zNearFarRatio(configHandler->GetFloat("ViewNearFarRatio"))
 	, aspectRatio(1.0f)
 
 	, forceDisableGL4(configHandler->GetInt("ForceDisableGL4"))
@@ -359,6 +362,7 @@ CGlobalRendering::CGlobalRendering()
 #endif
 	verticalSync->WrapNotifyOnChange();
 	configHandler->NotifyOnChange(this, {
+		"ViewNearFarRatio",
 		"DualScreenMode",
 		"DualScreenMiniMapOnLeft",
 		"Fullscreen",
@@ -1280,6 +1284,11 @@ void CGlobalRendering::SetWindowAttributes(SDL_Window* window)
 void CGlobalRendering::ConfigNotify(const std::string& key, const std::string& value)
 {
 	LOG("[GR::%s][1] key=%s val=%s", __func__, key.c_str(), value.c_str());
+
+	if (key == "ViewNearFarRatio") {
+		zNearFarRatio = configHandler->GetFloat("ViewNearFarRatio");
+		return;
+	}
 
 	if (key == "MinSampleShadingRate") {
 		auto newMSSR = configHandler->GetFloat("MinSampleShadingRate");

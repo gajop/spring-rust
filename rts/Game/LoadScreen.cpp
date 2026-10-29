@@ -41,6 +41,7 @@
 #include "System/Sound/ISound.h"
 #include "System/Sound/ISoundChannels.h"
 #include "System/LoadLock.h"
+#include "System/LoadingPump.h"
 
 #if !defined(HEADLESS) && !defined(NO_SOUND)
 #include "System/Sound/OpenAL/EFX.h"
@@ -58,6 +59,26 @@ CONFIG(int, LoadingMT)
 
 
 CLoadScreen* CLoadScreen::singleton = nullptr;
+
+// A long step redraws at the multi-threaded loader's 50 Hz, which loading screens animate by.
+static constexpr unsigned PUMP_INTERVAL_MS = 20;
+
+static bool PumpLoadScreen(bool draw)
+{
+	CLoadScreen* screen = CLoadScreen::GetInstance();
+	return screen != nullptr && Threading::IsMainThread() && screen->Pump(draw);
+}
+
+static void PostLoadProgress(const char* text)
+{
+	CLoadScreen* screen = CLoadScreen::GetInstance();
+	if (screen == nullptr || text == nullptr)
+		return;
+
+	screen->SetLoadProgress(text);
+	if (Threading::IsMainThread())
+		screen->Pump(true);
+}
 
 CLoadScreen::CLoadScreen(std::string&& _mapFileName, std::string&& _modFileName, ILoadSaveHandler* _saveFile)
 	: saveFile(_saveFile)
@@ -154,8 +175,21 @@ bool CLoadScreen::Init()
 			CLuaIntro::LoadFreeHandler();
 	}
 
+#ifndef HEADLESS
+	// Long steps on the loading thread (model loading, Wasm compilation, a game's own preload)
+	// post progress and, when that thread also draws, keep the screen drawing.
+	LoadingPump::Install(PumpLoadScreen, PostLoadProgress);
+#endif
+
 	if (mtLoading)
 		return true;
+
+#ifndef HEADLESS
+	// A draw inside a long step must not wait for the display: with vsync each would block
+	// the loading for up to a refresh. Restored once loading ends.
+	swapInterval = SDL_GL_GetSwapInterval();
+	SDL_GL_SetSwapInterval(0);
+#endif
 
 	LOG("[LoadScreen::%s] single-threaded", __func__);
 	game->Load(mapFileName);
@@ -167,6 +201,18 @@ void CLoadScreen::Kill()
 	RECOIL_DETAILED_TRACY_ZONE;
 	if (mtLoading && !gameLoadThread.joinable())
 		return;
+
+	LoadingPump::Install(nullptr, nullptr);
+#ifndef HEADLESS
+	if (!mtLoading)
+		SDL_GL_SetSwapInterval(swapInterval);
+#endif
+	if (!mtLoading && spring_tomsecs(longestDrawGap) > 0) {
+		LOG("[LoadScreen::%s] longest time without a loading screen draw: %dms (during \"%s\"); %d draws inside long steps took %dms, the slowest %dms (during \"%s\")",
+			__func__, static_cast<int>(spring_tomsecs(longestDrawGap)), longestGapMessage.c_str(), pumpDraws,
+			static_cast<int>(spring_tomsecs(pumpTime)), static_cast<int>(spring_tomsecs(slowestPump)),
+			slowestPumpMessage.c_str());
+	}
 
 	if (luaIntro != nullptr)
 		luaIntro->Shutdown();
@@ -272,22 +318,28 @@ int CLoadScreen::KeyReleased(int keyCode, int scanCode)
 }
 
 
+void CLoadScreen::DeliverMessages()
+{
+	if (luaIntro == nullptr && !HasWasmIntro())
+		return;
+
+	std::lock_guard<spring::recursive_mutex> lck(mutex);
+
+	for (const auto& pair: loadMessages) {
+		good_fpu_control_registers(pair.first.c_str());
+		if (luaIntro != nullptr)
+			luaIntro->LoadProgress(pair.first, pair.second);
+		DispatchWasmLoadProgress(pair.first, pair.second);
+	}
+
+	loadMessages.clear();
+}
+
 bool CLoadScreen::Update()
 {
 	ZoneScoped;
 
-	if (luaIntro != nullptr || HasWasmIntro()) {
-		std::lock_guard<spring::recursive_mutex> lck(mutex);
-
-		for (const auto& pair: loadMessages) {
-			good_fpu_control_registers(pair.first.c_str());
-			if (luaIntro != nullptr)
-				luaIntro->LoadProgress(pair.first, pair.second);
-			DispatchWasmLoadProgress(pair.first, pair.second);
-		}
-
-		loadMessages.clear();
-	}
+	DeliverMessages();
 
 	if (game->IsDoneLoading()) {
 		CLoadScreen::DeleteInstance();
@@ -306,6 +358,9 @@ bool CLoadScreen::Update()
 bool CLoadScreen::Draw()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (drawing)
+		return true;
+
 	// limit FPS via sleep to not lock a singlethreaded CPU from loading the game
 	if (mtLoading) {
 		const spring_time now = spring_gettime();
@@ -318,7 +373,17 @@ bool CLoadScreen::Draw()
 			spring_sleep(spring_msecs(minFrameTime - diffTime));
 
 		lastDrawTime = now;
+	} else {
+		const spring_time now = spring_gettime();
+		std::lock_guard<spring::recursive_mutex> lck(mutex);
+		if (spring_tomsecs(lastDrawTime) > 0 && now - lastDrawTime > longestDrawGap) {
+			longestDrawGap = now - lastDrawTime;
+			longestGapMessage = drawnMessage;
+		}
+		drawnMessage = lastMessage;
+		lastDrawTime = now;
 	}
+	drawing = true;
 
 	globalRendering->drawFrame = std::max(1U, globalRendering->drawFrame + 1);
 	// let LuaMenu keep the lobby connection alive
@@ -340,6 +405,33 @@ bool CLoadScreen::Draw()
 	if (!mtLoading)
 		globalRendering->SwapBuffers(true, false);
 
+	drawing = false;
+	return true;
+}
+
+bool CLoadScreen::Pump(bool draw)
+{
+	if (mtLoading || drawing)
+		return false;
+	if (!draw)
+		return true;
+	if (spring_tomsecs(spring_gettime() - lastDrawTime) < PUMP_INTERVAL_MS)
+		return true;
+
+	const spring_time start = spring_gettime();
+	spring::UnfreezeSpring(WDT_LOAD);
+	// The window manager marks a window that stops reading its events as not responding.
+	SDL_PumpEvents();
+	DeliverMessages();
+	Draw();
+	const spring_time took = spring_gettime() - start;
+	pumpTime += took;
+	pumpDraws += 1;
+	if (took > slowestPump) {
+		slowestPump = took;
+		std::lock_guard<spring::recursive_mutex> lck(mutex);
+		slowestPumpMessage = drawnMessage;
+	}
 	return true;
 }
 
@@ -355,6 +447,7 @@ void CLoadScreen::SetLoadMessage(const std::string& text, bool replaceLast)
 	std::lock_guard<spring::recursive_mutex> lck(mutex);
 
 	loadMessages.emplace_back(text, replaceLast);
+	lastMessage = text;
 
 	LOG("[LoadScreen::%s] text=\"%s\"", __func__, text.c_str());
 	LOG_CLEANUP();
@@ -369,6 +462,19 @@ void CLoadScreen::SetLoadMessage(const std::string& text, bool replaceLast)
 
 	Update();
 	Draw();
+}
+
+
+void CLoadScreen::SetLoadProgress(const std::string& text)
+{
+	std::lock_guard<spring::recursive_mutex> lck(mutex);
+
+	// Only the newest count matters: drop one not yet delivered.
+	if (!loadMessages.empty() && loadMessages.back().second)
+		loadMessages.back().first = text;
+	else
+		loadMessages.emplace_back(text, true);
+	lastMessage = text;
 }
 
 

@@ -1333,6 +1333,7 @@
   "unsynced_ctrl.SetWindowGeometry": "generated",
   "unsynced_ctrl.SetWindowMaximized": "generated",
   "unsynced_ctrl.SetWindowMinimized": "generated",
+  "unsynced_ctrl.ShowLoadProgress": "generated",
   "unsynced_ctrl.StopTrackingUnits": "generated",
   "unsynced_ctrl.TrackUnits": "generated",
   "unsynced_ctrl.WarpMouse": "generated",

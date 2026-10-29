@@ -1,15 +1,15 @@
 {
-  "total": 1432,
-  "executable_total": 1432,
+  "total": 1433,
+  "executable_total": 1433,
   "verified_total": 0,
-  "production_import_total": 1131,
+  "production_import_total": 1132,
   "by_class": {
     "dynamic-output-caller-owned": 89,
     "fixed": 864,
     "fixed-option": 15,
     "handwritten-reviewed": 71,
     "variable-input-adapted": 4,
-    "variable-input-borrowed": 198,
+    "variable-input-borrowed": 199,
     "variable-input-borrowed-mixed-fixed": 17,
     "variable-input-nested-adapted": 28,
     "variable-io-borrowed-input-caller-owned-output": 55,
@@ -9775,6 +9775,22 @@
       "production_visibility_environment_mask": 95,
       "production_environment_mask": 26,
       "reason": "withheld from production Core import registry by capability policy"
+    },
+    {
+      "module": "unsynced_ctrl",
+      "function": "ShowLoadProgress",
+      "import_module": "spring:unsynced-ctrl",
+      "import_name": "show-load-progress",
+      "class": "variable-input-borrowed",
+      "verified": false,
+      "parity_level": "exempt",
+      "grandfathered": false,
+      "production_import_allowed": true,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 26,
+      "production_visibility_environment_mask": 31,
+      "production_environment_mask": 26,
+      "reason": null
     },
     {
       "module": "unsynced_ctrl",

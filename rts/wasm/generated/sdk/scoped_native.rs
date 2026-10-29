@@ -18737,6 +18737,31 @@ pub(crate) mod unsynced_ctrl {
         }
         Ok((result.minimized) as _)
     }
+    pub(crate) fn show_load_progress(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::UnsyncedCtrlApi>,
+        text: &str,
+    ) -> Result<bool> {
+        let storage_text = std::ffi::CString::new(text)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_text = storage_text.as_ptr() as _;
+        let query = sys::ShowLoadProgressQuery {
+            text: native_text,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .ShowLoadProgress
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<sys::ShowLoadProgressResult>::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.success) as _)
+    }
     pub(crate) fn stop_tracking_units(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::UnsyncedCtrlApi>,

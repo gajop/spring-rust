@@ -29,15 +29,18 @@ WasmJobProgram::WasmJobProgram(std::unique_ptr<Backend> backend): backend(std::m
 WasmJobProgram::~WasmJobProgram() = default;
 const std::string& WasmJobProgram::Identity() const { return backend->identity; }
 
-std::shared_ptr<WasmJobProgram> WasmJobProgram::FromCompiled(const WasmRuntime& runtime, void* compiledModule, std::string identity)
+std::shared_ptr<WasmJobProgram> WasmJobProgram::FromCompiled(const WasmRuntime& runtime, void* compiledModule, std::string identity, void* engine)
 {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	if (compiledModule == nullptr || !runtime.IsAvailable() || runtime.Config().allowThreads)
 		return nullptr;
+	auto* runtimeEngine = static_cast<wasm_engine_t*>(runtime.BackendEngine());
+	auto* moduleEngine = engine != nullptr ? static_cast<wasm_engine_t*>(engine) : runtimeEngine;
 	auto state = std::make_unique<Backend>();
 	state->config = runtime.Config();
-	state->engine = wasmtime_engine_clone(static_cast<wasm_engine_t*>(runtime.BackendEngine()));
-	state->identity = std::move(identity) + "|" + runtime.ConfigurationIdentity();
+	state->engine = wasmtime_engine_clone(moduleEngine);
+	state->identity = std::move(identity) + "|" + runtime.ConfigurationIdentity() +
+		(moduleEngine != runtimeEngine ? "|nan-canonicalization-fallback=all" : "");
 	state->module = wasmtime_module_clone(static_cast<wasmtime_module_t*>(compiledModule));
 	return std::shared_ptr<WasmJobProgram>(new WasmJobProgram(std::move(state)));
 #else
@@ -59,13 +62,19 @@ std::shared_ptr<WasmJobProgram> WasmJobProgram::Compile(const WasmRuntime& runti
 		return nullptr;
 	}
 #if defined(RECOIL_WASMTIME_AVAILABLE)
+	// Jobs run synced kernels: the same NaN canonicalization as a synced module.
+	std::shared_ptr<const std::vector<std::uint8_t>> rewritten;
+	std::string note;
+	bool fallback = false;
+	void* engine = runtime.PrepareSyncedModule(bytes, validated.identity.sha512, rewritten, note, fallback);
+	const auto& compileBytes = rewritten != nullptr ? *rewritten : bytes;
 	wasmtime_module_t* module = nullptr;
-	if (auto* failure = wasmtime_module_new(static_cast<wasm_engine_t*>(runtime.BackendEngine()),
-			bytes.data(), bytes.size(), &module)) {
+	if (auto* failure = wasmtime_module_new(static_cast<wasm_engine_t*>(engine),
+			compileBytes.data(), compileBytes.size(), &module)) {
 		error = recoil::wasm::core::ErrorMessage(failure);
 		return nullptr;
 	}
-	auto program = FromCompiled(runtime, module, validated.identity.sha512);
+	auto program = FromCompiled(runtime, module, validated.identity.sha512, engine);
 	wasmtime_module_delete(module);
 	return program;
 #else

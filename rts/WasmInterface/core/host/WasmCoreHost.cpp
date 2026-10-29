@@ -3,6 +3,7 @@
 #include "WasmCoreHost.h"
 #include "System/GamePerformanceLog.h"
 #include "System/TimeProfiler.h"
+#include "System/Log/ILog.h"
 
 #include <algorithm>
 #include <array>
@@ -31,6 +32,7 @@
 #include "WasmInterface/jobs/WasmSyncedJobs.h"
 #include "System/Misc/TracyDefs.h"
 #include "WasmInterface/jobs/WasmJobProgram.h"
+#include "System/LoadingPump.h"
 #include "System/SpringHash.h"
 #include "NativeInterface/api/RmlUi.h"
 #include "Rml/Backends/RmlUi_Backend.h"
@@ -618,7 +620,26 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 	backend->bindings.Host().host = host.get();
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-	auto* engine = static_cast<wasm_engine_t*>(runtime.BackendEngine());
+	const bool synced = WasmEnvironmentMatrix::Policy(environment).synced;
+	// A synced module compiles with NaN canonicalization where NaN bits become
+	// visible (rewritten bytes), or, for a module the rewrite does not model, on
+	// every float operation (the runtime's canonicalizing engine).
+	std::shared_ptr<const std::vector<std::uint8_t>> rewritten;
+	std::string nanNote;
+	bool nanFallback = false;
+	auto* engine = static_cast<wasm_engine_t*>(synced
+		? runtime.PrepareSyncedModule(moduleBytes, identity.sha512, rewritten, nanNote, nanFallback)
+		: runtime.BackendEngine());
+	if (engine == nullptr) {
+		error = "Core Wasm host has no engine";
+		return false;
+	}
+	// LOG expands to an if statement: keep the braces.
+	if (nanFallback) {
+		LOG_L(L_WARNING, "Core Wasm module %s: %s", host->moduleName.c_str(), nanNote.c_str());
+	} else if (!nanNote.empty()) {
+		LOG("Core Wasm module %s: %s", host->moduleName.c_str(), nanNote.c_str());
+	}
 	backend->store = wasmtime_store_new(engine, nullptr, nullptr);
 	if (backend->store == nullptr) {
 		error = "Core Wasm host could not create a store";
@@ -639,25 +660,29 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 
 	std::vector<std::uint8_t> inspectedBytes;
 	const auto* compileBytes = &moduleBytes;
-	if (WasmEnvironmentMatrix::Policy(environment).synced) {
+	if (synced) {
 		// Validate ORIGINAL semantics first: adding exports must not accidentally
 		// make an invalid ref.func declaration valid. Identity is also original.
 		if (auto* failure = wasmtime_module_validate(engine, moduleBytes.data(), moduleBytes.size())) {
 			error = "Core Wasm validation failed: " + recoil::wasm::core::ErrorMessage(failure);
 			return false;
 		}
-		if (!recoil::wasm::core::StateExports::Prepare(moduleBytes, inspectedBytes, backend->stateExports, error))
+		const auto& prepared = rewritten != nullptr ? *rewritten : moduleBytes;
+		if (!recoil::wasm::core::StateExports::Prepare(prepared, inspectedBytes, backend->stateExports, error))
 			return false;
 		compileBytes = &inspectedBytes;
 	}
-	if (wasmtime_error_t* compileError = wasmtime_module_new(engine, compileBytes->data(),
-			compileBytes->size(), &backend->module);
+	// Compiling a large module takes seconds on a slow machine: on the loading screen, the
+	// compile runs beside the thread that keeps it drawing.
+	if (wasmtime_error_t* compileError = LoadingPump::RunPumped([&] {
+			return wasmtime_module_new(engine, compileBytes->data(), compileBytes->size(), &backend->module);
+		});
 		compileError != nullptr) {
 		error = "Core Wasm compilation failed: " +
 			recoil::wasm::core::ErrorMessage(compileError);
 		return false;
 	}
-	backend->jobProgram = WasmJobProgram::FromCompiled(runtime, backend->module, identity.sha512);
+	backend->jobProgram = WasmJobProgram::FromCompiled(runtime, backend->module, identity.sha512, engine);
 	backend->linker = wasmtime_linker_new(engine);
 	if (backend->linker == nullptr) {
 		error = "Core Wasm host could not create a linker";

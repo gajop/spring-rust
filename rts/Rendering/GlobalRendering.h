@@ -208,6 +208,8 @@ public:
 
 	float minViewRange;
 	float maxViewRange;
+	/// near plane distance as a share of the far plane's (ViewNearFarRatio)
+	float zNearFarRatio;
 	/**
 	 * @brief aspect ratio
 	 *

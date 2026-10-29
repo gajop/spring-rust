@@ -365,6 +365,11 @@ struct TrackUnitsResult { const Error* error; bool tracking; };
 struct StopTrackingUnitsQuery { uint8_t _unused; };
 struct StopTrackingUnitsResult { const Error* error; bool success; };
 
+// Shows a progress line on the loading screen and keeps it drawing (single-threaded loading)
+// from a long step of a module's own, such as preloading assets. Outside loading, does nothing.
+struct ShowLoadProgressQuery { const char* text; };
+struct ShowLoadProgressResult { const Error* error; bool success; };
+
 struct UnsyncedCtrlApi {
 	void (*SetUnitNoDraw)(const SetUnitNoDrawQuery* query, SetUnitNoDrawResult* result);
 	void (*SetUnitEngineDrawMask)(const SetUnitEngineDrawMaskQuery* query, SetUnitEngineDrawMaskResult* result);
@@ -457,6 +462,7 @@ struct UnsyncedCtrlApi {
 	void (*SetProjectileLuaDraw)(const SetProjectileLuaDrawQuery* query, SetProjectileLuaDrawResult* result);
 	void (*TrackUnits)(const TrackUnitsQuery* query, TrackUnitsResult* result);
 	void (*StopTrackingUnits)(const StopTrackingUnitsQuery* query, StopTrackingUnitsResult* result);
+	void (*ShowLoadProgress)(const ShowLoadProgressQuery* query, ShowLoadProgressResult* result);
 };
 
 extern const UnsyncedCtrlApi UNSYNCED_CTRL_API;

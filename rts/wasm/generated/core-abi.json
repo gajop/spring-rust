@@ -29706,6 +29706,26 @@
     },
     {
       "module": "unsynced_ctrl",
+      "function": "ShowLoadProgress",
+      "import_module": "spring:unsynced-ctrl",
+      "import_name": "show-load-progress",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "unsynced_ctrl",
       "function": "StopTrackingUnits",
       "import_module": "spring:unsynced-ctrl",
       "import_name": "stop-tracking-units",
@@ -31857,7 +31877,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1213,
+  "automatic_count": 1214,
   "manual_count": 202,
   "unsupported_count": 17
 }

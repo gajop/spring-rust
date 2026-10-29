@@ -3597,6 +3597,62 @@ wasm_trap_t* CoreBorrowed_unsynced_ctrl_set_water_texture(void* environment, was
     return nullptr;
 }
 
+wasm_trap_t* CoreBorrowed_unsynced_ctrl_show_load_progress(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unsyncedCtrl == nullptr ||
+        state->native->unsyncedCtrl->ShowLoadProgress == nullptr)
+        return Trap("ShowLoadProgress borrowed Core binding is unavailable");
+    if (slots == nullptr || slotCount != 1u)
+        return Trap("ShowLoadProgress borrowed Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    ShowLoadProgressQuery query{};
+    std::uint32_t textPointer = 0;
+    std::uint32_t textCount = 0;
+    if (!reader.U32(textPointer) || !reader.U32(textCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    if (textCount == std::numeric_limits<std::uint32_t>::max()) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> textBytes;
+    if (!state->memory.View(textPointer, static_cast<std::size_t>(textCount) + 1u, textBytes)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    if (textBytes[textCount] != 0) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.text = reinterpret_cast<const char*>(textBytes.data());
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    ShowLoadProgressResult result{};
+    state->native->unsyncedCtrl->ShowLoadProgress(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreBorrowed_unsynced_ctrl_track_units(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -14443,6 +14499,13 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:unsynced-ctrl", "show-load-progress",
+                MakeFuncType(params, 1, results, 1), CoreBorrowed_unsynced_ctrl_show_load_progress, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedBorrowed(linker, "spring:unsynced-ctrl", "track-units",
@@ -15293,6 +15356,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(215u >= 0u, "generated borrowed Core callback count");
+static_assert(216u >= 0u, "generated borrowed Core callback count");
 
 } // namespace recoil::wasm::core::generated
