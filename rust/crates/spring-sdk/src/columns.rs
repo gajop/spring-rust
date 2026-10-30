@@ -8,7 +8,7 @@
 //! (or written) exactly as the per-unit call reads it, with that call's visibility; an entry
 //! the per-unit call would answer with an error is 0 in `out` and 0 in `found`.
 //!
-//! In Wasm the whole column is one engine call (`spring:columns`, engine `2026.10.31`);
+//! In Wasm the whole column is one engine call (`spring:columns`, engines after `2026.10.3101`);
 //! the native backend runs the per-unit calls.
 
 use crate::capabilities::{Game, Synced};
