@@ -47,6 +47,9 @@ inline constexpr std::string_view TerrainModule = "spring:terrain";
 inline constexpr std::string_view ConfigModule = "spring:config";
 inline constexpr std::string_view BenchmarkModule = "spring:benchmark";
 inline constexpr std::string_view CusModule = "spring:cus";
+// One property of many units a call, as planes of 4-byte values; see
+// WasmCoreColumnsBindings.cpp.
+inline constexpr std::string_view ColumnsModule = "spring:columns";
 // Nondeterministic by design and available to synced guests; see
 // WasmCoreDesyncBindings.cpp.
 inline constexpr std::string_view DesyncModule = "spring:desync";
@@ -82,6 +85,11 @@ inline constexpr ImportDescriptor kImports[] = {
 	{"spring:jobs", "submit", "i32,i32,i32,i32->i64", AllEnvironmentMask},
 	{"spring:jobs", "submit-to", "i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
 	{"spring:jobs", "run-batch-to", "i32,i32,i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
+	// Reads run each entry through the per-unit import's own native read, with its visibility;
+	// writes are synced only, as the per-unit setters are.
+	{ColumnsModule, "get-units", "i32,i32,i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
+	{ColumnsModule, "set-units", "i32,i32,i32,i32,i32,i32,i32,i32->i64", SyncedEnvironmentMask},
+	{ColumnsModule, "get-units-rules-param", "i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
 	{UnitsInfoModule, "get-unit-def-id", "i32->i64", AllEnvironmentMask},
 	{UnitsInfoModule, "get-unit-team", "i32->i64", AllEnvironmentMask},
 	{UnitsInfoModule, "get-unit-is-dead", "i32->i64", AllEnvironmentMask},
