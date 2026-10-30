@@ -684,6 +684,10 @@ void SpringApp::LoadSpringMenu()
 	if (CLuaMenuController::ActivateInstance(""))
 		return;
 
+	// a game that names its own menu can refuse the engine's default menu in its place
+	if (luaMenuController->Valid() && configHandler->GetBool("RequireLuaMenu"))
+		throw content_error(luaMenuController->FailureMessage());
+
 	if (FLAGS_oldmenu || startScript.empty()) {
 		// old menu
 	#ifdef HEADLESS

@@ -14,6 +14,7 @@
 #include "System/FileSystem/VFSHandler.h"
 #include "System/SafeUtil.h"
 #include "System/Log/ILog.h"
+#include "System/LogOutput.h"
 #include "WasmInterface/core/host/WasmCoreCallinId.h"
 #include "WasmInterface/runtime/WasmEnvironment.h"
 #include "WasmInterface/standalone/WasmStandaloneEnvironment.h"
@@ -22,6 +23,8 @@
 #include "System/Misc/TracyDefs.h"
 
 CONFIG(std::string, DefaultLuaMenu).defaultValue("").description("Sets the default menu to be used when spring is started.");
+
+CONFIG(bool, RequireLuaMenu).defaultValue(false).description("When a menu archive is given (-menu or DefaultLuaMenu) and none of its menus load, stop with an error naming the cause instead of opening the engine's default menu.");
 
 CLuaMenuController* luaMenuController = nullptr;
 
@@ -94,6 +97,15 @@ bool CLuaMenuController::Activate(const std::string& msg)
 bool CLuaMenuController::ActivateInstance(const std::string& msg)
 {
 	return (luaMenuController->Valid() && luaMenuController->Activate(msg));
+}
+
+std::string CLuaMenuController::FailureMessage() const
+{
+	std::string message = "The menu \"" + menuArchive + "\" did not load.\n\n";
+	if (m_wasmEnv != nullptr)
+		message += m_wasmEnv->LastError();
+	message += "\nLog: " + logOutput.GetFilePath();
+	return message;
 }
 
 void CLuaMenuController::ResizeEvent()

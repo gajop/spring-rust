@@ -11,6 +11,41 @@
 #include "System/Threading/ThreadPool.h"
 #include "System/TimeUtil.h"
 
+#ifdef _WIN32
+	#include <cstdio>
+	#include <nowide/convert.hpp>
+
+// unzOpen hands its UTF-8 path to fopen, which reads it in the ANSI code page; a folder
+// name outside ASCII (a user name, a translated "Desktop") then cannot be opened.
+static voidpf ZCALLBACK WideOpen(voidpf, const void* fileName, int mode)
+{
+	const wchar_t* access = nullptr;
+	if ((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER) == ZLIB_FILEFUNC_MODE_READ)
+		access = L"rb";
+	else if ((mode & ZLIB_FILEFUNC_MODE_EXISTING) != 0)
+		access = L"r+b";
+	else if ((mode & ZLIB_FILEFUNC_MODE_CREATE) != 0)
+		access = L"wb";
+
+	if (fileName == nullptr || access == nullptr)
+		return nullptr;
+
+	return _wfopen(nowide::widen(static_cast<const char*>(fileName)).c_str(), access);
+}
+#endif
+
+static unzFile OpenZip(const std::string& path)
+{
+#ifdef _WIN32
+	zlib_filefunc64_def functions;
+	fill_fopen64_filefunc(&functions);
+	functions.zopen64_file = WideOpen;
+	return unzOpen2_64(path.c_str(), &functions);
+#else
+	return unzOpen(path.c_str());
+#endif
+}
+
 IArchive* CZipArchiveFactory::DoCreateArchive(const std::string& filePath) const
 {
 	return new CZipArchive(filePath);
@@ -26,7 +61,7 @@ CZipArchive::CZipArchive(const std::string& archiveName)
 
 	unzFile zip = nullptr;
 
-	if ((zip = unzOpen(archiveName.c_str())) == nullptr) {
+	if ((zip = OpenZip(archiveName)) == nullptr) {
 		LOG_L(L_ERROR, "[%s] error opening \"%s\"", __func__, archiveName.c_str());
 		return;
 	}
@@ -130,7 +165,7 @@ int CZipArchive::GetFileImpl(uint32_t fid, std::vector<std::uint8_t>& buffer)
 	unzFile& thisThreadZip = zipPerThread[tnum];
 
 	if (!thisThreadZip) {
-		thisThreadZip = unzOpen(GetArchiveFile().c_str());
+		thisThreadZip = OpenZip(GetArchiveFile());
 	}
 
 	// Prevent opening files on missing/invalid archives

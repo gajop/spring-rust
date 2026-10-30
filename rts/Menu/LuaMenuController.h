@@ -20,6 +20,8 @@ public:
 	bool Activate(const std::string& msg);
 
 	static bool ActivateInstance(const std::string& msg);
+	/// Names the menu, why its modules did not load, and the infolog.
+	std::string FailureMessage() const;
 
 	int KeyReleased(int keyCode, int scanCode) override;
 	int KeyPressed(int keyCode, int scanCode, bool isRepeat) override;

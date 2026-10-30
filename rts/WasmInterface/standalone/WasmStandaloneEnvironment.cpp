@@ -182,8 +182,10 @@ std::unique_ptr<WasmStandaloneEnvironment> WasmStandaloneEnvironment::Create()
 bool WasmStandaloneEnvironment::LoadManifest(const std::string& manifestPath)
 {
 	CFileHandler file(manifestPath, SPRING_VFS_RAW_FIRST);
-	if (!file.FileExists())
+	if (!file.FileExists()) {
+		m_lastError += manifestPath + ": not found\n";
 		return false;
+	}
 
 	std::string manifest;
 	manifest.resize(file.FileSize());
@@ -203,6 +205,7 @@ bool WasmStandaloneEnvironment::LoadManifest(const std::string& manifestPath)
 				return true;
 			}, error)) {
 		LOG_L(L_ERROR, "Failed to load manifest %s: %s", manifestPath.c_str(), error.c_str());
+		m_lastError += manifestPath + ": " + error + "\n";
 		return false;
 	}
 
@@ -218,18 +221,23 @@ bool WasmStandaloneEnvironment::TryLoadNativeDLL(const std::string& pathStem)
 	auto tempPath = CopyToTemp(resolvedPath, SPRING_VFS_MENU_BASE);
 	if (!tempPath.has_value())
 		tempPath = CopyToTemp(resolvedPath, nullptr);
-	if (!tempPath.has_value())
+	if (!tempPath.has_value()) {
+		m_lastError += resolvedPath + ": not found or could not be copied to " + fs::temp_directory_path().string() + "\n";
 		return false;
+	}
 
 	auto lib = std::unique_ptr<SharedLib>(SharedLib::Instantiate(tempPath->string()));
 	if (!lib) {
 		LOG_L(L_ERROR, "Failed to open native module %s", tempPath->string().c_str());
+		// An antivirus program can refuse a library written to the temp folder.
+		m_lastError += resolvedPath + ": the system did not load its copy " + tempPath->string() + " (an antivirus program can block it)\n";
 		return false;
 	}
 
 	uint32_t* moduleVersion = static_cast<uint32_t*>(lib->FindAddress("NativeModuleApiVersion"));
 	if (moduleVersion == nullptr) {
 		LOG_L(L_ERROR, "Module does not export NativeModuleApiVersion - incompatible module");
+		m_lastError += resolvedPath + ": not a native module\n";
 		return false;
 	}
 
@@ -238,6 +246,7 @@ bool WasmStandaloneEnvironment::TryLoadNativeDLL(const std::string& pathStem)
 	if (moduleMajor != hostMajor) {
 		LOG_L(L_ERROR, "Incompatible API version: module major %u, host major %u",
 			moduleMajor, hostMajor);
+		m_lastError += resolvedPath + ": built for another engine version\n";
 		return false;
 	}
 
@@ -246,6 +255,7 @@ bool WasmStandaloneEnvironment::TryLoadNativeDLL(const std::string& pathStem)
 	if (moduleMinor > hostMinor) {
 		LOG_L(L_ERROR, "Incompatible API version: module minor %u > host minor %u",
 			moduleMinor, hostMinor);
+		m_lastError += resolvedPath + ": needs a newer engine\n";
 		return false;
 	}
 
@@ -254,6 +264,7 @@ bool WasmStandaloneEnvironment::TryLoadNativeDLL(const std::string& pathStem)
 	if (const auto* environment = static_cast<const uint32_t*>(lib->FindAddress("NativeModuleEnvironment"));
 		environment != nullptr && *environment != (1u << 5)) {
 		LOG_L(L_ERROR, "Native module environment %u is not menu", *environment);
+		m_lastError += resolvedPath + ": not a menu module\n";
 		return false;
 	}
 
@@ -269,6 +280,7 @@ bool WasmStandaloneEnvironment::TryLoadNativeDLL(const std::string& pathStem)
 	m_eventClient->Initialize();
 	if (!m_eventClient->IsInitialized()) {
 		LOG_L(L_ERROR, "Native menu module failed to initialize: %s", resolvedPath.c_str());
+		m_lastError += resolvedPath + ": failed to initialize\n";
 		RemoveEventClient();
 		m_sharedLib.reset();
 		return false;

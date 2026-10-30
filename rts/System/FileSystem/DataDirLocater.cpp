@@ -455,21 +455,8 @@ void DataDirLocater::Check()
 	// Filter usable DataDirs
 	FilterUsableDataDirs();
 
-	if (writeDir == nullptr) {
-		// bail out
-		const std::string errstr =
-				"Not a single writable data directory found!\n\n"
-				"Configure a writable data directory using either:\n"
-				"- the SPRING_DATADIR environment variable,\n"
-			#ifdef _WIN32
-				"- a SpringData=C:/path/to/data declaration in spring's config file ./springsettings.cfg\n"
-				"- by giving your user-account write access to the installation directory";
-			#else
-				"- a SpringData=/path/to/data declaration in ~/.springrc or\n"
-				"- the configuration file /etc/spring/datadir";
-			#endif
-		throw content_error(errstr);
-	}
+	if (writeDir == nullptr)
+		ThrowNoWriteDir();
 
 	if (Platform::FreeDiskSpace(writeDir->path) <= 1024)
 		throw content_error("not enough free space on drive containing writeable data-directory " + writeDir->path);
@@ -488,8 +475,26 @@ void DataDirLocater::CreateCacheDir(const std::string& cacheDir)
 }
 
 
+void DataDirLocater::ThrowNoWriteDir() const
+{
+	std::string errstr = "No folder Recoil can write to.\n\nTried:\n";
+	for (const DataDir& d: dataDirs)
+		errstr += "- " + d.path + "\n";
+	errstr +=
+	#ifdef _WIN32
+		"\nA folder inside OneDrive, Desktop or Documents can refuse writes (Controlled folder access, sync).\n"
+		"Move the game folder to one such as C:\\Games, or set SPRING_WRITEDIR to a writable folder.";
+	#else
+		"\nSet SPRING_WRITEDIR to a writable folder or give your account write access to one of these.";
+	#endif
+	throw content_error(errstr);
+}
+
 void DataDirLocater::ChangeCwdToWriteDir()
 {
+	if (writeDir == nullptr)
+		ThrowNoWriteDir();
+
 	// for now, chdir to the data directory as a safety measure:
 	// Not only safety anymore, it's just easier if other code can safely assume that
 	// writeDir == current working directory
