@@ -45,6 +45,7 @@ The engine `CTimeProfiler` (and the `benchmark` tool) report three peer buckets:
 - **Zero, one, or many** sim frames per draw frame — if the client falls behind, pending sim frames burst in the next iteration to catch up.
 - Visuals interpolate between sim frames, so draw rate can exceed sim rate without stutter.
 - Sim time is carefully budgeted and scheduled against draw frames (because they run serially) so there's always a minimum fps for the player
+- The headless engine draws nothing: it runs a draw frame (unsynced update, interface, draw callins) at most `HeadlessDrawRate` times a second and sleeps between simulation frames instead, and as a host its own load counts against `HeadlessSimShare` of its main thread rather than a rendered host's 60–75%. Headless benchmarks therefore measure the simulation, not the draw loop.
 
 ## Multi-threading
 
