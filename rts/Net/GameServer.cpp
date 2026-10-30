@@ -72,6 +72,8 @@ CONFIG(int, AutohostPort).defaultValue(0).description("Which port should the eng
 CONFIG(int, ServerSleepTime).defaultValue(5).description("Number of milliseconds to sleep per tick for the server thread. Lower values have marginally higher CPU load, while high values can introduce additional latency.");
 CONFIG(int, SpeedControl).defaultValue(1).minimumValue(1).maximumValue(2)
 	.description("Sets how server adjusts speed according to player's load (CPU), 1: use average, 2: use highest");
+CONFIG(float, HeadlessSimShare).defaultValue(0.95f).minimumValue(0.1f).maximumValue(0.99f)
+	.description("Headless engine hosting a game: the share of its main thread the speed control lets the simulation take. A rendered host keeps part of its time for draw frames (60 or 75% by SpeedControl, MinSimDrawBalance); the headless engine draws nothing.");
 CONFIG(bool, AllowSpectatorJoin).defaultValue(true).dedicatedValue(false).description("allow any unauthenticated clients to join as spectator with any name, name will be prefixed with ~");
 CONFIG(bool, WhiteListAdditionalPlayers).defaultValue(true);
 CONFIG(bool, ServerRecordDemos).defaultValue(false).dedicatedValue(true);
@@ -888,6 +890,25 @@ void CGameServer::LagProtection()
 	cpu.reserve(players.size());
 	ping.reserve(players.size());
 
+	/* We don't actually aim to maintain the average sim FPS. We want to keep each frame sim time
+	 * under the nominal average. For example at 30 sim FPS, we want to keep all frames under ~33ms.
+	 * But frames have some distribution in how long they run, which isn't entirely predictable on
+	 * engine side (especially due to unequal load distribution in gameside Lua). And these long and
+	 * short frames don't cancel each other out nicely - you get stuttering and miss draw frames.
+	 * This means that we will necessarily have some idle time because the average frame time is now
+	 * lower than the nominal sim FPS, i.e. the ideal CPU% to aim at is less than 100%. The constants
+	 * below have been determined empirically. The max is of course higher than the median. */
+	const float wantedCpuUsage = (curSpeedCtrl == 1) ?  0.60f : 0.75f;
+
+#if defined(HEADLESS)
+	// the headless host draws nothing: its own client may give the simulation all but
+	// HeadlessSimShare's margin, so its load counts against that share instead
+	static const float headlessSimShare = configHandler->GetFloat("HeadlessSimShare");
+	const float localCpuScale = wantedCpuUsage / headlessSimShare;
+#else
+	const float localCpuScale = 1.0f;
+#endif
+
 	// detect reference cpu usage ( highest )
 	float refCpuUsage = 0.0f;
 	for (GameParticipant& player: players) {
@@ -896,7 +917,7 @@ void CGameServer::LagProtection()
 			const int curPing = ((serverFrameNum - player.lastFrameResponse) * 1000) / (GAME_SPEED * internalSpeed);
 			Broadcast(CBaseNetProtocol::Get().SendPlayerInfo(player.id, player.cpuUsage, curPing));
 
-			const float playerCpuUsage = player.cpuUsage;
+			const float playerCpuUsage = player.cpuUsage * (player.isLocal ? localCpuScale : 1.0f);
 			const float correctedCpu   = std::clamp(playerCpuUsage, 0.0f, 1.0f);
 
 			if (player.isReconn && curPing < 2 * GAME_SPEED)
@@ -934,16 +955,6 @@ void CGameServer::LagProtection()
 		//internalSpeed holds the current speed the sim is running
 		//refCpuUsage holds the highest cpu if curSpeedCtrl == 0 or median if curSpeedCtrl == 1
 
-		/* We don't actually aim to maintain the average sim FPS. We want to keep each frame sim time
-		 * under the nominal average. For example at 30 sim FPS, we want to keep all frames under ~33ms.
-		 * But frames have some distribution in how long they run, which isn't entirely predictable on
-		 * engine side (especially due to unequal load distribution in gameside Lua). And these long and
-		 * short frames don't cancel each other out nicely - you get stuttering and miss draw frames.
-		 * This means that we will necessarily have some idle time because the average frame time is now
-		 * lower than the nominal sim FPS, i.e. the ideal CPU% to aim at is less than 100%. The constants
-		 * below have been determined empirically. The max is of course higher than the median. */
-		float wantedCpuUsage = (curSpeedCtrl == 1) ?  0.60f : 0.75f;
-
 		//the following line can actually make it go faster than wanted normal speed ( userSpeedFactor )
 		//if the current cpu of the target is smaller than the aimed cpu target but the clamp will cap it
 		// the clamp will throttle it to the wanted one, otherwise it's a simple linear proportion aiming
@@ -957,7 +968,11 @@ void CGameServer::LagProtection()
 #ifndef DEDICATED
 		// in non-dedicated hosting, we'll add an additional safeguard to make sure the host can keep up with the game's speed
 		// adjust game speed to localclient's (:= host) maximum SimFrame rate
+#if defined(HEADLESS)
+		const float invSimDrawFract = headlessSimShare;
+#else
 		const float invSimDrawFract = 1.0f - globalConfig.minSimDrawBalance;
+#endif
 		const float maxSimFrameRate = (1000.0f / gu->avgSimFrameTime) * invSimDrawFract;
 
 		const float maxNewSpeed = std::max(0.1f, ((maxSimFrameRate / GAME_SPEED) + internalSpeed) * 0.5f);

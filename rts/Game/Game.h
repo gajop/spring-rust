@@ -116,6 +116,8 @@ private:
 	bool Draw() override;
 	bool Update() override;
 	bool UpdateUnsynced(const spring_time currentTime);
+	/// headless: whether a draw frame is due (HeadlessDrawRate); otherwise waits briefly for the next simulation frame
+	bool HeadlessDrawDue();
 
 	void DrawSkip(bool blackscreen = true);
 	void DrawInputReceivers();
@@ -172,6 +174,7 @@ public:
 	spring_time lastSimFrameNetPacketTime;
 	spring_time lastUnsyncedUpdateTime;
 	spring_time skipLastDrawTime;
+	spring_time lastHeadlessDrawTime;
 
 	float updateDeltaSeconds = 0.0f;
 	/// Time in seconds, stops at game end
@@ -214,6 +217,8 @@ public:
 	 * @see CGameServer#speedControl
 	 */
 	int speedControl = -1;
+	/// draw frames a second at most in the headless engine (HeadlessDrawRate), 0 for no limit
+	int headlessDrawRate = 0;
 
 	// 0 := 1/f rate, 1 := 30/s rate
 	int luaGCControl = 0;
