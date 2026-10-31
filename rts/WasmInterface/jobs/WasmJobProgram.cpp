@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cstdlib>
+#include <string_view>
 #include <limits>
 
 #include "WasmCoreAbi.h"
@@ -18,7 +20,13 @@ struct WasmJobProgram::Backend {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	wasm_engine_t* engine = nullptr;
 	wasmtime_module_t* module = nullptr;
+	// Imports resolved once (every import a trap): each job instantiates from
+	// this into its own fresh store, without building a linker per job.
+	wasmtime_linker_t* linker = nullptr;
+	wasmtime_instance_pre_t* pre = nullptr;
 	~Backend() {
+		if (pre) wasmtime_instance_pre_delete(pre);
+		if (linker) wasmtime_linker_delete(linker);
 		if (module) wasmtime_module_delete(module);
 		if (engine) wasm_engine_delete(engine);
 	}
@@ -42,6 +50,19 @@ std::shared_ptr<WasmJobProgram> WasmJobProgram::FromCompiled(const WasmRuntime& 
 	state->identity = std::move(identity) + "|" + runtime.ConfigurationIdentity() +
 		(moduleEngine != runtimeEngine ? "|nan-canonicalization-fallback=all" : "");
 	state->module = wasmtime_module_clone(static_cast<wasmtime_module_t*>(compiledModule));
+	// `SPRING_WASM_JOB_INSTANCE_PRE=0`: a linker per job, as before (to compare).
+	const char* pre = std::getenv("SPRING_WASM_JOB_INSTANCE_PRE");
+	if (pre == nullptr || std::string_view(pre) != "0") {
+		state->linker = wasmtime_linker_new(state->engine);
+		wasmtime_error_t* error = state->linker == nullptr ? nullptr :
+			wasmtime_linker_define_unknown_imports_as_traps(state->linker, state->module);
+		if (error == nullptr && state->linker != nullptr)
+			error = wasmtime_linker_instantiate_pre(state->linker, state->module, &state->pre);
+		if (error != nullptr) {
+			wasmtime_error_delete(error);
+			state->pre = nullptr;
+		}
+	}
 	return std::shared_ptr<WasmJobProgram>(new WasmJobProgram(std::move(state)));
 #else
 	return nullptr;
@@ -117,16 +138,23 @@ WasmJobResult WasmJobProgram::Run(std::string_view exportName,
 		if (auto* error = wasmtime_context_set_fuel(context, backend->config.instructionFuel))
 			return fail(WasmJobStatus::RuntimeFailure, ErrorMessage(error));
 	}
-	linker.reset(wasmtime_linker_new(backend->engine));
-	if (!linker)
-		return fail(WasmJobStatus::RuntimeFailure, "Cannot create job linker");
-	// Workers have NO engine, clock, RNG or submission capabilities. A source
-	// rules module can import them, but calling any import in a job traps.
-	if (auto* error = wasmtime_linker_define_unknown_imports_as_traps(linker.get(), backend->module))
-		return fail(WasmJobStatus::RuntimeFailure, ErrorMessage(error));
 	wasmtime_instance_t instance{};
 	wasm_trap_t* trap = nullptr;
-	if (auto* error = wasmtime_linker_instantiate(linker.get(), context, backend->module, &instance, &trap)) {
+	wasmtime_error_t* instantiateError = nullptr;
+	if (backend->pre != nullptr) {
+		// The same imports as below, resolved once for every job.
+		instantiateError = wasmtime_instance_pre_instantiate(backend->pre, context, &instance, &trap);
+	} else {
+		linker.reset(wasmtime_linker_new(backend->engine));
+		if (!linker)
+			return fail(WasmJobStatus::RuntimeFailure, "Cannot create job linker");
+		// Workers have NO engine, clock, RNG or submission capabilities. A source
+		// rules module can import them, but calling any import in a job traps.
+		if (auto* error = wasmtime_linker_define_unknown_imports_as_traps(linker.get(), backend->module))
+			return fail(WasmJobStatus::RuntimeFailure, ErrorMessage(error));
+		instantiateError = wasmtime_linker_instantiate(linker.get(), context, backend->module, &instance, &trap);
+	}
+	if (auto* error = instantiateError) {
 		std::string diagnostic = ErrorMessage(error);
 		if (trap) diagnostic += TrapMessage(trap);
 		return fail(WasmJobStatus::RuntimeFailure, std::move(diagnostic));

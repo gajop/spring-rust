@@ -32,6 +32,9 @@
 
 #include "System/Misc/TracyDefs.h"
 
+#include <cstdlib>
+#include <string_view>
+
 
 CR_BIND_DERIVED_POOL(CFeature, CSolidObject, , featureMemPool.allocMem, featureMemPool.freeMem)
 
@@ -59,6 +62,12 @@ CR_REG_METADATA(CFeature, (
 
 	CR_MEMBER(solidOnTop),
 	CR_MEMBER(transMatrix),
+	CR_IGNORED(transformVersion),
+	CR_IGNORED(prevFrameVersion),
+	CR_IGNORED(drawPosVersion),
+	CR_IGNORED(drawPosAt),
+	CR_IGNORED(drawPosSettled),
+	CR_IGNORED(restless),
 
 	CR_POSTLOAD(PostLoad)
 ))
@@ -517,9 +526,28 @@ void CFeature::ForcedSpin(const float3& newFrontDir, const float3& newRightDir)
 	UpdateTransform(pos, true);
 }
 
+bool CFeature::RestSkips()
+{
+	static const bool skips = [] {
+		const char* value = std::getenv("SPRING_FEATURE_REST");
+		return value == nullptr || std::string_view(value) != "0";
+	}();
+	return skips;
+}
+
+void CFeature::TransformChanged(bool synced)
+{
+	if (!synced)
+		return;
+
+	transformVersion += 1;
+	featureHandler.MarkRestless(this);
+}
+
 void CFeature::UpdateTransform(const float3& p, bool synced)
 {
 	transMatrix[synced] = std::move(ComposeMatrix(p));
+	TransformChanged(synced);
 
 	if (synced)
 		CondUpdatePrevTransform();

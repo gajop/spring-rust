@@ -13,6 +13,8 @@
 #include "System/Platform/errorhandler.h"
 #include "System/Platform/Threading.h"
 #include "System/Platform/Misc.h"
+#include "System/Platform/MessageBox.h"
+#include "System/SpringExitCode.h"
 #include "System/Platform/LeakSanitizerSuppressions.h"
 #include "System/Log/ILog.h"
 
@@ -21,6 +23,7 @@
 #include <clocale>
 #include <cstdlib>
 #include <cstdint>
+#include <memory>
 
 #ifdef _WIN32
 	#include "lib/SOP/SOP.hpp" // NvOptimus
@@ -47,9 +50,18 @@ int Run(int argc, char* argv[])
 	Threading::SetMainThread();
 
 	LOG("%s: thread affinity %x", __func__, Threading::GetAffinity());
-	SpringApp app(argc, argv);
+	// The data directories and the config are set up while SpringApp is constructed, before
+	// the error handlers run; say why it could not start rather than terminate silently.
+	std::unique_ptr<SpringApp> app;
+	try {
+		app = std::make_unique<SpringApp>(argc, argv);
+	} catch (const std::exception& e) {
+		LOG_L(L_FATAL, "%s", e.what());
+		Platform::MsgBox(e.what(), "Recoil could not start", MBF_OK | MBF_EXCL);
+		return spring::EXIT_CODE_FAILURE;
+	}
 	LOG("%s: thread affinity %x", __func__, Threading::GetAffinity());
-	return (app.Run());
+	return (app->Run());
 }
 
 

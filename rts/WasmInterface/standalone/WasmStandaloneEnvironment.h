@@ -35,6 +35,8 @@ public:
 	void Update();
 	bool HasModules(WasmEnvironment environment) const;
 	bool HasNativeModule() const { return m_nativeModuleLoaded; }
+	/// Why the native module or manifest did not load, one line per attempt.
+	const std::string& LastError() const { return m_lastError; }
 	WasmInterfaceSystem* GetWasmSystem() const;
 	NativeInterface* GetNativeInterface() const;
 
@@ -46,4 +48,5 @@ private:
 	std::unique_ptr<NativeInterfaceEventClient> m_eventClient;
 	std::unique_ptr<SharedLib> m_sharedLib;
 	bool m_nativeModuleLoaded = false;
+	std::string m_lastError;
 };

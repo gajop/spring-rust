@@ -84,6 +84,8 @@ pub mod gfx;
 #[cfg(feature = "alloc")]
 pub mod job_batch;
 #[cfg(target_arch = "wasm32")]
+pub mod columns;
+#[cfg(target_arch = "wasm32")]
 pub mod jobs;
 #[cfg(target_arch = "wasm32")]
 pub mod math_extra;

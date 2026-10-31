@@ -65,6 +65,8 @@ public:
 	void LoadFeaturesFromMap();
 
 	void SetFeatureUpdateable(CFeature* feature);
+	/// The feature's transform changed: its previous-frame transform is saved again next frame.
+	void MarkRestless(CFeature* feature);
 	void TerrainChanged(int x1, int y1, int x2, int y2);
 
 	const spring::unordered_set<int>& GetActiveFeatureIDs() const { return activeFeatureIDs; }
@@ -90,6 +92,8 @@ private:
 	std::vector<int> deletedFeatureIDs;
 	std::vector<CFeature*> features;
 	std::vector<CFeature*> updateFeatures;
+	/// Features whose transform changed since the last previous-frame save (by ID; not saved).
+	std::vector<int> restlessIDs;
 };
 
 extern CFeatureHandler featureHandler;

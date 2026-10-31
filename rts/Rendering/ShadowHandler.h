@@ -3,6 +3,7 @@
 #ifndef SHADOW_HANDLER_H
 #define SHADOW_HANDLER_H
 
+#include <algorithm>
 #include <array>
 #include <limits>
 #include <string>
@@ -91,6 +92,8 @@ public:
 
 	bool ShadowsLoaded() const { return shadowsLoaded; }
 	bool InShadowPass() const { return inShadowPass; }
+	// world length one shadow-map texel covers across the light
+	float GetTexelWorldSize() const { return shadowProjScales.x / std::max(shadowMapSize, 1); }
 
 	void SaveShadowMapTextures() const;
 	void DrawFrustumDebug() const;

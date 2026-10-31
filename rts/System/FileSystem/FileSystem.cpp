@@ -427,11 +427,23 @@ bool FileSystem::DirExists(const std::string& dirStr)
 
 bool FileSystem::DirIsWritable(const std::string& dirStr)
 {
-#if 1
 	auto dir = Recoil::filesystem::u8path(dirStr);
 	if (!DirExists(dir))
 		return false;
 
+#ifdef _WIN32
+	// Windows permission bits only reflect the read-only attribute. An ACL, Controlled
+	// folder access or a cloud-synced folder can still refuse this process's writes, so
+	// create (and on close delete) a probe file as this process.
+	const std::wstring probe = (dir / fmt::format(".spring-write-probe-{}-{}", GetCurrentProcessId(), GetTickCount64())).wstring();
+	const HANDLE handle = CreateFileW(probe.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW,
+		FILE_ATTRIBUTE_TEMPORARY | FILE_ATTRIBUTE_HIDDEN | FILE_FLAG_DELETE_ON_CLOSE, nullptr);
+	if (handle == INVALID_HANDLE_VALUE)
+		return false;
+
+	CloseHandle(handle);
+	return true;
+#else
 	std::error_code ec;
 	auto perms = fs::status(dir, ec).permissions();
 	if (ec)
@@ -441,44 +453,6 @@ bool FileSystem::DirIsWritable(const std::string& dirStr)
 		(perms & fs::perms::owner_write ) != fs::perms::none ||
 		(perms & fs::perms::group_write ) != fs::perms::none ||
 		(perms & fs::perms::others_write) != fs::perms::none;
-#else
-	#ifdef _WIN32
-		// this exists because _access does not do the right thing
-		// see http://msdn.microsoft.com/en-us/library/1w06ktdy(VS.71).aspx
-		// for now, try to create a temporary file in a directory and open it
-		// to rule out the possibility of it being created in the virtual store
-		// TODO perhaps use SECURITY_DESCRIPTOR winapi calls here
-
-		std::string testfile = dirStr + "\\__$testfile42$.test";
-		nowide::ofstream os(testfile.c_str());
-
-		if (os.fail())
-			return false;
-
-		const char* testdata = "THIS IS A TEST";
-		os << testdata;
-		os.close();
-
-		// this part should only be needed when there is no manifest embedded
-		nowide::ifstream is(testfile.c_str());
-
-		if (is.fail())
-			return false; // the file most likely exists in the virtual store
-
-		std::string input;
-		getline(is, input);
-
-		if (input != testdata) {
-			unlink(testfile.c_str());
-			return false;
-		}
-
-		is.close();
-		unlink(testfile.c_str());
-		return true;
-	#else
-		return (access(dir.c_str(), W_OK) == 0);
-	#endif
 #endif
 }
 

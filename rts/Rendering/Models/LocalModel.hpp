@@ -56,6 +56,7 @@ struct LocalModel
 	void UpdateBoundingVolume();
 	void SavePrevModelSpaceTransforms();
 	void SetPrevModelSpaceNeedsUpdate() const { prevModelSpaceNeedsUpdate = true; prevModelSpaceFullSweep = true; }
+	bool PrevModelSpaceNeedsUpdate() const { return prevModelSpaceNeedsUpdate; }
 	void SetPrevModelSpaceNeedsUpdate(const LocalModelPiece* piece) const;
 	void PostLoad() { SetPrevModelSpaceNeedsUpdate(); }
 

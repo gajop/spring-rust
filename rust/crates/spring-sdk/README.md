@@ -70,6 +70,13 @@ instances. Workers take owned input snapshots and must not access mutable
 globals or engine functions. See the design notes for limits and delivery timing.
 Nested native Update calls run immediately; only the outer call advances jobs.
 
+`spring.columns()` reads or writes one property of many units in one engine call:
+`get_units_f32(UnitColumn::Velocity, &ids, ColumnArg::None, &mut out, Some(&mut found))`
+fills every unit's x, then every y, then every z. Each entry reads as the per-unit call reads
+it; refused entries are 0 and marked in `found`. `set_units_f32` (synced) writes MoveCtrl
+velocity or direction; `get_units_rules_param_f32` reads a float rules parameter. See
+[the property list and ABI](../../../rts/wasm/docs/columns_2026-10-31.md).
+
 The SDK depends on private `spring-sdk-internal` transport code and native FFI
 bindings. It no longer depends on the legacy public `spring` or `spring-native`
 APIs. The old `spring` crate temporarily re-exports the internal implementation

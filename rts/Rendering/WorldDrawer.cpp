@@ -1,5 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include <cstdlib>
+
 #include "Rendering/GL/myGL.h"
 #include "Rendering/GL/FBO.h"
 
@@ -377,8 +379,31 @@ void CWorldDrawer::DrawOpaqueObjects() const
 	{
 		SCOPED_TIMER("Draw::World::Models::Opaque");
 		SCOPED_GL_DEBUGGROUP("Draw::World::Models::Opaque");
+		// `SPRING_MODEL_OVERDRAW=1`: fragments the opaque models write, per screen pixel, logged
+		// every 120 drawn frames (a diagnostic: how many times a pixel is shaded over).
+		static const bool overdraw = [] {
+			const char* value = std::getenv("SPRING_MODEL_OVERDRAW");
+			return value != nullptr && value[0] == '1';
+		}();
+		static GLuint queries[2] = {0, 0};
+		static unsigned frame = 0;
+		if (overdraw) {
+			if (queries[0] == 0)
+				glGenQueries(2, queries);
+			glBeginQuery(GL_SAMPLES_PASSED, queries[frame & 1]);
+		}
 		unitDrawer->Draw(false);
 		featureDrawer->Draw(false);
+		if (overdraw) {
+			glEndQuery(GL_SAMPLES_PASSED);
+			// Last frame's count, read a frame late so the GPU is not waited on.
+			if (++frame > 1 && frame % 120 == 0) {
+				GLuint64 samples = 0;
+				glGetQueryObjectui64v(queries[frame & 1], GL_QUERY_RESULT, &samples);
+				const double pixels = double(globalRendering->viewSizeX) * globalRendering->viewSizeY;
+				LOG("[overdraw] opaque models wrote %.0f fragments, %.2f per screen pixel", double(samples), samples / pixels);
+			}
+		}
 	}
 	{
 		SCOPED_TIMER("Draw::World::Models::Projectiles");

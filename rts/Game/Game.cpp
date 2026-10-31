@@ -162,6 +162,7 @@ CONFIG(int, ShowPlayerInfo).defaultValue(1).headlessValue(0);
 CONFIG(float, GuiOpacity).defaultValue(0.8f).minimumValue(0.0f).maximumValue(1.0f).description("Sets the opacity of the built-in Spring UI. Generally has no effect on LuaUI widgets. Can be set in-game using shift+, to decrease and shift+. to increase.");
 CONFIG(std::string, InputTextGeo).defaultValue("");
 
+CONFIG(int, HeadlessDrawRate).defaultValue(30).minimumValue(0).description("Headless engine only: draw frames a second at most (each runs the unsynced update, the interface and the draw callins), 0 for no limit. The headless engine renders nothing; between its draw frames the main thread waits for the next simulation frame instead of drawing again.");
 CONFIG(int, SmoothTimeOffset).defaultValue(0).headlessValue(0).description("Enables frametimeoffset smoothing, 0 = off (old version), -1 = forced 0.5,  1-20 smooth, recommended = 2-3");
 
 CGame* game = nullptr;
@@ -263,6 +264,7 @@ CGame::CGame(const std::string& mapFileName, const std::string& modFileName, ILo
 	showSpeed = configHandler->GetBool("ShowSpeed");
 
 	speedControl = configHandler->GetInt("SpeedControl");
+	headlessDrawRate = configHandler->GetInt("HeadlessDrawRate");
 
 	playerRoster.SetSortTypeByCode((PlayerRoster::SortType)configHandler->GetInt("ShowPlayerInfo"));
 
@@ -1508,7 +1510,31 @@ bool CGame::UpdateUnsynced(const spring_time currentTime)
 }
 
 
+bool CGame::HeadlessDrawDue()
+{
+	if (headlessDrawRate <= 0)
+		return true;
+
+	const spring_time now = spring_gettime();
+
+	if ((now - lastHeadlessDrawTime).toMilliSecsf() * headlessDrawRate >= 1000.0f) {
+		lastHeadlessDrawTime = now;
+		return true;
+	}
+
+	// nothing to draw and no frame waiting: sleep instead of spinning (the server thread
+	// hands out frames every ServerSleepTime milliseconds)
+	if (clientNet->GetNumWaitingServerPackets() == 0)
+		spring_time::fromMicroSecs(250).sleep(true);
+
+	return false;
+}
+
 bool CGame::Draw() {
+#ifdef HEADLESS
+	if (!HeadlessDrawDue())
+		return false;
+#endif
 	spring::game_perf::Frame perfFrame("draw", gs->frameNum);
 	const spring_time currentTimePreUpdate = spring_gettime();
 

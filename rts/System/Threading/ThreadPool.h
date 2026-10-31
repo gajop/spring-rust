@@ -3,6 +3,8 @@
 #ifndef _THREADPOOL_H
 #define _THREADPOOL_H
 
+#include <thread>
+
 #ifndef THREADPOOL
 #include <functional>
 #include <future>
@@ -118,12 +120,16 @@ namespace ThreadPool {
 
 	void PushTaskGroup(ITaskGroup* taskGroup);
 	void PushTaskGroup(std::shared_ptr<ITaskGroup>&& taskGroup);
-	void WaitForFinished(std::shared_ptr<ITaskGroup>&& taskGroup);
+	// `drain`: also wait until every worker queue has released its entry of the group, so the
+	// caller may reset it at once. A pooled group need not: its pool skips a group whose entries
+	// are still queued (SPRING_THREADPOOL_DRAIN=1 drains anyway, as before).
+	void WaitForFinished(std::shared_ptr<ITaskGroup>&& taskGroup, bool drain = true);
+	bool DrainPooledGroups();
 
 	template<typename T>
 	inline void PushTaskGroup(std::shared_ptr<T>& taskGroup) { PushTaskGroup(std::move(std::static_pointer_cast<ITaskGroup>(taskGroup))); } //FIXME std::move? doesn't it delete the original arg?
 	template<typename T>
-	inline void WaitForFinished(std::shared_ptr<T>& taskGroup) { WaitForFinished(std::move(std::static_pointer_cast<ITaskGroup>(taskGroup))); }
+	inline void WaitForFinished(std::shared_ptr<T>& taskGroup, bool drain = true) { WaitForFinished(std::move(std::static_pointer_cast<ITaskGroup>(taskGroup)), drain); }
 
 	void SetMaximumThreadCount();
 	void SetDefaultThreadCount();
@@ -242,6 +248,10 @@ public:
 
 	void UpdateId() { id = lastId.fetch_add(1); }
 	void SetTimeStamp(const spring_time t) { ts = t.toNanoSecsi(); }
+
+	// A pooled group finished without draining its queue entries: no longer in use, and
+	// reset by its pool once no queue holds it.
+	void ReleaseToPool() { taskPoolMask.store(taskPoolMask.load() & (1 << 0)); }
 
 	void ResetState(bool queued, bool pooled, bool inuse) {
 		assert(outstandingQueueEntries.load() == 0);
@@ -766,13 +776,22 @@ struct TaskPool {
 
 
 	FuncTaskGroupPtr GetTaskGroup() {
+		// A group whose last use returned without draining (WaitForFinished's `drain`) may still
+		// sit in a busy worker's queue: take the next one free.
+		for (size_t tries = 0; tries < tgPool.size(); ++tries) {
+			auto tg = tgPool[pos.fetch_add(1) % tgPool.size()];
+			if (tg->IsInJobQueue() || tg->IsInPoolUse())
+				continue;
+			assert(tg->IsFinished());
+			assert(tg->IsInTaskPool());
+			tg->ResetState(true, true, true);
+			return tg;
+		}
 		auto tg = tgPool[pos.fetch_add(1) % tgPool.size()];
-
+		while (tg->IsInJobQueue())
+			std::this_thread::yield();
 		assert(tg->IsFinished());
 		assert(tg->IsInTaskPool());
-		assert(!tg->IsInJobQueue());
-		assert(!tg->IsInPoolUse());
-
 		tg->ResetState(true, true, true);
 		return tg;
 	}
@@ -811,8 +830,9 @@ static inline void for_mt(int start, int end, int step, F&& f)
 		}
 		#endif
 
-		// make calling thread also run ExecuteLoop
-		ThreadPool::WaitForFinished(taskGroup);
+		// make calling thread also run ExecuteLoop; return once the work is done, not once
+		// every worker (one may be busy with a long background task) has dequeued its entry
+		ThreadPool::WaitForFinished(taskGroup, ThreadPool::DrainPooledGroups());
 	}
 }
 

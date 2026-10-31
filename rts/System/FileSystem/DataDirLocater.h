@@ -52,6 +52,8 @@ public:
 
 	const std::vector<DataDir>& GetDataDirs() const;
 	const DataDir* GetWriteDir() const { return writeDir; }
+	/// Explains which folders were tried; thrown when none can be written.
+	[[noreturn]] void ThrowNoWriteDir() const;
 
 	/**
 	 * @brief returns the highest priority writable directory, aka the writedir

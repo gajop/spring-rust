@@ -60,7 +60,7 @@ bool WasmEnvironmentMatrix::HasModule(WasmEnvironment environment, std::string_v
 {
 	if (!IsRuntimeEnabled(environment))
 		return false;
-	if (module == "spring:jobs")
+	if (module == "spring:jobs" || module == "spring:columns")
 		return true;
 	module = recoil::wasm::generated::CanonicalModule(module);
 	const std::uint32_t environmentBit = WasmEnvironmentMatrix::ApiMask(environment);

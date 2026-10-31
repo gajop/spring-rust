@@ -19,6 +19,19 @@
 #include "System/Log/ILog.h"
 #include "System/Platform/Misc.h"
 #include "System/Platform/Win/win32.h"
+#ifdef _WIN32
+	#include <nowide/convert.hpp>
+#endif
+
+// access() takes the ANSI code page on Windows; paths here are UTF-8 (a user folder may not be ASCII).
+static bool CanAccess(const std::string& path, int mode)
+{
+#ifdef _WIN32
+	return (_waccess(nowide::widen(path).c_str(), mode) == 0);
+#else
+	return (access(path.c_str(), mode) == 0);
+#endif
+}
 
 static void AddCfgFile(std::vector<std::string>& locations, const std::string& filepath)
 {
@@ -42,7 +55,7 @@ static void LoadCfgs(std::vector<std::string>& locations, const std::string& def
 
 		// warn user if the file is not both readable and writable
 		// (otherwise it can fail/segfault/end up in virtualstore/...)
-		if (access(defCfg.c_str(), R_OK | W_OK) == -1) {
+		if (!CanAccess(defCfg, R_OK | W_OK)) {
 			#ifndef _WIN32
 			LOG_L(L_WARNING, "default config-file \"%s\" not both readable and writeable", defCfg.c_str());
 			#else
@@ -51,10 +64,10 @@ static void LoadCfgs(std::vector<std::string>& locations, const std::string& def
 		}
 	}
 
-	if (access(verCfg.c_str(), R_OK) != -1)
+	if (CanAccess(verCfg, R_OK))
 		AddCfgFile(locations, verCfg);
 
-	if (access(defCfg.c_str(), R_OK) != -1)
+	if (CanAccess(defCfg, R_OK))
 		AddCfgFile(locations, defCfg);
 }
 

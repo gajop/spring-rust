@@ -3,6 +3,10 @@
 #include "WasmSyncedJobs.h"
 
 #include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <cstdlib>
+#include <string_view>
 #include <exception>
 #include <functional>
 #include <limits>
@@ -14,6 +18,62 @@
 #include "System/Threading/ThreadPool.h"
 
 namespace {
+// `SPRING_WASM_JOB_TIMING=1`: where a job's time goes (instantiation, copies, the
+// export, teardown; summed over workers) and how long the simulation thread spends
+// in same-frame batches and at the next-frame barrier, logged every 900 frames.
+// A local diagnostic: the clocks never reach synced state.
+struct JobClock {
+	using Clock = std::chrono::steady_clock;
+	const bool on = [] {
+		const char* value = std::getenv("SPRING_WASM_JOB_TIMING");
+		return value != nullptr && std::string_view(value) == "1";
+	}();
+	std::atomic<std::uint64_t> jobs{0}, instantiateNs{0}, inputNs{0}, executeNs{0}, outputNs{0}, totalNs{0};
+	std::uint64_t batchNs = 0, barrierNs = 0, batches = 0;
+	int since = -1;
+
+	static std::uint64_t Ns(Clock::time_point a, Clock::time_point b) {
+		return std::uint64_t(std::chrono::duration_cast<std::chrono::nanoseconds>(b - a).count());
+	}
+	WasmJobResult Run(const WasmJobProgram& program, std::string_view exportName,
+		std::span<const std::uint8_t> input, std::size_t maxOutputBytes) {
+		if (!on)
+			return program.Run(exportName, input, nullptr, maxOutputBytes);
+		WasmJobTiming timing;
+		const auto start = Clock::now();
+		auto result = program.Run(exportName, input, &timing, maxOutputBytes);
+		const auto total = Ns(start, Clock::now());
+		jobs.fetch_add(1, std::memory_order_relaxed);
+		instantiateNs.fetch_add(timing.instantiateNs, std::memory_order_relaxed);
+		inputNs.fetch_add(timing.inputCopyNs, std::memory_order_relaxed);
+		executeNs.fetch_add(timing.dispatchNs, std::memory_order_relaxed);
+		outputNs.fetch_add(timing.outputCopyNs, std::memory_order_relaxed);
+		totalNs.fetch_add(total, std::memory_order_relaxed);
+		return result;
+	}
+	void Report(int frame) {
+		if (!on)
+			return;
+		if (since < 0) { since = frame; return; }
+		if (frame - since < 900)
+			return;
+		const double frames = frame - since;
+		const auto n = jobs.exchange(0);
+		const double per = n ? 1e-3 / n : 0; // microseconds a job
+		const double inst = instantiateNs.exchange(0), in = inputNs.exchange(0), exe = executeNs.exchange(0),
+			out = outputNs.exchange(0), total = totalNs.exchange(0);
+		LOG("[Wasm jobs] timing frames %d-%d: %.1f jobs a frame; a job, us: instantiate %.1f, input %.1f, "
+			"execute %.1f, output %.1f, teardown %.1f, whole %.1f; workers' sum %.3f ms a frame (setup and teardown %.3f); "
+			"simulation thread: same-frame batches %.3f ms a frame (%.1f a frame), next-frame barrier %.3f ms a frame",
+			since, frame, n / frames, inst * per, in * per, exe * per, out * per,
+			(total - inst - in - exe - out) * per, total * per, total * 1e-6 / frames,
+			(total - in - exe - out) * 1e-6 / frames, batchNs * 1e-6 / frames, batches / frames, barrierNs * 1e-6 / frames);
+		batchNs = barrierNs = batches = 0;
+		since = frame;
+	}
+};
+JobClock& Timing() { static JobClock clock; return clock; }
+
 // A failed job's status reaches the game as synced bytes; its diagnostic (the
 // trap message) only this machine's log, so a game can tell a trap from a limit.
 void LogFailure(std::string_view kind, std::uint32_t id, int frame, const std::string& exportName,
@@ -124,7 +184,12 @@ std::vector<WasmSyncedJobs::Delivery> WasmSyncedJobs::BeginFrame(int frame)
 	{
 		ZoneNamedN(barrier, "Wasm::Jobs::Barrier", !state->active.empty());
 		ZoneValueV(barrier, frame);
+		const auto start = JobClock::Clock::now();
 		state->Wait();
+		if (Timing().on && state->mode == Mode::Synced) {
+			Timing().barrierNs += JobClock::Ns(start, JobClock::Clock::now());
+			Timing().Report(frame);
+		}
 	}
 	ZoneNamedN(collect, "Wasm::Jobs::Collect", !state->active.empty());
 	ZoneValueV(collect, frame);
@@ -216,15 +281,20 @@ WasmSyncedJobs::BatchStatus WasmSyncedJobs::RunBatch(void* owner,
 	if (ZoneIsActive)
 		ZoneTextF("frame=%d jobs=%zu input=%zu output-reserved=%zu threads=%d export=%s",
 			state->frame, inputs.size(), inputBytes, outputBytes, ThreadPool::GetNumThreads(), exportName.c_str());
+	const auto batchStart = JobClock::Clock::now();
 	for_mt(0, inputs.size(), 1, [&](int index) {
 		ZoneScopedN("Wasm::Jobs::BatchWorker");
 		ZoneValue(index);
 		try {
-			completed[index] = program->Run(exportName, inputs[index].bytes, nullptr, inputs[index].maxOutputBytes);
+			completed[index] = Timing().Run(*program, exportName, inputs[index].bytes, inputs[index].maxOutputBytes);
 		} catch (...) {
 			exceptions[index] = std::current_exception();
 		}
 	});
+	if (Timing().on) {
+		Timing().batchNs += JobClock::Ns(batchStart, JobClock::Clock::now());
+		Timing().batches++;
+	}
 	// The whole barrier completes before publishing even the first result.
 	for (std::size_t i = 0; i < completed.size(); ++i) {
 		if (exceptions[i]) std::rethrow_exception(exceptions[i]);
@@ -310,7 +380,7 @@ void WasmSyncedJobs::State::Seal()
 				job.id, ThreadPool::GetThreadNum(), static_cast<int>(job.profileOwner.size()), job.profileOwner.data(),
 				job.exportName.c_str(), job.program->Identity().c_str(), job.input.size());
 		try {
-			batch->results[index] = job.program->Run(job.exportName, job.input);
+			batch->results[index] = Timing().Run(*job.program, job.exportName, job.input, 1024 * 1024);
 		} catch (...) {
 			batch->exceptions[index] = std::current_exception();
 		}

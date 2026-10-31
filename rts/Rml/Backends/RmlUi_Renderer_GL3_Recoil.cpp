@@ -29,6 +29,9 @@
  */
 
 #include "RmlUi_Renderer_GL3_Recoil.h"
+
+#include <algorithm>
+#include <cmath>
 #include "RmlUi_Backend.h"
 #include <RmlUi/Core/Log.h>
 
@@ -40,6 +43,7 @@
 #include "Rendering/Shaders/ShaderHandler.h"
 #include "Rendering/Textures/Bitmap.h"
 #include "System/Log/ILog.h"
+#include "System/Config/ConfigHandler.h"
 #include "RmlUi/Core/Mesh.h"
 #include "RmlUi/Core/Colour.h"
 #include "RmlUi/Core/MeshUtilities.h"
@@ -49,7 +53,11 @@
 #include "RmlUi/Core/DecorationTypes.h"
 
 // Determines the anti-aliasing quality when creating layers. Enables better-looking visuals, especially when transforms are applied.
-static constexpr int NUM_MSAA_SAMPLES = 2;
+CONFIG(int, RmlMSAA)
+	.defaultValue(2)
+	.minimumValue(0)
+	.maximumValue(8)
+	.description("Samples of the RmlUi interface's layers: 2 smooths rounded and slanted edges; 0 draws them without multisampling, for less memory traffic. Read when the layers are made (window size changes).");
 
 #define MAX_NUM_STOPS 16
 #define BLUR_SIZE 7
@@ -473,6 +481,8 @@ struct CompiledGeometryData
 	std::unique_ptr<VBO> vbo;
 	std::unique_ptr<VBO> ibo;
 	GLsizei num_indices = 0;
+	// The vertices' bounds before translation, for the damage tiles.
+	Rml::Vector2f lo = {0, 0}, hi = {0, 0};
 };
 
 struct FramebufferData
@@ -716,6 +726,10 @@ void RenderInterface_GL3_Recoil::SetViewport(int width, int height, int offset_x
 	projection = Rml::Matrix4f::ProjectOrtho(0, (float) viewport_width, (float) viewport_height, 0, -10000, 10000);
 }
 
+CONFIG(bool, RmlDamageRects)
+	.defaultValue(true)
+	.description("RmlUi interface: clear, resolve and draw its layer only where something was drawn this frame (on), or over the whole screen every frame (off).");
+
 void RenderInterface_GL3_Recoil::BeginFrame()
 {
 	RMLUI_ASSERT(viewport_width >= 1 && viewport_height >= 1);
@@ -790,7 +804,23 @@ void RenderInterface_GL3_Recoil::BeginFrame()
 
 	render_layers.BeginFrame(viewport_width, viewport_height);
 	glBindFramebuffer(GL_FRAMEBUFFER, render_layers.GetTopLayer().framebuffer);
-	glClear(GL_COLOR_BUFFER_BIT);
+
+	damage_enabled = configHandler->GetBool("RmlDamageRects");
+	if (viewport_width != damage_width || viewport_height != damage_height) {
+		// New layer framebuffers: their contents are undefined.
+		damage_width = viewport_width;
+		damage_height = viewport_height;
+		damage_cols = (viewport_width + DamageTile - 1) / DamageTile;
+		damage_rows = (viewport_height + DamageTile - 1) / DamageTile;
+		damage_tiles.assign(size_t(damage_cols) * damage_rows, 0);
+		layer_clean = false;
+	}
+	std::fill(damage_tiles.begin(), damage_tiles.end(), 0);
+	damage_all = !damage_enabled;
+	damage_scissor = Rml::Rectanglei::MakeInvalid();
+	if (!(damage_enabled && layer_clean))
+		glClear(GL_COLOR_BUFFER_BIT);
+	layer_clean = false;
 
 	UseProgram(ProgramId::None);
 	program_transform_dirty.set();
@@ -804,6 +834,52 @@ void RenderInterface_GL3_Recoil::EndFrame()
 	const Gfx::FramebufferData& fb_active = render_layers.GetTopLayer();
 	const Gfx::FramebufferData& fb_postprocess = render_layers.GetPostprocessPrimary();
 
+	if (!damage_all) {
+		// Only the tiles drawn in: resolve them, lay them over the screen, and clear them in the
+		// layer, so it starts the next frame transparent.
+		const std::vector<Rml::Rectanglei> rects = DamageRects();
+		double area = 0.0;
+		for (const auto& r: rects)
+			area += double(r.Width()) * r.Height();
+		const double screen = double(viewport_width) * double(viewport_height);
+		damage_share = screen > 0.0 ? float(area / screen) : 1.0f;
+		damage_rects = int(rects.size());
+		const auto glRect = [this](const Rml::Rectanglei& r) {
+			return Rml::Rectanglei::FromCorners({r.Left(), viewport_height - r.Bottom()}, {r.Right(), viewport_height - r.Top()});
+		};
+		glEnable(GL_SCISSOR_TEST);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_active.framebuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb_postprocess.framebuffer);
+		for (const auto& r: rects) {
+			const auto g = glRect(r);
+			glScissor(g.Left(), g.Top(), g.Width(), g.Height());
+			glBlitFramebuffer(g.Left(), g.Top(), g.Right(), g.Bottom(), g.Left(), g.Top(), g.Right(), g.Bottom(),
+							  GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(viewport_offset_x, viewport_offset_y, viewport_width, viewport_height);
+		glActiveTexture(GL_TEXTURE0);
+		Gfx::BindTexture(fb_postprocess);
+		UseProgram(ProgramId::Passthrough);
+		for (const auto& r: rects) {
+			const auto g = glRect(r);
+			glScissor(viewport_offset_x + g.Left(), viewport_offset_y + g.Top(), g.Width(), g.Height());
+			DrawFullscreenQuad();
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, fb_active.framebuffer);
+		glViewport(0, 0, viewport_width, viewport_height);
+		for (const auto& r: rects) {
+			const auto g = glRect(r);
+			glScissor(g.Left(), g.Top(), g.Width(), g.Height());
+			glClear(GL_COLOR_BUFFER_BIT);
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(viewport_offset_x, viewport_offset_y, viewport_width, viewport_height);
+		glDisable(GL_SCISSOR_TEST);
+		layer_clean = true;
+	} else {
+	damage_share = 1.0f;
+	damage_rects = 0;
 	// Resolve MSAA to postprocess framebuffer.
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_active.framebuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb_postprocess.framebuffer);
@@ -821,6 +897,7 @@ void RenderInterface_GL3_Recoil::EndFrame()
 	Gfx::BindTexture(fb_postprocess);
 	UseProgram(ProgramId::Passthrough);
 	DrawFullscreenQuad();
+	}
 
 	render_layers.EndFrame();
 
@@ -916,8 +993,16 @@ RenderInterface_GL3_Recoil::CompileGeometry(Rml::Span<const Rml::Vertex> vertice
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	Rml::Vector2f lo = {0, 0}, hi = {0, 0};
+	if (!vertices.empty()) {
+		lo = hi = vertices[0].position;
+		for (const Rml::Vertex& v: vertices) {
+			lo.x = std::min(lo.x, v.position.x); lo.y = std::min(lo.y, v.position.y);
+			hi.x = std::max(hi.x, v.position.x); hi.y = std::max(hi.y, v.position.y);
+		}
+	}
 	return (Rml::CompiledGeometryHandle) new Gfx::CompiledGeometryData{
-		std::move(vao), std::move(vbo), std::move(ibo), (GLsizei) indices.size()
+		std::move(vao), std::move(vbo), std::move(ibo), (GLsizei) indices.size(), lo, hi
 	};
 }
 
@@ -941,14 +1026,15 @@ void RenderInterface_GL3_Recoil::RenderGeometry(Rml::CompiledGeometryHandle hand
 		SubmitTransformUniform(translation);
 	}
 
+	if (texture != TexturePostprocess)
+		MarkDamage(geometry->lo, geometry->hi, translation);
+
 	geometry->vao->Bind();
 	glDrawElements(GL_TRIANGLES, geometry->num_indices, GL_UNSIGNED_INT, nullptr);
 	geometry->vao->Unbind();
 
-	if (texture != TexturePostprocess) {
-		UseProgram(ProgramId::None);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
+	// The program stays bound for the next element, which mostly wants the same one
+	// (UseProgram switches only on a change); EndFrame unbinds it.
 }
 
 void RenderInterface_GL3_Recoil::ReleaseGeometry(Rml::CompiledGeometryHandle handle)
@@ -985,6 +1071,10 @@ void RenderInterface_GL3_Recoil::SetScissor(Rml::Rectanglei region, bool vertica
 			glDisable(GL_SCISSOR_TEST);
 	}
 
+	if (vertically_flip)
+		damage_all = true;
+	else
+		damage_scissor = region;
 	if (region.Valid() && vertically_flip)
 		region = VerticallyFlipped(region, viewport_height);
 
@@ -1294,6 +1384,71 @@ void RenderInterface_GL3_Recoil::SetTransform(const Rml::Matrix4f* new_transform
 {
 	transform = (new_transform ? (projection * (*new_transform)) : projection);
 	program_transform_dirty.set();
+	transform_set = new_transform != nullptr;
+}
+
+void RenderInterface_GL3_Recoil::MarkDamage(Rml::Vector2f lo, Rml::Vector2f hi, Rml::Vector2f translation)
+{
+	if (damage_all || !render_layers.HasActiveLayer() || render_layers.GetTopLayerHandle() != 0)
+		return; // the whole screen already, or a pushed layer: its composite marks the whole screen
+	if (transform_set) {
+		damage_all = true;
+		return;
+	}
+	// A pixel's margin for edges that blend into their neighbours.
+	float x0 = lo.x + translation.x - 1.0f, y0 = lo.y + translation.y - 1.0f;
+	float x1 = hi.x + translation.x + 1.0f, y1 = hi.y + translation.y + 1.0f;
+	if (damage_scissor.Valid()) {
+		x0 = std::max(x0, float(damage_scissor.Left())); y0 = std::max(y0, float(damage_scissor.Top()));
+		x1 = std::min(x1, float(damage_scissor.Right())); y1 = std::min(y1, float(damage_scissor.Bottom()));
+	}
+	const int c0 = std::max(0, int(std::floor(x0)) / DamageTile), r0 = std::max(0, int(std::floor(y0)) / DamageTile);
+	const int c1 = std::min(damage_cols - 1, int(std::ceil(x1)) / DamageTile);
+	const int r1 = std::min(damage_rows - 1, int(std::ceil(y1)) / DamageTile);
+	if (x1 <= x0 || y1 <= y0 || c1 < c0 || r1 < r0)
+		return;
+	for (int r = r0; r <= r1; ++r)
+		std::fill_n(damage_tiles.begin() + size_t(r) * damage_cols + c0, c1 - c0 + 1, 1);
+}
+
+std::vector<Rml::Rectanglei> RenderInterface_GL3_Recoil::DamageRects() const
+{
+	// Runs of tiles along each row, merged with the run of the same span in the row above.
+	// A gap of a few tiles inside a row is taken in: every rectangle costs a resolve, a draw
+	// and a clear of its own, so a few larger ones are cheaper than many small ones.
+	constexpr int BRIDGE = 4;
+	const auto damaged = [this](int r, int c) { return damage_tiles[size_t(r) * damage_cols + c] != 0; };
+	std::vector<Rml::Rectanglei> rects;
+	std::vector<std::pair<int, int>> open; // (column span packed, index into rects)
+	for (int r = 0; r < damage_rows; ++r) {
+		std::vector<std::pair<int, int>> next;
+		for (int c = 0; c < damage_cols; ) {
+			if (!damaged(r, c)) { ++c; continue; }
+			int e = c;
+			for (;;) {
+				while (e < damage_cols && damaged(r, e)) ++e;
+				int gap = e;
+				while (gap < damage_cols && gap - e < BRIDGE && !damaged(r, gap)) ++gap;
+				if (gap < damage_cols && gap - e < BRIDGE) { e = gap; continue; }
+				break;
+			}
+			const int key = c * 65536 + e;
+			const auto it = std::find_if(open.begin(), open.end(), [key](const auto& o) { return o.first == key; });
+			const int x0 = c * DamageTile, x1 = std::min(e * DamageTile, viewport_width);
+			const int y1 = std::min((r + 1) * DamageTile, viewport_height);
+			if (it != open.end()) {
+				auto& rect = rects[it->second];
+				rect = Rml::Rectanglei::FromCorners(rect.p0, {x1, y1});
+				next.push_back(*it);
+			} else {
+				rects.push_back(Rml::Rectanglei::FromCorners({x0, r * DamageTile}, {x1, y1}));
+				next.emplace_back(key, int(rects.size()) - 1);
+			}
+			c = e;
+		}
+		open = std::move(next);
+	}
+	return rects;
 }
 
 enum class FilterType
@@ -1509,6 +1664,8 @@ void RenderInterface_GL3_Recoil::RenderShader(Rml::CompiledShaderHandle shader_h
 	const CompiledShaderType type = shader.type;
 	const auto* geometry = (Gfx::CompiledGeometryData*) geometry_handle;
 
+	MarkDamage(geometry->lo, geometry->hi, translation);
+
 	switch (type) {
 		case CompiledShaderType::Gradient: {
 			RMLUI_ASSERT(shader.stop_positions.size() == shader.stop_colors.size())
@@ -1684,6 +1841,8 @@ void RenderInterface_GL3_Recoil::RenderFilters(Rml::Span<const Rml::CompiledFilt
 Rml::LayerHandle RenderInterface_GL3_Recoil::PushLayer()
 {
 	const Rml::LayerHandle layer_handle = render_layers.PushLayer();
+	// Composited over the base layer with a full-screen pass.
+	damage_all = true;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, render_layers.GetLayer(layer_handle).framebuffer);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -1860,7 +2019,7 @@ Rml::LayerHandle RenderInterface_GL3_Recoil::RenderLayerStack::PushLayer()
 		GLuint shared_depth_stencil = (fb_layers.empty() ? 0 : fb_layers.front().depth_stencil_buffer);
 
 		fb_layers.push_back(Gfx::FramebufferData{});
-		Gfx::CreateFramebuffer(fb_layers.back(), width, height, NUM_MSAA_SAMPLES,
+		Gfx::CreateFramebuffer(fb_layers.back(), width, height, configHandler->GetInt("RmlMSAA"),
 							   Gfx::FramebufferAttachment::DepthStencil, shared_depth_stencil);
 	}
 
