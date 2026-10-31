@@ -108,6 +108,7 @@
 #include "System/Log/ILog.h"
 #include "System/Config/ConfigHandler.h"
 #include "System/FileSystem/SimpleParser.h"
+#include "System/LoadSave/DemoRecorder.h"
 #include "System/Sound/ISound.h"
 #include "System/Sound/ISoundChannels.h"
 #include "System/Sync/DumpState.h"
@@ -2537,6 +2538,32 @@ public:
 
 
 
+class SaveReplayActionExecutor : public IUnsyncedActionExecutor {
+public:
+	SaveReplayActionExecutor() : IUnsyncedActionExecutor("SaveReplay",
+		"Write the replay recorded so far to its file; recording goes on, and the whole replay replaces it when the game ends") {
+	}
+
+	bool Execute(const UnsyncedAction& action) const final {
+		CDemoRecorder* record = (clientNet != nullptr) ? clientNet->GetDemoRecorder() : nullptr;
+		if (record == nullptr || !record->IsValid()) {
+			LOG_L(L_WARNING, "[DemoRecorder] no replay is being recorded");
+			return true;
+		}
+
+		std::string path;
+		if (!record->SaveSoFar(gs->frameNum / GAME_SPEED, static_cast<int>(gu->gameTime), path)) {
+			LOG_L(L_WARNING, "[DemoRecorder] the replay could not be saved to \"%s\"", path.c_str());
+			return true;
+		}
+
+		LOG("[DemoRecorder] replay saved to \"%s\" (%d s of game)", path.c_str(), gs->frameNum / GAME_SPEED);
+		return true;
+	}
+};
+
+
+
 class GrabInputActionExecutor : public IUnsyncedActionExecutor {
 public:
 	GrabInputActionExecutor() : IUnsyncedActionExecutor("GrabInput", "Prevents/Enables the mouse from leaving the game window (windowed mode only)") {
@@ -4224,6 +4251,7 @@ void UnsyncedGameCommands::AddDefaultActionExecutors()
 	AddActionExecutor(AllocActionExecutor<IncreaseGUIOpacityActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<DecreaseGUIOpacityActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<ScreenShotActionExecutor>());
+	AddActionExecutor(AllocActionExecutor<SaveReplayActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<GrabInputActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<ClockActionExecutor>());
 	AddActionExecutor(AllocActionExecutor<CrossActionExecutor>());

@@ -40,6 +40,7 @@ public:
 		std::swap(winningAllyTeams, r.winningAllyTeams);
 
 		std::swap(isServerDemo, r.isServerDemo);
+		std::swap(savedSoFar, r.savedSoFar);
 		return *this;
 	}
 
@@ -61,6 +62,13 @@ public:
 	void SetTeamStats(int teamNum, const std::vector<TeamStatistics>& stats);
 	void SetWinningAllyTeams(const std::vector<unsigned char>& winningAllyTeams);
 
+	/**
+	 * @brief Write what is recorded so far to the demo's file as a complete, playable demo
+	 * (without statistics); recording goes on, and the whole demo replaces it at the end.
+	 * @param path the file written, on success
+	 */
+	bool SaveSoFar(int gameTime, int wallclockTime, std::string& path);
+
 private:
 	unsigned int WriteFileHeader(bool updateStreamLength);
 	void SetFileHeader();
@@ -77,6 +85,8 @@ private:
 	std::vector<unsigned char> winningAllyTeams;
 
 	bool isServerDemo = false;
+	/// SaveSoFar wrote the file through its own handle; the end reopens it to write in full.
+	bool savedSoFar = false;
 };
 
 

@@ -56,7 +56,52 @@ CDemoRecorder::~CDemoRecorder()
 	WritePlayerStats();
 	WriteTeamStats();
 	WriteFileHeader(true);
+
+	if (savedSoFar) {
+		// The file holds a copy saved earlier: start it over.
+		gzclose(file);
+		file = gzopen(dataDirsAccess.LocateFile(demoName, FileQueryFlags::WRITE).c_str(), "wb9");
+		if (file == nullptr)
+			return;
+	}
+
 	WriteDemoFile();
+}
+
+bool CDemoRecorder::SaveSoFar(int gameTime, int wallclockTime, std::string& path)
+{
+	if (file == nullptr)
+		return false;
+
+	std::string data;
+	{
+		std::lock_guard<spring::mutex> lock(demoMutex);
+		data = demoStreams[isServerDemo];
+	}
+	if (data.size() < sizeof(DemoFileHeader))
+		return false;
+
+	// The header as at the end, with no statistics or winners after the stream.
+	DemoFileHeader header;
+	memcpy(&header, &fileHeader, sizeof(header));
+	header.gameTime = gameTime;
+	header.wallclockTime = wallclockTime;
+	header.numPlayers = 0;
+	header.playerStatSize = 0;
+	header.numTeams = 0;
+	header.teamStatSize = 0;
+	header.winningAllyTeamsSize = 0;
+	header.swab();
+	memcpy(&data[0], reinterpret_cast<const char*>(&header), sizeof(header));
+
+	path = dataDirsAccess.LocateFile(demoName, FileQueryFlags::WRITE);
+	gzFile copy = gzopen(path.c_str(), "wb6");
+	if (copy == nullptr)
+		return false;
+
+	savedSoFar = true;
+	const bool written = gzwrite(copy, data.data(), data.size()) == static_cast<int>(data.size());
+	return (gzclose(copy) == Z_OK) && written;
 }
 
 
