@@ -2263,7 +2263,14 @@ static void NativeSetUnitMidAndAimPos(const SetUnitMidAndAimPosQuery* query, Set
 	const float3 newMidPos(query->midPos.x, query->midPos.y, query->midPos.z);
 	const float3 newAimPos(query->aimPos.x, query->aimPos.y, query->aimPos.z);
 
+	const bool updateQuads = (newMidPos != unit->midPos);
+	if (updateQuads)
+		quadField.RemoveUnit(unit);
+
 	unit->SetMidAndAimPos(newMidPos, newAimPos, query->setRelative);
+
+	if (updateQuads)
+		quadField.MovedUnit(unit);
 
 	result->success = true;
 }
@@ -2288,7 +2295,14 @@ static void NativeSetUnitRadiusAndHeight(const SetUnitRadiusAndHeightQuery* quer
 	const float newRadius = std::max(1.0f, query->radius);
 	const float newHeight = std::max(1.0f, query->height);
 
+	const bool updateQuads = (newRadius != unit->radius);
+	if (updateQuads)
+		quadField.RemoveUnit(unit);
+
 	unit->SetRadiusAndHeight(newRadius, newHeight);
+
+	if (updateQuads)
+		quadField.MovedUnit(unit);
 	result->success = true;
 }
 

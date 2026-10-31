@@ -66,3 +66,22 @@ would still be useful before submitting outside this branch.
 The Lua parity canary and standalone repro were added separately in
 `945d9c47cb` (`Add RmlUi scrollbar teardown repro`) so the reproduction remains
 reviewable independently of the fix index.
+
+
+## Unit midpoint/radius spatial-index parity (2026-10-31)
+
+Native `SetUnitMidAndAimPos` and `SetUnitRadiusAndHeight` changed the values
+but omitted Lua's conditional `quadField.RemoveUnit` / `MovedUnit` refresh.
+The stale index changed spatial-query order and dense ground-unit collision
+accumulation even while the published geometry values matched. Match the Lua
+setters, including their conditions for refreshing the index. No ABI changes.
+
+Regression check used SpringCabal's existing frame-stepped NVIDIA world
+observer with tenfold Flove units, fixed RNG/input and one engine worker.
+Before the fix the first detailed position difference was at frame65. With
+the fix all91 samples through frame90 match, as do all14 ordered spatial
+queries captured at frames60–66. The read-only audit widget is maintained at
+`gajop/springcabal-dev/verification/fixtures/flove/spatial_order.lua`; use it
+with the normal `verification/verify perf flove scripted` recorder. Baseline
+and candidate captures retain their own engine binary hashes. The existing
+GlobalRNG, WasmNanSinks and WasmSyncedJobs tests pass39775 assertions.
