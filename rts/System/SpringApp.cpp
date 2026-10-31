@@ -37,6 +37,7 @@
 #include "Game/GameVersion.h"
 #include "Game/GameController.h"
 #include "Game/Game.h"
+#include "System/LoadSave/DemoRecorder.h"
 #include "Game/GlobalUnsynced.h"
 #include "Game/PreGame.h"
 #include "Game/UI/KeyBindings.h"
@@ -771,6 +772,17 @@ void SpringApp::Startup()
 
 
 
+/** Write the client demo. A game left before it ended keeps its length too, as GameOver gives
+it (CGame::GameEnd); without it the replay said 0 seconds. */
+static void EndClientDemo()
+{
+	CDemoRecorder* record = clientNet->GetDemoRecorder();
+	if (record != nullptr && record->IsValid() && game != nullptr && !game->IsGameOver())
+		record->SetTime(gs->frameNum / GAME_SPEED, static_cast<int>(gu->gameTime));
+
+	clientNet->ResetDemoRecorder();
+}
+
 void SpringApp::Reload(const std::string script)
 {
 	LOG("[SpringApp::%s][1]", __func__);
@@ -786,7 +798,7 @@ void SpringApp::Reload(const std::string script)
 		gameServer->SetReloading(true);
 
 	if (clientNet != nullptr)
-		clientNet->ResetDemoRecorder();
+		EndClientDemo();
 
 	// Lua shutdown functions need to access 'game' but spring::SafeDelete sets it to NULL.
 	// ~CGame also calls this, which does not matter because Lua handlers are gone by then
@@ -1038,7 +1050,7 @@ void SpringApp::Kill(bool fromRun)
 	// write the demo before destroying game, such that it can not
 	// be affected by a crash in any of the Game::Kill* functions
 	if (clientNet != nullptr)
-		clientNet->ResetDemoRecorder();
+		EndClientDemo();
 
 	// see ::Reload
 	ISound::Shutdown(false);
