@@ -146,7 +146,9 @@ fn check_shape(
         ColumnArg::Each(values) => values.len() == count,
         _ => true,
     };
-    if planes != property.components() * count || flags.is_some_and(|f| f.len() != count) || !args_ok
+    if planes != property.components() * count
+        || flags.is_some_and(|f| f.len() != count)
+        || !args_ok
     {
         return invalid();
     }
@@ -167,7 +169,8 @@ impl<E: Game> Columns<'_, '_, E> {
             return invalid();
         }
         // f32 and u32 share size and alignment; the engine writes IEEE bits
-        let planes = unsafe { core::slice::from_raw_parts_mut(out.as_mut_ptr().cast::<u32>(), out.len()) };
+        let planes =
+            unsafe { core::slice::from_raw_parts_mut(out.as_mut_ptr().cast::<u32>(), out.len()) };
         self.get_units_raw(property, units, arg, planes, found)
     }
 
@@ -183,7 +186,8 @@ impl<E: Game> Columns<'_, '_, E> {
         if property.floats() || property.settable() || property == UnitColumn::WeaponTarget {
             return invalid();
         }
-        let planes = unsafe { core::slice::from_raw_parts_mut(out.as_mut_ptr().cast::<u32>(), out.len()) };
+        let planes =
+            unsafe { core::slice::from_raw_parts_mut(out.as_mut_ptr().cast::<u32>(), out.len()) };
         self.get_units_raw(property, units, arg, planes, found)
     }
 
@@ -205,14 +209,16 @@ impl<E: Game> Columns<'_, '_, E> {
         #[cfg(target_arch = "wasm32")]
         {
             let (args, arg) = arg.parts();
-            self.0.engine.finish(spring_sdk_internal::columns::get_units(
-                property as i32,
-                units,
-                args,
-                arg,
-                planes,
-                found,
-            ))
+            self.0
+                .engine
+                .finish(spring_sdk_internal::columns::get_units(
+                    property as i32,
+                    units,
+                    args,
+                    arg,
+                    planes,
+                    found,
+                ))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -245,16 +251,22 @@ impl<E: Game> Columns<'_, '_, E> {
         self.0.engine.check()?;
         #[cfg(target_arch = "wasm32")]
         {
-            self.0.engine.finish(spring_sdk_internal::columns::get_units_rules_param(
-                name, units, out, found,
-            ))
+            self.0
+                .engine
+                .finish(spring_sdk_internal::columns::get_units_rules_param(
+                    name, units, out, found,
+                ))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
             let mut found = found;
             let mut count = 0;
             for (i, &unit) in units.iter().enumerate() {
-                let value = self.0.rules_params().get_unit_rules_param_f32(unit, name).ok();
+                let value = self
+                    .0
+                    .rules_params()
+                    .get_unit_rules_param_f32(unit, name)
+                    .ok();
                 out[i] = value.unwrap_or(0.0);
                 if let Some(found) = found.as_deref_mut() {
                     found[i] = value.is_some() as u8;
@@ -310,7 +322,10 @@ impl<E: Game> Columns<'_, '_, E> {
                 .map(|h| floats(&[h.health, h.max_health]))
                 .is_ok(),
             UnitColumn::Radius => info.get_unit_radius(unit).map(|r| floats(&[r])).is_ok(),
-            UnitColumn::AllyTeam => info.get_unit_ally_team(unit).map(|v| put(0, v as u32)).is_ok(),
+            UnitColumn::AllyTeam => info
+                .get_unit_ally_team(unit)
+                .map(|v| put(0, v as u32))
+                .is_ok(),
             UnitColumn::Team => info.get_unit_team(unit).map(|v| put(0, v as u32)).is_ok(),
             UnitColumn::DefId => info.get_unit_def_id(unit).map(|v| put(0, v as u32)).is_ok(),
             UnitColumn::Alive => {
@@ -319,10 +334,24 @@ impl<E: Game> Columns<'_, '_, E> {
                 put(0, alive as u32);
                 true
             }
-            UnitColumn::Cloaked => info.get_unit_is_cloaked(unit).map(|v| put(0, v as u32)).is_ok(),
-            UnitColumn::Stunned => info.get_unit_is_stunned(unit).map(|v| put(0, v as u32)).is_ok(),
-            UnitColumn::InLos => spring.los().is_unit_in_los(unit, arg).map(|v| put(0, v as u32)).is_ok(),
-            UnitColumn::InRadar => spring.los().is_unit_in_radar(unit, arg).map(|v| put(0, v as u32)).is_ok(),
+            UnitColumn::Cloaked => info
+                .get_unit_is_cloaked(unit)
+                .map(|v| put(0, v as u32))
+                .is_ok(),
+            UnitColumn::Stunned => info
+                .get_unit_is_stunned(unit)
+                .map(|v| put(0, v as u32))
+                .is_ok(),
+            UnitColumn::InLos => spring
+                .los()
+                .is_unit_in_los(unit, arg)
+                .map(|v| put(0, v as u32))
+                .is_ok(),
+            UnitColumn::InRadar => spring
+                .los()
+                .is_unit_in_radar(unit, arg)
+                .map(|v| put(0, v as u32))
+                .is_ok(),
             UnitColumn::WeaponTarget => spring
                 .units_weapons()
                 .get_unit_weapon_target(unit, arg)
@@ -337,7 +366,14 @@ impl<E: Game> Columns<'_, '_, E> {
             UnitColumn::FireState | UnitColumn::MoveState => info
                 .get_unit_states(unit, Default::default())
                 .map(|s| {
-                    put(0, if property == UnitColumn::FireState { s.fire_state } else { s.move_state } as u32)
+                    put(
+                        0,
+                        if property == UnitColumn::FireState {
+                            s.fire_state
+                        } else {
+                            s.move_state
+                        } as u32,
+                    )
                 })
                 .is_ok(),
             UnitColumn::MoveCtrlVelocity | UnitColumn::Direction => false,
@@ -358,19 +394,28 @@ impl<E: Synced> Columns<'_, '_, E> {
         if !property.settable() {
             return invalid();
         }
-        check_shape(property, units.len(), values.len(), done.as_deref(), ColumnArg::None)?;
+        check_shape(
+            property,
+            units.len(),
+            values.len(),
+            done.as_deref(),
+            ColumnArg::None,
+        )?;
         self.0.engine.check()?;
         #[cfg(target_arch = "wasm32")]
         {
-            let planes = unsafe { core::slice::from_raw_parts(values.as_ptr().cast::<u32>(), values.len()) };
-            self.0.engine.finish(spring_sdk_internal::columns::set_units(
-                property as i32,
-                units,
-                None,
-                0,
-                planes,
-                done,
-            ))
+            let planes =
+                unsafe { core::slice::from_raw_parts(values.as_ptr().cast::<u32>(), values.len()) };
+            self.0
+                .engine
+                .finish(spring_sdk_internal::columns::set_units(
+                    property as i32,
+                    units,
+                    None,
+                    0,
+                    planes,
+                    done,
+                ))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -385,9 +430,11 @@ impl<E: Synced> Columns<'_, '_, E> {
                     z: at(first + 2, i),
                 };
                 let ok = match property {
-                    UnitColumn::MoveCtrlVelocity => {
-                        self.0.move_ctrl().set_velocity(unit, vector(0)).unwrap_or(false)
-                    }
+                    UnitColumn::MoveCtrlVelocity => self
+                        .0
+                        .move_ctrl()
+                        .set_velocity(unit, vector(0))
+                        .unwrap_or(false),
                     UnitColumn::Direction => self
                         .0
                         .unit_control()

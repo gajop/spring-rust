@@ -579,11 +579,11 @@ mod logging;
 pub use helpers::Hit;
 pub use logging::ResultExt;
 pub mod callbacks;
+pub mod columns;
 pub mod commands;
 pub mod cus;
 pub mod default_interface;
 mod exports;
-pub mod columns;
 pub mod jobs;
 pub mod module;
 #[cfg(not(target_arch = "wasm32"))]
