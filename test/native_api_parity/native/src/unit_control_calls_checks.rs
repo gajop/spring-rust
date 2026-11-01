@@ -221,7 +221,7 @@ impl NativeApiParity {
             "unit_set_weapon_state" => unit
                 .set_unit_weapon_state(
                     unit_id,
-                    i32_field(message, "weaponNum")? - 1,
+                    i32_field(message, "weaponNum")?,
                     str_field(message, "key")?,
                     f32_field(message, "value")?,
                 )
@@ -229,7 +229,7 @@ impl NativeApiParity {
             "unit_set_weapon_damages" => unit
                 .set_unit_weapon_damages(
                     unit_id,
-                    i32_field(message, "weaponNum")? - 1,
+                    i32_field(message, "weaponNum")?,
                     str_field(message, "damageKey")?,
                     f32_field(message, "damageValue")?,
                 )
@@ -311,12 +311,12 @@ impl NativeApiParity {
             "unit_weapon_fire" => unit
                 // Lua weapon numbers are one-based; UnitControl's C ABI is
                 // explicitly zero-based.
-                .unit_weapon_fire(unit_id, i32_field(message, "weaponNum")? - 1)
+                .unit_weapon_fire(unit_id, i32_field(message, "weaponNum")?)
                 .map_err(|err| format!("unit_weapon_fire() failed: {err:?}"))?,
             "unit_weapon_hold_fire" => unit
                 // Lua weapon numbers are one-based; UnitControl's C ABI is
                 // explicitly zero-based.
-                .unit_weapon_hold_fire(unit_id, i32_field(message, "weaponNum")? - 1)
+                .unit_weapon_hold_fire(unit_id, i32_field(message, "weaponNum")?)
                 .map_err(|err| format!("unit_weapon_hold_fire() failed: {err:?}"))?,
             "unit_finish_command" => unit
                 .unit_finish_command(unit_id)
