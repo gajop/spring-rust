@@ -181,6 +181,16 @@ impl NativeApiParity {
         self.same_if_present(label, message, "tidalStrength", native)
     }
     pub(crate) fn check_game_wind(&mut self, message: &Value, label: &str) -> Result<(), String> {
+        if base_test_name(label) == "get_wind_vector" {
+            let vector = self
+                .interface
+                .game()
+                .get_wind_vector()
+                .map_err(|err| format!("get_wind_vector() failed: {err:?}"))?;
+            self.same_if_present(label, message, "x", vector.x)?;
+            self.same_if_present(label, message, "y", vector.y)?;
+            return self.same_if_present(label, message, "z", vector.z);
+        }
         let native = self
             .interface
             .game()

@@ -470,6 +470,18 @@ fn probe_get_wind(fixture: &super::Fixture) -> String {
     format!("WASM_API|get_wind|{fields}")
 }
 
+fn probe_get_wind_vector(fixture: &super::Fixture) -> String {
+    let result = crate::bindings::recoil::spring_api::game::get_wind_vector(0u8);
+    let fields = match result {
+        Ok(value) => {
+            let output_fields: Vec<String> = vec![encode_f32("x", value.x), encode_f32("y", value.y), encode_f32("z", value.z)];
+            output_fields.join("|")
+        }
+        Err(error) => format!("__error|i|{}", error.code),
+    };
+    format!("WASM_API|get_wind_vector|{fields}")
+}
+
 fn probe_get_vector_from_heading(fixture: &super::Fixture) -> String {
     let result = crate::bindings::recoil::spring_api::game::get_vector_from_heading((-1i32) as i32);
     let fields = match result {
@@ -6050,6 +6062,7 @@ pub fn run(fixture: &super::Fixture, mut emit: impl FnMut(String)) {
     emit(probe_get_tidal(fixture));
     emit(probe_get_global_los(fixture));
     emit(probe_get_wind(fixture));
+    emit(probe_get_wind_vector(fixture));
     emit(probe_get_vector_from_heading(fixture));
     emit(probe_get_mod_options(fixture));
     emit(probe_get_map_options(fixture));

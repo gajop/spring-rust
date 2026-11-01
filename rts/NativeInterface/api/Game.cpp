@@ -306,6 +306,14 @@ static void NativeGetWind(const GetWindQuery* query, GetWindResult* result) {
 	result->data.current = envResHandler.GetCurrentWindStrength();
 }
 
+static void NativeGetWindVector(const GetWindVectorQuery* query, GetWindVectorResult* result) {
+	bufferPos = 0;
+	if (!GameReady()) { result->error = &GAME_NOT_READY_ERROR; return; }
+	result->error = nullptr;
+	const float3& wind = envResHandler.GetCurrentWindVec();
+	result->vector = {wind.x, wind.y, wind.z};
+}
+
 static void NativeGetHeadingFromVector(const GetHeadingFromVectorQuery* query, GetHeadingFromVectorResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
@@ -481,4 +489,5 @@ const GameApi GAME_API = {
 	.GetTeamStartPosition = NativeGetTeamStartPosition,
 	.GetMapStartPositions = NativeGetMapStartPositions,
 	.GetGameRulesResourceInfo = NativeGetGameRulesResourceInfo,
+	.GetWindVector = NativeGetWindVector,
 };

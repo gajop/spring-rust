@@ -564,8 +564,32 @@
       "results": []
     }
   ],
-  "callout_count": 516,
+  "callout_count": 577,
   "callouts": [
+    {
+      "class": "fixed",
+      "function": "GetLocalAllyTeamID",
+      "module": "player",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetLocalPlayerID",
+      "module": "player",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetLocalTeamID",
+      "module": "player",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetSpectatingState",
+      "module": "player",
+      "signature": "i32->i64"
+    },
     {
       "class": "fixed",
       "function": "BitAnd",
@@ -699,6 +723,84 @@
       "signature": "i32->i64"
     },
     {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetActionHotKeys",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetInvertQueueKey",
+      "module": "input",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetKeyBindings",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GetKeyCode",
+      "module": "input",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetKeyFromScanSymbol",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetKeyState",
+      "module": "input",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetKeySymbol",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetModKeyState",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetMouseCursor",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetMouseState",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetPressedKeys",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetPressedScans",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetScanSymbol",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
       "class": "fixed",
       "function": "ClearEmulatedInput",
       "module": "debug_input",
@@ -742,6 +844,54 @@
     },
     {
       "class": "fixed",
+      "function": "GetDrawFrame",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetMiniMapDualScreen",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetScreenGeometry",
+      "module": "display",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetTeamColor",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetTeamOrigColor",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetViewGeometry",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetWindowGeometry",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "IsGUIHidden",
+      "module": "display",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
       "function": "SetTeamColor",
       "module": "display",
       "signature": "i32,i32->i64"
@@ -757,6 +907,90 @@
       "function": "GetSoundStreamTime",
       "module": "sound",
       "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "LoadSoundDef",
+      "module": "sound",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "PauseSoundStream",
+      "module": "sound",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "PlaySoundFile",
+      "module": "sound",
+      "signature": "f32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "PlaySoundStream",
+      "module": "sound",
+      "signature": "f32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-nested-adapted",
+      "function": "SetSoundEffectParams",
+      "module": "sound",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetSoundStreamVolume",
+      "module": "sound",
+      "signature": "f32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "StopSoundStream",
+      "module": "sound",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "Echo",
+      "module": "messages",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "Log",
+      "module": "messages",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "GetConfigFloat",
+      "module": "config",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "GetConfigInt",
+      "module": "config",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetConfigParams",
+      "module": "config",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetConfigString",
+      "module": "config",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetLogSections",
+      "module": "config",
+      "signature": "i32,i32->i32"
     },
     {
       "class": "variable-input-borrowed",
@@ -787,6 +1021,72 @@
       "function": "GetFeatureDefDimensions",
       "module": "utils",
       "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "AssignMouseCursor",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "ReplaceMouseCursor",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SDLSetTextInputRect",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SDLStartTextInput",
+      "module": "unsynced_ctrl",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SDLStopTextInput",
+      "module": "unsynced_ctrl",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetClipboard",
+      "module": "unsynced_ctrl",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetMouseCursor",
+      "module": "unsynced_ctrl",
+      "signature": "f32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetWMCaption",
+      "module": "unsynced_ctrl",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetWMIcon",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetWindowGeometry",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "WarpMouse",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
     },
     {
       "class": "handwritten-reviewed",
@@ -1029,10 +1329,22 @@
       "signature": "i32,i32,i32->i64"
     },
     {
+      "class": "fixed",
+      "function": "CopyVBOToReadback",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i32"
+    },
+    {
       "class": "variable-input-nested-adapted",
       "function": "CreateFBO",
       "module": "gfx",
       "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "CreateFence",
+      "module": "gfx",
+      "signature": "i32->i64"
     },
     {
       "class": "handwritten-reviewed",
@@ -1041,7 +1353,7 @@
       "signature": "i32->i64"
     },
     {
-      "class": "fixed",
+      "class": "fixed-option",
       "function": "CreateQuery",
       "module": "gfx",
       "signature": "i32->i64"
@@ -1051,6 +1363,12 @@
       "function": "CreateRBO",
       "module": "gfx",
       "signature": "i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "CreateReadback",
+      "module": "gfx",
+      "signature": "i32->i64"
     },
     {
       "class": "variable-input-borrowed-mixed-fixed",
@@ -1096,6 +1414,12 @@
     },
     {
       "class": "fixed",
+      "function": "DeleteFence",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
       "function": "DeleteFont",
       "module": "gfx",
       "signature": "i32->i32"
@@ -1115,6 +1439,12 @@
     {
       "class": "fixed",
       "function": "DeleteRBO",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DeleteReadback",
       "module": "gfx",
       "signature": "i32->i32"
     },
@@ -1518,7 +1848,7 @@
       "class": "fixed",
       "function": "GetQuery",
       "module": "gfx",
-      "signature": "i32->i64"
+      "signature": "i32,i32->i32"
     },
     {
       "class": "fixed",
@@ -1645,6 +1975,18 @@
       "function": "InstanceDataFromUnitsVBO",
       "module": "gfx",
       "signature": "i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "IsFenceSignaled",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "IsQueryAvailable",
+      "module": "gfx",
+      "signature": "i32->i64"
     },
     {
       "class": "fixed",
@@ -1846,6 +2188,12 @@
     },
     {
       "class": "fixed",
+      "function": "QueryCounter",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
       "function": "RawBindFBO",
       "module": "gfx",
       "signature": "i32,i32,i32,i32,i32->i32"
@@ -1855,6 +2203,12 @@
       "function": "ReadPixels",
       "module": "gfx",
       "signature": "i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "ReadReadback",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
     },
     {
       "class": "fixed",
@@ -2100,13 +2454,13 @@
       "class": "variable-input-borrowed",
       "function": "UniformArrayFloat",
       "module": "gfx",
-      "signature": "i32,i32->i32"
+      "signature": "i32,i32,i32->i32"
     },
     {
       "class": "variable-input-borrowed",
       "function": "UniformArrayInt",
       "module": "gfx",
-      "signature": "i32,i32->i32"
+      "signature": "i32,i32,i32->i32"
     },
     {
       "class": "fixed",
@@ -3538,6 +3892,12 @@
     },
     {
       "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "LoadFileRange",
+      "module": "vfs",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
       "function": "PackF32",
       "module": "vfs",
       "signature": "i32,i32->i32"
@@ -3661,9 +4021,15 @@
       "function": "ZlibDecompress",
       "module": "vfs",
       "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetClipboard",
+      "module": "unsynced_read",
+      "signature": "i32,i32->i32"
     }
   ],
   "canonical_callin_count": 26,
   "environment": "menu",
-  "surface_count": 566
+  "surface_count": 627
 }

@@ -35,6 +35,8 @@ return {
 
 		"get_wind",
 
+		"get_wind_vector",
+
 		"get_vector_from_heading",
 
 		"get_mod_options",

@@ -7175,6 +7175,18 @@ pub mod game {
         }
     }
     impl<E: crate::capabilities::Game> Game<'_, E> {
+        pub fn get_wind_vector(&self) -> Result<Float3> {
+            self._engine.check()?;
+            let result = {
+                #[cfg(target_arch = "wasm32")]
+                { spring_sdk_internal::generated::owned::game::get_wind_vector(0) }
+                #[cfg(not(target_arch = "wasm32"))]
+                { crate::native::game::get_wind_vector(&self._engine, self._native_api) }
+            };
+            self._engine.finish(result)
+        }
+    }
+    impl<E: crate::capabilities::Game> Game<'_, E> {
         pub fn is_cheating_enabled(&self) -> Result<bool> {
             self._engine.check()?;
             let result = {

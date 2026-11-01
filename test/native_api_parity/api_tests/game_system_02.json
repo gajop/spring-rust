@@ -95,6 +95,63 @@
       }
     },
     {
+      "id": "get_wind_vector",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": [],
+      "lua": {
+        "set": [],
+        "get": [
+          "Spring.GetWind"
+        ]
+      },
+      "native": {
+        "set": [],
+        "get": [
+          "Game.get_wind_vector"
+        ]
+      },
+      "compare": {
+        "mode": "fields",
+        "epsilon": 0.05,
+        "fields": [
+          "x",
+          "y",
+          "z"
+        ]
+      },
+      "report": {
+        "lua_setter": "n/a",
+        "native_setter": "n/a",
+        "lua_getter": "`Spring.GetWind` (velocity vector)",
+        "native_getter": "`Game.get_wind_vector`",
+        "fields": "`x`, `y`, `z`"
+      },
+      "rust": {
+        "check": "check_game_wind",
+        "set": "set_noop"
+      },
+      "params": {},
+      "lua_runtime": {
+        "call": "Spring.GetWind",
+        "args": [],
+        "returns": [
+          {
+            "field": "x",
+            "index": 1
+          },
+          {
+            "field": "y",
+            "index": 2
+          },
+          {
+            "field": "z",
+            "index": 3
+          }
+        ]
+      }
+    },
+    {
       "id": "get_vector_from_heading",
       "context": "synced_gadget",
       "kind": "readonly",

@@ -2198,7 +2198,7 @@
       "results": []
     }
   ],
-  "callout_count": 749,
+  "callout_count": 791,
   "callouts": [
     {
       "class": "handwritten-reviewed",
@@ -2795,24 +2795,6 @@
       "signature": "i32,i32,i32->i32"
     },
     {
-      "class": "handwritten-reviewed",
-      "function": "GiveOrder",
-      "module": "units_commands",
-      "signature": "i32,i32,i32,i32->i64"
-    },
-    {
-      "class": "variable-input-nested-adapted",
-      "function": "GiveOrderArrayToUnitMap",
-      "module": "units_commands",
-      "signature": "i32->i64"
-    },
-    {
-      "class": "handwritten-reviewed",
-      "function": "GiveOrderToUnitMap",
-      "module": "units_commands",
-      "signature": "i32,i32,i32,i32->i64"
-    },
-    {
       "class": "fixed",
       "function": "GetFeaturePieceDirection",
       "module": "units_pieces",
@@ -3324,12 +3306,6 @@
     },
     {
       "class": "fixed",
-      "function": "GetClosestValidPosition",
-      "module": "los",
-      "signature": "i32,f32,f32,f32,i32->i32"
-    },
-    {
-      "class": "fixed",
       "function": "GetPositionLosState",
       "module": "los",
       "signature": "i32,i32,i32->i32"
@@ -3606,6 +3582,12 @@
     },
     {
       "class": "fixed",
+      "function": "GetWeaponDefProjectileParams",
+      "module": "weapon_defs",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
       "function": "GetWeaponDefRange",
       "module": "weapon_defs",
       "signature": "i32->i64"
@@ -3780,6 +3762,12 @@
     },
     {
       "class": "fixed",
+      "function": "GetWindVector",
+      "module": "game",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
       "function": "IsCheatingEnabled",
       "module": "game",
       "signature": "i32->i64"
@@ -3806,7 +3794,7 @@
       "class": "fixed",
       "function": "IsGodModeEnabled",
       "module": "game",
-      "signature": "i32->i64"
+      "signature": "i32,i32->i32"
     },
     {
       "class": "fixed",
@@ -3837,6 +3825,12 @@
       "function": "GetGroundHeight",
       "module": "terrain",
       "signature": "f32,f32->i64"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetGroundHeights",
+      "module": "terrain",
+      "signature": "i32,i32->i32"
     },
     {
       "class": "variable-output-caller-owned",
@@ -4199,6 +4193,12 @@
       "signature": "i32,i32,i32->i64"
     },
     {
+      "class": "fixed",
+      "function": "GetTag",
+      "module": "move_ctrl",
+      "signature": "i32->i64"
+    },
+    {
       "class": "variable-output-caller-owned",
       "function": "GetUnitEstimatedPath",
       "module": "move_ctrl",
@@ -4224,15 +4224,69 @@
     },
     {
       "class": "fixed",
+      "function": "SetCollideStop",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetDrag",
+      "module": "move_ctrl",
+      "signature": "i32,f32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetExtrapolate",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetGravity",
+      "module": "move_ctrl",
+      "signature": "i32,f32->i64"
+    },
+    {
+      "class": "fixed",
       "function": "SetGroundMoveTypeMaxSpeed",
       "module": "move_ctrl",
       "signature": "i32,f32->i64"
     },
     {
       "class": "fixed",
+      "function": "SetGroundOffset",
+      "module": "move_ctrl",
+      "signature": "i32,f32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetHeading",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetLimits",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetLimitsStop",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
       "function": "SetMoveCtrlGravity",
       "module": "move_ctrl",
       "signature": "i32,f32->i64"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "SetMoveDef",
+      "module": "move_ctrl",
+      "signature": "i32,i32,i32->i64"
     },
     {
       "class": "fixed",
@@ -4251,6 +4305,78 @@
       "function": "SetNoBlocking",
       "module": "move_ctrl",
       "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetPhysics",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetPosition",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetProgressState",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetRelativeVelocity",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetRotation",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetRotationVelocity",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetTag",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetTrackGround",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetTrackLimits",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetTrackSlope",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetVelocity",
+      "module": "move_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetWindFactor",
+      "module": "move_ctrl",
+      "signature": "i32,f32->i64"
     },
     {
       "class": "variable-input-nested-adapted",
@@ -4341,6 +4467,12 @@
       "function": "SetUnitGroup",
       "module": "selection",
       "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetSoundStreamPlayTime",
+      "module": "sound",
+      "signature": "i32->i64"
     },
     {
       "class": "variable-input-borrowed",
@@ -4781,6 +4913,12 @@
       "signature": "i32,f32,f32,f32->i64"
     },
     {
+      "class": "fixed",
+      "function": "SetDefaultInterfaceVisible",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
       "class": "variable-input-adapted",
       "function": "SetDollyCameraCurve",
       "module": "unsynced_ctrl",
@@ -4884,6 +5022,12 @@
     },
     {
       "class": "fixed",
+      "function": "SetFeatureLuaDraw",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
       "function": "SetFeatureNoDraw",
       "module": "unsynced_ctrl",
       "signature": "i32,i32->i64"
@@ -4941,6 +5085,12 @@
       "function": "SetNanoProjectileParams",
       "module": "unsynced_ctrl",
       "signature": "f32,f32,f32,f32,f32,f32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetProjectileLuaDraw",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
     },
     {
       "class": "fixed-option",
@@ -5097,6 +5247,24 @@
       "function": "SetWindowMinimized",
       "module": "unsynced_ctrl",
       "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "ShowLoadProgress",
+      "module": "unsynced_ctrl",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "StopTrackingUnits",
+      "module": "unsynced_ctrl",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "TrackUnits",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
     },
     {
       "class": "fixed",
@@ -5433,6 +5601,12 @@
       "function": "LoadFile",
       "module": "vfs",
       "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "LoadFileRange",
+      "module": "vfs",
+      "signature": "i32,i32,i32,i32->i32"
     },
     {
       "class": "variable-io-borrowed-input-caller-owned-output",
@@ -6132,7 +6306,19 @@
     },
     {
       "class": "variable-input-borrowed",
+      "function": "SetUnitWeaponDamagesZeroBased",
+      "module": "unit_control",
+      "signature": "i32,i32,f32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
       "function": "SetUnitWeaponState",
+      "module": "unit_control",
+      "signature": "i32,i32,f32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetUnitWeaponStateZeroBased",
       "module": "unit_control",
       "signature": "i32,i32,f32,i32->i64"
     },
@@ -6174,7 +6360,19 @@
     },
     {
       "class": "fixed",
+      "function": "UnitWeaponFireZeroBased",
+      "module": "unit_control",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
       "function": "UnitWeaponHoldFire",
+      "module": "unit_control",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "UnitWeaponHoldFireZeroBased",
       "module": "unit_control",
       "signature": "i32,i32->i64"
     },
@@ -6624,6 +6822,12 @@
     },
     {
       "class": "variable-input-nested-adapted",
+      "function": "SpawnProjectileZeroBased",
+      "module": "projectile_control",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-input-nested-adapted",
       "function": "SpawnCEG",
       "module": "effects_control",
       "signature": "f32,f32,f32,i32,i32->i32"
@@ -6693,9 +6897,57 @@
       "function": "CallUnitScript",
       "module": "unit_script",
       "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "NextFloat",
+      "module": "synced_random",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "NextInt",
+      "module": "synced_random",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "NextIntUpTo",
+      "module": "synced_random",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetSeed",
+      "module": "synced_random",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "NextFloat",
+      "module": "unsynced_random",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "NextInt",
+      "module": "unsynced_random",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "NextIntUpTo",
+      "module": "unsynced_random",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetSeed",
+      "module": "unsynced_random",
+      "signature": "i32->i64"
     }
   ],
   "canonical_callin_count": 121,
   "environment": "rules-synced",
-  "surface_count": 923
+  "surface_count": 965
 }

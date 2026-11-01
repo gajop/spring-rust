@@ -272,8 +272,176 @@
       "results": []
     }
   ],
-  "callout_count": 327,
+  "callout_count": 406,
   "callouts": [
+    {
+      "class": "fixed",
+      "function": "ArePlayersAllied",
+      "module": "teams",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "AreTeamsAllied",
+      "module": "teams",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetAIInfo",
+      "module": "teams",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetAllyTeamInfo",
+      "module": "teams",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetAllyTeamList",
+      "module": "teams",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetPlayerInfo",
+      "module": "teams",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetPlayerList",
+      "module": "teams",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetTeamInfo",
+      "module": "teams",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetTeamList",
+      "module": "teams",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetTeamLuaAI",
+      "module": "teams",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "AreHelperAIsEnabled",
+      "module": "game",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "FixedAllies",
+      "module": "game",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetAllyTeamStartBox",
+      "module": "game",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetGaiaTeamID",
+      "module": "game",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetMapOptions",
+      "module": "game",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetModOption",
+      "module": "game",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetModOptions",
+      "module": "game",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetSideData",
+      "module": "game",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetTeamStartPosition",
+      "module": "game",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "GetGroundExtremes",
+      "module": "terrain",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetGroundHeight",
+      "module": "terrain",
+      "signature": "f32,f32->i64"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetGroundInfo",
+      "module": "terrain",
+      "signature": "f32,f32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetGroundNormal",
+      "module": "terrain",
+      "signature": "f32,f32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetGroundOrigHeight",
+      "module": "terrain",
+      "signature": "f32,f32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetLocalAllyTeamID",
+      "module": "player",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetLocalPlayerID",
+      "module": "player",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetLocalTeamID",
+      "module": "player",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "GetSpectatingState",
+      "module": "player",
+      "signature": "i32->i64"
+    },
     {
       "class": "fixed",
       "function": "BitAnd",
@@ -407,6 +575,84 @@
       "signature": "i32->i64"
     },
     {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetActionHotKeys",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetInvertQueueKey",
+      "module": "input",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetKeyBindings",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "GetKeyCode",
+      "module": "input",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetKeyFromScanSymbol",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetKeyState",
+      "module": "input",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetKeySymbol",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetModKeyState",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetMouseCursor",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetMouseState",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetPressedKeys",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetPressedScans",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetScanSymbol",
+      "module": "input",
+      "signature": "i32,i32->i32"
+    },
+    {
       "class": "fixed",
       "function": "ClearEmulatedInput",
       "module": "debug_input",
@@ -449,6 +695,42 @@
       "signature": "i32->i64"
     },
     {
+      "class": "variable-output-caller-owned",
+      "function": "GetMiniMapDualScreen",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetScreenGeometry",
+      "module": "display",
+      "signature": "i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetTeamColor",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetTeamOrigColor",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetViewGeometry",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "GetWindowGeometry",
+      "module": "display",
+      "signature": "i32,i32->i32"
+    },
+    {
       "class": "fixed",
       "function": "SetTeamColor",
       "module": "display",
@@ -465,6 +747,84 @@
       "function": "GetSoundStreamTime",
       "module": "sound",
       "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "LoadSoundDef",
+      "module": "sound",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "PauseSoundStream",
+      "module": "sound",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "PlaySoundFile",
+      "module": "sound",
+      "signature": "f32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "PlaySoundStream",
+      "module": "sound",
+      "signature": "f32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-nested-adapted",
+      "function": "SetSoundEffectParams",
+      "module": "sound",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetSoundStreamVolume",
+      "module": "sound",
+      "signature": "f32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "StopSoundStream",
+      "module": "sound",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "Echo",
+      "module": "messages",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "handwritten-reviewed",
+      "function": "Log",
+      "module": "messages",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "GetConfigFloat",
+      "module": "config",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed-mixed-fixed",
+      "function": "GetConfigInt",
+      "module": "config",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "GetConfigString",
+      "module": "config",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "dynamic-output-caller-owned",
+      "function": "GetLogSections",
+      "module": "config",
+      "signature": "i32,i32->i32"
     },
     {
       "class": "variable-input-borrowed",
@@ -495,6 +855,60 @@
       "function": "GetFeatureDefDimensions",
       "module": "utils",
       "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "AssignMouseCursor",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "ReplaceMouseCursor",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetMouseCursor",
+      "module": "unsynced_ctrl",
+      "signature": "f32,i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetWMCaption",
+      "module": "unsynced_ctrl",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "SetWMIcon",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetWindowGeometry",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetWindowMaximized",
+      "module": "unsynced_ctrl",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "SetWindowMinimized",
+      "module": "unsynced_ctrl",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "WarpMouse",
+      "module": "unsynced_ctrl",
+      "signature": "i32,i32->i64"
     },
     {
       "class": "handwritten-reviewed",
@@ -737,10 +1151,22 @@
       "signature": "i32,i32,i32->i64"
     },
     {
+      "class": "fixed",
+      "function": "CopyVBOToReadback",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32,i32->i32"
+    },
+    {
       "class": "variable-input-nested-adapted",
       "function": "CreateFBO",
       "module": "gfx",
       "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "CreateFence",
+      "module": "gfx",
+      "signature": "i32->i64"
     },
     {
       "class": "handwritten-reviewed",
@@ -749,7 +1175,7 @@
       "signature": "i32->i64"
     },
     {
-      "class": "fixed",
+      "class": "fixed-option",
       "function": "CreateQuery",
       "module": "gfx",
       "signature": "i32->i64"
@@ -759,6 +1185,12 @@
       "function": "CreateRBO",
       "module": "gfx",
       "signature": "i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "CreateReadback",
+      "module": "gfx",
+      "signature": "i32->i64"
     },
     {
       "class": "variable-input-borrowed-mixed-fixed",
@@ -804,6 +1236,12 @@
     },
     {
       "class": "fixed",
+      "function": "DeleteFence",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
       "function": "DeleteFont",
       "module": "gfx",
       "signature": "i32->i32"
@@ -823,6 +1261,12 @@
     {
       "class": "fixed",
       "function": "DeleteRBO",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
+      "function": "DeleteReadback",
       "module": "gfx",
       "signature": "i32->i32"
     },
@@ -1226,7 +1670,7 @@
       "class": "fixed",
       "function": "GetQuery",
       "module": "gfx",
-      "signature": "i32->i64"
+      "signature": "i32,i32->i32"
     },
     {
       "class": "fixed",
@@ -1353,6 +1797,18 @@
       "function": "InstanceDataFromUnitsVBO",
       "module": "gfx",
       "signature": "i32,i32,i32,i32,i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "IsFenceSignaled",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
+      "class": "fixed",
+      "function": "IsQueryAvailable",
+      "module": "gfx",
+      "signature": "i32->i64"
     },
     {
       "class": "fixed",
@@ -1554,6 +2010,12 @@
     },
     {
       "class": "fixed",
+      "function": "QueryCounter",
+      "module": "gfx",
+      "signature": "i32->i32"
+    },
+    {
+      "class": "fixed",
       "function": "RawBindFBO",
       "module": "gfx",
       "signature": "i32,i32,i32,i32,i32->i32"
@@ -1563,6 +2025,12 @@
       "function": "ReadPixels",
       "module": "gfx",
       "signature": "i32,i32,i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "ReadReadback",
+      "module": "gfx",
+      "signature": "i32,i32,i32,i32->i32"
     },
     {
       "class": "fixed",
@@ -1808,13 +2276,13 @@
       "class": "variable-input-borrowed",
       "function": "UniformArrayFloat",
       "module": "gfx",
-      "signature": "i32,i32->i32"
+      "signature": "i32,i32,i32->i32"
     },
     {
       "class": "variable-input-borrowed",
       "function": "UniformArrayInt",
       "module": "gfx",
-      "signature": "i32,i32->i32"
+      "signature": "i32,i32,i32->i32"
     },
     {
       "class": "fixed",
@@ -2118,6 +2586,12 @@
     },
     {
       "class": "variable-io-borrowed-input-caller-owned-output",
+      "function": "LoadFileRange",
+      "module": "vfs",
+      "signature": "i32,i32,i32,i32->i32"
+    },
+    {
+      "class": "variable-io-borrowed-input-caller-owned-output",
       "function": "PackF32",
       "module": "vfs",
       "signature": "i32,i32->i32"
@@ -2239,5 +2713,5 @@
   ],
   "canonical_callin_count": 6,
   "environment": "intro",
-  "surface_count": 352
+  "surface_count": 431
 }

@@ -19,6 +19,7 @@ native_tests! {
     get_tidal { check = check_game_tidal, set = set_noop, required = ["tidalStrength"], }
     get_global_los { check = check_game_global_los, set = set_noop, required = ["enabled"], }
     get_wind { check = check_game_wind, set = set_noop, required = ["windStrength"], }
+    get_wind_vector { check = check_game_wind, set = set_noop, required = ["x", "y", "z"], }
     get_vector_from_heading { check = check_game_vector_from_heading, set = set_noop, required = ["x", "z"], }
     get_mod_option { check = check_game_option, set = set_noop, required = ["value", "exists"], }
     get_map_option { check = check_game_option, set = set_noop, required = ["value", "exists"], }

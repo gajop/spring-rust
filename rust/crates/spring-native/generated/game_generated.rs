@@ -556,4 +556,19 @@ impl<'a> Game<'a> {
         }
     }
 
+    pub fn get_wind_vector(&self) -> Result<sys::Float3, Error> {
+        unsafe {
+            let query = sys::GetWindVectorQuery {
+                _unused: 0,
+            };
+            let mut result = MaybeUninit::<sys::GetWindVectorResult>::zeroed();
+            let func = self.api.GetWindVector.expect("GetWindVector function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.vector
+            })
+        }
+    }
+
 }

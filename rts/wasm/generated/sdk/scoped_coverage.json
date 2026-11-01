@@ -169,6 +169,7 @@
   "game.GetTidal": "generated",
   "game.GetVectorFromHeading": "generated",
   "game.GetWind": "generated",
+  "game.GetWindVector": "generated",
   "game.IsCheatingEnabled": "generated",
   "game.IsDevLuaEnabled": "generated",
   "game.IsEditDefsEnabled": "generated",

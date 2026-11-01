@@ -20,6 +20,7 @@
     "get_tidal",
     "get_global_los",
     "get_wind",
+    "get_wind_vector",
     "get_vector_from_heading",
     "get_mod_options",
     "get_map_options",
@@ -435,10 +436,10 @@
   ],
   "coverage": {
     "source_context": "synced_gadget",
-    "source_test_count": 507,
-    "selected_count": 429,
+    "source_test_count": 508,
+    "selected_count": 430,
     "selected_kind_counts": {
-      "readonly": 343,
+      "readonly": 344,
       "setter_getter": 86
     },
     "selected_ids": [
@@ -459,6 +460,7 @@
       "get_tidal",
       "get_global_los",
       "get_wind",
+      "get_wind_vector",
       "get_vector_from_heading",
       "get_mod_options",
       "get_map_options",

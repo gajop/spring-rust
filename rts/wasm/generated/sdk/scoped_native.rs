@@ -8782,6 +8782,28 @@ pub(crate) mod game {
         }
         from_wind_data(&(result.data))
     }
+    pub(crate) fn get_wind_vector(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::GameApi>,
+    ) -> Result<Float3> {
+        let native_unused = 0 as _;
+        let query = sys::GetWindVectorQuery {
+            _unused: native_unused,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .GetWindVector
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<sys::GetWindVectorResult>::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        from_float3(&(result.vector))
+    }
     pub(crate) fn is_cheating_enabled(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::GameApi>,
