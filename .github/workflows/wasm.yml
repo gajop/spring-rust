@@ -95,6 +95,9 @@ jobs:
             test/native_api_parity/native/src/generated_tests.rs \
             test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/generated_api_tests.lua
 
+      - name: Build native parity fixture
+        run: cargo build --manifest-path test/native_api_parity/native/Cargo.toml --locked
+
   # Full engine builds are expensive and consume Actions minutes. Opt in
   # through workflow_dispatch; a push never starts these jobs.
   integration:
