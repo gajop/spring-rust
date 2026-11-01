@@ -41,7 +41,7 @@ void spring_futex::lock()
 
 	do {
 		if ((c == 2) || __sync_val_compare_and_swap(&mtx, 1, 2) != 0)
-			do_futex(&mtx, FUTEX_WAIT, 2, NULL);
+			do_futex(&mtx, FUTEX_WAIT_PRIVATE, 2, NULL);
 	} while((c = __sync_val_compare_and_swap(&mtx, 0, 2)) != 0);
 }
 
@@ -56,7 +56,7 @@ void spring_futex::unlock()
 {
 	if (__sync_fetch_and_sub(&mtx, 1) != 1) {
 		__atomic_store_n(&mtx, 0, __ATOMIC_RELEASE);
-		do_futex(&mtx, FUTEX_WAKE, 4, NULL);
+		do_futex(&mtx, FUTEX_WAKE_PRIVATE, 4, NULL);
 	}
 }
 
@@ -139,7 +139,7 @@ void linux_signal::wait()
 	const int g = gen.load(); // our gen
 	sleepers++;
 	while ((g - (m = std::atomic_ref(mtx).load(std::memory_order_acquire))) >= 0) {
-		do_futex(&mtx, FUTEX_WAIT, m, NULL);
+		do_futex(&mtx, FUTEX_WAIT_PRIVATE, m, NULL);
 	}
 	sleepers--;
 }
@@ -158,7 +158,7 @@ void linux_signal::wait_for(spring_time t)
 	const spring_time endTimer = spring_now() + t;
 
 	while (((g - (m = std::atomic_ref(mtx).load(std::memory_order_acquire))) >= 0) && (spring_now() < endTimer)) {
-		do_futex(&mtx, FUTEX_WAIT, m, &linux_t);
+		do_futex(&mtx, FUTEX_WAIT_PRIVATE, m, &linux_t);
 	}
 	sleepers--;
 }
@@ -172,5 +172,5 @@ void linux_signal::notify_all(const int min_sleepers)
 	// Wakers and sleepers access this concurrently. A raw integer read/write
 	// races even though FUTEX_WAIT itself compares the word atomically.
 	std::atomic_ref(mtx).store(static_cast<std::uint32_t>(gen++), std::memory_order_release);
-	do_futex(&mtx, FUTEX_WAKE, INT_MAX, NULL);
+	do_futex(&mtx, FUTEX_WAKE_PRIVATE, INT_MAX, NULL);
 }

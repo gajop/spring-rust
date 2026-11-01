@@ -657,6 +657,12 @@ void CEventHandler::Update()
 	ITERATE_EVENTCLIENTLIST_NA(Update);
 }
 
+void CEventHandler::NanoParticleUpdate(const std::vector<NanoParticles::Event>& events)
+{
+	ZoneScopedN("NanoParticles::LuaUpdate");
+	ITERATE_EVENTCLIENTLIST(NanoParticleUpdate, events);
+}
+
 
 
 void CEventHandler::SunChanged()
@@ -836,6 +842,18 @@ bool CEventHandler::CommandNotify(const Command& cmd)
 		listCommandNotify, &CEventClient::CommandNotify, cmd);
 	spring::benchmark_callins::End(token);
 	return result;
+}
+
+bool CEventHandler::AllowQuit()
+{
+	ZoneScoped;
+	return ControlIterateDefTrue(listAllowQuit, &CEventClient::AllowQuit);
+}
+
+void CEventHandler::KeyBindingsChanged()
+{
+	ZoneScoped;
+	ITERATE_EVENTCLIENTLIST_NA(KeyBindingsChanged);
 }
 
 bool CEventHandler::KeyMapChanged()

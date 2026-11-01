@@ -142,6 +142,7 @@ private:
 	bool hardwareCursor = false;
 	bool invertMouse = false;
 	bool ignoreMove = false;
+	bool rebindCursorAfterWarp = false;
 
 	float cursorScale = 1.0f;
 

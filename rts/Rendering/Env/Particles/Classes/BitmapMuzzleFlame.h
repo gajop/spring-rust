@@ -27,6 +27,8 @@ public:
 	static bool GetMemberInfo(SExpGenSpawnableMemberInfo& memberInfo);
 
 private:
+	float GetSizeScale(float life) const;
+
 	AtlasedTexture* sideTexture;
 	AtlasedTexture* frontTexture;
 

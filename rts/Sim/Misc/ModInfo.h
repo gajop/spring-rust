@@ -96,6 +96,8 @@ public:
 	float constructionDecaySpeed;
 	/// When units are created, issue a move command off of the factory pad.
 	bool insertBuiltUnitMoveCommand;
+	/// Whether queued build overlap checks use yardmaps after their rectangular broad phase.
+	bool useYardmapsForQueuedBuildOverlap;
 
 	// Damage behaviour
 	/// unit pieces flying off (usually on death)
@@ -243,6 +245,9 @@ public:
 	float pfUpdateRateScale;
 
 	bool enableSmoothMesh;
+
+	/// If set, overrides the map's gravity (in elmo/s^2, same units as mapinfo `gravity`).
+	std::optional<float> forcedMapGravityStrength;
 
 	/// Reduce the resolution of the smooth mesh by the divider value. Increasing the value reduces
 	/// the accuracy of the smooth mesh, but improves performance. Minimum 1, default 2.

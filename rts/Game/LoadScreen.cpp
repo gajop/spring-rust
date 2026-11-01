@@ -141,7 +141,14 @@ bool CLoadScreen::Init()
 	clientNet->KeepUpdating(true);
 
 	netHeartbeatThread = spring::thread(Threading::CreateNewThread(std::bind(&CNetProtocol::UpdateLoop, clientNet)));
-	game = new CGame(mapFileName, modFileName, saveFile);
+	try {
+		game = new CGame(mapFileName, modFileName, saveFile);
+	} catch (...) {
+		// CGame publishes itself before parsing startup content. Its destructor is
+		// not called when construction fails, so do not leave a dangling global.
+		game = nullptr;
+		throw;
+	}
 
 	CglFont::sync.SetThreadSafety(mtLoading);
 	CLoadLock::SetThreadSafety(mtLoading);

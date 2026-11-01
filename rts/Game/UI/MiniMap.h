@@ -44,6 +44,7 @@ public:
 	ViewRectangle GetViewRectangle() const;
 	bool HasViewRectangle() const { return viewRectangle.IsSet(); }
 	float2 WorldToMiniMap(float x, float z) const;
+	static float2 WorldToMiniMap(const ViewRectangle& view, int rotation, float x, float z);
 	bool IsInView(float x, float z) const { return !HasViewRectangle() || viewRectangle.Contains(x, z); }
 	CUnit* GetSelectUnit(const float3& pos) const;
 

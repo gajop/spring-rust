@@ -30,6 +30,7 @@
 #include "Rendering/ShadowHandler.h"
 #include "Rendering/DebugVisibilityDrawer.h"
 #include "Rendering/Map/InfoTexture/IInfoTextureHandler.h"
+#include "Rendering/Env/NanoParticles/NanoParticleRenderer.h"
 #include "Rendering/Env/Particles/ProjectileDrawer.h"
 #include "Rendering/Units/UnitDrawer.h"
 #include "Rendering/GL/myGL.h"
@@ -108,7 +109,7 @@ CMiniMap::CMiniMap()
 
 	ConfigUpdate();
 
-	configHandler->NotifyOnChange(this, {"DualScreenMiniMapAspectRatio", "MiniMapCanFlip", "MiniMapDrawProjectiles", "MiniMapDrawPings", "MiniMapCursorScale", "MiniMapIcons", "MiniMapDrawCommands", "MiniMapButtonSize"});
+	configHandler->NotifyOnChange(this, {"DualScreenMiniMapAspectRatio", "MiniMapCanFlip", "MiniMapDrawProjectiles", "MiniMapDrawPings", "MiniMapCursorScale", "MiniMapIcons", "MiniMapDrawCommands", "MiniMapButtonSize", "MiniMapRefreshRate"});
 
 	UpdateGeometry();
 
@@ -203,6 +204,12 @@ void CMiniMap::ConfigUpdate()
 void CMiniMap::ConfigNotify(const std::string& key, const std::string& value)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	// alone, ConfigUpdate would also undo what /minimap icons, drawcommands etc. set
+	if (key == "MiniMapRefreshRate") {
+		minimapRefreshRate = configHandler->GetInt(key);
+		return;
+	}
+
 	ConfigUpdate();
 
 	if (key == "DualScreenMiniMapAspectRatio")
@@ -1922,7 +1929,27 @@ void CMiniMap::DrawUnitIcons() const
 	glTranslatef(0.0f, +1.0f, 0.0f);
 	glScalef(+1.0f / GetViewRectangle().Width(), -1.0f / GetViewRectangle().Height(), 1.0f);
 
-	unitDrawer->DrawUnitMiniMapIcons();
+	MiniMapIconDrawParams params;
+	params.iconSizeX = unitSizeX;
+	params.iconSizeY = unitSizeY;
+	params.rotation = rotation;
+	params.viewAllyTeam = gu->myAllyTeam;
+	params.fullView = gu->spectatingFullView;
+	params.useIcons = useIcons;
+	params.useSimpleColors = simpleColors;
+	params.myColor = SColor(myColor[0], myColor[1], myColor[2], myColor[3]);
+	params.allyColor = SColor(allyColor[0], allyColor[1], allyColor[2], allyColor[3]);
+	params.enemyColor = SColor(enemyColor[0], enemyColor[1], enemyColor[2], enemyColor[3]);
+
+	if (HasViewRectangle()) {
+		params.viewRect = viewRectangle;
+		params.cullMinX = viewRectangle.x0;
+		params.cullMaxX = viewRectangle.x1;
+		params.cullMinZ = viewRectangle.z0;
+		params.cullMaxZ = viewRectangle.z1;
+	}
+
+	unitDrawer->DrawUnitMiniMapIcons(params);
 
 	glDisable(GL_TEXTURE_2D); //maybe later stages need it
 
@@ -2013,6 +2040,8 @@ void CMiniMap::DrawWorldStuff() const
 
 	// draw the projectiles
 	if (drawProjectiles) {
+		// shares the projectile minimap buffer, so it has to fill before the submit
+		NanoParticles::DrawOnMinimap();
 		projectileDrawer->DrawProjectilesMiniMap();
 	}
 
@@ -2103,7 +2132,11 @@ ViewRectangle CMiniMap::GetViewRectangle() const
 
 float2 CMiniMap::WorldToMiniMap(float x, float z) const
 {
-	const auto view = GetViewRectangle();
+	return WorldToMiniMap(GetViewRectangle(), rotation, x, z);
+}
+
+float2 CMiniMap::WorldToMiniMap(const ViewRectangle& view, int rotation, float x, float z)
+{
 	const float u = (x - view.x0) / view.Width();
 	const float v = (z - view.z0) / view.Height();
 	switch (rotation) {

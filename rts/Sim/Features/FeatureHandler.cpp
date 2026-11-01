@@ -24,7 +24,8 @@ CR_REG_METADATA(CFeatureHandler, (
 	CR_MEMBER(deletedFeatureIDs),
 	CR_MEMBER(activeFeatureIDs),
 	CR_MEMBER(features),
-	CR_MEMBER(updateFeatures)
+	CR_MEMBER(updateFeatures),
+	CR_IGNORED(restlessIDs)
 ))
 
 /******************************************************************************/

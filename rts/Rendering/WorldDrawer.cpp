@@ -23,6 +23,7 @@
 #include "Rendering/LineDrawer.h"
 #include "Rendering/LuaObjectDrawer.h"
 #include "Rendering/Features/FeatureDrawer.h"
+#include "Rendering/Env/NanoParticles/NanoParticleRenderer.h"
 #include "Rendering/Env/Particles/ProjectileDrawer.h"
 #include "Rendering/Units/UnitDrawer.h"
 #include "Rendering/IPathDrawer.h"
@@ -142,6 +143,7 @@ void CWorldDrawer::InitPost() const
 
 		CProjectileDrawer::InitStatic();
 		CUnitDrawer::InitStatic();
+		NanoParticles::Renderer::InitStatic();
 		// see ::InitPre
 		// CFeatureDrawer::InitStatic();
 	}
@@ -192,6 +194,7 @@ void CWorldDrawer::Kill()
 	CFeatureDrawer::KillStatic(gu->globalReload);
 	CUnitDrawer::KillStatic(gu->globalReload); // depends on unitHandler, cubeMapHandler
 	CProjectileDrawer::KillStatic(gu->globalReload);
+	NanoParticles::Renderer::KillStatic();
 
 	S3DModelVAO::Kill();
 	modelLoader.Kill();
@@ -199,7 +202,8 @@ void CWorldDrawer::Kill()
 	textureHandler3DO.Kill();
 	textureHandlerS3O.Kill();
 
-	readMap->KillGroundDrawer();
+	if (readMap != nullptr)
+		readMap->KillGroundDrawer();
 	IGroundDecalDrawer::FreeInstance();
 	DepthBufferCopy::Kill();
 	LuaObjectDrawer::Kill();
@@ -450,6 +454,7 @@ void CWorldDrawer::DrawAlphaObjects() const
 		SCOPED_TIMER("Draw::World::Particles");
 		SCOPED_GL_DEBUGGROUP("Draw::World::Particles");
 		projectileDrawer->DrawAlpha(!hasWaterRendering, true, false, false);
+		NanoParticles::Draw(!hasWaterRendering, true, false, false);
 
 		if (hasWaterRendering)
 			glDisable(GL_CLIP_PLANE3);
@@ -489,6 +494,7 @@ void CWorldDrawer::DrawAlphaObjects() const
 		SCOPED_TIMER("Draw::World::Particles");
 		SCOPED_GL_DEBUGGROUP("Draw::World::Particles");
 		projectileDrawer->DrawAlpha(true, false, false, false);
+		NanoParticles::Draw(true, false, false, false);
 
 		glDisable(GL_CLIP_PLANE3);
 	}

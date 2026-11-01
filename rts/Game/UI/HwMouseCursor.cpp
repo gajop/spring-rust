@@ -4,20 +4,20 @@
 #include "System/TypeToStr.h"
 #include "Rendering/GlobalRendering.h"
 
-#if defined(__APPLE__) || defined(HEADLESS)
-	// FIXME: no hardware cursor support for macs
+#if defined(HEADLESS)
+	// no hardware cursor without a window
 #elif defined(_WIN32)
 	#include <windows.h>
 	#include "System/Input/MouseInput.h"
 	typedef unsigned char byte;
-#else
+#elif !defined(__APPLE__)
 	#include <X11/Xcursor/Xcursor.h>
 	#include <SDL_syswm.h>
 #endif
 
 #include "HwMouseCursor.h"
 
-#if !defined(__APPLE__) && !defined(HEADLESS)
+#if !defined(HEADLESS)
 
 #include "System/Log/ILog.h"
 #include "System/SpringMath.h"
@@ -36,12 +36,8 @@
 
 
 
-//////////////////////////////////////////////////////////////////////
-// Platform dependent classes
-//////////////////////////////////////////////////////////////////////
-
-#if defined(__APPLE__) || defined(HEADLESS)
-class HardwareCursorApple: public IHardwareCursor {
+// Shared fallback when no hardware cursor implementation is available.
+class HardwareCursorNull: public IHardwareCursor {
 public:
 	void PushImage(int xsize, int ysize, const void* mem) override {}
 	void PushFrame(int index, float delay) override {}
@@ -58,7 +54,11 @@ public:
 };
 
 
-#elif defined(_WIN32)
+//////////////////////////////////////////////////////////////////////
+// Platform dependent classes
+//////////////////////////////////////////////////////////////////////
+
+#if defined(_WIN32) && !defined(HEADLESS)
 
 
 class HardwareCursorWindows: public IHardwareCursor {
@@ -142,9 +142,10 @@ private:
 };
 
 
-#else
+#elif !defined(HEADLESS)
 
 
+#ifndef __APPLE__
 // X11/Wayland
 class HardwareCursorX11: public IHardwareCursor {
 public:
@@ -176,6 +177,8 @@ private:
 	std::vector<XcursorImage*> cimages;
 };
 
+#endif
+
 // SDL supports cursors for X11, Wayland, Windows and others
 // requires call to Update() to animate it
 class HardwareCursorSDL : public IHardwareCursor {
@@ -205,12 +208,15 @@ private:
 #endif
 
 IHardwareCursor* IHardwareCursor::Alloc(void* mem) {
-#if defined(__APPLE__) || defined(HEADLESS)
-	static_assert(sizeof(HardwareCursorApple  ) <= CMouseCursor::HWC_MEM_SIZE, "");
-	return (new (mem) HardwareCursorApple());
+#if defined(HEADLESS)
+	static_assert(sizeof(HardwareCursorNull) <= CMouseCursor::HWC_MEM_SIZE, "");
+	return (new (mem) HardwareCursorNull());
 #elif defined (_WIN32)
 	static_assert(sizeof(HardwareCursorWindows) <= CMouseCursor::HWC_MEM_SIZE, "");
 	return (new (mem) HardwareCursorWindows());
+#elif defined(__APPLE__)
+	static_assert(sizeof(HardwareCursorSDL) <= CMouseCursor::HWC_MEM_SIZE, "");
+	return (new (mem) HardwareCursorSDL());
 #else //LINUX
 	static_assert(sizeof(HardwareCursorX11) <= CMouseCursor::HWC_MEM_SIZE, "");
 	static_assert(sizeof(HardwareCursorSDL) <= CMouseCursor::HWC_MEM_SIZE, "");
@@ -218,13 +224,22 @@ IHardwareCursor* IHardwareCursor::Alloc(void* mem) {
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
 
-	if (SDL_GetWindowWMInfo(globalRendering->GetWindow(), &info) && info.subsystem == SDL_SYSWM_X11)
-		return (new (mem) HardwareCursorX11());
-
-	// Wayland, and video drivers with no window system at all (SDL's "offscreen", which renders
-	// headless through EGL) where SDL_GetWindowWMInfo fails: the caller never checks for null.
-	return (new (mem) HardwareCursorSDL());
+	if (SDL_GetWindowWMInfo(globalRendering->GetWindow(), &info)) {
+		switch (info.subsystem)
+		{
+		case SDL_SYSWM_X11:
+			return (new (mem) HardwareCursorX11());
+		case SDL_SYSWM_WAYLAND:
+		default: {
+			return (new (mem) HardwareCursorSDL());
+		} break;
+		}
+	}
 #endif
+
+	// Offscreen SDL drivers have no window-system cursor; software drawing still works.
+	static_assert(sizeof(HardwareCursorNull) <= CMouseCursor::HWC_MEM_SIZE, "");
+	return (new (mem) HardwareCursorNull());
 }
 
 void IHardwareCursor::Free(IHardwareCursor* hwc) {
@@ -240,7 +255,7 @@ void IHardwareCursor::Free(IHardwareCursor* hwc) {
 //////////////////////////////////////////////////////////////////////
 
 
-#if defined(__APPLE__) || defined(HEADLESS)
+#if defined(HEADLESS)
 
 
 #elif defined(_WIN32)
@@ -565,6 +580,7 @@ void HardwareCursorWindows::Bind()
 #else
 
 
+#ifndef __APPLE__
 void HardwareCursorX11::Init(CMouseCursor::HotSpot hs)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -720,6 +736,7 @@ void HardwareCursorX11::Bind()
 	SDL_ShowCursor(SDL_ENABLE);
 	XDefineCursor(info.info.x11.display, info.info.x11.window, cursor);
 }
+#endif
 
 
 void HardwareCursorSDL::PushImage(int xsize, int ysize, const void* mem)

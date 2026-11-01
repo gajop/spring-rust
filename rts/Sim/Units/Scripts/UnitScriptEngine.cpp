@@ -57,6 +57,9 @@ void CUnitScriptEngine::InitStatic() {
 
 void CUnitScriptEngine::KillStatic() {
 	RECOIL_DETAILED_TRACY_ZONE;
+	if (unitScriptEngine == nullptr)
+		return;
+
 	cobEngine->Kill();
 	cobFileHandler->Kill();
 	unitScriptEngine->Kill();

@@ -3,15 +3,18 @@ add_definitions(-DCATCH_AMALGAMATED_CUSTOM_MAIN)
 # defines spring_test_compile_fail macro
 include(${CMAKE_CURRENT_SOURCE_DIR}/tools/CompileFailTest/CompileFailTest.cmake)
 
-if    (UNIX AND (NOT APPLE) AND (NOT MINGW))
+if    (UNIX AND NOT APPLE AND NOT MINGW AND
+       NOT (CMAKE_SYSTEM_NAME MATCHES "OpenBSD"))
 	find_library(REALTIME_LIBRARY rt)
 
 	if    (PREFER_STATIC_LIBS AND NOT EXISTS "${REALTIME_LIBRARY}")
 		message(FATAL_ERROR "librt.[so|a] not found! Needed by std::chrono when statically linked!")
 	endif (PREFER_STATIC_LIBS AND NOT EXISTS "${REALTIME_LIBRARY}")
-else  (UNIX AND (NOT APPLE) AND (NOT MINGW))
+else  (UNIX AND NOT APPLE AND NOT MINGW AND
+       NOT (CMAKE_SYSTEM_NAME MATCHES "OpenBSD"))
 	set(REALTIME_LIBRARY "")
-endif (UNIX AND (NOT APPLE) AND (NOT MINGW))
+endif (UNIX AND NOT APPLE AND NOT MINGW AND
+       NOT (CMAKE_SYSTEM_NAME MATCHES "OpenBSD"))
 
 ADD_SUBDIRECTORY(lib/catch2)
 # Engine-wide -fsingle-precision-constant (gcc) makes `0.` a float, which
@@ -40,7 +43,7 @@ if (WIN32)
 		RESULT_VARIABLE IPV6_RET
 		ERROR_QUIET)
 else(WIN32)
-	execute_process(COMMAND ping6 ::1 -c 1
+	execute_process(COMMAND ping6 -c 1 ::1
 		RESULT_VARIABLE IPV6_RET
 		ERROR_QUIET)
 endif (WIN32)
@@ -77,9 +80,6 @@ set(test_common_libraries
 	fmt::fmt
 )
 
-# Guard against a duplicate: a vendored lib (rts/lib/nowide/test) also defines a
-# `tests` target and may be configured first. Its own CMakeLists guards this the
-# same way; without matching it here, configure aborts on the second definition.
 if(NOT TARGET tests)
 	add_custom_target(tests)
 endif()
@@ -578,7 +578,9 @@ endif()
 	set(test_libs
 			${WINMM_LIBRARY}
 		)
-	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND
+            NOT (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD") AND
+            NOT (CMAKE_SYSTEM_NAME STREQUAL "OpenBSD"))
 		list(APPEND test_libs atomic)
 	endif()
 	add_spring_test(${test_name} "${test_src}" "${test_libs}" "-DTHREADPOOL -DUNITSYNC")
@@ -603,6 +605,18 @@ endif()
 
 	set(test_flags "-DNOT_USING_CREG -DBUILDING_AI")
 	add_spring_test(${test_name} "${test_src}" "${test_libs}" "${test_flags}")
+
+################################################################################
+### QueuedBuildOverlap
+	set(test_name QueuedBuildOverlap)
+	set(test_src
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/Sim/Misc/testQueuedBuildOverlap.cpp"
+			"${ENGINE_SOURCE_DIR}/Sim/Units/QueuedBuildOverlap.cpp"
+			${test_Common_sources}
+		)
+
+	set(test_libs "")
+	add_spring_test(${test_name} "${test_src}" "${test_libs}" "-DNOT_USING_CREG -DNOT_USING_STREFLOP -DBUILDING_AI")
 
 ################################################################################
 ### Ellipsoid

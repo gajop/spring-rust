@@ -47,6 +47,7 @@ public:
 	bool HaveTarget() const { return (currentTarget.type != Target_None); }
 	bool HaveUnitTarget() const { return (currentTarget.type == Target_Unit); }
 	bool HavePosTarget() const { return (currentTarget.type == Target_Pos); }
+	bool HaveDeniedInterceptTarget() const;
 
 	const SWeaponTarget& GetCurrentTarget() const { return currentTarget; }
 	const float3& GetCurrentTargetPos() const { return currentTargetPos; }
@@ -121,8 +122,8 @@ protected:
 
 	void UpdateWeaponPieces(const bool updateAimFrom = true, const bool warnMissing = true);
 	float3 GetLeadVec(const CUnit* unit) const;
-	float GetAccuratePredictedImpactTime(const CUnit* unit) const;
-	float GetSafeInterceptTime(const CUnit* unit, float predictMult) const;
+	float GetAccuratePredictedImpactTime(const float3& targetPos, const float3& targetSpeed) const;
+	float GetSafeInterceptTime(const float3& targetPos, const float3& targetSpeed) const;
 
 	float GetShapedWeaponRange(const float3& dir, float maxLength) const;
 private:

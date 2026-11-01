@@ -3,7 +3,11 @@
 #include "System/GamePerformanceLog.h"
 #include "UnitDrawer.h"
 
+#include <algorithm>
+#include <cassert>
+#include <cstring>
 #include <map>
+#include <vector>
 
 #include "Game/Camera.h"
 #include "Game/WorldDrawBounds.h"
@@ -37,6 +41,7 @@
 #include "Rendering/Models/ModelsMemStorage.h"
 
 #include "Sim/Features/Feature.h"
+#include "Sim/Misc/GlobalConstants.h"
 #include "Sim/Misc/LosHandler.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Projectiles/ExplosionGenerator.h"
@@ -69,6 +74,7 @@ CONFIG(bool, UnitIconsAsUI).defaultValue(false).description("Draw unit icons lik
 CONFIG(bool, UnitIconsAsUIDraw).defaultValue(true).description("With UnitIconsAsUI, whether the engine draws the icons. Off keeps icon state (models hidden behind icons), icon picking and minimap icons, for a game that draws its own.");
 CONFIG(bool, UnitIconsHideWithUI).defaultValue(false).description("Hide unit icons when UI is hidden.");
 CONFIG(float, UnitGhostIconsDimming).defaultValue(0.8).minimumValue(0.0f).maximumValue(1.0f).description("Dimming multiplier for out of radar ghost icons. Setting to 0 disables them.");
+CONFIG(bool, UnitIconsSortedByDepth).defaultValue(false).description("Additionally order overlapping unit icons (world, screen and minimap) back-to-front by view depth. Icons always sort by the drawOrder of their icontypes.lua entry when the game defines one; depth ordering on top of that makes overlap stacking change as units and the camera move, hence optional.");
 
 CONFIG(int, MaxDynamicModelLights)
 	.defaultValue(1)
@@ -356,16 +362,151 @@ void CUnitDrawerGLSL::DrawUnitTrans(const CUnit* unit, uint32_t preList, uint32_
 	glPopMatrix();
 }
 
-void CUnitDrawerGLSL::DrawUnitMiniMapIcon(TypedRenderBuffer<VA_TYPE_2DTC3>& rb, size_t iconIdx, const float iconScale, const float3& pos, const SColor& color) const
+namespace {
+	// icon draw ordering: active whenever the game defines icontypes.lua drawOrder
+	// values (games without them skip sorting entirely). The sort runs over flat 8-byte
+	// records instead of the payload entries: the icon's drawOrder (higher drawn on
+	// top, 16 bits) packs above a path-specific back-to-front depth (full 32 bits),
+	// with the payload index in the low 16 bits. Both floats are remapped to
+	// order-preserving unsigned bits, so the whole sort is comparator-free integer
+	// sorting. The depth field only participates when UnitIconsSortedByDepth is
+	// enabled — it makes overlap stacking change as units and the camera move, so by
+	// default icons that share a drawOrder keep their stable gather (creation) order
+	// via the index tiebreak.
+	inline uint32_t SortableFloatBits(float f) {
+		uint32_t b;
+		std::memcpy(&b, &f, sizeof(b));
+		return b ^ (uint32_t(int32_t(b) >> 31) | 0x80000000u);
+	}
+
+	// 64k icons per path: covers MAX_UNITS with room to spare for dead ghost buildings
+	// (which draw in the same pass); the runtime assert below guards the combined count
+	constexpr uint32_t ICON_SORT_IDX_MASK = (1u << 16) - 1;
+	static_assert(ICON_SORT_IDX_MASK >= uint32_t(MAX_UNITS), "icon sort records cannot index all units");
+
+	inline uint64_t MakeIconSortRec(float drawOrder, float depth, size_t entryIdx) {
+		assert(entryIdx <= ICON_SORT_IDX_MASK);
+		// drawOrder gets 16 bits of float precision (plenty for layer indices); depth
+		// keeps all 32 so overlap order only changes at true depth crossings instead
+		// of jittering at quantization-bucket boundaries as units or the camera move
+		return (uint64_t{SortableFloatBits(drawOrder) >> 16} << 48)
+		     | (uint64_t{SortableFloatBits(depth)} << 16)
+		     | (uint32_t(entryIdx) & ICON_SORT_IDX_MASK);
+	}
+
+	// the minimap can be drawn rotated in 90° steps. Overlaps read naturally when the
+	// icon nearer the viewer's screen bottom draws on top — the same convention the
+	// world view gets from back-to-front depth ordering. Raw pos.z implements that only
+	// for the unrotated minimap: flipped 180° it would stack exactly backwards (icons
+	// visually behind covering the ones in front of them) and sideways at 90°/270°, so
+	// sort by the post-rotation screen vertical instead. A minimap that auto-rotates to
+	// follow the camera thereby also matches the world view's stacking for free, while
+	// a fixed minimap keeps a stable order instead of reshuffling as the camera turns
+	inline float MiniMapIconSortDepth(const float3& pos, int rotation) { // CMiniMap::RotationOptions
+		switch (rotation) {
+			case CMiniMap::ROTATION_90:  return -pos.x;
+			case CMiniMap::ROTATION_180: return -pos.z;
+			case CMiniMap::ROTATION_270: return  pos.x;
+			default:                     return  pos.z;
+		}
+	}
+
+	void SortIconRecs(std::vector<uint64_t>& recs) {
+		// measured crossover: LSD radix beats std::sort ~3x at 20k records but loses
+		// below a few thousand, where its per-pass histogram overhead dominates
+		constexpr size_t RADIX_THRESHOLD = 8192;
+
+		const size_t n = recs.size();
+
+		if (n < RADIX_THRESHOLD) {
+			std::sort(recs.begin(), recs.end());
+			return;
+		}
+
+		static std::vector<uint64_t> tmp;
+		tmp.resize(n);
+
+		uint64_t* a = recs.data();
+		uint64_t* b = tmp.data();
+
+		for (int pass = 0; pass < 8; ++pass) {
+			const int shift = pass * 8;
+
+			uint32_t cnt[256] = {0};
+			for (size_t i = 0; i < n; ++i)
+				++cnt[(a[i] >> shift) & 0xFF];
+
+			// a byte value shared by every key makes this pass an identity permutation;
+			// in practice this skips most of the drawOrder half of the key
+			bool skip = false;
+			for (int d = 0; d < 256; ++d) {
+				if (cnt[d] == uint32_t(n)) {
+					skip = true;
+					break;
+				}
+			}
+			if (skip)
+				continue;
+
+			uint32_t pos[256];
+			uint32_t sum = 0;
+			for (int d = 0; d < 256; ++d) {
+				pos[d] = sum;
+				sum += cnt[d];
+			}
+
+			for (size_t i = 0; i < n; ++i)
+				b[pos[(a[i] >> shift) & 0xFF]++] = a[i];
+
+			std::swap(a, b);
+		}
+
+		if (a != recs.data())
+			std::memcpy(recs.data(), a, n * sizeof(uint64_t));
+	}
+}
+
+void CUnitDrawerGLSL::DrawUnitMiniMapIcon(TypedRenderBuffer<VA_TYPE_2DTC3>& rb, size_t iconIdx, const float iconScale, const float3& pos, const SColor& color, const MiniMapIconDrawParams& params) const
 {
-	const float iconSizeX = (iconScale * minimap->GetUnitSizeX());
-	const float iconSizeY = (iconScale * minimap->GetUnitSizeY());
-	if (!minimap->IsInView(pos.x, pos.z))
-		return;
-	const auto normalized = minimap->WorldToMiniMap(pos.x, pos.z);
-	const auto view = minimap->GetViewRectangle();
-	const float posX = normalized.x * view.Width();
-	const float posY = (1.0f - normalized.y) * view.Height();
+	const float iconSizeX = (iconScale * params.iconSizeX);
+	const float iconSizeY = (iconScale * params.iconSizeY);
+	float posX = pos.x;
+	float posY = pos.z;
+
+	if (params.viewRect.IsSet()) {
+		// the minimap shows a sub-rectangle of the map (or a null map's play area):
+		// position within it, the caller scales by its width and height
+		const float2 normalized = CMiniMap::WorldToMiniMap(params.viewRect, params.rotation, pos.x, pos.z);
+		posX = normalized.x * params.viewRect.Width();
+		posY = (1.0f - normalized.y) * params.viewRect.Height();
+	} else {
+		switch (params.rotation) {
+			case CMiniMap::ROTATION_90:
+				posX = mapDims.mapx * SQUARE_SIZE - posX;
+
+				// Normalize the coordinates to the minimap
+				posX = posX / mapDims.mapx * mapDims.mapy;
+				posY = posY / mapDims.mapy * mapDims.mapx;
+
+				std::swap(posX, posY);
+				break;
+			case CMiniMap::ROTATION_180:
+				posX = mapDims.mapx * SQUARE_SIZE - posX;
+				posY = mapDims.mapy * SQUARE_SIZE - posY;
+				break;
+			case CMiniMap::ROTATION_270:
+				posY = mapDims.mapy * SQUARE_SIZE - posY;
+
+				// Normalize the coordinates to the minimap
+				posX = posX / mapDims.mapx * mapDims.mapy;
+				posY = posY / mapDims.mapy * mapDims.mapx;
+
+				std::swap(posX, posY);
+				break;
+			case CMiniMap::ROTATION_0:
+				break;
+		}
+	}
 
 	float x0 = posX - iconSizeX;
 	float x1 = posX + iconSizeX;
@@ -384,7 +525,7 @@ void CUnitDrawerGLSL::DrawUnitMiniMapIcon(TypedRenderBuffer<VA_TYPE_2DTC3>& rb, 
 	);
 }
 
-void CUnitDrawerGLSL::DrawUnitMiniMapIcons() const
+void CUnitDrawerGLSL::DrawUnitMiniMapIcons(const MiniMapIconDrawParams& params) const
 {
 	ZoneScoped;
 #ifdef HEADLESS
@@ -396,24 +537,34 @@ void CUnitDrawerGLSL::DrawUnitMiniMapIcons() const
 	rb.AssertSubmission();
 
 	SColor currentColor;
-	const auto myAllyTeam = gu->myAllyTeam;
-	const auto isFullView = gu->spectatingFullView;
+	const int viewAllyTeam = params.viewAllyTeam;
+	const bool isFullView = params.fullView;
+	// the local view can use the event-maintained per-unit icon cache; any other
+	// perspective recomputes the selection from that viewer's losStatus
+	const bool localView = (viewAllyTeam == gu->myAllyTeam && isFullView == gu->spectatingFullView);
 	const float ghostIconDimming = modelDrawerData->ghostIconDimming;
 	const auto defIconIdx = icon::iconHandler.GetDefaultIconIdx();
 
+	const bool sortDepth = modelDrawerData->sortUnitIconsByDepth;
+	const bool sortIcons = sortDepth || icon::iconHandler.HasDrawOrders();
+	const auto mmRotation = params.rotation;
+
+	struct IconDrawEntry {
+		size_t iconIdx;
+		float iconScale;
+		float3 pos;
+		SColor color;
+	};
+	static std::vector<IconDrawEntry> entries;
+	static std::vector<uint64_t> sortRecs;
+	entries.clear();
+	sortRecs.clear();
+	if (sortIcons) {
+		entries.reserve(modelDrawerData->GetUnsortedObjects().size());
+		sortRecs.reserve(modelDrawerData->GetUnsortedObjects().size());
+	}
+
 	for (auto* unit : modelDrawerData->GetUnsortedObjects()) {
-		// No current icon: the unit is neither in sight nor on radar, so it has no place on the
-		// minimap whichever icon the minimap draws. With minimap icons off (the default icon
-		// for all) it used to be drawn anyway, at a scale read from iconsData[INVALID_ICON_INDEX]:
-		// out of bounds, so garbage, now and then a quad over the whole minimap in its team colour.
-		if (unit->currentIconIndex == icon::INVALID_ICON_INDEX)
-			continue;
-
-		const size_t iconIndex = minimap->UseUnitIcons() ? unit->currentIconIndex : defIconIdx;
-
-		if (iconIndex == icon::INVALID_ICON_INDEX)
-			continue;
-
 		if (unit->noMinimap)
 			continue;
 
@@ -423,26 +574,50 @@ void CUnitDrawerGLSL::DrawUnitMiniMapIcons() const
 		if (unit->IsInVoid())
 			continue;
 
-		if (unit->isSelected) {
+		// cull before the icon-selection and color work; for sub-rect views
+		// (gl.DrawMiniMapIcons at higher zoom) this skips most units outright
+		const float3& pos = (!isFullView) ?
+			unit->GetObjDrawErrorPos(viewAllyTeam) :
+			unit->GetObjDrawMidPos();
+
+		if (pos.x < params.cullMinX || pos.x > params.cullMaxX || pos.z < params.cullMinZ || pos.z > params.cullMaxZ)
+			continue;
+
+		// No current icon for this viewer: the unit is neither in sight nor on radar, so it has
+		// no place on the minimap whichever icon the minimap draws. With minimap icons off (the
+		// default icon for all) it used to be drawn anyway, at a scale read from
+		// iconsData[INVALID_ICON_INDEX]: out of bounds, so garbage, now and then a quad over the
+		// whole minimap in its team colour.
+		const size_t viewerIconIndex = localView ? unit->currentIconIndex : modelDrawerData->GetUnitIconIndex(unit, viewAllyTeam, isFullView);
+
+		if (viewerIconIndex == icon::INVALID_ICON_INDEX)
+			continue;
+
+		const size_t iconIndex = params.useIcons ? viewerIconIndex : defIconIdx;
+
+		if (iconIndex == icon::INVALID_ICON_INDEX)
+			continue;
+
+		if (params.highlightSelected && unit->isSelected) {
 			currentColor = color4::white; // selected color
 		}
 		else {
-			if (minimap->UseSimpleColors()) {
+			if (params.useSimpleColors) {
 				if (unit->team == gu->myTeam) {
-					currentColor = minimap->GetMyTeamIconColor();
+					currentColor = params.myColor;
 				}
-				else if (teamHandler.Ally(myAllyTeam, unit->allyteam)) {
-					currentColor = minimap->GetAllyTeamIconColor();
+				else if (teamHandler.Ally(viewAllyTeam, unit->allyteam)) {
+					currentColor = params.allyColor;
 				}
 				else {
-					currentColor = minimap->GetEnemyTeamIconColor();
+					currentColor = params.enemyColor;
 				}
 			}
 			else {
 				currentColor = teamHandler.Team(unit->team)->color;
 			}
 
-			if (!isFullView && !(unit->losStatus[myAllyTeam] & LOS_INRADAR)) {
+			if (!isFullView && !(unit->losStatus[viewAllyTeam] & LOS_INRADAR)) {
 				if (ghostIconDimming == 0.0f)
 					continue;
 
@@ -453,36 +628,61 @@ void CUnitDrawerGLSL::DrawUnitMiniMapIcons() const
 		}
 
 		const float iconScale = CUnitDrawerHelper::GetUnitIconScale(unit);
-		const float3& pos = (!isFullView) ?
-			unit->GetObjDrawErrorPos(myAllyTeam) :
-			unit->GetObjDrawMidPos();
 
-		DrawUnitMiniMapIcon(rb, iconIndex, iconScale, pos, currentColor);
+		if (!sortIcons) {
+			DrawUnitMiniMapIcon(rb, iconIndex, iconScale, pos, currentColor, params);
+		} else {
+			entries.push_back({ iconIndex, iconScale, pos, currentColor });
+			sortRecs.push_back(MakeIconSortRec(icon::iconHandler.GetIconData(iconIndex).GetDrawOrder(), sortDepth ? MiniMapIconSortDepth(pos, mmRotation) : 0.0f, entries.size() - 1));
+		}
 	}
 
 	if (!isFullView && ghostIconDimming > 0.0f) {
-		for (auto* ghost : modelDrawerData->GetDeadGhostBuildings(gu->myAllyTeam)) {
-			if (minimap->UseSimpleColors())
-				currentColor = minimap->GetEnemyTeamIconColor();
+		for (auto* ghost : modelDrawerData->GetDeadGhostBuildings(viewAllyTeam)) {
+			const float3& pos = ghost->midPos;
+
+			if (pos.x < params.cullMinX || pos.x > params.cullMaxX || pos.z < params.cullMinZ || pos.z > params.cullMaxZ)
+				continue;
+
+			if (params.useSimpleColors)
+				currentColor = params.enemyColor;
 			else
 				currentColor = teamHandler.Team(ghost->team)->color;
 
-			const size_t iconIndex = minimap->UseUnitIcons() ? ghost->currentIconIndex : defIconIdx;
+			const size_t iconIndex = params.useIcons ? ghost->currentIconIndex : defIconIdx;
 
 			assert(iconIndex != icon::INVALID_ICON_INDEX);
 			if (iconIndex == icon::INVALID_ICON_INDEX)
 				continue;
 
 			const auto& iconData = icon::iconHandler.GetIconData(iconIndex);
-
 			const float iconScale = iconData.GetSize();
-			const float3& pos = ghost->midPos;
 
 			currentColor.r *= ghostIconDimming;
 			currentColor.g *= ghostIconDimming;
 			currentColor.b *= ghostIconDimming;
 
-			DrawUnitMiniMapIcon(rb, iconIndex, iconScale, pos, currentColor);
+			if (!sortIcons) {
+				DrawUnitMiniMapIcon(rb, iconIndex, iconScale, pos, currentColor, params);
+			} else {
+				entries.push_back({ iconIndex, iconScale, pos, currentColor });
+				sortRecs.push_back(MakeIconSortRec(iconData.GetDrawOrder(), sortDepth ? MiniMapIconSortDepth(pos, mmRotation) : 0.0f, entries.size() - 1));
+			}
+		}
+	}
+
+	if (sortIcons) {
+		{
+			ZoneScopedN("DrawUnitMiniMapIcons::Sort");
+			ZoneValue(uint64_t(sortRecs.size()));
+			SortIconRecs(sortRecs);
+		}
+
+		ZoneScopedN("DrawUnitMiniMapIcons::Emit");
+
+		for (const uint64_t rec : sortRecs) {
+			const auto& e = entries[uint32_t(rec) & ICON_SORT_IDX_MASK];
+			DrawUnitMiniMapIcon(rb, e.iconIdx, e.iconScale, e.pos, e.color, params);
 		}
 	}
 
@@ -566,6 +766,23 @@ void CUnitDrawerGLSL::DrawUnitIcons() const
 	static auto& rb = RenderBuffer::GetTypedRenderBuffer<VA_TYPE_TC3>();
 	rb.AssertSubmission();
 
+	const bool sortDepth = modelDrawerData->sortUnitIconsByDepth;
+	const bool sortIcons = sortDepth || icon::iconHandler.HasDrawOrders();
+
+	struct IconDrawEntry {
+		CUnit* unit;
+		float3 pos;
+		SColor color;
+	};
+	static std::vector<IconDrawEntry> entries;
+	static std::vector<uint64_t> sortRecs;
+	entries.clear();
+	sortRecs.clear();
+	if (sortIcons) {
+		entries.reserve(modelDrawerData->GetUnsortedObjects().size());
+		sortRecs.reserve(modelDrawerData->GetUnsortedObjects().size());
+	}
+
 	for (auto* unit : modelDrawerData->GetUnsortedObjects()) {
 		if (unit->currentIconIndex == icon::INVALID_ICON_INDEX)
 			continue;
@@ -578,9 +795,6 @@ void CUnitDrawerGLSL::DrawUnitIcons() const
 
 		if (!worldDrawBounds::Contains(unit->drawPos))
 			continue;
-
-		const auto& iconData = icon::iconHandler.GetIconData(unit->currentIconIndex);
-
 		// drawMidPos is auto-calculated now; can wobble on its own as pieces move
 		float3 pos = (!gu->spectatingFullView) ?
 			unit->GetObjDrawErrorPos(gu->myAllyTeam) :
@@ -589,7 +803,28 @@ void CUnitDrawerGLSL::DrawUnitIcons() const
 		// use white for selected units
 		const auto& iconColor = unit->isSelected ? color4::white : teamHandler.Team(unit->team)->color;
 
-		unit->iconRadius = DrawUnitIcon(rb, unit->currentIconIndex, unit->iconRadius, unit->radius, pos, iconColor);
+		// negated distance: within equal drawOrder farther icons are drawn first (back-to-front)
+		if (!sortIcons) {
+			unit->iconRadius = DrawUnitIcon(rb, unit->currentIconIndex, unit->iconRadius, unit->radius, pos, iconColor);
+		} else {
+			entries.push_back({ unit, pos, iconColor });
+			sortRecs.push_back(MakeIconSortRec(icon::iconHandler.GetIconData(unit->currentIconIndex).GetDrawOrder(), sortDepth ? -camera->GetPos().SqDistance(pos) : 0.0f, entries.size() - 1));
+		}
+	}
+
+	if (sortIcons) {
+		{
+			ZoneScopedN("DrawUnitIcons::Sort");
+			ZoneValue(uint64_t(sortRecs.size()));
+			SortIconRecs(sortRecs);
+		}
+
+		ZoneScopedN("DrawUnitIcons::Emit");
+
+		for (const uint64_t rec : sortRecs) {
+			const auto& e = entries[uint32_t(rec) & ICON_SORT_IDX_MASK];
+			e.unit->iconRadius = DrawUnitIcon(rb, e.unit->currentIconIndex, e.unit->iconRadius, e.unit->radius, e.pos, e.color);
+		}
 	}
 
 	if (!rb.ShouldSubmit())
@@ -683,6 +918,25 @@ void CUnitDrawerGLSL::DrawUnitIconsScreen() const
 	const auto isFullView = gu->spectatingFullView;
 	const float ghostIconDimming = modelDrawerData->ghostIconDimming;
 
+	const bool sortDepth = modelDrawerData->sortUnitIconsByDepth;
+	const bool sortIcons = sortDepth || icon::iconHandler.HasDrawOrders();
+
+	struct IconDrawEntry {
+		size_t iconIdx;
+		float3 pos;
+		SColor color;
+		float radius;
+		bool isIcon;
+	};
+	static std::vector<IconDrawEntry> entries;
+	static std::vector<uint64_t> sortRecs;
+	entries.clear();
+	sortRecs.clear();
+	if (sortIcons) {
+		entries.reserve(modelDrawerData->GetUnsortedObjects().size());
+		sortRecs.reserve(modelDrawerData->GetUnsortedObjects().size());
+	}
+
 	for (auto* unit : modelDrawerData->GetUnsortedObjects()) {
 		if (unit->currentIconIndex == icon::INVALID_ICON_INDEX)
 			continue;
@@ -702,11 +956,11 @@ void CUnitDrawerGLSL::DrawUnitIconsScreen() const
 
 
 		// drawMidPos is auto-calculated now; can wobble on its own as pieces move
-		float3 pos = (!isFullView) ?
+		const float3 worldPos = (!isFullView) ?
 			unit->GetObjDrawErrorPos(myAllyTeam) :
 			unit->GetObjDrawMidPos();
 
-		pos = camera->CalcViewPortCoordinates(pos);
+		float3 pos = camera->CalcViewPortCoordinates(worldPos);
 		if (pos.z > 1.0f || pos.z < 0.0f)
 			continue;
 
@@ -725,16 +979,23 @@ void CUnitDrawerGLSL::DrawUnitIconsScreen() const
 			}
 		}
 
-		DrawUnitIconScreen(rb, unit->currentIconIndex, pos, currentColor, unit->radius, unit->GetIsIcon());
+		if (!sortIcons) {
+			DrawUnitIconScreen(rb, unit->currentIconIndex, pos, currentColor, unit->radius, unit->GetIsIcon());
+		} else {
+			entries.push_back({ unit->currentIconIndex, pos, currentColor, unit->radius, unit->GetIsIcon() });
+			// negated camera distance: farther icons draw first (back-to-front). The
+			// post-projection viewport z is unusable here — it compresses everything
+			// toward 1.0, which the 16-bit key quantization collapses into one value
+			sortRecs.push_back(MakeIconSortRec(icon::iconHandler.GetIconData(unit->currentIconIndex).GetDrawOrder(), sortDepth ? -camera->GetPos().SqDistance(worldPos) : 0.0f, entries.size() - 1));
+		}
 	}
-	
+
 	if (!isFullView && ghostIconDimming > 0.0f) {
 		for (auto* ghost : modelDrawerData->GetDeadGhostBuildings(gu->myAllyTeam)) {
-			float3 pos = ghost->midPos;
-			if (!worldDrawBounds::Contains(pos))
+			if (!worldDrawBounds::Contains(ghost->midPos))
 				continue;
 
-			pos = camera->CalcViewPortCoordinates(pos);
+			float3 pos = camera->CalcViewPortCoordinates(ghost->midPos);
 			if (pos.z > 1.0f || pos.z < 0.0f)
 				continue;
 
@@ -749,7 +1010,27 @@ void CUnitDrawerGLSL::DrawUnitIconsScreen() const
 			currentColor.g *= ghostIconDimming;
 			currentColor.b *= ghostIconDimming;
 
-			DrawUnitIconScreen(rb, iconIndex, pos, currentColor, ghost->radius, false);
+			if (!sortIcons) {
+				DrawUnitIconScreen(rb, iconIndex, pos, currentColor, ghost->radius, false);
+			} else {
+				entries.push_back({ iconIndex, pos, currentColor, ghost->radius, false });
+				sortRecs.push_back(MakeIconSortRec(icon::iconHandler.GetIconData(iconIndex).GetDrawOrder(), sortDepth ? -camera->GetPos().SqDistance(ghost->midPos) : 0.0f, entries.size() - 1));
+			}
+		}
+	}
+
+	if (sortIcons) {
+		{
+			ZoneScopedN("DrawUnitIconsScreen::Sort");
+			ZoneValue(uint64_t(sortRecs.size()));
+			SortIconRecs(sortRecs);
+		}
+
+		ZoneScopedN("DrawUnitIconsScreen::Emit");
+
+		for (const uint64_t rec : sortRecs) {
+			auto& e = entries[uint32_t(rec) & ICON_SORT_IDX_MASK];
+			DrawUnitIconScreen(rb, e.iconIdx, e.pos, e.color, e.radius, e.isIcon);
 		}
 	}
 
@@ -1394,6 +1675,7 @@ bool CUnitDrawerGLSL::ShowUnitBuildSquare(const BuildInfo& buildInfo, const std:
 
 	struct BuildCache {
 		uint64_t key;
+		int unitDefID;
 		int createFrame;
 		bool canBuild;
 		std::vector<uint8_t> statuses;
@@ -1405,6 +1687,14 @@ bool CUnitDrawerGLSL::ShowUnitBuildSquare(const BuildInfo& buildInfo, const std:
 
 	uint64_t hashKey = spring::LiteHash(pos);
 	hashKey = spring::hash_combine(spring::LiteHash(buildInfo.buildFacing), hashKey);
+	// TestUnitBuildSquare statuses also depend on the definition and queued
+	// commands. Both the world and minimap passes share this cache.
+	hashKey = spring::hash_combine(spring::LiteHash(buildInfo.def->id), hashKey);
+	for (const Command& command: commands) {
+		hashKey = spring::hash_combine(spring::LiteHash(command.GetID()), hashKey);
+		for (unsigned int i = 0; i < command.GetNumParams(); ++i)
+			hashKey = spring::hash_combine(spring::LiteHash(command.GetParam(i)), hashKey);
+	}
 
 	static constexpr int CACHE_VALIDITY_PERIOD = GAME_SPEED / 5;
 	std::erase_if(buildCache, [](const BuildCache& bc) {
@@ -1419,8 +1709,14 @@ bool CUnitDrawerGLSL::ShowUnitBuildSquare(const BuildInfo& buildInfo, const std:
 
 	bool canBuild;
 
-	const auto it = std::find_if(buildCache.begin(), buildCache.end(), [hashKey](const BuildCache& bc) {
-		return bc.key == hashKey;
+	// A hash collision may reuse incorrect statuses. Verify the UnitDef separately
+	// to prevent an OOB read from a mismatched footprint; collisions within the
+	// same UnitDef may still render incorrect status data.
+	const auto it = std::find_if(buildCache.begin(), buildCache.end(), [hashKey, &buildInfo](const BuildCache& bc) {
+		return (
+			bc.key == hashKey &&
+			bc.unitDefID == buildInfo.def->id
+		);
 	});
 	if (it != buildCache.end()) {
 		statuses = it->statuses;
@@ -1439,6 +1735,7 @@ bool CUnitDrawerGLSL::ShowUnitBuildSquare(const BuildInfo& buildInfo, const std:
 		auto& buildCacheItem = buildCache.back();
 
 		buildCacheItem.key = hashKey;
+		buildCacheItem.unitDefID = buildInfo.def->id;
 		buildCacheItem.canBuild = canBuild;
 		buildCacheItem.createFrame = gs->frameNum;
 		buildCacheItem.statuses = statuses;
@@ -2229,4 +2526,3 @@ void CUnitDrawerGL4::DrawUnitModelBeingBuiltOpaque(const CUnit* unit, bool noLua
 
 	glPopAttrib();
 }
-

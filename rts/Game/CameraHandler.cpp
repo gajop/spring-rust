@@ -180,7 +180,7 @@ void CCameraHandler::Init()
 		SortRegisteredActions();
 	}
 
-	configHandler->NotifyOnChange(this, {"CamModeName", "WindowedEdgeMove", "FullscreenEdgeMove", "CamTimeFactor", "CamTimeExponent", "CamTransitionMode", "CamSpringHalflife"});
+	configHandler->NotifyOnChange(this, {"CamModeName", "WindowedEdgeMove", "FullscreenEdgeMove", "CamTimeFactor", "CamTimeExponent", "CamTransitionMode", "CamSpringHalflife", "UseDistToGroundForIcons"});
 
 	{
 		camTransState.startFOV  = 90.0f;
@@ -249,6 +249,12 @@ void CCameraHandler::ConfigNotify(const std::string& key, const std::string& val
 	RECOIL_DETAILED_TRACY_ZONE;
 	if (key == "CamModeName") {
 		SetCameraMode(configHandler->GetString("CamModeName"));
+	} else if (key == "UseDistToGroundForIcons") {
+		// every controller reads it in its constructor
+		for (CCameraController* cc: camControllers) {
+			if (cc != nullptr)
+				cc->SetUseDistToGroundForIcons(configHandler->GetFloat(key));
+		}
 	} else {
 		currCamTransitionNum = configHandler->GetInt("CamTransitionMode");
 
@@ -480,7 +486,7 @@ void UpdateTransitionLerpSmoothed(const CCameraController* currCam, CCameraHandl
 	float decay = camTransState.halflife / 1000.0f;
 	expDecay(currentPos, targetPos, decay, dt);
 	expDecay(currentRot, targetRot, decay, dt);
-	expDecay(currentFov, targetFov, decay, dt);
+	currentFov = expDecay(currentFov, targetFov, decay, dt);
 	camera->SetPos(currentPos);
 	camera->SetRot(currentRot);
 	camera->SetVFOV(currentFov);

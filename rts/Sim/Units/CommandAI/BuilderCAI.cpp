@@ -213,6 +213,37 @@ CBuilderCAI::CBuilderCAI(CUnit* owner):
 	unitHandler.AddBuilderCAI(this);
 }
 
+
+bool CBuilderCAI::HasCurrentBuild() const
+{
+	return (ownerBuilder != nullptr && ownerBuilder->curBuild != nullptr);
+}
+
+bool CBuilderCAI::GetCurrentBuildCommandTag(unsigned int& commandTag) const
+{
+	if (!HasCurrentBuild())
+		return false;
+
+	const CUnit* currentBuild = ownerBuilder->curBuild;
+
+	for (const Command& queuedCommand: commandQue) {
+		BuildInfo queuedBuild;
+		if (!queuedBuild.Parse(queuedCommand))
+			continue;
+		if (queuedBuild.def != currentBuild->unitDef)
+			continue;
+		if (queuedBuild.buildFacing != currentBuild->buildFacing)
+			continue;
+		if (CSolidObject::GetMapPosStatic(queuedBuild.pos, queuedBuild.GetXSize(), queuedBuild.GetZSize()) != currentBuild->mapPos)
+			continue;
+
+		commandTag = queuedCommand.GetTag();
+		return true;
+	}
+
+	return false;
+}
+
 CBuilderCAI::~CBuilderCAI()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -611,6 +642,9 @@ void CBuilderCAI::ExecuteBuildCmd(Command& c)
 
 		// <build> is never parsed (except in PostLoad) so just copy it
 		build = bi;
+		// snap to the position the build will actually use, so the early check
+		// below tests the same footprint the rest of this function does
+		build.pos = CGameHelper::Pos2BuildPos(build, true);
 		inCommand = c.GetID();
 
 		// One-time early check: if repeating the order (or first run), skip immediately if now blocked
@@ -1747,4 +1781,3 @@ void CBuilderCAI::BuggerOff(const float3& pos, float radius) {
 
 	CMobileCAI::BuggerOff(pos, radius);
 }
-

@@ -3039,7 +3039,7 @@ static void NativeForceUnitCollisionUpdate(const ForceUnitCollisionUpdateQuery* 
 		return;
 	}
 
-	unit->moveType->UpdateCollisionMap(true);
+	unit->moveType->UpdateCollisionMap();
 	result->success = true;
 }
 
@@ -3526,11 +3526,11 @@ static void NativeAddUnitResource(const AddUnitResourceQuery* query, AddUnitReso
 	const float amount = std::max(0.0f, query->amount);
 	switch (query->resourceType[0]) {
 		case 'm':
-			unit->AddMetal(amount);
+			unit->AddResources({amount, 0.0f});
 			result->success = true;
 			break;
 		case 'e':
-			unit->AddEnergy(amount);
+			unit->AddResources({0.0f, amount});
 			result->success = true;
 			break;
 		default:
@@ -3564,10 +3564,10 @@ static void NativeUseUnitResource(const UseUnitResourceQuery* query, UseUnitReso
 	const float amount = std::max(0.0f, query->amount);
 	switch (query->resourceType[0]) {
 		case 'm':
-			result->success = unit->UseMetal(amount);
+			result->success = unit->UseResources({amount, 0.0f});
 			break;
 		case 'e':
-			result->success = unit->UseEnergy(amount);
+			result->success = unit->UseResources({0.0f, amount});
 			break;
 		default:
 			result->error = MakeError(native_error::InvalidArgument, "Unknown resource type");

@@ -206,3 +206,5 @@ out/
 /rts/wasm/generated/signatures.json
 
 /test/wasm_api/guests/parity_guest/.probe-build.lock
+
+/.i-understand-git-submodules.txt

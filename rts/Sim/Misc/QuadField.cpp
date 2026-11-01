@@ -11,6 +11,7 @@
 #include "Sim/Misc/GlobalConstants.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "System/ContainerUtil.h"
+#include "System/Log/ILog.h"
 #include "System/Threading/ThreadPool.h"
 
 #ifndef UNIT_TEST
@@ -338,6 +339,16 @@ void CQuadField::GetQuadsOnRay(QuadFieldQuery& qfq, const float3& start, const f
 	dir.AssertNaNs();
 	start.AssertNaNs();
 
+	// callers may pass invalid lengths (see https://github.com/beyond-all-reason/RecoilEngine/issues/3018),
+	// which violates the preconditions of std::clamp(t0, 0.0f, length) below and aborts on
+	// hardened builds (_GLIBCXX_ASSERTIONS). Clamp to 0 instead, which routes execution
+	// into the "special case" below and turns this into a zero-length ray query.
+	if (!std::isfinite(length) || length < 0.0f) {
+		LOG_L(L_ERROR, "[CQuadField::%s] invalid ray length %f (start=(%g,%g,%g) dir=(%g,%g,%g)), clamping to 0"
+			, __func__, length, start.x, start.y, start.z, dir.x, dir.y, dir.z);
+		length = 0.0f;
+	}
+
 	auto& queryQuads = *(qfq.quads = tempQuads[qfq.threadOwner].ReserveVector());
 
 	const float3 to = start + (dir * length);
@@ -425,6 +436,13 @@ void CQuadField::GetQuadsOnWideRay(QuadFieldQuery& qfq, const float3& start, con
 	RECOIL_DETAILED_TRACY_ZONE;
 	dir.AssertNaNs();
 	start.AssertNaNs();
+
+	// same rationale as GetQuadsOnRay above (see https://github.com/beyond-all-reason/RecoilEngine/issues/3018)
+	if (!std::isfinite(length) || length < 0.0f) {
+		LOG_L(L_ERROR, "[CQuadField::%s] invalid ray length %f (start=(%g,%g,%g) dir=(%g,%g,%g)), clamping to 0"
+			, __func__, length, start.x, start.y, start.z, dir.x, dir.y, dir.z);
+		length = 0.0f;
+	}
 
 	const float3 baseTo = start + (dir * length);
 
@@ -570,6 +588,31 @@ bool CQuadField::RemoveUnitIf(CUnit* unit, const float3& wpos)
 
 
 #ifndef UNIT_TEST
+bool CQuadField::MayHaveEnemyUnits(float3 pos, float radius, int allyTeam) const
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	// upstream's API on top of the per-allyteam coarse membership grid
+	if (!std::isfinite(pos.x) || !std::isfinite(pos.y) || !std::isfinite(pos.z) || !std::isfinite(radius) || radius < 0.0f)
+		return true;
+
+	QuadFieldUnitQueryRectangle region;
+	bool regionPrepared = false;
+	bool regionSupported = false;
+
+	for (int t = 0; t < teamHandler.ActiveAllyTeams(); ++t) {
+		if (teamHandler.Ally(allyTeam, t) || !QuadFieldMayHaveUnitsInAllyTeam(*this, t))
+			continue;
+		if (!regionPrepared) {
+			regionSupported = QuadFieldGetUnitQueryRectangle(*this, pos, radius, region);
+			regionPrepared = true;
+		}
+		if (!regionSupported || QuadFieldMayHaveUnitsInAllyTeam(*this, t, region))
+			return true;
+	}
+
+	return false;
+}
+
 void CQuadField::MovedUnit(CUnit* unit)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -594,7 +637,8 @@ void CQuadField::MovedUnit(CUnit* unit)
 			AddUnitMembership(*this, unit->allyteam, qi);
 	}
 
-	unit->quads = std::move(*qfQuery.quads);
+	// copy, moving would take the pooled vector's buffer and make the next query reallocate it
+	unit->quads = *qfQuery.quads;
 }
 
 void CQuadField::RemoveUnit(CUnit* unit)
@@ -642,7 +686,7 @@ void CQuadField::MovedRepulser(CPlasmaRepulser* repulser)
 		spring::VectorInsertUnique(baseQuads.Write(qi).repulsers, repulser, false);
 	}
 
-	repulser->SetQuads(std::move(*qfQuery.quads));
+	repulser->SetQuads(*qfQuery.quads);
 }
 
 void CQuadField::RemoveRepulser(CPlasmaRepulser* repulser)
@@ -725,7 +769,7 @@ void CQuadField::AddProjectile(CProjectile* p)
 			spring::VectorInsertUnique(baseQuads.Write(qi).projectiles, p, false);
 		}
 
-		p->quads = std::move(*qfQuery.quads);
+		p->quads = *qfQuery.quads;
 	} else {
 		int newQuad = WorldPosToQuadFieldIdx(p->pos);
 		spring::VectorInsertUnique(baseQuads.Write(newQuad).projectiles, p, false);

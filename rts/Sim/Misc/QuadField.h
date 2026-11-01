@@ -148,6 +148,13 @@ public:
 	);
 
 
+	/**
+	 * Returns false only if no unit of an allyteam that is not allied to
+	 * @c allyTeam is in any of the quads GetQuads(pos, radius) returns;
+	 * checks coarse per-allyteam counts, so may also return true otherwise
+	 */
+	bool MayHaveEnemyUnits(float3 pos, float radius, int allyTeam) const;
+
 	bool InsertUnitIf(CUnit* unit, const float3& wpos);
 	bool RemoveUnitIf(CUnit* unit, const float3& wpos);
 

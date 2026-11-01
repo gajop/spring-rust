@@ -133,6 +133,7 @@ public:
 	 * eg depend on the current position/angle.
 	 */
 	virtual bool GetUseDistToGroundForIcons();
+	void SetUseDistToGroundForIcons(float value) { switchVal = value; }
 
 	/// should this mode appear when we toggle the camera controller?
 	bool enabled;
