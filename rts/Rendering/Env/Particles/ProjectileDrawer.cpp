@@ -982,7 +982,8 @@ void CProjectileDrawer::DrawAlpha(bool drawAboveWater, bool drawBelowWater, bool
 		if (!haveRangeToRedraw && !rb.ShouldSubmit())
 			return;
 
-		const bool needSoften = (wantSoften > 0) && !drawReflection && !drawRefraction;
+		// a depth copy that failed on this driver would fade every particle out
+		const bool needSoften = (wantSoften > 0) && !drawReflection && !drawRefraction && depthBufferCopy->IsValid(false);
 
 		glActiveTexture(GL_TEXTURE0); textureAtlas->BindTexture();
 
@@ -1218,7 +1219,7 @@ void CProjectileDrawer::DrawGroundFlashes()
 	bool depthTest = true;
 	bool depthMask = false;
 
-	const bool needSoften = (wantSoften > 0);
+	const bool needSoften = (wantSoften > 0) && depthBufferCopy->IsValid(false);
 
 	auto& rb = CExpGenSpawnable::GetPrimaryRenderBuffer();
 
