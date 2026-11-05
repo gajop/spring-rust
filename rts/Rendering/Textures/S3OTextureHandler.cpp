@@ -175,6 +175,10 @@ unsigned int CS3OTextureHandler::LoadAndCacheTexture(
 	const unsigned int texID = preloadCall ? 0 : bitmap->CreateMipMapTexture();
 #ifndef HEADLESS
 	assert(preloadCall || texID > 0);
+
+	// named for debuggers and debuginfo gpumemory, as named textures are
+	if (texID > 0 && glObjectLabel != nullptr)
+		glObjectLabel(GL_TEXTURE, texID, -1, ("model texture: " + textureName).c_str());
 #endif
 
 	if (textureIt != textureCache.end() && texID > 0) {

@@ -811,6 +811,10 @@ inline void TypedRenderBuffer<T>::UploadVBO()
 		LOG_L(L_DEBUG, "[TypedRenderBuffer<%s>::%s] Increase the number of elements here!", vboTypeName, __func__);
 		vbo->Resize(static_cast<uint32_t>(verts.capacity()));
 		vertCount0 = verts.capacity();
+		// the new storage holds nothing yet: upload this frame's elements from the first, so a
+		// draw (or a re-draw of a captured range) of elements uploaded before still finds them
+		elemsCount = verts.size();
+		vboUploadIndex = 0;
 	}
 
 	//update on the GPU
@@ -837,6 +841,10 @@ inline void TypedRenderBuffer<T>::UploadEBO()
 		LOG_L(L_DEBUG, "[TypedRenderBuffer<%s>::%s] Increase the number of elements here!", vboTypeName, __func__);
 		ebo->Resize(static_cast<uint32_t>(indcs.capacity()));
 		elemCount0 = indcs.capacity();
+		// the new storage holds nothing yet: upload this frame's elements from the first, so a
+		// draw (or a re-draw of a captured range) of elements uploaded before still finds them
+		elemsCount = indcs.size();
+		eboUploadIndex = 0;
 	}
 
 	//update on the GPU

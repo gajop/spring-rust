@@ -25,10 +25,12 @@ public:
 	void SwitchMode(const std::string& name);
 
 public:
+	GLuint GetTexture() override;
 	void Update() override;
 	bool IsUpdateNeeded() override { return !disabled; }
 
 private:
+	void CreateTexture();
 	bool CreateShader(const std::string& filename, const bool clear = false, const float4 clearColor = float4(0.5f, 0.5f, 0.5f, 1.0f));
 
 private:

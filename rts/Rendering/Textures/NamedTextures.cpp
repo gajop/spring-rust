@@ -255,12 +255,9 @@ namespace CNamedTextures {
 			#ifndef HEADLESS
 			else if (needMipMaps) {
 				// TextureMipSkip, as for DDS textures: the finest levels of a large image are
-				// left out (box-filtered down), never going below 1024 texels a side.
-				const int wanted = configHandler->GetInt("TextureMipSkip");
-				const int side = std::max(bitmap.xsize, bitmap.ysize);
-				int skip = 0;
-				while (skip < wanted && (side >> (skip + 1)) >= 1024)
-					skip++;
+				// left out (box-filtered down), never going below 1024 texels a side (effect
+				// sheets and interface images keep their detail where hull maps give theirs up)
+				const int skip = TextureMipSkipLevels(std::max(bitmap.xsize, bitmap.ysize), 1024);
 				if (skip > 0)
 					bitmap = bitmap.CreateRescaled(std::max(1, bitmap.xsize >> skip), std::max(1, bitmap.ysize >> skip));
 			}

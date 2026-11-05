@@ -1761,7 +1761,25 @@ CONFIG(int, TextureMipSkip)
 	.defaultValue(0)
 	.minimumValue(0)
 	.maximumValue(3)
-	.description("Leave out this many of the finest levels of mipmapped DDS textures and mipmapped named images larger than 1024 texels a side, never going below 1024: each step quarters their memory.");
+	.description("Leave out this many of the finest levels of mipmapped DDS textures and mipmapped named images, never taking their longer side below TextureMipFloor (DDS) or 1024 texels (named images): each step quarters their memory.");
+
+CONFIG(int, TextureMipFloor)
+	.defaultValue(1024)
+	.minimumValue(64)
+	.maximumValue(16384)
+	.description("TextureMipSkip never takes a mipmapped DDS texture's longer side below this many texels.");
+
+unsigned int TextureMipSkipLevels(unsigned int side, unsigned int floor)
+{
+	const unsigned int wanted = configHandler->GetInt("TextureMipSkip");
+	floor = std::max(1u, floor);
+	unsigned int skip = 0;
+
+	while (skip < wanted && (side >> (skip + 1)) >= floor)
+		skip++;
+
+	return skip;
+}
 
 // Levels of a mipmapped 2D DDS texture to leave out under TextureMipSkip.
 static unsigned int DDSSkipLevels(const nv_dds::CDDSImage& image)
@@ -1769,14 +1787,9 @@ static unsigned int DDSSkipLevels(const nv_dds::CDDSImage& image)
 	if (image.get_num_mipmaps() == 0)
 		return 0;
 
-	const unsigned int wanted = configHandler->GetInt("TextureMipSkip");
-	const unsigned int side = std::max(image.get_width(), image.get_height());
-	unsigned int skip = 0;
-
-	while (skip < wanted && (side >> (skip + 1)) >= 1024)
-		skip++;
-
-	return skip;
+	// never more levels than the file has below its top one
+	const unsigned int floor = configHandler->GetInt("TextureMipFloor");
+	return std::min(TextureMipSkipLevels(std::max(image.get_width(), image.get_height()), floor), image.get_num_mipmaps());
 }
 
 static void HandleDDSMipmap(GLenum target, int32_t numEmbeddedLevels, uint32_t minFilter)

@@ -27,6 +27,22 @@ CInfoTextureCombiner::CInfoTextureCombiner()
 	if (readMap->IsNullMap())
 		texSize = int2(std::min(texSize.x, 2048), std::min(texSize.y, 2048));
 
+	// on a null map nothing shows an overlay unless a game asks for one: the texture (with its
+	// levels, 21 MiB at 2048x2048) is made when a mode is switched on or the view is first bound
+	createdOnUse = readMap->IsNullMap();
+
+	if (!createdOnUse)
+		CreateTexture();
+
+	shader = shaderHandler->CreateProgramObject("[CInfoTextureCombiner]", "CInfoTextureCombiner");
+
+	if (!createdOnUse && !fbo.IsValid() /*|| !shader->IsValid()*/) { // don't check shader (it gets created/switched at runtime)
+		throw opengl_error("");
+	}
+}
+
+void CInfoTextureCombiner::CreateTexture()
+{
 	GL::TextureCreationParams tcp{
 		.reqNumLevels = -1,
 		.linearMipMapFilter = false,
@@ -48,12 +64,14 @@ CInfoTextureCombiner::CInfoTextureCombiner()
 		auto binding = texture.ScopedBind();
 		texture.ProduceMipmaps();
 	}
+}
 
-	shader = shaderHandler->CreateProgramObject("[CInfoTextureCombiner]", "CInfoTextureCombiner");
+GLuint CInfoTextureCombiner::GetTexture()
+{
+	if (!texture.IsValid())
+		CreateTexture();
 
-	if (!fbo.IsValid() /*|| !shader->IsValid()*/) { // don't check shader (it gets created/switched at runtime)
-		throw opengl_error("");
-	}
+	return CInfoTexture::GetTexture();
 }
 
 CInfoTextureCombiner::~CInfoTextureCombiner()
@@ -94,6 +112,12 @@ void CInfoTextureCombiner::SwitchMode(const std::string& name)
 bool CInfoTextureCombiner::CreateShader(const std::string& filename, const bool clear, const float4 clearColor)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	// switching the overlay off needs no texture; anything else makes it
+	if (!texture.IsValid() && filename.empty())
+		return false;
+	if (!texture.IsValid())
+		CreateTexture();
+
 	if (clear) {
 		// clear
 		fbo.Bind();

@@ -832,7 +832,10 @@ void RenderInterface_GL3_Recoil::EndFrame()
 	auto tok = Gfx::CheckGLError("EndFrame");
 
 	const Gfx::FramebufferData& fb_active = render_layers.GetTopLayer();
-	const Gfx::FramebufferData& fb_postprocess = render_layers.GetPostprocessPrimary();
+	// A single-sampled layer is a texture already: it is laid over the screen as it is, with no
+	// copy (a screen-sized RGBA8 target the multisampled layer needs to resolve into).
+	const bool direct = (fb_active.color_tex_buffer != 0);
+	const Gfx::FramebufferData& fb_postprocess = direct ? fb_active : render_layers.GetPostprocessPrimary();
 
 	if (!damage_all) {
 		// Only the tiles drawn in: resolve them, lay them over the screen, and clear them in the
@@ -848,13 +851,15 @@ void RenderInterface_GL3_Recoil::EndFrame()
 			return Rml::Rectanglei::FromCorners({r.Left(), viewport_height - r.Bottom()}, {r.Right(), viewport_height - r.Top()});
 		};
 		glEnable(GL_SCISSOR_TEST);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_active.framebuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb_postprocess.framebuffer);
-		for (const auto& r: rects) {
-			const auto g = glRect(r);
-			glScissor(g.Left(), g.Top(), g.Width(), g.Height());
-			glBlitFramebuffer(g.Left(), g.Top(), g.Right(), g.Bottom(), g.Left(), g.Top(), g.Right(), g.Bottom(),
-							  GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		if (!direct) {
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_active.framebuffer);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb_postprocess.framebuffer);
+			for (const auto& r: rects) {
+				const auto g = glRect(r);
+				glScissor(g.Left(), g.Top(), g.Width(), g.Height());
+				glBlitFramebuffer(g.Left(), g.Top(), g.Right(), g.Bottom(), g.Left(), g.Top(), g.Right(), g.Bottom(),
+								  GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			}
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(viewport_offset_x, viewport_offset_y, viewport_width, viewport_height);
@@ -881,11 +886,13 @@ void RenderInterface_GL3_Recoil::EndFrame()
 	damage_share = 1.0f;
 	damage_rects = 0;
 	// Resolve MSAA to postprocess framebuffer.
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_active.framebuffer);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb_postprocess.framebuffer);
+	if (!direct) {
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_active.framebuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb_postprocess.framebuffer);
 
-	glBlitFramebuffer(0, 0, fb_active.width, fb_active.height, 0, 0, fb_postprocess.width, fb_postprocess.height,
-					  GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, fb_active.width, fb_active.height, 0, 0, fb_postprocess.width, fb_postprocess.height,
+						  GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
 
 	// Draw to backbuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

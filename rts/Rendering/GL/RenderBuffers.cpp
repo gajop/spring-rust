@@ -9,20 +9,24 @@ decltype(RenderBuffer::typedRenderBuffers) RenderBuffer::typedRenderBuffers;
 void RenderBuffer::InitStatic()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	// Sized for a light frame: a buffer grows (doubling) the first frame that needs more and keeps
+	// that size (TypedRenderBuffer::UploadVBO/UploadEBO). Starting the busiest kinds at a million
+	// vertices held 56 MiB for projectiles alone, plus as much again on the CPU, in a game that
+	// draws a few thousand.
 	RenderBuffer::typedRenderBuffers = {
 		std::make_unique<TypedRenderBuffer<VA_TYPE_0    >>(1 << 16, 1 << 17),
-		std::make_unique<TypedRenderBuffer<VA_TYPE_C    >>(1 << 20, 1 << 21),
+		std::make_unique<TypedRenderBuffer<VA_TYPE_C    >>(1 << 16, 1 << 17),
 		std::make_unique<TypedRenderBuffer<VA_TYPE_N    >>(1 << 10, 1 << 11),
-		std::make_unique<TypedRenderBuffer<VA_TYPE_T    >>(1 << 20, 1 << 21),
+		std::make_unique<TypedRenderBuffer<VA_TYPE_T    >>(1 << 16, 1 << 17),
 		std::make_unique<TypedRenderBuffer<VA_TYPE_T4   >>(1 << 16, 1 << 18),
 		std::make_unique<TypedRenderBuffer<VA_TYPE_TN   >>(1 << 16, 1 << 17),
-		std::make_unique<TypedRenderBuffer<VA_TYPE_TC   >>(1 << 20, 1 << 21),
+		std::make_unique<TypedRenderBuffer<VA_TYPE_TC   >>(1 << 16, 1 << 17),
 		std::make_unique<TypedRenderBuffer<VA_TYPE_TC3  >>(1 << 10, 1 << 11),
-		std::make_unique<TypedRenderBuffer<VA_TYPE_PROJ >>(1 << 20, 1 << 21),
+		std::make_unique<TypedRenderBuffer<VA_TYPE_PROJ >>(1 << 16, 1 << 17),
 		std::make_unique<TypedRenderBuffer<VA_TYPE_TNT  >>(0      , 0      ),
 		std::make_unique<TypedRenderBuffer<VA_TYPE_2D0  >>(1 << 16, 1 << 17),
 		std::make_unique<TypedRenderBuffer<VA_TYPE_2DC  >>(1 << 16, 1 << 17),
-		std::make_unique<TypedRenderBuffer<VA_TYPE_2DT  >>(1 << 20, 1 << 21),
+		std::make_unique<TypedRenderBuffer<VA_TYPE_2DT  >>(1 << 16, 1 << 17),
 		std::make_unique<TypedRenderBuffer<VA_TYPE_2DTC >>(1 << 16, 1 << 17),
 		std::make_unique<TypedRenderBuffer<VA_TYPE_2DTC3>>(1 << 10, 1 << 11)
 	};
