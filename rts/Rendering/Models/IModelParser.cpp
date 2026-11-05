@@ -436,7 +436,8 @@ void CModelLoader::UploadLoadedModels()
 	for (S3DModel* model: loaded)
 		Upload(model);
 
-	LOG("[CModelLoader] %u models queued while loading uploaded before the first frame", static_cast<uint32_t>(loaded.size()));
+	LOG("[CModelLoader] %u models queued while loading uploaded before the first frame (%u vertices, %u indices in all)", static_cast<uint32_t>(loaded.size()),
+		static_cast<uint32_t>(S3DModelVAO::GetInstance().GetVertElemCount()), static_cast<uint32_t>(S3DModelVAO::GetInstance().GetIndxElemCount()));
 }
 
 IModelParser* CModelLoader::GetFormatParser(const std::string& pathExt)

@@ -221,7 +221,9 @@ void S3DModelVAO::UploadVBOs()
 	if (vertData.size() > vertUploadIndex) {
 		assert(!safeToDeleteVectors);
 		vertVBO.Bind();
-		const size_t reqSize = AlignUp(std::max(vertData.size(), S3DModelVAO::VERT_SIZE0) * sizeof(SVertexData), MEM_STEP);
+		// sized to the models loaded (8 MiB steps), not to the CPU-side reservation: a game that
+		// loads only its match's models keeps that much on the GPU
+		const size_t reqSize = AlignUp(vertData.size() * sizeof(SVertexData), MEM_STEP);
 		reinitVAO |= (reqSize > vertVBO.GetSize());
 		vertVBO.Resize(reqSize, GL_STATIC_DRAW); //noop if size hasn't changed, will copy data if changed
 		vertVBO.SetBufferSubData(vertUploadIndex * sizeof(SVertexData), (vertData.size() - vertUploadIndex) * sizeof(SVertexData), vertData.data() + vertUploadIndex);
@@ -233,7 +235,7 @@ void S3DModelVAO::UploadVBOs()
 	if (indxData.size() > indxUploadIndex) {
 		assert(!safeToDeleteVectors);
 		indxVBO.Bind();
-		const size_t reqSize = AlignUp(std::max(indxData.size(), S3DModelVAO::INDX_SIZE0) * sizeof(   uint32_t), MEM_STEP);
+		const size_t reqSize = AlignUp(indxData.size() * sizeof(   uint32_t), MEM_STEP);
 		reinitVAO |= (reqSize > indxVBO.GetSize());
 		indxVBO.Resize(reqSize, GL_STATIC_DRAW); //noop if size hasn't changed, will copy data if changed
 		indxVBO.SetBufferSubData(indxUploadIndex * sizeof(   uint32_t), (indxData.size() - indxUploadIndex) * sizeof(   uint32_t), indxData.data() + indxUploadIndex);
