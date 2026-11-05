@@ -155,6 +155,8 @@ bool DepthBufferCopy::CopyInto(bool ms, int32_t srcFboID)
 		for (int i = 0; i < 64 && glGetError() != GL_NO_ERROR; ++i) {}
 	}
 
+	empty[ms] = false;
+
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFboID);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, depthFBOs[ms]->GetId());
 	glBlitFramebuffer(x0, y0, x0 + sx, y0 + sy, 0, 0, sx, sy, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
@@ -273,4 +275,50 @@ void DepthBufferCopy::CreateTextureAndFBO(bool ms)
 	glDrawBuffer(GL_NONE);
 	depthFBO->CheckStatus(ms ? "DEPTH-BUFFER-COPY-FBO-MULTISAMPLED" : "DEPTH-BUFFER-COPY-FBO");
 	depthFBO->Unbind();
+
+	// A new texture's contents are undefined until the first copy, and drivers differ (one
+	// reads nearest depth, fading every soft particle out): start it empty, at the far plane.
+	ClearToEmpty(ms);
+}
+
+void DepthBufferCopy::ClearToEmpty(bool ms)
+{
+	const auto& depthFBO = depthFBOs[ms];
+	if (!depthFBO || !depthFBO->IsValid())
+		return;
+
+	// the world framebuffer's own clear value, so "empty" means what it means there
+	GLint previous = 0;
+	GLboolean mask = GL_TRUE;
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &previous);
+	glGetBooleanv(GL_DEPTH_WRITEMASK, &mask);
+	const GLboolean scissor = glIsEnabled(GL_SCISSOR_TEST);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, depthFBO->GetId());
+	glDepthMask(GL_TRUE);
+	glDisable(GL_SCISSOR_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	if (scissor)
+		glEnable(GL_SCISSOR_TEST);
+	glDepthMask(mask);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, previous);
+
+	empty[ms] = true;
+}
+
+void DepthBufferCopy::MakeEmptyDepthBufferCopy()
+{
+	for (const bool ms: {true, false}) {
+		if (consumersCount[ms] == 0)
+			continue;
+
+		if (!reportedEmpty) {
+			reportedEmpty = true;
+			LOG("[DepthBufferCopy] no ground drawn: soft particles soften against nothing (the depth copy is kept empty)");
+		}
+
+		if (!empty[ms])
+			ClearToEmpty(ms);
+	}
 }

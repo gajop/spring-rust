@@ -369,6 +369,10 @@ void CWorldDrawer::DrawOpaqueObjects() const
 			grassDrawer->Draw();
 		}
 		smoothHeightMeshDrawer->Draw(1.0f);
+	} else {
+		// No terrain (a space game): soft particles must not read a copy that was never
+		// made, whose contents are undefined and on some drivers fade every particle out.
+		depthBufferCopy->MakeEmptyDepthBufferCopy();
 	}
 
 	// not an opaque rendering, but makes sense to run after the terrain was rendered
