@@ -49,14 +49,15 @@ void DepthBufferCopy::DelConsumer(bool ms)
 {
 	consumersCount[ms]--;
 
-	if (consumersCount[ms] == 0)
+	if (consumersCount[ms] == 0 && depthFBOs[ms])
 		DestroyTextureAndFBO(ms);
 }
 
 void DepthBufferCopy::ViewResize()
 {
 	for (size_t ms = 0; ms < depthFBOs.size(); ++ms) {
-		if (consumersCount[ms] == 0)
+		// none while let go (no ground drawn): the next copy makes it at the new size
+		if (consumersCount[ms] == 0 || !depthFBOs[ms])
 			continue;
 
 		RecreateTextureAndFBO(static_cast<bool>(ms));
@@ -137,6 +138,10 @@ bool DepthBufferCopy::CopyInto(bool ms, int32_t srcFboID)
 		}
 	}
 
+	// let go while no ground was drawn
+	if (!failed[ms] && !depthFBOs[ms])
+		CreateTextureAndFBO(ms);
+
 	if (failed[ms] || !depthFBOs[ms])
 		return false;
 
@@ -154,8 +159,6 @@ bool DepthBufferCopy::CopyInto(bool ms, int32_t srcFboID)
 		// earlier errors belong to someone else; drained only for this one check
 		for (int i = 0; i < 64 && glGetError() != GL_NO_ERROR; ++i) {}
 	}
-
-	empty[ms] = false;
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFboID);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, depthFBOs[ms]->GetId());
@@ -303,22 +306,22 @@ void DepthBufferCopy::ClearToEmpty(bool ms)
 		glEnable(GL_SCISSOR_TEST);
 	glDepthMask(mask);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, previous);
-
-	empty[ms] = true;
 }
 
 void DepthBufferCopy::MakeEmptyDepthBufferCopy()
 {
 	for (const bool ms: {true, false}) {
-		if (consumersCount[ms] == 0)
+		if (consumersCount[ms] == 0 || !depthFBOs[ms])
 			continue;
+
+		// Nothing to soften against: the copy is let go (a screen-sized depth texture), its
+		// consumers draw unsoftened, and the next copy, if ground is drawn again, makes it anew.
+		DestroyTextureAndFBO(ms);
+		sourceFBOs[ms] = -1;
 
 		if (!reportedEmpty) {
 			reportedEmpty = true;
-			LOG("[DepthBufferCopy] no ground drawn: soft particles soften against nothing (the depth copy is kept empty)");
+			LOG("[DepthBufferCopy] no ground drawn: no depth copy is kept, soft particles draw unsoftened");
 		}
-
-		if (!empty[ms])
-			ClearToEmpty(ms);
 	}
 }

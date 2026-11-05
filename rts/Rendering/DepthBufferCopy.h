@@ -32,8 +32,8 @@ public:
 	bool IsValid(bool ms) const;
 
 	void MakeDepthBufferCopy();
-	/// Instead of a copy when no ground is drawn: what the copy would hold then, the
-	/// cleared depth (cleared once, until a copy is made again).
+	/// Instead of a copy when no ground is drawn: the copy is let go (IsValid turns false
+	/// and its consumers draw unsoftened) until a copy is made again.
 	void MakeEmptyDepthBufferCopy();
 	uint32_t GetDepthBufferTexture(bool ms) const { return depthTextures[ms]; }
 private:
@@ -72,8 +72,6 @@ private:
 	std::array<bool, 2> unverified = {};
 	std::array<bool, 2> failed = {};
 	std::array<uint32_t, 2> copyFormats = {};
-	/// The copy holds the cleared depth, not a blit (made, or no ground drawn since).
-	std::array<bool, 2> empty = {};
 	bool reportedEmpty = false;
 };
 
