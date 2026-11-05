@@ -415,6 +415,30 @@ void CModelLoader::DrainPreloadFutures(uint32_t numAllowed)
 	}
 }
 
+void CModelLoader::UploadLoadedModels()
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	assert(Threading::IsMainThread() || Threading::IsGameLoadThread());
+
+	DrainPreloadFutures(0);
+
+	std::vector<S3DModel*> loaded;
+	{
+		auto lock = CModelsLock::GetScopedLock();
+		// the dummy model (index 0) is never uploaded
+		for (size_t i = 1; i < models.size() && i <= modelID; ++i) {
+			S3DModel& model = models[i];
+			if (model.loadStatus == S3DModel::LoadStatus::LOADED && !model.uploaded)
+				loaded.push_back(&model);
+		}
+	}
+
+	for (S3DModel* model: loaded)
+		Upload(model);
+
+	LOG("[CModelLoader] %u models queued while loading uploaded before the first frame", static_cast<uint32_t>(loaded.size()));
+}
+
 IModelParser* CModelLoader::GetFormatParser(const std::string& pathExt)
 {
 	RECOIL_DETAILED_TRACY_ZONE;

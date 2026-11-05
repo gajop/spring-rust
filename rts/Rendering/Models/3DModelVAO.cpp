@@ -245,6 +245,14 @@ void S3DModelVAO::UploadVBOs()
 	if (reinitVAO)
 		CreateVAO();
 
+	#ifndef HEADLESS
+	// names the model buffers in GL debuggers and `debuginfo gpumemory`
+	if (glObjectLabel != nullptr) {
+		glObjectLabel(GL_BUFFER, vertVBO.GetId(), -1, "models: vertices");
+		glObjectLabel(GL_BUFFER, indxVBO.GetId(), -1, "models: indices");
+	}
+	#endif
+
 	if (safeToDeleteVectors && !vertData.empty()) {
 		// all models have been uploaded in the calls above
 		// safe to clear CPU copy of the data

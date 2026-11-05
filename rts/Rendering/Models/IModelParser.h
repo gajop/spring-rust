@@ -37,6 +37,9 @@ public:
 	void LogErrors();
 
 	void DrainPreloadFutures(uint32_t numAllowed = 0);
+	/// Uploads every model loaded but not yet uploaded (those a game queued while loading,
+	/// with PreloadModels = 0), so their first appearance does not upload mid-game.
+	void UploadLoadedModels();
 
 	const std::vector<S3DModel>& GetModelsVec() const { return models; }
 	      std::vector<S3DModel>& GetModelsVec()       { return models; }

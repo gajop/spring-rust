@@ -49,6 +49,7 @@
 #include "Sim/Units/UnitDefHandler.h"
 #include "Sim/Features/FeatureHandler.h"
 #include "Sim/Features/FeatureDefHandler.h"
+#include "Sim/Weapons/WeaponDef.h"
 #include "Sim/Projectiles/Projectile.h"
 #include "Sim/Projectiles/ProjectileHandler.h"
 #include "Sim/Misc/CustomColorPalette.h"
@@ -1847,7 +1848,19 @@ static void NativePreloadUnitDefModel(const PreloadUnitDefModelQuery* query, Pre
 		return;
 	}
 
+	// Everything a unit of this type brings into the world: its wreck chain (as a new unit
+	// preloads it) and its weapons' projectile models, so a game preloading its roster with
+	// PreloadModels = 0 meets none of them for the first time mid-game.
 	ud->PreloadModel();
+	for (const FeatureDef* fd = featureDefHandler->GetFeatureDef(ud->wreckName); fd != nullptr; ) {
+		fd->PreloadModel();
+		const FeatureDef* next = featureDefHandler->GetFeatureDefByID(fd->deathFeatureDefID);
+		fd = (next == fd) ? nullptr : next;
+	}
+	for (const UnitDefWeapon& weapon: ud->weapons) {
+		if (weapon.def != nullptr)
+			weapon.def->PreloadModel();
+	}
 	result->success = true;
 }
 

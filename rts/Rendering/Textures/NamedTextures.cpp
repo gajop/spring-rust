@@ -297,6 +297,12 @@ namespace CNamedTextures {
 		texInfo.ysize = bitmap.ysize;	
 
 		#ifndef HEADLESS
+		// names the texture by its file in GL debuggers and `debuginfo gpumemory`
+		if (glObjectLabel != nullptr)
+			glObjectLabel(GL_TEXTURE, texID, -1, filename.c_str());
+		#endif
+
+		#ifndef HEADLESS
 			switch (bitmap.textype) {
 				case GL_TEXTURE_2D_ARRAY:  { texInfo.texType = GL_TEXTURE_2D_ARRAY; } break;
 				case GL_TEXTURE_3D:        { texInfo.texType = GL_TEXTURE_3D;       } break;

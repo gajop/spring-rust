@@ -48,6 +48,7 @@
 #include "Rendering/HUDDrawer.h"
 #include "Rendering/IconHandler.h"
 #include "Rendering/ModelsDataUploader.h"
+#include "Rendering/Models/IModelParser.h"
 #include "Rendering/ShadowHandler.h"
 #include "Rendering/TeamHighlight.h"
 #include "Rendering/Units/UnitDrawer.h"
@@ -562,6 +563,21 @@ void CGame::Load(const std::string& mapFileName)
 		} catch (const content_error& e) {
 			contentErrors.emplace_back(e.what());
 			LOG_L(L_ERROR, "[Game::%s][8] forced quit with exception \"%s\"", __func__, e.what());
+			forcedQuit = true;
+		}
+	}
+
+	if (!forcedQuit && !configHandler->GetBool("PreloadModels")) {
+		// Without the preload of every model, the models the game queued while loading (its
+		// match's roster, from its Lua or native modules) still go to the GPU now, on the
+		// loading screen, rather than at their first sight in the game.
+		try {
+			loadscreen->SetLoadMessage("Uploading Models");
+			modelLoader.UploadLoadedModels();
+			Watchdog::ClearTimer(WDT_LOAD);
+		} catch (const content_error& e) {
+			contentErrors.emplace_back(e.what());
+			LOG_L(L_ERROR, "[Game::%s][9] forced quit with exception \"%s\"", __func__, e.what());
 			forcedQuit = true;
 		}
 	}
