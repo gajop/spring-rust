@@ -446,6 +446,9 @@ void CProjectileDrawer::Init() {
 
 	fxShader->Validate();
 
+	if (!fxShader->IsValid())
+		LOG_L(L_WARNING, "[ProjectileDrawer] the particle shader (FX Shader) failed to build on this driver: engine-drawn shots and particles may be missing (see the GLSL-PO log above)");
+
 	sdbc = std::make_unique<ScopedDepthBufferCopy>(false);
 
 	EnableSoften(configHandler->GetInt("SoftParticles"));

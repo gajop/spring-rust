@@ -102,17 +102,20 @@ void DepthBufferCopy::MakeDepthBufferCopy()
 {
 	// the world's framebuffer, bound now
 	GLint currentFBO = 0;
+	GLint currentReadFBO = 0;
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFBO);
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &currentReadFBO);
 
-	if (consumersCount[true ] > 0)
-		CopyInto(true, currentFBO);
+	const bool haveMS = (consumersCount[true] > 0) && CopyInto(true, currentFBO);
 
 	if (consumersCount[false] > 0) {
-		const int32_t srcFboID = depthFBOs[true] ? depthFBOs[true]->GetId() : currentFBO;
+		// from the multisampled copy when it holds the depth, else from the world's framebuffer
+		const int32_t srcFboID = (haveMS && depthFBOs[true]) ? depthFBOs[true]->GetId() : currentFBO;
 		CopyInto(false, srcFboID);
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, currentFBO);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, currentReadFBO);
 }
 
 bool DepthBufferCopy::CopyInto(bool ms, int32_t srcFboID)
@@ -149,7 +152,7 @@ bool DepthBufferCopy::CopyInto(bool ms, int32_t srcFboID)
 
 	if (verify) {
 		// earlier errors belong to someone else; drained only for this one check
-		while (glGetError() != GL_NO_ERROR) {}
+		for (int i = 0; i < 64 && glGetError() != GL_NO_ERROR; ++i) {}
 	}
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFboID);
