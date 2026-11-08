@@ -209,6 +209,33 @@ struct AbortDownloadResult { const Error* error; bool removed; };
 struct LoadFileRangeQuery { const char* path; const char* mode; uint32_t offset; uint32_t length; };
 struct LoadFileRangeResult { const Error* error; RECOIL_WASM_BYTES const uint8_t* data; uint32_t size; };
 
+// NEW (no Lua equivalent): the running game's own data directory, the only
+// files a module reaches by these calls: <write dir>/game-data/<id>/, the id
+// from the archive's `gameDataId` modinfo field, never from the caller. A path
+// is relative with `/` between lowercase components: letters, digits, `_`, `-`;
+// a file ends in one `.` and a data-only extension. A path that breaks a rule
+// is refused whole and nothing on disk is looked at. Links on the way are
+// refused. Bounded in size, files, folders and bytes per game. No write or
+// delete during a replay. Not for synced code (UNSYNCED_ONLY in
+// WasmAnnotations.def). Errors carry a code and no paths; the rules and the
+// codes are in rts/wasm/docs/game_data_sandbox.md. A path is passed with its
+// length, so that a NUL inside it is refused rather than ending it early.
+struct GameDataWriteQuery { RECOIL_WASM_BYTES const char* path; uint32_t pathSize; RECOIL_WASM_BYTES const uint8_t* data; uint32_t size; };
+struct GameDataWriteResult { const Error* error; bool success; };
+
+// A missing file is the NotFound error.
+struct GameDataReadQuery { RECOIL_WASM_BYTES const char* path; uint32_t pathSize; };
+struct GameDataReadResult { const Error* error; RECOIL_WASM_BYTES const uint8_t* data; uint32_t size; };
+
+// A file, or an empty folder: no recursive delete.
+struct GameDataDeleteQuery { RECOIL_WASM_BYTES const char* path; uint32_t pathSize; };
+struct GameDataDeleteResult { const Error* error; bool success; };
+
+// One folder's files and folders, names only, sorted and bounded. An empty path
+// lists the game's directory.
+struct GameDataListQuery { RECOIL_WASM_BYTES const char* path; uint32_t pathSize; };
+struct GameDataListResult { const Error* error; DirEntry* entries; uint32_t count; };
+
 // API structure
 struct VFSApi {
 	void (*FileExists)(const FileExistsQuery* query, FileExistsResult* result);
@@ -266,6 +293,11 @@ struct VFSApi {
 	void (*AbortDownload)(const AbortDownloadQuery* query, AbortDownloadResult* result);
 	// NEW (no Lua equivalent) — see LoadFileRangeQuery above.
 	void (*LoadFileRange)(const LoadFileRangeQuery* query, LoadFileRangeResult* result);
+	// NEW (no Lua equivalent) — see GameDataWriteQuery above.
+	void (*GameDataWrite)(const GameDataWriteQuery* query, GameDataWriteResult* result);
+	void (*GameDataRead)(const GameDataReadQuery* query, GameDataReadResult* result);
+	void (*GameDataDelete)(const GameDataDeleteQuery* query, GameDataDeleteResult* result);
+	void (*GameDataList)(const GameDataListQuery* query, GameDataListResult* result);
 };
 
 extern const VFSApi VFS_API;

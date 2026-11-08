@@ -107,6 +107,47 @@
             pub is_directory: bool,
         }
 
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GameDataDeleteQuery {
+            pub path: Vec<u8>,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GameDataDeleteResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GameDataListQuery {
+            pub path: Vec<u8>,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GameDataListResult {
+            pub entries: Vec<DirEntry>,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GameDataReadQuery {
+            pub path: Vec<u8>,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GameDataReadResult {
+            pub data: Vec<u8>,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GameDataWriteQuery {
+            pub path: Vec<u8>,
+            pub data: Vec<u8>,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GameDataWriteResult {
+            pub success: bool,
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetAllArchivesQuery {
             pub unused: u8,
@@ -743,6 +784,65 @@
                 None => super::CStrBuf::Heap(super::str_to_cstr_heap(path)?),
             };
             crate::generated::borrowed::vfs::file_exists(__core_string_0_buf.as_cstr())
+        }
+
+        #[inline]
+        pub fn game_data_delete(path: &[u8]) -> Result<bool> {
+            crate::generated::borrowed::vfs::game_data_delete(path)
+        }
+
+        #[inline]
+        pub fn game_data_list(path: &[u8]) -> Result<Vec<DirEntry>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_output::vfs::game_data_list(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        let mut __cursor = 0usize;
+                        let __result = { let __count = crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? as usize; let mut __items = Vec::with_capacity(__count); for _ in 0..__count { __items.push(DirEntry { name: crate::generated::__core_wire::string(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?, is_directory: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))? }); } __items };
+                        if !crate::generated::__core_wire::finish(&__output, &mut __cursor, 8) {
+                            return Err(crate::ApiError::new(crate::ErrorCode::Internal as i32));
+                        }
+                        return Ok(__result);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
+        }
+
+        #[inline]
+        pub fn game_data_read(path: &[u8]) -> Result<Vec<u8>> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + path.len()); __b.extend_from_slice(&(path.len() as u32).to_le_bytes()); __b.extend_from_slice(path); __b };
+            // Last result size: repeated queries fit on the first call, so the
+            // native getter does not run a second time just to size the buffer.
+            static __SIZE_HINT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+            let mut __output = alloc::vec![0u8; __SIZE_HINT.load(core::sync::atomic::Ordering::Relaxed)];
+            loop {
+                match crate::generated::dynamic_input::vfs::game_data_read(&__blob0, &mut __output) {
+                    Ok(required) => {
+                        __SIZE_HINT.store(required, core::sync::atomic::Ordering::Relaxed);
+                        __output.truncate(required);
+                        return Ok(__output);
+                    }
+                    Err(error) if error.error.code == crate::ErrorCode::BufferOverflow as i32 => {
+                        __output.resize(error.required, 0);
+                    }
+                    Err(error) => return Err(error.error),
+                }
+            }
+        }
+
+        #[inline]
+        pub fn game_data_write(path: &[u8], data: &[u8]) -> Result<bool> {
+            crate::generated::borrowed::vfs::game_data_write(path, data)
         }
 
         #[inline]

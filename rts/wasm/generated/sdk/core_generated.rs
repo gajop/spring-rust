@@ -20744,6 +20744,11 @@ pub mod vfs {
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
+            #[link_name = "game-data-read"]
+            pub safe fn core_game_data_read(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        unsafe extern "C" {
             #[link_name = "get-archive-checksum"]
             pub safe fn core_get_archive_checksum(p0: i32, p1: i32) -> i32;
         }

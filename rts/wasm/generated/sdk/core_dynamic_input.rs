@@ -6897,6 +6897,21 @@ pub safe fn file_exists(p0: i32) -> i64;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
+#[link_name = "game-data-delete"]
+pub safe fn game_data_delete(p0: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:vfs")]
+unsafe extern "C" {
+#[link_name = "game-data-read"]
+pub safe fn game_data_read(p0: i32, p1: i32) -> i32;
+}
+            #[link(wasm_import_module = "spring:vfs")]
+unsafe extern "C" {
+#[link_name = "game-data-write"]
+pub safe fn game_data_write(p0: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:vfs")]
+unsafe extern "C" {
 #[link_name = "get-archive-containing-file"]
 pub safe fn get_archive_containing_file(p0: i32, p1: i32) -> i32;
 }
@@ -7225,6 +7240,97 @@ crate::unpack_bool(raw::file_exists(descriptor_ptr))
 #[cfg(not(target_arch = "wasm32"))]
 {
 let _ = (blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn game_data_delete(blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::game_data_delete(descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn game_data_read(blob0: &[u8], output: &mut [u8]) -> core::result::Result<usize, super::VariableResultError> {
+#[cfg(target_arch = "wasm32")]
+{
+if output.len() > u32::MAX as usize {
+return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32), required: 0 });
+}
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(super::VariableResultError { error: crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32), required: 0 }),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let (output_ptr, output_bytes) = crate::wasm_mut_slice_parts(output)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let output_capacity = output_bytes as usize;
+let mut output_descriptor = [output_ptr as u32, output_capacity as u32, 0u32];
+let output_descriptor_ptr = crate::wasm_output_ptr(&mut output_descriptor)
+.map_err(|error| super::VariableResultError { error, required: 0 })?;
+let status = raw::game_data_read(descriptor_ptr, output_descriptor_ptr);
+let required = output_descriptor[2] as usize;
+if status == 0 { Ok(required) } else { Err(super::VariableResultError { error: crate::ApiError::new(status), required }) }
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (blob0, output);
+Err(super::VariableResultError { error: unreachable!(), required: 0 })
+}
+}
+
+        #[inline]
+pub fn game_data_write(blob0: &[u8], blob1: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 4];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+            let (blob1_ptr, blob1_len) =
+match crate::wasm_slice_parts(blob1) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[2] = blob1_ptr as u32;
+descriptor[3] = blob1_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::game_data_write(descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (blob0, blob1);
 Err(unreachable!())
 }
 }
@@ -9564,5 +9670,5 @@ Err(unreachable!())
     }
 
 #[doc(hidden)]
-pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 281;
+pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 284;
 }

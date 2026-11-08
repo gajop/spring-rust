@@ -2,7 +2,7 @@
 
 - source: `rts/wasm/generated/model.json`
 - coverage: `rts/wasm/generated/core-executable-coverage.json`
-- callouts: 1431
+- callouts: 1437
 
 ## Modules
 
@@ -20,7 +20,7 @@
 | `unit_defs` | 19 |
 | `feature_defs` | 10 |
 | `weapon_defs` | 11 |
-| `game` | 33 |
+| `game` | 34 |
 | `terrain` | 14 |
 | `player` | 7 |
 | `math_extra` | 14 |
@@ -40,7 +40,7 @@
 | `config` | 9 |
 | `tracing` | 7 |
 | `utils` | 7 |
-| `unsynced_ctrl` | 88 |
+| `unsynced_ctrl` | 89 |
 | `gfx` | 247 |
 | `lights` | 7 |
 | `icons` | 6 |
@@ -49,7 +49,7 @@
 | `system_control` | 22 |
 | `profiling` | 10 |
 | `rml_ui` | 180 |
-| `vfs` | 53 |
+| `vfs` | 57 |
 | `unsynced_read` | 20 |
 | `team_control` | 15 |
 | `unit_control` | 92 |
@@ -409,6 +409,7 @@
 | `GetTidal` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `GetVectorFromHeading` | i32,i32->i32 | x | x | x | x | x | synced-visible | fixed |
 | `GetWind` | i32,i32->i32 | x | x | x | x | x | synced-visible | fixed |
+| `GetWindVector` | i32,i32->i32 | x | x | x | x | x | synced-visible | fixed |
 | `IsCheatingEnabled` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `IsDevLuaEnabled` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `IsEditDefsEnabled` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
@@ -838,6 +839,7 @@
 | `SetWindowGeometry` | i32,i32,i32,i32,i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetWindowMaximized` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `SetWindowMinimized` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `ShowLoadProgress` | i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `StopTrackingUnits` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `TrackUnits` | i32,i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `WarpMouse` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
@@ -1403,6 +1405,10 @@
 | `DownloadArchive` | i32->i32 |  |  |  |  | x | unsynced-only | variable-input-borrowed |
 | `ExtractModArchiveFile` | i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `FileExists` | i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
+| `GameDataDelete` | i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `GameDataList` | i32,i32->i32 |  | x |  | x | x | unsynced-only | dynamic-output-caller-owned |
+| `GameDataRead` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-io-borrowed-input-caller-owned-output |
+| `GameDataWrite` | i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `GetAllArchives` | i32,i32->i32 |  | x |  | x | x | unsynced-only | dynamic-output-caller-owned |
 | `GetArchiveChecksum` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-io-borrowed-input-caller-owned-output |
 | `GetArchiveContainingFile` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-io-borrowed-input-caller-owned-output |

@@ -241,6 +241,32 @@ TEST_CASE("Production Core ABI enforces import environment masks")
 	CHECK(unsynced.valid);
 }
 
+TEST_CASE("Production Core ABI keeps game data out of synced environments")
+{
+	WasmRuntimeConfig config;
+	for (const auto& [name, params, result] : std::vector<std::tuple<std::string_view, std::vector<std::uint8_t>, std::uint8_t>>{
+		{"game-data-write", {0x7f}, 0x7e},
+		{"game-data-delete", {0x7f}, 0x7e},
+		{"game-data-read", {0x7f, 0x7f}, 0x7f},
+		{"game-data-list", {0x7f, 0x7f}, 0x7f},
+	}) {
+		auto module = CoreHeader();
+		AddCoreFunctionType(module, params, {result});
+		AddCoreFunctionImport(module, "spring:vfs", name);
+		AddCoreMemory(module, true);
+		AddCoreMemoryExport(module);
+		for (const WasmEnvironment synced : {WasmEnvironment::RulesSynced, WasmEnvironment::GaiaSynced}) {
+			const auto refused = recoil::wasm::core::ValidateModule(module, synced, RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
+			CHECK_FALSE(refused.valid);
+			CHECK(refused.error.find("unknown or unavailable Core Wasm import") != std::string::npos);
+		}
+		for (const WasmEnvironment unsynced : {WasmEnvironment::RulesUnsynced, WasmEnvironment::UI}) {
+			const auto taken = recoil::wasm::core::ValidateModule(module, unsynced, RECOIL_WASM_INTERFACE_VERSION_NUMBER, config);
+			CHECK(taken.valid);
+		}
+	}
+}
+
 TEST_CASE("Production Core ABI admits only reviewed synchronous callback imports in synced environments")
 {
 	WasmRuntimeConfig config;

@@ -7716,6 +7716,121 @@ slots[0].i32 = 0;
 return nullptr;
 }
 
+wasm_trap_t* CoreDynamicOutput_vfs_game_data_list(void* environment, wasmtime_caller_t* caller,
+wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+auto* state = static_cast<HostState*>(environment);
+if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+state->native->vfs->GameDataList == nullptr)
+return Trap("GameDataList dynamic-output Core binding is unavailable");
+if (slots == nullptr || slotCount != 2u)
+return Trap("GameDataList dynamic-output Core ABI signature mismatch");
+
+std::string budgetError;
+ImportGuard guard(state, 3u, budgetError);
+if (!guard.Ok()) return Trap(budgetError);
+
+std::string memoryError;
+if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+const std::uint32_t descriptorOffset = static_cast<std::uint32_t>(slots[1].i32);
+std::span<std::uint8_t> descriptor;
+if (!state->memory.MutableView(descriptorOffset, 12u, descriptor)) {
+slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+return nullptr;
+}
+WireReader control(std::span<const std::uint8_t>(descriptor.data(), descriptor.size()));
+std::uint32_t outputPointer = 0, outputCapacity = 0, ignoredRequired = 0;
+if (!control.U32(outputPointer) || !control.U32(outputCapacity) ||
+!control.U32(ignoredRequired) || !control.Finish(4)) {
+slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+return nullptr;
+}
+if (outputCapacity != 0 && !state->memory.Contains(outputPointer, outputCapacity)) {
+slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+return nullptr;
+}
+
+GameDataListQuery query{};
+    std::uint32_t pathInputPointer = 0;
+    std::uint32_t pathInputCount = 0;
+    if (!reader.U32(pathInputPointer) || !reader.U32(pathInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::uint32_t pathInputLength = 0;
+    if (!pathInputReader.U32(pathInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::span<const std::uint8_t> pathInputBytes;
+    if (!pathInputReader.Bytes(pathInputLength, pathInputBytes) || !pathInputReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.path = pathInputLength == 0 ? nullptr : reinterpret_cast<std::remove_reference_t<decltype(query.path)>>(pathInputBytes.data());
+    if (!AssignCoreCount(pathInputLength, query.pathSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+GameDataListResult result{};
+state->native->vfs->GameDataList(&query, &result);
+const std::int32_t errorCode = NativeErrorCode(result.error);
+if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+
+auto encode = [&](auto& writer) -> bool {
+        {
+            std::uint32_t coreCount = 0;
+            if (!NormalizeDynamicCount(result.count, coreCount)) return false;
+            if (coreCount != 0 && result.entries == nullptr) return false;
+            if (!writer.U32(coreCount)) return false;
+            for (std::uint32_t coreDynamicIndex2 = 0; coreDynamicIndex2 < coreCount; ++coreDynamicIndex2) {
+                {
+                    const std::string_view coreText = result.entries[coreDynamicIndex2].name == nullptr ? std::string_view{} : std::string_view(result.entries[coreDynamicIndex2].name);
+                    if (coreText.size() > std::numeric_limits<std::uint32_t>::max()) return false;
+                    if (!writer.U32(static_cast<std::uint32_t>(coreText.size()))) return false;
+                    if (!coreText.empty() && !writer.Bytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(coreText.data()), coreText.size()))) return false;
+                }
+                if (!writer.Bool(result.entries[coreDynamicIndex2].isDirectory)) return false;
+            }
+        }
+return writer.Align(8u);
+};
+DynamicSizeWriter sizer;
+if (!encode(sizer)) {
+slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed);
+return nullptr;
+}
+const std::size_t requiredSize = sizer.Offset();
+if (requiredSize > std::numeric_limits<std::uint32_t>::max() ||
+!CheckResultBytes(state, requiredSize)) {
+slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
+return nullptr;
+}
+const std::uint32_t required = static_cast<std::uint32_t>(requiredSize);
+if (!WriteDynamicRequired(descriptor, required))
+return Trap("dynamic Core output descriptor changed unexpectedly");
+if (outputCapacity < required) {
+slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow);
+return nullptr;
+}
+if (!guard.Charge(requiredSize)) return Trap(budgetError);
+if (requiredSize != 0) {
+std::span<std::uint8_t> payload;
+if (!state->memory.MutableView(outputPointer, requiredSize, payload))
+return Trap("dynamic Core output range changed unexpectedly");
+WireWriter writer(payload);
+if (!encode(writer) || writer.Offset() != requiredSize)
+return Trap("dynamic Core output size/write mismatch");
+}
+slots[0].i32 = 0;
+return nullptr;
+}
+
 wasm_trap_t* CoreDynamicOutput_vfs_get_all_archives(void* environment, wasmtime_caller_t* caller,
 wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -9818,6 +9933,13 @@ bool RegisterGeneratedDynamicOutputImports(wasmtime_linker_t* linker, HostState*
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicOutput(linker, "spring:vfs", "game-data-list",
+                MakeFuncType(params, 2, results, 1), CoreDynamicOutput_vfs_game_data_list, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedDynamicOutput(linker, "spring:vfs", "get-all-archives",
                 MakeFuncType(params, 2, results, 1), CoreDynamicOutput_vfs_get_all_archives, state, error))
             return false;
@@ -9917,6 +10039,6 @@ bool RegisterGeneratedDynamicOutputImports(wasmtime_linker_t* linker, HostState*
     return true;
 }
 
-static_assert(89u >= 0u, "generated dynamic-output Core callback count");
+static_assert(90u >= 0u, "generated dynamic-output Core callback count");
 
 } // namespace recoil::wasm::core::generated

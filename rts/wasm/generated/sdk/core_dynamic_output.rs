@@ -4198,6 +4198,11 @@ pub safe fn dir_list(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:vfs")]
 unsafe extern "C" {
+#[link_name = "game-data-list"]
+pub safe fn game_data_list(p0: i32, p1: i32) -> i32;
+}
+            #[link(wasm_import_module = "spring:vfs")]
+unsafe extern "C" {
 #[link_name = "get-all-archives"]
 pub safe fn get_all_archives(p0: i32, p1: i32) -> i32;
 }
@@ -4309,6 +4314,59 @@ required,
 #[cfg(not(target_arch = "wasm32"))]
 {
         let _ = (p0, blob0, blob1, blob2);
+let _ = output;
+Err(super::DynamicOutputError {
+error: unreachable!(),
+required: 0,
+})
+}
+}
+
+        #[inline]
+pub fn game_data_list(blob0: &[u8], output: &mut [u8])
+-> core::result::Result<usize, super::DynamicOutputError>
+{
+#[cfg(target_arch = "wasm32")]
+{
+let mut input = [0u32; 2];
+let (pointer, length) = crate::wasm_slice_parts(blob0).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+input[0] = pointer as u32;
+input[1] = length as u32;
+let input_pointer = crate::wasm_output_ptr(&mut input).map_err(|error| super::DynamicOutputError { error, required: 0 })?;
+let (output_pointer, output_capacity) =
+match crate::wasm_mut_slice_parts(output) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
+required: 0,
+}),
+};
+let mut descriptor = [
+output_pointer as u32,
+output_capacity as u32,
+0u32,
+];
+let descriptor_pointer = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(error) => return Err(super::DynamicOutputError {
+error,
+required: 0,
+}),
+};
+let status = raw::game_data_list(input_pointer, descriptor_pointer);
+let required = descriptor[2] as usize;
+if status == 0 {
+Ok(required)
+} else {
+Err(super::DynamicOutputError {
+error: crate::ApiError::new(status),
+required,
+})
+}
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+        let _ = (blob0);
 let _ = output;
 Err(super::DynamicOutputError {
 error: unreachable!(),
@@ -5059,5 +5117,5 @@ required: 0,
     }
 
 #[doc(hidden)]
-pub const __GENERATED_DYNAMIC_OUTPUT_CALLOUT_COUNT: usize = 89;
+pub const __GENERATED_DYNAMIC_OUTPUT_CALLOUT_COUNT: usize = 90;
 }

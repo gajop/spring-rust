@@ -10,6 +10,7 @@ pub enum Kind {
     Manual,
     Exclude,
     SyncedOnly,
+    UnsyncedOnly,
     /// Import the function under another Wasm name, given in place of the reason.
     ImportName,
 }
@@ -37,7 +38,7 @@ pub fn parse(path: &Path) -> Result<Vec<Annotation>> {
         }
         let (kind, body) = line.split_once('(').ok_or_else(|| {
             anyhow!(
-                "{}:{}: expected MANUAL(...), EXCLUDE(...), SYNCED_ONLY(...) or IMPORT_NAME(...)",
+                "{}:{}: expected MANUAL(...), EXCLUDE(...), SYNCED_ONLY(...), UNSYNCED_ONLY(...) or IMPORT_NAME(...)",
                 path.display(),
                 line_number + 1
             )
@@ -59,6 +60,7 @@ pub fn parse(path: &Path) -> Result<Vec<Annotation>> {
             "MANUAL" => Kind::Manual,
             "EXCLUDE" => Kind::Exclude,
             "SYNCED_ONLY" => Kind::SyncedOnly,
+            "UNSYNCED_ONLY" => Kind::UnsyncedOnly,
             "IMPORT_NAME" => Kind::ImportName,
             _ => {
                 return Err(anyhow!(
@@ -128,6 +130,12 @@ pub fn apply(model: &mut ApiModel, annotations: &[Annotation]) -> Result<Vec<(St
                 function
                     .environments
                     .retain(|environment| environment.is_synced());
+                function.notes.push(annotation.reason.clone());
+            }
+            Kind::UnsyncedOnly => {
+                function
+                    .environments
+                    .retain(|environment| !environment.is_synced());
                 function.notes.push(annotation.reason.clone());
             }
             Kind::ImportName => {

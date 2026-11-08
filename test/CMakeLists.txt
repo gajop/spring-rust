@@ -475,6 +475,18 @@ endif()
 	add_dependencies(test_${test_name} generateVersionFiles)
 	include_directories("${ENGINE_SOURCE_DIR}/lib")
 ################################################################################
+### GameDataFiles
+	set(test_name GameDataFiles)
+	set(test_src
+			"${ENGINE_SOURCE_DIR}/System/FileSystem/GameDataFiles.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/engine/System/FileSystem/TestGameDataFiles.cpp"
+			${test_Common_sources}
+		)
+	set(test_libs
+			nowide::nowide
+		)
+	add_spring_test(${test_name} "${test_src}" "${test_libs}" "-DNOT_USING_CREG -DNOT_USING_STREFLOP")
+################################################################################
 ### LuaSocketRestrictions
 	set(test_name LuaSocketRestrictions)
 	set(test_src

@@ -103,6 +103,7 @@ make_global_var(sources_engine_System_FileSystem
 		"${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/FileHandler.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/FileSystem.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/FileSystemInitializer.cpp"
+		"${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/GameDataFiles.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/GZFileHandler.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/Misc.cpp"
 		"${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/RapidHandler.cpp"

@@ -24723,6 +24723,86 @@
       "required_returns_mapped": false,
       "runs": []
     },
+    "vfs.GameDataWrite": {
+      "level": "exempt",
+      "reason": "No Lua equivalent: one game's sandboxed data directory (rts/wasm/docs/game_data_sandbox.md). Its effect is files on disk, covered by test/engine/System/FileSystem/TestGameDataFiles.cpp and the hostile guest in test/wasm_api/data/game_data_fixture; native and Wasm share the one host implementation, so there is no Lua state to compare.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu",
+        "intro"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
+    "vfs.GameDataRead": {
+      "level": "exempt",
+      "reason": "No Lua equivalent: one game's sandboxed data directory (rts/wasm/docs/game_data_sandbox.md). Its effect is files on disk, covered by test/engine/System/FileSystem/TestGameDataFiles.cpp and the hostile guest in test/wasm_api/data/game_data_fixture; native and Wasm share the one host implementation, so there is no Lua state to compare.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu",
+        "intro"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
+    "vfs.GameDataDelete": {
+      "level": "exempt",
+      "reason": "No Lua equivalent: one game's sandboxed data directory (rts/wasm/docs/game_data_sandbox.md). Its effect is files on disk, covered by test/engine/System/FileSystem/TestGameDataFiles.cpp and the hostile guest in test/wasm_api/data/game_data_fixture; native and Wasm share the one host implementation, so there is no Lua state to compare.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu",
+        "intro"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
+    "vfs.GameDataList": {
+      "level": "exempt",
+      "reason": "No Lua equivalent: one game's sandboxed data directory (rts/wasm/docs/game_data_sandbox.md). Its effect is files on disk, covered by test/engine/System/FileSystem/TestGameDataFiles.cpp and the hostile guest in test/wasm_api/data/game_data_fixture; native and Wasm share the one host implementation, so there is no Lua state to compare.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu",
+        "intro"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
     "vfs.PackF32": {
       "level": "untested",
       "grandfathered": true,
@@ -30421,6 +30501,6 @@
   "counts": {
     "untested": 1412,
     "exercised": 14,
-    "exempt": 7
+    "exempt": 11
   }
 }

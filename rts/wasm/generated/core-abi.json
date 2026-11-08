@@ -30657,6 +30657,96 @@
     },
     {
       "module": "vfs",
+      "function": "GameDataDelete",
+      "import_module": "spring:vfs",
+      "import_name": "game-data-delete",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": [
+        "a player's local files: simulation code must not depend on what differs between machines"
+      ]
+    },
+    {
+      "module": "vfs",
+      "function": "GameDataList",
+      "import_module": "spring:vfs",
+      "import_name": "game-data-list",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "variable-output-buffer",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": [
+        "a player's local files: simulation code must not depend on what differs between machines"
+      ]
+    },
+    {
+      "module": "vfs",
+      "function": "GameDataRead",
+      "import_module": "spring:vfs",
+      "import_name": "game-data-read",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "variable-output-buffer",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": [
+        "a player's local files: simulation code must not depend on what differs between machines"
+      ]
+    },
+    {
+      "module": "vfs",
+      "function": "GameDataWrite",
+      "import_module": "spring:vfs",
+      "import_name": "game-data-write",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": [
+        "a player's local files: simulation code must not depend on what differs between machines"
+      ]
+    },
+    {
+      "module": "vfs",
       "function": "GetAllArchives",
       "import_module": "spring:vfs",
       "import_name": "get-all-archives",
@@ -31878,6 +31968,6 @@
     }
   ],
   "automatic_count": 1214,
-  "manual_count": 202,
+  "manual_count": 206,
   "unsupported_count": 17
 }

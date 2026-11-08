@@ -34,6 +34,8 @@ public:
 
 	bool Valid() const { return !menuArchive.empty(); }
 	const std::string& GetMenuName() const { return menuArchive; }
+	/// The menu archive, also while the controller constructs and its module first loads.
+	static const std::string& ActiveArchive();
 
 	bool HasWasmMenu() const;
 	void ReloadWasmMenu();

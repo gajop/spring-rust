@@ -52,7 +52,12 @@ pub(crate) fn production_import_allowed(module: &str, function: &str) -> bool {
         // Generic VFS mixes content/archive helpers with raw path lookup,
         // directory creation, extraction/compression, data-dir rescans, and
         // downloader control. Keep it out of the ambient production namespace.
-        "vfs" => false,
+        // The GameData calls take a lexically checked relative path the host
+        // confines to one game's directory, with no links and bounded quotas.
+        "vfs" => matches!(
+            function,
+            "GameDataWrite" | "GameDataRead" | "GameDataDelete" | "GameDataList"
+        ),
 
         // Most message APIs are game/UI communication. SendCommands feeds
         // guest-controlled strings into guihandler->RunCustomCommands and is
@@ -199,6 +204,8 @@ mod tests {
         assert!(!production_import_allowed("profiling", "GetTimerMicros"));
         assert!(!production_import_allowed("vfs", "LoadFile"));
         assert!(!production_import_allowed("vfs", "ZlibCompress"));
+        assert!(production_import_allowed("vfs", "GameDataWrite"));
+        assert!(production_import_allowed("vfs", "GameDataRead"));
         assert!(!production_import_allowed("messages", "SendCommands"));
         assert!(production_import_allowed("messages", "SendPublicChat"));
         assert!(!production_import_allowed("rml_ui", "ContextLoadDocument"));

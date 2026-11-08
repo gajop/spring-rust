@@ -5,9 +5,13 @@
 #include "System/FileSystem/VFSHandler.h"
 #include "System/FileSystem/FileHandler.h"
 #include "System/FileSystem/ArchiveScanner.h"
+#include "System/FileSystem/DataDirLocater.h"
+#include "System/FileSystem/GameDataFiles.h"
 #include "System/FileSystem/RapidHandler.h"
 #include "System/FileSystem/FileSystem.h"
 #include "System/Info.h"
+#include "Game/GameSetup.h"
+#include "Menu/LuaMenuController.h"
 #include "Map/ReadMap.h"
 #include "Map/BaseGroundDrawer.h"
 #include "Map/BaseGroundTextures.h"
@@ -17,6 +21,7 @@
 #include "Lua/LuaZip.h"
 #include "Lua/LuaVFSDownload.h"
 #include "System/Log/ILog.h"
+#include "System/Misc/SpringTime.h"
 #include "System/StringUtil.h"
 #include "System/Sync/SHA512.hpp"
 #include "ExternalAI/LuaAIImplHandler.h"
@@ -25,6 +30,7 @@
 #include "../tools/pr-downloader/src/pr-downloader.h"
 #include <vector>
 #include <string>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <algorithm>
@@ -841,6 +847,138 @@ static void NativeCreateDir(const CreateDirQuery* query, CreateDirResult* result
 	result->error = nullptr;
 }
 
+/// The running game's id, from its archive: the game's in a match, the menu's in the menu. Nothing a
+/// module passes has a part in it.
+static std::string GameDataId() {
+	if (archiveScanner == nullptr)
+		return "";
+	const std::string archive = (gameSetup != nullptr && !gameSetup->modName.empty()) ? gameSetup->modName : CLuaMenuController::ActiveArchive();
+	if (archive.empty())
+		return "";
+	return archiveScanner->GetArchiveData(archive).GetGameDataId();
+}
+
+static GameData::Sandbox GameDataSandbox() {
+	// A launcher may keep game data where an update does not replace it. The environment is the
+	// launcher's: no module can set it.
+	const char* base = std::getenv("SPRING_GAME_DATA_BASE");
+	return GameData::Sandbox((base != nullptr && base[0] != '\0') ? std::string(base) : dataDirLocater.GetWriteDirPath(),
+		GameDataId(), gameSetup != nullptr && gameSetup->hostDemo);
+}
+
+/// The refusal for the caller: a code and words with no paths. The log's line has neither the
+/// module's text nor a path, and stops after a while, so a hostile module cannot fill it.
+static const Error* GameDataError(GameData::Status status, const char* call) {
+	if (status == GameData::Status::Ok)
+		return nullptr;
+	static thread_local int logged = 0;
+	if (status != GameData::Status::NotFound && logged < 64) {
+		logged++;
+		LOG_L(L_WARNING, "[VFS::%s] refused: %s", call, GameData::Describe(status));
+	}
+	using GameData::Status;
+	const int32_t code = [status]() {
+		switch (status) {
+			case Status::InvalidPath:    return native_error::InvalidArgument;
+			case Status::NoGameId:       return native_error::InvalidId;
+			case Status::ReadOnly:
+			case Status::Link:           return native_error::PermissionDenied;
+			case Status::NotFound:       return native_error::NotFound;
+			case Status::WrongType:
+			case Status::NotEmpty:       return native_error::InvalidState;
+			// Not BufferOverflow: from a read, that asks the SDK to retry with a larger buffer.
+			case Status::FileTooLarge:   return native_error::InvalidArgument;
+			case Status::TooManyFiles:
+			case Status::TooManyFolders:
+			case Status::TooManyBytes:   return native_error::BufferOverflow;
+			case Status::RateLimited:    return native_error::NotAvailable;
+			default:                     return native_error::OperationFailed;
+		}
+	}();
+	return MakeDynamicError(code, GameData::Describe(status));
+}
+
+static bool GameDataChangeAllowed() {
+	static GameData::ChangeBudget budget;
+	return budget.Allow(static_cast<std::uint64_t>(spring_now().toMilliSecsi()));
+}
+
+/// The path as the caller gave it, whole: a NUL in it stays in it, for the rules to refuse.
+template <typename Query>
+static bool GameDataPath(const Query* query, std::string_view& path) {
+	if (query->path == nullptr && query->pathSize > 0)
+		return false;
+	path = (query->path == nullptr) ? std::string_view() : std::string_view(query->path, query->pathSize);
+	return true;
+}
+
+static void NativeGameDataWrite(const GameDataWriteQuery* query, GameDataWriteResult* result) {
+	bufferPos = 0;
+	result->success = false;
+	std::string_view path;
+	if (!GameDataPath(query, path)) { result->error = &INVALID_ARGUMENT_ERROR; return; }
+	if (query->data == nullptr && query->size > 0) { result->error = &INVALID_ARGUMENT_ERROR; return; }
+	// A path refused by its text costs the disk nothing, so it costs no change either.
+	std::vector<std::string> components;
+	if (GameData::ParseFilePath(path, components) && !GameDataChangeAllowed()) {
+		result->error = GameDataError(GameData::Status::RateLimited, "GameDataWrite");
+		return;
+	}
+	const GameData::Status status = GameDataSandbox().Write(path, query->data, query->size);
+	result->error = GameDataError(status, "GameDataWrite");
+	result->success = status == GameData::Status::Ok;
+}
+
+static void NativeGameDataRead(const GameDataReadQuery* query, GameDataReadResult* result) {
+	bufferPos = 0;
+	result->data = nullptr;
+	result->size = 0;
+	std::string_view path;
+	if (!GameDataPath(query, path)) { result->error = &INVALID_ARGUMENT_ERROR; return; }
+	static thread_local std::vector<uint8_t> content;
+	const GameData::Status status = GameDataSandbox().Read(path, content);
+	result->error = GameDataError(status, "GameDataRead");
+	if (status == GameData::Status::Ok) {
+		result->data = content.data();
+		result->size = static_cast<uint32_t>(content.size());
+	}
+}
+
+static void NativeGameDataDelete(const GameDataDeleteQuery* query, GameDataDeleteResult* result) {
+	bufferPos = 0;
+	result->success = false;
+	std::string_view path;
+	if (!GameDataPath(query, path)) { result->error = &INVALID_ARGUMENT_ERROR; return; }
+	std::vector<std::string> components;
+	const bool valid = GameData::ParseFilePath(path, components) || (GameData::ParseFolderPath(path, components) && !components.empty());
+	if (valid && !GameDataChangeAllowed()) {
+		result->error = GameDataError(GameData::Status::RateLimited, "GameDataDelete");
+		return;
+	}
+	const GameData::Status status = GameDataSandbox().Delete(path);
+	result->error = GameDataError(status, "GameDataDelete");
+	result->success = status == GameData::Status::Ok;
+}
+
+static void NativeGameDataList(const GameDataListQuery* query, GameDataListResult* result) {
+	bufferPos = 0;
+	result->entries = nullptr;
+	result->count = 0;
+	std::string_view path;
+	if (!GameDataPath(query, path)) { result->error = &INVALID_ARGUMENT_ERROR; return; }
+	static thread_local std::vector<GameData::Entry> found;
+	static thread_local std::vector<DirEntry> entries;
+	const GameData::Status status = GameDataSandbox().List(path, found);
+	result->error = GameDataError(status, "GameDataList");
+	if (status != GameData::Status::Ok)
+		return;
+	entries.clear();
+	for (const GameData::Entry& entry: found)
+		entries.push_back({entry.name.c_str(), entry.isDirectory});
+	result->entries = entries.data();
+	result->count = static_cast<uint32_t>(entries.size());
+}
+
 static void NativeExtractModArchiveFile(const ExtractModArchiveFileQuery* query, ExtractModArchiveFileResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
@@ -1219,4 +1357,8 @@ const VFSApi VFS_API = {
 	.DownloadArchive = NativeDownloadArchive,
 	.AbortDownload = NativeAbortDownload,
 	.LoadFileRange = NativeLoadFileRange,
+	.GameDataWrite = NativeGameDataWrite,
+	.GameDataRead = NativeGameDataRead,
+	.GameDataDelete = NativeGameDataDelete,
+	.GameDataList = NativeGameDataList,
 };

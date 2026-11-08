@@ -11123,6 +11123,133 @@ wasm_trap_t* CoreVariable_vfs_file_exists(void* environment, wasmtime_caller_t* 
     return nullptr;
 }
 
+wasm_trap_t* CoreVariable_vfs_game_data_delete(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->GameDataDelete == nullptr)
+        return Trap("GameDataDelete generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 1)
+        return Trap("GameDataDelete generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    GameDataDeleteQuery query{};
+    std::uint32_t pathPointer = 0;
+    std::uint32_t pathCount = 0;
+    if (!reader.U32(pathPointer) || !reader.U32(pathCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> pathBytes;
+    if (!state->memory.View(pathPointer, pathCount, pathBytes)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    std::vector<std::uint8_t> pathStorage(pathBytes.begin(), pathBytes.end());
+    query.path = reinterpret_cast<std::remove_reference_t<decltype(query.path)>>(pathStorage.data());
+    if (!AssignCoreCount(pathCount, query.pathSize)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    GameDataDeleteResult result{};
+    state->native->vfs->GameDataDelete(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* CoreVariable_vfs_game_data_write(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->GameDataWrite == nullptr)
+        return Trap("GameDataWrite generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 1)
+        return Trap("GameDataWrite generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 16u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    GameDataWriteQuery query{};
+    std::uint32_t pathPointer = 0;
+    std::uint32_t pathCount = 0;
+    if (!reader.U32(pathPointer) || !reader.U32(pathCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> pathBytes;
+    if (!state->memory.View(pathPointer, pathCount, pathBytes)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    std::vector<std::uint8_t> pathStorage(pathBytes.begin(), pathBytes.end());
+    query.path = reinterpret_cast<std::remove_reference_t<decltype(query.path)>>(pathStorage.data());
+    if (!AssignCoreCount(pathCount, query.pathSize)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::uint32_t dataPointer = 0;
+    std::uint32_t dataCount = 0;
+    if (!reader.U32(dataPointer) || !reader.U32(dataCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> dataBytes;
+    if (!state->memory.View(dataPointer, dataCount, dataBytes)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    std::vector<std::uint8_t> dataStorage(dataBytes.begin(), dataBytes.end());
+    query.data = reinterpret_cast<std::remove_reference_t<decltype(query.data)>>(dataStorage.data());
+    if (!AssignCoreCount(dataCount, query.size)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    GameDataWriteResult result{};
+    state->native->vfs->GameDataWrite(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreVariable_vfs_get_file_size(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -13015,6 +13142,6 @@ bool RegisterGeneratedVariableImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(212 >= 0, "generated variable Core callback count");
+static_assert(214 >= 0, "generated variable Core callback count");
 
 } // namespace recoil::wasm::core::generated

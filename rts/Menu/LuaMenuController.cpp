@@ -27,6 +27,9 @@ CONFIG(std::string, DefaultLuaMenu).defaultValue("").description("Sets the defau
 CONFIG(bool, RequireLuaMenu).defaultValue(false).description("When a menu archive is given (-menu or DefaultLuaMenu) and none of its menus load, stop with an error naming the cause instead of opening the engine's default menu.");
 
 CLuaMenuController* luaMenuController = nullptr;
+static std::string activeMenuArchive;
+
+const std::string& CLuaMenuController::ActiveArchive() { return activeMenuArchive; }
 
 
 CLuaMenuController::CLuaMenuController(const std::string& menuName)
@@ -40,6 +43,7 @@ CLuaMenuController::CLuaMenuController(const std::string& menuName)
 	if (!Valid())
 		return;
 
+	activeMenuArchive = menuArchive;
 	Reset();
 	CLuaMenu::LoadFreeHandler();
 }

@@ -15499,6 +15499,39 @@ pub mod vfs {
         pub mode: u32,
         pub is_directory: bool,
     }
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GameDataDeleteQuery {
+        pub path: Vec<u8>,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GameDataDeleteResult {
+        pub success: bool,
+    }
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GameDataListQuery {
+        pub path: Vec<u8>,
+    }
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GameDataListResult {
+        pub entries: Vec<DirEntry>,
+    }
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GameDataReadQuery {
+        pub path: Vec<u8>,
+    }
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GameDataReadResult {
+        pub data: Vec<u8>,
+    }
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GameDataWriteQuery {
+        pub path: Vec<u8>,
+        pub data: Vec<u8>,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GameDataWriteResult {
+        pub success: bool,
+    }
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
     pub struct GetAllArchivesQuery {
         pub unused: u8,

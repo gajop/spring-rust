@@ -2446,6 +2446,82 @@ wasm_trap_t* CoreVariableIo_vfs_calculate_hash(void* environment, wasmtime_calle
     return nullptr;
 }
 
+wasm_trap_t* CoreVariableIo_vfs_game_data_read(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->GameDataRead == nullptr)
+        return Trap("GameDataRead generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2)
+        return Trap("GameDataRead generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<const std::uint8_t> inputWire;
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputWire) ||
+        !state->memory.MutableView(outputDescriptor, 12u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(inputWire);
+    WireReader dataControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t dataPointer = 0;
+    std::uint32_t dataCapacity = 0;
+    std::uint32_t dataIgnoredLength = 0;
+    if (!dataControl.U32(dataPointer) || !dataControl.U32(dataCapacity) ||
+        !dataControl.U32(dataIgnoredLength) || !dataControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    if (!state->memory.Contains(dataPointer, dataCapacity)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GameDataReadQuery query{};
+    std::uint32_t pathInputPointer = 0;
+    std::uint32_t pathInputCount = 0;
+    if (!reader.U32(pathInputPointer) || !reader.U32(pathInputCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> pathInputWire;
+    if (!state->memory.View(pathInputPointer, pathInputCount, pathInputWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader pathInputReader(pathInputWire);
+    std::uint32_t pathInputLength = 0;
+    if (!pathInputReader.U32(pathInputLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    std::span<const std::uint8_t> pathInputBytes;
+    if (!pathInputReader.Bytes(pathInputLength, pathInputBytes) || !pathInputReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    query.path = pathInputLength == 0 ? nullptr : reinterpret_cast<std::remove_reference_t<decltype(query.path)>>(pathInputBytes.data());
+    if (!AssignCoreCount(pathInputLength, query.pathSize)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    GameDataReadResult result{};
+    state->native->vfs->GameDataRead(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    if (static_cast<std::uint64_t>(result.size) > std::numeric_limits<std::uint32_t>::max()) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    const std::uint32_t dataRequired = static_cast<std::uint32_t>(result.size);
+    if (dataRequired != 0 && result.data == nullptr) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (!WriteCoreU32(outputWire, 8u, dataRequired))
+        return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || dataCapacity < dataRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (dataRequired != 0 && !state->memory.Write(dataPointer, result.data, dataRequired)) return Trap("generated Core variable output range changed unexpectedly");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreVariableIo_vfs_get_archive_checksum(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -5140,6 +5216,13 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableIo(linker, "spring:vfs", "game-data-read",
+                MakeFuncType(params, 2, results, 1), CoreVariableIo_vfs_game_data_read, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedVariableIo(linker, "spring:vfs", "get-archive-checksum",
                 MakeFuncType(params, 2, results, 1), CoreVariableIo_vfs_get_archive_checksum, state, error))
             return false;
@@ -5330,6 +5413,6 @@ bool RegisterGeneratedVariableIoImports(wasmtime_linker_t* linker, HostState* st
     return true;
 }
 
-static_assert(55 >= 0, "generated variable-I/O Core callback count");
+static_assert(56 >= 0, "generated variable-I/O Core callback count");
 
 } // namespace recoil::wasm::core::generated

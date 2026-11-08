@@ -1223,4 +1223,88 @@ impl<'a> Vfs<'a> {
         }
     }
 
+    pub fn game_data_write(&self, path: &str, path_size: u32, data: &[u8]) -> Result<bool, Error> {
+        unsafe {
+            let path_cstr = std::ffi::CString::new(path).map_err(|_| Error::invalid_argument("path"))?;
+            let query = sys::GameDataWriteQuery {
+                path: path_cstr.as_ptr(),
+                pathSize: path_size,
+                data: data.as_ptr(),
+                size: data.len() as u32,
+            };
+            let mut result = MaybeUninit::<sys::GameDataWriteResult>::zeroed();
+            let func = self.api.GameDataWrite.expect("GameDataWrite function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn game_data_read(&self, path: &str, path_size: u32) -> Result<Vec<u8>, Error> {
+        unsafe {
+            let path_cstr = std::ffi::CString::new(path).map_err(|_| Error::invalid_argument("path"))?;
+            let query = sys::GameDataReadQuery {
+                path: path_cstr.as_ptr(),
+                pathSize: path_size,
+            };
+            let mut result = MaybeUninit::<sys::GameDataReadResult>::zeroed();
+            let func = self.api.GameDataRead.expect("GameDataRead function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                {
+                    let slice = if result.size == 0 || result.data.is_null() {
+                        &[]
+                    } else {
+                        slice::from_raw_parts(result.data, result.size as usize)
+                    };
+                    slice.to_vec()
+                }
+            })
+        }
+    }
+
+    pub fn game_data_delete(&self, path: &str, path_size: u32) -> Result<bool, Error> {
+        unsafe {
+            let path_cstr = std::ffi::CString::new(path).map_err(|_| Error::invalid_argument("path"))?;
+            let query = sys::GameDataDeleteQuery {
+                path: path_cstr.as_ptr(),
+                pathSize: path_size,
+            };
+            let mut result = MaybeUninit::<sys::GameDataDeleteResult>::zeroed();
+            let func = self.api.GameDataDelete.expect("GameDataDelete function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn game_data_list(&self, path: &str, path_size: u32) -> Result<Vec<sys::DirEntry>, Error> {
+        unsafe {
+            let path_cstr = std::ffi::CString::new(path).map_err(|_| Error::invalid_argument("path"))?;
+            let query = sys::GameDataListQuery {
+                path: path_cstr.as_ptr(),
+                pathSize: path_size,
+            };
+            let mut result = MaybeUninit::<sys::GameDataListResult>::zeroed();
+            let func = self.api.GameDataList.expect("GameDataList function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                {
+                    let slice = if result.count == 0 || result.entries.is_null() {
+                        &[]
+                    } else {
+                        slice::from_raw_parts(result.entries as *const sys::DirEntry, result.count as usize)
+                    };
+                    slice.to_vec()
+                }
+            })
+        }
+    }
+
 }
