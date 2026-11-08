@@ -68,7 +68,11 @@ Tests: `test/engine/System/FileSystem/TestGameDataFiles.cpp` (`GameData*` cases,
   older calls, but it also does not take that away: `vfs.LoadFile` in raw mode, `vfs.CreateDir`,
   `gfx.SaveImage` and the archive helpers take raw paths in the data directories. Their production
   policy (`render_core_wasm_registry_policy.rs`) marks them withheld, yet the generated registry
-  still links them.
+  still links them. Withdrawing them is left open because it changes how a game behaves compared
+  with Lua: a Lua game keeps `gl.SaveImage`, `Spring.CreateDir` and `VFS.LoadFile` with `VFS.RAW`,
+  limited only to the write and data directories (`LuaIO.cpp`), so a Wasm game would no longer be
+  able to do what the same Lua code does: save images or make folders outside its game data, or
+  read loose files from those directories. Ship Game's tours use `gfx.SaveImage`.
 - **Who may write.** A spectator and a client without local play may write, since it is the same code
   as for a player and the limits are what protect the machine. Only replay playback is refused,
   because watching must not change anything.
