@@ -269,6 +269,22 @@ budgets and the Wasmtime fuel (`wasmtime_context_set_fuel`);
 `WasmCoreHost::FuelRemaining` exposes `wasmtime_context_get_fuel` for
 diagnostics.
 
+## Callin payloads a module doesn't control
+
+Variable-size callins are serialized into the guest's scratch region
+(`spring:callin/scratch-info`). A payload that doesn't fit never faults the module:
+
+- `AddConsoleLine` is cut to fit, between UTF-8 characters, and the message ends in
+  ` ...[cut to fit this module: <N> bytes in the infolog]` (`WasmConsoleLineFit.h`). The infolog
+  keeps the whole line. Its bytes aren't charged to the host-work budget: what others log isn't the
+  module's work.
+- `CommandNotify` and the generated scratch callins are skipped for that module, with
+  `Core Wasm callin <Callin> skipped in module <name>: ...`. A command cut short would be another
+  command, and the same goes for the fields of the generated callins.
+
+`test/wasm_api/data/console_line_fixture/run.py` runs a guest with a 256-byte scratch against
+`spring-headless`.
+
 ## Runtime safety model
 
 The hot path uses Wasmtime unchecked functions deliberately. Safety comes from

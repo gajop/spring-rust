@@ -20,6 +20,9 @@ public:
 	/// Returns partial matches
 	std::vector<std::string> Complete(std::string& msg) const;
 
+	/// Console rows for partial matches: whole names, a few short rows, then how many are left out
+	static std::vector<std::string> ListMatches(const std::vector<std::string>& matches);
+
 private:
 	class WordProperties {
 		public:

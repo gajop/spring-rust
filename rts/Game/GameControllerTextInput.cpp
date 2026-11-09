@@ -273,13 +273,8 @@ bool GameControllerTextInput::HandleEditCommand(const std::string& command) {
 			userInput = head + tail;
 			writingPos = head.length();
 
-			if (!partials.empty()) {
-				std::string msg;
-				for (const std::string& match: partials) {
-					msg.append("  ");
-					msg.append(match);
-				}
-				LOG("%s", msg.c_str());
+			for (const std::string& row: CWordCompletion::ListMatches(partials)) {
+				LOG("%s", row.c_str());
 			}
 
 			return true;

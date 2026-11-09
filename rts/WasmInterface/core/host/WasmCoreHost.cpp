@@ -1788,7 +1788,7 @@ bool WasmCoreHost::InvokeAddConsoleLine(const void* query, void* result,
 	if (typedResult == nullptr)
 		typedResult = &fallback;
 	return backend->variableCallins.AddConsoleLine(
-		wasmtime_store_context(backend->store), backend->hot.budget,
+		wasmtime_store_context(backend->store),
 		backend->bindings.Host().memory, *typed, *typedResult, error);
 #else
 	(void)query;

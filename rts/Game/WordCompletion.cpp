@@ -13,6 +13,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <utility>
 
 CWordCompletion wordCompletion;
 
@@ -172,4 +173,37 @@ std::vector<std::string> CWordCompletion::Complete(std::string& msg) const
 	msg = prefix + rawmsg.substr(0, startPos) + partials[0].substr(0, i);
 
 	return partials;
+}
+
+
+std::vector<std::string> CWordCompletion::ListMatches(const std::vector<std::string>& matches)
+{
+	// `/give` then Tab matches every unit def, which on one line is of no use to anyone.
+	static constexpr size_t MAX_ROWS = 4;
+	static constexpr size_t ROW_CHARS = 100;
+
+	std::vector<std::string> rows;
+	std::string row;
+	size_t listed = 0;
+
+	for (const std::string& match: matches) {
+		if (!row.empty() && (row.size() + 2 + match.size()) > ROW_CHARS) {
+			rows.push_back(std::move(row));
+			row.clear();
+
+			if (rows.size() == MAX_ROWS)
+				break;
+		}
+
+		row.append("  ");
+		row.append(match);
+		listed += 1;
+	}
+
+	if (!row.empty())
+		rows.push_back(std::move(row));
+	if (listed < matches.size())
+		rows.push_back("  ... and " + std::to_string(matches.size() - listed) + " more, " + std::to_string(matches.size()) + " in all");
+
+	return rows;
 }

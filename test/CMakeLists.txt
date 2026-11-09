@@ -181,6 +181,16 @@ endmacro()
 		"-DNOT_USING_CREG -DNOT_USING_STREFLOP" Catch2Wasm)
 
 ################################################################################
+### A console line of any length, into a guest's scratch; the chat input's Tab listing.
+	set(test_name WasmConsoleLineFit)
+	set(test_src
+		"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmConsoleLineFit.cpp"
+		"${ENGINE_SOURCE_DIR}/Game/WordCompletion.cpp"
+		${test_Common_sources}
+	)
+	add_spring_test(${test_name} "${test_src}" "" "-DNOT_USING_CREG -DNOT_USING_STREFLOP")
+
+################################################################################
 ### Native errors must keep their ABI values in either platform-header order.
 	set(test_name NativeErrorCodes)
 	set(test_src

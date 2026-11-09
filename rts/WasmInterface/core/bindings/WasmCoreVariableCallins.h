@@ -69,9 +69,8 @@ public:
 	bool HasCommandNotify() const { return commandNotify.Present(); }
 	bool AnyPresent() const { return HasAddConsoleLine() || HasCommandNotify(); }
 
-	bool AddConsoleLine(wasmtime_context_t* context, WasmExecutionBudget& budget,
-		Memory& memory, const AddConsoleLineQuery& query, BoolCallinResult& result,
-		std::string& error) const;
+	bool AddConsoleLine(wasmtime_context_t* context, Memory& memory,
+		const AddConsoleLineQuery& query, BoolCallinResult& result, std::string& error) const;
 	bool CommandNotify(wasmtime_context_t* context, WasmExecutionBudget& budget,
 		Memory& memory, const CommandNotifyQuery& query, BoolCallinResult& result,
 		std::string& error) const;

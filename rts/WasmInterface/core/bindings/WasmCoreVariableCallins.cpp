@@ -13,6 +13,8 @@
 
 #include "NativeInterface/api/Callins.h"
 #include "System/BenchmarkCallins.h"
+#include "WasmConsoleLineFit.h"
+#include "WasmInterface/core/host/WasmCoreDispatchPlan.h"
 #include "WasmResources.h"
 
 namespace recoil::wasm::core {
@@ -31,14 +33,6 @@ struct BenchmarkScope {
 
 	spring::benchmark_callins::Token token;
 };
-
-bool AddSize(std::size_t& value, std::size_t amount)
-{
-	if (amount > std::numeric_limits<std::size_t>::max() - value)
-		return false;
-	value += amount;
-	return true;
-}
 
 void WriteU32(std::uint8_t* output, std::uint32_t value)
 {
@@ -176,8 +170,8 @@ bool VariableCallinBindings::CallBool(wasmtime_context_t* context,
 }
 
 bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
-	WasmExecutionBudget& budget, Memory& memory, const AddConsoleLineQuery& query,
-	BoolCallinResult& result, std::string& error) const
+	Memory& memory, const AddConsoleLineQuery& query, BoolCallinResult& result,
+	std::string& error) const
 {
 	if (!addConsoleLine.Present()) {
 		error = "Core AddConsoleLine export is unavailable";
@@ -192,17 +186,20 @@ bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
 		? std::string_view{}
 		: std::string_view(query.section);
 
-	std::size_t required = ADD_CONSOLE_HEADER_BYTES;
-	if (!AddSize(required, message.size()) || !AddSize(required, section.size()) ||
-		required > scratchCapacity || required > std::numeric_limits<std::uint32_t>::max()) {
-		error = "Core AddConsoleLine payload exceeds guest scratch capacity";
-		return false;
+	// Too small for even the header: the module cannot hear console lines, which is not a fault.
+	// Nothing logged here, since a warning would be one more line to skip.
+	if (scratchCapacity < ADD_CONSOLE_HEADER_BYTES) {
+		result.error = nullptr;
+		result.value = false;
+		return true;
 	}
-	if (!budget.ChargeHost(static_cast<std::uint64_t>(required))) {
-		error = "Core AddConsoleLine scratch host-work budget exhausted";
-		return false;
-	}
+	const ConsoleLineFit fit = FitConsoleLine(message, section,
+		scratchCapacity - ADD_CONSOLE_HEADER_BYTES);
+	const std::size_t messageBytes = fit.message.size() + fit.marker.size();
+	const std::size_t required = ADD_CONSOLE_HEADER_BYTES + messageBytes + fit.section.size();
 
+	// The size is bounded by the guest's scratch. It isn't charged to the guest's host-work budget:
+	// what others log isn't its work, and this one callin's charge differs from peer to peer.
 	std::span<std::uint8_t> scratch;
 	if (!memory.MutableView(scratchOffset, required, scratch)) {
 		error = "Core AddConsoleLine scratch range became invalid";
@@ -210,16 +207,19 @@ bool VariableCallinBindings::AddConsoleLine(wasmtime_context_t* context,
 	}
 
 	const std::uint32_t messageOffset = static_cast<std::uint32_t>(ADD_CONSOLE_HEADER_BYTES);
-	const std::uint32_t sectionOffset = messageOffset + static_cast<std::uint32_t>(message.size());
+	const std::uint32_t sectionOffset = messageOffset + static_cast<std::uint32_t>(messageBytes);
 	WriteU32(scratch.data() + 0, messageOffset);
-	WriteU32(scratch.data() + 4, static_cast<std::uint32_t>(message.size()));
+	WriteU32(scratch.data() + 4, static_cast<std::uint32_t>(messageBytes));
 	WriteU32(scratch.data() + 8, sectionOffset);
-	WriteU32(scratch.data() + 12, static_cast<std::uint32_t>(section.size()));
+	WriteU32(scratch.data() + 12, static_cast<std::uint32_t>(fit.section.size()));
 	WriteI32(scratch.data() + 16, query.level);
-	if (!message.empty())
-		std::memcpy(scratch.data() + messageOffset, message.data(), message.size());
-	if (!section.empty())
-		std::memcpy(scratch.data() + sectionOffset, section.data(), section.size());
+	if (!fit.message.empty())
+		std::memcpy(scratch.data() + messageOffset, fit.message.data(), fit.message.size());
+	if (!fit.marker.empty())
+		std::memcpy(scratch.data() + messageOffset + fit.message.size(), fit.marker.data(),
+			fit.marker.size());
+	if (!fit.section.empty())
+		std::memcpy(scratch.data() + sectionOffset, fit.section.data(), fit.section.size());
 
 	scratchScope.SetUsed(required);
 	return CallBool(context, addConsoleLine, static_cast<std::uint32_t>(required),
@@ -243,13 +243,18 @@ bool VariableCallinBindings::CommandNotify(wasmtime_context_t* context,
 	}
 	if (command.numParams > (std::numeric_limits<std::uint32_t>::max() -
 		COMMAND_NOTIFY_HEADER_BYTES) / sizeof(float)) {
-		error = "Core CommandNotify parameter count overflows its wire payload";
+		error = std::string(kCoreInputRejectedPrefix) +
+			"CommandNotify parameter count overflows its wire payload";
 		return false;
 	}
 	const std::size_t required = COMMAND_NOTIFY_HEADER_BYTES +
 		static_cast<std::size_t>(command.numParams) * sizeof(float);
 	if (required > scratchCapacity) {
-		error = "Core CommandNotify payload exceeds guest scratch capacity";
+		// A command cut short would be another command, so it is skipped, with a warning, as the
+		// generated callins are: the command goes on, the module does not see it.
+		error = std::string(kCoreInputRejectedPrefix) + "CommandNotify payload of " +
+			std::to_string(required) + " bytes exceeds scratch capacity " +
+			std::to_string(scratchCapacity);
 		return false;
 	}
 	if (!budget.ChargeHost(static_cast<std::uint64_t>(required))) {
