@@ -35772,6 +35772,103 @@ pub(crate) mod vfs {
         }
         Ok((result.success) as _)
     }
+    pub(crate) fn game_output_close(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::VFSApi>,
+        handle: u32,
+    ) -> Result<bool> {
+        let native_handle = (handle) as _;
+        let query = sys::GameOutputCloseQuery {
+            handle: native_handle,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .GameOutputClose
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<sys::GameOutputCloseResult>::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.success) as _)
+    }
+    pub(crate) fn game_output_open(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::VFSApi>,
+        path: &[u8],
+        append: bool,
+    ) -> Result<u32> {
+        let mut inputs = Inputs::default();
+        let native_path = {
+            let mut converted: Vec<i8> = Vec::with_capacity((path).len());
+            for item in (path).iter() {
+                converted.push(*(item) as _);
+            }
+            inputs.slice(converted) as _
+        };
+        let native_append = (append) as _;
+        let query = sys::GameOutputOpenQuery {
+            path: native_path,
+            pathSize: (path)
+                .len()
+                .try_into()
+                .map_err(|_| ApiError::new(ErrorCode::OutOfBounds as i32))?,
+            append: native_append,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .GameOutputOpen
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<sys::GameOutputOpenResult>::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.handle) as _)
+    }
+    pub(crate) fn game_output_write(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::VFSApi>,
+        handle: u32,
+        data: &[u8],
+    ) -> Result<bool> {
+        let mut inputs = Inputs::default();
+        let native_handle = (handle) as _;
+        let native_data = {
+            let mut converted: Vec<u8> = Vec::with_capacity((data).len());
+            for item in (data).iter() {
+                converted.push(*(item) as _);
+            }
+            inputs.slice(converted) as _
+        };
+        let query = sys::GameOutputWriteQuery {
+            handle: native_handle,
+            data: native_data,
+            size: (data)
+                .len()
+                .try_into()
+                .map_err(|_| ApiError::new(ErrorCode::OutOfBounds as i32))?,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .GameOutputWrite
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<sys::GameOutputWriteResult>::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.success) as _)
+    }
     pub(crate) fn get_all_archives(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::VFSApi>,

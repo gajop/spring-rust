@@ -30747,6 +30747,74 @@
     },
     {
       "module": "vfs",
+      "function": "GameOutputClose",
+      "import_module": "spring:vfs",
+      "import_name": "game-output-close",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": [
+        "a player's local files: simulation code must not depend on what differs between machines"
+      ]
+    },
+    {
+      "module": "vfs",
+      "function": "GameOutputOpen",
+      "import_module": "spring:vfs",
+      "import_name": "game-output-open",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": [
+        "a player's local files: simulation code must not depend on what differs between machines"
+      ]
+    },
+    {
+      "module": "vfs",
+      "function": "GameOutputWrite",
+      "import_module": "spring:vfs",
+      "import_name": "game-output-write",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": [
+        "a player's local files: simulation code must not depend on what differs between machines"
+      ]
+    },
+    {
+      "module": "vfs",
       "function": "GetAllArchives",
       "import_module": "spring:vfs",
       "import_name": "get-all-archives",
@@ -31967,7 +32035,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1214,
-  "manual_count": 206,
+  "automatic_count": 1215,
+  "manual_count": 208,
   "unsupported_count": 17
 }

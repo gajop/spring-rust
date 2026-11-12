@@ -21,6 +21,7 @@
 #include "Lua/LuaZip.h"
 #include "Lua/LuaVFSDownload.h"
 #include "System/Log/ILog.h"
+#include "System/Config/ConfigHandler.h"
 #include "System/Misc/SpringTime.h"
 #include "System/StringUtil.h"
 #include "System/Sync/SHA512.hpp"
@@ -979,6 +980,82 @@ static void NativeGameDataList(const GameDataListQuery* query, GameDataListResul
 	result->count = static_cast<uint32_t>(entries.size());
 }
 
+// The player's settings bound a game's output, not the game: a downloaded game cannot raise them.
+CONFIG(int, GameOutputMaxFileMB).defaultValue(1024).minimumValue(1).description("Largest file a game's Wasm modules may write to their output directory (<write dir>/game-output/<gameDataId>/), in MiB.");
+CONFIG(int, GameOutputMaxTotalMB).defaultValue(8192).minimumValue(1).description("Largest total of a game's output directory (<write dir>/game-output/<gameDataId>/), earlier runs included, in MiB. Delete old files to make room.");
+CONFIG(int, GameOutputMaxFiles).defaultValue(4096).minimumValue(1).description("Most files a game's output directory (<write dir>/game-output/<gameDataId>/) may hold.");
+CONFIG(int, GameOutputMBPerSecond).defaultValue(32).minimumValue(1).description("How fast a game's Wasm modules may write output files, in MiB a second, after a burst of four seconds' worth.");
+
+static GameData::Outputs& GameOutputs() {
+	GameData::OutputLimits limits;
+	limits.maxFileBytes = static_cast<std::uint64_t>(configHandler->GetInt("GameOutputMaxFileMB")) << 20;
+	limits.maxTotalBytes = static_cast<std::uint64_t>(configHandler->GetInt("GameOutputMaxTotalMB")) << 20;
+	limits.maxFiles = static_cast<std::size_t>(configHandler->GetInt("GameOutputMaxFiles"));
+	limits.bytesPerSecond = static_cast<std::uint64_t>(configHandler->GetInt("GameOutputMBPerSecond")) << 20;
+	GameData::Outputs& outputs = GameData::ProcessOutputs();
+	outputs.SetLimits(limits);
+	return outputs;
+}
+
+/// As GameDataError: a code and words, no paths, and a bounded log.
+static const Error* GameOutputError(GameData::OutputStatus status, const char* call) {
+	using GameData::OutputStatus;
+	if (status == OutputStatus::Ok)
+		return nullptr;
+	static thread_local int logged = 0;
+	if (logged < 64) {
+		logged++;
+		LOG_L(L_WARNING, "[VFS::%s] refused: %s", call, GameData::Describe(status));
+	}
+	const int32_t code = [status]() {
+		switch (status) {
+			case OutputStatus::InvalidPath:    return native_error::InvalidArgument;
+			case OutputStatus::NoGameId:       return native_error::InvalidId;
+			case OutputStatus::Exists:         return native_error::AlreadyExists;
+			case OutputStatus::NoStream:       return native_error::NotFound;
+			case OutputStatus::Link:           return native_error::PermissionDenied;
+			case OutputStatus::WrongType:      return native_error::InvalidState;
+			case OutputStatus::TooManyOpen:
+			case OutputStatus::FileTooLarge:
+			case OutputStatus::TooManyFiles:
+			case OutputStatus::TooManyFolders:
+			case OutputStatus::TooManyBytes:   return native_error::BufferOverflow;
+			case OutputStatus::RateLimited:    return native_error::NotAvailable;
+			default:                           return native_error::OperationFailed;
+		}
+	}();
+	return MakeDynamicError(code, GameData::Describe(status));
+}
+
+static std::uint64_t NowMilliseconds() { return static_cast<std::uint64_t>(spring_now().toMilliSecsi()); }
+
+static void NativeGameOutputOpen(const GameOutputOpenQuery* query, GameOutputOpenResult* result) {
+	bufferPos = 0;
+	result->handle = 0;
+	std::string_view path;
+	if (!GameDataPath(query, path)) { result->error = &INVALID_ARGUMENT_ERROR; return; }
+	const char* base = std::getenv("SPRING_GAME_DATA_BASE");
+	const std::string root = (base != nullptr && base[0] != '\0') ? std::string(base) : dataDirLocater.GetWriteDirPath();
+	const GameData::OutputStatus status = GameOutputs().Open(root, GameDataId(), path, query->append, NowMilliseconds(), result->handle);
+	result->error = GameOutputError(status, "GameOutputOpen");
+}
+
+static void NativeGameOutputWrite(const GameOutputWriteQuery* query, GameOutputWriteResult* result) {
+	bufferPos = 0;
+	result->success = false;
+	if (query->data == nullptr && query->size > 0) { result->error = &INVALID_ARGUMENT_ERROR; return; }
+	const GameData::OutputStatus status = GameOutputs().Write(query->handle, query->data, query->size, NowMilliseconds());
+	result->error = GameOutputError(status, "GameOutputWrite");
+	result->success = status == GameData::OutputStatus::Ok;
+}
+
+static void NativeGameOutputClose(const GameOutputCloseQuery* query, GameOutputCloseResult* result) {
+	bufferPos = 0;
+	const GameData::OutputStatus status = GameData::ProcessOutputs().Close(query->handle);
+	result->error = GameOutputError(status, "GameOutputClose");
+	result->success = status == GameData::OutputStatus::Ok;
+}
+
 static void NativeExtractModArchiveFile(const ExtractModArchiveFileQuery* query, ExtractModArchiveFileResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
@@ -1361,4 +1438,7 @@ const VFSApi VFS_API = {
 	.GameDataRead = NativeGameDataRead,
 	.GameDataDelete = NativeGameDataDelete,
 	.GameDataList = NativeGameDataList,
+	.GameOutputOpen = NativeGameOutputOpen,
+	.GameOutputWrite = NativeGameOutputWrite,
+	.GameOutputClose = NativeGameOutputClose,
 };

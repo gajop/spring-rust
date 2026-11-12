@@ -241,7 +241,7 @@ TEST_CASE("Production Core ABI enforces import environment masks")
 	CHECK(unsynced.valid);
 }
 
-TEST_CASE("Production Core ABI keeps game data out of synced environments")
+TEST_CASE("Production Core ABI keeps game data and output out of synced environments")
 {
 	WasmRuntimeConfig config;
 	for (const auto& [name, params, result] : std::vector<std::tuple<std::string_view, std::vector<std::uint8_t>, std::uint8_t>>{
@@ -249,6 +249,9 @@ TEST_CASE("Production Core ABI keeps game data out of synced environments")
 		{"game-data-delete", {0x7f}, 0x7e},
 		{"game-data-read", {0x7f, 0x7f}, 0x7f},
 		{"game-data-list", {0x7f, 0x7f}, 0x7f},
+		{"game-output-open", {0x7f, 0x7f}, 0x7e},
+		{"game-output-write", {0x7f, 0x7f}, 0x7e},
+		{"game-output-close", {0x7f}, 0x7e},
 	}) {
 		auto module = CoreHeader();
 		AddCoreFunctionType(module, params, {result});

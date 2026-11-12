@@ -149,6 +149,38 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GameOutputCloseQuery {
+            pub handle: u32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GameOutputCloseResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GameOutputOpenQuery {
+            pub path: Vec<u8>,
+            pub append: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GameOutputOpenResult {
+            pub handle: u32,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GameOutputWriteQuery {
+            pub handle: u32,
+            pub data: Vec<u8>,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GameOutputWriteResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GetAllArchivesQuery {
             pub unused: u8,
         }
@@ -843,6 +875,22 @@
         #[inline]
         pub fn game_data_write(path: &[u8], data: &[u8]) -> Result<bool> {
             crate::generated::borrowed::vfs::game_data_write(path, data)
+        }
+
+        #[inline]
+        pub fn game_output_close(handle: u32) -> Result<bool> {
+            let value = crate::generated::vfs::game_output_close(handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn game_output_open(path: &[u8], append: bool) -> Result<u32> {
+            crate::generated::borrowed::vfs::game_output_open(path, append)
+        }
+
+        #[inline]
+        pub fn game_output_write(handle: u32, data: &[u8]) -> Result<bool> {
+            crate::generated::borrowed::vfs::game_output_write(handle, data)
         }
 
         #[inline]

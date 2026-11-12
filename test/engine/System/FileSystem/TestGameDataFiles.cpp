@@ -10,6 +10,10 @@
 
 #include <catch_amalgamated.hpp>
 
+#ifndef _WIN32
+	#include <sys/stat.h>
+#endif
+
 #include "System/FileSystem/GameDataFiles.h"
 
 namespace fs = std::filesystem;
@@ -427,5 +431,270 @@ TEST_CASE("GameDataRefusesLinks")
 	CHECK(ReadText(disk.outside / "canary.txt") == "canary");
 	CHECK_FALSE(fs::exists(disk.outside / "x.txt"));
 	CHECK_FALSE(fs::exists(disk.outside / "c"));
+	CHECK_FALSE(fs::exists(disk.outside / "new.txt"));
+}
+
+// ---- Output files: append-only streams in <write dir>/game-output/<id>/.
+
+namespace {
+
+struct OutputDisk : Disk {
+	fs::path output;
+	OutputDisk() { output = write / OUTPUT_ROOT / "testgame"; }
+	OutputStatus open(Outputs& outputs, std::string_view path, bool append, std::uint32_t& handle, std::uint64_t now = 0) const {
+		return outputs.Open(write.string(), "testgame", path, append, now, handle);
+	}
+};
+
+OutputStatus Put(Outputs& outputs, std::uint32_t handle, std::string_view text, std::uint64_t now = 0)
+{
+	return outputs.Write(handle, text.data(), text.size(), now);
+}
+
+}
+
+TEST_CASE("GameOutputPaths")
+{
+	const OutputDisk disk;
+	Outputs outputs;
+	std::uint32_t handle = 0;
+	for (const std::string_view path: HOSTILE_FILE_PATHS) {
+		if (path == "x.dat" || path == "x.bin")
+			continue;
+		INFO(std::string(path));
+		CHECK(disk.open(outputs, path, false, handle) == OutputStatus::InvalidPath);
+		CHECK(disk.open(outputs, path, true, handle) == OutputStatus::InvalidPath);
+		CHECK(handle == 0);
+	}
+	// Game data's own extensions that a loader or viewer picks up are not output.
+	for (const char* path: {"x.png", "x.jpg", "x.toml", "x.jsonl.lua", "x.lua", "x.wasm"}) {
+		INFO(path);
+		CHECK(disk.open(outputs, path, false, handle) == OutputStatus::InvalidPath);
+	}
+	CHECK(disk.writeDirEntries() == 0);
+	CHECK(disk.canaryIntact());
+	for (const char* good: {"world.jsonl", "recordings/world-20261113-120000-30.jsonl", "a/b.json", "x.txt", "x.csv", "x.tsv", "x.log", "x.dat", "x.bin"}) {
+		INFO(good);
+		CHECK(disk.open(outputs, good, false, handle) == OutputStatus::Ok);
+		CHECK(handle != 0);
+		CHECK(outputs.Close(handle) == OutputStatus::Ok);
+	}
+}
+
+TEST_CASE("GameOutputNeedsAValidId")
+{
+	const OutputDisk disk;
+	Outputs outputs;
+	std::uint32_t handle = 0;
+	for (const char* id: {"", "..", "a/b", "../outside", "Upper", "con"}) {
+		INFO(id);
+		CHECK(outputs.Open(disk.write.string(), id, "x.jsonl", false, 0, handle) == OutputStatus::NoGameId);
+	}
+	CHECK(disk.writeDirEntries() == 0);
+}
+
+TEST_CASE("GameOutputAppends")
+{
+	const OutputDisk disk;
+	Outputs outputs;
+	std::uint32_t first = 0;
+	REQUIRE(disk.open(outputs, "recordings/world.jsonl", false, first) == OutputStatus::Ok);
+	CHECK(Put(outputs, first, "{\"a\":1}\n") == OutputStatus::Ok);
+	CHECK(Put(outputs, first, "") == OutputStatus::Ok);
+	CHECK(Put(outputs, first, "{\"b\":2}\n") == OutputStatus::Ok);
+	// What a write put down is on disk before the stream closes.
+	CHECK(ReadText(disk.output / "recordings" / "world.jsonl") == "{\"a\":1}\n{\"b\":2}\n");
+	CHECK(outputs.Close(first) == OutputStatus::Ok);
+	CHECK(outputs.Close(first) == OutputStatus::NoStream);
+	CHECK(Put(outputs, first, "late") == OutputStatus::NoStream);
+	CHECK(Put(outputs, 0, "none") == OutputStatus::NoStream);
+
+	std::uint32_t again = 0;
+	CHECK(disk.open(outputs, "recordings/world.jsonl", false, again) == OutputStatus::Exists);
+	CHECK(again == 0);
+	REQUIRE(disk.open(outputs, "recordings/world.jsonl", true, again) == OutputStatus::Ok);
+	CHECK(again != first);
+	CHECK(Put(outputs, again, "{\"c\":3}\n") == OutputStatus::Ok);
+	CHECK(outputs.Close(again) == OutputStatus::Ok);
+	CHECK(ReadText(disk.output / "recordings" / "world.jsonl") == "{\"a\":1}\n{\"b\":2}\n{\"c\":3}\n");
+
+	// Separate from game data: neither directory reaches the other.
+	std::vector<std::uint8_t> bytes;
+	CHECK(disk.sandbox().Read("recordings/world.json", bytes) == Status::NotFound);
+	CHECK_FALSE(fs::exists(disk.game));
+#ifndef _WIN32
+	const auto others = fs::perms::group_all | fs::perms::others_all;
+	CHECK((fs::status(disk.output / "recordings" / "world.jsonl").permissions() & others) == fs::perms::none);
+	CHECK((fs::status(disk.output / "recordings").permissions() & others) == fs::perms::none);
+#endif
+	SECTION("CloseAll ends every stream") {
+		std::uint32_t a = 0, b = 0;
+		REQUIRE(disk.open(outputs, "a.txt", false, a) == OutputStatus::Ok);
+		REQUIRE(disk.open(outputs, "b.txt", false, b) == OutputStatus::Ok);
+		CHECK(outputs.CloseAll() == 2);
+		CHECK(outputs.OpenCount() == 0);
+		CHECK(Put(outputs, a, "x") == OutputStatus::NoStream);
+	}
+}
+
+TEST_CASE("GameOutputWrongTypes")
+{
+	const OutputDisk disk;
+	Outputs outputs;
+	std::uint32_t handle = 0;
+	fs::create_directories(disk.output / "folder.jsonl");
+	CHECK(disk.open(outputs, "folder.jsonl", true, handle) == OutputStatus::WrongType);
+	CHECK(disk.open(outputs, "folder.jsonl", false, handle) == OutputStatus::WrongType);
+	std::ofstream(disk.output / "file") << "x";
+	CHECK(disk.open(outputs, "file/x.jsonl", false, handle) == OutputStatus::WrongType);
+#ifndef _WIN32
+	REQUIRE(mkfifo((disk.output / "fifo.jsonl").c_str(), 0600) == 0);
+	CHECK(disk.open(outputs, "fifo.jsonl", true, handle) != OutputStatus::Ok);
+#endif
+	CHECK(outputs.OpenCount() == 0);
+}
+
+TEST_CASE("GameOutputLimits")
+{
+	const OutputDisk disk;
+	OutputLimits limits;
+	limits.maxFileBytes = 100;
+	limits.maxTotalBytes = 250;
+	limits.maxFiles = 4;
+	limits.maxFolders = 2;
+	limits.bytesPerSecond = 1000;
+	Outputs outputs(limits);
+	std::uint32_t handle = 0;
+
+	SECTION("a file's size: a write that passes it puts nothing down") {
+		REQUIRE(disk.open(outputs, "a.txt", false, handle) == OutputStatus::Ok);
+		CHECK(Put(outputs, handle, std::string(60, 'x')) == OutputStatus::Ok);
+		CHECK(Put(outputs, handle, std::string(41, 'x')) == OutputStatus::FileTooLarge);
+		CHECK(Put(outputs, handle, std::string(40, 'x')) == OutputStatus::Ok);
+		CHECK(fs::file_size(disk.output / "a.txt") == 100);
+		CHECK(outputs.Close(handle) == OutputStatus::Ok);
+		// Continuing a file counts what it already holds.
+		REQUIRE(disk.open(outputs, "a.txt", true, handle, 10000) == OutputStatus::Ok);
+		CHECK(Put(outputs, handle, "x", 10000) == OutputStatus::FileTooLarge);
+	}
+	SECTION("the directory's total, earlier runs included") {
+		fs::create_directories(disk.output);
+		std::ofstream(disk.output / "old.txt") << std::string(200, 'x');
+		REQUIRE(disk.open(outputs, "new.txt", false, handle) == OutputStatus::Ok);
+		CHECK(Put(outputs, handle, std::string(51, 'x')) == OutputStatus::TooManyBytes);
+		CHECK(Put(outputs, handle, std::string(50, 'x')) == OutputStatus::Ok);
+		std::uint32_t other = 0;
+		CHECK(disk.open(outputs, "other.txt", false, other) == OutputStatus::TooManyBytes);
+		CHECK_FALSE(fs::exists(disk.output / "other.txt"));
+		CHECK(outputs.Close(handle) == OutputStatus::Ok);
+		fs::remove(disk.output / "old.txt");
+		CHECK(disk.open(outputs, "other.txt", false, other, 10000) == OutputStatus::Ok);
+	}
+	SECTION("files and folders, none created when refused") {
+		for (int i = 0; i < 4; ++i) {
+			REQUIRE(disk.open(outputs, "f" + std::to_string(i) + ".txt", false, handle, 10000 * i) == OutputStatus::Ok);
+			CHECK(outputs.Close(handle) == OutputStatus::Ok);
+		}
+		CHECK(disk.open(outputs, "f4.txt", false, handle) == OutputStatus::TooManyFiles);
+		CHECK(disk.open(outputs, "f0.txt", true, handle) == OutputStatus::Ok);
+		CHECK(outputs.Close(handle) == OutputStatus::Ok);
+		fs::remove(disk.output / "f0.txt");
+		fs::remove(disk.output / "f1.txt");
+		CHECK(disk.open(outputs, "d1/d2/x.txt", false, handle, 100000) == OutputStatus::Ok);
+		CHECK(outputs.Close(handle) == OutputStatus::Ok);
+		CHECK(disk.open(outputs, "d3/x.txt", false, handle, 200000) == OutputStatus::TooManyFolders);
+		CHECK_FALSE(fs::exists(disk.output / "d3"));
+	}
+	SECTION("streams open at once") {
+		std::vector<std::uint32_t> open;
+		for (std::size_t i = 0; i < MAX_OPEN_OUTPUTS; ++i) {
+			std::uint32_t h = 0;
+			OutputLimits wide;
+			outputs.SetLimits(wide);
+			REQUIRE(disk.open(outputs, "s" + std::to_string(i) + ".txt", false, h, 10000 * i) == OutputStatus::Ok);
+			open.push_back(h);
+		}
+		CHECK(disk.open(outputs, "more.txt", false, handle, 1000000) == OutputStatus::TooManyOpen);
+		CHECK(outputs.Close(open.front()) == OutputStatus::Ok);
+		CHECK(disk.open(outputs, "more.txt", false, handle, 1000000) == OutputStatus::Ok);
+	}
+	SECTION("opens a second") {
+		OutputLimits wide;
+		outputs.SetLimits(wide);
+		for (std::uint32_t i = 0; i < OPEN_BURST; ++i) {
+			REQUIRE(disk.open(outputs, "o" + std::to_string(i) + ".txt", false, handle, 1000) == OutputStatus::Ok);
+			CHECK(outputs.Close(handle) == OutputStatus::Ok);
+		}
+		CHECK(disk.open(outputs, "late.txt", false, handle, 1000) == OutputStatus::RateLimited);
+		CHECK_FALSE(fs::exists(disk.output / "late.txt"));
+		CHECK(disk.open(outputs, "late.txt", false, handle, 1000 + 1000 / OPENS_PER_SECOND) == OutputStatus::Ok);
+	}
+	SECTION("bytes a second") {
+		limits.maxFileBytes = 1 << 20;
+		limits.maxTotalBytes = 1 << 20;
+		outputs.SetLimits(limits);
+		REQUIRE(disk.open(outputs, "fast.bin", false, handle, 0) == OutputStatus::Ok);
+		// A burst of four seconds' worth, then the rate.
+		CHECK(Put(outputs, handle, std::string(4000, 'x'), 0) == OutputStatus::Ok);
+		CHECK(Put(outputs, handle, "x", 0) == OutputStatus::RateLimited);
+		CHECK(Put(outputs, handle, std::string(500, 'x'), 500) == OutputStatus::Ok);
+		CHECK(Put(outputs, handle, "x", 500) == OutputStatus::RateLimited);
+		CHECK(fs::file_size(disk.output / "fast.bin") == 4500);
+	}
+}
+
+TEST_CASE("GameOutputRateBudget")
+{
+	RateBudget budget(10, 4);
+	CHECK(budget.Allow(10, 1000));
+	CHECK_FALSE(budget.Allow(1, 1000));
+	// Small steps still earn the full rate: 4 a second.
+	CHECK_FALSE(budget.Allow(1, 1100));
+	CHECK_FALSE(budget.Allow(1, 1200));
+	CHECK(budget.Allow(1, 1250));
+	CHECK(budget.Allow(3, 2000));
+	CHECK_FALSE(budget.Allow(1, 2000));
+	// A long rest fills it no further than the burst, and an amount over the burst never passes.
+	CHECK_FALSE(budget.Allow(11, 100000000));
+	CHECK(budget.Allow(10, 100000000));
+}
+
+TEST_CASE("GameOutputRefusesLinks")
+{
+	const OutputDisk disk;
+	Outputs outputs;
+	std::uint32_t handle = 0;
+	fs::create_directories(disk.output);
+	if (!MakeLink(disk.outside, disk.output / "probe", true))
+		SKIP("this system does not make symlinks");
+	fs::remove(disk.output / "probe");
+
+	SECTION("the root") {
+		fs::remove_all(disk.write / OUTPUT_ROOT);
+		REQUIRE(MakeLink(disk.outside, disk.write / OUTPUT_ROOT, true));
+		CHECK(disk.open(outputs, "x.txt", false, handle) == OutputStatus::Link);
+	}
+	SECTION("the id directory") {
+		fs::remove_all(disk.output);
+		REQUIRE(MakeLink(disk.outside, disk.output, true));
+		CHECK(disk.open(outputs, "x.txt", false, handle) == OutputStatus::Link);
+		CHECK(disk.open(outputs, "canary.txt", true, handle) == OutputStatus::Link);
+	}
+	SECTION("a folder on the way") {
+		REQUIRE(MakeLink(disk.outside, disk.output / "link", true));
+		CHECK(disk.open(outputs, "link/x.txt", false, handle) == OutputStatus::Link);
+		CHECK(disk.open(outputs, "link/canary.txt", true, handle) == OutputStatus::Link);
+	}
+	SECTION("the file, existing or dangling") {
+		REQUIRE(MakeLink(disk.outside / "canary.txt", disk.output / "file.txt", false));
+		CHECK(disk.open(outputs, "file.txt", true, handle) == OutputStatus::Link);
+		CHECK(disk.open(outputs, "file.txt", false, handle) == OutputStatus::Exists);
+		REQUIRE(MakeLink(disk.outside / "new.txt", disk.output / "dangling.txt", false));
+		CHECK(disk.open(outputs, "dangling.txt", true, handle) == OutputStatus::Link);
+		CHECK(disk.open(outputs, "dangling.txt", false, handle) == OutputStatus::Exists);
+	}
+	CHECK(outputs.OpenCount() == 0);
+	CHECK(ReadText(disk.outside / "canary.txt") == "canary");
+	CHECK_FALSE(fs::exists(disk.outside / "x.txt"));
 	CHECK_FALSE(fs::exists(disk.outside / "new.txt"));
 }

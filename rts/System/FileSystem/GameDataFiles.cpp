@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "GameDataFiles.h"
+#include "GameOutputStreams.h"
 
 #include <algorithm>
 #include <array>
@@ -25,6 +26,8 @@ namespace GameData {
 namespace {
 
 constexpr std::array<std::string_view, 8> EXTENSIONS = {"json", "toml", "txt", "csv", "dat", "bin", "png", "jpg"};
+/// Output files are data a person or a tool reads, never a loader: no image, no config, no code.
+constexpr std::array<std::string_view, 8> OUTPUT_EXTENSIONS = {"jsonl", "json", "txt", "csv", "tsv", "log", "dat", "bin"};
 /// Temporary files start with a dot, so no name a caller may give can reach one.
 constexpr std::string_view TEMPORARY_PREFIX = ".tmp-";
 
@@ -71,6 +74,40 @@ struct Usage {
 	std::size_t folders = 0;
 	std::uint64_t bytes = 0;
 };
+
+struct TreeLimits {
+	std::size_t files;
+	std::size_t folders;
+	std::uint64_t bytes;
+};
+constexpr TreeLimits GAME_DATA_LIMITS = {MAX_FILES, MAX_FOLDERS, MAX_TOTAL_BYTES};
+
+template <std::size_t N>
+bool IsValidFileNameIn(std::string_view name, const std::array<std::string_view, N>& extensions)
+{
+	if (name.size() > MAX_COMPONENT_LENGTH)
+		return false;
+	const std::size_t dot = name.find('.');
+	if (dot == std::string_view::npos || name.find('.', dot + 1) != std::string_view::npos)
+		return false;
+	const std::string_view extension = name.substr(dot + 1);
+	if (std::find(extensions.begin(), extensions.end(), extension) == extensions.end())
+		return false;
+	return IsValidStem(name.substr(0, dot));
+}
+
+template <typename IsValidLeaf>
+bool ParseFilePathWith(std::string_view path, std::vector<std::string>& components, IsValidLeaf isValidLeaf)
+{
+	components.clear();
+	if (path.empty() || !Split(path, components))
+		return false;
+	for (std::size_t i = 0; i + 1 < components.size(); ++i) {
+		if (!IsValidStem(components[i]))
+			return false;
+	}
+	return isValidLeaf(components.back());
+}
 
 #ifdef _WIN32
 
@@ -250,6 +287,45 @@ Status ReadWhole(const Dir& dir, std::string_view name, std::vector<std::uint8_t
 
 void FlushDir(const Dir&) {}
 
+OutputStatus OpenAppend(const Dir& dir, const std::string& name, bool append, void*& file, std::uint64_t& size)
+{
+	// FILE_APPEND_DATA alone: every write goes to the end. The reparse flag opens a link itself,
+	// which is then refused, never what it points to.
+	const HANDLE handle = CreateFileW(dir.Join(name).c_str(), FILE_APPEND_DATA, FILE_SHARE_READ, nullptr,
+		append ? OPEN_ALWAYS : CREATE_NEW, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OPEN_REPARSE_POINT, nullptr);
+	if (handle == INVALID_HANDLE_VALUE) {
+		if (GetLastError() == ERROR_FILE_EXISTS)
+			return OutputStatus::Exists;
+		return Leaf(dir, name) == LeafKind::Folder ? OutputStatus::WrongType : OutputStatus::IoError;
+	}
+	BY_HANDLE_FILE_INFORMATION info;
+	const auto refuse = [handle](OutputStatus status) { CloseHandle(handle); return status; };
+	if (!GetFileInformationByHandle(handle, &info))
+		return refuse(OutputStatus::IoError);
+	if (info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+		return refuse(OutputStatus::Link);
+	if ((info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) || GetFileType(handle) != FILE_TYPE_DISK)
+		return refuse(OutputStatus::WrongType);
+	file = handle;
+	size = (static_cast<std::uint64_t>(info.nFileSizeHigh) << 32) | info.nFileSizeLow;
+	return OutputStatus::Ok;
+}
+
+bool AppendAll(void* file, const std::uint8_t* data, std::size_t size)
+{
+	while (size > 0) {
+		const DWORD chunk = static_cast<DWORD>(std::min<std::size_t>(size, 1u << 30));
+		DWORD written = 0;
+		if (!WriteFile(static_cast<HANDLE>(file), data, chunk, &written, nullptr) || written == 0)
+			return false;
+		data += written;
+		size -= written;
+	}
+	return true;
+}
+
+void CloseOutputFile(void* file) { CloseHandle(static_cast<HANDLE>(file)); }
+
 #else
 
 // ---- POSIX: every step is relative to the directory before it, none follows a link.
@@ -413,12 +489,52 @@ Status ReadWhole(const Dir& dir, const std::string& name, std::vector<std::uint8
 
 void FlushDir(const Dir& dir) { fsync(dir.fd); }
 
+OutputStatus OpenAppend(const Dir& dir, const std::string& name, bool append, int& file, std::uint64_t& size)
+{
+	// O_NOFOLLOW refuses a link at the name; with O_EXCL a link is a taken name. O_NONBLOCK: a
+	// planted FIFO must not stall the game; it is refused below.
+	const int flags = O_WRONLY | O_APPEND | O_CREAT | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC | (append ? 0 : O_EXCL);
+	const int fd = openat(dir.fd, name.c_str(), flags, 0600);
+	if (fd < 0) {
+		switch (errno) {
+			case EEXIST: return OutputStatus::Exists;
+			case ELOOP:  return OutputStatus::Link;
+			case EISDIR: return OutputStatus::WrongType;
+			default:     return OutputStatus::IoError;
+		}
+	}
+	struct stat info;
+	if (fstat(fd, &info) != 0 || !S_ISREG(info.st_mode)) {
+		close(fd);
+		return S_ISREG(info.st_mode) ? OutputStatus::IoError : OutputStatus::WrongType;
+	}
+	file = fd;
+	size = static_cast<std::uint64_t>(info.st_size);
+	return OutputStatus::Ok;
+}
+
+bool AppendAll(int file, const std::uint8_t* data, std::size_t size)
+{
+	while (size > 0) {
+		const ssize_t written = write(file, data, size);
+		if (written < 0 && errno == EINTR)
+			continue;
+		if (written <= 0)
+			return false;
+		data += written;
+		size -= static_cast<std::size_t>(written);
+	}
+	return true;
+}
+
+void CloseOutputFile(int file) { close(file); }
+
 #endif
 
 /// Everything in one game's tree, as it is on disk: links and names outside the rules count too and
 /// are never followed. Stops descending when a limit is passed, so a planted tree costs no more
 /// than the limits. Temporary files a crash left are removed on the way.
-Status Scan(const Dir& dir, std::size_t depth, Usage& usage)
+Status Scan(const Dir& dir, std::size_t depth, Usage& usage, const TreeLimits& limits = GAME_DATA_LIMITS)
 {
 	std::vector<std::string> folders;
 	std::vector<std::string> stale;
@@ -429,19 +545,19 @@ Status Scan(const Dir& dir, std::size_t depth, Usage& usage)
 		}
 		if (kind == LeafKind::Folder) {
 			usage.folders++;
-			if (folders.size() <= MAX_FOLDERS)
+			if (folders.size() <= limits.folders)
 				folders.push_back(name);
 		} else {
 			usage.files++;
 			usage.bytes += size;
 		}
-		return usage.files <= MAX_FILES && usage.folders <= MAX_FOLDERS && usage.bytes <= MAX_TOTAL_BYTES;
+		return usage.files <= limits.files && usage.folders <= limits.folders && usage.bytes <= limits.bytes;
 	});
 	if (listed != Status::Ok)
 		return listed;
 	for (const std::string& name: stale)
 		RemoveFile(dir, name);
-	if (depth >= MAX_DEPTH + 1 || usage.files > MAX_FILES || usage.folders > MAX_FOLDERS)
+	if (depth >= MAX_DEPTH + 1 || usage.files > limits.files || usage.folders > limits.folders)
 		return Status::Ok;
 	for (const std::string& name: folders) {
 		Dir inside;
@@ -454,14 +570,14 @@ Status Scan(const Dir& dir, std::size_t depth, Usage& usage)
 #endif
 		if (OpenComponent(inside, name, false) != Status::Ok)
 			continue;
-		const Status status = Scan(inside, depth + 1, usage);
+		const Status status = Scan(inside, depth + 1, usage, limits);
 		if (status != Status::Ok)
 			return status;
 	}
 	return Status::Ok;
 }
 
-Status OpenGameDir(const std::string& writeDir, const std::string& id, bool create, Dir& dir)
+Status OpenGameDir(const std::string& writeDir, const std::string& id, bool create, Dir& dir, const char* root = ROOT)
 {
 	if (!IsValidId(id))
 		return Status::NoGameId;
@@ -476,7 +592,7 @@ Status OpenGameDir(const std::string& writeDir, const std::string& id, bool crea
 	}
 	Status status = OpenWriteDir(writeDir, dir);
 	if (status == Status::Ok)
-		status = OpenComponent(dir, ROOT, create);
+		status = OpenComponent(dir, root, create);
 	if (status == Status::Ok)
 		status = OpenComponent(dir, id, create);
 	return status;
@@ -519,29 +635,17 @@ const char* Describe(Status status)
 bool IsValidId(std::string_view id) { return IsValidStem(id); }
 bool IsValidFolderName(std::string_view name) { return IsValidStem(name); }
 
-bool IsValidFileName(std::string_view name)
-{
-	if (name.size() > MAX_COMPONENT_LENGTH)
-		return false;
-	const std::size_t dot = name.find('.');
-	if (dot == std::string_view::npos || name.find('.', dot + 1) != std::string_view::npos)
-		return false;
-	const std::string_view extension = name.substr(dot + 1);
-	if (std::find(EXTENSIONS.begin(), EXTENSIONS.end(), extension) == EXTENSIONS.end())
-		return false;
-	return IsValidStem(name.substr(0, dot));
-}
+bool IsValidFileName(std::string_view name) { return IsValidFileNameIn(name, EXTENSIONS); }
+bool IsValidOutputFileName(std::string_view name) { return IsValidFileNameIn(name, OUTPUT_EXTENSIONS); }
 
 bool ParseFilePath(std::string_view path, std::vector<std::string>& components)
 {
-	components.clear();
-	if (path.empty() || !Split(path, components))
-		return false;
-	for (std::size_t i = 0; i + 1 < components.size(); ++i) {
-		if (!IsValidFolderName(components[i]))
-			return false;
-	}
-	return IsValidFileName(components.back());
+	return ParseFilePathWith(path, components, [](std::string_view name) { return IsValidFileName(name); });
+}
+
+bool ParseOutputFilePath(std::string_view path, std::vector<std::string>& components)
+{
+	return ParseFilePathWith(path, components, [](std::string_view name) { return IsValidOutputFileName(name); });
 }
 
 bool ParseFolderPath(std::string_view path, std::vector<std::string>& components)
@@ -719,3 +823,244 @@ Status Sandbox::List(std::string_view folder, std::vector<Entry>& entries) const
 }
 
 } // namespace GameData
+
+
+namespace GameData {
+
+namespace {
+
+OutputStatus FromStatus(Status status)
+{
+	switch (status) {
+		case Status::Ok:          return OutputStatus::Ok;
+		case Status::InvalidPath: return OutputStatus::InvalidPath;
+		case Status::NoGameId:    return OutputStatus::NoGameId;
+		case Status::Link:        return OutputStatus::Link;
+		case Status::WrongType:   return OutputStatus::WrongType;
+		default:                  return OutputStatus::IoError;
+	}
+}
+
+} // namespace
+
+const char* Describe(OutputStatus status)
+{
+	switch (status) {
+		case OutputStatus::Ok:             return "ok";
+		case OutputStatus::InvalidPath:    return "the path breaks the game output rules";
+		case OutputStatus::NoGameId:       return "the archive declares no valid gameDataId";
+		case OutputStatus::Exists:         return "a new file was asked for and the name is taken";
+		case OutputStatus::NoStream:       return "no open output stream has this handle";
+		case OutputStatus::TooManyOpen:    return "too many output streams are open";
+		case OutputStatus::Link:           return "a symlink or reparse point is on the way";
+		case OutputStatus::WrongType:      return "not a regular file, or a file where a folder is needed";
+		case OutputStatus::FileTooLarge:   return "the file would pass its size limit";
+		case OutputStatus::TooManyFiles:   return "too many output files";
+		case OutputStatus::TooManyFolders: return "too many output folders";
+		case OutputStatus::TooManyBytes:   return "the game's output would pass its total limit";
+		case OutputStatus::RateLimited:    return "too much output in a short time";
+		case OutputStatus::IoError:        return "the disk refused";
+	}
+	return "unknown";
+}
+
+bool RateBudget::Allow(std::uint64_t amount, std::uint64_t now)
+{
+	if (!started) {
+		started = true;
+		lastRefill = now;
+	}
+	if (now > lastRefill && perSecond > 0) {
+		const std::uint64_t elapsed = now - lastRefill;
+		// A long rest fills the bucket; the product below cannot overflow under it.
+		if (elapsed >= 1000000 || (elapsed * perSecond) / 1000 >= burst) {
+			tokens = burst;
+			lastRefill = now;
+		} else {
+			const std::uint64_t gained = elapsed * perSecond / 1000;
+			if (gained > 0) {
+				tokens = std::min(burst, tokens + gained);
+				// Keep the remainder of a token, so many small calls still earn the full rate.
+				lastRefill += gained * 1000 / perSecond;
+			}
+		}
+	}
+	if (amount > tokens)
+		return false;
+	tokens -= amount;
+	return true;
+}
+
+Outputs::Outputs(OutputLimits limits)
+	: limits(limits)
+	, opens(OPEN_BURST, OPENS_PER_SECOND)
+	, bytes(limits.bytesPerSecond * 4, limits.bytesPerSecond)
+{}
+
+Outputs::~Outputs() { CloseAll(); }
+
+void Outputs::SetLimits(const OutputLimits& next)
+{
+	if (next.bytesPerSecond != limits.bytesPerSecond)
+		bytes = RateBudget(next.bytesPerSecond * 4, next.bytesPerSecond);
+	limits = next;
+}
+
+void Outputs::CloseStream(Stream& stream)
+{
+	CloseOutputFile(stream.file);
+}
+
+OutputStatus Outputs::Open(const std::string& base, const std::string& id, std::string_view path, bool append, std::uint64_t now, std::uint32_t& handle)
+{
+	handle = 0;
+	std::vector<std::string> components;
+	if (!ParseOutputFilePath(path, components))
+		return OutputStatus::InvalidPath;
+	if (!IsValidId(id))
+		return OutputStatus::NoGameId;
+	if (streams.size() >= MAX_OPEN_OUTPUTS)
+		return OutputStatus::TooManyOpen;
+	if (!opens.Allow(1, now))
+		return OutputStatus::RateLimited;
+
+	Dir dir;
+	Status status = OpenGameDir(base, id, true, dir, OUTPUT_ROOT);
+	if (status != Status::Ok)
+		return FromStatus(status);
+
+	// What is on disk, read from the directory only while none of this id's streams is open.
+	auto known = usage.find(id);
+	if (known == usage.end()) {
+		GameData::Usage scanned;
+		const TreeLimits bounds = {limits.maxFiles, limits.maxFolders, limits.maxTotalBytes};
+		if ((status = Scan(dir, 0, scanned, bounds)) != Status::Ok)
+			return FromStatus(status);
+		known = usage.emplace(id, Usage{scanned.bytes, scanned.files, scanned.folders}).first;
+	}
+	Usage& current = known->second;
+	const auto forget = [&]() {
+		if (std::none_of(streams.begin(), streams.end(), [&](const auto& open) { return open.second.id == id; }))
+			usage.erase(id);
+	};
+
+	// What the path needs that is not there yet, without creating anything.
+	std::size_t newFolders = 0;
+	bool fileExists = false;
+	{
+		Dir probe;
+		if ((status = OpenGameDir(base, id, false, probe, OUTPUT_ROOT)) != Status::Ok) {
+			forget();
+			return FromStatus(status);
+		}
+		std::size_t i = 0;
+		for (; i + 1 < components.size(); ++i) {
+			status = OpenComponent(probe, components[i], false);
+			if (status == Status::NotFound)
+				break;
+			if (status != Status::Ok) {
+				forget();
+				return FromStatus(status);
+			}
+		}
+		newFolders = components.size() - 1 - i;
+		if (newFolders == 0) {
+			switch (Leaf(probe, components.back())) {
+				case LeafKind::Missing: break;
+				case LeafKind::File: fileExists = true; break;
+				case LeafKind::Folder: forget(); return OutputStatus::WrongType;
+				case LeafKind::Link: forget(); return append ? OutputStatus::Link : OutputStatus::Exists;
+				case LeafKind::Error: forget(); return OutputStatus::IoError;
+			}
+		}
+	}
+	OutputStatus refusal = OutputStatus::Ok;
+	if (fileExists && !append)
+		refusal = OutputStatus::Exists;
+	else if (current.folders + newFolders > limits.maxFolders)
+		refusal = OutputStatus::TooManyFolders;
+	else if (!fileExists && current.files + 1 > limits.maxFiles)
+		refusal = OutputStatus::TooManyFiles;
+	else if (current.bytes >= limits.maxTotalBytes)
+		refusal = OutputStatus::TooManyBytes;
+	if (refusal != OutputStatus::Ok) {
+		forget();
+		return refusal;
+	}
+
+	if ((status = Walk(dir, components, 1, true)) != Status::Ok) {
+		forget();
+		return FromStatus(status);
+	}
+	Stream stream;
+	stream.id = id;
+	const OutputStatus opened = OpenAppend(dir, components.back(), append, stream.file, stream.size);
+	if (opened != OutputStatus::Ok) {
+		forget();
+		return opened;
+	}
+	FlushDir(dir);
+	current.folders += newFolders;
+	if (!fileExists)
+		current.files++;
+	handle = nextHandle++;
+	streams.emplace(handle, std::move(stream));
+	return OutputStatus::Ok;
+}
+
+OutputStatus Outputs::Write(std::uint32_t handle, const void* data, std::size_t size, std::uint64_t now)
+{
+	const auto found = streams.find(handle);
+	if (found == streams.end())
+		return OutputStatus::NoStream;
+	if (size == 0)
+		return OutputStatus::Ok;
+	if (data == nullptr)
+		return OutputStatus::IoError;
+	Stream& stream = found->second;
+	Usage& current = usage[stream.id];
+	if (size > limits.maxFileBytes || stream.size + size > limits.maxFileBytes)
+		return OutputStatus::FileTooLarge;
+	if (size > limits.maxTotalBytes || current.bytes + size > limits.maxTotalBytes)
+		return OutputStatus::TooManyBytes;
+	if (!bytes.Allow(size, now))
+		return OutputStatus::RateLimited;
+	const bool written = AppendAll(stream.file, static_cast<const std::uint8_t*>(data), size);
+	// A failed write may have put part of the data down: count it all, never less than the disk has.
+	stream.size += size;
+	current.bytes += size;
+	return written ? OutputStatus::Ok : OutputStatus::IoError;
+}
+
+OutputStatus Outputs::Close(std::uint32_t handle)
+{
+	const auto found = streams.find(handle);
+	if (found == streams.end())
+		return OutputStatus::NoStream;
+	const std::string id = found->second.id;
+	CloseStream(found->second);
+	streams.erase(found);
+	if (std::none_of(streams.begin(), streams.end(), [&](const auto& open) { return open.second.id == id; }))
+		usage.erase(id);
+	return OutputStatus::Ok;
+}
+
+std::size_t Outputs::CloseAll()
+{
+	const std::size_t closed = streams.size();
+	for (auto& [handle, stream]: streams)
+		CloseStream(stream);
+	streams.clear();
+	usage.clear();
+	return closed;
+}
+
+Outputs& ProcessOutputs()
+{
+	static Outputs outputs;
+	return outputs;
+}
+
+} // namespace GameData
+
+std::size_t CloseGameOutputStreams() { return GameData::ProcessOutputs().CloseAll(); }

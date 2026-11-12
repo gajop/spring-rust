@@ -236,6 +236,30 @@ struct GameDataDeleteResult { const Error* error; bool success; };
 struct GameDataListQuery { RECOIL_WASM_BYTES const char* path; uint32_t pathSize; };
 struct GameDataListResult { const Error* error; DirEntry* entries; uint32_t count; };
 
+// NEW (no Lua equivalent): append-only output files, such as recordings and
+// exports, in <write dir>/game-output/<id>/, the id the game data calls use.
+// A module writes them and nothing reads them back: there is no read, list or
+// delete call. The path rules are the game data rules with the extensions
+// jsonl json txt csv tsv log dat bin. Allowed during replay playback. The
+// file size, the directory's total bytes and files, and the write rate are
+// bounded by the player's settings (GameOutputMaxFileMB, GameOutputMaxTotalMB,
+// GameOutputMaxFiles, GameOutputMBPerSecond); open streams and opens a second
+// are bounded too. Not for synced code (UNSYNCED_ONLY in WasmAnnotations.def).
+// Rules and codes: rts/wasm/docs/game_output_files.md.
+//
+// `append` false asks for a new file and refuses a taken name with
+// AlreadyExists; true continues an existing file or makes it. A handle is
+// never 0 and never reused; streams still open when the game ends are closed.
+struct GameOutputOpenQuery { RECOIL_WASM_BYTES const char* path; uint32_t pathSize; bool append; };
+struct GameOutputOpenResult { const Error* error; uint32_t handle; };
+
+// All of `data` goes to the end of the file, or nothing when a bound refuses it.
+struct GameOutputWriteQuery { uint32_t handle; RECOIL_WASM_BYTES const uint8_t* data; uint32_t size; };
+struct GameOutputWriteResult { const Error* error; bool success; };
+
+struct GameOutputCloseQuery { uint32_t handle; };
+struct GameOutputCloseResult { const Error* error; bool success; };
+
 // API structure
 struct VFSApi {
 	void (*FileExists)(const FileExistsQuery* query, FileExistsResult* result);
@@ -298,6 +322,10 @@ struct VFSApi {
 	void (*GameDataRead)(const GameDataReadQuery* query, GameDataReadResult* result);
 	void (*GameDataDelete)(const GameDataDeleteQuery* query, GameDataDeleteResult* result);
 	void (*GameDataList)(const GameDataListQuery* query, GameDataListResult* result);
+	// NEW (no Lua equivalent) — see GameOutputOpenQuery above.
+	void (*GameOutputOpen)(const GameOutputOpenQuery* query, GameOutputOpenResult* result);
+	void (*GameOutputWrite)(const GameOutputWriteQuery* query, GameOutputWriteResult* result);
+	void (*GameOutputClose)(const GameOutputCloseQuery* query, GameOutputCloseResult* result);
 };
 
 extern const VFSApi VFS_API;

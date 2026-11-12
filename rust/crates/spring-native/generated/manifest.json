@@ -280,8 +280,8 @@
     },
     {
       "name": "vfs_generated.rs",
-      "sha256": "a2906d628ea9a98448f22679466d6815e2ca9e31ea849da54280ce1935f3b986",
-      "bytes": 56650
+      "sha256": "4d3eb1c9c63b6e2cc0aa2a159cb08154abb26b415d335c479e43bff95b666052",
+      "bytes": 58680
     },
     {
       "name": "weapon_defs_generated.rs",

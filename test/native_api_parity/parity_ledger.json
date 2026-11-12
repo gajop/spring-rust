@@ -24803,6 +24803,66 @@
       "required_returns_mapped": false,
       "runs": []
     },
+    "vfs.GameOutputOpen": {
+      "level": "exempt",
+      "reason": "No Lua equivalent: append-only output files in one game's directory (rts/wasm/docs/game_output_files.md). Its effect is files on disk, covered by test/engine/System/FileSystem/TestGameDataFiles.cpp (GameOutput cases); native and Wasm share the one host implementation, so there is no Lua state to compare.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu",
+        "intro"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
+    "vfs.GameOutputWrite": {
+      "level": "exempt",
+      "reason": "No Lua equivalent: append-only output files in one game's directory (rts/wasm/docs/game_output_files.md). Its effect is files on disk, covered by test/engine/System/FileSystem/TestGameDataFiles.cpp (GameOutput cases); native and Wasm share the one host implementation, so there is no Lua state to compare.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu",
+        "intro"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
+    "vfs.GameOutputClose": {
+      "level": "exempt",
+      "reason": "No Lua equivalent: append-only output files in one game's directory (rts/wasm/docs/game_output_files.md). Its effect is files on disk, covered by test/engine/System/FileSystem/TestGameDataFiles.cpp (GameOutput cases); native and Wasm share the one host implementation, so there is no Lua state to compare.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu",
+        "intro"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
     "vfs.PackF32": {
       "level": "untested",
       "grandfathered": true,
@@ -30501,6 +30561,6 @@
   "counts": {
     "untested": 1412,
     "exercised": 14,
-    "exempt": 11
+    "exempt": 14
   }
 }

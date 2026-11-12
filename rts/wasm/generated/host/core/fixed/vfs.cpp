@@ -59,6 +59,32 @@ wasm_trap_t* Core_vfs_abort_download(void* environment, wasmtime_caller_t* calle
     return nullptr;
 }
 
+wasm_trap_t* Core_vfs_game_output_close(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->vfs == nullptr ||
+        state->native->vfs->GameOutputClose == nullptr)
+        return Trap("GameOutputClose generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("GameOutputClose generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("GameOutputClose generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    GameOutputCloseQuery query{};
+    query.handle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.handle)>>>(slots[0].i32);
+    GameOutputCloseResult result{};
+    state->native->vfs->GameOutputClose(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.success ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_vfs_get_map_square_texture_info(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -150,6 +176,13 @@ bool RegisterGeneratedImports_vfs(wasmtime_linker_t* linker, HostState* state, s
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:vfs", "game-output-close",
+                MakeFuncType(params, 1, results, 1), Core_vfs_game_output_close, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGenerated(linker, "spring:vfs", "get-map-square-texture-info",
@@ -167,6 +200,6 @@ bool RegisterGeneratedImports_vfs(wasmtime_linker_t* linker, HostState* state, s
     return true;
 }
 
-static_assert(3 >= 0, "generated Core Wasm callback count");
+static_assert(4 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

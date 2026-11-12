@@ -5211,6 +5211,16 @@ pub mod borrowed {
             }
             #[link(wasm_import_module = "spring:vfs")]
             unsafe extern "C" {
+                #[link_name = "game-output-open"]
+                pub safe fn game_output_open(arg0: i32, arg1: i32) -> i64;
+            }
+            #[link(wasm_import_module = "spring:vfs")]
+            unsafe extern "C" {
+                #[link_name = "game-output-write"]
+                pub safe fn game_output_write(arg0: i32, arg1: i32) -> i64;
+            }
+            #[link(wasm_import_module = "spring:vfs")]
+            unsafe extern "C" {
                 #[link_name = "get-file-size"]
                 pub safe fn get_file_size(arg0: i32) -> i64;
             }
@@ -5394,6 +5404,50 @@ pub mod borrowed {
             #[cfg(not(target_arch = "wasm32"))]
             {
                 let _ = (path, data);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn game_output_open(path: &[u8], append: bool) -> Result<u32> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut descriptor = [0u8; 8];
+            let mut cursor = 0usize;
+            let (core_ptr, core_len) = crate::wasm_slice_parts(path)?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::game_output_open(if append { 1 } else { 0 }, descriptor_ptr) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok(packed as u32)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (path, append);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn game_output_write(handle: u32, data: &[u8]) -> Result<bool> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut descriptor = [0u8; 8];
+            let mut cursor = 0usize;
+            let (core_ptr, core_len) = crate::wasm_slice_parts(data)?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::game_output_write(handle as i32, descriptor_ptr) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok((packed as u32) != 0)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (handle, data);
                 Err(unreachable!())
             }
         }
@@ -6331,5 +6385,5 @@ pub mod borrowed {
     }
 
 #[doc(hidden)]
-    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 218;
+    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 220;
 }

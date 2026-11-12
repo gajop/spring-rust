@@ -130,6 +130,7 @@
 #include "System/SpringExitCode.h"
 #include "System/SpringMath.h"
 #include "System/FileSystem/FileSystem.h"
+#include "System/FileSystem/GameOutputStreams.h"
 #include "System/FileSystem/VFSModes.h"
 #include "System/LoadSave/LoadSaveHandler.h"
 #include "System/LoadSave/DemoRecorder.h"
@@ -1053,6 +1054,9 @@ void CGame::KillLua(bool dtor)
 	// before their host services disappear, rather than in member destruction.
 	if (nativeInterfaceSystem != nullptr)
 		nativeInterfaceSystem->ShutdownModules();
+	// Output streams a module left open end with the game; what was written is on disk already.
+	if (const std::size_t closed = CloseGameOutputStreams(); closed > 0)
+		LOG("[Game::%s] closed %zu output stream(s) left open", __func__, closed);
 
 	// kill LuaUI here, various handler pointers are invalid in ~GuiHandler
 	LOG("[Game::%s][1] dtor=%d luaUI=%p", __func__, dtor, luaUI);

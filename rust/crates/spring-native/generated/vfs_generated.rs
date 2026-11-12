@@ -1307,4 +1307,54 @@ impl<'a> Vfs<'a> {
         }
     }
 
+    pub fn game_output_open(&self, path: &str, path_size: u32, append: bool) -> Result<u32, Error> {
+        unsafe {
+            let path_cstr = std::ffi::CString::new(path).map_err(|_| Error::invalid_argument("path"))?;
+            let query = sys::GameOutputOpenQuery {
+                path: path_cstr.as_ptr(),
+                pathSize: path_size,
+                append,
+            };
+            let mut result = MaybeUninit::<sys::GameOutputOpenResult>::zeroed();
+            let func = self.api.GameOutputOpen.expect("GameOutputOpen function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.handle
+            })
+        }
+    }
+
+    pub fn game_output_write(&self, handle: u32, data: &[u8]) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::GameOutputWriteQuery {
+                handle,
+                data: data.as_ptr(),
+                size: data.len() as u32,
+            };
+            let mut result = MaybeUninit::<sys::GameOutputWriteResult>::zeroed();
+            let func = self.api.GameOutputWrite.expect("GameOutputWrite function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
+    pub fn game_output_close(&self, handle: u32) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::GameOutputCloseQuery {
+                handle,
+            };
+            let mut result = MaybeUninit::<sys::GameOutputCloseResult>::zeroed();
+            let func = self.api.GameOutputClose.expect("GameOutputClose function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
 }

@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <map>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -85,6 +86,116 @@ namespace GameData {
 		std::string name;
 		bool isDirectory;
 	};
+
+	// ---- Output files: append-only streams a module writes and never reads back, such as recordings
+	// and exports, in `<write dir>/game-output/<id>/`. The same path rules as game data, apart from
+	// the extension list; no read, list or delete call exists. See rts/wasm/docs/game_output_files.md.
+
+	inline constexpr const char* OUTPUT_ROOT = "game-output";
+	/// Streams open at once, for all modules together.
+	inline constexpr std::size_t MAX_OPEN_OUTPUTS = 16;
+	/// Opens: a burst, then this many a second.
+	inline constexpr std::uint32_t OPEN_BURST = 16;
+	inline constexpr std::uint32_t OPENS_PER_SECOND = 2;
+
+	/// The bounds the host sets from the player's settings (VFS.cpp); a module cannot change them.
+	struct OutputLimits {
+		std::uint64_t maxFileBytes = 1024ull * 1024 * 1024;
+		/// Everything in the game's output directory, from earlier runs too.
+		std::uint64_t maxTotalBytes = 8ull * 1024 * 1024 * 1024;
+		std::size_t maxFiles = 4096;
+		std::size_t maxFolders = 64;
+		/// Bytes written: a burst of four seconds' worth, then this many a second.
+		std::uint64_t bytesPerSecond = 32ull * 1024 * 1024;
+	};
+
+	enum class OutputStatus {
+		Ok,
+		InvalidPath,   ///< the path's text breaks a rule; nothing on disk was looked at
+		NoGameId,
+		Exists,        ///< a new file was asked for and the name is taken
+		NoStream,      ///< no open stream has this handle
+		TooManyOpen,
+		Link,
+		WrongType,
+		FileTooLarge,
+		TooManyFiles,
+		TooManyFolders,
+		TooManyBytes,
+		RateLimited,
+		IoError,
+	};
+	const char* Describe(OutputStatus status);
+
+	/// A file name with an output extension: `jsonl json txt csv tsv log dat bin`.
+	bool IsValidOutputFileName(std::string_view name);
+	bool ParseOutputFilePath(std::string_view path, std::vector<std::string>& components);
+
+	/// A token bucket: `burst` at most, `perSecond` back each second.
+	class RateBudget {
+	public:
+		RateBudget(std::uint64_t burst, std::uint64_t perSecond) : burst(burst), perSecond(perSecond), tokens(burst) {}
+		bool Allow(std::uint64_t amount, std::uint64_t nowMilliseconds);
+	private:
+		std::uint64_t burst;
+		std::uint64_t perSecond;
+		std::uint64_t tokens;
+		std::uint64_t lastRefill = 0;
+		bool started = false;
+	};
+
+	/// The open output streams of one engine process. Writes are allowed during replay playback:
+	/// they change nothing a game reads. Streams still open when the game ends are closed by
+	/// `CloseAll`.
+	class Outputs {
+	public:
+		explicit Outputs(OutputLimits limits = {});
+		~Outputs();
+		Outputs(const Outputs&) = delete;
+		Outputs& operator=(const Outputs&) = delete;
+
+		/// Opens `path` under `<base>/game-output/<id>/` for appending, making its folders. `append`
+		/// false asks for a new file and refuses a name already taken (`Exists`); true continues an
+		/// existing file or makes it. A handle is never 0 and never reused.
+		OutputStatus Open(const std::string& base, const std::string& id, std::string_view path, bool append, std::uint64_t nowMilliseconds, std::uint32_t& handle);
+		/// Appends all of `data`, or nothing when a bound refuses it.
+		OutputStatus Write(std::uint32_t handle, const void* data, std::size_t size, std::uint64_t nowMilliseconds);
+		OutputStatus Close(std::uint32_t handle);
+		/// Closes every stream; returns how many were open.
+		std::size_t CloseAll();
+		std::size_t OpenCount() const { return streams.size(); }
+		/// New bounds apply to the next call; what is already written stays.
+		void SetLimits(const OutputLimits& next);
+
+	private:
+		struct Stream {
+			std::string id;
+			std::uint64_t size = 0;
+#ifdef _WIN32
+			void* file = nullptr;
+#else
+			int file = -1;
+#endif
+		};
+		struct Usage {
+			std::uint64_t bytes = 0;
+			std::size_t files = 0;
+			std::size_t folders = 0;
+		};
+		void CloseStream(Stream& stream);
+
+		OutputLimits limits;
+		RateBudget opens;
+		RateBudget bytes;
+		std::map<std::uint32_t, Stream> streams;
+		/// Per id while any of its streams is open: what is on disk, kept current by writes, so an
+		/// open file's size is never read back from the directory.
+		std::map<std::string, Usage> usage;
+		std::uint32_t nextHandle = 1;
+	};
+
+	/// The engine's one set of output streams.
+	Outputs& ProcessOutputs();
 
 	class Sandbox {
 	public:

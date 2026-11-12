@@ -15538,6 +15538,32 @@ pub mod vfs {
         pub success: bool,
     }
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GameOutputCloseQuery {
+        pub handle: u32,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GameOutputCloseResult {
+        pub success: bool,
+    }
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GameOutputOpenQuery {
+        pub path: Vec<u8>,
+        pub append: bool,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GameOutputOpenResult {
+        pub handle: u32,
+    }
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GameOutputWriteQuery {
+        pub handle: u32,
+        pub data: Vec<u8>,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GameOutputWriteResult {
+        pub success: bool,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
     pub struct GetAllArchivesQuery {
         pub unused: u8,
     }

@@ -20749,6 +20749,11 @@ pub mod vfs {
         }
         #[link(wasm_import_module = "spring:vfs")]
         unsafe extern "C" {
+            #[link_name = "game-output-close"]
+            pub safe fn core_game_output_close(p0: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:vfs")]
+        unsafe extern "C" {
             #[link_name = "get-archive-checksum"]
             pub safe fn core_get_archive_checksum(p0: i32, p1: i32) -> i32;
         }
@@ -20902,6 +20907,28 @@ pub mod vfs {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (id,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn game_output_close(handle: u32) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_game_output_close(handle as i32) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (handle,);
             Err(unreachable!())
         }
     }
