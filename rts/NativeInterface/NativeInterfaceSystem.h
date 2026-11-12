@@ -52,6 +52,8 @@ public:
 	// Special events (called from Lua)
 	void HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data);
 	void HandleLuaCall(const char* msg, size_t msgLength, bool synced);
+	/// A chat command or action nothing in the engine handled; true if a module took it.
+	bool GotChatMsg(const std::string& msg, int playerID);
 	// One-way synced-to-unsynced Wasm message delivery. Unsynced receiver
 	// failures are reported to the caller for logging but never feed back into
 	// the simulation result.

@@ -406,6 +406,7 @@ void NativeInterfaceEventClient::LoadSymbols() {
 	LOAD_SYMBOL(CameraPositionChanged);
 	LOAD_SYMBOL(CommandNotify);
 	LOAD_SYMBOL(AddConsoleLine);
+	LOAD_SYMBOL(GotChatMsg);
 	LOAD_SYMBOL(GroupChanged);
 	LOAD_SYMBOL(MiniMapRotationChanged);
 	LOAD_SYMBOL(MiniMapStateChanged);
@@ -2516,6 +2517,18 @@ bool NativeInterfaceEventClient::AddConsoleLine(const std::string& msg, const st
 	if (m_AddConsoleLineFuncPtr) {
 		BoolCallinResult result = {.value = false};
 		INVOKE_NATIVE(m_AddConsoleLineFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
+		return result.value || (hasWasmValue && wasmValue);
+	}
+	return hasWasmValue && wasmValue;
+}
+
+bool NativeInterfaceEventClient::GotChatMsg(const std::string& msg, int playerID) {
+	GotChatMsgQuery query = {.message = msg.c_str(), .playerID = playerID};
+	bool wasmValue = false;
+	const bool hasWasmValue = DispatchWasmBoolCallin(CoreCallinOf("GotChatMsg"), &query, false, wasmValue);
+	if (m_GotChatMsgFuncPtr) {
+		BoolCallinResult result = {.value = false};
+		INVOKE_NATIVE(m_GotChatMsgFuncPtr, m_nativeInterface, m_moduleData, &query, &result);
 		return result.value || (hasWasmValue && wasmValue);
 	}
 	return hasWasmValue && wasmValue;

@@ -118,7 +118,8 @@ public:
 private:
 	void GiveCommand(const Command& cmd, bool fromUser = true);
 	void GiveCommandsNow();
-	bool LayoutCustomIcons(bool useSelectionPage);
+	/// askLuaUI false: the empty layout of a disabled engine command panel
+	bool LayoutCustomIcons(bool useSelectionPage, bool askLuaUI);
 	void ResizeIconArray(size_t size);
 	void AppendPrevAndNext(std::vector<SCommandDescription>& cmds);
 	void ConvertCommands(std::vector<SCommandDescription>& cmds);

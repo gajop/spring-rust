@@ -951,6 +951,13 @@ struct AddConsoleLineQuery {
 	int32_t level;
 };
 
+/// A chat command or bound action the engine did not handle itself (the rawline, without the leading
+/// slash of a typed command), offered as LuaUI's GotChatMsg is. Return true to mark it handled.
+struct GotChatMsgQuery {
+	const char* message;
+	int32_t playerID;
+};
+
 struct GroupChangedQuery {
 	int32_t groupID;
 };

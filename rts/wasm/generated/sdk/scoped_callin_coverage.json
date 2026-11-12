@@ -95,6 +95,7 @@
     "GameStart",
     "GenerateDefs",
     "GetTooltip",
+    "GotChatMsg",
     "GroupChanged",
     "HandleLuaCall",
     "HandleLuaMsg",

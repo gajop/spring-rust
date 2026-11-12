@@ -748,6 +748,15 @@
     "aggregation": "first-non-empty"
   },
   {
+    "name": "GotChatMsg",
+    "query": "GotChatMsgQuery",
+    "result": "BoolCallinResult",
+    "environments": [
+      "ui"
+    ],
+    "aggregation": "or-true"
+  },
+  {
     "name": "GroupChanged",
     "query": "GroupChangedQuery",
     "result": "BoolCallinResult",

@@ -536,6 +536,12 @@
         pub struct GameStartResult {
         }
 
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GotChatMsgQuery {
+            pub message: String,
+            pub player_id: i32,
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GroupChangedQuery {
             pub group_id: i32,

@@ -192,6 +192,7 @@ namespace fptr {
 	using ActiveCommandChangedFuncPtr = void(*)(NativeInterface*, void*, const ActiveCommandChangedQuery*, ActiveCommandChangedResult*);
 	using CommandNotifyFuncPtr = void(*)(NativeInterface*, void*, const CommandNotifyQuery*, BoolCallinResult*);
 	using AddConsoleLineFuncPtr = void(*)(NativeInterface*, void*, const AddConsoleLineQuery*, BoolCallinResult*);
+	using GotChatMsgFuncPtr = void(*)(NativeInterface*, void*, const GotChatMsgQuery*, BoolCallinResult*);
 	using GroupChangedFuncPtr = void(*)(NativeInterface*, void*, const GroupChangedQuery*, BoolCallinResult*);
 	using DefaultCommandFuncPtr = void(*)(NativeInterface*, void*, const DefaultCommandQuery*, DefaultCommandResult*);
 	using MapDrawCmdFuncPtr = void(*)(NativeInterface*, void*, const MapDrawCmdQuery*, BoolCallinResult*);
@@ -433,6 +434,7 @@ public:
 	// Special events (not part of CEventClient)
 	void HandleLuaMsg(int playerID, int script, int mode, const std::vector<std::uint8_t>& data);
 	void HandleLuaCall(const char* msg, size_t msgLength, bool synced);
+	bool GotChatMsg(const std::string& msg, int playerID);
 
 	// NativeUnitScriptBackend implementation.  These methods are intentionally
 	// independent of the ordinary event callback fan-out: a CUS instance is
@@ -594,6 +596,7 @@ private:
 	fptr::ActiveCommandChangedFuncPtr m_ActiveCommandChangedFuncPtr = nullptr;
 	fptr::CommandNotifyFuncPtr m_CommandNotifyFuncPtr = nullptr;
 	fptr::AddConsoleLineFuncPtr m_AddConsoleLineFuncPtr = nullptr;
+	fptr::GotChatMsgFuncPtr m_GotChatMsgFuncPtr = nullptr;
 	fptr::GroupChangedFuncPtr m_GroupChangedFuncPtr = nullptr;
 	fptr::MapDrawCmdFuncPtr m_MapDrawCmdFuncPtr = nullptr;
 	fptr::ArchiveCallinFuncPtr m_LoadFuncPtr = nullptr;

@@ -157,6 +157,7 @@ void CModInfo::ResetState()
 		allowTake = true;
 
 		allowEnginePlayerlist = true;
+		allowEngineCommandPanel = true;
 
 		useStartPositionSelecter = true;
 	}
@@ -236,6 +237,7 @@ void CModInfo::Init(const std::string& modFileName)
 		nativeExcessSharing = system.GetBool("nativeExcessSharing", nativeExcessSharing);
 		allowTake = system.GetBool("allowTake", allowTake);
 		allowEnginePlayerlist = system.GetBool("allowEnginePlayerlist", allowEnginePlayerlist);
+		allowEngineCommandPanel = system.GetBool("allowEngineCommandPanel", allowEngineCommandPanel);
 
 		useStartPositionSelecter = system.GetBool("useStartPositionSelecter", useStartPositionSelecter);
 	}

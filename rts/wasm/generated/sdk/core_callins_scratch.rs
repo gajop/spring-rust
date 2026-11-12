@@ -362,6 +362,23 @@ macro_rules! export_game_setup {
     };
 }
 
+/// Export `GotChatMsg` through the shared-scratch Core ABI.
+#[macro_export]
+macro_rules! export_got_chat_msg {
+    ($handler:path) => {
+        #[cfg(target_arch = "wasm32")]
+        #[unsafe(export_name = "spring:callin/got-chat-msg")]
+        pub extern "C" fn __spring_wasm_core_callin_got_chat_msg(used_bytes: i32) -> i32 {
+            let bytes = match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let mut reader = $crate::generated::__core_callin_scratch_wire::Reader::new(bytes);
+            let message = match reader.bytes() { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            let player_id = match reader.i32() { Some(value) => value, None => core::arch::wasm32::unreachable() };
+            if !reader.finish() { core::arch::wasm32::unreachable(); }
+            if $handler(message, player_id) { 1 } else { 0 }
+        }
+    };
+}
+
 /// Export `HandleLuaCall` through the shared-scratch Core ABI.
 #[macro_export]
 macro_rules! export_handle_lua_call {
@@ -640,4 +657,4 @@ macro_rules! export_unit_command {
 
 
 #[doc(hidden)]
-pub const __GENERATED_SCRATCH_CALLIN_COUNT: usize = 23;
+pub const __GENERATED_SCRATCH_CALLIN_COUNT: usize = 24;

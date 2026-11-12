@@ -83,6 +83,7 @@ inline constexpr CallinDescriptor kCallins[] = {
 	{"GameSetup", "GameSetup", "GameSetupQuery", "GameSetupResult", "ignore", 26u},
 	{"GameStart", "GameStart", "GameStartQuery", "GameStartResult", "ignore", 31u},
 	{"GenerateDefs", "GenerateDefs", "SimpleCallinQuery", "StringCallinResult", "first-non-empty", 1u},
+	{"GotChatMsg", "GotChatMsg", "GotChatMsgQuery", "BoolCallinResult", "or-true", 16u},
 	{"GroupChanged", "GroupChanged", "GroupChangedQuery", "BoolCallinResult", "or-true", 31u},
 	{"HandleLuaCall", "HandleLuaCall", "HandleLuaCallQuery", "HandleLuaCallResult", "ignore", 15u},
 	{"HandleLuaMsg", "HandleLuaMsg", "HandleLuaMsgQuery", "HandleLuaMsgResult", "ignore", 15u},

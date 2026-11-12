@@ -202,6 +202,8 @@ fn handler_generate_defs(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spri
 spring_sdk::export_generate_defs!(MODULE_RULES_SYNCED,handler_generate_defs,4096);
 fn handler_get_tooltip(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::Menu>,_arg0:i32,_arg1:i32)->spring_sdk::Result<String> {record_call(module);Ok(String::from("tooltip 日本語"))}
 spring_sdk::export_get_tooltip!(MODULE,handler_get_tooltip,4096);
+fn handler_got_chat_msg(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::Ui>,_arg0:&str,_arg1:i32)->spring_sdk::Result<bool> {record_call(module);Ok(Default::default())}
+spring_sdk::export_got_chat_msg!(MODULE_UI,handler_got_chat_msg);
 fn handler_group_changed(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:i32)->spring_sdk::Result<bool> {record_call(module);Ok(Default::default())}
 spring_sdk::export_group_changed!(MODULE_RULES_SYNCED,handler_group_changed);
 fn handler_handle_lua_call(module:&Fixture,_spring:&mut spring_sdk::Spring<'_,spring_sdk::RulesSynced>,_arg0:&[u8])->spring_sdk::Result<()> {record_call(module);Ok(())}

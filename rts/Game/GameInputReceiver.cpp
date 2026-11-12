@@ -183,5 +183,11 @@ bool CGameInputReceiver::TryOnPressActions(bool isRepeat)
 		}
 	}
 
+	if (NativeInterfaceSystem::s_instance != nullptr) {
+		for (const Action& action: lastActionList) {
+			handled |= NativeInterfaceSystem::s_instance->GotChatMsg(action.rawline, 0);
+		}
+	}
+
 	return handled;
 }

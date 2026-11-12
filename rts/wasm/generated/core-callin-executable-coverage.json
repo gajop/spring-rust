@@ -1,6 +1,6 @@
 {
-  "total": 132,
-  "executable_total": 132,
+  "total": 133,
+  "executable_total": 133,
   "verified_total": 0,
   "by_class": {
     "generated-direct": 27,
@@ -9,7 +9,7 @@
     "generated-fixed-flattened": 5,
     "generated-fixed-flattened-ignored-result": 4,
     "generated-packed-result": 3,
-    "generated-shared-scratch": 10,
+    "generated-shared-scratch": 11,
     "generated-shared-scratch-ignored-result": 13,
     "specialized": 8
   },
@@ -918,6 +918,18 @@
         "rules-synced"
       ],
       "class": "generated-first-non-empty-string",
+      "verified": false,
+      "reason": null
+    },
+    {
+      "name": "GotChatMsg",
+      "query": "GotChatMsgQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "ui"
+      ],
+      "class": "generated-shared-scratch",
       "verified": false,
       "reason": null
     },

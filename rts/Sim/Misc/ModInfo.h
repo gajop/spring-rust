@@ -281,6 +281,11 @@ public:
 	bool nativeExcessSharing;
 	bool allowTake;
 	bool allowEnginePlayerlist;
+	/// Whether the engine lays out and draws its own command panel (modrules
+	/// system.allowEngineCommandPanel, default true). False: every available command stays
+	/// usable through actions, hotkeys and the API, but the panel places no buttons, as when a
+	/// LuaUI LayoutButtons returns an empty layout. For games that draw their own interface.
+	bool allowEngineCommandPanel;
 
 	// how often to report wind speed/direction to wind gens
 	int windChangeReportPeriod;

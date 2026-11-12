@@ -774,6 +774,22 @@ pub mod callins {
             .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
         Ok(GameStartQuery {})
     }
+    pub struct GotChatMsgQueryInput {
+        pub message: crate::native::InputString,
+        pub player_id: i32,
+    }
+    /// # Safety
+    /// Host query and pointed-to inputs must be valid while decoding.
+    pub unsafe fn decode_got_chat_msg_query(
+        pointer: *const sys::GotChatMsgQuery,
+    ) -> Result<GotChatMsgQueryInput> {
+        let value = unsafe { pointer.as_ref() }
+            .ok_or(ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        Ok(GotChatMsgQueryInput {
+            message: unsafe { read_callin_string(value.message, None)? },
+            player_id: (value.playerID) as _,
+        })
+    }
     /// # Safety
     /// Host query and pointed-to inputs must be valid while decoding.
     pub unsafe fn decode_group_changed_query(

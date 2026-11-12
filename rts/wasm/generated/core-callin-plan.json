@@ -1273,6 +1273,23 @@
       ]
     },
     {
+      "name": "GotChatMsg",
+      "query": "GotChatMsgQuery",
+      "result": "BoolCallinResult",
+      "aggregation": "or-true",
+      "environments": [
+        "ui"
+      ],
+      "query_strategy": "variable-scratch",
+      "result_strategy": "direct",
+      "fixed_result_bytes": 4,
+      "scratch_query_eligible": true,
+      "packed_result_values": 1,
+      "notes": [
+        "variable payload should use one cached guest callin scratch region"
+      ]
+    },
+    {
       "name": "GroupChanged",
       "query": "GroupChangedQuery",
       "result": "BoolCallinResult",
@@ -2826,10 +2843,10 @@
     "direct": 93,
     "empty": 3,
     "fixed-wire": 11,
-    "variable-scratch": 25
+    "variable-scratch": 26
   },
   "by_result_strategy": {
-    "direct": 44,
+    "direct": 45,
     "empty": 80,
     "fixed-wire": 5,
     "manual": 3

@@ -11,7 +11,7 @@ class WasmExecutionBudget;
 
 namespace recoil::wasm::core::generated {
 
-inline constexpr std::size_t kGeneratedScratchCallinSlotCount = 186u;
+inline constexpr std::size_t kGeneratedScratchCallinSlotCount = 187u;
 
 class GeneratedScratchCallinBindings {
 public:

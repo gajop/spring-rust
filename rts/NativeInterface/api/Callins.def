@@ -223,3 +223,5 @@ CALLIN(LoadProgress, LoadProgressQuery, LoadProgressResult, intro, ignore, none)
 # game loading.  The module returns a Lua table literal string that replaces
 # gamedata/defs.lua execution.
 CALLIN(GenerateDefs, SimpleCallinQuery, StringCallinResult, rules-synced, first-non-empty, none)
+# A chat command or bound action the engine did not handle, as LuaUI's GotChatMsg receives it.
+CALLIN(GotChatMsg, GotChatMsgQuery, BoolCallinResult, ui, or-true, none)

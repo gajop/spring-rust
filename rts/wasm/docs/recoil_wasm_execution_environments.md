@@ -95,6 +95,36 @@ For the first implementation, reuse existing game/map loading conventions where 
 
 Later, multiple modules may be declared by several participating archives.
 
+### Manifests a match reads
+
+Each manifest line is `module(name, path, environment, order, version)`; the line, not the
+manifest's folder, picks the environment, and `path` is the module's path in the same archive.
+At load (`CGame::Load`, before `GamePreload`) the engine reads, each optional:
+
+| Manifest | VFS | For |
+|---|---|---|
+| `wasm/manifest.txt` | game | A game's modules of any environment (rules, UI, job workers) outside the Lua folders |
+| `LuaRules/wasm/manifest.txt` | game | Rules modules, as before |
+| `LuaGaia/wasm/manifest.txt` | map | Gaia modules |
+| `LuaUI/wasm/manifest.txt` | game | UI modules, as before |
+
+The menu and loading screen keep their own folders (`WasmMenu/`, `WasmIntro/`).
+
+### A game without Lua entry files
+
+A game whose modules do all its work needs no `LuaRules/main.lua`, `LuaRules/draw.lua` or
+`LuaUI/main.lua`: without them the engine runs no Lua handle, and Wasm messages between the
+synced and unsynced rules go directly (`SendToUnsynced` without `luaRules`). Two things LuaUI
+used to be needed for have engine equivalents usable by any game:
+
+- **The engine's command panel.** Modrules `system.allowEngineCommandPanel = false` lays the panel
+  out as a custom layout that places no buttons: every command stays usable through actions,
+  hotkeys and the API, and nothing is drawn, exactly as a LuaUI `LayoutButtons` returning an empty
+  layout did (`CGuiHandler::LayoutIcons`). Default true.
+- **Chat commands.** The `GotChatMsg` callin (environment `ui`, `or-true`) receives a typed chat
+  command (without its slash) or a bound action the engine did not handle itself, where LuaUI's and
+  LuaMenu's `GotChatMsg` receive it (`CGame::ProcessAction`, `CGameInputReceiver`). True marks it handled.
+
 ## Multiple modules
 
 Each Wasm module instance is independent.

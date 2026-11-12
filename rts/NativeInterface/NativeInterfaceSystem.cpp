@@ -549,6 +549,10 @@ void NativeInterfaceSystem::HandleLuaCall(const char* msg, size_t msgLength, boo
 		pImpl->eventClient->HandleLuaCall(msg, msgLength, synced);
 }
 
+bool NativeInterfaceSystem::GotChatMsg(const std::string& msg, int playerID) {
+	return pImpl->eventClient != nullptr && pImpl->eventClient->GotChatMsg(msg, playerID);
+}
+
 bool NativeInterfaceSystem::DispatchWasmSyncedMessage(std::string_view message,
 	std::string& error)
 {

@@ -33,6 +33,7 @@
 #include "Rendering/Textures/NamedTextures.h"
 #include "Sim/Features/Feature.h"
 #include "Sim/Misc/LosHandler.h"
+#include "Sim/Misc/ModInfo.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Sim/Units/CommandAI/CommandAI.h"
 #include "Sim/Units/CommandAI/BuilderCAI.h"
@@ -617,8 +618,19 @@ void CGuiHandler::LayoutIcons(bool useSelectionPage)
 		commands.clear();
 	}
 
+	// modrules system.allowEngineCommandPanel = false: the game draws its own command interface;
+	// lay the panel out as a custom layout that places no buttons (every command stays usable)
+	if (!modInfo.allowEngineCommandPanel) {
+		if (LayoutCustomIcons(useSelectionPage, false)) {
+			if (validInCommand)
+				RevertToCmdDesc(cmdDesc, defCmd, samePage);
+
+			return;
+		}
+	}
+
 	if (luaUI != nullptr && luaUI->WantsEvent("LayoutButtons")) {
-		if (LayoutCustomIcons(useSelectionPage)) {
+		if (LayoutCustomIcons(useSelectionPage, true)) {
 			if (validInCommand)
 				RevertToCmdDesc(cmdDesc, defCmd, samePage);
 
@@ -751,10 +763,10 @@ void CGuiHandler::LayoutIcons(bool useSelectionPage)
 }
 
 
-bool CGuiHandler::LayoutCustomIcons(bool useSelectionPage)
+bool CGuiHandler::LayoutCustomIcons(bool useSelectionPage, bool askLuaUI)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	assert(luaUI != nullptr);
+	assert(!askLuaUI || luaUI != nullptr);
 
 	// get the commands to process
 	CSelectedUnitsHandler::AvailableCommandsStruct ac = selectedUnitsHandler.GetAvailableCommands();
@@ -778,7 +790,10 @@ bool CGuiHandler::LayoutCustomIcons(bool useSelectionPage)
 	std::vector<CLuaUI::ReParamsPair> reParamsCmds;
 	spring::unordered_map<int, int> iconMap;
 
-	if (!luaUI->LayoutButtons(
+	if (!askLuaUI) {
+		// the empty layout: no buttons, no menu name, every command kept (hidden)
+		menuName.clear();
+	} else if (!luaUI->LayoutButtons(
 		tmpXicons, tmpYicons,
 		cmds, removeCmds, customCmds,
 		onlyTextureCmds, reTextureCmds,

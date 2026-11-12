@@ -5424,6 +5424,42 @@ macro_rules! export_game_setup {
         };$crate::__native_callins::encode_game_setup_result(& value, result) }) }) }); }
     };
 }
+/// Shared scoped `GotChatMsg` handler: `(&Module, &mut Spring, &str, i32) -> Result<bool>`.
+#[macro_export]
+macro_rules! export_got_chat_msg {
+    ($slot:ident, $handler:path) => {
+        #[cfg(target_arch = "wasm32")] #[unsafe (export_name =
+        "spring:callin/got-chat-msg")] pub extern "C" fn
+        __spring_wasm_core_callin_got_chat_msg(used_bytes : i32) -> i32 { let bytes =
+        match __spring_core_callin_scratch_view(used_bytes) { Some(value) => value, None
+        => core::arch::wasm32::unreachable() }; let mut reader =
+        $crate::__callin_wire::Reader::new(bytes); let message = match reader.bytes() {
+        Some(value) => value, None => core::arch::wasm32::unreachable() }; let player_id
+        = match reader.i32() { Some(value) => value, None =>
+        core::arch::wasm32::unreachable() }; if ! reader.finish() {
+        core::arch::wasm32::unreachable(); } if { let
+        value:$crate::types::callins::BoolCallinResult
+        =$crate::module::wasm_boundary($slot .with(| slot | slot
+        .invoke_for_environment::< 16, _ > (| module, spring | { let query = { let
+        message =$crate::module::decode_string((message).to_vec()); let player_id =
+        player_id; $crate::types::callins::GotChatMsgQuery { message, player_id } }; let
+        returned =$handler (module, spring, query.message.as_ref(), query.player_id) ?;
+        Ok({ $crate::types::callins::BoolCallinResult { value : returned } }) }))); value
+        .value } { 1 } else { 0 } } #[cfg(not(target_arch = "wasm32"))] #[unsafe
+        (no_mangle)] pub unsafe extern "C" fn GotChatMsg(_interface:* const
+        $crate::__sys::NativeInterface, data:* mut core::ffi::c_void, query:* const
+        $crate::__sys::GotChatMsgQuery, result:* mut $crate::__sys::BoolCallinResult) {
+        let Some(result) = (unsafe { result.as_mut() }) else { return; }; * result =
+        Default::default(); result.error =$crate::module::error_pointer(unsafe { $slot
+        .with_host(| slot | { slot.validate_identity(data) ?; slot
+        .invoke_for_environment::< 16, _ > (| module, spring | { let query = unsafe {
+        $crate::__native_callins::decode_got_chat_msg_query(query) } ?; let returned
+        =$handler (module, spring, query.message.as_ref(), query.player_id) ?; let value
+        = { $crate::types::callins::BoolCallinResult { value : returned }
+        };$crate::__native_callins::encode_bool_callin_result(& value, result) }) }) });
+        }
+    };
+}
 /// Shared scoped `HandleLuaCall` handler: `(&Module, &mut Spring, &[u8]) -> Result<()>`.
 #[macro_export]
 macro_rules! export_handle_lua_call {

@@ -490,11 +490,17 @@ void CGame::Load(const std::string& mapFileName)
 		NativeInterfaceSystem::s_instance->Reload();
 
 		// Rules modules come from the game VFS and Gaia modules from the map VFS,
-		// matching the corresponding Lua loader namespaces. Both manifests are
+		// matching the corresponding Lua loader namespaces. Every manifest is
 		// optional; if present, their declarations and module bytes are validated
 		// before GamePreload so synced identity is fixed before simulation starts.
+		// wasm/manifest.txt is the game's manifest outside the Lua folders: each of
+		// its lines names its module's environment, so one file declares a game's
+		// rules, UI and job modules alike. The LuaRules/ and LuaUI/ manifests are
+		// still read, as before, for games that keep them there.
 		std::string wasmError;
 		if (!nativeInterfaceSystem->LoadWasmManifest(
+				"wasm/manifest.txt", SPRING_VFS_MOD, wasmError) ||
+			!nativeInterfaceSystem->LoadWasmManifest(
 				"LuaRules/wasm/manifest.txt", SPRING_VFS_MOD, wasmError) ||
 			!nativeInterfaceSystem->LoadWasmManifest(
 				"LuaGaia/wasm/manifest.txt", SPRING_VFS_MAP, wasmError) ||
@@ -2341,6 +2347,9 @@ bool CGame::ProcessAction(const Action& action, bool isRepeat)
 		handled = true;
 
 	if (luaMenu != nullptr && luaMenu->GotChatMsg(action.rawline, false))
+		handled = true;
+
+	if (NativeInterfaceSystem::s_instance != nullptr && NativeInterfaceSystem::s_instance->GotChatMsg(action.rawline, 0))
 		handled = true;
 
 	return handled;
