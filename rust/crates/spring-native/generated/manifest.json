@@ -135,8 +135,8 @@
     },
     {
       "name": "platform_generated.rs",
-      "sha256": "860ddc7cc1583406dc1ed3e45ac5d9371d18eaac53cd9403b13e80cfa8f9398e",
-      "bytes": 1387
+      "sha256": "850b4fb51fa71fccfc9e8970f8f5bf817613066abe4edd1f2cab63ad00f78947",
+      "bytes": 2256
     },
     {
       "name": "player_generated.rs",

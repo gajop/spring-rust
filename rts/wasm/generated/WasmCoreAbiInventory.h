@@ -612,6 +612,7 @@ inline constexpr Candidate kCandidates[] = {
 	{"spring:path-finder", "set-path-node-cost", "i32,i32,f32->i64", 5u, Strategy::direct},
 	{"spring:path-finder", "set-path-node-costs", "i32->i64", 5u, Strategy::direct},
 	{"spring:platform", "get-architecture", "i32,i32->i32", 127u, Strategy::variableOutput},
+	{"spring:platform", "get-local-time", "i32,i32->i32", 122u, Strategy::fixedOutput},
 	{"spring:platform", "is-headless", "i32->i64", 127u, Strategy::direct},
 	{"spring:player", "get-local-ally-team-id", "i32->i64", 122u, Strategy::direct},
 	{"spring:player", "get-local-player-id", "i32->i64", 122u, Strategy::direct},

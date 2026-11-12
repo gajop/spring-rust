@@ -1,11 +1,11 @@
 {
-  "total": 1440,
-  "executable_total": 1440,
+  "total": 1441,
+  "executable_total": 1441,
   "verified_total": 0,
-  "production_import_total": 1140,
+  "production_import_total": 1141,
   "by_class": {
     "dynamic-output-caller-owned": 90,
-    "fixed": 865,
+    "fixed": 866,
     "fixed-option": 15,
     "handwritten-reviewed": 71,
     "variable-input-adapted": 4,
@@ -5502,6 +5502,22 @@
       "production_sync_environment_mask": 127,
       "production_visibility_environment_mask": 127,
       "production_environment_mask": 127,
+      "reason": null
+    },
+    {
+      "module": "platform",
+      "function": "GetLocalTime",
+      "import_module": "spring:platform",
+      "import_name": "get-local-time",
+      "class": "fixed",
+      "verified": false,
+      "parity_level": "exempt",
+      "grandfathered": false,
+      "production_import_allowed": true,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 122,
+      "production_visibility_environment_mask": 122,
+      "production_environment_mask": 122,
       "reason": null
     },
     {

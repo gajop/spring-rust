@@ -10705,6 +10705,7 @@ pub(crate) mod path_finder {
     }
 }
 pub(crate) mod platform {
+    use crate::types::platform::GetLocalTimeValue;
     use alloc::string::String;
     use crate::{Result, ApiError, ErrorCode};
     use spring_native_sys as sys;
@@ -10730,6 +10731,35 @@ pub(crate) mod platform {
             check_error(result.error)?;
         }
         Ok(unsafe { read_string(result.architecture, None)? })
+    }
+    pub(crate) fn get_local_time(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::PlatformApi>,
+    ) -> Result<GetLocalTimeValue> {
+        let native_unused = 0 as _;
+        let query = sys::GetLocalTimeQuery {
+            _unused: native_unused,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .GetLocalTime
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<sys::GetLocalTimeResult>::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok(GetLocalTimeValue {
+            year: (result.year) as _,
+            month: (result.month) as _,
+            day: (result.day) as _,
+            hour: (result.hour) as _,
+            minute: (result.minute) as _,
+            second: (result.second) as _,
+        })
     }
     pub(crate) fn is_headless(
         _engine: &crate::Backend<'_>,

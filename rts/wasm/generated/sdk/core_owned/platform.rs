@@ -12,6 +12,21 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetLocalTimeQuery {
+            pub unused: u8,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetLocalTimeResult {
+            pub year: i32,
+            pub month: i32,
+            pub day: i32,
+            pub hour: i32,
+            pub minute: i32,
+            pub second: i32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct IsHeadlessQuery {
             pub unused: u8,
         }
@@ -30,6 +45,16 @@
                 #[link_name = "get-architecture"]
                 pub safe fn call(punused: i32, output: i32) -> i32;
             }
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetLocalTimeValue {
+            pub year: i32,
+            pub month: i32,
+            pub day: i32,
+            pub hour: i32,
+            pub minute: i32,
+            pub second: i32,
         }
 
         #[inline]
@@ -61,6 +86,19 @@
                 let _ = (unused as i32);
                 Err(unreachable!())
             }
+        }
+
+        #[inline]
+        pub fn get_local_time(unused: u8) -> Result<GetLocalTimeValue> {
+            let value = crate::generated::platform::get_local_time(unused)?;
+            Ok(GetLocalTimeValue {
+                year: value.0,
+                month: value.1,
+                day: value.2,
+                hour: value.3,
+                minute: value.4,
+                second: value.5
+            })
         }
 
         #[inline]

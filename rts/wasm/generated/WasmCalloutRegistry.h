@@ -356,6 +356,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"path_finder", "SetPathNodeCost", 5u, true, false, LoweringStatus::automatic},
 	{"path_finder", "SetPathNodeCosts", 5u, true, false, LoweringStatus::automatic},
 	{"platform", "GetArchitecture", 127u, false, false, LoweringStatus::automatic},
+	{"platform", "GetLocalTime", 122u, false, false, LoweringStatus::automatic},
 	{"platform", "IsHeadless", 127u, false, false, LoweringStatus::automatic},
 	{"rules_params", "GetFeatureRulesParam", 31u, false, true, LoweringStatus::automatic},
 	{"rules_params", "GetFeatureRulesParams", 31u, false, true, LoweringStatus::annotated},

@@ -54,6 +54,7 @@ UNSYNCED_ONLY(vfs, GameDataList, a player's local files: simulation code must no
 UNSYNCED_ONLY(vfs, GameOutputOpen, a player's local files: simulation code must not depend on what differs between machines)
 UNSYNCED_ONLY(vfs, GameOutputWrite, a player's local files: simulation code must not depend on what differs between machines)
 UNSYNCED_ONLY(vfs, GameOutputClose, a player's local files: simulation code must not depend on what differs between machines)
+UNSYNCED_ONLY(platform, GetLocalTime, the local clock differs between machines: simulation code must not depend on it)
 
 EXCLUDE(los, GetClosestValidPosition, Lua and native implementations are unsupported; no callable production import)
 

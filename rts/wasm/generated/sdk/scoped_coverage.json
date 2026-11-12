@@ -601,6 +601,7 @@
   "path_finder.SetPathNodeCost": "generated",
   "path_finder.SetPathNodeCosts": "generated",
   "platform.GetArchitecture": "generated",
+  "platform.GetLocalTime": "generated",
   "platform.IsHeadless": "generated",
   "player.GetLocalAllyTeamID": "generated",
   "player.GetLocalPlayerID": "generated",

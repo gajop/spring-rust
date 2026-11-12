@@ -13390,6 +13390,34 @@
     },
     {
       "module": "platform",
+      "function": "GetLocalTime",
+      "import_module": "spring:platform",
+      "import_name": "get-local-time",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 24,
+          "alignment": 4
+        }
+      },
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": [
+        "the local clock differs between machines: simulation code must not depend on it"
+      ]
+    },
+    {
+      "module": "platform",
       "function": "IsHeadless",
       "import_module": "spring:platform",
       "import_name": "is-headless",
@@ -32035,7 +32063,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1215,
+  "automatic_count": 1216,
   "manual_count": 208,
   "unsupported_count": 17
 }

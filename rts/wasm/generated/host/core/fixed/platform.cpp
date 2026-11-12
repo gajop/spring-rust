@@ -33,6 +33,57 @@ bool DefineGenerated(wasmtime_linker_t* linker, const char* moduleName,
     return false;
 }
 
+wasm_trap_t* Core_platform_get_local_time(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->platform == nullptr ||
+        state->native->platform->GetLocalTime == nullptr)
+        return Trap("GetLocalTime generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("GetLocalTime generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("GetLocalTime generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
+    if (!state->memory.Contains(output, 24u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+
+    GetLocalTimeQuery query{};
+    query._unused = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query._unused)>>>(slots[0].i32);
+    GetLocalTimeResult result{};
+    state->native->platform->GetLocalTime(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) {
+        slots[0].i32 = errorCode;
+        return nullptr;
+    }
+    std::array<std::uint8_t, 24> wire{};
+    WireWriter writer(wire);
+    if (!writer.I32(result.year)) return Trap("generated Core wire overflow");
+    if (!writer.I32(result.month)) return Trap("generated Core wire overflow");
+    if (!writer.I32(result.day)) return Trap("generated Core wire overflow");
+    if (!writer.I32(result.hour)) return Trap("generated Core wire overflow");
+    if (!writer.I32(result.minute)) return Trap("generated Core wire overflow");
+    if (!writer.I32(result.second)) return Trap("generated Core wire overflow");
+    if (!writer.Finish(4u))
+        return Trap("generated Core wire layout mismatch for GetLocalTime");
+    if (!state->memory.Write(output, wire.data(), wire.size()))
+        return Trap("generated Core output range changed unexpectedly");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* Core_platform_is_headless(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -69,6 +120,13 @@ bool RegisterGeneratedImports_platform(wasmtime_linker_t* linker, HostState* sta
         return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGenerated(linker, "spring:platform", "get-local-time",
+                MakeFuncType(params, 2, results, 1), Core_platform_get_local_time, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:platform", "is-headless",
@@ -79,6 +137,6 @@ bool RegisterGeneratedImports_platform(wasmtime_linker_t* linker, HostState* sta
     return true;
 }
 
-static_assert(1 >= 0, "generated Core Wasm callback count");
+static_assert(2 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

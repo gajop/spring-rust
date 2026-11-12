@@ -39,7 +39,8 @@ pub(crate) fn production_import_allowed(module: &str, function: &str) -> bool {
 
         // Architecture/headless state is local machine identity. Keep it out of
         // production Core until an explicit reviewed local-info capability exists.
-        "platform" => matches!(function, "GetArchitecture" | "IsHeadless"),
+        // The local date and time (Lua's os.date) names a player's files.
+        "platform" => matches!(function, "GetArchitecture" | "IsHeadless" | "GetLocalTime"),
 
         // Generic config includes persistent setters. Individually reviewed
         // read-only helpers can be exposed through a dedicated Core namespace.

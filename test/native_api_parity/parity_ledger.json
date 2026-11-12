@@ -7540,6 +7540,26 @@
       "required_returns_mapped": false,
       "runs": []
     },
+    "platform.GetLocalTime": {
+      "level": "exempt",
+      "reason": "No Spring Lua call: Lua reads the local time with os.date from its standard library. A wall-clock value differs between machines and runs, so there is no Lua state to compare; unsynced only.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu",
+        "intro"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
     "rules_params.GetFeatureRulesParam": {
       "level": "untested",
       "grandfathered": true,
@@ -30561,6 +30581,6 @@
   "counts": {
     "untested": 1412,
     "exercised": 14,
-    "exempt": 14
+    "exempt": 15
   }
 }

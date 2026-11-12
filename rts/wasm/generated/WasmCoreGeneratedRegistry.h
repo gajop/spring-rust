@@ -336,6 +336,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:path-finder", "set-path-node-cost", "i32,i32,f32->i64", 5u},
     {"spring:path-finder", "set-path-node-costs", "i32->i64", 5u},
     {"spring:platform", "get-architecture", "i32,i32->i32", 127u},
+    {"spring:platform", "get-local-time", "i32,i32->i32", 122u},
     {"spring:platform", "is-headless", "i32->i64", 127u},
     {"spring:rules-params", "get-feature-rules-param", "i32,i32,i32->i32", 31u},
     {"spring:rules-params", "get-feature-rules-params", "i32,i32->i32", 31u},

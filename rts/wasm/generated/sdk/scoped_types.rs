@@ -9146,6 +9146,19 @@ pub mod platform {
         pub architecture: String,
     }
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GetLocalTimeQuery {
+        pub unused: u8,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GetLocalTimeResult {
+        pub year: i32,
+        pub month: i32,
+        pub day: i32,
+        pub hour: i32,
+        pub minute: i32,
+        pub second: i32,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
     pub struct IsHeadlessQuery {
         pub unused: u8,
     }
@@ -9167,6 +9180,15 @@ pub mod platform {
         SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array,
         UInt32Result, UnitCostOverrides, UnitHealthValue, UnitTargetRef, WaterParams,
     };
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GetLocalTimeValue {
+        pub year: i32,
+        pub month: i32,
+        pub day: i32,
+        pub hour: i32,
+        pub minute: i32,
+        pub second: i32,
+    }
 }
 pub mod rules_params {
     use alloc::string::String;
