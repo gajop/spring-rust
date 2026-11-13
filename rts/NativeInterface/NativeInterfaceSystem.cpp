@@ -283,6 +283,12 @@ public:
 		}
 
 		sharedLib.reset(SharedLib::Instantiate(temp_path->string()));
+#ifndef _WIN32
+		{
+			std::error_code ec;
+			fs::remove(*temp_path, ec);
+		}
+#endif
 		if (!sharedLib) {
 			LOG_L(L_ERROR, "Failed to open plugin %s", temp_path->string().c_str());
 			return;

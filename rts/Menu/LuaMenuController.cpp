@@ -74,8 +74,12 @@ bool CLuaMenuController::Reset()
 	vfsHandler->FreeLock();
 
 	mouse->ReloadCursors();
-	RmlGui::SetMenuActive(true);
-	ReloadWasmMenu();
+	if (m_wasmEnv == nullptr) {
+		RmlGui::SetMenuActive(true);
+		InitWasmMenu();
+	} else {
+		m_wasmEnv->EnsureEventClient();
+	}
 	return true;
 }
 

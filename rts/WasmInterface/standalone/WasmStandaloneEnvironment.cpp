@@ -227,6 +227,12 @@ bool WasmStandaloneEnvironment::TryLoadNativeDLL(const std::string& pathStem)
 	}
 
 	auto lib = std::unique_ptr<SharedLib>(SharedLib::Instantiate(tempPath->string()));
+#ifndef _WIN32
+	{
+		std::error_code ec;
+		fs::remove(*tempPath, ec);
+	}
+#endif
 	if (!lib) {
 		LOG_L(L_ERROR, "Failed to open native module %s", tempPath->string().c_str());
 		// An antivirus program can refuse a library written to the temp folder.
@@ -292,8 +298,12 @@ bool WasmStandaloneEnvironment::TryLoadNativeDLL(const std::string& pathStem)
 
 void WasmStandaloneEnvironment::EnsureEventClient()
 {
-	if (m_eventClient)
+	if (m_eventClient) {
+		// SpringApp::Reload resets eventHandler, so re-register the menu client without reloading the native library.
+		eventHandler.RemoveClient(m_eventClient.get());
+		eventHandler.AddClient(m_eventClient.get());
 		return;
+	}
 
 	m_eventClient = std::make_unique<NativeInterfaceEventClient>(
 		m_nativeInterface.get(), nullptr, m_wasmSystem.get(), true);
