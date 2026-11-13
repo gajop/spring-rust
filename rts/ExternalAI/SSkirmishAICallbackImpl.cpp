@@ -41,6 +41,7 @@
 #include "Sim/Misc/ResourceMapAnalyzer.h"
 #include "Sim/Misc/LosHandler.h"
 #include "Sim/Misc/TeamHandler.h"
+#include "Game/GameSetup.h"
 #include "Sim/Misc/ModInfo.h"
 #include "Sim/Misc/QuadField.h" // for quadField.GetFeaturesExact(pos, radius)
 #include "System/SafeCStrings.h"
@@ -4801,6 +4802,34 @@ EXPORT(bool) skirmishAiCallback_Debug_GraphDrawer_isEnabled(int skirmishAIId) {
 	return GetCallBack(skirmishAIId)->IsDebugDrawerEnabled();
 }
 
+EXPORT(int) skirmishAiCallback_Game_getModOptions(int skirmishAIId, const char** keys, const char** values) {
+	(void)skirmishAIId;
+	if (gameSetup == nullptr)
+		return 0;
+
+	const auto& modOptions = gameSetup->GetModOptions();
+	const size_t realSize = modOptions.size();
+
+	if ((keys != nullptr) && (values != nullptr))
+		ShallowCopyKeyValPairs(modOptions, keys, values);
+
+	return realSize;
+}
+
+EXPORT(const char*) skirmishAiCallback_Game_getModOption(int skirmishAIId, const char* const key) {
+	(void)skirmishAIId;
+	if (gameSetup == nullptr || key == nullptr)
+		return nullptr;
+
+	const auto& modOptions = gameSetup->GetModOptions();
+	const auto it = modOptions.find(key);
+
+	if (it == modOptions.end())
+		return nullptr;
+
+	return it->second.c_str();
+}
+
 EXPORT(int) skirmishAiCallback_getGroups(int skirmishAIId, int* groupIds, int maxGroups) {
 	const CGroupHandler& gh = uiGroupHandlers[ AI_TEAM_IDS[skirmishAIId] ];
 	const std::vector<CGroup>& gs = gh.GetGroups();
@@ -5524,6 +5553,8 @@ static void skirmishAiCallback_init(SSkirmishAICallback* callback) {
 	callback->Unit_Weapon_isShieldEnabled = &skirmishAiCallback_Unit_Weapon_isShieldEnabled;
 	callback->Unit_Weapon_getShieldPower = &skirmishAiCallback_Unit_Weapon_getShieldPower;
 	callback->Debug_GraphDrawer_isEnabled = &skirmishAiCallback_Debug_GraphDrawer_isEnabled;
+	callback->Game_getModOptions = &skirmishAiCallback_Game_getModOptions;
+	callback->Game_getModOption = &skirmishAiCallback_Game_getModOption;
 }
 
 SSkirmishAICallback* skirmishAiCallback_GetInstance(CSkirmishAIWrapper* ai)

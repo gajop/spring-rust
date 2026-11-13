@@ -1263,6 +1263,9 @@ EXPORT(float            ) skirmishAiCallback_Unit_Weapon_getShieldPower(int skir
 
 EXPORT(bool             ) skirmishAiCallback_Debug_GraphDrawer_isEnabled(int skirmishAIId);
 
+EXPORT(int              ) skirmishAiCallback_Game_getModOptions(int skirmishAIId, const char** keys, const char** values);
+EXPORT(const char*      ) skirmishAiCallback_Game_getModOption(int skirmishAIId, const char* const key);
+
 #if	defined(__cplusplus)
 } // extern "C"
 #endif
