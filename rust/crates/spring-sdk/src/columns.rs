@@ -59,6 +59,13 @@ pub enum UnitColumn {
     MoveCtrlVelocity = 20,
     /// Set only, f32 x6: front xyz, right xyz (`set_unit_direction`).
     Direction = 21,
+    /// f32, `get_unit_mass`.
+    Mass = 22,
+    /// x8: has_command i32, cmd_id i32, options i32, tag i32, param_count i32, param0..2 f32
+    /// (`get_command_queue`). When `arg <= 0`, reads queue slot 0 verbatim; when `arg > 0`,
+    /// scans up to `arg` entries and picks the first without `INTERNAL_ORDER`. Read it with
+    /// [`Columns::get_units_raw`].
+    CurrentCommand = 23,
 }
 
 impl UnitColumn {
@@ -70,6 +77,7 @@ impl UnitColumn {
             Self::Vectors => 9,
             Self::Health => 2,
             Self::WeaponTarget => 5,
+            Self::CurrentCommand => 8,
             Self::Direction => 6,
             _ => 1,
         }
@@ -85,6 +93,7 @@ impl UnitColumn {
                 | Self::Vectors
                 | Self::Health
                 | Self::Radius
+                | Self::Mass
                 | Self::MoveCtrlVelocity
                 | Self::Direction
         )
@@ -183,7 +192,13 @@ impl<E: Game> Columns<'_, '_, E> {
         out: &mut [i32],
         found: Option<&mut [u8]>,
     ) -> Result<usize> {
-        if property.floats() || property.settable() || property == UnitColumn::WeaponTarget {
+        if property.floats()
+            || property.settable()
+            || matches!(
+                property,
+                UnitColumn::WeaponTarget | UnitColumn::CurrentCommand
+            )
+        {
             return invalid();
         }
         let planes =
@@ -377,6 +392,33 @@ impl<E: Game> Columns<'_, '_, E> {
                 })
                 .is_ok(),
             UnitColumn::MoveCtrlVelocity | UnitColumn::Direction => false,
+            UnitColumn::Mass => info.get_unit_mass(unit).map(|m| floats(&[m])).is_ok(),
+            UnitColumn::CurrentCommand => {
+                let max_commands = if arg > 0 { arg as u32 } else { 1 };
+                match spring
+                    .units_commands()
+                    .get_command_queue(unit, max_commands)
+                {
+                    Ok(queue) => {
+                        let chosen = queue.iter().find(|c| {
+                            arg <= 0
+                                || (c.options as u32 & crate::cmd::options::INTERNAL_ORDER) == 0
+                        });
+                        if let Some(cmd) = chosen {
+                            put(0, 1);
+                            put(1, cmd.cmd_id as u32);
+                            put(2, cmd.options as u32);
+                            put(3, cmd.tag as u32);
+                            put(4, cmd.params.len() as u32);
+                            for (p, &val) in cmd.params.iter().take(3).enumerate() {
+                                put(5 + p, val.to_bits());
+                            }
+                        }
+                        true
+                    }
+                    Err(_) => false,
+                }
+            }
         }
     }
 }

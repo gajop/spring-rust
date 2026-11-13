@@ -1539,3 +1539,270 @@ fn pointer_capture_preserves_deltas_and_rejects_unknown_status() {
         })
         .unwrap();
 }
+
+#[test]
+fn columns_read_unit_mass_and_current_command_on_native() {
+    use crate::columns::{ColumnArg, UnitColumn};
+
+    #[repr(transparent)]
+    struct SyncError(sys::Error);
+    unsafe impl Sync for SyncError {}
+
+    static INVALID_UNIT: SyncError = SyncError(sys::Error {
+        code: 10,
+        message: c"invalid unit".as_ptr(),
+    });
+
+    unsafe extern "C" fn get_unit_mass(
+        query: *const sys::GetUnitMassQuery,
+        result: *mut sys::GetUnitMassResult,
+    ) {
+        let query = unsafe { &*query };
+        let result = unsafe { &mut *result };
+        match query.unitID {
+            10 => {
+                *result = sys::GetUnitMassResult {
+                    error: ptr::null(),
+                    mass: 1200.0,
+                }
+            }
+            11 => {
+                *result = sys::GetUnitMassResult {
+                    error: ptr::null(),
+                    mass: 6000.0,
+                }
+            }
+            _ => {
+                *result = sys::GetUnitMassResult {
+                    error: &INVALID_UNIT.0,
+                    mass: 0.0,
+                }
+            }
+        }
+    }
+
+    unsafe extern "C" fn get_command_queue(
+        query: *const sys::GetCommandQueueQuery,
+        result: *mut sys::GetCommandQueueResult,
+    ) {
+        static mut PARAMS_MOVE: [f32; 5] = [100.0, 20.0, 300.0, 40.0, 50.0];
+        static mut PARAMS_INT: [f32; 1] = [9.0];
+        static mut QUEUE: [sys::CommandFFI; 2] = [
+            sys::CommandFFI {
+                cmdID: 0,
+                options: 0,
+                tag: 0,
+                aiCommandID: 0,
+                timeOut: 0.0,
+                params: ptr::null_mut(),
+                paramCount: 0,
+            },
+            sys::CommandFFI {
+                cmdID: 0,
+                options: 0,
+                tag: 0,
+                aiCommandID: 0,
+                timeOut: 0.0,
+                params: ptr::null_mut(),
+                paramCount: 0,
+            },
+        ];
+
+        let query = unsafe { &*query };
+        let result = unsafe { &mut *result };
+        result.error = ptr::null();
+        result.commands = ptr::null_mut();
+        result.count = 0;
+
+        match query.unitID {
+            10 => unsafe {
+                QUEUE[0] = sys::CommandFFI {
+                    cmdID: 20,
+                    options: crate::cmd::options::INTERNAL_ORDER as u8,
+                    tag: 11,
+                    aiCommandID: 0,
+                    timeOut: 0.0,
+                    params: ptr::addr_of_mut!(PARAMS_INT).cast(),
+                    paramCount: 1,
+                };
+                QUEUE[1] = sys::CommandFFI {
+                    cmdID: 10,
+                    options: 0,
+                    tag: 77,
+                    aiCommandID: 0,
+                    timeOut: 0.0,
+                    params: ptr::addr_of_mut!(PARAMS_MOVE).cast(),
+                    paramCount: 3,
+                };
+                result.commands = ptr::addr_of_mut!(QUEUE).cast();
+                result.count = query.maxCommands.min(2);
+            },
+            11 => unsafe {
+                QUEUE[0] = sys::CommandFFI {
+                    cmdID: 40,
+                    options: 16,
+                    tag: 88,
+                    aiCommandID: 0,
+                    timeOut: 0.0,
+                    params: ptr::addr_of_mut!(PARAMS_MOVE).cast(),
+                    paramCount: 5,
+                };
+                result.commands = ptr::addr_of_mut!(QUEUE).cast();
+                result.count = query.maxCommands.min(1);
+            },
+            12 => {}
+            13 => unsafe {
+                QUEUE[0] = sys::CommandFFI {
+                    cmdID: 0,
+                    options: 0,
+                    tag: 5,
+                    aiCommandID: 0,
+                    timeOut: 0.0,
+                    params: ptr::null_mut(),
+                    paramCount: 0,
+                };
+                result.commands = ptr::addr_of_mut!(QUEUE).cast();
+                result.count = query.maxCommands.min(1);
+            },
+            _ => result.error = &INVALID_UNIT.0,
+        }
+    }
+
+    let info = sys::UnitsInfoApi {
+        GetUnitMass: Some(get_unit_mass),
+        ..Default::default()
+    };
+    let commands = sys::UnitsCommandsApi {
+        GetCommandQueue: Some(get_command_queue),
+        ..Default::default()
+    };
+    let interface = sys::NativeInterface {
+        unitsInfo: &info,
+        unitsCommands: &commands,
+        ..Default::default()
+    };
+
+    let context = unsafe { ModuleContext::<All>::from_native(&interface) }.unwrap();
+    context
+        .with_spring(|spring| {
+            let cols = spring.columns();
+            assert_eq!(UnitColumn::Mass.components(), 1);
+            assert_eq!(UnitColumn::CurrentCommand.components(), 8);
+
+            let units = [10, 999, 11];
+            let mut masses = [0.0f32; 3];
+            let mut found = [0u8; 3];
+            let ok = cols
+                .get_units_f32(
+                    UnitColumn::Mass,
+                    &units,
+                    ColumnArg::None,
+                    &mut masses,
+                    Some(&mut found),
+                )
+                .unwrap();
+            assert_eq!(ok, 2);
+            assert_eq!(masses, [1200.0, 0.0, 6000.0]);
+            assert_eq!(found, [1, 0, 1]);
+
+            let mut dummy_i32 = [0i32; 3];
+            assert_eq!(
+                cols.get_units_i32(
+                    UnitColumn::Mass,
+                    &units,
+                    ColumnArg::None,
+                    &mut dummy_i32,
+                    None
+                )
+                .unwrap_err()
+                .code,
+                ErrorCode::InvalidArgument as i32
+            );
+            let mut dummy_i32_cmd = [0i32; 24];
+            assert_eq!(
+                cols.get_units_i32(
+                    UnitColumn::CurrentCommand,
+                    &units,
+                    ColumnArg::All(4),
+                    &mut dummy_i32_cmd,
+                    None
+                )
+                .unwrap_err()
+                .code,
+                ErrorCode::InvalidArgument as i32
+            );
+            let mut dummy_f32_cmd = [0.0f32; 24];
+            assert_eq!(
+                cols.get_units_f32(
+                    UnitColumn::CurrentCommand,
+                    &units,
+                    ColumnArg::All(4),
+                    &mut dummy_f32_cmd,
+                    None
+                )
+                .unwrap_err()
+                .code,
+                ErrorCode::InvalidArgument as i32
+            );
+
+            let cmd_units = [10, 11, 12, 13, 999];
+            let n = cmd_units.len();
+            let mut planes = vec![0u32; n * UnitColumn::CurrentCommand.components()];
+            let mut cmd_found = vec![0u8; n];
+            let ok = cols
+                .get_units_raw(
+                    UnitColumn::CurrentCommand,
+                    &cmd_units,
+                    ColumnArg::All(4),
+                    &mut planes,
+                    Some(&mut cmd_found),
+                )
+                .unwrap();
+            assert_eq!(ok, 4);
+            assert_eq!(cmd_found, [1, 1, 1, 1, 0]);
+            let at = |plane: usize, i: usize| planes[plane * n + i];
+            assert_eq!(
+                (at(0, 0), at(1, 0) as i32, at(3, 0) as i32, at(4, 0)),
+                (1, 10, 77, 3)
+            );
+            assert_eq!(
+                (
+                    f32::from_bits(at(5, 0)),
+                    f32::from_bits(at(6, 0)),
+                    f32::from_bits(at(7, 0))
+                ),
+                (100.0, 20.0, 300.0)
+            );
+            assert_eq!(
+                (
+                    at(0, 1),
+                    at(1, 1) as i32,
+                    at(2, 1),
+                    at(3, 1) as i32,
+                    at(4, 1)
+                ),
+                (1, 40, 16, 88, 5)
+            );
+            assert_eq!((at(0, 2), at(1, 2), at(4, 2)), (0, 0, 0));
+            assert_eq!(
+                (at(0, 3), at(1, 3) as i32, at(3, 3) as i32, at(4, 3)),
+                (1, 0, 5, 0)
+            );
+
+            let each_units = [10, 10];
+            let mut each_planes = vec![0u32; 2 * 8];
+            let ok = cols
+                .get_units_raw(
+                    UnitColumn::CurrentCommand,
+                    &each_units,
+                    ColumnArg::Each(&[0, 4]),
+                    &mut each_planes,
+                    None,
+                )
+                .unwrap();
+            assert_eq!(ok, 2);
+            assert_eq!(each_planes[2] as i32, 20);
+            assert_eq!(each_planes[3] as i32, 10);
+        })
+        .unwrap();
+}

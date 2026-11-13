@@ -15,11 +15,13 @@
 //
 // `args` (an i32 column, or 0 to use `arg` for every entry) carries a
 // property's argument: the ally team for in-los/in-radar, the weapon number
-// (from 1) for weapon-target. The result packs the number of entries found (or
-// applied) with a status, as the other Core imports do.
+// (from 1) for weapon-target, or the queue scan limit past internal orders for
+// current-command (<= 0 reads queue slot 0 verbatim). The result packs the number
+// of entries found (or applied) with a status, as the other Core imports do.
 
 #include "WasmCoreBindings.h"
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cstdint>
@@ -36,6 +38,8 @@ namespace {
 
 using generated::ImportGuard;
 using generated::Trap;
+
+constexpr std::uint8_t InternalOrderOption = 1u << 3;
 
 // Property numbers are the ABI; never renumber them.
 enum class UnitColumn : std::int32_t {
@@ -59,6 +63,8 @@ enum class UnitColumn : std::int32_t {
 	MoveState = 18,    // i32
 	MoveCtrlVelocity = 20, // set only, f32 x3: MoveCtrl.SetVelocity
 	Direction = 21,        // set only, f32 x6: front xyz, right xyz (SetUnitDirection)
+	Mass = 22,             // f32: GetUnitMass
+	CurrentCommand = 23,   // x8: has i32, id i32, options i32, tag i32, paramCount i32, param0..2 f32
 };
 
 constexpr std::uint32_t MAX_ENTRIES = 1u << 20;
@@ -81,9 +87,11 @@ std::uint32_t Components(std::int32_t property, bool set)
 		case UnitColumn::InRadar:
 		case UnitColumn::Stunned:
 		case UnitColumn::FireState:
-		case UnitColumn::MoveState: return set ? 0 : 1;
+		case UnitColumn::MoveState:
+		case UnitColumn::Mass: return set ? 0 : 1;
 		case UnitColumn::Health: return set ? 0 : 2;
 		case UnitColumn::WeaponTarget: return set ? 0 : 5;
+		case UnitColumn::CurrentCommand: return set ? 0 : 8;
 		case UnitColumn::MoveCtrlVelocity: return set ? 3 : 0;
 		case UnitColumn::Direction: return set ? 6 : 0;
 	}
@@ -272,6 +280,43 @@ bool ReadUnit(const NativeInterface& native, UnitColumn property, std::int32_t u
 			out.I32(0, i, property == UnitColumn::FireState ? result.states.fireState : result.states.moveState);
 			return true;
 		}
+		case UnitColumn::Mass: {
+			GetUnitMassQuery query{unit};
+			GetUnitMassResult result{};
+			native.unitsInfo->GetUnitMass(&query, &result);
+			if (Failed(result.error)) return false;
+			out.F32(0, i, result.mass);
+			return true;
+		}
+		case UnitColumn::CurrentCommand: {
+			const std::uint32_t maxCommands = arg > 0 ? static_cast<std::uint32_t>(arg) : 1u;
+			GetCommandQueueQuery query{unit, maxCommands};
+			GetCommandQueueResult result{};
+			native.unitsCommands->GetCommandQueue(&query, &result);
+			if (Failed(result.error)) return false;
+			const CommandFFI* chosen = nullptr;
+			if (result.commands != nullptr) {
+				for (std::uint32_t c = 0; c < result.count; ++c) {
+					if (arg <= 0 || (result.commands[c].options & InternalOrderOption) == 0) {
+						chosen = &result.commands[c];
+						break;
+					}
+				}
+			}
+			if (chosen == nullptr)
+				return true;
+			out.I32(0, i, 1);
+			out.I32(1, i, chosen->cmdID);
+			out.I32(2, i, static_cast<std::int32_t>(chosen->options));
+			out.I32(3, i, chosen->tag);
+			out.I32(4, i, static_cast<std::int32_t>(chosen->paramCount));
+			if (chosen->params != nullptr) {
+				const std::uint32_t limit = std::min<std::uint32_t>(chosen->paramCount, 3u);
+				for (std::uint32_t p = 0; p < limit; ++p)
+					out.F32(5u + p, i, chosen->params[p]);
+			}
+			return true;
+		}
 		default:
 			return false;
 	}
@@ -307,8 +352,9 @@ bool Available(const HostState* state)
 {
 	const NativeInterface* native = state->native;
 	return native != nullptr && native->unitsInfo != nullptr && native->unitsQuery != nullptr &&
-		native->unitsWeapons != nullptr && native->los != nullptr && native->moveCtrl != nullptr &&
-		native->syncedCtrl != nullptr && native->syncedCtrl->unit != nullptr && native->rulesParams != nullptr;
+		native->unitsCommands != nullptr && native->unitsWeapons != nullptr && native->los != nullptr &&
+		native->moveCtrl != nullptr && native->syncedCtrl != nullptr &&
+		native->syncedCtrl->unit != nullptr && native->rulesParams != nullptr;
 }
 
 void Return(wasmtime_val_raw_t* slots, std::uint32_t value, Status status)

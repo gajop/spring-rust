@@ -181,6 +181,22 @@ endmacro()
 		"-DNOT_USING_CREG -DNOT_USING_STREFLOP" Catch2Wasm)
 
 ################################################################################
+### Column bulk reads (mass and current command) through spring:columns.
+	set(test_name WasmColumns)
+	set(test_src
+		"${CMAKE_CURRENT_SOURCE_DIR}/engine/WasmInterface/TestWasmColumns.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/core/bindings/WasmCoreColumnsBindings.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/core/host/WasmCoreAbi.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/core/host/WasmCoreState.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmEnvironment.cpp"
+		"${ENGINE_SOURCE_DIR}/WasmInterface/runtime/WasmResources.cpp"
+		${test_Common_sources}
+	)
+	add_spring_test(${test_name} "${test_src}" "recoil-wasmtime;${WINMM_LIBRARY}"
+		"-DNOT_USING_CREG -DNOT_USING_STREFLOP" Catch2Wasm)
+	target_include_directories(test_${test_name} PRIVATE ${ENGINE_SOURCE_DIR}/wasm)
+
+################################################################################
 ### A console line of any length, into a guest's scratch; the chat input's Tab listing.
 	set(test_name WasmConsoleLineFit)
 	set(test_src
