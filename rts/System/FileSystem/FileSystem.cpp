@@ -48,6 +48,12 @@
 	#include <unistd.h>
 	#include <sys/types.h>
 	#include <dirent.h>
+	#ifdef __linux__
+		#include <filesystem>
+		#include <sys/sysmacros.h>
+		#include <sys/vfs.h>
+		#include <linux/magic.h>
+	#endif
 #endif // _WIN32
 
 namespace fs = std::filesystem;
@@ -278,39 +284,39 @@ bool FileSystem::IsPathOnSpinningDisk(const std::string& path)
 #elif defined(__APPLE__)
 	// Macs have shipped with SSDs for years, and the /sys lookup below does not exist here
 	return false;
-#else
+#elif defined(__linux__)
 	struct stat info;
-
 	if (stat(path.c_str(), &info) != 0) {
 		LOG_L(L_WARNING, "[%s] Error '%s' getting stat() for file '%s'", __func__, Platform::GetLastErrorAsString().c_str(), path.c_str());
 		return true;
 	}
 
-	// the partition
-	// devId: (info.st_dev >> 8) : (info.st_dev & 0xFF));
-
-	// the physical disk
-	// devId: (info.st_dev >> 8) : (0));
-
-	// we need the physical disk
-	std::string devName; devName.resize(1024);
-	if (readlink(fmt::format("/sys/dev/block/{}:{}", info.st_dev >> 8, 0).c_str(), devName.data(), devName.size()) > 0) {
-		devName.resize(strlen(devName.c_str()));
-	}
-	else {
-		LOG_L(L_WARNING, "[%s] Error '%s' getting readlink() for file '%s'", __func__, Platform::GetLastErrorAsString().c_str(), path.c_str());
+	const unsigned int devMajor = major(info.st_dev);
+	const unsigned int devMinor = minor(info.st_dev);
+	if (devMajor == 0) {
+		// Virtual/unnamed filesystems (tmpfs, proc, overlay, fuse, nfs, btrfs subvolumes) have no /sys/dev/block entry.
+		struct statfs fsInfo;
+		if (statfs(path.c_str(), &fsInfo) == 0
+		    && (static_cast<unsigned long>(fsInfo.f_type) == TMPFS_MAGIC || static_cast<unsigned long>(fsInfo.f_type) == RAMFS_MAGIC))
+			return false;
+		LOG_L(L_DEBUG, "[%s] Non-block device (0:%u) for file '%s'", __func__, devMinor, path.c_str());
 		return true;
 	}
 
-	auto ss = devName.rfind('/');
-	if (ss == std::string::npos) {
-		LOG_L(L_WARNING, "[%s] Error finding the device name for file '%s'", __func__, devName.c_str());
+	const std::string sysDevPath = fmt::format("/sys/dev/block/{}:{}", devMajor, devMinor);
+	std::error_code ec;
+	const std::filesystem::path devDir = std::filesystem::canonical(sysDevPath, ec);
+	if (ec) {
+		LOG_L(L_WARNING, "[%s] Error '%s' resolving '%s' for file '%s'", __func__, ec.message().c_str(), sysDevPath.c_str(), path.c_str());
 		return true;
 	}
 
-	devName = devName.substr(ss + 1);
-	std::string rotFileName = fmt::format("/sys/block/{}/queue/rotational", devName);
+	// Whole block devices expose queue/rotational directly; partitions expose it on the parent disk.
+	std::filesystem::path rotPath = devDir / "queue" / "rotational";
+	if (!std::filesystem::exists(rotPath, ec))
+		rotPath = devDir.parent_path() / "queue" / "rotational";
 
+	const std::string rotFileName = rotPath.string();
 	nowide::ifstream rotf(rotFileName, std::ios::in);
 	if (rotf.bad() || !rotf.is_open()) {
 		LOG_L(L_WARNING, "[%s] Error '%s' opening file '%s'", __func__, Platform::GetLastErrorAsString().c_str(), rotFileName.c_str());
@@ -323,6 +329,8 @@ bool FileSystem::IsPathOnSpinningDisk(const std::string& path)
 		return true;
 	}
 	return rot == '1';
+#else
+	return true;
 #endif
 }
 

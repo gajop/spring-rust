@@ -263,15 +263,19 @@ void Skinning::ReparentCompleteMeshesToBones(S3DModel* model, const std::vector<
 
 void ModelUtils::CalculateModelDimensions(S3DModel* model, S3DModelPiece* piece)
 {
-	// TODO fix
-	const CMatrix44f scaleRotMat = piece->ComposeTransform(ZeroVector, ZeroVector, piece->scale).ToMatrix();
+	if (piece->parent == nullptr)
+		piece->SetPieceTransform(Transform{});
 
-	// cannot set this until parent relations are known, so either here or in BuildPieceHierarchy()
-	piece->goffset = scaleRotMat.Mul(piece->offset) + ((piece->parent != nullptr) ? piece->parent->goffset : ZeroVector);
+	piece->goffset = piece->bposeTransform.t;
 
-	// update model min/max extents
-	model->mins = float3::min(piece->goffset + piece->mins, model->mins);
-	model->maxs = float3::max(piece->goffset + piece->maxs, model->maxs);
+	// Update model min/max extents in model space (including node rotation and scale)
+	if (piece->HasGeometryData()) {
+		for (const auto& vert : piece->GetVerticesVec()) {
+			const float3 pos = piece->bposeTransform * vert.pos;
+			model->mins = float3::min(pos, model->mins);
+			model->maxs = float3::max(pos, model->maxs);
+		}
+	}
 
 	piece->SetCollisionVolume(CollisionVolume('b', 'z', piece->maxs - piece->mins, (piece->maxs + piece->mins) * 0.5f));
 
