@@ -195,7 +195,7 @@ void CModelLoader::Kill()
 void CModelLoader::KillModels()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	models.clear();
+	decltype(models){}.swap(models);
 	modelID = 0;
 }
 

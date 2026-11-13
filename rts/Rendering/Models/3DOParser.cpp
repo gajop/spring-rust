@@ -149,12 +149,9 @@ void C3DOParser::Kill()
 	teamTextures.clear();
 	LOG_L(L_INFO, "[3DOParser::%s] allocated %u pieces", __func__, numPoolPieces);
 
-	// reuse piece innards when reloading
-	// piecePool.clear();
-	for (unsigned int i = 0; i < numPoolPieces; i++) {
-		piecePool[i].Clear();
-	}
-
+	// Release pooled pieces and their vertex/index buffers back to the allocator
+	// instead of keeping peak match allocations across menu reloads.
+	decltype(piecePool){}.swap(piecePool);
 	numPoolPieces = 0;
 }
 

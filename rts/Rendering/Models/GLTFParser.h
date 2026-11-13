@@ -26,8 +26,8 @@ struct GLTFPiece : public S3DModelPiece {
 class CGLTFParser: public IModelParser
 {
 public:
-	void Init() override {};
-	void Kill() override {};
+	void Init() override { numPoolPieces = 0; }
+	void Kill() override;
 
 	void Load(S3DModel& model, const std::string& name) override;
 private:

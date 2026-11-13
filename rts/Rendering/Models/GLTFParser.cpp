@@ -564,6 +564,15 @@ void CGLTFParser::Load(S3DModel& model, const std::string& modelFilePath)
 	ModelLog::LogModelProperties(model);
 }
 
+void CGLTFParser::Kill()
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	LOG_L(L_INFO, "[GLTFParser::%s] allocated %u pieces", __func__, numPoolPieces);
+
+	decltype(piecePool){}.swap(piecePool);
+	numPoolPieces = 0;
+}
+
 GLTFPiece* CGLTFParser::AllocPiece()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
