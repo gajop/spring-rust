@@ -1783,6 +1783,18 @@ fn columns_read_unit_mass_and_current_command_on_native() {
                 ),
                 (1, 40, 16, 88, 5)
             );
+            assert_eq!(
+                (
+                    f32::from_bits(at(5, 1)),
+                    f32::from_bits(at(6, 1)),
+                    f32::from_bits(at(7, 1))
+                ),
+                (100.0, 20.0, 300.0)
+            );
+            if at(4, 1) > 3 {
+                let full = spring.units_commands().get_command_queue(11, 1).unwrap();
+                assert_eq!(full[0].params.as_slice(), &[100.0, 20.0, 300.0, 40.0, 50.0]);
+            }
             assert_eq!((at(0, 2), at(1, 2), at(4, 2)), (0, 0, 0));
             assert_eq!(
                 (at(0, 3), at(1, 3) as i32, at(3, 3) as i32, at(4, 3)),

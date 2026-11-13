@@ -63,8 +63,10 @@ pub enum UnitColumn {
     Mass = 22,
     /// x8: has_command i32, cmd_id i32, options i32, tag i32, param_count i32, param0..2 f32
     /// (`get_command_queue`). When `arg <= 0`, reads queue slot 0 verbatim; when `arg > 0`,
-    /// scans up to `arg` entries and picks the first without `INTERNAL_ORDER`. Read it with
-    /// [`Columns::get_units_raw`].
+    /// scans up to `arg` entries and picks the first without `INTERNAL_ORDER`. Only the leading
+    /// 3 parameters (`param0..2`, planes 5..7) are returned alongside `param_count` (plane 4);
+    /// when `param_count > 3`, call `spring.units_commands().get_command_queue(unit, max)` for
+    /// that unit to read parameters at index 3 and above. Read it with [`Columns::get_units_raw`].
     CurrentCommand = 23,
 }
 
