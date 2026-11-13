@@ -853,6 +853,27 @@ void CFontTexture::ClearFallbackFonts()
 #endif
 }
 
+void CFontTexture::ClearTransientCaches()
+{
+	auto lock = sync.GetScopedLock();
+	pinnedRecentFonts.clear();
+	invalidFonts.clear();
+
+	for (auto it = fontFaceCache.begin(); it != fontFaceCache.end(); ) {
+		if (it->second.expired())
+			it = fontFaceCache.erase(it);
+		else
+			++it;
+	}
+	for (auto it = fontMemCache.begin(); it != fontMemCache.end(); ) {
+		if (it->second.expired())
+			it = fontMemCache.erase(it);
+		else
+			++it;
+	}
+	std::erase_if(allFonts, [](const std::weak_ptr<CFontTexture>& wp) { return wp.expired(); });
+}
+
 /***
  *
  * Clears all glyphs for all fonts

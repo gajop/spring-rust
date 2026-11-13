@@ -54,10 +54,7 @@ public:
 		buffers.reserve(256);
 		buffers.emplace_back(); // empty ("zero") buffer
 	}
-	static void Deinitialise() {
-		bufferMap.clear();
-		buffers.clear();
-	}
+	static void Deinitialise();
 
 	static size_t GetId(const std::string& name);
 	static SoundBuffer& GetById(const size_t id);

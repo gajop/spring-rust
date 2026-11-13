@@ -47,6 +47,7 @@ namespace RmlGui
 
 	void Shutdown();
 	void Reload();
+	void ReleaseMatchCaches();
 	void SetMenuActive(bool active);
 	void SetCurrentContextOwner(void* owner, bool menuPhase);
 	void* GetCurrentContextOwner();

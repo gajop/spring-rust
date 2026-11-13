@@ -55,6 +55,7 @@
 #include "Net/GameServer.h"
 #include "Net/Protocol/NetProtocol.h" // clientNet
 #include "Rendering/GlobalRendering.h"
+#include "Rendering/Fonts/CFontTexture.h"
 #include "Rendering/Fonts/FontHandler.h"
 #include "Rendering/Fonts/glFont.h"
 #include "Rendering/GL/FBO.h"
@@ -114,6 +115,13 @@
 #include "Game/UnsyncedGameCommands.h"
 #include "Game/SyncedGameCommands.h"
 #include "lib/luasocket/src/restrictions.h"
+
+#ifdef __linux__
+#include <malloc.h>
+#endif
+#if defined(USE_MIMALLOC) && USE_MIMALLOC
+#include <mimalloc.h>
+#endif
 
 
 
@@ -856,6 +864,8 @@ void SpringApp::Reload(const std::string script)
 	// next match must neither resolve a name to them nor keep their video memory
 	LuaOpenGLUtils::ResetState();
 	CleanupNativeGfxResources();
+	shaderHandler->GetShaderCache().Clear();
+	CFontTexture::ClearTransientCaches();
 
 	/*
 	* // Some bitmaps are still allocated even after CglFont::ReallocSystemFontAtlases(true);
@@ -900,10 +910,18 @@ void SpringApp::Reload(const std::string script)
 	assert(!gu->globalReload);
 
 	luaMenuController->Reset();
+	RmlGui::ReleaseMatchCaches();
 	// clean changed configs
 	configHandler->Update();
 
 	LOG("[SpringApp::%s][12] #script=" _STPF_ "", __func__, script.size());
+
+#if defined(USE_MIMALLOC) && USE_MIMALLOC
+	mi_collect(true);
+#endif
+#ifdef __linux__
+	malloc_trim(0);
+#endif
 
 	if (script.empty()) {
 		// if no script, drop back to menu

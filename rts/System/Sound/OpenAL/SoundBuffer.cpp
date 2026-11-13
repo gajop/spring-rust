@@ -21,6 +21,14 @@ SoundBuffer::bufferVecT SoundBuffer::buffers;
 
 static std::vector<std::uint8_t> decodeBuffer;
 
+void SoundBuffer::Deinitialise()
+{
+	bufferMap.clear();
+	buffers.clear();
+	decodeBuffer.clear();
+	decodeBuffer.shrink_to_fit();
+}
+
 
 #pragma pack(push, 1)
 // Header copied from WavLib by Michael McTernan

@@ -406,6 +406,21 @@ void RmlGui::Reload()
 	RmlGui::Initialize();
 }
 
+void RmlGui::ReleaseMatchCaches()
+{
+	if (!RmlInitialized())
+		return;
+
+	state->pending_deletes.clear();
+	state->pending_deletes.shrink_to_fit();
+
+	Rml::Factory::ClearStyleSheetCache();
+	Rml::Factory::ClearTemplateCache();
+	Rml::ReleaseCompiledGeometry(&state->render_interface);
+	Rml::ReleaseTextures(&state->render_interface);
+	Rml::ReleaseFontResources();
+}
+
 void RmlGui::SetMenuActive(bool active)
 {
 	if (!RmlInitialized())

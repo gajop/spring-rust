@@ -25,6 +25,12 @@
 #include <cstdint>
 #include <memory>
 
+#ifdef __linux__
+	#include <malloc.h>
+#endif
+#if defined(USE_MIMALLOC) && USE_MIMALLOC
+	#include <mimalloc.h>
+#endif
 #ifdef _WIN32
 	#include "lib/SOP/SOP.hpp" // NvOptimus
 #endif
@@ -95,6 +101,17 @@ static bool SetNvOptimusProfile(const std::string& processFileName)
  */
 int main(int argc, char* argv[])
 {
+#if defined(USE_MIMALLOC) && USE_MIMALLOC
+	// Keep 2 MiB transparent huge pages disabled in mimalloc so mi_collect(true)
+	// can purge freed 4 KiB pages back to the OS across match reloads instead of
+	// pinning whole 2 MiB slices around a few long-lived menu allocations.
+	mi_option_set(mi_option_allow_thp, 0);
+#endif
+#ifdef __linux__
+	// Bound glibc per-thread arenas used by third-party/driver shared libraries so
+	// torn-down worker pools do not leave hundreds of MiB stranded in un-trimmed arenas.
+	mallopt(M_ARENA_MAX, 2);
+#endif
 	nowide::args a(argc, argv); // Fix arguments - make them UTF-8
 
 // PROFILE builds exit on execv, HEADLESS does not use the GPU
