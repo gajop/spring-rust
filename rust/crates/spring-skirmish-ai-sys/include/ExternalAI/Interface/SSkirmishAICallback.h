@@ -2256,6 +2256,18 @@ struct SSkirmishAICallback {
 
 	bool              (CALLING_CONV *Debug_GraphDrawer_isEnabled)(int skirmishAIId);
 
+	/**
+	 * Fills keys and values with the match's mod options map (from [GAME][MODOPTIONS]).
+	 * If either keys or values is NULL, only returns the number of mod options.
+	 */
+	int               (CALLING_CONV *Game_getModOptions)(int skirmishAIId, const char** keys, const char** values); //$ MAP
+
+	/**
+	 * Returns the value associated with the given key in the match's mod options map,
+	 * or NULL if key is NULL or not found.
+	 */
+	const char*       (CALLING_CONV *Game_getModOption)(int skirmishAIId, const char* const key);
+
 };
 
 #if	defined(__cplusplus)

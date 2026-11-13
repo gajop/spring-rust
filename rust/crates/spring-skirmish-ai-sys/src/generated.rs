@@ -3666,6 +3666,21 @@ pub struct SSkirmishAICallback {
     >,
     pub Debug_GraphDrawer_isEnabled:
         ::std::option::Option<unsafe extern "system" fn(skirmishAIId: ::std::os::raw::c_int) -> bool>,
+    #[doc = " Fills keys and values with the match's mod options map (from \\[GAME\\]\\[MODOPTIONS\\]).\n If either keys or values is NULL, only returns the number of mod options."]
+    pub Game_getModOptions: ::std::option::Option<
+        unsafe extern "system" fn(
+            skirmishAIId: ::std::os::raw::c_int,
+            keys: *mut *const ::std::os::raw::c_char,
+            values: *mut *const ::std::os::raw::c_char,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " Returns the value associated with the given key in the match's mod options map,\n or NULL if key is NULL or not found."]
+    pub Game_getModOption: ::std::option::Option<
+        unsafe extern "system" fn(
+            skirmishAIId: ::std::os::raw::c_int,
+            key: *const ::std::os::raw::c_char,
+        ) -> *const ::std::os::raw::c_char,
+    >,
 }
 #[test]
 fn bindgen_test_layout_SSkirmishAICallback() {
@@ -3673,7 +3688,7 @@ fn bindgen_test_layout_SSkirmishAICallback() {
     let ptr = UNINIT.as_ptr();
     assert_eq!(
         ::std::mem::size_of::<SSkirmishAICallback>(),
-        4720usize,
+        4736usize,
         concat!("Size of: ", stringify!(SSkirmishAICallback))
     );
     assert_eq!(
@@ -9786,6 +9801,26 @@ fn bindgen_test_layout_SSkirmishAICallback() {
             stringify!(SSkirmishAICallback),
             "::",
             stringify!(Debug_GraphDrawer_isEnabled)
+        )
+    );
+    assert_eq!(
+        unsafe { ::std::ptr::addr_of!((*ptr).Game_getModOptions) as usize - ptr as usize },
+        4720usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SSkirmishAICallback),
+            "::",
+            stringify!(Game_getModOptions)
+        )
+    );
+    assert_eq!(
+        unsafe { ::std::ptr::addr_of!((*ptr).Game_getModOption) as usize - ptr as usize },
+        4728usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SSkirmishAICallback),
+            "::",
+            stringify!(Game_getModOption)
         )
     );
 }

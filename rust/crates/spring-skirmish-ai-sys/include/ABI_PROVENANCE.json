@@ -1,9 +1,9 @@
 {
-  "engine_revision": "443c9ba41c805488c5776d15142d1939609f739c",
+  "engine_revision": "8eeb837f7ff631a2efe9be8e4753b4cf701d6264",
   "headers": {
     "ExternalAI/Interface/AISCommands.h": "db16d2de7e7889fecd5036648f9eb94815a7458b2feea310ce462f114eaf9026",
     "ExternalAI/Interface/AISEvents.h": "c10dc7f299d0c48a0315f4cb82185658114ba954ea2e5adcc25f2db248cfcf6c",
-    "ExternalAI/Interface/SSkirmishAICallback.h": "49bb34660e723b068ba64cc284699c9484f0a5aa2d774383ca711954e96e9a20",
+    "ExternalAI/Interface/SSkirmishAICallback.h": "c7f95845c89fc6d2878878246aefd6b38e9150ce2a03e547d3f7ec14e4f47565",
     "ExternalAI/Interface/aidefines.h": "10e43c37d274178736b395eedc124f23ea7a4c6b61ac583649d282096a6d21e6",
     "System/ExportDefines.h": "80e97e97280e4b0268e84dc6b5242e826760b992f76951b8c56cafef63fb7aea",
     "System/MainDefines.h": "469648d218459fbf18ea997375bf1208a8048aac59512ac81c56c78d3b5cc1c0"

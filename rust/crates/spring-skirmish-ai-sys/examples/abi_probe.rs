@@ -22,6 +22,8 @@ fn main() {
     offset!(SSkirmishAICallback, Unit_getRulesParamFloat);
     offset!(SSkirmishAICallback, getEnemyUnits);
     offset!(SSkirmishAICallback, SkirmishAI_Info_getValueByKey);
+    offset!(SSkirmishAICallback, Game_getModOptions);
+    offset!(SSkirmishAICallback, Game_getModOption);
     size!(SInitEvent);
     offset!(SInitEvent, callback);
     offset!(SInitEvent, savedGame);

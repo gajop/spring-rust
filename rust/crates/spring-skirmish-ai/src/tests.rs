@@ -231,3 +231,47 @@ fn destructor_panics_do_not_poison_the_registry() {
     assert_eq!(unsafe { runtime.init(AiId(2), &t) }, 0);
     assert_ne!(runtime.release(AiId(2)), 0);
 }
+unsafe extern "system" fn mod_options_cb(
+    _: i32,
+    keys: *mut *const std::ffi::c_char,
+    values: *mut *const std::ffi::c_char,
+) -> i32 {
+    const KEYS: [&std::ffi::CStr; 2] = [c"sb_game_mode", c"sb_space_map"];
+    const VALS: [&std::ffi::CStr; 2] = [c"siege", c"amber-veil"];
+    if !keys.is_null() && !values.is_null() {
+        for i in 0..KEYS.len() {
+            unsafe {
+                keys.add(i).write(KEYS[i].as_ptr());
+                values.add(i).write(VALS[i].as_ptr());
+            }
+        }
+    }
+    KEYS.len() as i32
+}
+unsafe extern "system" fn mod_option_cb(
+    _: i32,
+    key: *const std::ffi::c_char,
+) -> *const std::ffi::c_char {
+    if unsafe { std::ffi::CStr::from_ptr(key) } == c"sb_game_mode" {
+        c"siege".as_ptr()
+    } else {
+        std::ptr::null()
+    }
+}
+#[test]
+fn mod_options_and_mod_option_read_engine_callbacks() {
+    let t = sys::SSkirmishAICallback {
+        Game_getModOptions: Some(mod_options_cb),
+        Game_getModOption: Some(mod_option_cb),
+        ..table()
+    };
+    let c = Context::new(AiId(1), &t);
+    let all = c.mod_options().unwrap();
+    assert_eq!(all.get("sb_game_mode").map(String::as_str), Some("siege"));
+    assert_eq!(
+        all.get("sb_space_map").map(String::as_str),
+        Some("amber-veil")
+    );
+    assert_eq!(c.mod_option("sb_game_mode").unwrap().as_deref(), Some("siege"));
+    assert_eq!(c.mod_option("missing").unwrap(), None);
+}

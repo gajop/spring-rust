@@ -1,5 +1,6 @@
 use crate::{AiId, Error, FeatureDefId, FeatureId, Result, TeamId, UnitDefId, UnitId, sys};
 use std::{
+    collections::BTreeMap,
     ffi::{CStr, CString, c_void},
     marker::PhantomData,
     rc::Rc,
@@ -85,14 +86,48 @@ impl<'a> Context<'a> {
     pub fn option(&self, key: &str) -> Result<Option<String>> {
         let key = CString::new(key).map_err(|_| Error::InvalidInput("option key contains NUL"))?;
         let pointer = callback!(self, SkirmishAI_OptionValues_getValueByKey, key.as_ptr());
-        if pointer.is_null() {
-            return Ok(None);
+        Ok(unsafe { optional_cstr(pointer) })
+    }
+    /// Match mod options parsed from `[GAME][MODOPTIONS]` by the engine.
+    pub fn mod_options(&self) -> Result<BTreeMap<String, String>> {
+        let count = callback!(
+            self,
+            Game_getModOptions,
+            std::ptr::null_mut(),
+            std::ptr::null_mut()
+        );
+        if count == 0 {
+            return Ok(BTreeMap::new());
         }
-        Ok(Some(
-            unsafe { CStr::from_ptr(pointer) }
-                .to_string_lossy()
-                .into_owned(),
-        ))
+        if !(0..=1_048_576).contains(&count) {
+            return Err(Error::InvalidInput("invalid mod options count"));
+        }
+        let capacity = count as usize;
+        let mut keys = vec![std::ptr::null(); capacity];
+        let mut values = vec![std::ptr::null(); capacity];
+        let written = callback!(self, Game_getModOptions, keys.as_mut_ptr(), values.as_mut_ptr());
+        if !(0..=count).contains(&written) {
+            return Err(Error::InvalidInput("mod options count overflow"));
+        }
+        let mut options = BTreeMap::new();
+        for (&k, &v) in keys[..written as usize]
+            .iter()
+            .zip(&values[..written as usize])
+        {
+            let (Some(key), Some(value)) = (unsafe { optional_cstr(k) }, unsafe { optional_cstr(v) })
+            else {
+                return Err(Error::InvalidInput("null mod option entry"));
+            };
+            options.insert(key, value);
+        }
+        Ok(options)
+    }
+    /// Match mod option value associated with `key`, or `None` if absent.
+    pub fn mod_option(&self, key: &str) -> Result<Option<String>> {
+        let key =
+            CString::new(key).map_err(|_| Error::InvalidInput("mod option key contains NUL"))?;
+        let pointer = callback!(self, Game_getModOption, key.as_ptr());
+        Ok(unsafe { optional_cstr(pointer) })
     }
     /// Read-only diagnostic; safe APIs never enable cheat access.
     pub fn cheats_enabled(&self) -> Result<bool> {
@@ -320,4 +355,15 @@ impl<'a> Context<'a> {
     pub fn stop(&self, unit: UnitId) -> Result<()> {
         self.custom_order(unit, 0, &[], OrderOptions::default())
     }
+}
+
+unsafe fn optional_cstr(pointer: *const std::ffi::c_char) -> Option<String> {
+    if pointer.is_null() {
+        return None;
+    }
+    Some(
+        unsafe { CStr::from_ptr(pointer) }
+            .to_string_lossy()
+            .into_owned(),
+    )
 }

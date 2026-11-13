@@ -9,6 +9,7 @@ int main(void) {
  SIZE(SSkirmishAICallback); OFFSET(SSkirmishAICallback, Engine_handleCommand);
  OFFSET(SSkirmishAICallback, Unit_getVel); OFFSET(SSkirmishAICallback, Unit_getRulesParamFloat);
  OFFSET(SSkirmishAICallback, getEnemyUnits); OFFSET(SSkirmishAICallback, SkirmishAI_Info_getValueByKey);
+ OFFSET(SSkirmishAICallback, Game_getModOptions); OFFSET(SSkirmishAICallback, Game_getModOption);
  SIZE(SInitEvent); OFFSET(SInitEvent, callback); OFFSET(SInitEvent, savedGame);
  SIZE(SUnitDamagedEvent); OFFSET(SUnitDamagedEvent, dir_posF3); OFFSET(SUnitDamagedEvent, paralyzer);
  SIZE(SCustomUnitCommand); OFFSET(SCustomUnitCommand, options); OFFSET(SCustomUnitCommand, params);
