@@ -196,11 +196,25 @@ static void NativeGetLuaMemUsage(const GetLuaMemUsageQuery*, GetLuaMemUsageResul
 	}
 }
 
+static const Error VID_MEM_UNKNOWN_ERROR = {
+	.code = native_error::NotAvailable,
+	.message = "The driver does not report video memory"
+};
+
+// usedMB: the card's memory in use by every process; availableMB: the card's total
+// (NVX, Mesa) or, where the driver only reports what is free (ATI), that free figure,
+// with usedMB 0. Either way availableMB - usedMB is what is free now. NotAvailable when
+// the driver reports nothing (headless, Intel, a driver without the extensions).
 static void NativeGetVidMemUsage(const GetVidMemUsageQuery*, GetVidMemUsageResult* result)
 {
 	result->error = nullptr;
-	int2 vidMemInfo;
-	GetAvailableVideoRAM(&vidMemInfo.x, globalRenderingInfo.glVendor);
+	result->usedMB = 0.0f;
+	result->availableMB = 0.0f;
+	int2 vidMemInfo = {0, 0};
+	if (!GetAvailableVideoRAM(&vidMemInfo.x, globalRenderingInfo.glVendor) || vidMemInfo.x <= 0 || vidMemInfo.y < 0 || vidMemInfo.y > vidMemInfo.x) {
+		result->error = &VID_MEM_UNKNOWN_ERROR;
+		return;
+	}
 
 	result->usedMB = (vidMemInfo.x - vidMemInfo.y) / 1024.0f;
 	result->availableMB = (vidMemInfo.x) / 1024.0f;
