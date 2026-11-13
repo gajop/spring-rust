@@ -39,6 +39,7 @@ public:
 public:
 	const CInfoTexture* GetInfoTextureConst(const std::string& name) const override;
 	      CInfoTexture* GetInfoTexture     (const std::string& name)       override;
+	bool OwnsInfoTexture(const CInfoTexture* tex) const override;
 
 protected:
 	friend class CModernInfoTexture;
@@ -79,4 +80,5 @@ public:
 public:
 	const CInfoTexture* GetInfoTextureConst(const std::string& name) const override { return nullptr; }
 	      CInfoTexture* GetInfoTexture(const std::string& name)            override { return nullptr; }
+	bool OwnsInfoTexture(const CInfoTexture* tex) const override { return false; }
 };

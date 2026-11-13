@@ -46,9 +46,11 @@
 #include "Game/UI/InfoConsole.h"
 #include "Game/UI/MouseHandler.h"
 #include "Lua/LuaOpenGL.h"
+#include "Lua/LuaOpenGLUtils.h"
 #include "Lua/LuaDebugExtra.h"
 #include "Lua/LuaVFSDownload.h"
 #include "Menu/LuaMenuController.h"
+#include "NativeInterface/GfxLifecycle.h"
 #include "Menu/SelectMenu.h"
 #include "Net/GameServer.h"
 #include "Net/Protocol/NetProtocol.h" // clientNet
@@ -849,6 +851,11 @@ void SpringApp::Reload(const std::string script)
 
 	LuaOpenGL::Free();
 	LuaOpenGL::Init();
+	// parsed engine texture names and the GL objects native and Wasm modules made
+	// belong to the match that just ended; its modules are unloaded by now, and the
+	// next match must neither resolve a name to them nor keep their video memory
+	LuaOpenGLUtils::ResetState();
+	CleanupNativeGfxResources();
 
 	/*
 	* // Some bitmaps are still allocated even after CglFont::ReallocSystemFontAtlases(true);

@@ -125,6 +125,9 @@ class LuaMatTexture {
 		bool enable = false;
 		// bool enableTexParams = false;
 
+		// whether the engine object behind this texture exists right now; the
+		// getters below return 0 (and GL_TEXTURE_2D) when it does not
+		bool IsAvailable() const;
 		std::tuple<int, int, int> GetSize() const;
 		GLuint GetTextureID() const;
 		GLuint GetTextureTarget() const;
