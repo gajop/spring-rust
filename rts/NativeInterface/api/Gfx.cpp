@@ -560,6 +560,11 @@ static bool ResolveTexture(const char* name, ResolvedTexture& resolved)
 	if (!LuaOpenGLUtils::ParseTextureImage(nullptr, matTex, name != nullptr ? name : ""))
 		return false;
 
+	// an engine texture whose owner does not exist right now (no game yet, between
+	// matches, the world still loading) is not found rather than a dead pointer
+	if (!matTex.IsAvailable())
+		return false;
+
 	const auto [xsize, ysize, zsize] = matTex.GetSize();
 	resolved.id = matTex.GetTextureID();
 	resolved.target = matTex.GetTextureTarget();
@@ -4935,6 +4940,11 @@ static void DrawGroundCircle(const GfxGroundCircleQuery* query, GfxEmptyResult* 
 		const WeaponDef* wd = weaponDefHandler != nullptr ? weaponDefHandler->GetWeaponDefByID(query->weaponDefID) : nullptr;
 		if (wd == nullptr) {
 			result->error = &NOT_FOUND_ERROR;
+			return;
+		}
+
+		if (query->gravity == 0.0f && mapInfo == nullptr) {
+			result->error = &NOT_READY_ERROR;
 			return;
 		}
 

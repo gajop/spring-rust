@@ -396,7 +396,7 @@ namespace CNamedTextures {
 		return (size_t(-1));
 	}
 
-	const TexInfo* GetInfo(size_t texIdx) { return &texInfoVec[texIdx]; }
+	const TexInfo* GetInfo(size_t texIdx) { return ((texIdx < texInfoVec.size())? &texInfoVec[texIdx]: nullptr); }
 	const TexInfo* GetInfo(const std::string& texName, bool forceLoad, bool persist, bool secondaryGLContext)
 	{
 	RECOIL_DETAILED_TRACY_ZONE;

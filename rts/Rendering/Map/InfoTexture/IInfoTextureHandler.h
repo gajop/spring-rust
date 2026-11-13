@@ -57,6 +57,10 @@ public:
 public:
 	virtual const CInfoTexture* GetInfoTextureConst(const std::string& name) const = 0;
 	virtual       CInfoTexture* GetInfoTexture     (const std::string& name)       = 0;
+
+	// whether `tex` is one of this handler's live info textures; a pointer kept
+	// from an earlier match (the handler is recreated per game) is not
+	virtual bool OwnsInfoTexture(const CInfoTexture* tex) const = 0;
 };
 
 extern std::unique_ptr<IInfoTextureHandler> infoTextureHandler;

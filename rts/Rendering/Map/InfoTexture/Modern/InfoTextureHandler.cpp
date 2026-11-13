@@ -74,6 +74,19 @@ CInfoTexture* CInfoTextureHandler::GetInfoTexture(const std::string& name)
 	return (const_cast<CInfoTexture*>(GetInfoTextureConst(name)));
 }
 
+bool CInfoTextureHandler::OwnsInfoTexture(const CInfoTexture* tex) const
+{
+	if (tex == nullptr)
+		return false;
+
+	for (const auto& [name, itex]: infoTextures) {
+		if (static_cast<const CInfoTexture*>(itex) == tex)
+			return true;
+	}
+
+	return false;
+}
+
 
 bool CInfoTextureHandler::IsEnabled() const
 {

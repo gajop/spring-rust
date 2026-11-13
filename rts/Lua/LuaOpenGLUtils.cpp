@@ -107,7 +107,9 @@ extern "C" bool GetNativeGfxTextureInfo(
 	const char* name, uint32_t* id, int32_t* xsize, int32_t* ysize, uint32_t* target);
 
 
-// for "$info:los", etc
+// parsed "$ssmf_splat_normals:X" names; entries hold only plain values, never a
+// pointer to an engine object: the cache outlives a match (it is process-wide),
+// while info textures, defs and drawers are recreated for every game
 static spring::unsynced_map<size_t, LuaMatTexture> luaMatTextures;
 
 /******************************************************************************/
@@ -116,7 +118,6 @@ static spring::unsynced_map<size_t, LuaMatTexture> luaMatTextures;
 
 void LuaOpenGLUtils::ResetState()
 {
-	// must be cleared, LuaMatTexture's contain pointers
 	luaMatTextures.clear();
 }
 
@@ -234,9 +235,11 @@ S3DModel* ParseModel(int defID)
 	const SolidObjectDef* objectDef = nullptr;
 
 	if (defID < 0) {
-		objectDef = featureDefHandler->GetFeatureDefByID(-defID);
+		if (featureDefHandler != nullptr)
+			objectDef = featureDefHandler->GetFeatureDefByID(-defID);
 	} else {
-		objectDef = unitDefHandler->GetUnitDefByID(defID);
+		if (unitDefHandler != nullptr)
+			objectDef = unitDefHandler->GetUnitDefByID(defID);
 	}
 
 	if (objectDef == nullptr)
@@ -350,6 +353,10 @@ static bool ParseNamedSubTexture(LuaMatTexture& texUnit, const std::string& texN
 
 		case hashString("$info"):
 		case hashString("$extra"): {
+			// no info textures outside a game (menu, loading before the world drawer)
+			if (infoTextureHandler == nullptr)
+				return false;
+
 			// try to find a matching (non-dummy) info-texture based on suffix
 			CInfoTexture* itex = infoTextureHandler->GetInfoTexture(texName.substr(sepIdx + 1));
 
@@ -357,7 +364,8 @@ static bool ParseNamedSubTexture(LuaMatTexture& texUnit, const std::string& texN
 				texUnit.type = LuaMatTexture::LUATEX_INFOTEX_SUFFIX;
 				texUnit.data = itex; // fast, and barely preserves RTTI
 
-				luaMatTextures[texNameHash] = texUnit;
+				// not cached: the handler and its textures are freed when the game
+				// ends, and a cached pointer crashed the next match in the same process
 				return true;
 			}
 		} break;
@@ -452,7 +460,7 @@ bool LuaOpenGLUtils::ParseTextureImage(lua_State* L, LuaMatTexture& texUnit, con
 			const char* startPtr = image.c_str() + 1; // skip the '#'
 			const int unitDefID = (int)strtol(startPtr, &endPtr, 10);
 
-			if (endPtr == startPtr)
+			if (endPtr == startPtr || unitDefHandler == nullptr)
 				return false;
 
 			const UnitDef* ud = unitDefHandler->GetUnitDefByID(unitDefID);
@@ -487,7 +495,7 @@ bool LuaOpenGLUtils::ParseTextureImage(lua_State* L, LuaMatTexture& texUnit, con
 				} break;
 
 				case LuaMatTexture::LUATEX_HEIGHTMAP: {
-					if (readMap->GetHeightMapTexture() == 0) {
+					if (readMap == nullptr || readMap->GetHeightMapTexture() == 0) {
 						// optional, return false when not available
 						return false;
 					}
@@ -526,9 +534,128 @@ bool LuaOpenGLUtils::ParseTextureImage(lua_State* L, LuaMatTexture& texUnit, con
 }
 
 
+bool LuaMatTexture::IsAvailable() const
+{
+	switch (type) {
+		case LUATEX_NONE: {
+			return false;
+		} break;
+		case LUATEX_NAMED: {
+			return (CNamedTextures::GetInfo(*reinterpret_cast<const size_t*>(&data)) != nullptr);
+		} break;
+		case LUATEX_NATIVE: {
+			return (data != nullptr);
+		} break;
+
+		case LUATEX_LUATEXTURE: {
+			if (state == nullptr)
+				return false;
+
+			return (CLuaHandle::GetActiveTextures(reinterpret_cast<lua_State*>(state)).GetInfo(*reinterpret_cast<const size_t*>(&data)) != nullptr);
+		} break;
+		case LUATEX_LUATEXTUREATLAS: {
+			if (state == nullptr)
+				return false;
+
+			return (CLuaHandle::GetActiveAtlasTextures(reinterpret_cast<lua_State*>(state)).GetAtlasByIndex(*reinterpret_cast<const size_t*>(&data)) != nullptr);
+		} break;
+
+		case LUATEX_UNITTEXTURE1:
+		case LUATEX_UNITTEXTURE2: {
+			return (textureHandlerS3O.GetTexture(*reinterpret_cast<const int*>(&data)) != nullptr);
+		} break;
+		case LUATEX_UNITBUILDPIC: {
+			return (unitDefHandler != nullptr && data != nullptr);
+		} break;
+
+		case LUATEX_HEIGHTMAP:
+		case LUATEX_SMF_GRASS:
+		case LUATEX_SMF_DETAIL:
+		case LUATEX_SMF_MINIMAP:
+		case LUATEX_SMF_SHADING:
+		case LUATEX_SMF_NORMALS:
+		case LUATEX_SSMF_NORMALS:
+		case LUATEX_SSMF_SPECULAR:
+		case LUATEX_SSMF_SDISTRIB:
+		case LUATEX_SSMF_SDETAIL:
+		case LUATEX_SSMF_SNORMALS:
+		case LUATEX_SSMF_SKYREFL:
+		case LUATEX_SSMF_EMISSION:
+		case LUATEX_SSMF_PARALLAX: {
+			return (readMap != nullptr);
+		} break;
+
+		case LUATEX_INFOTEX_SUFFIX: {
+			// `data` may point into the handler of an earlier match
+			return (infoTextureHandler != nullptr && infoTextureHandler->OwnsInfoTexture(static_cast<const CInfoTexture*>(data)));
+		} break;
+		case LUATEX_INFOTEX_ACTIVE: {
+			return (infoTextureHandler != nullptr);
+		} break;
+
+		case LUATEX_MAP_GBUFFER_NORM:
+		case LUATEX_MAP_GBUFFER_DIFF:
+		case LUATEX_MAP_GBUFFER_SPEC:
+		case LUATEX_MAP_GBUFFER_EMIT:
+		case LUATEX_MAP_GBUFFER_MISC:
+		case LUATEX_MAP_GBUFFER_ZVAL: {
+			return (readMap != nullptr && readMap->GetGroundDrawer() != nullptr && readMap->GetGroundDrawer()->GetGeometryBuffer() != nullptr);
+		} break;
+
+		case LUATEX_MODEL_GBUFFER_NORM:
+		case LUATEX_MODEL_GBUFFER_DIFF:
+		case LUATEX_MODEL_GBUFFER_SPEC:
+		case LUATEX_MODEL_GBUFFER_EMIT:
+		case LUATEX_MODEL_GBUFFER_MISC:
+		case LUATEX_MODEL_GBUFFER_ZVAL: {
+			return (unitDrawer != nullptr && unitDrawer->GetGeometryBuffer() != nullptr);
+		} break;
+
+		case LUATEX_FONT: {
+			return (font != nullptr);
+		} break;
+		case LUATEX_FONTSMALL: {
+			return (smallFont != nullptr);
+		} break;
+
+		case LUATEX_EXPLOSIONS_ATLAS: {
+			return (projectileDrawer != nullptr && projectileDrawer->textureAtlas != nullptr);
+		} break;
+		case LUATEX_GROUNDFX_ATLAS: {
+			return (projectileDrawer != nullptr && projectileDrawer->groundFXAtlas != nullptr);
+		} break;
+		case LUATEX_DECALS_ATLAS: {
+			return (groundDecals != nullptr);
+		} break;
+
+		// process-lifetime handlers; their ids are 0 until created
+		case LUATEX_3DOTEXTURE:
+		case LUATEX_MAP_REFLECTION:
+		case LUATEX_SKY_REFLECTION:
+		case LUATEX_SPECULAR:
+		case LUATEX_SHADOWMAP:
+		case LUATEX_SHADOWCOLOR:
+		case LUATEX_ICONS_ATLAS0:
+		case LUATEX_ICONS_ATLAS1: {
+			return true;
+		} break;
+
+		default: {
+		} break;
+	}
+
+	return false;
+}
+
+
 GLuint LuaMatTexture::GetTextureID() const
 {
 	GLuint texID = 0;
+
+	// a backing object that is gone (between matches, before the world exists)
+	// is no texture rather than a dereference of a dead or null pointer
+	if (!IsAvailable())
+		return texID;
 
 	#define groundDrawer (readMap->GetGroundDrawer())
 	#define gdGeomBuff (groundDrawer->GetGeometryBuffer())
@@ -636,12 +763,10 @@ GLuint LuaMatTexture::GetTextureID() const
 
 		// map info-overlay textures
 		case LUATEX_INFOTEX_SUFFIX: {
-			if (infoTextureHandler != nullptr) {
-				const CInfoTexture* cInfoTex = static_cast<const CInfoTexture*>(data);
-				      CInfoTexture* mInfoTex = const_cast<CInfoTexture*>(cInfoTex);
+			const CInfoTexture* cInfoTex = static_cast<const CInfoTexture*>(data);
+			      CInfoTexture* mInfoTex = const_cast<CInfoTexture*>(cInfoTex);
 
-				texID = mInfoTex->GetTexture();
-			}
+			texID = mInfoTex->GetTexture();
 		} break;
 
 		case LUATEX_INFOTEX_ACTIVE: {
@@ -698,6 +823,9 @@ GLuint LuaMatTexture::GetTextureID() const
 GLuint LuaMatTexture::GetTextureTarget() const
 {
 	GLuint texType = GL_TEXTURE_2D;
+
+	if (!IsAvailable())
+		return texType;
 
 	#define groundDrawer (readMap->GetGroundDrawer())
 	#define gdGeomBuff (groundDrawer->GetGeometryBuffer())
@@ -898,6 +1026,9 @@ std::tuple<int, int, int> LuaMatTexture::GetSize() const
 		return std::make_tuple(x, y, z);
 	};
 
+	if (!IsAvailable())
+		return ReturnHelper(0);
+
 	switch (type) {
 		case LUATEX_NAMED: {
 			const CNamedTextures::TexInfo* namedTexInfo = CNamedTextures::GetInfo(*reinterpret_cast<const size_t*>(&data));
@@ -1013,10 +1144,8 @@ std::tuple<int, int, int> LuaMatTexture::GetSize() const
 
 
 		case LUATEX_INFOTEX_SUFFIX: {
-			if (infoTextureHandler != nullptr) {
-				auto sz = static_cast<const CInfoTexture*>(data)->GetTexSize();
-				return ReturnHelper(sz.x, sz.y);
-			}
+			auto sz = static_cast<const CInfoTexture*>(data)->GetTexSize();
+			return ReturnHelper(sz.x, sz.y);
 		} break;
 
 		case LUATEX_INFOTEX_ACTIVE: {
