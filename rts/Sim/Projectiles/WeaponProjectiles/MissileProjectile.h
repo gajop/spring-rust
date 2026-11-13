@@ -33,12 +33,23 @@ public:
 
 	void SetIgnoreError(bool b) { ignoreError = b; }
 
+	// Stop target/launch-arc steering while preserving engine movement, acceleration,
+	// collision and lifetime. Re-enabling does not replay an obsolete launch arc.
+	void SetGuidanceEnabled(bool enabled) {
+		guidanceEnabled = enabled;
+		if (!enabled) {
+			extraHeight = 0.0f;
+			extraHeightTime = 0;
+		}
+	}
+
 private:
 	float3 UpdateTargeting();
 	void UpdateWobble();
 	void UpdateDance();
 
 	bool ignoreError;
+	bool guidanceEnabled = true;
 
 	float maxSpeed;
 	float extraHeight;

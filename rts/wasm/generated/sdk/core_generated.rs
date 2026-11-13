@@ -25599,6 +25599,11 @@ pub mod projectile_control {
         }
         #[link(wasm_import_module = "spring:projectile-control")]
         unsafe extern "C" {
+            #[link_name = "set-projectile-guidance"]
+            pub safe fn core_set_projectile_guidance(p0: i32, p1: i32) -> i64;
+        }
+        #[link(wasm_import_module = "spring:projectile-control")]
+        unsafe extern "C" {
             #[link_name = "set-projectile-ignore-tracking-error"]
             pub safe fn core_set_projectile_ignore_tracking_error(p0: i32, p1: i32) -> i64;
         }
@@ -25755,6 +25760,28 @@ pub mod projectile_control {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (projectile_id, gravity);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn set_projectile_guidance(projectile_id: i32, enable: bool) -> Result<bool> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_set_projectile_guidance(projectile_id, if enable { 1 } else { 0 }) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            match packed as u32 {
+                0 => Ok(false),
+                1 => Ok(true),
+                _ => Err(ApiError::new(ErrorCode::Internal as i32)),
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (projectile_id, enable);
             Err(unreachable!())
         }
     }

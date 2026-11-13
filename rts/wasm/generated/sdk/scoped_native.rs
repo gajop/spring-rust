@@ -43705,6 +43705,34 @@ pub(crate) mod projectile_control {
         }
         Ok((result.success) as _)
     }
+    pub(crate) fn set_projectile_guidance(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::ProjectileControlApi>,
+        projectile_id: i32,
+        enable: bool,
+    ) -> Result<bool> {
+        let native_projectile_id = (projectile_id) as _;
+        let native_enable = (enable) as _;
+        let query = sys::SetProjectileGuidanceQuery {
+            projectileID: native_projectile_id,
+            enable: native_enable,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .SetProjectileGuidance
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::SetProjectileGuidanceResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.success) as _)
+    }
     pub(crate) fn set_projectile_ignore_tracking_error(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::ProjectileControlApi>,

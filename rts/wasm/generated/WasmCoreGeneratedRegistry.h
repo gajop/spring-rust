@@ -1319,6 +1319,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:projectile-control", "set-projectile-collision", "i32->i64", 5u},
     {"spring:projectile-control", "set-projectile-damages", "i32,i32,f32,i32->i64", 5u},
     {"spring:projectile-control", "set-projectile-gravity", "i32,f32->i64", 5u},
+    {"spring:projectile-control", "set-projectile-guidance", "i32,i32->i64", 5u},
     {"spring:projectile-control", "set-projectile-ignore-tracking-error", "i32,i32->i64", 5u},
     {"spring:projectile-control", "set-projectile-is-intercepted", "i32,i32->i64", 5u},
     {"spring:projectile-control", "set-projectile-move-control", "i32,i32->i64", 5u},

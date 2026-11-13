@@ -1100,6 +1100,12 @@ struct SetProjectileVelocityResult { const Error* error; bool success; };
 struct SetProjectileGravityQuery { int32_t projectileID; float gravity; };
 struct SetProjectileGravityResult { const Error* error; bool success; };
 
+// Enables/disables target/launch-arc steering of a missile projectile. Default on.
+// Movement, motor acceleration, collision and TTL stay engine-owned and unchanged.
+// Other projectile classes return InvalidArgument rather than silently ignoring it.
+struct SetProjectileGuidanceQuery { int32_t projectileID; bool enable; };
+struct SetProjectileGuidanceResult { const Error* error; bool success; };
+
 struct SetProjectileTargetQuery { int32_t projectileID; ProjectileTargetRef target; };
 struct SetProjectileTargetResult { const Error* error; bool success; };
 
@@ -1159,6 +1165,7 @@ struct ProjectileControlApi {
 	void (*SetPieceProjectileParams)(const SetPieceProjectileParamsQuery* query, SetPieceProjectileParamsResult* result);
 	// Appended so earlier native modules keep their table layout.
 	void (*SpawnProjectileZeroBased)(const SpawnProjectileZeroBasedQuery* query, SpawnProjectileZeroBasedResult* result);
+	void (*SetProjectileGuidance)(const SetProjectileGuidanceQuery* query, SetProjectileGuidanceResult* result);
 };
 
 // ============================================================================

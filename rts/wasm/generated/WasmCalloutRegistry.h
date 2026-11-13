@@ -1388,6 +1388,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"projectile_control", "SetProjectileCollision", 5u, true, false, LoweringStatus::automatic},
 	{"projectile_control", "SetProjectileDamages", 5u, true, false, LoweringStatus::automatic},
 	{"projectile_control", "SetProjectileGravity", 5u, true, false, LoweringStatus::automatic},
+	{"projectile_control", "SetProjectileGuidance", 5u, true, false, LoweringStatus::automatic},
 	{"projectile_control", "SetProjectileIgnoreTrackingError", 5u, true, false, LoweringStatus::automatic},
 	{"projectile_control", "SetProjectileIsIntercepted", 5u, true, false, LoweringStatus::automatic},
 	{"projectile_control", "SetProjectileMoveControl", 5u, true, false, LoweringStatus::automatic},

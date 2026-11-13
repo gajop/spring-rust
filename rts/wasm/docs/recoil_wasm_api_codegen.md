@@ -232,3 +232,18 @@ The build fails on:
 - an environment world referencing an unavailable interface.
 
 Generated code is reproducible and never manually edited.
+
+## Missile guidance control
+
+`ProjectileControl.SetProjectileGuidance(projectileID, enable)` is a native/Wasm control for
+`MissileLauncher` projectiles. Guidance defaults to enabled. Disabling it stops target, launch-arc,
+wobble and dance steering while leaving position integration, motor acceleration, collision and
+TTL in the engine. Changing the target does not implicitly re-enable guidance. Re-enabling does
+not replay the discarded launch arc. Other projectile classes return `InvalidArgument`; invalid
+projectile IDs return the ordinary invalid-projectile error. The entry is appended to the native
+control table and requires API version 1.19.
+
+A game's target-loss lifecycle can therefore stop seeking without move-controlling a projectile
+or repeatedly inventing a distant target. The game still decides when to abandon/reacquire a
+lock and how long an outgoing projectile remains alive. There is no Lua parity counterpart;
+actual flight must be checked in an engine integration test, alongside unsupported-class errors.

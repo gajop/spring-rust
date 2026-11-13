@@ -30576,6 +30576,21 @@
       "required_returns_mapped": false,
       "runs": [],
       "reason": "Restored unchanged published ABI from engine 2026.10.3103 (782c0e8a); TTLD and Parts Needed import spring:game/get-wind-vector. It is a legacy API, not a new call. New vector parity coverage is get_wind_vector; no verified or behavioural evidence is claimed here."
+    },
+    "projectile_control.SetProjectileGuidance": {
+      "level": "exempt",
+      "reason": "New native/Wasm steering control has no Lua equivalent to compare. Default-on behavior is unchanged; actual engine trajectory and unsupported-ID behavior are covered by the projectile-flyout integration fixture. This exemption is only from Lua parity, not from engine testing.",
+      "required_environments": [
+        "rules-synced",
+        "gaia-synced"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [],
+      "required_returns_mapped": false,
+      "runs": []
     }
   },
   "counts": {

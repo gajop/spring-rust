@@ -13975,6 +13975,27 @@
     },
     {
       "module": "projectile_control",
+      "function": "SetProjectileGuidance",
+      "import_module": "spring:projectile-control",
+      "import_name": "set-projectile-guidance",
+      "environment_mask": 5,
+      "mutating": true,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32,i32->i64",
+      "notes": []
+    },
+    {
+      "module": "projectile_control",
       "function": "SetProjectileIgnoreTrackingError",
       "import_module": "spring:projectile-control",
       "import_name": "set-projectile-ignore-tracking-error",
@@ -32063,7 +32084,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1216,
+  "automatic_count": 1217,
   "manual_count": 208,
   "unsupported_count": 17
 }

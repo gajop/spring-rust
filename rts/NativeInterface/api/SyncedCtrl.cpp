@@ -5800,6 +5800,31 @@ static void NativeSetProjectileGravity(const SetProjectileGravityQuery* query, S
 	result->success = true;
 }
 
+static void NativeSetProjectileGuidance(const SetProjectileGuidanceQuery* query, SetProjectileGuidanceResult* result)
+{
+	bufferPos = 0;
+	result->error = nullptr;
+	result->success = false;
+
+	if (!IsReady()) {
+		result->error = &NOT_READY_ERROR;
+		return;
+	}
+
+	CProjectile* projectile = projectileHandler.GetProjectileBySyncedID(query->projectileID);
+	if (projectile == nullptr) {
+		result->error = &INVALID_PROJECTILE_ERROR;
+		return;
+	}
+	if (!projectile->weapon || projectile->GetProjectileType() != WEAPON_MISSILE_PROJECTILE) {
+		result->error = MakeError(native_error::InvalidArgument, "Projectile does not support missile guidance");
+		return;
+	}
+
+	static_cast<CMissileProjectile*>(projectile)->SetGuidanceEnabled(query->enable);
+	result->success = true;
+}
+
 static void NativeSetProjectileTarget(const SetProjectileTargetQuery* query, SetProjectileTargetResult* result)
 {
 	bufferPos = 0;
@@ -6140,7 +6165,8 @@ static const ProjectileControlApi PROJECTILE_CONTROL_API = {
 	.SetProjectileMoveControl = NativeSetProjectileMoveControl,
 	.SetProjectileIgnoreTrackingError = NativeSetProjectileIgnoreTrackingError,
 	.SetPieceProjectileParams = NativeSetPieceProjectileParams,
-	.SpawnProjectileZeroBased = NativeSpawnProjectileZeroBased
+	.SpawnProjectileZeroBased = NativeSpawnProjectileZeroBased,
+	.SetProjectileGuidance = NativeSetProjectileGuidance
 };
 
 // ============================================================================

@@ -1801,6 +1801,7 @@
             pub set_projectile_ignore_tracking_error: u32,
             pub set_piece_projectile_params: u32,
             pub spawn_projectile_zero_based: u32,
+            pub set_projectile_guidance: u32,
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -3013,6 +3014,17 @@
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct SetProjectileGravityResult {
+            pub success: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetProjectileGuidanceQuery {
+            pub projectile_id: i32,
+            pub enable: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct SetProjectileGuidanceResult {
             pub success: bool,
         }
 

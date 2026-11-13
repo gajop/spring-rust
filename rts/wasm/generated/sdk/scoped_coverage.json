@@ -627,6 +627,7 @@
   "projectile_control.SetProjectileCollision": "generated",
   "projectile_control.SetProjectileDamages": "generated",
   "projectile_control.SetProjectileGravity": "generated",
+  "projectile_control.SetProjectileGuidance": "generated",
   "projectile_control.SetProjectileIgnoreTrackingError": "generated",
   "projectile_control.SetProjectileIsIntercepted": "generated",
   "projectile_control.SetProjectileMoveControl": "generated",
