@@ -31,6 +31,11 @@
 	                    // The number of seconds till the game starts,
 	                    // counting from the moment when all players are connected and ready.
 	StartPosType=x;     // 0 fixed, 1 random, 2 choose in game, 3 choose before game (see StartPosX)
+	WaitForReady=0;     // optional, default 0. With StartPosType 0, 1 or 3 a player is ready to start
+	                    // as soon as it has loaded; with 1 only once its client sends ready
+	                    // (Spring.RequestStartPosition(x, y, z, true) or the native RequestStartPosition;
+	                    // the position is ignored), so a game can finish its own warm-up first.
+	                    // The game starts when every playing player is ready, as with StartPosType 2.
 
 	DemoFile=demo.sdfz; // if set this game is a multiplayer demo replay
 	SaveFile=save.ssf;  // if set this game is a continuation of a saved game

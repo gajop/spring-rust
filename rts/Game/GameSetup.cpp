@@ -45,6 +45,7 @@ CR_REG_METADATA(CGameSetup, (
 	CR_IGNORED(fixedUnsyncedRNGSeed),
 
 	CR_IGNORED(gameStartDelay),
+	CR_IGNORED(waitForReady),
 
 	CR_IGNORED(numDemoPlayers),
 	CR_IGNORED(maxUnitsPerTeam),
@@ -200,6 +201,7 @@ void CGameSetup::ResetState()
 	fixedUnsyncedRNGSeed = 0;
 
 	gameStartDelay = 0;
+	waitForReady = false;
 	numDemoPlayers = 0;
 	maxUnitsPerTeam = 0;
 
@@ -634,6 +636,7 @@ bool CGameSetup::Init(const std::string& buf)
 	hostDemo    = !demoName.empty();
 
 	file.GetTDef(gameStartDelay, 4u, "GAME\\GameStartDelay");
+	file.GetDef(waitForReady, "0", "GAME\\WaitForReady");
 
 	file.GetDef(enforceArchiveChecks, "0", "GAME\\EnforceArchiveChecks");
 	file.GetDef(recordDemo,          "1", "GAME\\RecordDemo");

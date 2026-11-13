@@ -124,6 +124,21 @@ used to be needed for have engine equivalents usable by any game:
 - **Chat commands.** The `GotChatMsg` callin (environment `ui`, `or-true`) receives a typed chat
   command (without its slash) or a bound action the engine did not handle itself, where LuaUI's and
   LuaMenu's `GotChatMsg` receive it (`CGame::ProcessAction`, `CGameInputReceiver`). True marks it handled.
+- **The pre-game panel.** Modrules `system.allowEngineGameSetupPanel = false` draws none of the
+  engine's pre-game state text ("Waiting for players", "Choose start pos", the countdown), player
+  list or ready box, as when a LuaUI `GameSetup` returns true (`GameSetupDrawer::Draw`). Default true.
+
+### Starting when every player is ready
+
+A game that loads more after the engine's loading screen (populating the map in `GamePreload`,
+then drawing its first view to warm models, textures and shaders) can hold the start until every
+client has finished: the start script's `[GAME] WaitForReady=1` makes a player with a fixed or
+before-game start position (`StartPosType` 0, 1, 3) ready only once its client sends ready, and
+the server starts the match when every playing player is, as with `StartPosType=2`. A `ui` module
+sends it with `system_control().request_start_position(pos, true)`; the position is ignored and
+the script's stays. Spectators, AI teams and replays are not waited for; a host can `/forcestart`.
+Without the key nothing changes. While players wait, the world is drawn and the `ui` module's
+draw callins run, so a game draws its own loading cover over it.
 
 ## Multiple modules
 

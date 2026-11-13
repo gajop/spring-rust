@@ -1226,6 +1226,21 @@ void CGameServer::ProcessPacket(const unsigned playerNum, std::shared_ptr<const 
 					if (hostif != nullptr)
 						hostif->SendPlayerReady(a, rdyState);
 				}
+			} else if (myGameSetup->waitForReady) {
+				// the start position stays the script's; only the ready state is taken
+				if (team >= teams.size()) {
+					Message(spring::format("Invalid teamID %d in NETMSG_STARTPOS from player %d", team, player));
+				} else if (getSkirmishAIIds(skirmishAIs, freeSkirmishAIs, team, player).empty() && ((team != players[player].team) || (players[player].spectator))) {
+					Message(spring::format("Player %d sent spoofed NETMSG_STARTPOS with teamID %d", player, team));
+				} else {
+					const float3& teamStartPos = teams[team].GetStartPos();
+					players[player].SetReadyToStart(rdyState != CPlayer::PLAYER_RDYSTATE_UPDATED);
+
+					Broadcast(CBaseNetProtocol::Get().SendStartPos(player, team, rdyState, teamStartPos.x, teamStartPos.y, teamStartPos.z));
+
+					if (hostif != nullptr)
+						hostif->SendPlayerReady(a, rdyState);
+				}
 			} else {
 				Message(spring::format(NoStartposChange, a));
 			}
@@ -3163,7 +3178,8 @@ unsigned CGameServer::BindConnection(
 
 			if (!teams[newPlayerTeam].IsActive()) {
 				// create new team
-				newPlayer.SetReadyToStart(myGameSetup->startPosType != CGameSetup::StartPos_ChooseInGame);
+				// with WaitForReady the player is ready once its client says so (NETMSG_STARTPOS)
+				newPlayer.SetReadyToStart(myGameSetup->startPosType != CGameSetup::StartPos_ChooseInGame && !myGameSetup->waitForReady);
 				teams[newPlayerTeam].SetActive(true);
 			}
 

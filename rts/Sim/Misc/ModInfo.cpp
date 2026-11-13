@@ -158,6 +158,7 @@ void CModInfo::ResetState()
 
 		allowEnginePlayerlist = true;
 		allowEngineCommandPanel = true;
+		allowEngineGameSetupPanel = true;
 
 		useStartPositionSelecter = true;
 	}
@@ -238,6 +239,7 @@ void CModInfo::Init(const std::string& modFileName)
 		allowTake = system.GetBool("allowTake", allowTake);
 		allowEnginePlayerlist = system.GetBool("allowEnginePlayerlist", allowEnginePlayerlist);
 		allowEngineCommandPanel = system.GetBool("allowEngineCommandPanel", allowEngineCommandPanel);
+		allowEngineGameSetupPanel = system.GetBool("allowEngineGameSetupPanel", allowEngineGameSetupPanel);
 
 		useStartPositionSelecter = system.GetBool("useStartPositionSelecter", useStartPositionSelecter);
 	}

@@ -286,6 +286,12 @@ public:
 	/// usable through actions, hotkeys and the API, but the panel places no buttons, as when a
 	/// LuaUI LayoutButtons returns an empty layout. For games that draw their own interface.
 	bool allowEngineCommandPanel;
+	/// Whether the engine draws its own pre-game panel while players load and ready up: the
+	/// start state ("Waiting for players", "Choose start pos", the countdown), the player list
+	/// and the start position selector's ready box (modrules system.allowEngineGameSetupPanel,
+	/// default true). False draws none of it, as when a LuaUI GameSetup callin says it draws the
+	/// panel itself; readiness and the start are unchanged. For games that draw their own.
+	bool allowEngineGameSetupPanel;
 
 	// how often to report wind speed/direction to wind gens
 	int windChangeReportPeriod;

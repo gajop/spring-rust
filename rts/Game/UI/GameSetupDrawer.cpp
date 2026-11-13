@@ -11,6 +11,7 @@
 #include "Game/Players/PlayerHandler.h"
 #include "Net/GameServer.h"
 #include "Sim/Misc/GlobalSynced.h"
+#include "Sim/Misc/ModInfo.h"
 #include "Sim/Misc/TeamHandler.h"
 #include "Rendering/Fonts/glFont.h"
 #include "Net/Protocol/NetProtocol.h"
@@ -122,11 +123,15 @@ void GameSetupDrawer::Draw()
 	// and deletes itself afterwards
 	bool playerHasReadied = (CStartPosSelecter::GetSelector() == nullptr);
 
-	if (eventHandler.GameSetup(startState, playerHasReadied, playerStates)) {
+	// a LuaUI that handles GameSetup, or a game that turns the panel off (modrules
+	// system.allowEngineGameSetupPanel = false), draws its own
+	const bool luaHandled = eventHandler.GameSetup(startState, playerHasReadied, playerStates);
+
+	if (luaHandled || !modInfo.allowEngineGameSetupPanel) {
 		if (CStartPosSelecter::GetSelector() != nullptr) {
 			CStartPosSelecter::GetSelector()->ShowReadyBox(false);
 
-			if (playerHasReadied) {
+			if (luaHandled && playerHasReadied) {
 				// either we were ready before or a client
 				// listening to the GameSetup event forced
 				// us to be

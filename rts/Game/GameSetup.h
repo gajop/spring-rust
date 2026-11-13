@@ -50,6 +50,7 @@ public:
 		fixedUnsyncedRNGSeed = gs.fixedUnsyncedRNGSeed;
 
 		gameStartDelay = gs.gameStartDelay;
+		waitForReady = gs.waitForReady;
 
 		numDemoPlayers = gs.numDemoPlayers;
 		maxUnitsPerTeam = gs.maxUnitsPerTeam;
@@ -208,6 +209,16 @@ public:
 	 * Default: 4 (seconds)
 	 */
 	unsigned int gameStartDelay;
+
+	/**
+	 * With a start position type other than choose-in-game, whether a player is
+	 * ready to start only once its client says so (NETMSG_STARTPOS with a ready
+	 * state, as Spring.RequestStartPosition or the native RequestStartPosition
+	 * send it; the position is ignored) instead of as soon as it has loaded.
+	 * Lets a game finish its own warm-up before the match begins for everyone.
+	 * Default: false.
+	 */
+	bool waitForReady;
 
 	int numDemoPlayers;
 	int maxUnitsPerTeam;
