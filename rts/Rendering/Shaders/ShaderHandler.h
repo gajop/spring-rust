@@ -46,6 +46,12 @@ public:
 	struct ShaderCache {
 	public:
 		void Clear() { cache.clear(); }
+		/// Delete the cached programs, which no program object owns any more, and forget them.
+		void Release() {
+			for (const auto& [hash, objID]: cache)
+				glDeleteProgram(objID);
+			cache.clear();
+		}
 
 		unsigned int Find(unsigned int hash) {
 			const auto it = cache.find(hash);

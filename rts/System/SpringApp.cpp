@@ -864,7 +864,7 @@ void SpringApp::Reload(const std::string script)
 	// next match must neither resolve a name to them nor keep their video memory
 	LuaOpenGLUtils::ResetState();
 	CleanupNativeGfxResources();
-	shaderHandler->GetShaderCache().Clear();
+	shaderHandler->GetShaderCache().Release();
 	CFontTexture::ClearTransientCaches();
 
 	/*
