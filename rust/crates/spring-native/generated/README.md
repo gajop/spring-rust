@@ -6,9 +6,10 @@ Normal `spring-native` builds copy these checked-in files and do not require
 libclang. Regenerate them deliberately after changing NativeInterface headers:
 
 ```text
-SPRING_NATIVE_REGENERATE=1 cargo build --manifest-path rust/Cargo.toml -p spring-native --lib
 python3 rust/crates/spring-native-codegen/snapshot_native.py --root .
 ```
 
-The manifest records SHA-256 digests for every generated file. CI should run
-the same two commands and fail if the snapshot changes unexpectedly.
+The script builds `spring-native` with `SPRING_NATIVE_REGENERATE=1` (libclang)
+and copies the build script's output. The manifest records SHA-256 digests for
+every generated file. CI runs it with `--check` (`tools/ci/wasm-api-check.sh`)
+and fails if the snapshot differs from a fresh generation.

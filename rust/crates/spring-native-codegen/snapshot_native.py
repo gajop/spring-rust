@@ -8,9 +8,57 @@ import hashlib
 import json
 import argparse
 import filecmp
+import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
+
+
+def regenerate(root: Path) -> Path | None:
+    """Build spring-native with SPRING_NATIVE_REGENERATE=1 and return its OUT_DIR.
+
+    Cargo reports the build script's OUT_DIR in its JSON messages. Searching
+    target/debug/build instead broke when Cargo 1.100 moved build scripts to
+    build/<package>/<hash>/out, and picking the newest of several directories
+    could compare a stale earlier generation. Any cargo or rustc warning fails.
+    """
+    manifest = root / "rust" / "Cargo.toml"
+    metadata = json.loads(
+        subprocess.run(
+            ["cargo", "metadata", "--manifest-path", str(manifest), "--no-deps",
+             "--format-version", "1", "--locked"],
+            check=True, stdout=subprocess.PIPE, text=True,
+        ).stdout
+    )
+    package_id = next(p["id"] for p in metadata["packages"] if p["name"] == "spring-native")
+    build = subprocess.run(
+        ["cargo", "build", "--manifest-path", str(manifest), "-p", "spring-native", "--lib",
+         "--locked", "--message-format=json", "--color", "never"],
+        env=dict(os.environ, SPRING_NATIVE_REGENERATE="1"),
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    )
+    sys.stderr.write(build.stderr)
+    warned = any(line.startswith("warning") for line in build.stderr.splitlines())
+    out_dir = None
+    for line in build.stdout.splitlines():
+        message = json.loads(line)
+        if message.get("reason") == "compiler-message":
+            sys.stderr.write(message["message"].get("rendered") or "")
+            warned |= message["message"].get("level") == "warning"
+        elif message.get("reason") == "build-script-executed" and message["package_id"] == package_id:
+            out_dir = Path(message["out_dir"])
+    if build.returncode != 0:
+        print("spring-native regeneration build failed", file=sys.stderr)
+        return None
+    if warned:
+        print("spring-native regeneration build printed warnings (above); none are allowed",
+              file=sys.stderr)
+        return None
+    if out_dir is None or not (out_dir / "units_query_generated.rs").exists():
+        print(f"no native generator output from cargo (OUT_DIR {out_dir})", file=sys.stderr)
+        return None
+    return out_dir
 
 
 def main() -> int:
@@ -23,28 +71,9 @@ def main() -> int:
     )
     args = parser.parse_args()
     root = args.root.resolve()
-    target = root / "rust" / "target" / "debug" / "build"
-    candidates = [
-        path / "out"
-        for path in target.glob("spring-native-*")
-        if path.is_dir() and path.name != "spring-native-sys"
-        and (path / "out" / "units_query_generated.rs").exists()
-    ]
-    if not candidates:
-        print("no native generator output found; run cargo build first", file=sys.stderr)
+    output = regenerate(root)
+    if output is None:
         return 1
-    # The build-script output directory's mtime is not a reliable generation
-    # timestamp: Cargo may copy an older snapshot into a newer directory, and
-    # multiple debug builds can leave several valid candidates behind.  Use
-    # the newest generated file instead, which tracks the actual regeneration
-    # event and keeps --check deterministic in a reused target directory.
-    def generated_mtime(path: Path) -> int:
-        return max(
-            (entry.stat().st_mtime_ns for entry in path.iterdir() if entry.is_file()),
-            default=path.stat().st_mtime_ns,
-        )
-
-    output = max(candidates, key=generated_mtime)
     snapshot = root / "rust" / "crates" / "spring-native" / "generated"
     # version.rs is read from Common.h on every build, so it is never snapshotted.
     source_files = [
@@ -88,9 +117,9 @@ def main() -> int:
     manifest = {
         "format": "recoil.spring-native.snapshot.v1",
         "generator": "spring-api-codegen",
-        # Cargo hashes the build directory; keep the checked-in manifest
-        # deterministic while retaining the location pattern for diagnostics.
-        "source_out": "rust/target/debug/build/spring-native-*/out",
+        # The OUT_DIR path is hashed per build; keep the checked-in manifest
+        # deterministic and name where the files come from.
+        "source_out": "OUT_DIR of spring-native's build script (SPRING_NATIVE_REGENERATE=1)",
         "files": files,
     }
     (snapshot / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

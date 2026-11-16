@@ -1,7 +1,7 @@
 {
   "format": "recoil.spring-native.snapshot.v1",
   "generator": "spring-api-codegen",
-  "source_out": "rust/target/debug/build/spring-native-*/out",
+  "source_out": "OUT_DIR of spring-native's build script (SPRING_NATIVE_REGENERATE=1)",
   "files": [
     {
       "name": "camera_generated.rs",

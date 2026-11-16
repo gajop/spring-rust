@@ -80,7 +80,7 @@ step "Check generated Wasm artifacts"
 python3 rts/wasm/verify_codegen.py
 
 step "Check native generated snapshot"
-SPRING_NATIVE_REGENERATE=1 cargo_strict build --manifest-path rust/Cargo.toml -p spring-native --lib
+# Builds spring-native with SPRING_NATIVE_REGENERATE=1 and compares its OUT_DIR.
 python3 rust/crates/spring-native-codegen/snapshot_native.py --root . --check
 
 # verify_codegen.py already regenerates every Core probe context in a
