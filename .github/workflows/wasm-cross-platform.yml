@@ -110,10 +110,8 @@ jobs:
           fi
           "$sevenzip" x "$archive" -oinstall
 
-      - name: Install Rust and the Wasm target
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
+      - name: Install the pinned Rust toolchain and the Wasm target (rust-toolchain.toml)
+        run: rustup toolchain install
 
       - name: Run synced Wasm Core parity
         env:

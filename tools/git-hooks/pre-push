@@ -1,0 +1,29 @@
+#!/bin/sh
+# Refuses a push whose commits touch Rust while `tools/ci/wasm-api-check.sh --fast`
+# fails (rustfmt, scoped clippy): the first steps of the "Wasm API" workflow, so
+# unformatted Rust cannot reach CI. Runs in the worktree being pushed from, with the
+# toolchain pinned in rust-toolchain.toml.
+# Install once per clone (all its worktrees share it):
+#   ln -sf ../../tools/git-hooks/pre-push "$(git rev-parse --git-common-dir)/hooks/pre-push"
+# Pushes that only delete a ref, or touch no Rust, are let through.
+zero=0000000000000000000000000000000000000000
+rust=
+while read -r local_ref local_sha remote_ref remote_sha; do
+    [ "$local_sha" = "$zero" ] && continue
+    if [ "$remote_sha" = "$zero" ]; then
+        base=$(git merge-base "$local_sha" origin/rust-wip 2>/dev/null) || base=
+    else
+        base=$remote_sha
+    fi
+    if [ -z "$base" ] || git diff --name-only "$base" "$local_sha" -- 2>/dev/null |
+        grep -qE '\.rs$|(^|/)Cargo\.(toml|lock)$|^rust-toolchain\.toml$|^tools/ci/'; then
+        rust=1
+    fi
+done
+[ -n "$rust" ] || exit 0
+root=$(git rev-parse --show-toplevel) || exit 1
+cd "$root" || exit 1
+if ! tools/ci/wasm-api-check.sh --fast; then
+    echo "pre-push: tools/ci/wasm-api-check.sh --fast failed; fix it (cargo fmt --manifest-path rust/Cargo.toml --all formats) and push again." >&2
+    exit 1
+fi

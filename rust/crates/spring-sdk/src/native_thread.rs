@@ -21,11 +21,24 @@ thread_local! {
 #[cold]
 #[inline(never)]
 fn initialize_token(slot: &std::cell::Cell<usize>) -> usize {
-    let token = NEXT_THREAD
-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
-            (value < usize::MAX / 2).then_some(value + 1)
-        })
-        .expect("native SDK thread identity exhausted");
+    // A compare-exchange loop rather than fetch_update (deprecated in Rust 1.99)
+    // or its replacement try_update (not in the Rust 1.97 games may build with).
+    let mut token = NEXT_THREAD.load(Ordering::Relaxed);
+    loop {
+        assert!(
+            token < usize::MAX / 2,
+            "native SDK thread identity exhausted"
+        );
+        match NEXT_THREAD.compare_exchange_weak(
+            token,
+            token + 1,
+            Ordering::Relaxed,
+            Ordering::Relaxed,
+        ) {
+            Ok(_) => break,
+            Err(current) => token = current,
+        }
+    }
     slot.set(token);
     token
 }

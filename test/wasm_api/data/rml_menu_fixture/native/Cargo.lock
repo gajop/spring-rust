@@ -332,7 +332,6 @@ name = "spring-native-sys"
 version = "0.1.0"
 dependencies = [
  "bindgen",
- "libc",
 ]
 
 [[package]]

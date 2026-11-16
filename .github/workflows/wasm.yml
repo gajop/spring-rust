@@ -10,6 +10,8 @@ on:
   pull_request:
     paths:
       - ".github/workflows/wasm.yml"
+      - "rust-toolchain.toml"
+      - "tools/ci/**"
       - "rts/NativeInterface/**"
       - "rts/Lua/**"
       - "rts/WasmInterface/**"
@@ -30,6 +32,8 @@ on:
       - rust-wip
     paths:
       - ".github/workflows/wasm.yml"
+      - "rust-toolchain.toml"
+      - "tools/ci/**"
       - "rts/NativeInterface/**"
       - "rts/Lua/**"
       - "rts/WasmInterface/**"
@@ -56,12 +60,11 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-
-      - name: Install Wasm target
-        run: rustup target add wasm32-unknown-unknown
+      # rust-toolchain.toml pins the version, components and Wasm target, so
+      # this job and a local tools/ci/wasm-api-check.sh run the same rustfmt
+      # and clippy.
+      - name: Install the pinned Rust toolchain
+        run: rustup toolchain install
 
       - name: Install libclang
         run: sudo apt-get update && sudo apt-get install --yes libclang-18-dev
@@ -69,34 +72,10 @@ jobs:
       - name: Locate libclang
         run: echo "LIBCLANG_PATH=/usr/lib/llvm-18/lib" >> "$GITHUB_ENV"
 
-      - name: Check Rust formatting
-        run: cargo fmt --manifest-path rust/Cargo.toml --all --check
-
-      - name: Check scoped SDK Wasm exports
-        run: cargo clippy --manifest-path rust/Cargo.toml -p spring-sdk --target wasm32-unknown-unknown --all-targets -- --deny warnings
-
-      - name: Test Rust workspace
-        run: cargo test --manifest-path rust/Cargo.toml --workspace
-
-      - name: Check generated Wasm artifacts
-        run: python3 rts/wasm/verify_codegen.py
-
-      - name: Check native generated snapshot
-        run: |
-          SPRING_NATIVE_REGENERATE=1 cargo build --manifest-path rust/Cargo.toml -p spring-native --lib
-          python3 rust/crates/spring-native-codegen/snapshot_native.py --root . --check
-
-      # verify_codegen.py already regenerates every Core probe context in a
-      # temporary tree using fresh metadata; no checkout model.json is needed.
-      - name: Check native parity generated artifacts
-        run: |
-          python3 test/native_api_parity/generate_from_spec.py
-          git diff --exit-code -- \
-            test/native_api_parity/native/src/generated_tests.rs \
-            test/native_api_parity/fixtures/game.sdd/LuaRules/Utilities/generated_api_tests.lua
-
-      - name: Build native parity fixture
-        run: cargo build --manifest-path test/native_api_parity/native/Cargo.toml --locked
+      # Formatting, scoped clippy, workspace tests and every generated-artifact
+      # check, failing on any cargo or rustc warning.
+      - name: Check Rust and generated artifacts
+        run: tools/ci/wasm-api-check.sh
 
   # Full engine builds are expensive and consume Actions minutes. Opt in
   # through workflow_dispatch; a push never starts these jobs.
@@ -109,12 +88,8 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-
-      - name: Install Wasm target
-        run: rustup target add wasm32-unknown-unknown
+      - name: Install the pinned Rust toolchain
+        run: rustup toolchain install
 
       - name: Install libclang and native regression dependencies
         run: sudo apt-get update && sudo apt-get install --yes libclang-18-dev libsdl2-dev libjsoncpp-dev libgl-dev libgl1-mesa-dri python3-clang-18 libopenal-dev libfreetype-dev libfontconfig-dev libogg-dev libvorbis-dev libopus-dev libminizip-dev libunwind-dev

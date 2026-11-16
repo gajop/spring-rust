@@ -7,6 +7,7 @@ on:
       - rust-wip
     paths:
       - .github/workflows/spring-native.yml
+      - rust-toolchain.toml
       - rust/**
       - rts/NativeInterface/**
 
@@ -27,9 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
+      - name: Install the pinned Rust toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
 
       - name: Install libclang on Linux
         if: runner.os == 'Linux'

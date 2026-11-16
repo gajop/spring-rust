@@ -1,0 +1,9 @@
+# One Rust toolchain for local builds and CI. With `stable`, every Rust release
+# changed CI's rustfmt and clippy under unchanged code (2026-10-19: deprecated
+# fetch_update and a new clippy lint failed "Wasm API"). Bump the version in a
+# commit of its own and run tools/ci/wasm-api-check.sh with it first.
+[toolchain]
+channel = "1.100.0"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"

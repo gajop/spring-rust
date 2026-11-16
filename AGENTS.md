@@ -182,6 +182,16 @@ ctest -N
 - Test sources use `#include <catch_amalgamated.hpp>`
 - Each test is compiled as a separate executable named `test_<TestName>`
 
+### Rust crates (`rust/`, `test/**/Cargo.toml`)
+- `rust-toolchain.toml` pins the Rust version for local builds and CI. Bump it in a commit
+  of its own after `tools/ci/wasm-api-check.sh` passes with the new version.
+- Before pushing Rust changes run `tools/ci/wasm-api-check.sh`: the "Wasm API" workflow's
+  check job (rustfmt, scoped clippy, workspace tests, generated-artifact checks), failing on
+  any cargo or rustc warning. `cargo fmt --manifest-path rust/Cargo.toml --all` formats.
+- `tools/git-hooks/pre-push` runs its `--fast` part (rustfmt, clippy) on pushes that touch Rust.
+  Install it once per clone:
+  `ln -sf ../../tools/git-hooks/pre-push "$(git rev-parse --git-common-dir)/hooks/pre-push"`.
+
 ## Code Style Guidelines
 
 ### Indentation and Formatting
