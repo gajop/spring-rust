@@ -23,6 +23,8 @@ done
 [ -n "$rust" ] || exit 0
 root=$(git rev-parse --show-toplevel) || exit 1
 cd "$root" || exit 1
+# A checkout from before the script existed has nothing to run.
+[ -x tools/ci/wasm-api-check.sh ] || exit 0
 if ! tools/ci/wasm-api-check.sh --fast; then
     echo "pre-push: tools/ci/wasm-api-check.sh --fast failed; fix it (cargo fmt --manifest-path rust/Cargo.toml --all formats) and push again." >&2
     exit 1
