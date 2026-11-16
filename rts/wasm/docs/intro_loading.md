@@ -21,6 +21,15 @@ stays responsive. A progress line replaces the last message without logging it a
 `LoadProgress` like one; counts end in `done/total` (`Loading models 12/40`). At the end the
 engine logs the longest stretch without a draw and what the pumped draws cost.
 
+Multi-threaded loading (`LoadingMT=1`) draws on the main thread while `CGame::Load` runs on its
+own. Both share one GL context, which a thread has only while it holds `CLoadLock`. A Wasm
+module's initialization (`spring:module/initialize`, which may make shaders and textures) runs
+under that lock, its compilation outside it. Inside a step that holds the lock,
+`UnsyncedCtrl.ShowLoadProgress` lets the main thread draw once (`CLoadLock::YieldToDraw`, at most
+every 20 ms), as the single-threaded pump does. The main thread waits for its next frame before
+taking the lock, not while holding it, and loading draws skip vsync in both modes. At the end the
+engine logs how often the loading thread let the screen draw and how long it waited.
+
 Intro uses the standalone Wasm feature configuration, before the game's modrules are applied.
 Standalone Menu and Intro accept fixed-width SIMD Rust builds; relaxed SIMD stays off.
 Generic profiling timer imports are not available in the current Core

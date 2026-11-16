@@ -33,6 +33,7 @@
 #include "System/Misc/TracyDefs.h"
 #include "WasmInterface/jobs/WasmJobProgram.h"
 #include "System/LoadingPump.h"
+#include "System/LoadLock.h"
 #include "System/SpringHash.h"
 #include "NativeInterface/api/RmlUi.h"
 #include "Rml/Backends/RmlUi_Backend.h"
@@ -907,6 +908,14 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 #endif
 
 	WasmCoreHost* registered = host.get();
+	// A module's initialization may use GL (shaders, textures). With LoadingMT=1 the game
+	// loads on its own thread, which has the GL context only while it holds the load lock
+	// (LuaUI loads under it too); without it every GL call there fails ("Could not create
+	// shader object"). The compile above runs outside the lock, so the screen keeps drawing
+	// through it, and the module can let it draw in between (UnsyncedCtrl.ShowLoadProgress,
+	// CLoadLock::YieldToDraw). Taken before the registry lock, so the two are always taken in
+	// that order. A no-op when loading is single-threaded.
+	auto loadLock = CLoadLock::GetUniqueLock();
 	// Preserve the loader's lifetime lock through initialization: frontend and
 	// loading threads must not unload this host during its first entry. It is
 	// recursive, so callbacks on this engine thread still reenter immediately.

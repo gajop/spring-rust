@@ -24,6 +24,9 @@ public:
 	// Single-threaded loading: draws the screen from inside a long step at most every
 	// PUMP_INTERVAL_MS and keeps the window responsive (see System/LoadingPump.h).
 	bool Pump(bool draw);
+	// With LoadingMT=1, from the loading thread: lets the main thread draw once, if this
+	// thread holds the load lock (CLoadLock::YieldToDraw).
+	void YieldToDraw();
 
 	CLoadScreen(std::string&& mapFileName, std::string&& modFileName, ILoadSaveHandler* saveFile);
 	~CLoadScreen();

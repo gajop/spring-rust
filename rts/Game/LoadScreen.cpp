@@ -78,6 +78,8 @@ static void PostLoadProgress(const char* text)
 	screen->SetLoadProgress(text);
 	if (Threading::IsMainThread())
 		screen->Pump(true);
+	else
+		screen->YieldToDraw();
 }
 
 CLoadScreen::CLoadScreen(std::string&& _mapFileName, std::string&& _modFileName, ILoadSaveHandler* _saveFile)
@@ -180,6 +182,14 @@ bool CLoadScreen::Init()
 		// Keep the existing Lua screen as the fallback for games without one.
 		if (!HasWasmIntro())
 			CLuaIntro::LoadFreeHandler();
+#ifndef HEADLESS
+		// A draw must not wait for the display. With single-threaded loading, each draw inside
+		// a long step would hold up the loading for up to a refresh; with LoadingMT=1, a draw
+		// holds the load lock, which the loading thread needs for its GL work. Restored once
+		// loading ends.
+		swapInterval = SDL_GL_GetSwapInterval();
+		SDL_GL_SetSwapInterval(0);
+#endif
 	}
 
 #ifndef HEADLESS
@@ -190,13 +200,6 @@ bool CLoadScreen::Init()
 
 	if (mtLoading)
 		return true;
-
-#ifndef HEADLESS
-	// A draw inside a long step must not wait for the display: with vsync each would block
-	// the loading for up to a refresh. Restored once loading ends.
-	swapInterval = SDL_GL_GetSwapInterval();
-	SDL_GL_SetSwapInterval(0);
-#endif
 
 	LOG("[LoadScreen::%s] single-threaded", __func__);
 	game->Load(mapFileName);
@@ -210,10 +213,11 @@ void CLoadScreen::Kill()
 		return;
 
 	LoadingPump::Install(nullptr, nullptr);
-#ifndef HEADLESS
-	if (!mtLoading)
-		SDL_GL_SetSwapInterval(swapInterval);
-#endif
+	if (mtLoading && pumpDraws > 0) {
+		LOG("[LoadScreen::%s] the loading thread let the screen draw %d times inside long steps, waiting %dms, the longest %dms (during \"%s\")",
+			__func__, pumpDraws, static_cast<int>(spring_tomsecs(pumpTime)),
+			static_cast<int>(spring_tomsecs(slowestPump)), slowestPumpMessage.c_str());
+	}
 	if (!mtLoading && spring_tomsecs(longestDrawGap) > 0) {
 		LOG("[LoadScreen::%s] longest time without a loading screen draw: %dms (during \"%s\"); %d draws inside long steps took %dms, the slowest %dms (during \"%s\")",
 			__func__, static_cast<int>(spring_tomsecs(longestDrawGap)), longestGapMessage.c_str(), pumpDraws,
@@ -236,6 +240,9 @@ void CLoadScreen::Kill()
 	// set last time and forever
 	globalRendering->MakeCurrentContext(false);
 	globalRendering->ToggleMultisampling();
+#ifndef HEADLESS
+	SDL_GL_SetSwapInterval(swapInterval);
+#endif
 }
 
 
@@ -358,6 +365,18 @@ bool CLoadScreen::Update()
 	if (!mtLoading)
 		spring::UnfreezeSpring(WDT_LOAD);
 
+	// Limit FPS via sleep to not lock a singlethreaded CPU from loading the game. Here, before
+	// the main loop takes the load lock for Draw: sleeping under it would keep the loading
+	// thread from the GL context for most of every frame.
+	if (mtLoading) {
+		constexpr unsigned wantedFPS = 50;
+		constexpr unsigned minFrameTime = 1000 / wantedFPS;
+
+		const unsigned diffTime = spring_tomsecs(spring_gettime() - lastDrawTime);
+		if (diffTime < minFrameTime)
+			spring_sleep(spring_msecs(minFrameTime - diffTime));
+	}
+
 	return true;
 }
 
@@ -368,18 +387,9 @@ bool CLoadScreen::Draw()
 	if (drawing)
 		return true;
 
-	// limit FPS via sleep to not lock a singlethreaded CPU from loading the game
+	// the frame rate is limited in Update, outside the load lock
 	if (mtLoading) {
-		const spring_time now = spring_gettime();
-		const unsigned diffTime = spring_tomsecs(now - lastDrawTime);
-
-		constexpr unsigned wantedFPS = 50;
-		constexpr unsigned minFrameTime = 1000 / wantedFPS;
-
-		if (diffTime < minFrameTime)
-			spring_sleep(spring_msecs(minFrameTime - diffTime));
-
-		lastDrawTime = now;
+		lastDrawTime = spring_gettime();
 	} else {
 		const spring_time now = spring_gettime();
 		std::lock_guard<spring::recursive_mutex> lck(mutex);
@@ -440,6 +450,22 @@ bool CLoadScreen::Pump(bool draw)
 		slowestPumpMessage = drawnMessage;
 	}
 	return true;
+}
+
+
+void CLoadScreen::YieldToDraw()
+{
+	const spring_time start = spring_gettime();
+	if (!CLoadLock::YieldToDraw())
+		return;
+	const spring_time took = spring_gettime() - start;
+	std::lock_guard<spring::recursive_mutex> lck(mutex);
+	pumpTime += took;
+	pumpDraws += 1;
+	if (took > slowestPump) {
+		slowestPump = took;
+		slowestPumpMessage = lastMessage;
+	}
 }
 
 
