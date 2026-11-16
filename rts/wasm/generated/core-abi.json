@@ -17050,6 +17050,46 @@
     },
     {
       "module": "rml_ui",
+      "function": "ElementGetClientHeight",
+      "import_module": "spring:rml-ui",
+      "import_name": "element-get-client-height",
+      "environment_mask": 58,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i64"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i64->i64",
+      "notes": []
+    },
+    {
+      "module": "rml_ui",
+      "function": "ElementGetClientWidth",
+      "import_module": "spring:rml-ui",
+      "import_name": "element-get-client-width",
+      "environment_mask": 58,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i64"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i64->i64",
+      "notes": []
+    },
+    {
+      "module": "rml_ui",
       "function": "ElementGetElementById",
       "import_module": "spring:rml-ui",
       "import_name": "element-get-element-by-id",
@@ -17231,6 +17271,26 @@
     },
     {
       "module": "rml_ui",
+      "function": "ElementGetScrollHeight",
+      "import_module": "spring:rml-ui",
+      "import_name": "element-get-scroll-height",
+      "environment_mask": 58,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i64"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i64->i64",
+      "notes": []
+    },
+    {
+      "module": "rml_ui",
       "function": "ElementGetScrollLeft",
       "import_module": "spring:rml-ui",
       "import_name": "element-get-scroll-left",
@@ -17254,6 +17314,26 @@
       "function": "ElementGetScrollTop",
       "import_module": "spring:rml-ui",
       "import_name": "element-get-scroll-top",
+      "environment_mask": 58,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i64"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i64->i64",
+      "notes": []
+    },
+    {
+      "module": "rml_ui",
+      "function": "ElementGetScrollWidth",
+      "import_module": "spring:rml-ui",
+      "import_name": "element-get-scroll-width",
       "environment_mask": 58,
       "mutating": false,
       "visibility_sensitive": false,
@@ -32063,7 +32143,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1216,
+  "automatic_count": 1220,
   "manual_count": 208,
   "unsupported_count": 17
 }

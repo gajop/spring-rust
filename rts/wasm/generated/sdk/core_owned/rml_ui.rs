@@ -2538,6 +2538,18 @@
         }
 
         #[inline]
+        pub fn element_get_client_height(element_handle: u64) -> Result<f32> {
+            let value = crate::generated::rml_ui::element_get_client_height(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_get_client_width(element_handle: u64) -> Result<f32> {
+            let value = crate::generated::rml_ui::element_get_client_width(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
         pub fn element_get_element_by_id(element_handle: u64, value: &str) -> Result<ElementGetElementByIdValue> {
             let __blob0 = { let mut __b = Vec::with_capacity(4 + value.len()); __b.extend_from_slice(&(value.len() as u32).to_le_bytes()); __b.extend_from_slice(value.as_bytes()); __b };
             let mut __output = [0u8; 16];
@@ -2697,6 +2709,12 @@
         }
 
         #[inline]
+        pub fn element_get_scroll_height(element_handle: u64) -> Result<f32> {
+            let value = crate::generated::rml_ui::element_get_scroll_height(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
         pub fn element_get_scroll_left(element_handle: u64) -> Result<i32> {
             let value = crate::generated::rml_ui::element_get_scroll_left(element_handle)?;
             Ok(value)
@@ -2705,6 +2723,12 @@
         #[inline]
         pub fn element_get_scroll_top(element_handle: u64) -> Result<i32> {
             let value = crate::generated::rml_ui::element_get_scroll_top(element_handle)?;
+            Ok(value)
+        }
+
+        #[inline]
+        pub fn element_get_scroll_width(element_handle: u64) -> Result<f32> {
+            let value = crate::generated::rml_ui::element_get_scroll_width(element_handle)?;
             Ok(value)
         }
 

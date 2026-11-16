@@ -22777,6 +22777,82 @@
       "required_returns_mapped": false,
       "runs": []
     },
+    "rml_ui.ElementGetScrollWidth": {
+      "level": "exempt",
+      "reason": "Read-only RmlUi layout value, Lua's element.scroll_width (Element::GetScrollWidth), returned as RmlUi computes it. Reviewed exemption: no function can reach verified while the parity runs record no Wasm-compared environments. test/engine/Rml/TestNativeElementRect.cpp checks it against RmlUi on a scrolling element; the native parity fixture reads it on an overflowing element.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
+    "rml_ui.ElementGetScrollHeight": {
+      "level": "exempt",
+      "reason": "Read-only RmlUi layout value, Lua's element.scroll_height (Element::GetScrollHeight), returned as RmlUi computes it. Reviewed exemption: no function can reach verified while the parity runs record no Wasm-compared environments. test/engine/Rml/TestNativeElementRect.cpp checks it against RmlUi on a scrolling element; the native parity fixture reads it on an overflowing element.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
+    "rml_ui.ElementGetClientWidth": {
+      "level": "exempt",
+      "reason": "Read-only RmlUi layout value, Lua's element.client_width (Element::GetClientWidth), returned as RmlUi computes it. Reviewed exemption: no function can reach verified while the parity runs record no Wasm-compared environments. test/engine/Rml/TestNativeElementRect.cpp checks it against RmlUi on a scrolling element; the native parity fixture reads it on an overflowing element.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
+    "rml_ui.ElementGetClientHeight": {
+      "level": "exempt",
+      "reason": "Read-only RmlUi layout value, Lua's element.client_height (Element::GetClientHeight), returned as RmlUi computes it. Reviewed exemption: no function can reach verified while the parity runs record no Wasm-compared environments. test/engine/Rml/TestNativeElementRect.cpp checks it against RmlUi on a scrolling element; the native parity fixture reads it on an overflowing element.",
+      "required_environments": [
+        "rules-unsynced",
+        "gaia-unsynced",
+        "ui",
+        "menu"
+      ],
+      "tests": [],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
     "rml_ui.ElementGetTagName": {
       "level": "untested",
       "grandfathered": true,
@@ -30581,6 +30657,6 @@
   "counts": {
     "untested": 1412,
     "exercised": 14,
-    "exempt": 15
+    "exempt": 19
   }
 }

@@ -160,8 +160,8 @@
     },
     {
       "name": "rml_ui_generated.rs",
-      "sha256": "c967c03612483c85a2f20544f28ab616747b51fc48fbc74ab3b1fe94037cc270",
-      "bytes": 143341
+      "sha256": "6a64222fdaf78b7e0036fddc3fe6e86fb62fb408736ca25fc8c9d7c0ea04b950",
+      "bytes": 145863
     },
     {
       "name": "rules_params_generated.rs",

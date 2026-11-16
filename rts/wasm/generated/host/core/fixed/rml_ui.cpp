@@ -1978,6 +1978,58 @@ wasm_trap_t* Core_rml_ui_element_get_child(void* environment, wasmtime_caller_t*
     return nullptr;
 }
 
+wasm_trap_t* Core_rml_ui_element_get_client_height(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->rmlUi == nullptr ||
+        state->native->rmlUi->ElementGetClientHeight == nullptr)
+        return Trap("ElementGetClientHeight generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("ElementGetClientHeight generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("ElementGetClientHeight generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    RmlElementHandleQuery query{};
+    query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
+    RmlElementGetFloatResult result{};
+    state->native->rmlUi->ElementGetClientHeight(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(std::bit_cast<std::uint32_t>(result.value), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_rml_ui_element_get_client_width(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->rmlUi == nullptr ||
+        state->native->rmlUi->ElementGetClientWidth == nullptr)
+        return Trap("ElementGetClientWidth generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("ElementGetClientWidth generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("ElementGetClientWidth generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    RmlElementHandleQuery query{};
+    query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
+    RmlElementGetFloatResult result{};
+    state->native->rmlUi->ElementGetClientWidth(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(std::bit_cast<std::uint32_t>(result.value), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* Core_rml_ui_element_get_rect(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -2024,6 +2076,32 @@ wasm_trap_t* Core_rml_ui_element_get_rect(void* environment, wasmtime_caller_t* 
     if (!state->memory.Write(output, wire.data(), wire.size()))
         return Trap("generated Core output range changed unexpectedly");
     slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* Core_rml_ui_element_get_scroll_height(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->rmlUi == nullptr ||
+        state->native->rmlUi->ElementGetScrollHeight == nullptr)
+        return Trap("ElementGetScrollHeight generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("ElementGetScrollHeight generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("ElementGetScrollHeight generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    RmlElementHandleQuery query{};
+    query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
+    RmlElementGetFloatResult result{};
+    state->native->rmlUi->ElementGetScrollHeight(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(std::bit_cast<std::uint32_t>(result.value), errorCode));
     return nullptr;
 }
 
@@ -2076,6 +2154,32 @@ wasm_trap_t* Core_rml_ui_element_get_scroll_top(void* environment, wasmtime_call
     state->native->rmlUi->ElementGetScrollTop(&query, &result);
     const std::int32_t errorCode = NativeErrorCode(result.error);
     slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.value), errorCode));
+    return nullptr;
+}
+
+wasm_trap_t* Core_rml_ui_element_get_scroll_width(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->rmlUi == nullptr ||
+        state->native->rmlUi->ElementGetScrollWidth == nullptr)
+        return Trap("ElementGetScrollWidth generated Core binding is unavailable");
+    if (1 != 0 && (slots == nullptr || slotCount != 1))
+        return Trap("ElementGetScrollWidth generated Core ABI signature mismatch");
+    if (1 == 0 && slotCount != 0)
+        return Trap("ElementGetScrollWidth generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    RmlElementHandleQuery query{};
+    query.elementHandle = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.elementHandle)>>>(slots[0].i64);
+    RmlElementGetFloatResult result{};
+    state->native->rmlUi->ElementGetScrollWidth(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(std::bit_cast<std::uint32_t>(result.value), errorCode));
     return nullptr;
 }
 
@@ -3427,10 +3531,31 @@ bool RegisterGeneratedImports_rml_ui(wasmtime_linker_t* linker, HostState* state
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I64};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:rml-ui", "element-get-client-height",
+                MakeFuncType(params, 1, results, 1), Core_rml_ui_element_get_client_height, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I64};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:rml-ui", "element-get-client-width",
+                MakeFuncType(params, 1, results, 1), Core_rml_ui_element_get_client_width, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I64, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGenerated(linker, "spring:rml-ui", "element-get-rect",
                 MakeFuncType(params, 2, results, 1), Core_rml_ui_element_get_rect, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I64};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:rml-ui", "element-get-scroll-height",
+                MakeFuncType(params, 1, results, 1), Core_rml_ui_element_get_scroll_height, state, error))
             return false;
     }
     {
@@ -3445,6 +3570,13 @@ bool RegisterGeneratedImports_rml_ui(wasmtime_linker_t* linker, HostState* state
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:rml-ui", "element-get-scroll-top",
                 MakeFuncType(params, 1, results, 1), Core_rml_ui_element_get_scroll_top, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I64};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGenerated(linker, "spring:rml-ui", "element-get-scroll-width",
+                MakeFuncType(params, 1, results, 1), Core_rml_ui_element_get_scroll_width, state, error))
             return false;
     }
     {
@@ -3626,6 +3758,6 @@ bool RegisterGeneratedImports_rml_ui(wasmtime_linker_t* linker, HostState* state
     return true;
 }
 
-static_assert(88 >= 0, "generated Core Wasm callback count");
+static_assert(92 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

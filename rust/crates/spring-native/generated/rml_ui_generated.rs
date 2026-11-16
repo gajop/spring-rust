@@ -3250,4 +3250,64 @@ impl<'a> RmlUi<'a> {
         }
     }
 
+    pub fn element_get_scroll_width(&self, element_handle: u64) -> Result<f32, Error> {
+        unsafe {
+            let query = sys::RmlElementHandleQuery {
+                elementHandle: element_handle,
+            };
+            let mut result = MaybeUninit::<sys::RmlElementGetFloatResult>::zeroed();
+            let func = self.api.ElementGetScrollWidth.expect("ElementGetScrollWidth function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.value
+            })
+        }
+    }
+
+    pub fn element_get_scroll_height(&self, element_handle: u64) -> Result<f32, Error> {
+        unsafe {
+            let query = sys::RmlElementHandleQuery {
+                elementHandle: element_handle,
+            };
+            let mut result = MaybeUninit::<sys::RmlElementGetFloatResult>::zeroed();
+            let func = self.api.ElementGetScrollHeight.expect("ElementGetScrollHeight function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.value
+            })
+        }
+    }
+
+    pub fn element_get_client_width(&self, element_handle: u64) -> Result<f32, Error> {
+        unsafe {
+            let query = sys::RmlElementHandleQuery {
+                elementHandle: element_handle,
+            };
+            let mut result = MaybeUninit::<sys::RmlElementGetFloatResult>::zeroed();
+            let func = self.api.ElementGetClientWidth.expect("ElementGetClientWidth function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.value
+            })
+        }
+    }
+
+    pub fn element_get_client_height(&self, element_handle: u64) -> Result<f32, Error> {
+        unsafe {
+            let query = sys::RmlElementHandleQuery {
+                elementHandle: element_handle,
+            };
+            let mut result = MaybeUninit::<sys::RmlElementGetFloatResult>::zeroed();
+            let func = self.api.ElementGetClientHeight.expect("ElementGetClientHeight function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.value
+            })
+        }
+    }
+
 }

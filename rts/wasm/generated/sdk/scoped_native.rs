@@ -33251,6 +33251,56 @@ pub(crate) mod rml_ui {
         }
         Ok(unsafe { read_string(result.value, None)? })
     }
+    pub(crate) fn element_get_client_height(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::RmlUiApi>,
+        element_handle: u64,
+    ) -> Result<f32> {
+        let native_element_handle = (element_handle) as _;
+        let query = sys::RmlElementHandleQuery {
+            elementHandle: native_element_handle,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .ElementGetClientHeight
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::RmlElementGetFloatResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.value) as _)
+    }
+    pub(crate) fn element_get_client_width(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::RmlUiApi>,
+        element_handle: u64,
+    ) -> Result<f32> {
+        let native_element_handle = (element_handle) as _;
+        let query = sys::RmlElementHandleQuery {
+            elementHandle: native_element_handle,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .ElementGetClientWidth
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::RmlElementGetFloatResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.value) as _)
+    }
     pub(crate) fn element_get_element_by_id(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::RmlUiApi>,
@@ -33490,6 +33540,31 @@ pub(crate) mod rml_ui {
             height: (result.height) as _,
         })
     }
+    pub(crate) fn element_get_scroll_height(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::RmlUiApi>,
+        element_handle: u64,
+    ) -> Result<f32> {
+        let native_element_handle = (element_handle) as _;
+        let query = sys::RmlElementHandleQuery {
+            elementHandle: native_element_handle,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .ElementGetScrollHeight
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::RmlElementGetFloatResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.value) as _)
+    }
     pub(crate) fn element_get_scroll_left(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::RmlUiApi>,
@@ -33527,6 +33602,31 @@ pub(crate) mod rml_ui {
             .ElementGetScrollTop
             .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
         let mut result = core::mem::MaybeUninit::<sys::RmlElementGetIntResult>::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.value) as _)
+    }
+    pub(crate) fn element_get_scroll_width(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::RmlUiApi>,
+        element_handle: u64,
+    ) -> Result<f32> {
+        let native_element_handle = (element_handle) as _;
+        let query = sys::RmlElementHandleQuery {
+            elementHandle: native_element_handle,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .ElementGetScrollWidth
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::RmlElementGetFloatResult,
+        >::zeroed();
         unsafe {
             call(&query, result.as_mut_ptr());
         }

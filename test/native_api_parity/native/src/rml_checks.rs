@@ -1131,6 +1131,61 @@ impl NativeApiParity {
                 rml.element_get_scroll_left(text).map_err(format_error)?,
                 0,
             )?;
+            // An overflowing list: Lua's scroll_height, client_height and
+            // scroll_top, as a list that follows its newest entry reads them.
+            let scroll_document = create_document(rml, context, "scroll")?;
+            ensure(
+                rml.element_set_inner_rml(
+                    scroll_document,
+                    "<div id=\"native-scroll-host\" style=\"display: block; position: absolute; \
+                     width: 80px; height: 80px; overflow: auto;\"><div style=\"display: block; \
+                     width: 60px; height: 320px;\"></div></div>",
+                )
+                .map_err(format_error)?,
+                "element_set_inner_rml(scroll document) should succeed",
+            )?;
+            ensure(
+                rml.document_show(
+                    scroll_document,
+                    spring_native::RmlDocumentShowOptions::default(),
+                )
+                .map_err(format_error)?,
+                "scroll document show should succeed",
+            )?;
+            rml.context_update(context).map_err(format_error)?;
+            let host = expect_element(
+                "scroll host",
+                rml.element_get_element_by_id(scroll_document, "native-scroll-host")
+                    .map_err(format_error)?,
+            )?;
+            let scroll_height = rml.element_get_scroll_height(host).map_err(format_error)?;
+            let client_height = rml.element_get_client_height(host).map_err(format_error)?;
+            ensure(
+                scroll_height >= 320.0 && client_height > 0.0 && client_height <= 80.0,
+                &format!("scroll host sizes: scroll {scroll_height}, client {client_height}"),
+            )?;
+            ensure(
+                rml.element_get_scroll_width(host).map_err(format_error)? > 0.0
+                    && rml.element_get_client_width(host).map_err(format_error)? > 0.0,
+                "scroll host widths should be positive",
+            )?;
+            ensure(
+                rml.element_set_scroll_top(host, scroll_height as i32)
+                    .map_err(format_error)?,
+                "element_set_scroll_top(scroll host) should succeed",
+            )?;
+            let scroll_top = rml.element_get_scroll_top(host).map_err(format_error)?;
+            ensure(
+                scroll_top as f32 + client_height >= scroll_height - 1.0,
+                &format!(
+                    "scroll host at its end: top {scroll_top} + client {client_height} < {scroll_height}"
+                ),
+            )?;
+            ensure(
+                rml.context_unload_document(context, scroll_document)
+                    .map_err(format_error)?,
+                "unload scroll document should succeed",
+            )?;
             let _ = rml
                 .context_get_element_at_point(context, 1.0, 1.0, 0)
                 .map_err(format_error)?;

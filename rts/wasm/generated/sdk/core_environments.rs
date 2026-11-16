@@ -2227,6 +2227,8 @@ pub mod rules_unsynced {
         pub use super::super::owned::rml_ui::element_get_attribute;
         pub use super::super::owned::rml_ui::element_get_child;
         pub use super::super::owned::rml_ui::element_get_class_name;
+        pub use super::super::owned::rml_ui::element_get_client_height;
+        pub use super::super::owned::rml_ui::element_get_client_width;
         pub use super::super::owned::rml_ui::element_get_element_by_id;
         pub use super::super::owned::rml_ui::element_get_elements_by_class_name;
         pub use super::super::owned::rml_ui::element_get_elements_by_class_name_count;
@@ -2235,8 +2237,10 @@ pub mod rules_unsynced {
         pub use super::super::owned::rml_ui::element_get_id;
         pub use super::super::owned::rml_ui::element_get_inner_rml;
         pub use super::super::owned::rml_ui::element_get_rect;
+        pub use super::super::owned::rml_ui::element_get_scroll_height;
         pub use super::super::owned::rml_ui::element_get_scroll_left;
         pub use super::super::owned::rml_ui::element_get_scroll_top;
+        pub use super::super::owned::rml_ui::element_get_scroll_width;
         pub use super::super::owned::rml_ui::element_get_tag_name;
         pub use super::super::owned::rml_ui::element_get_value;
         pub use super::super::owned::rml_ui::element_has_attribute;
@@ -4710,6 +4714,8 @@ pub mod gaia_unsynced {
         pub use super::super::owned::rml_ui::element_get_attribute;
         pub use super::super::owned::rml_ui::element_get_child;
         pub use super::super::owned::rml_ui::element_get_class_name;
+        pub use super::super::owned::rml_ui::element_get_client_height;
+        pub use super::super::owned::rml_ui::element_get_client_width;
         pub use super::super::owned::rml_ui::element_get_element_by_id;
         pub use super::super::owned::rml_ui::element_get_elements_by_class_name;
         pub use super::super::owned::rml_ui::element_get_elements_by_class_name_count;
@@ -4718,8 +4724,10 @@ pub mod gaia_unsynced {
         pub use super::super::owned::rml_ui::element_get_id;
         pub use super::super::owned::rml_ui::element_get_inner_rml;
         pub use super::super::owned::rml_ui::element_get_rect;
+        pub use super::super::owned::rml_ui::element_get_scroll_height;
         pub use super::super::owned::rml_ui::element_get_scroll_left;
         pub use super::super::owned::rml_ui::element_get_scroll_top;
+        pub use super::super::owned::rml_ui::element_get_scroll_width;
         pub use super::super::owned::rml_ui::element_get_tag_name;
         pub use super::super::owned::rml_ui::element_get_value;
         pub use super::super::owned::rml_ui::element_has_attribute;
@@ -6158,6 +6166,8 @@ pub mod ui {
         pub use super::super::owned::rml_ui::element_get_attribute;
         pub use super::super::owned::rml_ui::element_get_child;
         pub use super::super::owned::rml_ui::element_get_class_name;
+        pub use super::super::owned::rml_ui::element_get_client_height;
+        pub use super::super::owned::rml_ui::element_get_client_width;
         pub use super::super::owned::rml_ui::element_get_element_by_id;
         pub use super::super::owned::rml_ui::element_get_elements_by_class_name;
         pub use super::super::owned::rml_ui::element_get_elements_by_class_name_count;
@@ -6166,8 +6176,10 @@ pub mod ui {
         pub use super::super::owned::rml_ui::element_get_id;
         pub use super::super::owned::rml_ui::element_get_inner_rml;
         pub use super::super::owned::rml_ui::element_get_rect;
+        pub use super::super::owned::rml_ui::element_get_scroll_height;
         pub use super::super::owned::rml_ui::element_get_scroll_left;
         pub use super::super::owned::rml_ui::element_get_scroll_top;
+        pub use super::super::owned::rml_ui::element_get_scroll_width;
         pub use super::super::owned::rml_ui::element_get_tag_name;
         pub use super::super::owned::rml_ui::element_get_value;
         pub use super::super::owned::rml_ui::element_has_attribute;
@@ -7050,6 +7062,8 @@ pub mod menu {
         pub use super::super::owned::rml_ui::element_get_attribute;
         pub use super::super::owned::rml_ui::element_get_child;
         pub use super::super::owned::rml_ui::element_get_class_name;
+        pub use super::super::owned::rml_ui::element_get_client_height;
+        pub use super::super::owned::rml_ui::element_get_client_width;
         pub use super::super::owned::rml_ui::element_get_element_by_id;
         pub use super::super::owned::rml_ui::element_get_elements_by_class_name;
         pub use super::super::owned::rml_ui::element_get_elements_by_class_name_count;
@@ -7058,8 +7072,10 @@ pub mod menu {
         pub use super::super::owned::rml_ui::element_get_id;
         pub use super::super::owned::rml_ui::element_get_inner_rml;
         pub use super::super::owned::rml_ui::element_get_rect;
+        pub use super::super::owned::rml_ui::element_get_scroll_height;
         pub use super::super::owned::rml_ui::element_get_scroll_left;
         pub use super::super::owned::rml_ui::element_get_scroll_top;
+        pub use super::super::owned::rml_ui::element_get_scroll_width;
         pub use super::super::owned::rml_ui::element_get_tag_name;
         pub use super::super::owned::rml_ui::element_get_value;
         pub use super::super::owned::rml_ui::element_has_attribute;

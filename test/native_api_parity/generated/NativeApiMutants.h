@@ -469,6 +469,7 @@ struct NativeApiMutants {
 		if (module=="game" && function=="GetTidal") { table1.GetTidal=noop ? Noop<GetTidalQuery,GetTidalResult> : Zero<GetTidalQuery,GetTidalResult>; return true; }
 		if (module=="game" && function=="GetVectorFromHeading") { table1.GetVectorFromHeading=noop ? Noop<GetVectorFromHeadingQuery,GetVectorFromHeadingResult> : Zero<GetVectorFromHeadingQuery,GetVectorFromHeadingResult>; return true; }
 		if (module=="game" && function=="GetWind") { table1.GetWind=noop ? Noop<GetWindQuery,GetWindResult> : Zero<GetWindQuery,GetWindResult>; return true; }
+		if (module=="game" && function=="GetWindVector") { table1.GetWindVector=noop ? Noop<GetWindVectorQuery,GetWindVectorResult> : Zero<GetWindVectorQuery,GetWindVectorResult>; return true; }
 		if (module=="game" && function=="IsCheatingEnabled") { table1.IsCheatingEnabled=noop ? Noop<IsCheatingEnabledQuery,IsCheatingEnabledResult> : Zero<IsCheatingEnabledQuery,IsCheatingEnabledResult>; return true; }
 		if (module=="game" && function=="IsDevLuaEnabled") { table1.IsDevLuaEnabled=noop ? Noop<IsDevLuaEnabledQuery,IsDevLuaEnabledResult> : Zero<IsDevLuaEnabledQuery,IsDevLuaEnabledResult>; return true; }
 		if (module=="game" && function=="IsEditDefsEnabled") { table1.IsEditDefsEnabled=noop ? Noop<IsEditDefsEnabledQuery,IsEditDefsEnabledResult> : Zero<IsEditDefsEnabledQuery,IsEditDefsEnabledResult>; return true; }
@@ -531,6 +532,7 @@ struct NativeApiMutants {
 		if (module=="path_finder" && function=="SetPathNodeCost") { table16.SetPathNodeCost=noop ? Noop<SetPathNodeCostQuery,SetPathNodeCostResult> : Zero<SetPathNodeCostQuery,SetPathNodeCostResult>; return true; }
 		if (module=="path_finder" && function=="SetPathNodeCosts") { table16.SetPathNodeCosts=noop ? Noop<SetPathNodeCostsQuery,SetPathNodeCostsResult> : Zero<SetPathNodeCostsQuery,SetPathNodeCostsResult>; return true; }
 		if (module=="platform" && function=="GetArchitecture") { table17.GetArchitecture=noop ? Noop<GetArchitectureQuery,GetArchitectureResult> : Zero<GetArchitectureQuery,GetArchitectureResult>; return true; }
+		if (module=="platform" && function=="GetLocalTime") { table17.GetLocalTime=noop ? Noop<GetLocalTimeQuery,GetLocalTimeResult> : Zero<GetLocalTimeQuery,GetLocalTimeResult>; return true; }
 		if (module=="platform" && function=="IsHeadless") { table17.IsHeadless=noop ? Noop<IsHeadlessQuery,IsHeadlessResult> : Zero<IsHeadlessQuery,IsHeadlessResult>; return true; }
 		if (module=="rules_params" && function=="GetFeatureRulesParam") { table18.GetFeatureRulesParam=noop ? Noop<GetFeatureRulesParamQuery,GetFeatureRulesParamResult> : Zero<GetFeatureRulesParamQuery,GetFeatureRulesParamResult>; return true; }
 		if (module=="rules_params" && function=="GetFeatureRulesParams") { table18.GetFeatureRulesParams=noop ? Noop<GetFeatureRulesParamsQuery,GetFeatureRulesParamsResult> : Zero<GetFeatureRulesParamsQuery,GetFeatureRulesParamsResult>; return true; }
@@ -798,6 +800,7 @@ struct NativeApiMutants {
 		if (module=="unsynced_ctrl" && function=="SetWindowGeometry") { table45.SetWindowGeometry=noop ? Noop<SetWindowGeometryQuery,SetWindowGeometryResult> : Zero<SetWindowGeometryQuery,SetWindowGeometryResult>; return true; }
 		if (module=="unsynced_ctrl" && function=="SetWindowMaximized") { table45.SetWindowMaximized=noop ? Noop<SetWindowMaximizedQuery,SetWindowMaximizedResult> : Zero<SetWindowMaximizedQuery,SetWindowMaximizedResult>; return true; }
 		if (module=="unsynced_ctrl" && function=="SetWindowMinimized") { table45.SetWindowMinimized=noop ? Noop<SetWindowMinimizedQuery,SetWindowMinimizedResult> : Zero<SetWindowMinimizedQuery,SetWindowMinimizedResult>; return true; }
+		if (module=="unsynced_ctrl" && function=="ShowLoadProgress") { table45.ShowLoadProgress=noop ? Noop<ShowLoadProgressQuery,ShowLoadProgressResult> : Zero<ShowLoadProgressQuery,ShowLoadProgressResult>; return true; }
 		if (module=="unsynced_ctrl" && function=="StopTrackingUnits") { table45.StopTrackingUnits=noop ? Noop<StopTrackingUnitsQuery,StopTrackingUnitsResult> : Zero<StopTrackingUnitsQuery,StopTrackingUnitsResult>; return true; }
 		if (module=="unsynced_ctrl" && function=="TrackUnits") { table45.TrackUnits=noop ? Noop<TrackUnitsQuery,TrackUnitsResult> : Zero<TrackUnitsQuery,TrackUnitsResult>; return true; }
 		if (module=="unsynced_ctrl" && function=="WarpMouse") { table45.WarpMouse=noop ? Noop<WarpMouseQuery,WarpMouseResult> : Zero<WarpMouseQuery,WarpMouseResult>; return true; }
@@ -1237,6 +1240,8 @@ struct NativeApiMutants {
 		if (module=="rml_ui" && function=="ElementGetAttribute") { table19.ElementGetAttribute=noop ? Noop<RmlElementGetAttributeQuery,RmlElementGetAttributeResult> : Zero<RmlElementGetAttributeQuery,RmlElementGetAttributeResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetChild") { table19.ElementGetChild=noop ? Noop<RmlElementGetChildQuery,RmlElementGetElementResult> : Zero<RmlElementGetChildQuery,RmlElementGetElementResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetClassName") { table19.ElementGetClassName=noop ? Noop<RmlElementHandleQuery,RmlElementGetStringResult> : Zero<RmlElementHandleQuery,RmlElementGetStringResult>; return true; }
+		if (module=="rml_ui" && function=="ElementGetClientHeight") { table19.ElementGetClientHeight=noop ? Noop<RmlElementHandleQuery,RmlElementGetFloatResult> : Zero<RmlElementHandleQuery,RmlElementGetFloatResult>; return true; }
+		if (module=="rml_ui" && function=="ElementGetClientWidth") { table19.ElementGetClientWidth=noop ? Noop<RmlElementHandleQuery,RmlElementGetFloatResult> : Zero<RmlElementHandleQuery,RmlElementGetFloatResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetElementById") { table19.ElementGetElementById=noop ? Noop<RmlElementGetByStringQuery,RmlElementGetElementResult> : Zero<RmlElementGetByStringQuery,RmlElementGetElementResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetElementsByClassName") { table19.ElementGetElementsByClassName=noop ? Noop<RmlElementGetByStringQuery,RmlElementHandleListResult> : Zero<RmlElementGetByStringQuery,RmlElementHandleListResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetElementsByClassNameCount") { table19.ElementGetElementsByClassNameCount=noop ? Noop<RmlElementGetByStringQuery,RmlElementGetIntResult> : Zero<RmlElementGetByStringQuery,RmlElementGetIntResult>; return true; }
@@ -1245,8 +1250,10 @@ struct NativeApiMutants {
 		if (module=="rml_ui" && function=="ElementGetId") { table19.ElementGetId=noop ? Noop<RmlElementHandleQuery,RmlElementGetStringResult> : Zero<RmlElementHandleQuery,RmlElementGetStringResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetInnerRml") { table19.ElementGetInnerRml=noop ? Noop<RmlElementHandleQuery,RmlElementGetStringResult> : Zero<RmlElementHandleQuery,RmlElementGetStringResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetRect") { table19.ElementGetRect=noop ? Noop<RmlElementHandleQuery,RmlElementGetRectResult> : Zero<RmlElementHandleQuery,RmlElementGetRectResult>; return true; }
+		if (module=="rml_ui" && function=="ElementGetScrollHeight") { table19.ElementGetScrollHeight=noop ? Noop<RmlElementHandleQuery,RmlElementGetFloatResult> : Zero<RmlElementHandleQuery,RmlElementGetFloatResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetScrollLeft") { table19.ElementGetScrollLeft=noop ? Noop<RmlElementHandleQuery,RmlElementGetIntResult> : Zero<RmlElementHandleQuery,RmlElementGetIntResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetScrollTop") { table19.ElementGetScrollTop=noop ? Noop<RmlElementHandleQuery,RmlElementGetIntResult> : Zero<RmlElementHandleQuery,RmlElementGetIntResult>; return true; }
+		if (module=="rml_ui" && function=="ElementGetScrollWidth") { table19.ElementGetScrollWidth=noop ? Noop<RmlElementHandleQuery,RmlElementGetFloatResult> : Zero<RmlElementHandleQuery,RmlElementGetFloatResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetTagName") { table19.ElementGetTagName=noop ? Noop<RmlElementHandleQuery,RmlElementGetStringResult> : Zero<RmlElementHandleQuery,RmlElementGetStringResult>; return true; }
 		if (module=="rml_ui" && function=="ElementGetValue") { table19.ElementGetValue=noop ? Noop<RmlElementHandleQuery,RmlElementGetStringResult> : Zero<RmlElementHandleQuery,RmlElementGetStringResult>; return true; }
 		if (module=="rml_ui" && function=="ElementHasAttribute") { table19.ElementHasAttribute=noop ? Noop<RmlElementGetByStringQuery,RmlElementBoolResult> : Zero<RmlElementGetByStringQuery,RmlElementBoolResult>; return true; }
@@ -1318,6 +1325,13 @@ struct NativeApiMutants {
 		if (module=="vfs" && function=="DownloadArchive") { table37.DownloadArchive=noop ? Noop<DownloadArchiveQuery,DownloadArchiveResult> : Zero<DownloadArchiveQuery,DownloadArchiveResult>; return true; }
 		if (module=="vfs" && function=="ExtractModArchiveFile") { table37.ExtractModArchiveFile=noop ? Noop<ExtractModArchiveFileQuery,ExtractModArchiveFileResult> : Zero<ExtractModArchiveFileQuery,ExtractModArchiveFileResult>; return true; }
 		if (module=="vfs" && function=="FileExists") { table37.FileExists=noop ? Noop<FileExistsQuery,FileExistsResult> : Zero<FileExistsQuery,FileExistsResult>; return true; }
+		if (module=="vfs" && function=="GameDataDelete") { table37.GameDataDelete=noop ? Noop<GameDataDeleteQuery,GameDataDeleteResult> : Zero<GameDataDeleteQuery,GameDataDeleteResult>; return true; }
+		if (module=="vfs" && function=="GameDataList") { table37.GameDataList=noop ? Noop<GameDataListQuery,GameDataListResult> : Zero<GameDataListQuery,GameDataListResult>; return true; }
+		if (module=="vfs" && function=="GameDataRead") { table37.GameDataRead=noop ? Noop<GameDataReadQuery,GameDataReadResult> : Zero<GameDataReadQuery,GameDataReadResult>; return true; }
+		if (module=="vfs" && function=="GameDataWrite") { table37.GameDataWrite=noop ? Noop<GameDataWriteQuery,GameDataWriteResult> : Zero<GameDataWriteQuery,GameDataWriteResult>; return true; }
+		if (module=="vfs" && function=="GameOutputClose") { table37.GameOutputClose=noop ? Noop<GameOutputCloseQuery,GameOutputCloseResult> : Zero<GameOutputCloseQuery,GameOutputCloseResult>; return true; }
+		if (module=="vfs" && function=="GameOutputOpen") { table37.GameOutputOpen=noop ? Noop<GameOutputOpenQuery,GameOutputOpenResult> : Zero<GameOutputOpenQuery,GameOutputOpenResult>; return true; }
+		if (module=="vfs" && function=="GameOutputWrite") { table37.GameOutputWrite=noop ? Noop<GameOutputWriteQuery,GameOutputWriteResult> : Zero<GameOutputWriteQuery,GameOutputWriteResult>; return true; }
 		if (module=="vfs" && function=="GetAllArchives") { table37.GetAllArchives=noop ? Noop<GetAllArchivesQuery,GetAllArchivesResult> : Zero<GetAllArchivesQuery,GetAllArchivesResult>; return true; }
 		if (module=="vfs" && function=="GetArchiveChecksum") { table37.GetArchiveChecksum=noop ? Noop<GetArchiveChecksumQuery,GetArchiveChecksumResult> : Zero<GetArchiveChecksumQuery,GetArchiveChecksumResult>; return true; }
 		if (module=="vfs" && function=="GetArchiveContainingFile") { table37.GetArchiveContainingFile=noop ? Noop<GetArchiveContainingFileQuery,GetArchiveContainingFileResult> : Zero<GetArchiveContainingFileQuery,GetArchiveContainingFileResult>; return true; }
@@ -1622,5 +1636,5 @@ struct NativeApiMutants {
 		if (module=="object_rendering" && function=="SetPieceList") { table56.SetPieceList=noop ? Noop<SetObjectPieceListQuery,ObjectRenderingResult> : Zero<SetObjectPieceListQuery,ObjectRenderingResult>; return true; }
 		return false;
 	}
-	static constexpr unsigned FunctionCount=1431;
+	static constexpr unsigned FunctionCount=1445;
 };

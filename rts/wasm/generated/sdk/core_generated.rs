@@ -18547,6 +18547,16 @@ pub mod rml_ui {
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
+            #[link_name = "element-get-client-height"]
+            pub safe fn core_element_get_client_height(p0: i64) -> i64;
+        }
+        #[link(wasm_import_module = "spring:rml-ui")]
+        unsafe extern "C" {
+            #[link_name = "element-get-client-width"]
+            pub safe fn core_element_get_client_width(p0: i64) -> i64;
+        }
+        #[link(wasm_import_module = "spring:rml-ui")]
+        unsafe extern "C" {
             #[link_name = "element-get-elements-by-class-name"]
             pub safe fn core_element_get_elements_by_class_name(p0: i64, p1: i32, p2: i32) -> i32;
         }
@@ -18572,6 +18582,11 @@ pub mod rml_ui {
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
+            #[link_name = "element-get-scroll-height"]
+            pub safe fn core_element_get_scroll_height(p0: i64) -> i64;
+        }
+        #[link(wasm_import_module = "spring:rml-ui")]
+        unsafe extern "C" {
             #[link_name = "element-get-scroll-left"]
             pub safe fn core_element_get_scroll_left(p0: i64) -> i64;
         }
@@ -18579,6 +18594,11 @@ pub mod rml_ui {
         unsafe extern "C" {
             #[link_name = "element-get-scroll-top"]
             pub safe fn core_element_get_scroll_top(p0: i64) -> i64;
+        }
+        #[link(wasm_import_module = "spring:rml-ui")]
+        unsafe extern "C" {
+            #[link_name = "element-get-scroll-width"]
+            pub safe fn core_element_get_scroll_width(p0: i64) -> i64;
         }
         #[link(wasm_import_module = "spring:rml-ui")]
         unsafe extern "C" {
@@ -20121,6 +20141,42 @@ pub mod rml_ui {
     }
 
     #[inline]
+    pub fn element_get_client_height(element_handle: u64) -> Result<f32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_element_get_client_height(element_handle as i64) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(f32::from_bits(packed as u32))
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (element_handle,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn element_get_client_width(element_handle: u64) -> Result<f32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_element_get_client_width(element_handle as i64) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(f32::from_bits(packed as u32))
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (element_handle,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
     pub fn element_get_rect(element_handle: u64) -> Result<(f32, f32, f32, f32)> {
         #[cfg(target_arch = "wasm32")]
         {
@@ -20136,6 +20192,24 @@ pub mod rml_ui {
                 return Err(ApiError::new(ErrorCode::Internal as i32));
             }
             Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (element_handle,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn element_get_scroll_height(element_handle: u64) -> Result<f32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_element_get_scroll_height(element_handle as i64) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
@@ -20172,6 +20246,24 @@ pub mod rml_ui {
                 return Err(ApiError::new(status));
             }
             Ok(packed as u32 as i32)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (element_handle,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn element_get_scroll_width(element_handle: u64) -> Result<f32> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let packed = raw::core_element_get_scroll_width(element_handle as i64) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            Ok(f32::from_bits(packed as u32))
         }
         #[cfg(not(target_arch = "wasm32"))]
         {

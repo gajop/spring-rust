@@ -2,7 +2,7 @@
 
 - source: `rts/wasm/generated/model.json`
 - coverage: `rts/wasm/generated/core-executable-coverage.json`
-- callouts: 1437
+- callouts: 1445
 
 ## Modules
 
@@ -27,7 +27,7 @@
 | `encoding` | 6 |
 | `metal_map` | 4 |
 | `path_finder` | 10 |
-| `platform` | 2 |
+| `platform` | 3 |
 | `rules_params` | 15 |
 | `move_ctrl` | 31 |
 | `camera` | 10 |
@@ -48,8 +48,8 @@
 | `ground_decals` | 31 |
 | `system_control` | 22 |
 | `profiling` | 10 |
-| `rml_ui` | 180 |
-| `vfs` | 57 |
+| `rml_ui` | 184 |
+| `vfs` | 60 |
 | `unsynced_read` | 20 |
 | `team_control` | 15 |
 | `unit_control` | 92 |
@@ -507,6 +507,7 @@
 | callout | signature | rules-synced | rules-unsynced | gaia-synced | gaia-unsynced | ui | sync | transport | mutating |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
 | `GetArchitecture` | i32,i32->i32 | x | x | x | x | x | synced-visible | variable-output-caller-owned |
+| `GetLocalTime` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `IsHeadless` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 
 ## `rules_params`
@@ -1319,6 +1320,8 @@
 | `ElementGetAttribute` | i64,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-io-borrowed-input-caller-owned-output |
 | `ElementGetChild` | i64,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `ElementGetClassName` | i64,i32->i32 |  | x |  | x | x | unsynced-only | variable-output-caller-owned |
+| `ElementGetClientHeight` | i64->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `ElementGetClientWidth` | i64->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `ElementGetElementById` | i64,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `ElementGetElementsByClassName` | i64,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-io-borrowed-input-caller-owned-output |
 | `ElementGetElementsByClassNameCount` | i64,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
@@ -1327,8 +1330,10 @@
 | `ElementGetId` | i64,i32->i32 |  | x |  | x | x | unsynced-only | variable-output-caller-owned |
 | `ElementGetInnerRml` | i64,i32->i32 |  | x |  | x | x | unsynced-only | variable-output-caller-owned |
 | `ElementGetRect` | i64,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
+| `ElementGetScrollHeight` | i64->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `ElementGetScrollLeft` | i64->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `ElementGetScrollTop` | i64->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `ElementGetScrollWidth` | i64->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `ElementGetTagName` | i64,i32->i32 |  | x |  | x | x | unsynced-only | variable-output-caller-owned |
 | `ElementGetValue` | i64,i32->i32 |  | x |  | x | x | unsynced-only | variable-output-caller-owned |
 | `ElementHasAttribute` | i64,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
@@ -1409,6 +1414,9 @@
 | `GameDataList` | i32,i32->i32 |  | x |  | x | x | unsynced-only | dynamic-output-caller-owned |
 | `GameDataRead` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-io-borrowed-input-caller-owned-output |
 | `GameDataWrite` | i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `GameOutputClose` | i32->i64 |  | x |  | x | x | unsynced-only | fixed |
+| `GameOutputOpen` | i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `GameOutputWrite` | i32,i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `GetAllArchives` | i32,i32->i32 |  | x |  | x | x | unsynced-only | dynamic-output-caller-owned |
 | `GetArchiveChecksum` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-io-borrowed-input-caller-owned-output |
 | `GetArchiveContainingFile` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-io-borrowed-input-caller-owned-output |

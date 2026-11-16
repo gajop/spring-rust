@@ -3185,6 +3185,54 @@ static void NativeElementSetScrollTop(const RmlElementSetIntQuery* query, RmlEle
 	result->success = true;
 }
 
+static void NativeElementGetScrollWidth(const RmlElementHandleQuery* query, RmlElementGetFloatResult* result)
+{
+	result->error = nullptr;
+	result->value = 0.0f;
+	Rml::Element* element = FromElementHandle(query->elementHandle);
+	if (element == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = element->GetScrollWidth();
+}
+
+static void NativeElementGetScrollHeight(const RmlElementHandleQuery* query, RmlElementGetFloatResult* result)
+{
+	result->error = nullptr;
+	result->value = 0.0f;
+	Rml::Element* element = FromElementHandle(query->elementHandle);
+	if (element == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = element->GetScrollHeight();
+}
+
+static void NativeElementGetClientWidth(const RmlElementHandleQuery* query, RmlElementGetFloatResult* result)
+{
+	result->error = nullptr;
+	result->value = 0.0f;
+	Rml::Element* element = FromElementHandle(query->elementHandle);
+	if (element == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = element->GetClientWidth();
+}
+
+static void NativeElementGetClientHeight(const RmlElementHandleQuery* query, RmlElementGetFloatResult* result)
+{
+	result->error = nullptr;
+	result->value = 0.0f;
+	Rml::Element* element = FromElementHandle(query->elementHandle);
+	if (element == nullptr) {
+		result->error = &INVALID_ARGUMENT_ERROR;
+		return;
+	}
+	result->value = element->GetClientHeight();
+}
+
 static void NativeElementGetTagName(const RmlElementHandleQuery* query, RmlElementGetStringResult* result)
 {
 	Rml::Element* element = FromElementHandle(query->elementHandle);
@@ -3954,4 +4002,8 @@ const RmlUiApi RMLUI_API = {
 	.DataModelUnbindEvent = NativeDataModelUnbindEvent,
 	.ContextRemoveEventListener = NativeContextRemoveEventListener,
 	.ElementRemoveEventListener = NativeElementRemoveEventListener,
+	.ElementGetScrollWidth = NativeElementGetScrollWidth,
+	.ElementGetScrollHeight = NativeElementGetScrollHeight,
+	.ElementGetClientWidth = NativeElementGetClientWidth,
+	.ElementGetClientHeight = NativeElementGetClientHeight,
 };
