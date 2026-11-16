@@ -272,6 +272,9 @@ fn mod_options_and_mod_option_read_engine_callbacks() {
         all.get("sb_space_map").map(String::as_str),
         Some("amber-veil")
     );
-    assert_eq!(c.mod_option("sb_game_mode").unwrap().as_deref(), Some("siege"));
+    assert_eq!(
+        c.mod_option("sb_game_mode").unwrap().as_deref(),
+        Some("siege")
+    );
     assert_eq!(c.mod_option("missing").unwrap(), None);
 }

@@ -105,7 +105,12 @@ impl<'a> Context<'a> {
         let capacity = count as usize;
         let mut keys = vec![std::ptr::null(); capacity];
         let mut values = vec![std::ptr::null(); capacity];
-        let written = callback!(self, Game_getModOptions, keys.as_mut_ptr(), values.as_mut_ptr());
+        let written = callback!(
+            self,
+            Game_getModOptions,
+            keys.as_mut_ptr(),
+            values.as_mut_ptr()
+        );
         if !(0..=count).contains(&written) {
             return Err(Error::InvalidInput("mod options count overflow"));
         }
@@ -114,7 +119,8 @@ impl<'a> Context<'a> {
             .iter()
             .zip(&values[..written as usize])
         {
-            let (Some(key), Some(value)) = (unsafe { optional_cstr(k) }, unsafe { optional_cstr(v) })
+            let (Some(key), Some(value)) =
+                (unsafe { optional_cstr(k) }, unsafe { optional_cstr(v) })
             else {
                 return Err(Error::InvalidInput("null mod option entry"));
             };
