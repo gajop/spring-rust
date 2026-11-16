@@ -446,9 +446,10 @@ struct RmlUiApi {
 	void (*ContextRemoveEventListener)(const RmlContextEventListenerRemoveQuery* query, RmlElementBoolResult* result);
 	void (*ElementRemoveEventListener)(const RmlElementEventListenerRemoveQuery* query, RmlElementBoolResult* result);
 	// NEW (Lua's element.scroll_width, scroll_height, client_width, client_height):
-	// RmlUi's Element::GetScrollWidth/GetScrollHeight (the scrollable content,
-	// padding included) and GetClientWidth/GetClientHeight (the padding box less
-	// any scrollbar), in pixels, from the last layout. With ElementGetScrollTop:
+	// RmlUi's Element::GetScrollWidth/GetScrollHeight (the scrollable overflow,
+	// from the padding edge to the content's end, at least the client size) and
+	// GetClientWidth/GetClientHeight (the padding box less any scrollbar), in
+	// pixels, from the last layout. With ElementGetScrollTop:
 	// an element is scrolled to its end when scroll_top + client_height reaches
 	// scroll_height.
 	void (*ElementGetScrollWidth)(const RmlElementHandleQuery* query, RmlElementGetFloatResult* result);

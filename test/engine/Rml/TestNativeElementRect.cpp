@@ -162,7 +162,7 @@ TEST_CASE("ElementGetScroll and ElementGetClient sizes report an element's scrol
 
 	Rml::ElementDocument* document = context->CreateDocument();
 	REQUIRE(document != nullptr);
-	// A 100x80 box scrolling vertically over 300x500 of content, with 10px of
+	// A 100x80 box scrolling vertically over 60x500 of content, with 10px of
 	// padding (scroll and client sizes include it) and a 2px border (neither does).
 	document->SetInnerRML(R"(<div id="host"><div id="content"/></div>)");
 	Rml::Element* host = document->GetElementById("host");
@@ -203,8 +203,10 @@ TEST_CASE("ElementGetScroll and ElementGetClient sizes report an element's scrol
 	CHECK(scrollHeight == Catch::Approx(host->GetScrollHeight()));
 	CHECK(clientWidth == Catch::Approx(host->GetClientWidth()));
 	CHECK(clientHeight == Catch::Approx(host->GetClientHeight()));
-	// The content and the padding around it; the padding box, no border.
-	CHECK(scrollHeight == Catch::Approx(520.0f));
+	// RmlUi's scrollable overflow runs from the padding edge to the content's end:
+	// the top padding and the content (10 + 500), not the bottom padding. The client
+	// height is the padding box (10 + 80 + 10), no border.
+	CHECK(scrollHeight == Catch::Approx(510.0f));
 	CHECK(clientHeight == Catch::Approx(100.0f));
 	CHECK(clientWidth <= 120.0f);
 
