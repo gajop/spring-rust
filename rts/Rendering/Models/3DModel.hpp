@@ -43,6 +43,7 @@ struct S3DModel
 
 		, loadStatus(NOTLOADED)
 		, uploaded(false)
+		, uploadFrame(-2)
 
 		, traAlloc(ScopedTransformMemAlloc())
 	{}
@@ -106,6 +107,8 @@ public:
 
 	LoadStatus loadStatus;
 	bool uploaded;
+	/// the game frame it was uploaded on (-1 while loading, -2 not uploaded); `debuginfo models`
+	int uploadFrame;
 private:
 	ScopedTransformMemAlloc traAlloc;
 };

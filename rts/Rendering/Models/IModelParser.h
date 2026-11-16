@@ -40,6 +40,8 @@ public:
 	/// Uploads every model loaded but not yet uploaded (those a game queued while loading,
 	/// with PreloadModels = 0), so their first appearance does not upload mid-game.
 	void UploadLoadedModels();
+	/// `debuginfo models`: every model on the GPU, its vertices and indices and the frame it was uploaded on
+	void LogModels() const;
 
 	const std::vector<S3DModel>& GetModelsVec() const { return models; }
 	      std::vector<S3DModel>& GetModelsVec()       { return models; }

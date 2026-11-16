@@ -14,6 +14,7 @@
 #include "System/StringUtil.h"
 #include "System/Exceptions.h"
 #include "System/Log/ILog.h"
+#include "System/Config/ConfigHandler.h"
 #include "System/Platform/Threading.h"
 
 #include <algorithm>
@@ -67,6 +68,23 @@ void CS3OTextureHandler::Kill()
 	bitmapCache.clear();
 }
 
+// TextureMipSkip and TextureMipFloor, as for a model's DDS textures: an image the engine decodes
+// itself (PNG, TGA, ...) leaves out its finest levels too, box-filtered down, its longer side never
+// below the floor. A large decoded map (a planet's, 4096 x 2048 RGBA8 with its levels: 43 MiB)
+// otherwise kept its full size at every preset.
+static void SkipFinestLevels(CBitmap& bitmap)
+{
+#ifndef HEADLESS
+	if (bitmap.compressed)
+		return;
+
+	const unsigned int floor = configHandler->GetInt("TextureMipFloor");
+	const int skip = TextureMipSkipLevels(std::max(bitmap.xsize, bitmap.ysize), floor);
+	if (skip > 0)
+		bitmap = bitmap.CreateRescaled(std::max(1, bitmap.xsize >> skip), std::max(1, bitmap.ysize >> skip));
+#endif
+}
+
 void CS3OTextureHandler::Reload()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -85,6 +103,7 @@ void CS3OTextureHandler::Reload()
 				bitmap.InvertAlpha();
 			if (texData.invertAxis)
 				bitmap.ReverseYAxis();
+			SkipFinestLevels(bitmap);
 
 			uint32_t newTexId = bitmap.CreateMipMapTexture(0.0f, 0.0f, 0, texData.texID);
 			assert(newTexId == texData.texID);
@@ -170,6 +189,7 @@ unsigned int CS3OTextureHandler::LoadAndCacheTexture(
 			bitmap->ReverseYAxis();
 		if (invertAlpha)
 			bitmap->InvertAlpha();
+		SkipFinestLevels(*bitmap);
 	}
 
 	const unsigned int texID = preloadCall ? 0 : bitmap->CreateMipMapTexture();

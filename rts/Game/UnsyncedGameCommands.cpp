@@ -66,6 +66,7 @@
 
 #include "Rendering/DebugColVolDrawer.h"
 #include "Rendering/GL/GpuMemoryCensus.h"
+#include "Rendering/Models/IModelParser.h"
 #include "Rendering/DebugVisibilityDrawer.h"
 #include "Rendering/DebugDrawerAI.h"
 #include "Rendering/DebugDrawerQuadField.h"
@@ -3955,7 +3956,7 @@ class DebugInfoActionExecutor : public IUnsyncedActionExecutor {
 public:
 	DebugInfoActionExecutor() : IUnsyncedActionExecutor(
 		"DebugInfo",
-		"Print debug info to the chat/log-file about either sound, profiling, command-descriptions or GPU memory (gpumemory)"
+		"Print debug info to the chat/log-file about either sound, profiling, command-descriptions, GPU memory (gpumemory) or the models on the GPU (models)"
 	) {
 	}
 
@@ -3975,8 +3976,11 @@ public:
 			case hashString("gpumemory"): {
 				LogGpuMemoryCensus();
 			} break;
+			case hashString("models"): {
+				modelLoader.LogModels();
+			} break;
 			default: {
-				LOG_L(L_WARNING, "[DbgInfoAction::%s] unknown argument \"%s\" (use \"sound\", \"profiling\", \"cmddescrs\" or \"gpumemory\")", __func__, args.c_str());
+				LOG_L(L_WARNING, "[DbgInfoAction::%s] unknown argument \"%s\" (use \"sound\", \"profiling\", \"cmddescrs\", \"gpumemory\" or \"models\")", __func__, args.c_str());
 			} break;
 		}
 

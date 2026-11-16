@@ -40,6 +40,7 @@ S3DModel& S3DModel::operator= (S3DModel&& m) noexcept {
 
 	loadStatus = m.loadStatus;
 	uploaded = m.uploaded;
+	uploadFrame = m.uploadFrame;
 
 	std::swap(traAlloc, m.traAlloc);
 

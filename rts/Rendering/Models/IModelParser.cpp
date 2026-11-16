@@ -14,6 +14,7 @@
 #include "3DModelVAO.hpp"
 #include "ModelsLock.h"
 #include "Game/GlobalUnsynced.h"
+#include "Sim/Misc/GlobalSynced.h"
 #include "Rendering/Textures/S3OTextureHandler.h"
 #include "Net/Protocol/NetProtocol.h" // NETLOG
 #include "Sim/Misc/CollisionVolume.h"
@@ -531,5 +532,43 @@ void CModelLoader::Upload(S3DModel* model) const {
 		CheckPieceNormals(model, model->GetRootPiece());
 
 	model->uploaded = true;
+	model->uploadFrame = (gs != nullptr)? gs->frameNum: -1;
+}
+
+void CModelLoader::LogModels() const
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	struct Row { const S3DModel* model; size_t verts; };
+	std::vector<Row> rows;
+	size_t verts = 0;
+	size_t indxs = 0;
+	{
+		auto lock = CModelsLock::GetScopedLock();
+		for (size_t i = 1; i < models.size() && i <= modelID; ++i) {
+			const S3DModel& model = models[i];
+			if (!model.uploaded)
+				continue;
+			// the pieces a level skip left out have no indices and no vertices on the GPU
+			size_t n = 0;
+			for (const auto* piece: model.pieceObjects)
+				if (piece->HasGeometryData() && piece->indxCount > 0)
+					n += piece->GetVerticesVec().size();
+			rows.push_back({&model, n});
+			verts += n;
+			indxs += model.indxCount;
+		}
+	}
+	std::sort(rows.begin(), rows.end(), [](const Row& a, const Row& b) { return a.verts > b.verts; });
+
+	const auto& vao = S3DModelVAO::GetInstance();
+	LOG("[models] %u models on the GPU: %u vertices (%.1f MiB), %u indices (%.1f MiB); the buffers hold %u vertices and %u indices with shatter pieces",
+		static_cast<uint32_t>(rows.size()), static_cast<uint32_t>(verts), verts * sizeof(SVertexData) / 1048576.0,
+		static_cast<uint32_t>(indxs), indxs * sizeof(uint32_t) / 1048576.0,
+		static_cast<uint32_t>(vao.GetVertElemCount()), static_cast<uint32_t>(vao.GetIndxElemCount()));
+	for (const Row& row: rows) {
+		LOG("[models] %9u vertices %9u indices %7.2f MiB  frame %6d  %s", static_cast<uint32_t>(row.verts), row.model->indxCount,
+			(row.verts * sizeof(SVertexData) + row.model->indxCount * sizeof(uint32_t)) / 1048576.0, row.model->uploadFrame, row.model->name.c_str());
+	}
+	LOG("[models] listed");
 }
 

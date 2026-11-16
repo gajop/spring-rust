@@ -1761,13 +1761,13 @@ CONFIG(int, TextureMipSkip)
 	.defaultValue(0)
 	.minimumValue(0)
 	.maximumValue(3)
-	.description("Leave out this many of the finest levels of mipmapped DDS textures and mipmapped named images, never taking their longer side below TextureMipFloor (DDS) or 1024 texels (named images): each step quarters their memory.");
+	.description("Leave out this many of the finest levels of mipmapped DDS textures, model textures and mipmapped named images, never taking their longer side below TextureMipFloor (DDS and model textures) or 1024 texels (named images): each step quarters their memory.");
 
 CONFIG(int, TextureMipFloor)
 	.defaultValue(1024)
 	.minimumValue(64)
 	.maximumValue(16384)
-	.description("TextureMipSkip never takes a mipmapped DDS texture's longer side below this many texels.");
+	.description("TextureMipSkip never takes a mipmapped DDS texture's or a model texture's longer side below this many texels.");
 
 unsigned int TextureMipSkipLevels(unsigned int side, unsigned int floor)
 {
