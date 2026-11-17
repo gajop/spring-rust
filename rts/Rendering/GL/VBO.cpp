@@ -5,6 +5,7 @@
  * ARB_vertex_buffer_object class implementation
  */
 
+#include <algorithm>
 #include <cassert>
 #include <vector>
 #include <stdint.h>
@@ -111,6 +112,8 @@ VBO& VBO::operator=(VBO&& other) noexcept
 
 	std::swap(isSupported, other.isSupported);
 	std::swap(immutableStorage, other.immutableStorage);
+	std::swap(sparse, other.sparse);
+	std::swap(committed, other.committed);
 	std::swap(readableStorage, other.readableStorage);
 
 	std::swap(data, other.data);
@@ -309,6 +312,62 @@ void VBO::Resize(GLsizeiptr newSize, GLenum newUsage)
 		data = newData;
 	}
 }
+
+#ifdef HEADLESS
+bool VBO::SparseSupported() { return false; }
+bool VBO::NewSparse(GLsizeiptr) { return false; }
+bool VBO::CommitSparse(GLsizeiptr) { return false; }
+#else
+bool VBO::SparseSupported()
+{
+	return GLAD_GL_ARB_sparse_buffer && GLAD_GL_ARB_buffer_storage;
+}
+
+bool VBO::NewSparse(GLsizeiptr virtualSize)
+{
+	assert(bound);
+	if (!SparseSupported() || virtualSize <= 0)
+		return false;
+
+	glClearErrors("VBO", __func__, globalRendering->glDebugErrors);
+	glBufferStorage(curBoundTarget, virtualSize, nullptr, GL_DYNAMIC_STORAGE_BIT | GL_SPARSE_STORAGE_BIT_ARB);
+	if (glGetError() != GL_NO_ERROR)
+		return false;
+
+	bufSize = virtualSize;
+	memSize = 0;
+	committed = 0;
+	sparse = true;
+	immutableStorage = true;
+	return true;
+}
+
+bool VBO::CommitSparse(GLsizeiptr bytes)
+{
+	assert(bound);
+	if (!sparse || bytes < 0 || static_cast<size_t>(bytes) > bufSize)
+		return false;
+
+	static GLint pageSize = 0;
+	if (pageSize <= 0) {
+		glGetIntegerv(GL_SPARSE_BUFFER_PAGE_SIZE_ARB, &pageSize);
+		if (pageSize <= 0)
+			pageSize = 65536;
+	}
+
+	const size_t wanted = std::min<size_t>(bufSize, ((static_cast<size_t>(bytes) + pageSize - 1) / pageSize) * pageSize);
+	if (wanted <= committed)
+		return true;
+
+	glClearErrors("VBO", __func__, globalRendering->glDebugErrors);
+	glBufferPageCommitmentARB(curBoundTarget, committed, wanted - committed, GL_TRUE);
+	if (glGetError() != GL_NO_ERROR)
+		return false;
+
+	committed = wanted;
+	return true;
+}
+#endif
 
 #ifdef HEADLESS
 bool VBO::CopyTo(VBO& dest, GLsizeiptr copySize) { return false; }

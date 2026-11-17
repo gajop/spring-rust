@@ -55,6 +55,19 @@ public:
 	void Resize(GLsizeiptr newSize, GLenum newUsage = GL_STREAM_DRAW);
 	bool CopyTo(VBO& dest, GLsizeiptr copySize);
 
+	/**
+	 * Sparse (virtual) storage, GL_ARB_sparse_buffer: `virtualSize` bytes of address space with no memory behind
+	 * them, which CommitSparse backs a page range at a time. The buffer never moves and never copies, so growing
+	 * it costs the new pages and nothing else (Resize holds the old and the new buffer together for its copy).
+	 * False, with the buffer left empty, where the driver cannot (or the size is refused).
+	 */
+	static bool SparseSupported();
+	bool NewSparse(GLsizeiptr virtualSize);
+	/// Backs the first `bytes` of a sparse buffer with memory (rounded up to a page); only grows.
+	bool CommitSparse(GLsizeiptr bytes);
+	bool IsSparse() const { return sparse; }
+	size_t GetCommitted() const { return sparse ? committed : bufSize; }
+
 	template<typename TData>
 	void New(const std::vector<TData>& data, GLenum newUsage = GL_STATIC_DRAW) { New(sizeof(TData) * data.size(), newUsage, data.data()); };
 	void New(GLsizeiptr newSize, GLenum newUsage = GL_STREAM_DRAW, const void* newData = nullptr);
@@ -145,6 +158,8 @@ private:
 	};
 public:
 	bool immutableStorage = false;
+	bool sparse = false;
+	size_t committed = 0; // bytes of a sparse buffer backed by memory
 	bool readableStorage = false;
 	GLuint mapUnsyncedBit;
 

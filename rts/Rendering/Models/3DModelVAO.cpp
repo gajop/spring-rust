@@ -16,6 +16,7 @@
 #include "System/Misc/TracyDefs.h"
 #include "System/Config/ConfigHandler.h"
 #include "System/StringUtil.h"
+#include "System/Log/ILog.h"
 
 #include <cstdlib>
 #include <string_view>
@@ -212,20 +213,55 @@ void S3DModelVAO::CreateVAO()
 	instVBO.Unbind();
 }
 
+// Model buffers are sparse where the driver can (GL_ARB_sparse_buffer): the address space for every model
+// a game can hold is reserved once and memory is committed a page at a time as models go up, so a model
+// uploaded mid-game costs its own pages. Resizing a regular buffer copies it into a new one and holds both
+// for the copy, so each 8 MiB step of growth peaked at the buffer's whole size above its steady state.
+CONFIG(bool, ModelBufferSparse)
+	.defaultValue(true)
+	.description("Reserve the model vertex and index buffers as sparse (virtual) storage and commit memory as models upload, instead of regrowing them in 8 MiB steps that copy the whole buffer.");
+
+static constexpr size_t SPARSE_VERT_BYTES = size_t(2) << 30;
+static constexpr size_t SPARSE_INDX_BYTES = size_t(1) << 30;
+
+// Makes `vbo` hold at least `usedBytes`. A buffer that is not yet there is made sparse when it can be;
+// `reinitVAO` says the buffer's id changed.
+static void GrowModelVBO(VBO& vbo, size_t usedBytes, size_t sparseBytes, bool& reinitVAO, bool& sparseFailed)
+{
+	static constexpr size_t MEM_STEP = 8 * 1024 * 1024;
+
+	if (!sparseFailed && vbo.GetSize() == 0 && VBO::SparseSupported() && configHandler->GetBool("ModelBufferSparse")) {
+		if (vbo.NewSparse(sparseBytes))
+			reinitVAO = true;
+		else
+			sparseFailed = true;
+	}
+
+	if (vbo.IsSparse()) {
+		if (!vbo.CommitSparse(usedBytes)) {
+			// out of address space or memory: leave what is committed and say so once
+			LOG_L(L_ERROR, "[S3DModelVAO::%s] cannot commit %u bytes of a sparse model buffer", __func__, static_cast<uint32_t>(usedBytes));
+		}
+		return;
+	}
+
+	// sized to the models loaded (8 MiB steps), not to the CPU-side reservation: a game that
+	// loads only its match's models keeps that much on the GPU
+	const size_t reqSize = AlignUp(usedBytes, MEM_STEP);
+	reinitVAO |= (reqSize > vbo.GetSize());
+	vbo.Resize(reqSize, GL_STATIC_DRAW); //noop if size hasn't changed, will copy data if changed
+}
+
 void S3DModelVAO::UploadVBOs()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	static constexpr size_t MEM_STEP = 8 * 1024 * 1024;
 	bool reinitVAO = (vao.GetIdRaw() == 0);
+	static bool sparseFailed = false;
 
 	if (vertData.size() > vertUploadIndex) {
 		assert(!safeToDeleteVectors);
 		vertVBO.Bind();
-		// sized to the models loaded (8 MiB steps), not to the CPU-side reservation: a game that
-		// loads only its match's models keeps that much on the GPU
-		const size_t reqSize = AlignUp(vertData.size() * sizeof(SVertexData), MEM_STEP);
-		reinitVAO |= (reqSize > vertVBO.GetSize());
-		vertVBO.Resize(reqSize, GL_STATIC_DRAW); //noop if size hasn't changed, will copy data if changed
+		GrowModelVBO(vertVBO, vertData.size() * sizeof(SVertexData), SPARSE_VERT_BYTES, reinitVAO, sparseFailed);
 		vertVBO.SetBufferSubData(vertUploadIndex * sizeof(SVertexData), (vertData.size() - vertUploadIndex) * sizeof(SVertexData), vertData.data() + vertUploadIndex);
 		vertVBO.Unbind();
 		vertUploadIndex = vertData.size();
@@ -235,10 +271,8 @@ void S3DModelVAO::UploadVBOs()
 	if (indxData.size() > indxUploadIndex) {
 		assert(!safeToDeleteVectors);
 		indxVBO.Bind();
-		const size_t reqSize = AlignUp(indxData.size() * sizeof(   uint32_t), MEM_STEP);
-		reinitVAO |= (reqSize > indxVBO.GetSize());
-		indxVBO.Resize(reqSize, GL_STATIC_DRAW); //noop if size hasn't changed, will copy data if changed
-		indxVBO.SetBufferSubData(indxUploadIndex * sizeof(   uint32_t), (indxData.size() - indxUploadIndex) * sizeof(   uint32_t), indxData.data() + indxUploadIndex);
+		GrowModelVBO(indxVBO, indxData.size() * sizeof(uint32_t), SPARSE_INDX_BYTES, reinitVAO, sparseFailed);
+		indxVBO.SetBufferSubData(indxUploadIndex * sizeof(uint32_t), (indxData.size() - indxUploadIndex) * sizeof(uint32_t), indxData.data() + indxUploadIndex);
 		indxVBO.Unbind();
 		indxUploadIndex = indxData.size();
 		indxUploadSize = indxUploadIndex;
@@ -250,8 +284,8 @@ void S3DModelVAO::UploadVBOs()
 	#ifndef HEADLESS
 	// names the model buffers in GL debuggers and `debuginfo gpumemory`
 	if (glObjectLabel != nullptr) {
-		glObjectLabel(GL_BUFFER, vertVBO.GetId(), -1, "models: vertices");
-		glObjectLabel(GL_BUFFER, indxVBO.GetId(), -1, "models: indices");
+		glObjectLabel(GL_BUFFER, vertVBO.GetId(), -1, vertVBO.IsSparse() ? "models: vertices (sparse)" : "models: vertices");
+		glObjectLabel(GL_BUFFER, indxVBO.GetId(), -1, indxVBO.IsSparse() ? "models: indices (sparse)" : "models: indices");
 	}
 	#endif
 
