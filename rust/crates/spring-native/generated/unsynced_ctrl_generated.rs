@@ -1515,4 +1515,21 @@ impl<'a> UnsyncedCtrl<'a> {
         }
     }
 
+    pub fn upload_queued_models(&self, max_models: u32) -> Result<(u32, u32), Error> {
+        unsafe {
+            let query = sys::UploadQueuedModelsQuery {
+                maxModels: max_models,
+            };
+            let mut result = MaybeUninit::<sys::UploadQueuedModelsResult>::zeroed();
+            let func = self.api.UploadQueuedModels.expect("UploadQueuedModels function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            let value = (
+                result.uploaded,
+                result.remaining,
+            );
+            Error::result_or(result.error, value)
+        }
+    }
+
 }

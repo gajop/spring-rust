@@ -8738,7 +8738,7 @@
           ]
         }
       ],
-      "callout_count": 1196,
+      "callout_count": 1209,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -10776,6 +10776,12 @@
         },
         {
           "class": "fixed",
+          "function": "GetLocalTime",
+          "module": "platform",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "fixed",
           "function": "IsHeadless",
           "module": "platform",
           "signature": "i32->i64"
@@ -12183,6 +12189,12 @@
           "function": "TrackUnits",
           "module": "unsynced_ctrl",
           "signature": "i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "UploadQueuedModels",
+          "module": "unsynced_ctrl",
+          "signature": "i32,i32->i32"
         },
         {
           "class": "fixed",
@@ -14807,6 +14819,18 @@
           "signature": "i64,i32->i32"
         },
         {
+          "class": "fixed",
+          "function": "ElementGetClientHeight",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetClientWidth",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
           "class": "variable-input-borrowed",
           "function": "ElementGetElementById",
           "module": "rml_ui",
@@ -14856,6 +14880,12 @@
         },
         {
           "class": "fixed",
+          "function": "ElementGetScrollHeight",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
           "function": "ElementGetScrollLeft",
           "module": "rml_ui",
           "signature": "i64->i64"
@@ -14863,6 +14893,12 @@
         {
           "class": "fixed",
           "function": "ElementGetScrollTop",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetScrollWidth",
           "module": "rml_ui",
           "signature": "i64->i64"
         },
@@ -15279,6 +15315,48 @@
           "function": "FileExists",
           "module": "vfs",
           "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameDataDelete",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "dynamic-output-caller-owned",
+          "function": "GameDataList",
+          "module": "vfs",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-io-borrowed-input-caller-owned-output",
+          "function": "GameDataRead",
+          "module": "vfs",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameDataWrite",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "GameOutputClose",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameOutputOpen",
+          "module": "vfs",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameOutputWrite",
+          "module": "vfs",
+          "signature": "i32,i32->i64"
         },
         {
           "class": "dynamic-output-caller-owned",
@@ -15919,7 +15997,7 @@
       ],
       "canonical_callin_count": 100,
       "environment": "rules-unsynced",
-      "surface_count": 1346
+      "surface_count": 1359
     },
     {
       "alias_callin_count": 53,
@@ -24645,7 +24723,7 @@
           ]
         }
       ],
-      "callout_count": 1196,
+      "callout_count": 1209,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -26683,6 +26761,12 @@
         },
         {
           "class": "fixed",
+          "function": "GetLocalTime",
+          "module": "platform",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "fixed",
           "function": "IsHeadless",
           "module": "platform",
           "signature": "i32->i64"
@@ -28090,6 +28174,12 @@
           "function": "TrackUnits",
           "module": "unsynced_ctrl",
           "signature": "i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "UploadQueuedModels",
+          "module": "unsynced_ctrl",
+          "signature": "i32,i32->i32"
         },
         {
           "class": "fixed",
@@ -30714,6 +30804,18 @@
           "signature": "i64,i32->i32"
         },
         {
+          "class": "fixed",
+          "function": "ElementGetClientHeight",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetClientWidth",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
           "class": "variable-input-borrowed",
           "function": "ElementGetElementById",
           "module": "rml_ui",
@@ -30763,6 +30865,12 @@
         },
         {
           "class": "fixed",
+          "function": "ElementGetScrollHeight",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
           "function": "ElementGetScrollLeft",
           "module": "rml_ui",
           "signature": "i64->i64"
@@ -30770,6 +30878,12 @@
         {
           "class": "fixed",
           "function": "ElementGetScrollTop",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetScrollWidth",
           "module": "rml_ui",
           "signature": "i64->i64"
         },
@@ -31186,6 +31300,48 @@
           "function": "FileExists",
           "module": "vfs",
           "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameDataDelete",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "dynamic-output-caller-owned",
+          "function": "GameDataList",
+          "module": "vfs",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-io-borrowed-input-caller-owned-output",
+          "function": "GameDataRead",
+          "module": "vfs",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameDataWrite",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "GameOutputClose",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameOutputOpen",
+          "module": "vfs",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameOutputWrite",
+          "module": "vfs",
+          "signature": "i32,i32->i64"
         },
         {
           "class": "dynamic-output-caller-owned",
@@ -31826,11 +31982,11 @@
       ],
       "canonical_callin_count": 100,
       "environment": "gaia-unsynced",
-      "surface_count": 1346
+      "surface_count": 1359
     },
     {
       "alias_callin_count": 50,
-      "callin_count": 140,
+      "callin_count": 141,
       "callins": [
         {
           "alias": false,
@@ -32271,6 +32427,18 @@
           "name": "GameStart",
           "params": [],
           "results": []
+        },
+        {
+          "alias": false,
+          "canonical": "GotChatMsg",
+          "class": "generated-shared-scratch",
+          "name": "GotChatMsg",
+          "params": [
+            "i32"
+          ],
+          "results": [
+            "i32"
+          ]
         },
         {
           "alias": false,
@@ -33493,7 +33661,7 @@
           ]
         }
       ],
-      "callout_count": 1199,
+      "callout_count": 1212,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -35531,6 +35699,12 @@
         },
         {
           "class": "fixed",
+          "function": "GetLocalTime",
+          "module": "platform",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "fixed",
           "function": "IsHeadless",
           "module": "platform",
           "signature": "i32->i64"
@@ -36938,6 +37112,12 @@
           "function": "TrackUnits",
           "module": "unsynced_ctrl",
           "signature": "i32,i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "UploadQueuedModels",
+          "module": "unsynced_ctrl",
+          "signature": "i32,i32->i32"
         },
         {
           "class": "fixed",
@@ -39562,6 +39742,18 @@
           "signature": "i64,i32->i32"
         },
         {
+          "class": "fixed",
+          "function": "ElementGetClientHeight",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetClientWidth",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
           "class": "variable-input-borrowed",
           "function": "ElementGetElementById",
           "module": "rml_ui",
@@ -39611,6 +39803,12 @@
         },
         {
           "class": "fixed",
+          "function": "ElementGetScrollHeight",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
           "function": "ElementGetScrollLeft",
           "module": "rml_ui",
           "signature": "i64->i64"
@@ -39618,6 +39816,12 @@
         {
           "class": "fixed",
           "function": "ElementGetScrollTop",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetScrollWidth",
           "module": "rml_ui",
           "signature": "i64->i64"
         },
@@ -40046,6 +40250,48 @@
           "function": "FileExists",
           "module": "vfs",
           "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameDataDelete",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "dynamic-output-caller-owned",
+          "function": "GameDataList",
+          "module": "vfs",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-io-borrowed-input-caller-owned-output",
+          "function": "GameDataRead",
+          "module": "vfs",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameDataWrite",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "GameOutputClose",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameOutputOpen",
+          "module": "vfs",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameOutputWrite",
+          "module": "vfs",
+          "signature": "i32,i32->i64"
         },
         {
           "class": "dynamic-output-caller-owned",
@@ -40690,9 +40936,9 @@
           "signature": "i32,i32,i32,i32,i32->i64"
         }
       ],
-      "canonical_callin_count": 90,
+      "canonical_callin_count": 91,
       "environment": "ui",
-      "surface_count": 1339
+      "surface_count": 1353
     },
     {
       "alias_callin_count": 24,
@@ -41260,7 +41506,7 @@
           "results": []
         }
       ],
-      "callout_count": 577,
+      "callout_count": 589,
       "callouts": [
         {
           "class": "fixed",
@@ -41409,6 +41655,12 @@
         {
           "class": "variable-output-caller-owned",
           "function": "GetArchitecture",
+          "module": "platform",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "GetLocalTime",
           "module": "platform",
           "signature": "i32,i32->i32"
         },
@@ -43975,6 +44227,18 @@
           "signature": "i64,i32->i32"
         },
         {
+          "class": "fixed",
+          "function": "ElementGetClientHeight",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetClientWidth",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
           "class": "variable-input-borrowed",
           "function": "ElementGetElementById",
           "module": "rml_ui",
@@ -44024,6 +44288,12 @@
         },
         {
           "class": "fixed",
+          "function": "ElementGetScrollHeight",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
           "function": "ElementGetScrollLeft",
           "module": "rml_ui",
           "signature": "i64->i64"
@@ -44031,6 +44301,12 @@
         {
           "class": "fixed",
           "function": "ElementGetScrollTop",
+          "module": "rml_ui",
+          "signature": "i64->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "ElementGetScrollWidth",
           "module": "rml_ui",
           "signature": "i64->i64"
         },
@@ -44461,6 +44737,48 @@
           "signature": "i32->i64"
         },
         {
+          "class": "variable-input-borrowed",
+          "function": "GameDataDelete",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "dynamic-output-caller-owned",
+          "function": "GameDataList",
+          "module": "vfs",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-io-borrowed-input-caller-owned-output",
+          "function": "GameDataRead",
+          "module": "vfs",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameDataWrite",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "GameOutputClose",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameOutputOpen",
+          "module": "vfs",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameOutputWrite",
+          "module": "vfs",
+          "signature": "i32,i32->i64"
+        },
+        {
           "class": "dynamic-output-caller-owned",
           "function": "GetAllArchives",
           "module": "vfs",
@@ -44727,7 +45045,7 @@
       ],
       "canonical_callin_count": 26,
       "environment": "menu",
-      "surface_count": 627
+      "surface_count": 639
     },
     {
       "alias_callin_count": 19,
@@ -45003,7 +45321,7 @@
           "results": []
         }
       ],
-      "callout_count": 406,
+      "callout_count": 414,
       "callouts": [
         {
           "class": "fixed",
@@ -45296,6 +45614,12 @@
         {
           "class": "variable-output-caller-owned",
           "function": "GetArchitecture",
+          "module": "platform",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "fixed",
+          "function": "GetLocalTime",
           "module": "platform",
           "signature": "i32,i32->i32"
         },
@@ -47190,6 +47514,48 @@
           "signature": "i32->i64"
         },
         {
+          "class": "variable-input-borrowed",
+          "function": "GameDataDelete",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "dynamic-output-caller-owned",
+          "function": "GameDataList",
+          "module": "vfs",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-io-borrowed-input-caller-owned-output",
+          "function": "GameDataRead",
+          "module": "vfs",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameDataWrite",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "fixed",
+          "function": "GameOutputClose",
+          "module": "vfs",
+          "signature": "i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameOutputOpen",
+          "module": "vfs",
+          "signature": "i32,i32->i64"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "GameOutputWrite",
+          "module": "vfs",
+          "signature": "i32,i32->i64"
+        },
+        {
           "class": "dynamic-output-caller-owned",
           "function": "GetAllArchives",
           "module": "vfs",
@@ -47444,12 +47810,12 @@
       ],
       "canonical_callin_count": 6,
       "environment": "intro",
-      "surface_count": 431
+      "surface_count": 439
     }
   ],
   "purpose": "instantiate-only complete Core ABI signature/link coverage",
-  "unique_executable_callin_spellings": 185,
-  "unique_executable_callins": 132,
-  "unique_executable_callouts": 1433,
+  "unique_executable_callin_spellings": 186,
+  "unique_executable_callins": 133,
+  "unique_executable_callouts": 1446,
   "version": 2
 }

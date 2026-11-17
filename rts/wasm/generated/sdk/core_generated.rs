@@ -10559,6 +10559,11 @@ pub mod unsynced_ctrl {
         }
         #[link(wasm_import_module = "spring:unsynced-ctrl")]
         unsafe extern "C" {
+            #[link_name = "upload-queued-models"]
+            pub safe fn core_upload_queued_models(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:unsynced-ctrl")]
+        unsafe extern "C" {
             #[link_name = "warp-mouse"]
             pub safe fn core_warp_mouse(p0: i32, p1: i32) -> i64;
         }
@@ -12334,6 +12339,30 @@ pub mod unsynced_ctrl {
         #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = (unused,);
+            Err(unreachable!())
+        }
+    }
+
+    #[inline]
+    pub fn upload_queued_models(max_models: u32) -> Result<(u32, u32)> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            let mut wire = [0u8; 8];
+            let output_pointer = crate::wasm_output_ptr(&mut wire)?;
+            let status = raw::core_upload_queued_models(max_models as i32, output_pointer);
+            if status != 0 {
+                return Err(ApiError::new(status));
+            }
+            let mut cursor = 0usize;
+            let value = (super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?, super::__core_wire::u32(&wire, &mut cursor).ok_or(ApiError::new(ErrorCode::Internal as i32))?);
+            if !super::__core_wire::finish(&wire, &mut cursor, 4) {
+                return Err(ApiError::new(ErrorCode::Internal as i32));
+            }
+            Ok(value)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = (max_models,);
             Err(unreachable!())
         }
     }

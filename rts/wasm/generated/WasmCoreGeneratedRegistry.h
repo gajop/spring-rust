@@ -589,6 +589,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:unsynced-ctrl", "show-load-progress", "i32->i64", 31u},
     {"spring:unsynced-ctrl", "stop-tracking-units", "i32->i64", 31u},
     {"spring:unsynced-ctrl", "track-units", "i32,i32->i64", 31u},
+    {"spring:unsynced-ctrl", "upload-queued-models", "i32,i32->i32", 26u},
     {"spring:unsynced-ctrl", "warp-mouse", "i32,i32->i64", 127u},
     {"spring:gfx", "active-texture", "i32->i32", 122u},
     {"spring:gfx", "add-atlas-texture", "i32->i32", 122u},

@@ -627,6 +627,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"unsynced_ctrl", "ShowLoadProgress", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "StopTrackingUnits", 31u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "TrackUnits", 31u, false, false, LoweringStatus::annotated},
+	{"unsynced_ctrl", "UploadQueuedModels", 26u, false, false, LoweringStatus::automatic},
 	{"unsynced_ctrl", "WarpMouse", 127u, false, false, LoweringStatus::automatic},
 	{"gfx", "ActiveFBO", 122u, false, false, LoweringStatus::manual},
 	{"gfx", "ActiveShader", 122u, false, false, LoweringStatus::manual},

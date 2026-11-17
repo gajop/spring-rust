@@ -1843,6 +1843,53 @@ wasm_trap_t* Core_unsynced_ctrl_stop_tracking_units(void* environment, wasmtime_
     return nullptr;
 }
 
+wasm_trap_t* Core_unsynced_ctrl_upload_queued_models(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unsyncedCtrl == nullptr ||
+        state->native->unsyncedCtrl->UploadQueuedModels == nullptr)
+        return Trap("UploadQueuedModels generated Core binding is unavailable");
+    if (2 != 0 && (slots == nullptr || slotCount != 2))
+        return Trap("UploadQueuedModels generated Core ABI signature mismatch");
+    if (2 == 0 && slotCount != 0)
+        return Trap("UploadQueuedModels generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
+    if (!state->memory.Contains(output, 8u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+
+    UploadQueuedModelsQuery query{};
+    query.maxModels = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.maxModels)>>>(slots[0].i32);
+    UploadQueuedModelsResult result{};
+    state->native->unsyncedCtrl->UploadQueuedModels(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) {
+        slots[0].i32 = errorCode;
+        return nullptr;
+    }
+    std::array<std::uint8_t, 8> wire{};
+    WireWriter writer(wire);
+    if (!writer.U32(result.uploaded)) return Trap("generated Core wire overflow");
+    if (!writer.U32(result.remaining)) return Trap("generated Core wire overflow");
+    if (!writer.Finish(4u))
+        return Trap("generated Core wire layout mismatch for UploadQueuedModels");
+    if (!state->memory.Write(output, wire.data(), wire.size()))
+        return Trap("generated Core output range changed unexpectedly");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* Core_unsynced_ctrl_warp_mouse(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -2294,6 +2341,13 @@ bool RegisterGeneratedImports_unsynced_ctrl(wasmtime_linker_t* linker, HostState
     }
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGenerated(linker, "spring:unsynced-ctrl", "upload-queued-models",
+                MakeFuncType(params, 2, results, 1), Core_unsynced_ctrl_upload_queued_models, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGenerated(linker, "spring:unsynced-ctrl", "warp-mouse",
                 MakeFuncType(params, 2, results, 1), Core_unsynced_ctrl_warp_mouse, state, error))
@@ -2303,6 +2357,6 @@ bool RegisterGeneratedImports_unsynced_ctrl(wasmtime_linker_t* linker, HostState
     return true;
 }
 
-static_assert(60 >= 0, "generated Core Wasm callback count");
+static_assert(61 >= 0, "generated Core Wasm callback count");
 
 } // namespace recoil::wasm::core::generated

@@ -370,6 +370,15 @@ struct StopTrackingUnitsResult { const Error* error; bool success; };
 struct ShowLoadProgressQuery { const char* text; };
 struct ShowLoadProgressResult { const Error* error; bool success; };
 
+// NEW (no Lua equivalent): uploads at most `maxModels` of the models queued with
+// PreloadUnitDefModel and PreloadFeatureDefModel that have finished loading, without
+// waiting for the others, so a game queues what a match may show and spreads its upload
+// over frames instead of paying it when the model is first used. `uploaded` is how many
+// went to the GPU now; `remaining` how many queued models are not on it yet (loaded and
+// left over, or still queued or loading): 0 means every queued model is on the GPU.
+struct UploadQueuedModelsQuery { uint32_t maxModels; };
+struct UploadQueuedModelsResult { const Error* error; uint32_t uploaded; uint32_t remaining; };
+
 struct UnsyncedCtrlApi {
 	void (*SetUnitNoDraw)(const SetUnitNoDrawQuery* query, SetUnitNoDrawResult* result);
 	void (*SetUnitEngineDrawMask)(const SetUnitEngineDrawMaskQuery* query, SetUnitEngineDrawMaskResult* result);
@@ -463,6 +472,7 @@ struct UnsyncedCtrlApi {
 	void (*TrackUnits)(const TrackUnitsQuery* query, TrackUnitsResult* result);
 	void (*StopTrackingUnits)(const StopTrackingUnitsQuery* query, StopTrackingUnitsResult* result);
 	void (*ShowLoadProgress)(const ShowLoadProgressQuery* query, ShowLoadProgressResult* result);
+	void (*UploadQueuedModels)(const UploadQueuedModelsQuery* query, UploadQueuedModelsResult* result);
 };
 
 extern const UnsyncedCtrlApi UNSYNCED_CTRL_API;

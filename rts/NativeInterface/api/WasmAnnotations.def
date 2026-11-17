@@ -55,6 +55,7 @@ UNSYNCED_ONLY(vfs, GameOutputOpen, a player's local files: simulation code must 
 UNSYNCED_ONLY(vfs, GameOutputWrite, a player's local files: simulation code must not depend on what differs between machines)
 UNSYNCED_ONLY(vfs, GameOutputClose, a player's local files: simulation code must not depend on what differs between machines)
 UNSYNCED_ONLY(platform, GetLocalTime, the local clock differs between machines: simulation code must not depend on it)
+UNSYNCED_ONLY(unsynced_ctrl, UploadQueuedModels, a GL upload on the draw thread: simulation code must not run it)
 
 EXCLUDE(los, GetClosestValidPosition, Lua and native implementations are unsupported; no callable production import)
 

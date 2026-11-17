@@ -2,7 +2,7 @@
 
 - source: `rts/wasm/generated/model.json`
 - coverage: `rts/wasm/generated/core-executable-coverage.json`
-- callouts: 1445
+- callouts: 1446
 
 ## Modules
 
@@ -40,7 +40,7 @@
 | `config` | 9 |
 | `tracing` | 7 |
 | `utils` | 7 |
-| `unsynced_ctrl` | 89 |
+| `unsynced_ctrl` | 90 |
 | `gfx` | 247 |
 | `lights` | 7 |
 | `icons` | 6 |
@@ -843,6 +843,7 @@
 | `ShowLoadProgress` | i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `StopTrackingUnits` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 | `TrackUnits` | i32,i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
+| `UploadQueuedModels` | i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `WarpMouse` | i32,i32->i64 | x | x | x | x | x | synced-visible | fixed |
 
 ## `gfx`

@@ -1341,6 +1341,7 @@
   "unsynced_ctrl.ShowLoadProgress": "generated",
   "unsynced_ctrl.StopTrackingUnits": "generated",
   "unsynced_ctrl.TrackUnits": "generated",
+  "unsynced_ctrl.UploadQueuedModels": "generated",
   "unsynced_ctrl.WarpMouse": "generated",
   "unsynced_random.NextFloat": "generated",
   "unsynced_random.NextInt": "generated",

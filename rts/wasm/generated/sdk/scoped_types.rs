@@ -4031,6 +4031,15 @@ pub mod shared {
     pub struct UnitWeaponHoldFireZeroBasedResult {
         pub success: bool,
     }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct UploadQueuedModelsQuery {
+        pub max_models: u32,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct UploadQueuedModelsResult {
+        pub uploaded: u32,
+        pub remaining: u32,
+    }
     #[derive(Debug, Clone, PartialEq, Default)]
     pub struct UseTeamResourceQuery {
         pub team_id: i32,
@@ -11712,8 +11721,8 @@ pub mod unsynced_ctrl {
         ShowLoadProgressQuery, ShowLoadProgressResult, SoundEffectParams,
         StopTrackingUnitsQuery, StopTrackingUnitsResult, StringArray, StringResult,
         SunLightingParams, TrackUnitsQuery, TrackUnitsResult, UInt32Array, UInt32Result,
-        UnitCostOverrides, UnitHealthValue, UnitTargetRef, WarpMouseQuery,
-        WarpMouseResult, WaterParams,
+        UnitCostOverrides, UnitHealthValue, UnitTargetRef, UploadQueuedModelsQuery,
+        UploadQueuedModelsResult, WarpMouseQuery, WarpMouseResult, WaterParams,
     };
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
     pub struct SetDrawGroundDeferredValue {
@@ -11733,6 +11742,11 @@ pub mod unsynced_ctrl {
     pub struct SetMiniMapRotationValue {
         pub success: bool,
         pub rotation: i32,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct UploadQueuedModelsValue {
+        pub uploaded: u32,
+        pub remaining: u32,
     }
 }
 pub mod gfx {
@@ -17826,6 +17840,7 @@ pub mod unsynced_random {
         pub track_units: u32,
         pub stop_tracking_units: u32,
         pub show_load_progress: u32,
+        pub upload_queued_models: u32,
     }
     pub use super::shared::{
         AssignMouseCursorQuery, AssignMouseCursorResult, AtmosphereParams, BoolResult,
@@ -17906,8 +17921,8 @@ pub mod unsynced_random {
         ShowLoadProgressQuery, ShowLoadProgressResult, SoundEffectParams,
         StopTrackingUnitsQuery, StopTrackingUnitsResult, StringArray, StringResult,
         SunLightingParams, TrackUnitsQuery, TrackUnitsResult, UInt32Array, UInt32Result,
-        UnitCostOverrides, UnitHealthValue, UnitTargetRef, WarpMouseQuery,
-        WarpMouseResult, WaterParams,
+        UnitCostOverrides, UnitHealthValue, UnitTargetRef, UploadQueuedModelsQuery,
+        UploadQueuedModelsResult, WarpMouseQuery, WarpMouseResult, WaterParams,
     };
 }
 pub mod unit_rendering {

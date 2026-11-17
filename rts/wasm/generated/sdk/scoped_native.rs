@@ -16352,7 +16352,7 @@ pub(crate) mod unsynced_ctrl {
         AtmosphereParams, DefRef, Float3, Float4, MapRenderingParams, RgbColor,
         SetActiveCommandOptions, SetDrawGroundDeferredValue, SetDrawModelsDeferredValue,
         SetMiniMapRotationValue, SetShockFrontFactorsOptions, SetWindowGeometryOptions,
-        SunLightingParams, WaterParams,
+        SunLightingParams, UploadQueuedModelsValue, WaterParams,
     };
     use alloc::vec::Vec;
     use alloc::string::String;
@@ -18852,6 +18852,34 @@ pub(crate) mod unsynced_ctrl {
             check_error(result.error)?;
         }
         Ok((result.tracking) as _)
+    }
+    pub(crate) fn upload_queued_models(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::UnsyncedCtrlApi>,
+        max_models: u32,
+    ) -> Result<UploadQueuedModelsValue> {
+        let native_max_models = (max_models) as _;
+        let query = sys::UploadQueuedModelsQuery {
+            maxModels: native_max_models,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .UploadQueuedModels
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::UploadQueuedModelsResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok(UploadQueuedModelsValue {
+            uploaded: (result.uploaded) as _,
+            remaining: (result.remaining) as _,
+        })
     }
     pub(crate) fn warp_mouse(
         _engine: &crate::Backend<'_>,

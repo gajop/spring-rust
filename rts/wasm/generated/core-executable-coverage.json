@@ -1,11 +1,11 @@
 {
-  "total": 1445,
-  "executable_total": 1445,
+  "total": 1446,
+  "executable_total": 1446,
   "verified_total": 0,
-  "production_import_total": 1141,
+  "production_import_total": 1142,
   "by_class": {
     "dynamic-output-caller-owned": 90,
-    "fixed": 870,
+    "fixed": 871,
     "fixed-option": 15,
     "handwritten-reviewed": 71,
     "variable-input-adapted": 4,
@@ -9837,6 +9837,22 @@
       "production_process_safe": true,
       "production_sync_environment_mask": 26,
       "production_visibility_environment_mask": 31,
+      "production_environment_mask": 26,
+      "reason": null
+    },
+    {
+      "module": "unsynced_ctrl",
+      "function": "UploadQueuedModels",
+      "import_module": "spring:unsynced-ctrl",
+      "import_name": "upload-queued-models",
+      "class": "fixed",
+      "verified": false,
+      "parity_level": "exempt",
+      "grandfathered": false,
+      "production_import_allowed": true,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 26,
+      "production_visibility_environment_mask": 26,
       "production_environment_mask": 26,
       "reason": null
     },

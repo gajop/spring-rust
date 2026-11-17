@@ -274,9 +274,9 @@ pub mod shared {
         UnitWeaponFireResult, UnitWeaponFireZeroBasedQuery,
         UnitWeaponFireZeroBasedResult, UnitWeaponHoldFireQuery, UnitWeaponHoldFireResult,
         UnitWeaponHoldFireZeroBasedQuery, UnitWeaponHoldFireZeroBasedResult,
-        UseTeamResourceQuery, UseTeamResourceResult, UseUnitResourceQuery,
-        UseUnitResourceResult, ValidUnitIDQuery, ValidUnitIDResult, WarpMouseQuery,
-        WarpMouseResult, WaterParams,
+        UploadQueuedModelsQuery, UploadQueuedModelsResult, UseTeamResourceQuery,
+        UseTeamResourceResult, UseUnitResourceQuery, UseUnitResourceResult,
+        ValidUnitIDQuery, ValidUnitIDResult, WarpMouseQuery, WarpMouseResult, WaterParams,
     };
 }
 pub mod callins {
@@ -1537,6 +1537,7 @@ pub mod unsynced_ctrl {
         StopTrackingUnitsQuery, StopTrackingUnitsResult, StringArray, StringResult,
         SunLightingParams, TrackUnitsQuery, TrackUnitsResult, UInt32Array, UInt32Result,
         UnitCostOverrides, UnitHealthValue, UnitTargetRef, UnsyncedRandomApi,
+        UploadQueuedModelsQuery, UploadQueuedModelsResult, UploadQueuedModelsValue,
         WarpMouseQuery, WarpMouseResult, WaterParams,
     };
 }
@@ -3657,7 +3658,8 @@ pub mod unsynced_random {
         StopTrackingUnitsQuery, StopTrackingUnitsResult, StringArray, StringResult,
         SunLightingParams, TrackUnitsQuery, TrackUnitsResult, UInt32Array, UInt32Result,
         UnitCostOverrides, UnitHealthValue, UnitTargetRef, UnsyncedCtrlApi,
-        WarpMouseQuery, WarpMouseResult, WaterParams,
+        UploadQueuedModelsQuery, UploadQueuedModelsResult, WarpMouseQuery,
+        WarpMouseResult, WaterParams,
     };
 }
 pub mod unit_rendering {

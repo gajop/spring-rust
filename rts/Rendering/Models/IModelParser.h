@@ -40,6 +40,12 @@ public:
 	/// Uploads every model loaded but not yet uploaded (those a game queued while loading,
 	/// with PreloadModels = 0), so their first appearance does not upload mid-game.
 	void UploadLoadedModels();
+	/// Uploads at most `maxModels` of the models a game queued with `PreloadModel` that have finished
+	/// loading on the loading threads, without waiting for the ones still loading, so a game spreads
+	/// the uploads (and the model buffer's growth) over frames. `remaining` counts the queued models
+	/// not on the GPU yet: those loaded and left over, and those still queued or loading. Returns how
+	/// many it uploaded.
+	uint32_t UploadQueuedModels(uint32_t maxModels, uint32_t& remaining);
 	/// `debuginfo models`: every model on the GPU, its vertices and indices and the frame it was uploaded on
 	void LogModels() const;
 

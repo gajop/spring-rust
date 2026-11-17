@@ -4791,6 +4791,17 @@
             pub success: bool,
         }
 
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct UploadQueuedModelsQuery {
+            pub max_models: u32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct UploadQueuedModelsResult {
+            pub uploaded: u32,
+            pub remaining: u32,
+        }
+
         #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UseTeamResourceQuery {
             pub team_id: i32,

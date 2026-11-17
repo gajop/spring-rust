@@ -1352,6 +1352,7 @@ inline constexpr Candidate kCandidates[] = {
 	{"spring:unsynced-ctrl", "show-load-progress", "i32->i64", 31u, Strategy::variableInput},
 	{"spring:unsynced-ctrl", "stop-tracking-units", "i32->i64", 31u, Strategy::direct},
 	{"spring:unsynced-ctrl", "track-units", "i32,i32->i64", 31u, Strategy::manual},
+	{"spring:unsynced-ctrl", "upload-queued-models", "i32,i32->i32", 26u, Strategy::fixedOutput},
 	{"spring:unsynced-ctrl", "warp-mouse", "i32,i32->i64", 127u, Strategy::direct},
 	{"spring:unsynced-random", "next-float", "i32->i64", 31u, Strategy::direct},
 	{"spring:unsynced-random", "next-int", "i32,i32->i64", 31u, Strategy::direct},

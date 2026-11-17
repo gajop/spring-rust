@@ -2032,6 +2032,13 @@ static void NativeShowLoadProgress(const ShowLoadProgressQuery* query, ShowLoadP
 	result->success = true;
 }
 
+static void NativeUploadQueuedModels(const UploadQueuedModelsQuery* query, UploadQueuedModelsResult* result)
+{
+	result->error = nullptr;
+	result->remaining = 0;
+	result->uploaded = modelLoader.UploadQueuedModels(query->maxModels, result->remaining);
+}
+
 const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.SetUnitNoDraw = NativeSetUnitNoDraw,
 	.SetUnitEngineDrawMask = NativeSetUnitEngineDrawMask,
@@ -2123,4 +2130,5 @@ const UnsyncedCtrlApi UNSYNCED_CTRL_API = {
 	.TrackUnits = NativeTrackUnits,
 	.StopTrackingUnits = NativeStopTrackingUnits,
 	.ShowLoadProgress = NativeShowLoadProgress,
+	.UploadQueuedModels = NativeUploadQueuedModels,
 };

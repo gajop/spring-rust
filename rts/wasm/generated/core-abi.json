@@ -29875,6 +29875,34 @@
     },
     {
       "module": "unsynced_ctrl",
+      "function": "UploadQueuedModels",
+      "import_module": "spring:unsynced-ctrl",
+      "import_name": "upload-queued-models",
+      "environment_mask": 26,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "direct",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 8,
+          "alignment": 4
+        }
+      },
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": [
+        "a GL upload on the draw thread: simulation code must not run it"
+      ]
+    },
+    {
+      "module": "unsynced_ctrl",
       "function": "WarpMouse",
       "import_module": "spring:unsynced-ctrl",
       "import_name": "warp-mouse",
@@ -32143,7 +32171,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1220,
+  "automatic_count": 1221,
   "manual_count": 208,
   "unsupported_count": 17
 }

@@ -441,6 +441,40 @@ void CModelLoader::UploadLoadedModels()
 		static_cast<uint32_t>(S3DModelVAO::GetInstance().GetVertElemCount()), static_cast<uint32_t>(S3DModelVAO::GetInstance().GetIndxElemCount()));
 }
 
+uint32_t CModelLoader::UploadQueuedModels(uint32_t maxModels, uint32_t& remaining)
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	assert(Threading::IsMainThread() || Threading::IsGameLoadThread());
+
+	// finished futures are let go; the ones left are queued or running, and their models are not
+	// in the cache yet or are still loading
+	std::erase_if(preloadFutures, [](const auto& item) {
+		using namespace std::chrono_literals;
+		return item.wait_for(0ms) == std::future_status::ready;
+	});
+
+	std::vector<S3DModel*> ready;
+	remaining = static_cast<uint32_t>(preloadFutures.size());
+	{
+		auto lock = CModelsLock::GetScopedLock();
+		// the dummy model (index 0) is never uploaded
+		for (size_t i = 1; i < models.size() && i <= modelID; ++i) {
+			S3DModel& model = models[i];
+			if (model.uploaded || model.loadStatus != S3DModel::LoadStatus::LOADED)
+				continue;
+			if (ready.size() < maxModels)
+				ready.push_back(&model);
+			else
+				++remaining;
+		}
+	}
+
+	for (S3DModel* model: ready)
+		Upload(model);
+
+	return static_cast<uint32_t>(ready.size());
+}
+
 IModelParser* CModelLoader::GetFormatParser(const std::string& pathExt)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -513,7 +547,12 @@ void CModelLoader::Upload(S3DModel* model) const {
 
 	{
 		auto lock = CLoadLock::GetUniqueLock(); //mostly needed to support calls from CFeatureHandler::LoadFeaturesFromMap()
-		S3DModelVAO::GetInstance().UploadVBOs();
+		{
+			// the loading threads append a finished model's vertices and indices under this lock
+			// (PostProcessGeometry): while models are queued mid-game they may do so as these go up
+			auto modelsLock = CModelsLock::GetScopedLock();
+			S3DModelVAO::GetInstance().UploadVBOs();
+		}
 
 		// 3DO atlases are preloaded C3DOTextureHandler::Init()
 		if (model->type != MODELTYPE_3DO) {
