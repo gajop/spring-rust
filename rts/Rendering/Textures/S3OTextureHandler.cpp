@@ -115,10 +115,39 @@ void CS3OTextureHandler::Reload()
 void CS3OTextureHandler::PreloadTexture(S3DModel* model, bool invertAxis, bool invertAlpha)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	auto lock = CModelsLock::GetScopedLock();
 
-	LoadAndCacheTexture(model, 0, invertAxis, invertAlpha, true);
-	LoadAndCacheTexture(model, 1, invertAxis,       false, true); // never invert alpha for tex2
+	// A model's maps are decoded without the models lock, which main-thread work needs at any time
+	// (a unit or feature made, a model uploaded): decoding a 4096 x 4096 map takes tens of
+	// milliseconds, and the lock is held only to look in and fill the caches.
+	const bool invertAlphas[2] = {invertAlpha, false}; // never invert alpha for tex2
+	for (unsigned int texNum = 0; texNum < 2; ++texNum) {
+		const std::string textureName = model->texs[texNum];
+		{
+			auto lock = CModelsLock::GetScopedLock();
+			const auto textureIt = textureCache.find(textureName);
+			if ((textureIt != textureCache.end() && textureIt->second.texID > 0) || bitmapCache.find(textureName) != bitmapCache.end())
+				continue;
+		}
+
+		CBitmap bitmap;
+		if (!bitmap.Load(textureName) && !bitmap.Load("unittextures/" + textureName)) {
+			if (texNum == 0)
+				LOG_L(L_WARNING, "[%s] could not load primary texture \"%s\" from model \"%s\"", __func__, textureName.c_str(), model->name.c_str());
+
+			// file not found (or headless build), set a single pixel so model is visible
+			bitmap.AllocDummy(SColor(255 * (texNum == 0), 0, 0, 255 * (1 - invertAlphas[texNum])));
+		}
+
+		if (invertAxis)
+			bitmap.ReverseYAxis();
+		if (invertAlphas[texNum])
+			bitmap.InvertAlpha();
+		SkipFinestLevels(bitmap);
+
+		auto lock = CModelsLock::GetScopedLock();
+		bitmapCache.emplace(textureName, std::move(bitmap)); // another thread's copy of the same map wins
+		LoadAndCacheTexture(model, texNum, invertAxis, invertAlphas[texNum], true);
+	}
 }
 
 

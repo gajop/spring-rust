@@ -23,6 +23,8 @@ namespace spring {
 
 		std::scoped_lock<spring::mutex_wrapper_concept> GetScopedLock() { return std::scoped_lock(*sync[needThreadSafety]); }
 		std::unique_lock<spring::mutex_wrapper_concept> GetUniqueLock() { return std::unique_lock(*sync[needThreadSafety]); }
+		/// Locks only if nobody holds it: `owns_lock()` says whether it did.
+		std::unique_lock<spring::mutex_wrapper_concept> GetTryLock() { return std::unique_lock(*sync[needThreadSafety], std::try_to_lock); }
 	protected:
 		std::array<std::unique_ptr<spring::mutex_wrapper_concept>, 2> sync;
 		bool needThreadSafety = true;

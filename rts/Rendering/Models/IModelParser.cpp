@@ -455,18 +455,24 @@ uint32_t CModelLoader::UploadQueuedModels(uint32_t maxModels, uint32_t& remainin
 
 	std::vector<S3DModel*> ready;
 	remaining = static_cast<uint32_t>(preloadFutures.size());
-	{
-		auto lock = CModelsLock::GetScopedLock();
-		// the dummy model (index 0) is never uploaded
-		for (size_t i = 1; i < models.size() && i <= modelID; ++i) {
-			S3DModel& model = models[i];
-			if (model.uploaded || model.loadStatus != S3DModel::LoadStatus::LOADED)
-				continue;
-			if (ready.size() < maxModels)
-				ready.push_back(&model);
-			else
-				++remaining;
-		}
+
+	// A loading thread holds the models lock while it decodes a model's textures, tens of
+	// milliseconds for a large one: a game that asks again next frame loses nothing by not waiting for it.
+	auto lock = CModelsLock::GetTryLock();
+	if (!lock.owns_lock()) {
+		remaining += 1; // the one being decoded, or whatever it leaves: not done
+		return 0;
+	}
+
+	// the dummy model (index 0) is never uploaded
+	for (size_t i = 1; i < models.size() && i <= modelID; ++i) {
+		S3DModel& model = models[i];
+		if (model.uploaded || model.loadStatus != S3DModel::LoadStatus::LOADED)
+			continue;
+		if (ready.size() < maxModels)
+			ready.push_back(&model);
+		else
+			++remaining;
 	}
 
 	for (S3DModel* model: ready)
