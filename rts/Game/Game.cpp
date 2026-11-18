@@ -55,6 +55,7 @@
 #include "Rendering/UniformConstants.h"
 #include "Rendering/Map/InfoTexture/IInfoTextureHandler.h"
 #include "Rendering/Textures/NamedTextures.h"
+#include "Rendering/Textures/S3OTextureHandler.h"
 #include "Lua/LuaGaia.h"
 #include "Lua/LuaHandle.h"
 #include "Lua/LuaDebugExtra.h"
@@ -1482,6 +1483,7 @@ bool CGame::UpdateUnsynced(const spring_time currentTime)
 
 	icon::iconHandler.Update();
 	CNamedTextures::Update();
+	textureHandlerS3O.Update();
 
 	// always update InfoTexture and SoundListener at <= 30Hz (even when paused)
 	if (newSimFrame || forceUpdate) {
