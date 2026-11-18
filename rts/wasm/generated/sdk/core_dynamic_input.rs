@@ -2986,6 +2986,11 @@ pub safe fn object_label(p0: i32, p1: i32, p2: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
+#[link_name = "preload-texture"]
+pub safe fn preload_texture(p0: i32) -> i64;
+}
+            #[link(wasm_import_module = "spring:gfx")]
+unsafe extern "C" {
 #[link_name = "push-debug-group"]
 pub safe fn push_debug_group(p0: i32, p1: i32, p2: i32) -> i32;
 }
@@ -3028,6 +3033,11 @@ pub safe fn text(p0: f32, p1: f32, p2: f32, p3: i32) -> i32;
 unsafe extern "C" {
 #[link_name = "texture-info"]
 pub safe fn texture_info(p0: i32, p1: i32) -> i32;
+}
+            #[link(wasm_import_module = "spring:gfx")]
+unsafe extern "C" {
+#[link_name = "texture-preload-state"]
+pub safe fn texture_preload_state(p0: i32, p1: i32) -> i32;
 }
             #[link(wasm_import_module = "spring:gfx")]
 unsafe extern "C" {
@@ -4094,6 +4104,31 @@ Err(unreachable!())
 }
 
         #[inline]
+pub fn preload_texture(blob0: &[u8]) -> crate::Result<bool> {
+#[cfg(target_arch = "wasm32")]
+{
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = match crate::wasm_output_ptr(&mut descriptor) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+crate::unpack_bool(raw::preload_texture(descriptor_ptr))
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (blob0);
+Err(unreachable!())
+}
+}
+
+        #[inline]
 pub fn push_debug_group(p0: i32, p1: i32, blob0: &[u8]) -> crate::Result<()> {
 #[cfg(target_arch = "wasm32")]
 {
@@ -4323,6 +4358,31 @@ descriptor[1] = blob0_len as u32;
 let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
 let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
 let status = raw::texture_info(descriptor_ptr, output_ptr);
+if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
+}
+#[cfg(not(target_arch = "wasm32"))]
+{
+let _ = (blob0, output);
+Err(unreachable!())
+}
+}
+
+        #[inline]
+pub fn texture_preload_state(blob0: &[u8], output: &mut [u8]) -> crate::Result<()> {
+#[cfg(target_arch = "wasm32")]
+{
+if output.len() != 12usize { return Err(crate::ApiError::new(crate::ErrorCode::InvalidArgument as i32)); }
+let mut descriptor = [0u32; 2];
+            let (blob0_ptr, blob0_len) =
+match crate::wasm_slice_parts(blob0) {
+Ok(value) => value,
+Err(_) => return Err(crate::ApiError::new(crate::ErrorCode::OutOfBounds as i32)),
+};
+descriptor[0] = blob0_ptr as u32;
+descriptor[1] = blob0_len as u32;
+let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+let (output_ptr, _) = crate::wasm_mut_slice_parts(output)?;
+let status = raw::texture_preload_state(descriptor_ptr, output_ptr);
 if status == 0 { Ok(()) } else { Err(crate::ApiError::new(status)) }
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -9730,5 +9790,5 @@ Err(unreachable!())
     }
 
 #[doc(hidden)]
-pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 286;
+pub const __GENERATED_DYNAMIC_INPUT_CALLOUT_COUNT: usize = 288;
 }

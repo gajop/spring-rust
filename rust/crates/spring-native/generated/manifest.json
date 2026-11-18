@@ -65,8 +65,8 @@
     },
     {
       "name": "gfx_generated.rs",
-      "sha256": "2bc74ab09143a7200fc136116888d6a49d3996c90d6a50777882ef1017f6b8d4",
-      "bytes": 176567
+      "sha256": "1850cd2acba724e54000e95c59637eb87955d1500d720437cadfa12d6b554936",
+      "bytes": 178075
     },
     {
       "name": "ground_decals_generated.rs",

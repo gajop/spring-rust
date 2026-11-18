@@ -8057,6 +8057,26 @@
     },
     {
       "module": "gfx",
+      "function": "PreloadTexture",
+      "import_module": "spring:gfx",
+      "import_name": "preload-texture",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": "packed32",
+      "direct_params": [
+        "i32"
+      ],
+      "direct_results": [
+        "i64"
+      ],
+      "signature": "i32->i64",
+      "notes": []
+    },
+    {
+      "module": "gfx",
       "function": "PushAttrib",
       "import_module": "spring:gfx",
       "import_name": "push-attrib",
@@ -9052,6 +9072,32 @@
       "result_strategy": {
         "fixed-output-buffer": {
           "bytes": 24,
+          "alignment": 4
+        }
+      },
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
+    },
+    {
+      "module": "gfx",
+      "function": "TexturePreloadState",
+      "import_module": "spring:gfx",
+      "import_name": "texture-preload-state",
+      "environment_mask": 122,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "automatic",
+      "input_strategy": "variable-input-buffer",
+      "result_strategy": {
+        "fixed-output-buffer": {
+          "bytes": 12,
           "alignment": 4
         }
       },
@@ -32171,7 +32217,7 @@
       "notes": []
     }
   ],
-  "automatic_count": 1221,
+  "automatic_count": 1223,
   "manual_count": 208,
   "unsupported_count": 17
 }

@@ -1781,7 +1781,7 @@
       ]
     }
   ],
-  "callout_count": 1209,
+  "callout_count": 1211,
   "callouts": [
     {
       "class": "handwritten-reviewed",
@@ -6320,6 +6320,12 @@
       "signature": "i32->i32"
     },
     {
+      "class": "variable-input-borrowed",
+      "function": "PreloadTexture",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
       "class": "fixed",
       "function": "PushAttrib",
       "module": "gfx",
@@ -6586,6 +6592,12 @@
     {
       "class": "variable-input-borrowed",
       "function": "TextureInfo",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "TexturePreloadState",
       "module": "gfx",
       "signature": "i32,i32->i32"
     },
@@ -9040,5 +9052,5 @@
   ],
   "canonical_callin_count": 100,
   "environment": "rules-unsynced",
-  "surface_count": 1359
+  "surface_count": 1361
 }

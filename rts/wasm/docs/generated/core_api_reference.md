@@ -2,7 +2,7 @@
 
 - source: `rts/wasm/generated/model.json`
 - coverage: `rts/wasm/generated/core-executable-coverage.json`
-- callouts: 1446
+- callouts: 1448
 
 ## Modules
 
@@ -41,7 +41,7 @@
 | `tracing` | 7 |
 | `utils` | 7 |
 | `unsynced_ctrl` | 90 |
-| `gfx` | 247 |
+| `gfx` | 249 |
 | `lights` | 7 |
 | `icons` | 6 |
 | `markers` | 6 |
@@ -1029,6 +1029,7 @@
 | `PopAttrib` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `PopDebugGroup` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `PopMatrix` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
+| `PreloadTexture` | i32->i64 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `PushAttrib` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `PushDebugGroup` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `PushMatrix` | i32->i32 |  | x |  | x | x | unsynced-only | fixed |
@@ -1074,6 +1075,7 @@
 | `Text` | f32,f32,f32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `TextEnv` | i32,i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `TextureInfo` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
+| `TexturePreloadState` | i32,i32->i32 |  | x |  | x | x | unsynced-only | variable-input-borrowed |
 | `Translate` | f32,f32,f32->i32 |  | x |  | x | x | unsynced-only | fixed |
 | `UnbindBufferRangeVBO` | i32,i32,i32,i32,i32,i32->i64 |  | x |  | x | x | unsynced-only | fixed |
 | `Uniform` | i32,i32,i32->i32 |  | x |  | x | x | unsynced-only | fixed |

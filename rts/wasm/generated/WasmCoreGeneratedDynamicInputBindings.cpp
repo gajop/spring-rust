@@ -6125,6 +6125,46 @@ wasm_trap_t* CoreDynamicInput_gfx_object_label(void* environment, wasmtime_calle
     return nullptr;
 }
 
+wasm_trap_t* CoreDynamicInput_gfx_preload_texture(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->PreloadTexture == nullptr)
+        return Trap("PreloadTexture dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 1u)
+        return Trap("PreloadTexture dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GfxTextureNameQuery query{};
+    std::uint32_t namePointer = 0, nameBytes = 0;
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!guard.Charge(nameBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> nameWire;
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::OutOfBounds))); return nullptr; }
+    WireReader nameReader(nameWire);
+    std::string nameStorage;
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i64 = static_cast<std::int64_t>(PackU32(0u, static_cast<std::int32_t>(Status::InvalidArgument))); return nullptr; }
+
+    GfxBoolResult result{};
+    state->native->gfx->PreloadTexture(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.value ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreDynamicInput_gfx_push_debug_group(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -6566,6 +6606,56 @@ wasm_trap_t* CoreDynamicInput_gfx_texture_info(void* environment, wasmtime_calle
     if (!writer.U32(result.id)) return Trap("dynamic-input Core wire overflow");
     if (!writer.U32(result.target)) return Trap("dynamic-input Core wire overflow");
     if (!writer.U32(result.fbo)) return Trap("dynamic-input Core wire overflow");
+    if (!writer.Finish(4u)) return Trap("dynamic-input Core fixed output layout mismatch");
+    if (!state->memory.Write(output, wire.data(), wire.size())) return Trap("dynamic-input Core output range changed unexpectedly");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreDynamicInput_gfx_texture_preload_state(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->TexturePreloadState == nullptr)
+        return Trap("TexturePreloadState dynamic-input Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("TexturePreloadState dynamic-input Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+
+    const std::uint32_t inputDescriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> inputDescriptorWire;
+    if (!state->memory.View(inputDescriptor, 8u, inputDescriptorWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader inputControl(inputDescriptorWire);
+
+    GfxTextureNameQuery query{};
+    std::uint32_t namePointer = 0, nameBytes = 0;
+    if (!inputControl.U32(namePointer) || !inputControl.U32(nameBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!guard.Charge(nameBytes)) return Trap(budgetError);
+    std::span<const std::uint8_t> nameWire;
+    if (!state->memory.View(namePointer, nameBytes, nameWire)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+    WireReader nameReader(nameWire);
+    std::string nameStorage;
+    { std::uint32_t coreLength = 0; if (!nameReader.U32(coreLength) || !CheckResultNodes(state, coreLength)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } std::span<const std::uint8_t> coreBytes; if (!nameReader.Bytes(coreLength, coreBytes)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; } nameStorage.assign(reinterpret_cast<const char*>(coreBytes.data()), coreBytes.size()); query.name = nameStorage.data(); }
+    if (!nameReader.Finish(1u)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    if (!inputControl.Finish(4)) { slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument); return nullptr; }
+    const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
+    if (!state->memory.Contains(output, 12u)) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GfxTexturePreloadStateResult result{};
+    state->native->gfx->TexturePreloadState(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    std::array<std::uint8_t, 12> wire{};
+    WireWriter writer(wire);
+    if (!writer.Bool(result.pending)) return Trap("dynamic-input Core wire overflow");
+    if (!writer.Bool(result.ready)) return Trap("dynamic-input Core wire overflow");
+    if (!writer.Bool(result.loaded)) return Trap("dynamic-input Core wire overflow");
     if (!writer.Finish(4u)) return Trap("dynamic-input Core fixed output layout mismatch");
     if (!state->memory.Write(output, wire.data(), wire.size())) return Trap("dynamic-input Core output range changed unexpectedly");
     slots[0].i32 = 0;
@@ -14959,6 +15049,13 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedDynamicInput(linker, "spring:gfx", "texture-preload-state",
+                MakeFuncType(params, 2, results, 1), CoreDynamicInput_gfx_texture_preload_state, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32};
         const wasm_valkind_t results[] = {WASM_I64};
         if (!DefineGeneratedDynamicInput(linker, "spring:markers", "add-world-text",
@@ -15466,6 +15563,6 @@ bool RegisterGeneratedDynamicInputImports(wasmtime_linker_t* linker, HostState* 
     return true;
 }
 
-static_assert(286u >= 0u, "generated dynamic-input Core callback count");
+static_assert(288u >= 0u, "generated dynamic-input Core callback count");
 
 } // namespace recoil::wasm::core::generated

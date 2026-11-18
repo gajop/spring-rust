@@ -154,6 +154,10 @@ struct GfxTextureNameQuery { const char* name; };
 struct GfxTextureBindQuery { const char* name; int32_t texNum; bool enable; };
 struct GfxChangeTextureParamsQuery { const char* name; GfxTextureParams params; };
 struct GfxTextureInfoResult { const Error* error; int32_t xsize; int32_t ysize; int32_t zsize; uint32_t id; uint32_t target; uint32_t fbo; };
+// NEW (no Lua equivalent): see PreloadTexture. `pending`: the image is being decoded on a
+// worker thread; `ready`: it is decoded and waits for TextureInfo (or a bind) to make the
+// texture without reading or decoding anything; `loaded`: the texture exists. At most one is true.
+struct GfxTexturePreloadStateResult { const Error* error; bool pending; bool ready; bool loaded; };
 struct GfxEngineTextureNamesResult { const Error* error; const char** names; uint32_t count; };
 struct GfxConsoleCommandEntry { const char* command; const char* description; bool synced; bool cheat; };
 struct GfxConsoleCommandsResult { const Error* error; const GfxConsoleCommandEntry* entries; uint32_t count; };
@@ -727,6 +731,23 @@ struct GfxApi {
 	// different callins of one frame time the GPU work between them, which
 	// RunQuery's elapsed time cannot span.
 	void (*QueryCounter)(const GfxUIntQuery* query, GfxEmptyResult* result);
+
+	// NEW (no Lua equivalent): asynchronous texture decoding, as asset streaming in
+	// established engines does it (Unity's async upload pipeline, Unreal's texture
+	// streaming): the file read and decode of a named texture (the name TextureInfo takes,
+	// qualifiers included) run on the engine's worker threads, and the texture is made on
+	// the calling thread from the decoded image, which is the cheap part (for a 4096 x 4096
+	// DXT5 map, 6 to 18 ms against 35 to 50 ms for the decode). PreloadTexture queues the
+	// decode and returns at once: true when one was queued, false when the texture is
+	// already loaded or being decoded, or the name is empty. TexturePreloadState says how
+	// far it is. TextureInfo (or a bind) of a name that is ready takes the decoded image; of
+	// one still decoding, waits for it; of one never queued, decodes it there as before.
+	// DeleteTexture of a name that is no created texture drops a decoded image nothing
+	// used (true when there was one). Decoded images are held in
+	// main memory until used, so queue what will be used. On an engine built without worker
+	// threads the decode happens inside PreloadTexture.
+	void (*PreloadTexture)(const GfxTextureNameQuery* query, GfxBoolResult* result);
+	void (*TexturePreloadState)(const GfxTextureNameQuery* query, GfxTexturePreloadStateResult* result);
 };
 
 extern const GfxApi GFX_API;

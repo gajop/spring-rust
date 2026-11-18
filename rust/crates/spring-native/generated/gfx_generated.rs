@@ -4372,4 +4372,39 @@ impl<'a> Gfx<'a> {
         }
     }
 
+    pub fn preload_texture(&self, name: &str) -> Result<bool, Error> {
+        unsafe {
+            let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
+            let query = sys::GfxTextureNameQuery {
+                name: name_cstr.as_ptr(),
+            };
+            let mut result = MaybeUninit::<sys::GfxBoolResult>::zeroed();
+            let func = self.api.PreloadTexture.expect("PreloadTexture function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.value
+            })
+        }
+    }
+
+    pub fn texture_preload_state(&self, name: &str) -> Result<(bool, bool, bool), Error> {
+        unsafe {
+            let name_cstr = std::ffi::CString::new(name).map_err(|_| Error::invalid_argument("name"))?;
+            let query = sys::GfxTextureNameQuery {
+                name: name_cstr.as_ptr(),
+            };
+            let mut result = MaybeUninit::<sys::GfxTexturePreloadStateResult>::zeroed();
+            let func = self.api.TexturePreloadState.expect("TexturePreloadState function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            let value = (
+                result.pending,
+                result.ready,
+                result.loaded,
+            );
+            Error::result_or(result.error, value)
+        }
+    }
+
 }

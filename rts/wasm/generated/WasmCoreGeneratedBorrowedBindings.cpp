@@ -6200,6 +6200,62 @@ wasm_trap_t* CoreBorrowed_gfx_object_label(void* environment, wasmtime_caller_t*
     return nullptr;
 }
 
+wasm_trap_t* CoreBorrowed_gfx_preload_texture(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->PreloadTexture == nullptr)
+        return Trap("PreloadTexture borrowed Core binding is unavailable");
+    if (slots == nullptr || slotCount != 1u)
+        return Trap("PreloadTexture borrowed Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 2u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+
+    GfxTextureNameQuery query{};
+    std::uint32_t namePointer = 0;
+    std::uint32_t nameCount = 0;
+    if (!reader.U32(namePointer) || !reader.U32(nameCount)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    if (nameCount == std::numeric_limits<std::uint32_t>::max()) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    std::span<const std::uint8_t> nameBytes;
+    if (!state->memory.View(namePointer, static_cast<std::size_t>(nameCount) + 1u, nameBytes)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::OutOfBounds)));
+        return nullptr;
+    }
+    if (nameBytes[nameCount] != 0) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    query.name = reinterpret_cast<const char*>(nameBytes.data());
+    if (!reader.Finish(4u)) {
+        slots[0].i64 = static_cast<std::int64_t>(PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument)));
+        return nullptr;
+    }
+    GfxBoolResult result{};
+    state->native->gfx->PreloadTexture(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    slots[0].i64 = static_cast<std::int64_t>(PackU32(static_cast<std::uint32_t>(result.value ? 1u : 0u), errorCode));
+    return nullptr;
+}
+
 wasm_trap_t* CoreBorrowed_gfx_push_debug_group(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -6733,6 +6789,75 @@ wasm_trap_t* CoreBorrowed_gfx_texture_info(void* environment, wasmtime_caller_t*
     if (!writer.U32(result.id)) return Trap("borrowed Core wire overflow");
     if (!writer.U32(result.target)) return Trap("borrowed Core wire overflow");
     if (!writer.U32(result.fbo)) return Trap("borrowed Core wire overflow");
+    if (!writer.Finish(4u)) return Trap("borrowed Core output layout mismatch");
+    if (!state->memory.Write(output, wire.data(), wire.size())) return Trap("borrowed Core output range changed unexpectedly");
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
+wasm_trap_t* CoreBorrowed_gfx_texture_preload_state(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->gfx == nullptr ||
+        state->native->gfx->TexturePreloadState == nullptr)
+        return Trap("TexturePreloadState borrowed Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2u)
+        return Trap("TexturePreloadState borrowed Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok()) return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError)) return Trap(memoryError);
+    const std::uint32_t descriptor = static_cast<std::uint32_t>(slots[0].i32);
+    std::span<const std::uint8_t> descriptorWire;
+    if (!state->memory.View(descriptor, 8u, descriptorWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader reader(descriptorWire);
+    const std::uint32_t output = static_cast<std::uint32_t>(slots[1].i32);
+    if (!state->memory.Contains(output, 12u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+
+    GfxTextureNameQuery query{};
+    std::uint32_t namePointer = 0;
+    std::uint32_t nameCount = 0;
+    if (!reader.U32(namePointer) || !reader.U32(nameCount)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    if (nameCount == std::numeric_limits<std::uint32_t>::max()) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    std::span<const std::uint8_t> nameBytes;
+    if (!state->memory.View(namePointer, static_cast<std::size_t>(nameCount) + 1u, nameBytes)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    if (nameBytes[nameCount] != 0) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    query.name = reinterpret_cast<const char*>(nameBytes.data());
+    if (!reader.Finish(4u)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    GfxTexturePreloadStateResult result{};
+    state->native->gfx->TexturePreloadState(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    std::array<std::uint8_t, 12> wire{};
+    WireWriter writer(wire);
+    if (!writer.Bool(result.pending)) return Trap("borrowed Core wire overflow");
+    if (!writer.Bool(result.ready)) return Trap("borrowed Core wire overflow");
+    if (!writer.Bool(result.loaded)) return Trap("borrowed Core wire overflow");
     if (!writer.Finish(4u)) return Trap("borrowed Core output layout mismatch");
     if (!state->memory.Write(output, wire.data(), wire.size())) return Trap("borrowed Core output range changed unexpectedly");
     slots[0].i32 = 0;
@@ -14941,6 +15066,13 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
             return false;
     }
     {
+        const wasm_valkind_t params[] = {WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I64};
+        if (!DefineGeneratedBorrowed(linker, "spring:gfx", "preload-texture",
+                MakeFuncType(params, 1, results, 1), CoreBorrowed_gfx_preload_texture, state, error))
+            return false;
+    }
+    {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedBorrowed(linker, "spring:gfx", "push-debug-group",
@@ -15630,6 +15762,6 @@ bool RegisterGeneratedBorrowedImports(wasmtime_linker_t* linker, HostState* stat
     return true;
 }
 
-static_assert(220u >= 0u, "generated borrowed Core callback count");
+static_assert(222u >= 0u, "generated borrowed Core callback count");
 
 } // namespace recoil::wasm::core::generated

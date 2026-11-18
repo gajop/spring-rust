@@ -19558,7 +19558,7 @@ pub(crate) mod gfx {
         GfxMultiTexGenOptions, GfxObjectShapeOptions, GfxSaveImageOptions,
         GfxTexGenOptions, GfxTextureParams, GfxUnitDrawOptions, GfxVBOAttributeOptions,
         GfxVertexData, IsValidFBOValue, RawBindFBOValue, ReadPixelsValue,
-        TextureInfoValue,
+        TextureInfoValue, TexturePreloadStateValue,
     };
     use alloc::vec::Vec;
     use alloc::string::String;
@@ -24904,6 +24904,31 @@ pub(crate) mod gfx {
         }
         Ok(())
     }
+    pub(crate) fn preload_texture(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::GfxApi>,
+        name: &str,
+    ) -> Result<bool> {
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
+        let query = sys::GfxTextureNameQuery {
+            name: native_name,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .PreloadTexture
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<sys::GfxBoolResult>::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok((result.value) as _)
+    }
     pub(crate) fn push_attrib(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::GfxApi>,
@@ -26324,6 +26349,37 @@ pub(crate) mod gfx {
             id: (result.id) as _,
             target: (result.target) as _,
             fbo: (result.fbo) as _,
+        })
+    }
+    pub(crate) fn texture_preload_state(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::GfxApi>,
+        name: &str,
+    ) -> Result<TexturePreloadStateValue> {
+        let storage_name = std::ffi::CString::new(name)
+            .map_err(|_| ApiError::new(ErrorCode::InvalidArgument as i32))?;
+        let native_name = storage_name.as_ptr() as _;
+        let query = sys::GfxTextureNameQuery {
+            name: native_name,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .TexturePreloadState
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::GfxTexturePreloadStateResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        Ok(TexturePreloadStateValue {
+            pending: (result.pending) as _,
+            ready: (result.ready) as _,
+            loaded: (result.loaded) as _,
         })
     }
     pub(crate) fn translate(

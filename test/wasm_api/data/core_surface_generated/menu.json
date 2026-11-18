@@ -564,7 +564,7 @@
       "results": []
     }
   ],
-  "callout_count": 589,
+  "callout_count": 591,
   "callouts": [
     {
       "class": "fixed",
@@ -2169,6 +2169,12 @@
       "signature": "i32->i32"
     },
     {
+      "class": "variable-input-borrowed",
+      "function": "PreloadTexture",
+      "module": "gfx",
+      "signature": "i32->i64"
+    },
+    {
       "class": "fixed",
       "function": "PushAttrib",
       "module": "gfx",
@@ -2435,6 +2441,12 @@
     {
       "class": "variable-input-borrowed",
       "function": "TextureInfo",
+      "module": "gfx",
+      "signature": "i32,i32->i32"
+    },
+    {
+      "class": "variable-input-borrowed",
+      "function": "TexturePreloadState",
       "module": "gfx",
       "signature": "i32,i32->i32"
     },
@@ -4103,5 +4115,5 @@
   ],
   "canonical_callin_count": 26,
   "environment": "menu",
-  "surface_count": 639
+  "surface_count": 641
 }

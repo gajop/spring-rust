@@ -8738,7 +8738,7 @@
           ]
         }
       ],
-      "callout_count": 1209,
+      "callout_count": 1211,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -13277,6 +13277,12 @@
           "signature": "i32->i32"
         },
         {
+          "class": "variable-input-borrowed",
+          "function": "PreloadTexture",
+          "module": "gfx",
+          "signature": "i32->i64"
+        },
+        {
           "class": "fixed",
           "function": "PushAttrib",
           "module": "gfx",
@@ -13543,6 +13549,12 @@
         {
           "class": "variable-input-borrowed",
           "function": "TextureInfo",
+          "module": "gfx",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "TexturePreloadState",
           "module": "gfx",
           "signature": "i32,i32->i32"
         },
@@ -15997,7 +16009,7 @@
       ],
       "canonical_callin_count": 100,
       "environment": "rules-unsynced",
-      "surface_count": 1359
+      "surface_count": 1361
     },
     {
       "alias_callin_count": 53,
@@ -24723,7 +24735,7 @@
           ]
         }
       ],
-      "callout_count": 1209,
+      "callout_count": 1211,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -29262,6 +29274,12 @@
           "signature": "i32->i32"
         },
         {
+          "class": "variable-input-borrowed",
+          "function": "PreloadTexture",
+          "module": "gfx",
+          "signature": "i32->i64"
+        },
+        {
           "class": "fixed",
           "function": "PushAttrib",
           "module": "gfx",
@@ -29528,6 +29546,12 @@
         {
           "class": "variable-input-borrowed",
           "function": "TextureInfo",
+          "module": "gfx",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "TexturePreloadState",
           "module": "gfx",
           "signature": "i32,i32->i32"
         },
@@ -31982,7 +32006,7 @@
       ],
       "canonical_callin_count": 100,
       "environment": "gaia-unsynced",
-      "surface_count": 1359
+      "surface_count": 1361
     },
     {
       "alias_callin_count": 50,
@@ -33661,7 +33685,7 @@
           ]
         }
       ],
-      "callout_count": 1212,
+      "callout_count": 1214,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -38200,6 +38224,12 @@
           "signature": "i32->i32"
         },
         {
+          "class": "variable-input-borrowed",
+          "function": "PreloadTexture",
+          "module": "gfx",
+          "signature": "i32->i64"
+        },
+        {
           "class": "fixed",
           "function": "PushAttrib",
           "module": "gfx",
@@ -38466,6 +38496,12 @@
         {
           "class": "variable-input-borrowed",
           "function": "TextureInfo",
+          "module": "gfx",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "TexturePreloadState",
           "module": "gfx",
           "signature": "i32,i32->i32"
         },
@@ -40938,7 +40974,7 @@
       ],
       "canonical_callin_count": 91,
       "environment": "ui",
-      "surface_count": 1353
+      "surface_count": 1355
     },
     {
       "alias_callin_count": 24,
@@ -41506,7 +41542,7 @@
           "results": []
         }
       ],
-      "callout_count": 589,
+      "callout_count": 591,
       "callouts": [
         {
           "class": "fixed",
@@ -43111,6 +43147,12 @@
           "signature": "i32->i32"
         },
         {
+          "class": "variable-input-borrowed",
+          "function": "PreloadTexture",
+          "module": "gfx",
+          "signature": "i32->i64"
+        },
+        {
           "class": "fixed",
           "function": "PushAttrib",
           "module": "gfx",
@@ -43377,6 +43419,12 @@
         {
           "class": "variable-input-borrowed",
           "function": "TextureInfo",
+          "module": "gfx",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "TexturePreloadState",
           "module": "gfx",
           "signature": "i32,i32->i32"
         },
@@ -45045,7 +45093,7 @@
       ],
       "canonical_callin_count": 26,
       "environment": "menu",
-      "surface_count": 639
+      "surface_count": 641
     },
     {
       "alias_callin_count": 19,
@@ -45321,7 +45369,7 @@
           "results": []
         }
       ],
-      "callout_count": 414,
+      "callout_count": 416,
       "callouts": [
         {
           "class": "fixed",
@@ -47040,6 +47088,12 @@
           "signature": "i32->i32"
         },
         {
+          "class": "variable-input-borrowed",
+          "function": "PreloadTexture",
+          "module": "gfx",
+          "signature": "i32->i64"
+        },
+        {
           "class": "fixed",
           "function": "PushAttrib",
           "module": "gfx",
@@ -47306,6 +47360,12 @@
         {
           "class": "variable-input-borrowed",
           "function": "TextureInfo",
+          "module": "gfx",
+          "signature": "i32,i32->i32"
+        },
+        {
+          "class": "variable-input-borrowed",
+          "function": "TexturePreloadState",
           "module": "gfx",
           "signature": "i32,i32->i32"
         },
@@ -47810,12 +47870,12 @@
       ],
       "canonical_callin_count": 6,
       "environment": "intro",
-      "surface_count": 439
+      "surface_count": 441
     }
   ],
   "purpose": "instantiate-only complete Core ABI signature/link coverage",
   "unique_executable_callin_spellings": 186,
   "unique_executable_callins": 133,
-  "unique_executable_callouts": 1446,
+  "unique_executable_callouts": 1448,
   "version": 2
 }

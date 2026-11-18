@@ -12721,6 +12721,12 @@ pub mod gfx {
         pub fbo_depth: bool,
     }
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GfxTexturePreloadStateResult {
+        pub pending: bool,
+        pub ready: bool,
+        pub loaded: bool,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
     pub struct GfxTranslateQuery {
         pub x: f32,
         pub y: f32,
@@ -13202,6 +13208,12 @@ pub mod gfx {
         pub id: u32,
         pub target: u32,
         pub fbo: u32,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct TexturePreloadStateValue {
+        pub pending: bool,
+        pub ready: bool,
+        pub loaded: bool,
     }
 }
 pub mod lights {

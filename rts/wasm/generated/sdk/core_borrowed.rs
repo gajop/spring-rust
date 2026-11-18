@@ -1998,6 +1998,11 @@ pub mod borrowed {
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
+                #[link_name = "preload-texture"]
+                pub safe fn preload_texture(arg0: i32) -> i64;
+            }
+            #[link(wasm_import_module = "spring:gfx")]
+            unsafe extern "C" {
                 #[link_name = "push-debug-group"]
                 pub safe fn push_debug_group(arg0: i32, arg1: i32, arg2: i32) -> i32;
             }
@@ -2035,6 +2040,11 @@ pub mod borrowed {
             unsafe extern "C" {
                 #[link_name = "texture-info"]
                 pub safe fn texture_info(arg0: i32, arg1: i32) -> i32;
+            }
+            #[link(wasm_import_module = "spring:gfx")]
+            unsafe extern "C" {
+                #[link_name = "texture-preload-state"]
+                pub safe fn texture_preload_state(arg0: i32, arg1: i32) -> i32;
             }
             #[link(wasm_import_module = "spring:gfx")]
             unsafe extern "C" {
@@ -2848,6 +2858,28 @@ pub mod borrowed {
         }
 
         #[inline]
+        pub fn preload_texture(name: &core::ffi::CStr) -> Result<bool> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut descriptor = [0u8; 8];
+            let mut cursor = 0usize;
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let packed = raw::preload_texture(descriptor_ptr) as u64;
+            let status = (packed >> 32) as i32;
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok((packed as u32) != 0)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (name);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
         pub fn push_debug_group(id: u32, message: &core::ffi::CStr, source_is_third_party: bool) -> Result<()> {
             #[cfg(target_arch = "wasm32")]
             {
@@ -3009,6 +3041,28 @@ pub mod borrowed {
             if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
             let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
             let status = raw::texture_info(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
+            if status != 0 { return Err(ApiError::new(status)); }
+            Ok(output)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (name);
+                Err(unreachable!())
+            }
+        }
+
+        #[inline]
+        pub fn texture_preload_state(name: &core::ffi::CStr) -> Result<[u8; 12]> {
+            #[cfg(target_arch = "wasm32")]
+            {
+            let mut output = [0u8; 12];
+            let mut descriptor = [0u8; 8];
+            let mut cursor = 0usize;
+            let (core_ptr, core_len) = crate::wasm_slice_parts(name.to_bytes())?;
+            if !super::__core_borrowed_wire::put_pair(&mut descriptor, &mut cursor, core_ptr as u32, core_len as u32) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            if !super::__core_borrowed_wire::finish(&mut descriptor, &mut cursor, 4usize) { return Err(ApiError::new(ErrorCode::Internal as i32)); }
+            let descriptor_ptr = crate::wasm_output_ptr(&mut descriptor)?;
+            let status = raw::texture_preload_state(descriptor_ptr, crate::wasm_output_ptr(&mut output)?);
             if status != 0 { return Err(ApiError::new(status)); }
             Ok(output)
             }
@@ -6385,5 +6439,5 @@ pub mod borrowed {
     }
 
 #[doc(hidden)]
-    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 220;
+    pub const __GENERATED_BORROWED_CALLOUT_COUNT: usize = 222;
 }

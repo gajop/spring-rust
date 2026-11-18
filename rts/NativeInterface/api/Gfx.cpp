@@ -22,6 +22,7 @@
 #include "Game/UI/MiniMap.h"
 #include "Map/MapInfo.h"
 #include "Map/ReadMap.h"
+#include "Rendering/Textures/NamedTextures.h"
 #include "Rendering/Map/InfoTexture/IInfoTextureHandler.h"
 #include "Rendering/Env/ISky.h"
 #include "Rendering/Env/MapRendering.h"
@@ -1804,8 +1805,11 @@ static void DeleteTexture(const GfxTextureNameQuery* query, GfxBoolResult* resul
 	result->value = false;
 
 	const auto it = nativeTextures.find(query->name != nullptr ? query->name : "");
-	if (it == nativeTextures.end())
+	if (it == nativeTextures.end()) {
+		// not a texture made by CreateTexture: an image PreloadTexture decoded and nothing used
+		result->value = query->name != nullptr && CNamedTextures::DropPreloaded(query->name);
 		return;
+	}
 
 	DeleteNativeTexture(it->second);
 	nativeTextures.erase(it);
@@ -1888,6 +1892,29 @@ static void TextureInfo(const GfxTextureNameQuery* query, GfxTextureInfoResult* 
 	result->id = texture.id;
 	result->target = texture.target;
 	result->fbo = texture.native != nullptr ? texture.native->fbo : 0;
+}
+
+static void PreloadTexture(const GfxTextureNameQuery* query, GfxBoolResult* result)
+{
+	result->error = nullptr;
+	result->value = query->name != nullptr && CNamedTextures::Preload(query->name);
+}
+
+static void TexturePreloadState(const GfxTextureNameQuery* query, GfxTexturePreloadStateResult* result)
+{
+	result->error = nullptr;
+	result->pending = false;
+	result->ready = false;
+	result->loaded = false;
+	if (query->name == nullptr)
+		return;
+
+	switch (CNamedTextures::GetPreloadState(query->name)) {
+		case CNamedTextures::PreloadState::Pending: result->pending = true; break;
+		case CNamedTextures::PreloadState::Ready:   result->ready   = true; break;
+		case CNamedTextures::PreloadState::Loaded:  result->loaded  = true; break;
+		case CNamedTextures::PreloadState::None:    break;
+	}
 }
 
 static void GetEngineTextureNames(const GfxEmptyQuery*, GfxEngineTextureNamesResult* result)
@@ -5973,4 +6000,6 @@ const GfxApi GFX_API = {
 	.ReadReadback = ReadReadback,
 	.DeleteReadback = DeleteReadback,
 	.QueryCounter = QueryCounter,
+	.PreloadTexture = PreloadTexture,
+	.TexturePreloadState = TexturePreloadState,
 };

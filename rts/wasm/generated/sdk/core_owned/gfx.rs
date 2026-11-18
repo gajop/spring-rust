@@ -1126,6 +1126,13 @@
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GfxTexturePreloadStateResult {
+            pub pending: bool,
+            pub ready: bool,
+            pub loaded: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct GfxTranslateQuery {
             pub x: f32,
             pub y: f32,
@@ -1720,6 +1727,13 @@
             pub id: u32,
             pub target: u32,
             pub fbo: u32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct TexturePreloadStateValue {
+            pub pending: bool,
+            pub ready: bool,
+            pub loaded: bool,
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -3342,6 +3356,16 @@
         }
 
         #[inline]
+        pub fn preload_texture(name: &str) -> Result<bool> {
+            let mut __core_string_0_scratch = [0u8; 256];
+            let __core_string_0_buf = match super::write_cstr(name, &mut __core_string_0_scratch) {
+                Some(s) => super::CStrBuf::Stack(s),
+                None => super::CStrBuf::Heap(super::str_to_cstr_heap(name)?),
+            };
+            crate::generated::borrowed::gfx::preload_texture(__core_string_0_buf.as_cstr())
+        }
+
+        #[inline]
         pub fn push_attrib(value: u32) -> Result<()> {
             crate::generated::gfx::push_attrib(value)?;
             Ok(())
@@ -3737,6 +3761,19 @@
                 id: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
                 target: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
                 fbo: crate::generated::__core_wire::u32(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
+            })
+        }
+
+        #[inline]
+        pub fn texture_preload_state(name: &str) -> Result<TexturePreloadStateValue> {
+            let __blob0 = { let mut __b = Vec::with_capacity(4 + name.len()); __b.extend_from_slice(&(name.len() as u32).to_le_bytes()); __b.extend_from_slice(name.as_bytes()); __b };
+            let mut __output = [0u8; 12];
+            crate::generated::dynamic_input::gfx::texture_preload_state(&__blob0, &mut __output)?;
+            let mut __cursor = 0usize;
+            Ok(TexturePreloadStateValue {
+                pending: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                ready: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?,
+                loaded: crate::generated::__core_wire::boolean(&__output, &mut __cursor).ok_or(crate::ApiError::new(crate::ErrorCode::Internal as i32))?
             })
         }
 
