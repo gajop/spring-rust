@@ -2,6 +2,8 @@
 
 #include "IArchive.h"
 
+#include <algorithm>
+
 #include <cassert>
 
 #include "System/StringUtil.h"
@@ -32,6 +34,28 @@ bool IArchive::GetFile(const std::string& name, std::vector<std::uint8_t>& buffe
 		return false;
 
 	return GetFile(fid, buffer);
+}
+
+bool IArchive::GetFileRange(uint32_t fid, uint64_t offset, uint64_t length, std::vector<std::uint8_t>& buffer)
+{
+	if (!GetFile(fid, buffer))
+		return false;
+
+	const uint64_t begin = std::min<uint64_t>(offset, buffer.size());
+	const uint64_t count = std::min<uint64_t>(length, buffer.size() - begin);
+	buffer.erase(buffer.begin(), buffer.begin() + begin);
+	buffer.resize(count);
+	return true;
+}
+
+bool IArchive::GetFileRange(const std::string& name, uint64_t offset, uint64_t length, std::vector<std::uint8_t>& buffer)
+{
+	const uint32_t fid = FindFile(name);
+
+	if (!IsFileId(fid))
+		return false;
+
+	return GetFileRange(fid, offset, length, buffer);
 }
 
 bool IArchive::CalcHash(uint32_t fid, sha512::raw_digest& hash, std::vector<std::uint8_t>& fb)

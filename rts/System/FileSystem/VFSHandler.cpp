@@ -456,6 +456,27 @@ int CVFSHandler::LoadFile(const std::string& filePath, std::vector<std::uint8_t>
 	return (fileData.ar->GetFile(normalizedPath, buffer));
 }
 
+int CVFSHandler::LoadFileRange(const std::string& filePath, uint64_t offset, uint64_t length, std::vector<std::uint8_t>& buffer, Section section)
+{
+	const std::string& normalizedPath = GetNormalizedPath(filePath);
+	const FileData& fileData = GetFileData(normalizedPath, section);
+
+	if (fileData.ar == nullptr)
+		return -1;
+
+	return (fileData.ar->GetFileRange(normalizedPath, offset, length, buffer));
+}
+
+int CVFSHandler::GetFileSize(const std::string& filePath, Section section)
+{
+	const FileData& fileData = GetFileData(GetNormalizedPath(filePath), section);
+
+	if (fileData.ar == nullptr)
+		return -1;
+
+	return fileData.size;
+}
+
 int CVFSHandler::FileExistsInArchive(const std::string& archiveName,
 	const std::string& filePath, Section section) const
 {

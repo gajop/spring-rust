@@ -72,6 +72,33 @@ bool CDirArchive::GetFile(uint32_t fid, std::vector<std::uint8_t>& buffer)
 	return true;
 }
 
+bool CDirArchive::GetFileRange(uint32_t fid, uint64_t offset, uint64_t length, std::vector<std::uint8_t>& buffer)
+{
+	assert(IsFileId(fid));
+
+	auto scopedSemAcq = AcquireSemaphoreScoped();
+
+	// the part only: a file's header is read without the rest of it
+	nowide::ifstream ifs(files[fid].rawFileName, std::ios::in | std::ios::binary);
+
+	if (ifs.bad() || !ifs.is_open())
+		return false;
+
+	ifs.seekg(0, std::ios_base::end);
+	const uint64_t size = static_cast<uint64_t>(ifs.tellg());
+	const uint64_t begin = std::min(offset, size);
+	const uint64_t count = std::min(length, size - begin);
+
+	buffer.resize(count);
+	ifs.seekg(static_cast<std::streamoff>(begin), std::ios_base::beg);
+	ifs.clear();
+
+	if (!buffer.empty())
+		ifs.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
+
+	return true;
+}
+
 const std::string& CDirArchive::FileName(uint32_t fid) const
 {
 	return files[fid].fileName;

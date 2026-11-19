@@ -139,6 +139,80 @@ void CFileHandler::Close()
 
 /******************************************************************************/
 
+// The raw (data directories) or working-directory path of a file for one of Open's modes, empty if
+// the mode does not reach a file there.
+static std::string RawPathForMode(const std::string& filePath, char mode)
+{
+#ifndef TOOLS
+	if (mode == SPRING_VFS_RAW[0])
+		return dataDirsAccess.LocateFile(filePath);
+#endif
+	if (mode == SPRING_VFS_PWD[0]) {
+#ifndef TOOLS
+		if (FileSystem::IsAbsolutePath(filePath))
+			return {};
+		return Platform::GetOrigCWD() + filePath;
+#else
+		return filePath;
+#endif
+	}
+	return {};
+}
+
+int CFileHandler::FileSize(const std::string& filePath, const std::string& modes)
+{
+	for (char c: modes) {
+#ifndef TOOLS
+		const CVFSHandler::Section section = CVFSHandler::GetModeSection(c);
+		if (section != CVFSHandler::Section::Error) {
+			if (const int size = vfsHandler->GetFileSize(StringToLower(filePath), section); size >= 0)
+				return size;
+			continue;
+		}
+#endif
+		const std::string path = RawPathForMode(filePath, c);
+		if (path.empty() || !FileSystem::FileExists(path))
+			continue;
+
+		nowide::ifstream ifs(path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+		if (ifs.is_open())
+			return static_cast<int>(ifs.tellg());
+	}
+
+	return -1;
+}
+
+bool CFileHandler::LoadFileRange(const std::string& filePath, const std::string& modes, uint64_t offset, uint64_t length, std::vector<std::uint8_t>& buffer)
+{
+	for (char c: modes) {
+#ifndef TOOLS
+		const CVFSHandler::Section section = CVFSHandler::GetModeSection(c);
+		if (section != CVFSHandler::Section::Error) {
+			if (vfsHandler->LoadFileRange(StringToLower(filePath), offset, length, buffer, section) == 1)
+				return true;
+			continue;
+		}
+#endif
+		const std::string path = RawPathForMode(filePath, c);
+		if (path.empty() || !FileSystem::FileExists(path))
+			continue;
+
+		nowide::ifstream ifs(path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+		if (!ifs.is_open())
+			continue;
+
+		const uint64_t size = static_cast<uint64_t>(ifs.tellg());
+		const uint64_t begin = std::min(offset, size);
+		buffer.resize(std::min(length, size - begin));
+		ifs.seekg(static_cast<std::streamoff>(begin), std::ios_base::beg);
+		if (!buffer.empty())
+			ifs.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
+		return true;
+	}
+
+	return false;
+}
+
 bool CFileHandler::FileExists(const std::string& filePath, const std::string& modes)
 {
 	for (char c: modes) {

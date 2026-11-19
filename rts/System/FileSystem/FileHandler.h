@@ -35,6 +35,11 @@ public:
 	void Seek(int pos, std::ios_base::seekdir where = std::ios_base::beg);
 
 	static bool FileExists(const std::string& filePath, const std::string& modes);
+	/// The size of a file found as Open finds it (first of `modes`), without reading it; -1 if none.
+	static int FileSize(const std::string& filePath, const std::string& modes);
+	/// Reads `length` bytes from `offset` of a file found as Open finds it, without the rest of it
+	/// where its archive can (fewer bytes where the file ends first). False if there is no file.
+	static bool LoadFileRange(const std::string& filePath, const std::string& modes, uint64_t offset, uint64_t length, std::vector<std::uint8_t>& buffer);
 	// true if any of TryReadFrom{RawFS,PWD,VFS} succeed
 	bool FileExists() const { return (fileSize >= 0); }
 	// true if (and only if) TryReadFromVFS succeeds

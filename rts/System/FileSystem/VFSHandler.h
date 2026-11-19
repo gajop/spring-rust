@@ -103,6 +103,17 @@ public:
 	 * @return 1 if the file exists in the VFS and was successfully read
 	 */
 	int LoadFile(const std::string& filePath, std::vector<std::uint8_t>& buffer, Section section);
+	/**
+	 * Reads `length` bytes of a file from `offset` (fewer where it ends first), from an archive
+	 * that can without reading the rest (IArchive::GetFileRange).
+	 * @return 1 if the file exists in the VFS and the part was read
+	 */
+	int LoadFileRange(const std::string& filePath, uint64_t offset, uint64_t length, std::vector<std::uint8_t>& buffer, Section section);
+	/**
+	 * The size of a file in the VFS, without reading it.
+	 * @return its size in bytes, -1 if it is not in the VFS
+	 */
+	int GetFileSize(const std::string& filePath, Section section);
 	// Returns -1 when the archive is not loaded, 0 when the file is absent,
 	// and 1 when the file exists in the requested archive.
 	int FileExistsInArchive(const std::string& archiveName, const std::string& filePath,

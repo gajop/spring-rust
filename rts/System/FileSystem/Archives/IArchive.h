@@ -89,6 +89,14 @@ public:
 	 * @see GetFile(uint32_t fid, std::vector<std::uint8_t>& buffer)
 	 */
 	bool GetFile(const std::string& name, std::vector<std::uint8_t>& buffer);
+	/**
+	 * Fetches `length` bytes of a file from `offset`, fewer where the file ends first. An archive
+	 * that can read part of a file without the rest (a directory) does; the others read the whole
+	 * file and keep the part.
+	 * @return true if the file was found and the part read into buffer
+	 */
+	virtual bool GetFileRange(uint32_t fid, uint64_t offset, uint64_t length, std::vector<std::uint8_t>& buffer);
+	bool GetFileRange(const std::string& name, uint64_t offset, uint64_t length, std::vector<std::uint8_t>& buffer);
 
 	uint32_t ExtractedSize() const {
 		uint32_t size = 0;

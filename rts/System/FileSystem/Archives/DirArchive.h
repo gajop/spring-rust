@@ -37,6 +37,7 @@ public:
 
 	uint32_t NumFiles() const override { return (files.size()); }
 	bool GetFile(uint32_t fid, std::vector<std::uint8_t>& buffer) override;
+	bool GetFileRange(uint32_t fid, uint64_t offset, uint64_t length, std::vector<std::uint8_t>& buffer) override;
 	const std::string& FileName(uint32_t fid) const override;
 	int32_t FileSize(uint32_t fid) const override;
 	SFileInfo FileInfo(uint32_t fid) const override;
