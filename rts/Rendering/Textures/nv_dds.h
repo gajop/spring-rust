@@ -312,6 +312,15 @@ namespace nv_dds
                 return m_images[0].get_mipmap(index);
             }
 
+            /// the image itself (its top level), as upload_texture2D uploads it
+            inline const CTexture &get_image(unsigned int index = 0) const
+            {
+                assert(m_valid);
+                assert(index < m_images.size());
+
+                return m_images[index];
+            }
+
             inline const CTexture &get_cubemap_face(unsigned int face) const
             {
                 assert(m_valid);

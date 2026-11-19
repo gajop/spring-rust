@@ -1897,7 +1897,21 @@ static void TextureInfo(const GfxTextureNameQuery* query, GfxTextureInfoResult* 
 static void PreloadTexture(const GfxTextureNameQuery* query, GfxBoolResult* result)
 {
 	result->error = nullptr;
-	result->value = query->name != nullptr && CNamedTextures::Preload(query->name);
+	result->value = false;
+
+	// only a texture made from a file (a named texture, as ResolveTexture finds it) loads in the
+	// background: native and atlas textures, and the engine's ('$'), models' ('%'), build
+	// pictures' ('#') and Lua's ('!'), exist already or are made otherwise
+	const char* name = query->name;
+	if (name == nullptr || name[0] == '\0' || GetNativeTexture(name) != nullptr || GetNativeAtlas(name) != nullptr)
+		return;
+
+	switch (name[0]) {
+		case '!': case '%': case '#': case '$': return;
+		default: break;
+	}
+
+	result->value = CNamedTextures::Preload(name);
 }
 
 static void TexturePreloadState(const GfxTextureNameQuery* query, GfxTexturePreloadStateResult* result)

@@ -3,7 +3,7 @@
   "functions": {
     "gfx.PreloadTexture": {
       "level": "exempt",
-      "reason": "No Lua equivalent: queues the file read and decode of a named texture on the engine's worker threads. Its effect is when the decode cost is paid, with no engine state a Lua run and a Wasm run could compare; the result only says whether a decode was queued.",
+      "reason": "No Lua equivalent: queues the file read and decode of a named texture on the engine's worker threads and its upload over the next drawn frames. Its effect is when the decode and upload costs are paid, with no engine state a Lua run and a Wasm run could compare; the result only says whether it was queued.",
       "required_environments": [
         "rules-unsynced",
         "gaia-unsynced",
@@ -23,7 +23,7 @@
     },
     "gfx.TexturePreloadState": {
       "level": "exempt",
-      "reason": "No Lua equivalent: reads how far a PreloadTexture decode is (pending, ready, loaded). It depends on thread timing, so there is nothing to compare between a native and a Wasm run.",
+      "reason": "No Lua equivalent: reads how far a PreloadTexture is (decoding, being made, loaded). It depends on thread and frame timing, so there is nothing to compare between a native and a Wasm run.",
       "required_environments": [
         "rules-unsynced",
         "gaia-unsynced",

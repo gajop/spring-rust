@@ -3,6 +3,8 @@
 #ifndef S3O_TEXTURE_HANDLER_H
 #define S3O_TEXTURE_HANDLER_H
 
+#include <future>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -44,6 +46,13 @@ public:
 	void LoadTexture(S3DModel* model);
 	void PreloadTexture(S3DModel* model, bool invertAxis, bool invertAlpha);
 
+	/// Queues the maps being streamed in (see ModelTextureStreaming) whose images are decoded and
+	/// whose models are on the GPU, to be made in the textures that stand in for them over the next
+	/// frames (TextureUploads). Called once a drawn frame, while a game runs.
+	void Update();
+	/// Maps still being decoded or waiting to be made.
+	size_t NumStreaming() const { return streaming.size(); }
+
 public:
 	const S3OTexMat* GetTexture(unsigned int num) {
 		if (num < textures.size())
@@ -53,6 +62,26 @@ public:
 	}
 
 private:
+	/// A map of a model loaded while the game runs, decoded on a worker thread; until it is
+	/// made, the model's texture is a single pixel.
+	struct StreamedTex {
+		struct Image {
+			CBitmap bitmap;
+		};
+
+		std::string name;
+		unsigned int texID = 0; // the stand-in, once its model is on the GPU
+		bool invertAxis = false;
+		bool invertAlpha = false;
+		std::shared_future<void> job; // the decode; not valid for a map decoded ahead
+		std::shared_ptr<Image> image;
+		uint64_t ticket = 0; // being made (TextureUploads)
+	};
+
+	bool StreamTexture(const S3DModel* model, unsigned int texNum, bool invertAxis, bool invertAlpha);
+	void FinishStreamedTexture(const std::string& name, unsigned int texID, const CBitmap& bitmap);
+	/// whether a model's map made now goes up in steps: on the main thread, while a game runs
+	bool StreamUploads() const;
 	unsigned int LoadAndCacheTexture(
 		const S3DModel* model,
 		unsigned int texNum,
@@ -71,6 +100,8 @@ private:
 	TextureTable textureTable; // stores (primary, secondary) texture-pairs by unique ident
 	BitmapCache bitmapCache;
 
+	std::vector<StreamedTex> streaming;
+	bool streamUploads = false;
 	std::vector<S3OTexMat> textures;
 };
 

@@ -22,6 +22,8 @@ struct SDL_Surface;
 // Finest levels TextureMipSkip leaves out of a mipmapped texture whose longer side is `side`
 // texels, never going below `floor`.
 unsigned int TextureMipSkipLevels(unsigned int side, unsigned int floor);
+// The same for `wanted` levels instead of the TextureMipSkip setting.
+unsigned int TextureMipSkipLevels(unsigned int side, unsigned int floor, unsigned int wanted);
 #endif
 
 struct TextureCreationParams {

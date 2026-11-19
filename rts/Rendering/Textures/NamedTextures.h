@@ -24,18 +24,20 @@ namespace CNamedTextures {
 	bool Free(const std::string& texName);
 
 	/**
-	 * Asynchronous decode: reads and decodes the image of a named texture on the worker
-	 * threads, so that making the texture (Load, from GetInfo(forceLoad) or Bind) takes the
-	 * decoded image and costs the upload only, not the file read and the decode, which are
-	 * the larger part for a block-compressed map. Returns true when a decode was queued.
-	 * Without worker threads the decode happens in the call. Main-thread only.
+	 * Loads a named texture in the background: its image is read and decoded on the worker
+	 * threads, then made into the texture over the next drawn frames within the upload budget
+	 * every texture made in steps shares (TextureUploads, TextureUploadRate), at the
+	 * TextureMipSkip and TextureMipFloor in force now. The name is a texture once its state is
+	 * Loaded. Asked for before that (GetInfo with forceLoad, Bind), it is made at once, waiting for
+	 * its decode. Returns true when it was queued. Without worker threads the decode happens in the
+	 * call. Main-thread only; textures are made while a game runs (Update).
 	 */
 	bool Preload(const std::string& texName);
 
 	enum class PreloadState {
 		None,    ///< nothing queued and not loaded
 		Pending, ///< being decoded
-		Ready,   ///< decoded, waiting for the texture to be made
+		Ready,   ///< decoded, the texture being made
 		Loaded,  ///< the texture exists
 	};
 	PreloadState GetPreloadState(const std::string& texName);

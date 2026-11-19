@@ -1771,7 +1771,11 @@ CONFIG(int, TextureMipFloor)
 
 unsigned int TextureMipSkipLevels(unsigned int side, unsigned int floor)
 {
-	const unsigned int wanted = configHandler->GetInt("TextureMipSkip");
+	return TextureMipSkipLevels(side, floor, configHandler->GetInt("TextureMipSkip"));
+}
+
+unsigned int TextureMipSkipLevels(unsigned int side, unsigned int floor, unsigned int wanted)
+{
 	floor = std::max(1u, floor);
 	unsigned int skip = 0;
 

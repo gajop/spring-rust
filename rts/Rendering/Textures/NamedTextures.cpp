@@ -11,6 +11,7 @@
 
 #include "Rendering/GL/myGL.h"
 #include "Bitmap.h"
+#include "TextureUploads.h"
 #include "Rendering/GlobalRendering.h"
 #include "System/type2.h"
 #include "System/Log/ILog.h"
@@ -41,9 +42,17 @@ namespace CNamedTextures {
 	struct PreloadedImage {
 		std::shared_future<void> job;
 		std::shared_ptr<DecodedImage> image; // the job's own reference, so the job does not own its entry
+		// the order queued: decoded images are made into textures in it
+		uint64_t order = 0;
+		// TextureMipSkip and TextureMipFloor when queued: the texture is made at that detail
+		uint32_t mipSkip = 0;
+		uint32_t mipFloor = 1;
+		// being made (TextureUploads); 0 while it decodes
+		TextureUploads::Ticket ticket = 0;
 	};
 	static spring::unordered_map<std::string, std::shared_ptr<PreloadedImage>> preloaded;
 	static spring::mutex preloadMutex;
+	static uint64_t preloadOrder = 0;
 
 	/******************************************************************************/
 
@@ -72,8 +81,12 @@ namespace CNamedTextures {
 			for (const auto& [texName, image]: preloaded) {
 				if (image->job.valid())
 					image->job.wait();
+				if (image->ticket != 0)
+					TextureUploads::Cancel(image->ticket);
 			}
 			preloaded.clear();
+			// and whatever else is queued (model maps' jobs were dropped with their models)
+			TextureUploads::Kill();
 		}
 
 		const std::lock_guard<spring::recursive_mutex> lck(mutex);
@@ -272,6 +285,8 @@ namespace CNamedTextures {
 				return false;
 
 			image = it->second;
+			if (image->ticket != 0)
+				return false; // being made: FinishPreloaded
 			preloaded.erase(it);
 		}
 
@@ -284,34 +299,53 @@ namespace CNamedTextures {
 		return true;
 	}
 
-	static bool Load(const std::string& texName, unsigned int texID, bool genInsert)
+	// TextureMipSkip and TextureMipFloor (a headless build has no textures, nor the settings)
+	static uint32_t CurrentMipSkip()
+	{
+	#ifndef HEADLESS
+		return static_cast<uint32_t>(configHandler->GetInt("TextureMipSkip"));
+	#else
+		return 0;
+	#endif
+	}
+
+	static uint32_t CurrentMipFloor()
+	{
+	#ifndef HEADLESS
+		return static_cast<uint32_t>(configHandler->GetInt("TextureMipFloor"));
+	#else
+		return 1;
+	#endif
+	}
+
+	// TextureCreationParams of a named texture, from its qualifiers
+	static GL::TextureCreationParams NamedTCP(const NameSpec& spec, unsigned int texID)
+	{
+		const bool needMipMaps = (!(spec.nearest || spec.linear)) || spec.mipnear;
+
+		GL::TextureCreationParams tcp;
+		tcp.texID = texID;
+		tcp.linearMipMapFilter = !spec.mipnear;
+		tcp.linearTextureFilter = !spec.nearest;
+		tcp.reqNumLevels = needMipMaps ? 0 : 1;
+		if (spec.aniso)
+			tcp.aniso = globalRendering->maxTexAnisoLvl;
+
+		return tcp;
+	}
+
+	// Makes the texture of a named image; `mipSkip` is TextureMipSkip as it applies to it.
+	static TexInfo MakeTexture(const NameSpec& spec, CBitmap& bitmap, unsigned int texID, unsigned int mipSkip)
 	{
 	RECOIL_DETAILED_TRACY_ZONE;
-		const NameSpec spec = ParseName(texName);
 		const std::string& filename = spec.filename;
 		const bool nearest = spec.nearest;
 		const bool linear  = spec.linear;
 		const bool mipnear = spec.mipnear;
-
-		// get the image
-		CBitmap bitmap;
 		TexInfo texInfo;
 
-		if (!TakePreloaded(texName, bitmap) && !bitmap.Load(filename, 1.0f, 4u, 0u)) {
-			LOG_L(L_WARNING, "Couldn't find texture \"%s\"!", filename.c_str());
-			GenInsertTex(texName, texInfo, false, false, true, false);
-			return false;
-		}
-
 		const bool needMipMaps = (!(nearest || linear)) || mipnear;
-
-		GL::TextureCreationParams tcp;
-		tcp.texID = texID;
-		tcp.linearMipMapFilter = !mipnear;
-		tcp.linearTextureFilter = !nearest;
-		tcp.reqNumLevels = needMipMaps ? 0 : 1;
-		if (spec.aniso)
-			tcp.aniso = globalRendering->maxTexAnisoLvl;
+		const GL::TextureCreationParams tcp = NamedTCP(spec, texID);
 
 		if (bitmap.compressed) {
 			texID = bitmap.CreateDDSTexture(tcp);
@@ -324,7 +358,7 @@ namespace CNamedTextures {
 				// TextureMipSkip, as for DDS textures: the finest levels of a large image are
 				// left out (box-filtered down), never going below 1024 texels a side (effect
 				// sheets and interface images keep their detail where hull maps give theirs up)
-				const int skip = TextureMipSkipLevels(std::max(bitmap.xsize, bitmap.ysize), 1024);
+				const int skip = TextureMipSkipLevels(std::max(bitmap.xsize, bitmap.ysize), 1024, mipSkip);
 				if (skip > 0)
 					bitmap = bitmap.CreateRescaled(std::max(1, bitmap.xsize >> skip), std::max(1, bitmap.ysize >> skip));
 			}
@@ -358,7 +392,7 @@ namespace CNamedTextures {
 
 		texInfo.id    = texID;
 		texInfo.xsize = bitmap.xsize;
-		texInfo.ysize = bitmap.ysize;	
+		texInfo.ysize = bitmap.ysize;
 
 		#ifndef HEADLESS
 		// names the texture by its file in GL debuggers and `debuginfo gpumemory`
@@ -372,13 +406,122 @@ namespace CNamedTextures {
 				case GL_TEXTURE_3D:        { texInfo.texType = GL_TEXTURE_3D;       } break;
 				case GL_TEXTURE_CUBE_MAP:  { texInfo.texType = GL_TEXTURE_CUBE_MAP; } break;
 				default:                   { texInfo.texType = GL_TEXTURE_2D;       } break;
-			}	
+			}
 		#endif
+
+		return texInfo;
+	}
+
+	static bool Load(const std::string& texName, unsigned int texID, bool genInsert)
+	{
+	RECOIL_DETAILED_TRACY_ZONE;
+		const NameSpec spec = ParseName(texName);
+
+		// get the image
+		CBitmap bitmap;
+
+		if (!TakePreloaded(texName, bitmap) && !bitmap.Load(spec.filename, 1.0f, 4u, 0u)) {
+			LOG_L(L_WARNING, "Couldn't find texture \"%s\"!", spec.filename.c_str());
+			GenInsertTex(texName, TexInfo{}, false, false, true, false);
+			return false;
+		}
+
+		const TexInfo texInfo = MakeTexture(spec, bitmap, texID, CurrentMipSkip());
 
 		if (genInsert)
 			GenInsertTex(texName, texInfo, false, false, true, false);
 
 		return true;
+	}
+
+	static bool GenLoadTex(const std::string& texName);
+
+	// A texture being made from its preloaded image over several frames, asked for now: made whole.
+	// True when the name is a texture after it.
+	static bool FinishPreloaded(const std::string& texName)
+	{
+		TextureUploads::Ticket ticket = 0;
+		{
+			const std::lock_guard<spring::mutex> lck(preloadMutex);
+			const auto it = preloaded.find(texName);
+			if (it == preloaded.end() || it->second->ticket == 0)
+				return false;
+
+			ticket = it->second->ticket;
+		}
+
+		// its done callback makes the name a texture and drops the entry
+		TextureUploads::Complete(ticket);
+		return (texInfoMap.find(texName) != texInfoMap.end());
+	}
+
+	// Queues the textures whose images finished decoding to be made, in the order preloaded.
+	static void QueuePreloaded()
+	{
+		std::vector<std::pair<std::string, std::shared_ptr<PreloadedImage>>> ready;
+		{
+			const std::lock_guard<spring::mutex> lck(preloadMutex);
+			for (const auto& [texName, entry]: preloaded) {
+				if (entry->ticket != 0)
+					continue;
+				if (entry->job.valid() && entry->job.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+					continue;
+
+				ready.emplace_back(texName, entry);
+			}
+		}
+
+		std::sort(ready.begin(), ready.end(), [](const auto& a, const auto& b) { return a.second->order < b.second->order; });
+
+		for (auto& [texName, entry]: ready) {
+			if (!entry->image->decoded) {
+				// not a file: made as Load makes a missing one (said in the log, an empty texture)
+				{
+					const std::lock_guard<spring::mutex> lck(preloadMutex);
+					preloaded.erase(texName);
+				}
+				GenLoadTex(texName);
+				continue;
+			}
+
+			const NameSpec spec = ParseName(texName);
+			const auto image = std::shared_ptr<const CBitmap>(entry->image, &entry->image->bitmap);
+			const auto finished = [texName](const TexInfo& texInfo) {
+				{
+					const std::lock_guard<spring::mutex> lck(preloadMutex);
+					preloaded.erase(texName);
+				}
+				GenInsertTex(texName, texInfo, false, false, true, false);
+			};
+
+			TextureUploads::Request request;
+			request.image = image;
+			request.mipSkip = entry->mipSkip;
+			request.mipFloor = entry->mipFloor;
+			request.tcp = NamedTCP(spec, 0);
+			request.makeWhole = [spec, decoded = entry->image, mipSkip = entry->mipSkip, finished](const CBitmap&, uint32_t) {
+				GLuint texID = 0;
+				glGenTextures(1, &texID);
+				const TexInfo texInfo = MakeTexture(spec, decoded->bitmap, texID, mipSkip);
+				finished(texInfo);
+				return texInfo.id;
+			};
+			request.done = [spec, image, finished](uint32_t texID) {
+				// made in steps (a DDS map): its size and label as MakeTexture gives them
+				TexInfo texInfo;
+				texInfo.id = texID;
+				texInfo.xsize = image->xsize;
+				texInfo.ysize = image->ysize;
+				texInfo.texType = GL_TEXTURE_2D;
+				#ifndef HEADLESS
+				if (glObjectLabel != nullptr && texID != 0)
+					glObjectLabel(GL_TEXTURE, texID, -1, spec.filename.c_str());
+				#endif
+				finished(texInfo);
+			};
+
+			entry->ticket = TextureUploads::Queue(std::move(request));
+		}
 	}
 
 	static bool GenLoadTex(const std::string& texName)
@@ -414,6 +557,13 @@ namespace CNamedTextures {
 			return true;
 		}
 
+		// being made from a preloaded image: now, whole
+		if (FinishPreloaded(texName)) {
+			const GLuint texID = texInfoVec[texInfoMap[texName]].id;
+			glBindTexture(GL_TEXTURE_2D, texID);
+			return (texID != 0);
+		}
+
 		return (GenLoadTex(texName));
 	}
 
@@ -421,6 +571,8 @@ namespace CNamedTextures {
 	void Update()
 	{
 	RECOIL_DETAILED_TRACY_ZONE;
+		QueuePreloaded();
+
 		if (waitingTextures.empty())
 			return;
 
@@ -456,9 +608,23 @@ namespace CNamedTextures {
 	bool DropPreloaded(const std::string& texName)
 	{
 	RECOIL_DETAILED_TRACY_ZONE;
-		// a decode still running keeps its own reference to its image
-		const std::lock_guard<spring::mutex> lck(preloadMutex);
-		return preloaded.erase(texName) > 0;
+		// a decode still running keeps its own reference to its image; one being made is dropped
+		// with the texture it was making
+		TextureUploads::Ticket ticket = 0;
+		{
+			const std::lock_guard<spring::mutex> lck(preloadMutex);
+			const auto it = preloaded.find(texName);
+			if (it == preloaded.end())
+				return false;
+
+			ticket = it->second->ticket;
+			preloaded.erase(it);
+		}
+
+		if (ticket != 0)
+			TextureUploads::Cancel(ticket);
+
+		return true;
 	}
 
 
@@ -476,6 +642,9 @@ namespace CNamedTextures {
 
 		auto entry = std::make_shared<PreloadedImage>();
 		entry->image = std::make_shared<DecodedImage>();
+		entry->order = preloadOrder++;
+		entry->mipSkip = CurrentMipSkip();
+		entry->mipFloor = CurrentMipFloor();
 		{
 			const std::lock_guard<spring::mutex> lck(preloadMutex);
 			if (!preloaded.emplace(texName, entry).second)
@@ -515,6 +684,7 @@ namespace CNamedTextures {
 		if (job.valid() && job.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
 			return PreloadState::Pending;
 
+		// decoded: being made over the next frames (Update)
 		return PreloadState::Ready;
 	}
 
@@ -551,7 +721,7 @@ namespace CNamedTextures {
 
 			if (inListCompile) {
 				GenInsertTex(texName, {}, true, secondaryGLContext, false, persist);
-			} else {
+			} else if (!FinishPreloaded(texName)) {
 				GenLoadTex(texName);
 			}
 
