@@ -102,7 +102,6 @@ void S3DModelVAO::DisableAttribs() const
 S3DModelVAO::S3DModelVAO()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
-	vertData.reserve(VERT_SIZE0);
 	indxData.reserve(INDX_SIZE0);
 
 	vertVBO = VBO{ GL_ARRAY_BUFFER        , false };
@@ -126,16 +125,18 @@ void S3DModelVAO::ProcessVertices(const S3DModel* model)
 	if (const auto* root = model->GetRootPiece(); root->vertIndex != ~0u)
 		return;
 
-	uint32_t vertIndex = static_cast<uint32_t>(vertData.size());
+	// the pieces' own vertices go up (UploadVBOs), at the places given here: not copied first
 	const auto skipped = SkippedPieces(model, configHandler->GetInt("ModelLodSkip"));
 	for (size_t i = 0; i < model->pieceObjects.size(); ++i) {
 		auto* modelPiece = model->pieceObjects[i];
-		modelPiece->vertIndex = vertIndex;
+		modelPiece->vertIndex = static_cast<uint32_t>(vertEnd);
 		if (skipped[i])
 			continue; // a level left out: no vertices on the GPU, and no indices (below)
-		const auto& modelPieceVerts = modelPiece->GetVerticesVec();
-		vertIndex += modelPieceVerts.size();
-		vertData.insert(vertData.end(), modelPieceVerts.begin(), modelPieceVerts.end()); //append
+		const size_t count = modelPiece->GetVerticesVec().size();
+		if (count == 0)
+			continue;
+		vertPending.push_back({modelPiece, vertEnd});
+		vertEnd += count;
 	}
 }
 
@@ -146,14 +147,14 @@ void S3DModelVAO::ProcessIndicies(S3DModel* model)
 	if (model->indxStart != ~0u)
 		return;
 
-	//models should know their index offset
-	model->indxStart = static_cast<uint32_t>(std::distance(indxData.cbegin(), indxData.cend()));
+	//models should know their index offset (in the GPU buffer: what went up before comes first)
+	model->indxStart = static_cast<uint32_t>(indxBase + indxData.size());
 
 	const auto skipped = SkippedPieces(model, configHandler->GetInt("ModelLodSkip"));
 	for (size_t i = 0; i < model->pieceObjects.size(); ++i) {
 		auto* modelPiece = model->pieceObjects[i];
 		if (!modelPiece->HasGeometryData() || skipped[i]) {
-			modelPiece->indxStart = static_cast<uint32_t>(indxData.size());
+			modelPiece->indxStart = static_cast<uint32_t>(indxBase + indxData.size());
 			modelPiece->indxCount = 0;
 			continue;
 		}
@@ -167,13 +168,13 @@ void S3DModelVAO::ProcessIndicies(S3DModel* model)
 		std::for_each(begIdx, endIdx, [offset = modelPiece->vertIndex](uint32_t& indx) { indx += offset; }); // add per piece vertex offset to indices
 
 		//model pieces should know their index offset
-		modelPiece->indxStart = static_cast<uint32_t>(std::distance(indxData.begin(), begIdx));
+		modelPiece->indxStart = static_cast<uint32_t>(indxBase + std::distance(indxData.begin(), begIdx));
 
 		//model pieces should know their index count
 		modelPiece->indxCount = static_cast<uint32_t>(modelPieceIndcs.size());
 	}
 	//models should know their index count
-	model->indxCount = static_cast<uint32_t>(indxData.size() - model->indxStart);
+	model->indxCount = static_cast<uint32_t>(indxBase + indxData.size() - model->indxStart);
 
 	//add shatter indices to the end of indxData
 	for (size_t i = 0; i < model->pieceObjects.size(); ++i) {
@@ -252,30 +253,46 @@ static void GrowModelVBO(VBO& vbo, size_t usedBytes, size_t sparseBytes, bool& r
 	vbo.Resize(reqSize, GL_STATIC_DRAW); //noop if size hasn't changed, will copy data if changed
 }
 
+// After a model's indices are in the GPU buffer, nothing reads their CPU copy (offset to the
+// model's place in the buffer): it is dropped, so main memory does not hold every model's indices
+// twice. Vertices have no such copy: the pieces' own go up.
+template<typename T>
+static void DropUploaded(std::vector<T>& data, size_t keepCapacity)
+{
+	data.clear();
+	// a burst at load time grows far past what a model loaded in a match needs: give it back
+	if (data.capacity() > keepCapacity) {
+		std::vector<T>().swap(data);
+		data.reserve(keepCapacity);
+	}
+}
+
 void S3DModelVAO::UploadVBOs()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	bool reinitVAO = (vao.GetIdRaw() == 0);
 	static bool sparseFailed = false;
 
-	if (vertData.size() > vertUploadIndex) {
-		assert(!safeToDeleteVectors);
+	if (!vertPending.empty()) {
 		vertVBO.Bind();
-		GrowModelVBO(vertVBO, vertData.size() * sizeof(SVertexData), SPARSE_VERT_BYTES, reinitVAO, sparseFailed);
-		vertVBO.SetBufferSubData(vertUploadIndex * sizeof(SVertexData), (vertData.size() - vertUploadIndex) * sizeof(SVertexData), vertData.data() + vertUploadIndex);
+		GrowModelVBO(vertVBO, vertEnd * sizeof(SVertexData), SPARSE_VERT_BYTES, reinitVAO, sparseFailed);
+		for (const auto& [piece, at]: vertPending) {
+			const auto& verts = piece->GetVerticesVec();
+			vertVBO.SetBufferSubData(at * sizeof(SVertexData), verts.size() * sizeof(SVertexData), verts.data());
+		}
 		vertVBO.Unbind();
-		vertUploadIndex = vertData.size();
-		vertUploadSize = vertUploadIndex;
+		vertPending.clear();
+		vertUploadSize = vertEnd;
 	}
 
-	if (indxData.size() > indxUploadIndex) {
-		assert(!safeToDeleteVectors);
+	if (!indxData.empty()) {
 		indxVBO.Bind();
-		GrowModelVBO(indxVBO, indxData.size() * sizeof(uint32_t), SPARSE_INDX_BYTES, reinitVAO, sparseFailed);
-		indxVBO.SetBufferSubData(indxUploadIndex * sizeof(uint32_t), (indxData.size() - indxUploadIndex) * sizeof(uint32_t), indxData.data() + indxUploadIndex);
+		GrowModelVBO(indxVBO, (indxBase + indxData.size()) * sizeof(uint32_t), SPARSE_INDX_BYTES, reinitVAO, sparseFailed);
+		indxVBO.SetBufferSubData(indxBase * sizeof(uint32_t), indxData.size() * sizeof(uint32_t), indxData.data());
 		indxVBO.Unbind();
-		indxUploadIndex = indxData.size();
-		indxUploadSize = indxUploadIndex;
+		indxBase += indxData.size();
+		indxUploadSize = indxBase;
+		DropUploaded(indxData, INDX_SIZE0);
 	}
 
 	if (reinitVAO)
@@ -288,15 +305,6 @@ void S3DModelVAO::UploadVBOs()
 		glObjectLabel(GL_BUFFER, indxVBO.GetId(), -1, indxVBO.IsSparse() ? "models: indices (sparse)" : "models: indices");
 	}
 	#endif
-
-	if (safeToDeleteVectors && !vertData.empty()) {
-		// all models have been uploaded in the calls above
-		// safe to clear CPU copy of the data
-		vertData.clear();
-		indxData.clear();
-		vertUploadIndex = 0;
-		indxUploadIndex = 0;
-	}
 }
 
 void S3DModelVAO::Init()

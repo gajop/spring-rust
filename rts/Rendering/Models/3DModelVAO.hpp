@@ -48,14 +48,12 @@ public:
 public:
 	explicit S3DModelVAO();
 
-	uint32_t GetVertOffset() const { return static_cast<uint32_t>(vertData.size()); }
+	uint32_t GetVertOffset() const { return static_cast<uint32_t>(vertEnd); }
 
 	void ProcessVertices(const S3DModel* model);
 	void ProcessIndicies(S3DModel* model);
 	void CreateVAO();
 	void UploadVBOs();
-
-	void SetSafeToDeleteVectors() { safeToDeleteVectors = true; };
 
 	void Bind() const;
 	void Unbind() const;
@@ -121,17 +119,19 @@ private:
 private:
 	static std::unique_ptr<S3DModelVAO> instance;
 private:
-	bool safeToDeleteVectors = false;
-
 	uint32_t batchedBaseInstance   = 0;
 	uint32_t immediateBaseInstance = 0; //note relative index
 
-	size_t vertUploadIndex = 0;
-	size_t indxUploadIndex = 0;
+	// vertices placed in the GPU buffer: those of the pieces in vertPending go up next, from the
+	// pieces themselves, at the given places
+	size_t vertEnd = 0;
+	std::vector<std::pair<const S3DModelPiece*, size_t>> vertPending;
+	// indices in the GPU buffer; those of models processed since the last upload are in indxData
+	// and go up after them
+	size_t indxBase = 0;
 	size_t vertUploadSize = 0;
 	size_t indxUploadSize = 0;
 
-	std::vector<SVertexData> vertData;
 	std::vector<uint32_t   > indxData;
 
 	VBO vertVBO;
