@@ -866,6 +866,9 @@ bool CCommandAI::ExecuteStateCommand(const Command& c)
 		case CMD_FIRE_STATE: {
 			owner->fireState = (int)c.GetParam(0);
 
+			if (owner->fireState == FIRESTATE_HOLDFIRE)
+				StopSelfChosenAttacks();
+
 			SetCommandDescParam0(c);
 			selectedUnitsHandler.PossibleCommandChange(owner);
 			return true;
@@ -1882,6 +1885,35 @@ void CCommandAI::StopAttackingTargetIf(const std::function<bool(const CUnit*)>& 
 		inCommand = CMD_STOP;
 		targetDied = false;
 		SetOrderTarget(nullptr);
+	}
+}
+
+/// Hold Fire stops what the unit fires at by its own choice, as Fire at Will and Return Fire
+/// chose it: the attack orders the command AI queued for itself (INTERNAL_ORDER), the unit's
+/// target when it is not the player's (a user target stays), and each weapon's own auto-target.
+/// Without this a weapon kept firing at whatever it had picked before the order, since a target
+/// once held is not judged by the fire state again; only picking a new one is.
+void CCommandAI::StopSelfChosenAttacks()
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	const auto selfChosen = [](const Command& c) { return (c.GetID() == CMD_ATTACK && c.IsInternalOrder()); };
+	const bool frontRemoved = (!commandQue.empty() && selfChosen(commandQue.front()));
+
+	commandQue.erase(std::remove_if(commandQue.begin(), commandQue.end(), selfChosen), commandQue.end());
+
+	// as StopAttackingTargetIf: the order being executed went without FinishCommand
+	if (frontRemoved) {
+		inCommand = CMD_STOP;
+		targetDied = false;
+		SetOrderTarget(nullptr);
+	}
+
+	if (owner->curTarget.type != Target_None && !owner->curTarget.isUserTarget)
+		owner->DropCurrentAttackTarget();
+
+	for (CWeapon* w: owner->weapons) {
+		if (w->HaveTarget() && !w->GetCurrentTarget().isUserTarget)
+			w->DropCurrentTarget();
 	}
 }
 

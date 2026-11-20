@@ -57,6 +57,8 @@ public:
 
 	void StopAttackingTargetIf(const std::function<bool(const CUnit*)>& pred);
 	void StopAttackingAllyTeam(int ally);
+	/// Hold Fire: drops the engagements the unit started on its own (see the definition).
+	void StopSelfChosenAttacks();
 
 	/**
 	 * @brief Determines if c will cancel a queued command
