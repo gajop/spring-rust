@@ -244,6 +244,7 @@ inline constexpr CalloutDescriptor kCallouts[] = {
 	{"unit_defs", "GetUnitDefParamString", 31u, false, false, LoweringStatus::automatic},
 	{"unit_defs", "GetUnitDefParamType", 31u, false, false, LoweringStatus::automatic},
 	{"unit_defs", "GetUnitDefSpeed", 31u, false, false, LoweringStatus::automatic},
+	{"unit_defs", "GetUnitDefWeaponMounts", 31u, false, false, LoweringStatus::annotated},
 	{"unit_defs", "ValidUnitDefID", 31u, false, false, LoweringStatus::automatic},
 	{"feature_defs", "GetFeatureDefByID", 31u, false, false, LoweringStatus::automatic},
 	{"feature_defs", "GetFeatureDefCount", 31u, false, false, LoweringStatus::automatic},

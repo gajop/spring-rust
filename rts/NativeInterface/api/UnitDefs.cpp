@@ -24,6 +24,7 @@ static thread_local std::vector<int32_t> unitDefIDs;
 static thread_local std::vector<UnitDefParamKey> unitDefParamKeys;
 static thread_local std::vector<int32_t> unitWeaponIDs;
 static thread_local std::vector<int32_t> unitBuildableIDs;
+static thread_local std::vector<UnitDefWeaponMount> unitWeaponMounts;
 static thread_local std::vector<const char*> unitCustomParamKeys;
 
 // Static errors
@@ -270,6 +271,38 @@ static void NativeGetUnitDefClassify(const GetUnitDefClassifyQuery* query, GetUn
 		return;
 	}
 	FillClassify(ud, &result->classify);
+}
+
+// Lua's UnitDefs[id].weapons (LuaUnitDefs.cpp, WeaponsTable): the same mounts,
+// in the same order, ending at the first mount without a weapon.
+static void NativeGetUnitDefWeaponMounts(const GetUnitDefWeaponMountsQuery* query, GetUnitDefWeaponMountsResult* result) {
+	bufferPos = 0;
+	result->error = nullptr;
+	result->mounts = nullptr;
+	result->count = 0;
+
+	const UnitDef* ud = unitDefHandler->GetUnitDefByID(query->unitDefID);
+	if (ud == nullptr) {
+		result->error = &INVALID_UNITDEF_ERROR;
+		return;
+	}
+
+	unitWeaponMounts.clear();
+	unitWeaponMounts.reserve(ud->weapons.size());
+	for (size_t i = 0; i < ud->weapons.size() && ud->weapons[i].def != nullptr; i++) {
+		const UnitDefWeapon& udw = ud->weapons[i];
+		unitWeaponMounts.push_back({
+			.weaponDefID = udw.def->id,
+			.slavedTo = udw.slavedTo,
+			.maxAngleDif = udw.maxMainDirAngleDif,
+			.mainDirX = udw.mainDir.x,
+			.mainDirY = udw.mainDir.y,
+			.mainDirZ = udw.mainDir.z,
+		});
+	}
+
+	result->mounts = unitWeaponMounts.empty() ? nullptr : unitWeaponMounts.data();
+	result->count = unitWeaponMounts.size();
 }
 
 static void NativeGetUnitDefByID(const GetUnitDefByIDQuery* query, GetUnitDefByIDResult* result) {
@@ -578,4 +611,5 @@ const UnitDefsApi UNIT_DEFS_API = {
 	.GetUnitDefParamInt = NativeGetUnitDefParamInt,
 	.GetUnitDefParamFloat = NativeGetUnitDefParamFloat,
 	.GetUnitDefParamString = NativeGetUnitDefParamString,
+	.GetUnitDefWeaponMounts = NativeGetUnitDefWeaponMounts,
 };

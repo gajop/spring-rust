@@ -359,4 +359,26 @@ impl<'a> UnitDefs<'a> {
         }
     }
 
+    pub fn get_unit_def_weapon_mounts(&self, unit_def_id: i32) -> Result<Vec<sys::UnitDefWeaponMount>, Error> {
+        unsafe {
+            let query = sys::GetUnitDefWeaponMountsQuery {
+                unitDefID: unit_def_id,
+            };
+            let mut result = MaybeUninit::<sys::GetUnitDefWeaponMountsResult>::zeroed();
+            let func = self.api.GetUnitDefWeaponMounts.expect("GetUnitDefWeaponMounts function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                {
+                    let slice = if result.count == 0 || result.mounts.is_null() {
+                        &[]
+                    } else {
+                        slice::from_raw_parts(result.mounts as *const sys::UnitDefWeaponMount, result.count as usize)
+                    };
+                    slice.to_vec()
+                }
+            })
+        }
+    }
+
 }

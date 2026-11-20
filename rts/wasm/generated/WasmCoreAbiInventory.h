@@ -1110,6 +1110,7 @@ inline constexpr Candidate kCandidates[] = {
 	{"spring:unit-defs", "get-unit-def-param-string", "i32,i32,i32->i32", 31u, Strategy::variableInput},
 	{"spring:unit-defs", "get-unit-def-param-type", "i32->i64", 31u, Strategy::variableInput},
 	{"spring:unit-defs", "get-unit-def-speed", "i32->i64", 31u, Strategy::direct},
+	{"spring:unit-defs", "get-unit-def-weapon-mounts", "i32,i32->i32", 31u, Strategy::manual},
 	{"spring:unit-defs", "valid-unit-def-id", "i32->i64", 31u, Strategy::direct},
 	{"spring:unit-rendering", "get-camera-rotation", "i32,i32->i32", 26u, Strategy::fixedOutput},
 	{"spring:unit-rendering", "get-camera-vectors", "i32,i32->i32", 26u, Strategy::fixedOutput},

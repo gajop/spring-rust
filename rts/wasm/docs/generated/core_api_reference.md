@@ -2,7 +2,7 @@
 
 - source: `rts/wasm/generated/model.json`
 - coverage: `rts/wasm/generated/core-executable-coverage.json`
-- callouts: 1448
+- callouts: 1449
 
 ## Modules
 
@@ -17,7 +17,7 @@
 | `features` | 38 |
 | `projectiles` | 17 |
 | `los` | 9 |
-| `unit_defs` | 19 |
+| `unit_defs` | 20 |
 | `feature_defs` | 10 |
 | `weapon_defs` | 11 |
 | `game` | 34 |
@@ -345,6 +345,7 @@
 | `GetUnitDefParamString` | i32,i32,i32->i32 | x | x | x | x | x | synced-visible | variable-io-borrowed-input-caller-owned-output |
 | `GetUnitDefParamType` | i32->i64 | x | x | x | x | x | synced-visible | variable-input-borrowed |
 | `GetUnitDefSpeed` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
+| `GetUnitDefWeaponMounts` | i32,i32->i32 | x | x | x | x | x | synced-visible | variable-output-caller-owned |
 | `ValidUnitDefID` | i32->i64 | x | x | x | x | x | synced-visible | fixed |
 
 ## `feature_defs`

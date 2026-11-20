@@ -24506,6 +24506,27 @@
     },
     {
       "module": "unit_defs",
+      "function": "GetUnitDefWeaponMounts",
+      "import_module": "spring:unit-defs",
+      "import_name": "get-unit-def-weapon-mounts",
+      "environment_mask": 31,
+      "mutating": false,
+      "visibility_sensitive": false,
+      "source_status": "annotated",
+      "input_strategy": "direct",
+      "result_strategy": "variable-output-buffer",
+      "direct_params": [
+        "i32",
+        "i32"
+      ],
+      "direct_results": [
+        "i32"
+      ],
+      "signature": "i32,i32->i32",
+      "notes": []
+    },
+    {
+      "module": "unit_defs",
       "function": "ValidUnitDefID",
       "import_module": "spring:unit-defs",
       "import_name": "valid-unit-def-id",
@@ -32218,6 +32239,6 @@
     }
   ],
   "automatic_count": 1223,
-  "manual_count": 208,
+  "manual_count": 209,
   "unsupported_count": 17
 }

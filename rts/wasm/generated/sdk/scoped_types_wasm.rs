@@ -695,7 +695,8 @@ pub mod unit_defs {
         GetUnitDefParamIntQuery, GetUnitDefParamIntResult, GetUnitDefParamKeysQuery,
         GetUnitDefParamKeysResult, GetUnitDefParamStringQuery,
         GetUnitDefParamStringResult, GetUnitDefParamTypeQuery, GetUnitDefParamTypeResult,
-        GetUnitDefSpeedQuery, GetUnitDefSpeedResult, GiveOrderArrayToUnitArrayQuery,
+        GetUnitDefSpeedQuery, GetUnitDefSpeedResult, GetUnitDefWeaponMountsQuery,
+        GetUnitDefWeaponMountsResult, GiveOrderArrayToUnitArrayQuery,
         GiveOrderArrayToUnitArrayResult, GiveOrderArrayToUnitQuery,
         GiveOrderArrayToUnitResult, GiveOrderToUnitArrayQuery,
         GiveOrderToUnitArrayResult, GiveOrderToUnitQuery, GiveOrderToUnitResult, Int2,
@@ -706,8 +707,9 @@ pub mod unit_defs {
         SoundEffectParams, StringArray, StringResult, SunLightingParams, UInt32Array,
         UInt32Result, UnitCostOverrides, UnitDefBasicInfo, UnitDefBuildOptions,
         UnitDefClassify, UnitDefCosts, UnitDefHealth, UnitDefParamKey, UnitDefParamType,
-        UnitDefPhysics, UnitDefSensors, UnitDefWeapons, UnitHealthValue, UnitTargetRef,
-        ValidUnitDefIDQuery, ValidUnitDefIDResult, WaterParams,
+        UnitDefPhysics, UnitDefSensors, UnitDefWeaponMount, UnitDefWeapons,
+        UnitHealthValue, UnitTargetRef, ValidUnitDefIDQuery, ValidUnitDefIDResult,
+        WaterParams,
     };
 }
 pub mod feature_defs {

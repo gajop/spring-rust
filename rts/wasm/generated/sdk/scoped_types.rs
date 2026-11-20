@@ -7658,6 +7658,14 @@ pub mod unit_defs {
     pub struct GetUnitDefSpeedResult {
         pub speed: f32,
     }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct GetUnitDefWeaponMountsQuery {
+        pub unit_def_id: i32,
+    }
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GetUnitDefWeaponMountsResult {
+        pub mounts: Vec<UnitDefWeaponMount>,
+    }
     #[derive(Debug, Clone, PartialEq, Default)]
     pub struct UnitDefBasicInfo {
         pub id: i32,
@@ -7733,6 +7741,15 @@ pub mod unit_defs {
         pub seismic_radius: f32,
         pub radar_jammer_radius: f32,
         pub sonar_jammer_radius: f32,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct UnitDefWeaponMount {
+        pub weapon_def_id: i32,
+        pub slaved_to: i32,
+        pub max_angle_dif: f32,
+        pub main_dir_x: f32,
+        pub main_dir_y: f32,
+        pub main_dir_z: f32,
     }
     #[derive(Debug, Clone, PartialEq, Default)]
     pub struct UnitDefWeapons {

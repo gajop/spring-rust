@@ -173,6 +173,31 @@
       "order_insensitive_fields": ["keys"]
     },
     {
+      "id": "get_unit_def_weapon_mounts",
+      "context": "synced_gadget",
+      "kind": "readonly",
+      "requires": ["unit"],
+      "lua": {"set": [], "get": ["UnitDefs"]},
+      "native": {"set": [], "get": ["UnitDefs.get_unit_def_weapon_mounts"]},
+      "compare": {"mode": "fields", "epsilon": 0.0001, "fields": ["count", "weaponDefID", "slavedTo", "maxAngleDif", "mainDirX", "mainDirY", "mainDirZ"]},
+      "report": {"lua_setter": "n/a", "native_setter": "n/a", "lua_getter": "`UnitDefs[id].weapons`", "native_getter": "`UnitDefs.get_unit_def_weapon_mounts`", "fields": "`count`, `weaponDef`, `slavedTo`, `maxAngleDif`, `mainDirX`, `mainDirY`, `mainDirZ`"},
+      "rust": {"check": "check_unit_def_weapon_mounts", "set": "set_noop"},
+      "params": {"unitDefID": {"type": "i32", "fixture": "unitDefID"}},
+      "lua_runtime": {
+        "table": "UnitDefs",
+        "key": "fixture.unitDefID",
+        "returns": [
+          {"field": "count", "path": ["weapons"], "transform": "table_count"},
+          {"field": "weaponDefID", "path": ["weapons", 1, "weaponDef"]},
+          {"field": "slavedTo", "path": ["weapons", 1, "slavedTo"]},
+          {"field": "maxAngleDif", "path": ["weapons", 1, "maxAngleDif"]},
+          {"field": "mainDirX", "path": ["weapons", 1, "mainDirX"]},
+          {"field": "mainDirY", "path": ["weapons", 1, "mainDirY"]},
+          {"field": "mainDirZ", "path": ["weapons", 1, "mainDirZ"]}
+        ]
+      }
+    },
+    {
       "id": "get_unit_def_by_id",
       "context": "synced_gadget",
       "kind": "readonly",

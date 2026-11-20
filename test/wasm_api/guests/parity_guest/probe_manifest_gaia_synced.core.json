@@ -436,7 +436,7 @@
   ],
   "coverage": {
     "source_context": "synced_gadget",
-    "source_test_count": 508,
+    "source_test_count": 509,
     "selected_count": 430,
     "selected_kind_counts": {
       "readonly": 344,
@@ -904,6 +904,7 @@
         "terrain_type_data",
         "get_unit_def_name",
         "get_unit_def_human_name",
+        "get_unit_def_weapon_mounts",
         "request_path",
         "give_order_to_unit_synced",
         "give_order_to_unit_array_synced",

@@ -170,6 +170,29 @@ impl NativeApiParity {
         self.same_if_present(label, message, "health", health.health)
     }
 
+    pub(crate) fn check_unit_def_weapon_mounts(
+        &mut self,
+        message: &Value,
+        label: &str,
+    ) -> Result<(), String> {
+        let unit_def_id = i32_field(message, "unitDefID")?;
+        let mounts = self
+            .interface
+            .unit_defs()
+            .get_unit_def_weapon_mounts(unit_def_id)
+            .map_err(|err| format!("get_unit_def_weapon_mounts({unit_def_id}) failed: {err:?}"))?;
+        self.same_i32_if_present(label, message, "count", mounts.len() as i32)?;
+        let first = mounts
+            .first()
+            .ok_or_else(|| format!("{label}: the fixture unit has no weapon mount"))?;
+        self.same_i32_if_present(label, message, "weaponDefID", first.weaponDefID)?;
+        self.same_i32_if_present(label, message, "slavedTo", first.slavedTo)?;
+        self.same_if_present(label, message, "maxAngleDif", first.maxAngleDif)?;
+        self.same_if_present(label, message, "mainDirX", first.mainDirX)?;
+        self.same_if_present(label, message, "mainDirY", first.mainDirY)?;
+        self.same_if_present(label, message, "mainDirZ", first.mainDirZ)
+    }
+
     pub(crate) fn check_feature_defs_list_count(
         &mut self,
         message: &Value,

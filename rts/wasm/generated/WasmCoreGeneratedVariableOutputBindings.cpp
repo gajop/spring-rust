@@ -1641,6 +1641,75 @@ wasm_trap_t* CoreVariableOutput_unit_defs_get_unit_def_i_ds(void* environment, w
     return nullptr;
 }
 
+wasm_trap_t* CoreVariableOutput_unit_defs_get_unit_def_weapon_mounts(void* environment, wasmtime_caller_t* caller,
+    wasmtime_val_raw_t* slots, std::size_t slotCount)
+{
+    auto* state = static_cast<HostState*>(environment);
+    if (state == nullptr || state->native == nullptr || state->native->unitDefs == nullptr ||
+        state->native->unitDefs->GetUnitDefWeaponMounts == nullptr)
+        return Trap("GetUnitDefWeaponMounts generated Core binding is unavailable");
+    if (slots == nullptr || slotCount != 2)
+        return Trap("GetUnitDefWeaponMounts generated Core ABI signature mismatch");
+
+    std::string budgetError;
+    ImportGuard guard(state, 3u, budgetError);
+    if (!guard.Ok())
+        return Trap(budgetError);
+
+    std::string memoryError;
+    if (!EnsureMemory(state, caller, memoryError))
+        return Trap(memoryError);
+    const std::uint32_t outputDescriptor = static_cast<std::uint32_t>(slots[1].i32);
+    std::span<std::uint8_t> outputWire;
+    if (!state->memory.MutableView(outputDescriptor, 12u, outputWire)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds);
+        return nullptr;
+    }
+    WireReader mountsControl(std::span<const std::uint8_t>(outputWire.data() + 0u, 12));
+    std::uint32_t mountsPointer = 0;
+    std::uint32_t mountsCapacity = 0;
+    std::uint32_t mountsIgnoredLength = 0;
+    if (!mountsControl.U32(mountsPointer) || !mountsControl.U32(mountsCapacity) ||
+        !mountsControl.U32(mountsIgnoredLength) || !mountsControl.Finish(4)) {
+        slots[0].i32 = static_cast<std::int32_t>(Status::InvalidArgument);
+        return nullptr;
+    }
+    const std::uint64_t mountsCapacityBytes = static_cast<std::uint64_t>(mountsCapacity) * 24u;
+    if (mountsCapacityBytes > std::numeric_limits<std::size_t>::max() || !state->memory.Contains(mountsPointer, static_cast<std::size_t>(mountsCapacityBytes))) { slots[0].i32 = static_cast<std::int32_t>(Status::OutOfBounds); return nullptr; }
+
+    GetUnitDefWeaponMountsQuery query{};
+    query.unitDefID = static_cast<std::remove_cv_t<std::remove_reference_t<decltype(query.unitDefID)>>>(slots[0].i32);
+    GetUnitDefWeaponMountsResult result{};
+    state->native->unitDefs->GetUnitDefWeaponMounts(&query, &result);
+    const std::int32_t errorCode = NativeErrorCode(result.error);
+    if (errorCode != 0) { slots[0].i32 = errorCode; return nullptr; }
+    bool outputTooSmall = false;
+    std::uint32_t mountsRequired = 0;
+    if (!NormalizeCoreCount(result.count, mountsRequired)) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (mountsRequired != 0 && result.mounts == nullptr) { slots[0].i32 = static_cast<std::int32_t>(Status::OperationFailed); return nullptr; }
+    if (!WriteCoreU32(outputWire, 8u, mountsRequired)) return Trap("generated Core output descriptor changed unexpectedly");
+    outputTooSmall = outputTooSmall || mountsCapacity < mountsRequired;
+    if (outputTooSmall) { slots[0].i32 = static_cast<std::int32_t>(Status::BufferOverflow); return nullptr; }
+    if (mountsRequired != 0) {
+        const std::size_t mountsBytes = static_cast<std::size_t>(mountsRequired) * 24u;
+        std::span<std::uint8_t> mountsWire;
+        if (!state->memory.MutableView(mountsPointer, mountsBytes, mountsWire)) return Trap("generated Core variable output range changed unexpectedly");
+        WireWriter mountsWriter(mountsWire);
+        for (std::uint32_t coreIndex = 0; coreIndex < mountsRequired; ++coreIndex) {
+        if (!mountsWriter.I32(result.mounts[coreIndex].weaponDefID)) return Trap("generated Core wire overflow");
+        if (!mountsWriter.I32(result.mounts[coreIndex].slavedTo)) return Trap("generated Core wire overflow");
+        if (!mountsWriter.F32(result.mounts[coreIndex].maxAngleDif)) return Trap("generated Core wire overflow");
+        if (!mountsWriter.F32(result.mounts[coreIndex].mainDirX)) return Trap("generated Core wire overflow");
+        if (!mountsWriter.F32(result.mounts[coreIndex].mainDirY)) return Trap("generated Core wire overflow");
+        if (!mountsWriter.F32(result.mounts[coreIndex].mainDirZ)) return Trap("generated Core wire overflow");
+        if (!mountsWriter.Align(4u)) return Trap("generated Core record alignment overflow");
+        }
+        if (!mountsWriter.Finish(4u)) return Trap("generated Core list output layout mismatch");
+    }
+    slots[0].i32 = 0;
+    return nullptr;
+}
+
 wasm_trap_t* CoreVariableOutput_feature_defs_get_feature_def_i_ds(void* environment, wasmtime_caller_t* caller,
     wasmtime_val_raw_t* slots, std::size_t slotCount)
 {
@@ -5890,6 +5959,13 @@ bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState
     {
         const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
         const wasm_valkind_t results[] = {WASM_I32};
+        if (!DefineGeneratedVariableOutput(linker, "spring:unit-defs", "get-unit-def-weapon-mounts",
+                MakeFuncType(params, 2, results, 1), CoreVariableOutput_unit_defs_get_unit_def_weapon_mounts, state, error))
+            return false;
+    }
+    {
+        const wasm_valkind_t params[] = {WASM_I32, WASM_I32};
+        const wasm_valkind_t results[] = {WASM_I32};
         if (!DefineGeneratedVariableOutput(linker, "spring:feature-defs", "get-feature-def-i-ds",
                 MakeFuncType(params, 2, results, 1), CoreVariableOutput_feature_defs_get_feature_def_i_ds, state, error))
             return false;
@@ -6360,6 +6436,6 @@ bool RegisterGeneratedVariableOutputImports(wasmtime_linker_t* linker, HostState
     return true;
 }
 
-static_assert(91 >= 0, "generated variable-output Core callback count");
+static_assert(92 >= 0, "generated variable-output Core callback count");
 
 } // namespace recoil::wasm::core::generated

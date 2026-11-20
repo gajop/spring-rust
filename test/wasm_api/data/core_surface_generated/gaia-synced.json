@@ -2186,7 +2186,7 @@
       "results": []
     }
   ],
-  "callout_count": 791,
+  "callout_count": 792,
   "callouts": [
     {
       "class": "handwritten-reviewed",
@@ -3453,6 +3453,12 @@
       "function": "GetUnitDefSpeed",
       "module": "unit_defs",
       "signature": "i32->i64"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetUnitDefWeaponMounts",
+      "module": "unit_defs",
+      "signature": "i32,i32->i32"
     },
     {
       "class": "fixed",
@@ -6937,5 +6943,5 @@
   ],
   "canonical_callin_count": 120,
   "environment": "gaia-synced",
-  "surface_count": 964
+  "surface_count": 965
 }

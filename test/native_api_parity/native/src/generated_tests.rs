@@ -562,6 +562,7 @@ native_tests! {
     get_unit_def_speed { check = check_unit_defs_f32, set = set_noop, required = ["value"], }
     get_unit_def_custom_param { check = check_unit_defs_string, set = set_noop, required = ["value"], }
     get_unit_def_custom_param_keys { check = check_unit_defs_keys, set = set_noop, required = ["keys"], }
+    get_unit_def_weapon_mounts { check = check_unit_def_weapon_mounts, set = set_noop, required = ["count", "weaponDefID", "slavedTo", "maxAngleDif", "mainDirX", "mainDirY", "mainDirZ"], }
     get_unit_def_by_id { check = check_unit_def_by_id, set = set_noop, required = ["exists", "id", "nameValue", "humanName", "metalCost", "health"], }
     get_feature_def_ids { check = check_feature_defs_list_count, set = set_noop, required = ["ids"], }
     get_feature_def_count { check = check_feature_defs_list_count, set = set_noop, required = ["count"], }

@@ -229,6 +229,7 @@ inline constexpr ImportDescriptor kImports[] = {
     {"spring:unit-defs", "get-unit-def-param-string", "i32,i32,i32->i32", 31u},
     {"spring:unit-defs", "get-unit-def-param-type", "i32->i64", 31u},
     {"spring:unit-defs", "get-unit-def-speed", "i32->i64", 31u},
+    {"spring:unit-defs", "get-unit-def-weapon-mounts", "i32,i32->i32", 31u},
     {"spring:unit-defs", "valid-unit-def-id", "i32->i64", 31u},
     {"spring:feature-defs", "get-feature-def-by-id", "i32,i32->i32", 31u},
     {"spring:feature-defs", "get-feature-def-count", "i32->i64", 31u},

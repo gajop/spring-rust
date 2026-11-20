@@ -1675,7 +1675,7 @@
       ]
     }
   ],
-  "callout_count": 1214,
+  "callout_count": 1215,
   "callouts": [
     {
       "class": "handwritten-reviewed",
@@ -3062,6 +3062,12 @@
       "function": "GetUnitDefSpeed",
       "module": "unit_defs",
       "signature": "i32->i64"
+    },
+    {
+      "class": "variable-output-caller-owned",
+      "function": "GetUnitDefWeaponMounts",
+      "module": "unit_defs",
+      "signature": "i32,i32->i32"
     },
     {
       "class": "fixed",
@@ -8964,5 +8970,5 @@
   ],
   "canonical_callin_count": 91,
   "environment": "ui",
-  "surface_count": 1355
+  "surface_count": 1356
 }

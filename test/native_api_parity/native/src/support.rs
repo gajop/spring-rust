@@ -66,8 +66,11 @@ impl NativeApiParity {
             .append(true)
             .open(path)
             .map_err(|e| e.to_string())?;
-        let name = message.get("testName").or_else(|| message.get("name"))
-            .and_then(Value::as_str).unwrap_or(label);
+        let name = message
+            .get("testName")
+            .or_else(|| message.get("name"))
+            .and_then(Value::as_str)
+            .unwrap_or(label);
         let name = name.strip_prefix("native_").unwrap_or(name);
         let row = serde_json::json!({"test": name,
             "field": field, "compared": message.get(field).is_some(), "kind": kind,

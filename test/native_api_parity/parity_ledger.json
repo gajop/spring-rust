@@ -5118,6 +5118,28 @@
       "required_returns_mapped": false,
       "runs": []
     },
+    "unit_defs.GetUnitDefWeaponMounts": {
+      "level": "exempt",
+      "reason": "Read-only UnitDef data, Lua's UnitDefs[id].weapons (LuaUnitDefs.cpp WeaponsTable): per mount the weaponDef, slavedTo, maxAngleDif (the cosine the engine stores) and mainDirX/Y/Z, in the same order and ending at the same mount. Reviewed exemption: no function can reach verified while the parity runs record no Wasm-compared environments. The native parity fixture compares it with UnitDefs[id].weapons on the fixture unit (get_unit_def_weapon_mounts).",
+      "required_environments": [
+        "rules-synced",
+        "rules-unsynced",
+        "gaia-synced",
+        "gaia-unsynced",
+        "ui"
+      ],
+      "tests": [
+        "get_unit_def_weapon_mounts"
+      ],
+      "fields": {},
+      "compared_environments": [],
+      "killed_mutants": [],
+      "required_mutants": [
+        "zero"
+      ],
+      "required_returns_mapped": false,
+      "runs": []
+    },
     "unit_defs.ValidUnitDefID": {
       "level": "untested",
       "grandfathered": true,
@@ -30717,6 +30739,6 @@
   "counts": {
     "untested": 1412,
     "exercised": 14,
-    "exempt": 22
+    "exempt": 23
   }
 }

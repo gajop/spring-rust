@@ -1,6 +1,5 @@
 use serde_json::Value;
 use spring_native::prelude::*;
-use support::{benchmark_callin_variant_is, benchmark_case_is, record_callins_enabled};
 use std::{
     env,
     ffi::{CStr, CString},
@@ -10,6 +9,7 @@ use std::{
     sync::atomic::{AtomicBool, Ordering},
     time::Instant,
 };
+use support::{benchmark_callin_variant_is, benchmark_case_is, record_callins_enabled};
 
 const EPSILON: f32 = 0.05;
 static DRAW_BENCHMARK_RAN: AtomicBool = AtomicBool::new(false);
@@ -83,9 +83,9 @@ fn scaled_brush_size(value: usize, scale: f64) -> usize {
 }
 
 fn percentile99(samples: &[f64]) -> f64 {
-	let mut sorted = samples.to_vec();
-	sorted.sort_by(|left, right| left.total_cmp(right));
-	sorted[((sorted.len() - 1) * 99) / 100]
+    let mut sorted = samples.to_vec();
+    sorted.sort_by(|left, right| left.total_cmp(right));
+    sorted[((sorted.len() - 1) * 99) / 100]
 }
 
 struct NativeApiParity {
@@ -984,13 +984,7 @@ impl NativeApiParity {
                     interface
                         .synced_ctrl()
                         .unit()
-                        .set_unit_physics(
-                            unit_id,
-                            physics_position,
-                            velocity,
-                            rotation,
-                            drag,
-                        )
+                        .set_unit_physics(unit_id, physics_position, velocity, rotation, drag)
                         .map(|_| ())
                         .map_err(|err| format!("{err:?}"))
                 },
@@ -1113,7 +1107,11 @@ impl NativeApiParity {
                     .give_order_to_unit(
                         *unit,
                         10,
-                        &[unit_position.x + 8.0, unit_position.y, unit_position.z + 8.0],
+                        &[
+                            unit_position.x + 8.0,
+                            unit_position.y,
+                            unit_position.z + 8.0,
+                        ],
                         0,
                         0,
                     )

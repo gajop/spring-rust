@@ -749,8 +749,10 @@ pub mod projectiles {
     }
 }
 pub mod unit_defs {
+    use crate::types::unit_defs::UnitDefWeaponMount;
+    use alloc::vec::Vec;
     use alloc::string::String;
-    use crate::Result;
+    use crate::{Result, ApiError, ErrorCode};
     pub fn get_unit_def_human_name(unit_def_id: i32) -> Result<String> {
         spring_sdk_internal::get_unit_def_human_name_bytes(unit_def_id)
             .map(super::decode_string)
@@ -758,6 +760,86 @@ pub mod unit_defs {
     pub fn get_unit_def_name(unit_def_id: i32) -> Result<String> {
         spring_sdk_internal::get_unit_def_name_bytes(unit_def_id)
             .map(super::decode_string)
+    }
+    pub fn get_unit_def_weapon_mounts(
+        unit_def_id: i32,
+    ) -> Result<Vec<UnitDefWeaponMount>> {
+        #[link(wasm_import_module = "spring:unit-defs")]
+        unsafe extern "C" {
+            #[link_name = "get-unit-def-weapon-mounts"]
+            fn raw(p0: i32, p1: i32) -> i32;
+        }
+        let mut out0 = Vec::<u8>::new();
+        let mut descriptor = [0u8; 12];
+        loop {
+            descriptor[0..4].copy_from_slice(&(out0.as_mut_ptr() as u32).to_le_bytes());
+            descriptor[4..8].copy_from_slice(&((out0.len() / 24) as u32).to_le_bytes());
+            let status = unsafe {
+                raw(unit_def_id as _, descriptor.as_mut_ptr() as i32)
+            };
+            if status == 0 {
+                let required = (u32::from_le_bytes(descriptor[8..12].try_into().unwrap())
+                    as usize)
+                    .checked_mul(24)
+                    .ok_or(ApiError::new(ErrorCode::OutOfBounds as i32))?;
+                if required > out0.len() {
+                    return Err(ApiError::new(ErrorCode::InvalidState as i32));
+                }
+                out0.truncate(required);
+                return Ok({
+                    let required = u32::from_le_bytes(
+                        descriptor[8..12].try_into().unwrap(),
+                    ) as usize;
+                    let mut reader = super::Reader::new(&out0);
+                    let mut items = Vec::with_capacity(required);
+                    for _ in 0..required {
+                        items
+                            .push({
+                                reader.align(4)?;
+                                UnitDefWeaponMount {
+                                    weapon_def_id: {
+                                        reader.align(4)?;
+                                        i32::from_le_bytes(reader.take()?) as _
+                                    },
+                                    slaved_to: {
+                                        reader.align(4)?;
+                                        i32::from_le_bytes(reader.take()?) as _
+                                    },
+                                    max_angle_dif: {
+                                        reader.align(4)?;
+                                        f32::from_le_bytes(reader.take()?) as _
+                                    },
+                                    main_dir_x: {
+                                        reader.align(4)?;
+                                        f32::from_le_bytes(reader.take()?) as _
+                                    },
+                                    main_dir_y: {
+                                        reader.align(4)?;
+                                        f32::from_le_bytes(reader.take()?) as _
+                                    },
+                                    main_dir_z: {
+                                        reader.align(4)?;
+                                        f32::from_le_bytes(reader.take()?) as _
+                                    },
+                                }
+                            });
+                        reader.align(4)?;
+                    }
+                    items
+                });
+            }
+            if status != ErrorCode::BufferOverflow as i32 {
+                return Err(ApiError::new(status));
+            }
+            let required = u32::from_le_bytes(descriptor[8..12].try_into().unwrap())
+                as usize;
+            out0.resize(
+                required
+                    .checked_mul(24)
+                    .ok_or(ApiError::new(ErrorCode::OutOfBounds as i32))?,
+                0,
+            );
+        }
     }
 }
 pub mod game {

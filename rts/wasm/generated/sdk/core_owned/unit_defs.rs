@@ -205,6 +205,16 @@
             pub speed: f32,
         }
 
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct GetUnitDefWeaponMountsQuery {
+            pub unit_def_id: i32,
+        }
+
+        #[derive(Debug, Clone, PartialEq, Default)]
+        pub struct GetUnitDefWeaponMountsResult {
+            pub mounts: Vec<UnitDefWeaponMount>,
+        }
+
         #[derive(Debug, Clone, PartialEq, Default)]
         pub struct UnitDefBasicInfo {
             pub id: i32,
@@ -287,6 +297,16 @@
             pub seismic_radius: f32,
             pub radar_jammer_radius: f32,
             pub sonar_jammer_radius: f32,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
+        pub struct UnitDefWeaponMount {
+            pub weapon_def_id: i32,
+            pub slaved_to: i32,
+            pub max_angle_dif: f32,
+            pub main_dir_x: f32,
+            pub main_dir_y: f32,
+            pub main_dir_z: f32,
         }
 
         #[derive(Debug, Clone, PartialEq, Default)]
@@ -603,6 +623,22 @@
         pub fn get_unit_def_speed(unit_def_id: i32) -> Result<f32> {
             let value = crate::generated::unit_defs::get_unit_def_speed(unit_def_id)?;
             Ok(value)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        mod __core_owned_get_unit_def_weapon_mounts {
+            #[link(wasm_import_module = "spring:unit-defs")]
+            unsafe extern "C" {
+                #[link_name = "get-unit-def-weapon-mounts"]
+                pub safe fn call(p0: i32, p1: i32) -> i32;
+            }
+        }
+
+        #[doc = "Exact Core ABI forwarding entry for spring:unit-defs.get-unit-def-weapon-mounts."]
+        #[doc(hidden)]
+        #[inline]
+        pub fn get_unit_def_weapon_mounts(p0: i32, p1: i32) -> i32 {
+            __core_owned_get_unit_def_weapon_mounts::call(p0, p1)
         }
 
         #[inline]

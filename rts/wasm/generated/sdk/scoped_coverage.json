@@ -1099,6 +1099,7 @@
   "unit_defs.GetUnitDefParamString": "generated",
   "unit_defs.GetUnitDefParamType": "generated",
   "unit_defs.GetUnitDefSpeed": "generated",
+  "unit_defs.GetUnitDefWeaponMounts": "generated",
   "unit_defs.ValidUnitDefID": "generated",
   "unit_rendering.GetCameraRotation": "generated",
   "unit_rendering.GetCameraVectors": "generated",

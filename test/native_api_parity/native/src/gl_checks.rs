@@ -933,11 +933,11 @@ impl NativeApiParity {
         );
         void!(
             "gl.UniformArray",
-			gfx.uniform_array_float(locations["u_floatArray"], &[1.5, 2.5], 1)
+            gfx.uniform_array_float(locations["u_floatArray"], &[1.5, 2.5], 1)
         );
         side_effect!(
             "gl.UniformArray.int",
-			gfx.uniform_array_int(locations["u_intArray"], &[3, 4], 1)
+            gfx.uniform_array_int(locations["u_intArray"], &[3, 4], 1)
         );
         void!(
             "gl.UniformMatrix",

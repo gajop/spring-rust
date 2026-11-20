@@ -225,8 +225,8 @@
     },
     {
       "name": "unit_defs_generated.rs",
-      "sha256": "6af35722b6a57daf976c58db58b387d08471cb1a35280de54ebfa97abb8ecfd4",
-      "bytes": 15338
+      "sha256": "4d6d790e6dde93c49f5a98e23b03ccb144ba8ac381d9af4e86cae06ad02cf781",
+      "bytes": 16318
     },
     {
       "name": "unit_rendering_generated.rs",

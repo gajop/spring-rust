@@ -4606,6 +4606,11 @@ pub mod unit_defs {
         }
         #[link(wasm_import_module = "spring:unit-defs")]
         unsafe extern "C" {
+            #[link_name = "get-unit-def-weapon-mounts"]
+            pub safe fn core_get_unit_def_weapon_mounts(p0: i32, p1: i32) -> i32;
+        }
+        #[link(wasm_import_module = "spring:unit-defs")]
+        unsafe extern "C" {
             #[link_name = "valid-unit-def-id"]
             pub safe fn core_valid_unit_def_id(p0: i32) -> i64;
         }

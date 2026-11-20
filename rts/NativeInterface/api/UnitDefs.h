@@ -121,6 +121,21 @@ struct UnitDefWeapons {
 	uint32_t weaponCount;
 };
 
+// One weapon mount of a UnitDef, as Lua's `UnitDefs[id].weapons[i]` gives it:
+// the weapon, the mount it is slaved to, and the arc it may fire in.
+struct UnitDefWeaponMount {
+	int32_t weaponDefID;
+	// The weapon number (from 1) of the mount this one aims with; 0 when it aims by itself.
+	int32_t slavedTo;
+	// The cosine of half the mount's arc about mainDir, as the engine stores the
+	// def's `maxAngleDif` (degrees, the whole arc): -1 for all round.
+	float maxAngleDif;
+	// The arc's centre in unit space (+z forward), normalized.
+	float mainDirX;
+	float mainDirY;
+	float mainDirZ;
+};
+
 struct UnitDefBuildOptions {
 	int32_t* buildableUnitDefIDs;
 	uint32_t buildableCount;
@@ -163,6 +178,10 @@ struct GetUnitDefByIDResult {
 	UnitDefHealth health;
 	UnitDefClassify classify;
 };
+
+// Every weapon mount of a UnitDef, in weapon-number order (the first is weapon 1).
+struct GetUnitDefWeaponMountsQuery { int32_t unitDefID; };
+struct GetUnitDefWeaponMountsResult { const Error* error; UnitDefWeaponMount* mounts; uint32_t count; };
 
 struct GetUnitDefClassifyQuery { int32_t unitDefID; };
 struct GetUnitDefClassifyResult { const Error* error; UnitDefClassify classify; };
@@ -215,6 +234,7 @@ struct UnitDefsApi {
 	void (*GetUnitDefParamInt)(const GetUnitDefParamIntQuery* query, GetUnitDefParamIntResult* result);
 	void (*GetUnitDefParamFloat)(const GetUnitDefParamFloatQuery* query, GetUnitDefParamFloatResult* result);
 	void (*GetUnitDefParamString)(const GetUnitDefParamStringQuery* query, GetUnitDefParamStringResult* result);
+	void (*GetUnitDefWeaponMounts)(const GetUnitDefWeaponMountsQuery* query, GetUnitDefWeaponMountsResult* result);
 };
 
 extern const UnitDefsApi UNIT_DEFS_API;

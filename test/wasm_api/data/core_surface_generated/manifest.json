@@ -2202,7 +2202,7 @@
           "results": []
         }
       ],
-      "callout_count": 791,
+      "callout_count": 792,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -3469,6 +3469,12 @@
           "function": "GetUnitDefSpeed",
           "module": "unit_defs",
           "signature": "i32->i64"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "GetUnitDefWeaponMounts",
+          "module": "unit_defs",
+          "signature": "i32,i32->i32"
         },
         {
           "class": "fixed",
@@ -6953,7 +6959,7 @@
       ],
       "canonical_callin_count": 121,
       "environment": "rules-synced",
-      "surface_count": 965
+      "surface_count": 966
     },
     {
       "alias_callin_count": 50,
@@ -8738,7 +8744,7 @@
           ]
         }
       ],
-      "callout_count": 1211,
+      "callout_count": 1212,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -10125,6 +10131,12 @@
           "function": "GetUnitDefSpeed",
           "module": "unit_defs",
           "signature": "i32->i64"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "GetUnitDefWeaponMounts",
+          "module": "unit_defs",
+          "signature": "i32,i32->i32"
         },
         {
           "class": "fixed",
@@ -16009,7 +16021,7 @@
       ],
       "canonical_callin_count": 100,
       "environment": "rules-unsynced",
-      "surface_count": 1361
+      "surface_count": 1362
     },
     {
       "alias_callin_count": 53,
@@ -18199,7 +18211,7 @@
           "results": []
         }
       ],
-      "callout_count": 791,
+      "callout_count": 792,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -19466,6 +19478,12 @@
           "function": "GetUnitDefSpeed",
           "module": "unit_defs",
           "signature": "i32->i64"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "GetUnitDefWeaponMounts",
+          "module": "unit_defs",
+          "signature": "i32,i32->i32"
         },
         {
           "class": "fixed",
@@ -22950,7 +22968,7 @@
       ],
       "canonical_callin_count": 120,
       "environment": "gaia-synced",
-      "surface_count": 964
+      "surface_count": 965
     },
     {
       "alias_callin_count": 50,
@@ -24735,7 +24753,7 @@
           ]
         }
       ],
-      "callout_count": 1211,
+      "callout_count": 1212,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -26122,6 +26140,12 @@
           "function": "GetUnitDefSpeed",
           "module": "unit_defs",
           "signature": "i32->i64"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "GetUnitDefWeaponMounts",
+          "module": "unit_defs",
+          "signature": "i32,i32->i32"
         },
         {
           "class": "fixed",
@@ -32006,7 +32030,7 @@
       ],
       "canonical_callin_count": 100,
       "environment": "gaia-unsynced",
-      "surface_count": 1361
+      "surface_count": 1362
     },
     {
       "alias_callin_count": 50,
@@ -33685,7 +33709,7 @@
           ]
         }
       ],
-      "callout_count": 1214,
+      "callout_count": 1215,
       "callouts": [
         {
           "class": "handwritten-reviewed",
@@ -35072,6 +35096,12 @@
           "function": "GetUnitDefSpeed",
           "module": "unit_defs",
           "signature": "i32->i64"
+        },
+        {
+          "class": "variable-output-caller-owned",
+          "function": "GetUnitDefWeaponMounts",
+          "module": "unit_defs",
+          "signature": "i32,i32->i32"
         },
         {
           "class": "fixed",
@@ -40974,7 +41004,7 @@
       ],
       "canonical_callin_count": 91,
       "environment": "ui",
-      "surface_count": 1355
+      "surface_count": 1356
     },
     {
       "alias_callin_count": 24,
@@ -47876,6 +47906,6 @@
   "purpose": "instantiate-only complete Core ABI signature/link coverage",
   "unique_executable_callin_spellings": 186,
   "unique_executable_callins": 133,
-  "unique_executable_callouts": 1448,
+  "unique_executable_callouts": 1449,
   "version": 2
 }

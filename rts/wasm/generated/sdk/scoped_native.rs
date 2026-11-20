@@ -6915,7 +6915,7 @@ pub(crate) mod unit_defs {
     use crate::types::unit_defs::{
         GetUnitDefByIDValue, UnitDefBasicInfo, UnitDefBuildOptions, UnitDefClassify,
         UnitDefCosts, UnitDefHealth, UnitDefParamKey, UnitDefPhysics, UnitDefSensors,
-        UnitDefWeapons,
+        UnitDefWeaponMount, UnitDefWeapons,
     };
     use alloc::vec::Vec;
     use alloc::string::String;
@@ -7400,6 +7400,34 @@ pub(crate) mod unit_defs {
         }
         Ok((result.speed) as _)
     }
+    pub(crate) fn get_unit_def_weapon_mounts(
+        _engine: &crate::Backend<'_>,
+        api: Option<&sys::UnitDefsApi>,
+        unit_def_id: i32,
+    ) -> Result<Vec<UnitDefWeaponMount>> {
+        let native_unit_def_id = (unit_def_id) as _;
+        let query = sys::GetUnitDefWeaponMountsQuery {
+            unitDefID: native_unit_def_id,
+        };
+        let table = api.ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let call = table
+            .GetUnitDefWeaponMounts
+            .ok_or(ApiError::new(ErrorCode::NotAvailable as i32))?;
+        let mut result = core::mem::MaybeUninit::<
+            sys::GetUnitDefWeaponMountsResult,
+        >::zeroed();
+        unsafe {
+            call(&query, result.as_mut_ptr());
+        }
+        let result = unsafe { result.assume_init() };
+        unsafe {
+            check_error(result.error)?;
+        }
+        unsafe { read_slice(result.mounts, result.count as usize)? }
+            .iter()
+            .map(|item| -> Result<_> { from_unit_def_weapon_mount(item) })
+            .collect::<Result<Vec<_>>>()
+    }
     pub(crate) fn valid_unit_def_id(
         _engine: &crate::Backend<'_>,
         api: Option<&sys::UnitDefsApi>,
@@ -7512,6 +7540,18 @@ pub(crate) mod unit_defs {
             seismic_radius: (value.seismicRadius) as _,
             radar_jammer_radius: (value.radarJammerRadius) as _,
             sonar_jammer_radius: (value.sonarJammerRadius) as _,
+        })
+    }
+    fn from_unit_def_weapon_mount(
+        value: &sys::UnitDefWeaponMount,
+    ) -> Result<UnitDefWeaponMount> {
+        Ok(UnitDefWeaponMount {
+            weapon_def_id: (value.weaponDefID) as _,
+            slaved_to: (value.slavedTo) as _,
+            max_angle_dif: (value.maxAngleDif) as _,
+            main_dir_x: (value.mainDirX) as _,
+            main_dir_y: (value.mainDirY) as _,
+            main_dir_z: (value.mainDirZ) as _,
         })
     }
     fn from_unit_def_weapons(value: &sys::UnitDefWeapons) -> Result<UnitDefWeapons> {

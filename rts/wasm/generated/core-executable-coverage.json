@@ -1,8 +1,8 @@
 {
-  "total": 1448,
-  "executable_total": 1448,
+  "total": 1449,
+  "executable_total": 1449,
   "verified_total": 0,
-  "production_import_total": 1144,
+  "production_import_total": 1145,
   "by_class": {
     "dynamic-output-caller-owned": 90,
     "fixed": 871,
@@ -13,7 +13,7 @@
     "variable-input-borrowed-mixed-fixed": 17,
     "variable-input-nested-adapted": 28,
     "variable-io-borrowed-input-caller-owned-output": 56,
-    "variable-output-caller-owned": 91
+    "variable-output-caller-owned": 92
   },
   "executable": [
     {
@@ -3705,6 +3705,22 @@
       "verified": false,
       "parity_level": "untested",
       "grandfathered": true,
+      "production_import_allowed": true,
+      "production_process_safe": true,
+      "production_sync_environment_mask": 31,
+      "production_visibility_environment_mask": 31,
+      "production_environment_mask": 31,
+      "reason": null
+    },
+    {
+      "module": "unit_defs",
+      "function": "GetUnitDefWeaponMounts",
+      "import_module": "spring:unit-defs",
+      "import_name": "get-unit-def-weapon-mounts",
+      "class": "variable-output-caller-owned",
+      "verified": false,
+      "parity_level": "exempt",
+      "grandfathered": false,
       "production_import_allowed": true,
       "production_process_safe": true,
       "production_sync_environment_mask": 31,
