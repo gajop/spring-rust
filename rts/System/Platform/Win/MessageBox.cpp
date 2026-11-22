@@ -10,7 +10,7 @@ namespace Platform {
 /**
  * @brief message box function
  */
-void MsgBox(const char* message, const char* caption, unsigned int flags)
+void MsgBoxNative(const char* message, const char* caption, unsigned int flags)
 {
 	// Translate spring flags to corresponding win32 dialog flags
 	unsigned int winFlags = MB_TOPMOST | MB_OK;

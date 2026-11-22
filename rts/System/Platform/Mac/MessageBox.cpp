@@ -15,7 +15,7 @@ namespace Platform {
  *
  * MacOSX clone of the Windows' MessageBox() function.
  */
-void MsgBox(const char* message, const char* caption, unsigned int flags)
+void MsgBoxNative(const char* message, const char* caption, unsigned int flags)
 {
 #if 0 //!defined(DEDICATED) && !defined(HEADLESS)
 	CFStringRef cf_caption = CFStringCreateWithCString(NULL, caption, strlen(caption));

@@ -27,7 +27,7 @@ namespace Platform {
  * could be found, or the used program returned an error) the message is
  * written to stderr.
  */
-void MsgBox(const char* message, const char* caption, unsigned int flags)
+void MsgBoxNative(const char* message, const char* caption, unsigned int flags)
 {
 	char cap[1024];
 	char msg[1024];
