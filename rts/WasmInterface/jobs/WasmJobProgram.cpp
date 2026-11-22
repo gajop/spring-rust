@@ -89,12 +89,10 @@ std::shared_ptr<WasmJobProgram> WasmJobProgram::Compile(const WasmRuntime& runti
 	bool fallback = false;
 	void* engine = runtime.PrepareSyncedModule(bytes, validated.identity.sha512, rewritten, note, fallback);
 	const auto& compileBytes = rewritten != nullptr ? *rewritten : bytes;
-	wasmtime_module_t* module = nullptr;
-	if (auto* failure = wasmtime_module_new(static_cast<wasm_engine_t*>(engine),
-			compileBytes.data(), compileBytes.size(), &module)) {
-		error = recoil::wasm::core::ErrorMessage(failure);
+	bool reused = false;
+	auto* module = static_cast<wasmtime_module_t*>(runtime.CompileModule(engine, compileBytes, error, reused));
+	if (module == nullptr)
 		return nullptr;
-	}
 	auto program = FromCompiled(runtime, module, validated.identity.sha512, engine);
 	wasmtime_module_delete(module);
 	return program;

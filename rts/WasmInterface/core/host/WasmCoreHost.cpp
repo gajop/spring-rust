@@ -674,15 +674,19 @@ bool WasmCoreHost::Load(std::string moduleName, const std::vector<std::uint8_t>&
 		compileBytes = &inspectedBytes;
 	}
 	// Compiling a large module takes seconds on a slow machine: on the loading screen, the
-	// compile runs beside the thread that keeps it drawing.
-	if (wasmtime_error_t* compileError = LoadingPump::RunPumped([&] {
-			return wasmtime_module_new(engine, compileBytes->data(), compileBytes->size(), &backend->module);
-		});
-		compileError != nullptr) {
-		error = "Core Wasm compilation failed: " +
-			recoil::wasm::core::ErrorMessage(compileError);
+	// compile runs beside the thread that keeps it drawing. A module loaded before in this
+	// process (the previous match) reuses its compiled code.
+	std::string compileError;
+	bool reused = false;
+	backend->module = static_cast<wasmtime_module_t*>(LoadingPump::RunPumped([&] {
+		return runtime.CompileModule(engine, *compileBytes, compileError, reused);
+	}));
+	if (backend->module == nullptr) {
+		error = "Core Wasm compilation failed: " + compileError;
 		return false;
 	}
+	if (reused)
+		LOG("Core Wasm module %s: compiled code reused", host->moduleName.c_str());
 	backend->jobProgram = WasmJobProgram::FromCompiled(runtime, backend->module, identity.sha512, engine);
 	backend->linker = wasmtime_linker_new(engine);
 	if (backend->linker == nullptr) {

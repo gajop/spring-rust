@@ -134,6 +134,13 @@ private:
 	void* PrepareSyncedModule(const std::vector<std::uint8_t>& original, const std::string& sha512,
 		std::shared_ptr<const std::vector<std::uint8_t>>& rewritten, std::string& note,
 		bool& fallback) const;
+	// A compiled `wasmtime_module_t*` of `bytes` for `engine` (this runtime's
+	// BackendEngine or the one PrepareSyncedModule returned), which the caller
+	// deletes; nullptr with `error` set on failure. Code compiled for an equal
+	// configuration earlier in the process, by this runtime or one before it, is
+	// reused (`reused`) instead of compiled again.
+	void* CompileModule(void* engine, const std::vector<std::uint8_t>& bytes, std::string& error,
+		bool& reused) const;
 
 	WasmRuntimeConfig config;
 	WasmRuntimeBackend backend = WasmRuntimeBackend::Unavailable;

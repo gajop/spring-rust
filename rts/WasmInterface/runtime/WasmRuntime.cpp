@@ -575,10 +575,13 @@ namespace {
 
 struct WasmRuntime::BackendState {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
+	// Handles on the process's shared engines (`SharedEngine`); each key names its configuration.
 	wasm_engine_t* engine = nullptr;
+	std::string engineKey;
 	// Sinks mode compiles a module the rewrite does not model with this one.
 	std::once_flag canonicalizingOnce;
 	wasm_engine_t* canonicalizingEngine = nullptr;
+	std::string canonicalizingKey;
 
 	~BackendState()
 	{
@@ -638,6 +641,70 @@ wasm_engine_t* NewEngine(const WasmRuntimeConfig& config, bool canonicalizeAll)
 	return wasm_engine_new_with_config(wasmtimeConfig);
 }
 
+// What `NewEngine` configures from: engines with equal keys compile the same code.
+std::string EngineKey(const WasmRuntimeConfig& config, bool canonicalizeAll)
+{
+	const char* profiling = std::getenv("SPRING_WASM_JITDUMP");
+	return std::string("fuel=") + (config.instructionFuel != 0 ? "1" : "0") +
+		";threads=" + (config.allowThreads ? "1" : "0") +
+		";simd=" + (config.allowSimd || config.allowRelaxedSimd ? "1" : "0") +
+		";relaxed-simd=" + (config.allowRelaxedSimd ? "1" : "0") +
+		";nan-all=" + (canonicalizeAll ? "1" : "0") +
+		";jitdump=" + (profiling != nullptr && std::string_view(profiling) == "1" ? "1" : "0");
+}
+
+// Engines and compiled modules outlive a match. A reload (a rematch from the menu, the next
+// match of a batch) makes a new runtime with the same configuration and loads the same modules
+// again: it shares the engine that compiled them and reuses their code instead of compiling it
+// again, which takes seconds for a large module. Wasmtime engines and compiled modules are
+// immutable and thread-safe; every load still makes its own store and instance, so no state
+// carries from one match to the next. `SPRING_WASM_KEEP_COMPILED=0` compiles every load.
+struct SharedCompilation {
+	std::mutex mutex;
+	std::map<std::string, wasm_engine_t*> engines;
+	struct Module {
+		std::string engineKey;
+		std::string hash;
+		wasmtime_module_t* module = nullptr;
+		std::uint64_t used = 0;
+	};
+	std::vector<Module> modules;
+	std::uint64_t clock = 0;
+};
+
+// The modules of one game (rules, its jobs, interface, look, loader) and a few more.
+constexpr std::size_t KEPT_MODULES = 8;
+
+bool KeepCompiled()
+{
+	const char* value = std::getenv("SPRING_WASM_KEEP_COMPILED");
+	return value == nullptr || std::string_view(value) != "0";
+}
+
+SharedCompilation& Shared()
+{
+	// Never destroyed: engines may still be referenced while statics are torn down at exit.
+	static auto* shared = new SharedCompilation();
+	return *shared;
+}
+
+// A handle on the shared engine for `key`, made on first use; the caller deletes the handle.
+wasm_engine_t* SharedEngine(const std::string& key, const WasmRuntimeConfig& config, bool canonicalizeAll)
+{
+	if (!KeepCompiled())
+		return NewEngine(config, canonicalizeAll);
+	auto& shared = Shared();
+	std::lock_guard<std::mutex> lock(shared.mutex);
+	auto it = shared.engines.find(key);
+	if (it == shared.engines.end()) {
+		wasm_engine_t* engine = NewEngine(config, canonicalizeAll);
+		if (engine == nullptr)
+			return nullptr;
+		it = shared.engines.emplace(key, engine).first;
+	}
+	return wasmtime_engine_clone(it->second);
+}
+
 struct CachedRewrite {
 	bool ok = false;
 	std::shared_ptr<const std::vector<std::uint8_t>> bytes;
@@ -654,8 +721,9 @@ WasmRuntime::WasmRuntime(WasmRuntimeConfig config)
 {
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	backendState = std::make_unique<BackendState>();
-	backendState->engine = NewEngine(this->config,
-		nanCanonicalization == WasmNanCanonicalization::All);
+	const bool canonicalizeAll = nanCanonicalization == WasmNanCanonicalization::All;
+	backendState->engineKey = EngineKey(this->config, canonicalizeAll);
+	backendState->engine = SharedEngine(backendState->engineKey, this->config, canonicalizeAll);
 	if (backendState->engine != nullptr)
 		backend = WasmRuntimeBackend::WasmtimeComponentModel;
 	else
@@ -716,7 +784,8 @@ void* WasmRuntime::PrepareSyncedModule(const std::vector<std::uint8_t>& original
 	note = "NaN canonicalization on every float operation for this module (the sink rewrite does "
 		"not model it: " + entry->error + ")";
 	std::call_once(backendState->canonicalizingOnce, [this] {
-		backendState->canonicalizingEngine = NewEngine(config, true);
+		backendState->canonicalizingKey = EngineKey(config, true);
+		backendState->canonicalizingEngine = SharedEngine(backendState->canonicalizingKey, config, true);
 	});
 	return backendState->canonicalizingEngine;
 #else
@@ -728,6 +797,58 @@ void* WasmRuntime::PrepareSyncedModule(const std::vector<std::uint8_t>& original
 }
 
 WasmRuntime::~WasmRuntime() = default;
+
+void* WasmRuntime::CompileModule(void* engine, const std::vector<std::uint8_t>& bytes,
+	std::string& error, bool& reused) const
+{
+	reused = false;
+#if defined(RECOIL_WASMTIME_AVAILABLE)
+	const auto compile = [&]() -> wasmtime_module_t* {
+		wasmtime_module_t* module = nullptr;
+		if (wasmtime_error_t* failure = wasmtime_module_new(static_cast<wasm_engine_t*>(engine),
+				bytes.data(), bytes.size(), &module)) {
+			error = WasmtimeErrorMessage(failure);
+			return nullptr;
+		}
+		return module;
+	};
+	if (backendState == nullptr || engine == nullptr || !KeepCompiled())
+		return compile();
+	const std::string& engineKey = engine == backendState->engine ? backendState->engineKey :
+		engine == backendState->canonicalizingEngine ? backendState->canonicalizingKey : "";
+	if (engineKey.empty())
+		return compile();
+	const std::string hash = HashModule(bytes);
+	auto& shared = Shared();
+	{
+		std::lock_guard<std::mutex> lock(shared.mutex);
+		for (auto& kept : shared.modules) {
+			if (kept.engineKey == engineKey && kept.hash == hash) {
+				kept.used = ++shared.clock;
+				reused = true;
+				return wasmtime_module_clone(kept.module);
+			}
+		}
+	}
+	wasmtime_module_t* module = compile();
+	if (module == nullptr)
+		return nullptr;
+	std::lock_guard<std::mutex> lock(shared.mutex);
+	if (shared.modules.size() >= KEPT_MODULES) {
+		const auto oldest = std::min_element(shared.modules.begin(), shared.modules.end(),
+			[](const auto& a, const auto& b) { return a.used < b.used; });
+		wasmtime_module_delete(oldest->module);
+		shared.modules.erase(oldest);
+	}
+	shared.modules.push_back({engineKey, hash, wasmtime_module_clone(module), ++shared.clock});
+	return module;
+#else
+	(void)engine;
+	(void)bytes;
+	error = "Wasmtime is unavailable";
+	return nullptr;
+#endif
+}
 
 void* WasmRuntime::BackendEngine() const
 {
