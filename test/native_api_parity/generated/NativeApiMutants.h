@@ -420,6 +420,7 @@ struct NativeApiMutants {
 		if (module=="unit_defs" && function=="GetUnitDefParamString") { table12.GetUnitDefParamString=noop ? Noop<GetUnitDefParamStringQuery,GetUnitDefParamStringResult> : Zero<GetUnitDefParamStringQuery,GetUnitDefParamStringResult>; return true; }
 		if (module=="unit_defs" && function=="GetUnitDefParamType") { table12.GetUnitDefParamType=noop ? Noop<GetUnitDefParamTypeQuery,GetUnitDefParamTypeResult> : Zero<GetUnitDefParamTypeQuery,GetUnitDefParamTypeResult>; return true; }
 		if (module=="unit_defs" && function=="GetUnitDefSpeed") { table12.GetUnitDefSpeed=noop ? Noop<GetUnitDefSpeedQuery,GetUnitDefSpeedResult> : Zero<GetUnitDefSpeedQuery,GetUnitDefSpeedResult>; return true; }
+		if (module=="unit_defs" && function=="GetUnitDefWeaponMounts") { table12.GetUnitDefWeaponMounts=noop ? Noop<GetUnitDefWeaponMountsQuery,GetUnitDefWeaponMountsResult> : Zero<GetUnitDefWeaponMountsQuery,GetUnitDefWeaponMountsResult>; return true; }
 		if (module=="unit_defs" && function=="ValidUnitDefID") { table12.ValidUnitDefID=noop ? Noop<ValidUnitDefIDQuery,ValidUnitDefIDResult> : Zero<ValidUnitDefIDQuery,ValidUnitDefIDResult>; return true; }
 		if (module=="feature_defs" && function=="GetFeatureDefByID") { table13.GetFeatureDefByID=noop ? Noop<GetFeatureDefByIDQuery,GetFeatureDefByIDResult> : Zero<GetFeatureDefByIDQuery,GetFeatureDefByIDResult>; return true; }
 		if (module=="feature_defs" && function=="GetFeatureDefCount") { table13.GetFeatureDefCount=noop ? Noop<GetFeatureDefCountQuery,GetFeatureDefCountResult> : Zero<GetFeatureDefCountQuery,GetFeatureDefCountResult>; return true; }
@@ -803,6 +804,7 @@ struct NativeApiMutants {
 		if (module=="unsynced_ctrl" && function=="ShowLoadProgress") { table45.ShowLoadProgress=noop ? Noop<ShowLoadProgressQuery,ShowLoadProgressResult> : Zero<ShowLoadProgressQuery,ShowLoadProgressResult>; return true; }
 		if (module=="unsynced_ctrl" && function=="StopTrackingUnits") { table45.StopTrackingUnits=noop ? Noop<StopTrackingUnitsQuery,StopTrackingUnitsResult> : Zero<StopTrackingUnitsQuery,StopTrackingUnitsResult>; return true; }
 		if (module=="unsynced_ctrl" && function=="TrackUnits") { table45.TrackUnits=noop ? Noop<TrackUnitsQuery,TrackUnitsResult> : Zero<TrackUnitsQuery,TrackUnitsResult>; return true; }
+		if (module=="unsynced_ctrl" && function=="UploadQueuedModels") { table45.UploadQueuedModels=noop ? Noop<UploadQueuedModelsQuery,UploadQueuedModelsResult> : Zero<UploadQueuedModelsQuery,UploadQueuedModelsResult>; return true; }
 		if (module=="unsynced_ctrl" && function=="WarpMouse") { table45.WarpMouse=noop ? Noop<WarpMouseQuery,WarpMouseResult> : Zero<WarpMouseQuery,WarpMouseResult>; return true; }
 		if (module=="gfx" && function=="ActiveFBO") { table55.ActiveFBO=noop ? Noop<GfxActiveFBOQuery,GfxEmptyResult> : Zero<GfxActiveFBOQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="ActiveShader") { table55.ActiveShader=noop ? Noop<GfxActiveShaderQuery,GfxEmptyResult> : Zero<GfxActiveShaderQuery,GfxEmptyResult>; return true; }
@@ -983,6 +985,7 @@ struct NativeApiMutants {
 		if (module=="gfx" && function=="PopAttrib") { table55.PopAttrib=noop ? Noop<GfxEmptyQuery,GfxEmptyResult> : Zero<GfxEmptyQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="PopDebugGroup") { table55.PopDebugGroup=noop ? Noop<GfxEmptyQuery,GfxEmptyResult> : Zero<GfxEmptyQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="PopMatrix") { table55.PopMatrix=noop ? Noop<GfxEmptyQuery,GfxEmptyResult> : Zero<GfxEmptyQuery,GfxEmptyResult>; return true; }
+		if (module=="gfx" && function=="PreloadTexture") { table55.PreloadTexture=noop ? Noop<GfxTextureNameQuery,GfxBoolResult> : Zero<GfxTextureNameQuery,GfxBoolResult>; return true; }
 		if (module=="gfx" && function=="PushAttrib") { table55.PushAttrib=noop ? Noop<GfxUIntQuery,GfxEmptyResult> : Zero<GfxUIntQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="PushDebugGroup") { table55.PushDebugGroup=noop ? Noop<GfxPushDebugGroupQuery,GfxEmptyResult> : Zero<GfxPushDebugGroupQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="PushMatrix") { table55.PushMatrix=noop ? Noop<GfxEmptyQuery,GfxEmptyResult> : Zero<GfxEmptyQuery,GfxEmptyResult>; return true; }
@@ -1028,6 +1031,7 @@ struct NativeApiMutants {
 		if (module=="gfx" && function=="Text") { table55.Text=noop ? Noop<GfxTextQuery,GfxEmptyResult> : Zero<GfxTextQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="TextEnv") { table55.TextEnv=noop ? Noop<GfxTexEnvQuery,GfxEmptyResult> : Zero<GfxTexEnvQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="TextureInfo") { table55.TextureInfo=noop ? Noop<GfxTextureNameQuery,GfxTextureInfoResult> : Zero<GfxTextureNameQuery,GfxTextureInfoResult>; return true; }
+		if (module=="gfx" && function=="TexturePreloadState") { table55.TexturePreloadState=noop ? Noop<GfxTextureNameQuery,GfxTexturePreloadStateResult> : Zero<GfxTextureNameQuery,GfxTexturePreloadStateResult>; return true; }
 		if (module=="gfx" && function=="Translate") { table55.Translate=noop ? Noop<GfxTranslateQuery,GfxEmptyResult> : Zero<GfxTranslateQuery,GfxEmptyResult>; return true; }
 		if (module=="gfx" && function=="UnbindBufferRangeVBO") { table55.UnbindBufferRangeVBO=noop ? Noop<GfxVBOBindRangeQuery,GfxIntResult> : Zero<GfxVBOBindRangeQuery,GfxIntResult>; return true; }
 		if (module=="gfx" && function=="Uniform") { table55.Uniform=noop ? Noop<GfxUniformFloatQuery,GfxEmptyResult> : Zero<GfxUniformFloatQuery,GfxEmptyResult>; return true; }
@@ -1568,6 +1572,7 @@ struct NativeApiMutants {
 		if (module=="projectile_control" && function=="SetProjectileCollision") { table27.SetProjectileCollision=noop ? Noop<SetProjectileCollisionQuery,SetProjectileCollisionResult> : Zero<SetProjectileCollisionQuery,SetProjectileCollisionResult>; return true; }
 		if (module=="projectile_control" && function=="SetProjectileDamages") { table27.SetProjectileDamages=noop ? Noop<SetProjectileDamagesQuery,SetProjectileDamagesResult> : Zero<SetProjectileDamagesQuery,SetProjectileDamagesResult>; return true; }
 		if (module=="projectile_control" && function=="SetProjectileGravity") { table27.SetProjectileGravity=noop ? Noop<SetProjectileGravityQuery,SetProjectileGravityResult> : Zero<SetProjectileGravityQuery,SetProjectileGravityResult>; return true; }
+		if (module=="projectile_control" && function=="SetProjectileGuidance") { table27.SetProjectileGuidance=noop ? Noop<SetProjectileGuidanceQuery,SetProjectileGuidanceResult> : Zero<SetProjectileGuidanceQuery,SetProjectileGuidanceResult>; return true; }
 		if (module=="projectile_control" && function=="SetProjectileIgnoreTrackingError") { table27.SetProjectileIgnoreTrackingError=noop ? Noop<SetProjectileIgnoreTrackingErrorQuery,SetProjectileIgnoreTrackingErrorResult> : Zero<SetProjectileIgnoreTrackingErrorQuery,SetProjectileIgnoreTrackingErrorResult>; return true; }
 		if (module=="projectile_control" && function=="SetProjectileIsIntercepted") { table27.SetProjectileIsIntercepted=noop ? Noop<SetProjectileIsInterceptedQuery,SetProjectileIsInterceptedResult> : Zero<SetProjectileIsInterceptedQuery,SetProjectileIsInterceptedResult>; return true; }
 		if (module=="projectile_control" && function=="SetProjectileMoveControl") { table27.SetProjectileMoveControl=noop ? Noop<SetProjectileMoveControlQuery,SetProjectileMoveControlResult> : Zero<SetProjectileMoveControlQuery,SetProjectileMoveControlResult>; return true; }
@@ -1636,5 +1641,5 @@ struct NativeApiMutants {
 		if (module=="object_rendering" && function=="SetPieceList") { table56.SetPieceList=noop ? Noop<SetObjectPieceListQuery,ObjectRenderingResult> : Zero<SetObjectPieceListQuery,ObjectRenderingResult>; return true; }
 		return false;
 	}
-	static constexpr unsigned FunctionCount=1445;
+	static constexpr unsigned FunctionCount=1450;
 };

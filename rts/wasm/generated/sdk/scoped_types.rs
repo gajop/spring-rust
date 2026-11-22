@@ -1525,6 +1525,7 @@ pub mod shared {
         pub set_projectile_ignore_tracking_error: u32,
         pub set_piece_projectile_params: u32,
         pub spawn_projectile_zero_based: u32,
+        pub set_projectile_guidance: u32,
     }
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
     pub struct ProjectileTargetRef {
@@ -2531,6 +2532,15 @@ pub mod shared {
     }
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
     pub struct SetProjectileGravityResult {
+        pub success: bool,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct SetProjectileGuidanceQuery {
+        pub projectile_id: i32,
+        pub enable: bool,
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct SetProjectileGuidanceResult {
         pub success: bool,
     }
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -9777,7 +9787,8 @@ pub mod synced_ctrl {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,
@@ -16259,7 +16270,8 @@ pub mod team_control {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,
@@ -16417,7 +16429,8 @@ pub mod unit_control {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,
@@ -16575,7 +16588,8 @@ pub mod feature_control {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,
@@ -16733,7 +16747,8 @@ pub mod terrain_control {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,
@@ -16891,7 +16906,8 @@ pub mod projectile_control {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,
@@ -17049,7 +17065,8 @@ pub mod effects_control {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,
@@ -17212,7 +17229,8 @@ pub mod game_config {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,
@@ -17371,7 +17389,8 @@ pub mod cob_script {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,
@@ -17535,7 +17554,8 @@ pub mod unit_script {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,
@@ -17699,7 +17719,8 @@ pub mod synced_random {
         SetProjectileCEGQuery, SetProjectileCEGResult, SetProjectileCollisionQuery,
         SetProjectileCollisionResult, SetProjectileDamagesQuery,
         SetProjectileDamagesResult, SetProjectileGravityQuery,
-        SetProjectileGravityResult, SetProjectileIgnoreTrackingErrorQuery,
+        SetProjectileGravityResult, SetProjectileGuidanceQuery,
+        SetProjectileGuidanceResult, SetProjectileIgnoreTrackingErrorQuery,
         SetProjectileIgnoreTrackingErrorResult, SetProjectileIsInterceptedQuery,
         SetProjectileIsInterceptedResult, SetProjectileMoveControlQuery,
         SetProjectileMoveControlResult, SetProjectilePositionQuery,

@@ -276,4 +276,20 @@ impl<'a> ProjectileControl<'a> {
         }
     }
 
+    pub fn set_projectile_guidance(&self, projectile_id: i32, enable: bool) -> Result<bool, Error> {
+        unsafe {
+            let query = sys::SetProjectileGuidanceQuery {
+                projectileID: projectile_id,
+                enable,
+            };
+            let mut result = MaybeUninit::<sys::SetProjectileGuidanceResult>::zeroed();
+            let func = self.api.SetProjectileGuidance.expect("SetProjectileGuidance function pointer must be initialized");
+            func(&query, result.as_mut_ptr());
+            let result = result.assume_init();
+            Error::result_or(result.error, {
+                result.success
+            })
+        }
+    }
+
 }

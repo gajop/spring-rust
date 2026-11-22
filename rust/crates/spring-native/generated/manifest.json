@@ -150,8 +150,8 @@
     },
     {
       "name": "projectile_control_generated.rs",
-      "sha256": "eb341b2df8c0e5de65275be29d23c3a48f99892376395759e574929dacc0cd07",
-      "bytes": 12328
+      "sha256": "fe9f51578805640a909240838c51e01ce6495d90e796a47db78e1a31a0727acd",
+      "bytes": 13002
     },
     {
       "name": "projectiles_generated.rs",
