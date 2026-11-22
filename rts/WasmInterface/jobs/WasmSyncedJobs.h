@@ -32,7 +32,8 @@ public:
 	// Returns zero for a bounded admission rejection; never depends on worker
 	// completion, queue readiness, wall time or worker count.
 	std::uint32_t Submit(void* owner, std::shared_ptr<const WasmJobProgram> program,
-		std::string exportName, std::span<const std::uint8_t> input
+		std::string exportName, std::span<const std::uint8_t> input,
+		WasmJobInstanceMode instanceMode = WasmJobInstanceMode::Fresh
 #if defined(TRACY_ENABLE)
 		// Immutable owner name, valid until this queue drains; not synced data.
 		, std::string_view profileOwner = "native"
@@ -54,7 +55,7 @@ public:
 	// next-frame deliveries. Admission shares this window's job/input quotas.
 	BatchStatus RunBatch(void* owner, std::shared_ptr<const WasmJobProgram> program,
 		std::string exportName, std::vector<WasmJobBatchInput> inputs,
-		std::vector<WasmJobResult>& results);
+		std::vector<WasmJobResult>& results, WasmJobInstanceMode instanceMode = WasmJobInstanceMode::Fresh);
 	// A C-ABI import must unwind by returning a trap, not a C++ exception.
 	// Retain host failures so the native frame boundary still terminates the
 	// simulation instead of accepting a locally faulted/missing rules module.

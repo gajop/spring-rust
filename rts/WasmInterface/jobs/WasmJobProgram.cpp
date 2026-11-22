@@ -3,32 +3,139 @@
 #include "WasmJobProgram.h"
 #include "WasmJobProfile.h"
 
-#include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstdlib>
+#include <mutex>
 #include <string_view>
-#include <limits>
 
 #include "WasmCoreAbi.h"
 #include "WasmCoreValidation.h"
 #include "WasmRuntime.h"
+#include "System/Threading/ThreadPool.h"
 
 struct WasmJobProgram::Backend {
 	WasmRuntimeConfig config;
 	std::string identity;
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-	wasm_engine_t* engine = nullptr;
-	wasmtime_module_t* module = nullptr;
-	// Imports resolved once (every import a trap): each job instantiates from
-	// this into its own fresh store, without building a linker per job.
-	wasmtime_linker_t* linker = nullptr;
-	wasmtime_instance_pre_t* pre = nullptr;
-	~Backend() {
-		if (pre) wasmtime_instance_pre_delete(pre);
-		if (linker) wasmtime_linker_delete(linker);
-		if (module) wasmtime_module_delete(module);
-		if (engine) wasm_engine_delete(engine);
+	struct Instance {
+		std::unique_ptr<wasmtime_store_t, decltype(&wasmtime_store_delete)> store{nullptr, wasmtime_store_delete};
+		wasmtime_instance_t handle{};
+		wasmtime_context_t* context = nullptr;
+		recoil::wasm::core::Memory memory;
+		recoil::wasm::core::RawExport buffer, capacity, work;
+	};
+	struct Slot {
+		std::mutex mutex;
+		Instance instance;
+		std::string exportName;
+	};
+	struct Executable {
+		wasm_engine_t* engine = nullptr;
+		wasmtime_module_t* module = nullptr;
+		wasmtime_linker_t* linker = nullptr;
+		wasmtime_instance_pre_t* pre = nullptr;
+
+		void Link()
+		{
+			// Resolve imports once. Workers have no host capabilities.
+			linker = wasmtime_linker_new(engine);
+			if (!linker)
+				return;
+			auto* error = wasmtime_linker_define_unknown_imports_as_traps(linker, module);
+			if (!error)
+				error = wasmtime_linker_instantiate_pre(linker, module, &pre);
+			if (error)
+				wasmtime_error_delete(error);
+		}
+
+		WasmJobStatus Instantiate(Instance& instance, const WasmRuntimeConfig& config, std::string& diagnostic) const
+		{
+			using namespace recoil::wasm::core;
+			instance.store.reset(wasmtime_store_new(engine, nullptr, nullptr));
+			if (!instance.store) {
+				diagnostic = "Cannot create job store";
+				return WasmJobStatus::RuntimeFailure;
+			}
+			wasmtime_store_limiter(instance.store.get(), static_cast<std::int64_t>(config.maxMemoryPages) * 65536,
+				config.maxTableElements, 1, 1, 1);
+			instance.context = wasmtime_store_context(instance.store.get());
+			if (config.instructionFuel != 0) {
+				if (auto* error = wasmtime_context_set_fuel(instance.context, config.instructionFuel)) {
+					diagnostic = ErrorMessage(error);
+					return WasmJobStatus::RuntimeFailure;
+				}
+			}
+			wasm_trap_t* trap = nullptr;
+			wasmtime_error_t* instantiateError = nullptr;
+			if (pre != nullptr) {
+				instantiateError = wasmtime_instance_pre_instantiate(pre, instance.context, &instance.handle, &trap);
+			} else {
+				std::unique_ptr<wasmtime_linker_t, decltype(&wasmtime_linker_delete)> localLinker(
+					wasmtime_linker_new(engine), wasmtime_linker_delete);
+				if (!localLinker) {
+					diagnostic = "Cannot create job linker";
+					return WasmJobStatus::RuntimeFailure;
+				}
+				if (auto* error = wasmtime_linker_define_unknown_imports_as_traps(localLinker.get(), module)) {
+					diagnostic = ErrorMessage(error);
+					return WasmJobStatus::RuntimeFailure;
+				}
+				instantiateError = wasmtime_linker_instantiate(localLinker.get(), instance.context, module, &instance.handle, &trap);
+			}
+			if (instantiateError) {
+				diagnostic = ErrorMessage(instantiateError);
+				if (trap)
+					diagnostic += TrapMessage(trap);
+				return WasmJobStatus::RuntimeFailure;
+			}
+			if (trap) {
+				diagnostic = TrapMessage(trap);
+				return WasmJobStatus::Trapped;
+			}
+			return WasmJobStatus::Ok;
+		}
+
+		~Executable()
+		{
+			if (pre) wasmtime_instance_pre_delete(pre);
+			if (linker) wasmtime_linker_delete(linker);
+			if (module) wasmtime_module_delete(module);
+			if (engine) wasm_engine_delete(engine);
+		}
+	};
+	Executable fresh;
+	bool canonicalizeAll = false;
+	std::once_flag pooledOnce;
+	std::unique_ptr<Executable> pooled;
+	std::once_flag reusableOnce;
+	std::unique_ptr<std::array<Slot, ThreadPool::MAX_THREADS>> reusable;
+
+	const Executable* Pooled()
+	{
+		std::call_once(pooledOnce, [&] {
+			auto executable = std::make_unique<Executable>();
+			executable->engine = static_cast<wasm_engine_t*>(WasmRuntime::NewPooledJobEngine(config, canonicalizeAll));
+			if (!executable->engine)
+				return;
+			// Only deserialize this engine's own compiled code. Allocation policy
+			// can change without recompiling or accepting an external artifact.
+			wasm_byte_vec_t bytes{};
+			if (auto* error = wasmtime_module_serialize(fresh.module, &bytes)) {
+				wasmtime_error_delete(error);
+				return;
+			}
+			auto* error = wasmtime_module_deserialize(executable->engine,
+				reinterpret_cast<const std::uint8_t*>(bytes.data), bytes.size, &executable->module);
+			wasm_byte_vec_delete(&bytes);
+			if (error) {
+				wasmtime_error_delete(error);
+				return;
+			}
+			executable->Link();
+			pooled = std::move(executable);
+		});
+		return pooled.get();
 	}
 #endif
 };
@@ -46,23 +153,16 @@ std::shared_ptr<WasmJobProgram> WasmJobProgram::FromCompiled(const WasmRuntime& 
 	auto* moduleEngine = engine != nullptr ? static_cast<wasm_engine_t*>(engine) : runtimeEngine;
 	auto state = std::make_unique<Backend>();
 	state->config = runtime.Config();
-	state->engine = wasmtime_engine_clone(moduleEngine);
+	state->fresh.engine = wasmtime_engine_clone(moduleEngine);
+	state->canonicalizeAll = moduleEngine != runtimeEngine ||
+		runtime.NanCanonicalization() == WasmNanCanonicalization::All;
 	state->identity = std::move(identity) + "|" + runtime.ConfigurationIdentity() +
 		(moduleEngine != runtimeEngine ? "|nan-canonicalization-fallback=all" : "");
-	state->module = wasmtime_module_clone(static_cast<wasmtime_module_t*>(compiledModule));
-	// `SPRING_WASM_JOB_INSTANCE_PRE=0`: a linker per job, as before (to compare).
+	state->fresh.module = wasmtime_module_clone(static_cast<wasmtime_module_t*>(compiledModule));
+	// Diagnostic baseline: resolving the imports separately for each job.
 	const char* pre = std::getenv("SPRING_WASM_JOB_INSTANCE_PRE");
-	if (pre == nullptr || std::string_view(pre) != "0") {
-		state->linker = wasmtime_linker_new(state->engine);
-		wasmtime_error_t* error = state->linker == nullptr ? nullptr :
-			wasmtime_linker_define_unknown_imports_as_traps(state->linker, state->module);
-		if (error == nullptr && state->linker != nullptr)
-			error = wasmtime_linker_instantiate_pre(state->linker, state->module, &state->pre);
-		if (error != nullptr) {
-			wasmtime_error_delete(error);
-			state->pre = nullptr;
-		}
-	}
+	if (pre == nullptr || std::string_view(pre) != "0")
+		state->fresh.Link();
 	return std::shared_ptr<WasmJobProgram>(new WasmJobProgram(std::move(state)));
 #else
 	return nullptr;
@@ -103,7 +203,7 @@ std::shared_ptr<WasmJobProgram> WasmJobProgram::Compile(const WasmRuntime& runti
 }
 
 WasmJobResult WasmJobProgram::Run(std::string_view exportName,
-	std::span<const std::uint8_t> input, WasmJobTiming* timing, std::size_t maxOutputBytes) const
+	std::span<const std::uint8_t> input, WasmJobTiming* timing, std::size_t maxOutputBytes, WasmJobInstanceMode mode) const
 {
 	WasmJobResult result;
 #if defined(RECOIL_WASMTIME_AVAILABLE)
@@ -121,60 +221,63 @@ WasmJobResult WasmJobProgram::Run(std::string_view exportName,
 	};
 	WASM_JOB_PROFILE_START(stages);
 	WASM_JOB_PROFILE_STAGE(stages, "Wasm::Jobs::Setup");
-	std::unique_ptr<wasmtime_store_t, decltype(&wasmtime_store_delete)> store(
-		wasmtime_store_new(backend->engine, nullptr, nullptr), wasmtime_store_delete);
-	std::unique_ptr<wasmtime_linker_t, decltype(&wasmtime_linker_delete)> linker(
-		nullptr, wasmtime_linker_delete);
+	Backend::Slot* cached = nullptr;
+	std::unique_lock<std::mutex> lease;
+	if (mode == WasmJobInstanceMode::Reuse) {
+		std::call_once(backend->reusableOnce, [&] {
+			backend->reusable = std::make_unique<std::array<Backend::Slot, ThreadPool::MAX_THREADS>>();
+		});
+		auto& slot = (*backend->reusable)[ThreadPool::GetThreadNum()];
+		// Foreground and background workers may share an index. Contended jobs
+		// use a private instance rather than waiting or sharing mutable state.
+		lease = std::unique_lock(slot.mutex, std::try_to_lock);
+		if (lease.owns_lock()) {
+			cached = &slot;
+			if (slot.exportName != exportName) {
+				slot.instance = {};
+				slot.exportName = exportName;
+			}
+		}
+	}
+	// On any failure the checked-out store is destroyed. Only a completed
+	// job returns an instance to its slot, after copying the result bytes.
+	auto instance = cached ? std::move(cached->instance) : Backend::Instance{};
 	WASM_JOB_PROFILE_TEARDOWN(stages);
-	if (!store)
-		return fail(WasmJobStatus::RuntimeFailure, "Cannot create job store");
-	wasmtime_store_limiter(store.get(), static_cast<std::int64_t>(backend->config.maxMemoryPages) * 65536,
-		backend->config.maxTableElements, 1, 1, 1);
-	auto* context = wasmtime_store_context(store.get());
-	// The fresh per-job budget includes helper exports as well as computation.
-	if (backend->config.instructionFuel != 0) {
-		if (auto* error = wasmtime_context_set_fuel(context, backend->config.instructionFuel))
-			return fail(WasmJobStatus::RuntimeFailure, ErrorMessage(error));
-	}
-	wasmtime_instance_t instance{};
-	wasm_trap_t* trap = nullptr;
-	wasmtime_error_t* instantiateError = nullptr;
-	if (backend->pre != nullptr) {
-		// The same imports as below, resolved once for every job.
-		instantiateError = wasmtime_instance_pre_instantiate(backend->pre, context, &instance, &trap);
-	} else {
-		linker.reset(wasmtime_linker_new(backend->engine));
-		if (!linker)
-			return fail(WasmJobStatus::RuntimeFailure, "Cannot create job linker");
-		// Workers have NO engine, clock, RNG or submission capabilities. A source
-		// rules module can import them, but calling any import in a job traps.
-		if (auto* error = wasmtime_linker_define_unknown_imports_as_traps(linker.get(), backend->module))
-			return fail(WasmJobStatus::RuntimeFailure, ErrorMessage(error));
-		instantiateError = wasmtime_linker_instantiate(linker.get(), context, backend->module, &instance, &trap);
-	}
-	if (auto* error = instantiateError) {
-		std::string diagnostic = ErrorMessage(error);
-		if (trap) diagnostic += TrapMessage(trap);
-		return fail(WasmJobStatus::RuntimeFailure, std::move(diagnostic));
-	}
-	if (trap)
-		return fail(WasmJobStatus::Trapped, TrapMessage(trap));
-	Memory memory;
 	std::string error;
-	RawExport buffer, capacity, work;
-	const wasm_valkind_t i32[] = {WASM_I32};
-	const wasm_valkind_t twoI32[] = {WASM_I32, WASM_I32};
-	const wasm_valkind_t i64[] = {WASM_I64};
-	if (!memory.BindFromInstance(context, instance, error) ||
-		!buffer.Resolve(context, instance, "SPRING_JOB_INPUT_BUFFER", 23, {}, i32, false, error) ||
-		!capacity.Resolve(context, instance, "SPRING_JOB_INPUT_CAPACITY", 25, {}, i32, false, error) ||
-		!work.Resolve(context, instance, exportName.data(), exportName.size(), twoI32, i64, false, error))
-		return fail(WasmJobStatus::InvalidExport, error);
+	if (!instance.store) {
+		const auto* pooled = mode == WasmJobInstanceMode::Pooled ? backend->Pooled() : nullptr;
+		auto status = pooled ? pooled->Instantiate(instance, backend->config, error)
+			: backend->fresh.Instantiate(instance, backend->config, error);
+		// Unsupported modules/platforms and local pool capacity fall back to the
+		// ordinary allocator. Both allocators give Wasm the same initial state.
+		if (pooled && status == WasmJobStatus::RuntimeFailure) {
+			instance = {};
+			error.clear();
+			status = backend->fresh.Instantiate(instance, backend->config, error);
+		}
+		if (status != WasmJobStatus::Ok)
+			return fail(status, std::move(error));
+		const wasm_valkind_t i32[] = {WASM_I32};
+		const wasm_valkind_t twoI32[] = {WASM_I32, WASM_I32};
+		const wasm_valkind_t i64[] = {WASM_I64};
+		if (!instance.memory.BindFromInstance(instance.context, instance.handle, error) ||
+			!instance.buffer.Resolve(instance.context, instance.handle, "SPRING_JOB_INPUT_BUFFER", 23, {}, i32, false, error) ||
+			!instance.capacity.Resolve(instance.context, instance.handle, "SPRING_JOB_INPUT_CAPACITY", 25, {}, i32, false, error) ||
+			!instance.work.Resolve(instance.context, instance.handle, exportName.data(), exportName.size(), twoI32, i64, false, error))
+			return fail(WasmJobStatus::InvalidExport, std::move(error));
+	} else if (backend->config.instructionFuel != 0) {
+		// Core validation forbids a Wasm start function, so there is no
+		// instantiation fuel to carry over to the next call.
+		if (auto* failure = wasmtime_context_set_fuel(instance.context, backend->config.instructionFuel))
+			return fail(WasmJobStatus::RuntimeFailure, ErrorMessage(failure));
+	}
+	auto* context = instance.context;
+	auto& memory = instance.memory;
 	std::array<wasmtime_val_raw_t, 2> slots{};
-	if (!buffer.Call(context, slots.data(), 1, error))
+	if (!instance.buffer.Call(context, slots.data(), 1, error))
 		return fail(WasmJobStatus::Trapped, error);
 	const auto inputPointer = static_cast<std::uint32_t>(slots[0].i32);
-	if (!capacity.Call(context, slots.data(), 1, error))
+	if (!instance.capacity.Call(context, slots.data(), 1, error))
 		return fail(WasmJobStatus::Trapped, error);
 	const auto inputCapacity = static_cast<std::uint32_t>(slots[0].i32);
 	if (input.size() > inputCapacity || !memory.Contains(inputPointer, input.size()))
@@ -187,7 +290,7 @@ WasmJobResult WasmJobProgram::Run(std::string_view exportName,
 	slots[0].i32 = static_cast<std::int32_t>(inputPointer);
 	slots[1].i32 = static_cast<std::int32_t>(input.size());
 	WASM_JOB_PROFILE_STAGE(stages, "Wasm::Jobs::Execute");
-	if (!work.Call(context, slots.data(), slots.size(), error))
+	if (!instance.work.Call(context, slots.data(), slots.size(), error))
 		return fail(WasmJobStatus::Trapped, error);
 	const auto dispatched = now();
 	WASM_JOB_PROFILE_STAGE(stages, "Wasm::Jobs::OutputCopy");
@@ -200,6 +303,8 @@ WasmJobResult WasmJobProgram::Run(std::string_view exportName,
 	result.bytes.resize(outputBytes);
 	if (!memory.Read(outputPointer, result.bytes.data(), outputBytes))
 		return fail(WasmJobStatus::InvalidOutput, "Cannot copy job result");
+	if (cached)
+		cached->instance = std::move(instance);
 	const auto finished = now();
 	if (timing) {
 		timing->instantiateNs = elapsed(start, instantiated);

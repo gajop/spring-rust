@@ -22,6 +22,13 @@ enum class WasmJobStatus : std::uint32_t {
 	RuntimeFailure = 5,
 };
 
+// Stable values for the optional spring:jobs imports.
+enum class WasmJobInstanceMode : std::uint32_t {
+	Fresh = 0,
+	Pooled = 1,
+	Reuse = 2,
+};
+
 struct WasmJobResult {
 	WasmJobStatus status = WasmJobStatus::Ok;
 	std::vector<std::uint8_t> bytes;
@@ -37,8 +44,7 @@ struct WasmJobTiming {
 
 class WasmJobProgram {
 public:
-	// Compile once on the sim thread. Workers share immutable compiled code,
-	// and each Run creates and destroys its own store/instance/private memory.
+	// Compile once on the sim thread. Workers share immutable compiled code.
 	static std::shared_ptr<WasmJobProgram> Compile(const WasmRuntime& runtime,
 		const std::vector<std::uint8_t>& bytes, std::string& error);
 	// `engine` is the one the module was compiled with (the runtime's by default).
@@ -47,7 +53,8 @@ public:
 	~WasmJobProgram();
 	const std::string& Identity() const;
 	WasmJobResult Run(std::string_view exportName, std::span<const std::uint8_t> input,
-		WasmJobTiming* timing = nullptr, std::size_t maxOutputBytes = 1024 * 1024) const;
+		WasmJobTiming* timing = nullptr, std::size_t maxOutputBytes = 1024 * 1024,
+		WasmJobInstanceMode mode = WasmJobInstanceMode::Fresh) const;
 
 private:
 	struct Backend;

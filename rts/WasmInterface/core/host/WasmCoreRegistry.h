@@ -85,6 +85,8 @@ inline constexpr ImportDescriptor kImports[] = {
 	{"spring:jobs", "submit", "i32,i32,i32,i32->i64", AllEnvironmentMask},
 	{"spring:jobs", "submit-to", "i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
 	{"spring:jobs", "run-batch-to", "i32,i32,i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
+	{"spring:jobs", "submit-to-with-mode", "i32,i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
+	{"spring:jobs", "run-batch-to-with-mode", "i32,i32,i32,i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},
 	// Reads run each entry through the per-unit import's own native read, with its visibility;
 	// writes are synced only, as the per-unit setters are.
 	{ColumnsModule, "get-units", "i32,i32,i32,i32,i32,i32,i32,i32->i64", AllEnvironmentMask},

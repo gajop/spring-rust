@@ -50,6 +50,11 @@
     i64.const 34359738400)
   (func (export "trap") (param i32 i32) (result i64) unreachable)
   (func (export "host-call") (param i32 i32) (result i64) call $timer)
+  (func (export "warm-or-trap") (param $ptr i32) (param $len i32) (result i64)
+    i32.const 44 i32.const 44 i32.load i32.const 1 i32.add i32.store
+    local.get $ptr i32.load i32.const -1 i32.eq if unreachable end
+    local.get $ptr local.get $len call $work drop
+    i64.const 68719476768) ;; 16-byte output at offset 32
   (func (export "loop") (param i32 i32) (result i64) (loop $forever br $forever) i64.const 0)
   (func (export "bad-output") (param i32 i32) (result i64) i64.const -1)
   (func (export "grow") (param i32 i32) (result i64)

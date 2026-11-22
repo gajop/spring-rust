@@ -1,5 +1,5 @@
 // This file is part of the Spring engine (GPL v2 or later), see LICENSE.html
-//! Jobs in fresh private instances, available in every Core environment.
+//! Jobs in private instances, available in every Core environment.
 //!
 //! Synced results arrive before GameFrame in the next simulation frame, in global
 //! submission order. Local/UI/menu results arrive before the next Update after
@@ -33,6 +33,16 @@ mod raw {
             input: i32,
             input_bytes: i32,
         ) -> i64;
+        #[link_name = "submit-to-with-mode"]
+        pub safe fn submit_to_with_mode(
+            module: i32,
+            module_bytes: i32,
+            name: i32,
+            name_bytes: i32,
+            input: i32,
+            input_bytes: i32,
+            mode: i32,
+        ) -> i64;
         #[cfg(feature = "alloc")]
         #[link_name = "run-batch-to"]
         pub safe fn run_batch_to(
@@ -45,6 +55,19 @@ mod raw {
             output: i32,
             output_bytes: i32,
         ) -> i64;
+        #[cfg(feature = "alloc")]
+        #[link_name = "run-batch-to-with-mode"]
+        pub safe fn run_batch_to_with_mode(
+            module: i32,
+            module_bytes: i32,
+            name: i32,
+            name_bytes: i32,
+            input: i32,
+            input_bytes: i32,
+            output: i32,
+            output_bytes: i32,
+            mode: i32,
+        ) -> i64;
     }
 }
 
@@ -56,6 +79,77 @@ pub fn run_batch_to(
     export_name: &str,
     jobs: &[crate::job_batch::BatchJob<'_>],
 ) -> Result<alloc::vec::Vec<crate::job_batch::OwnedJobResult>> {
+    run_batch_impl(
+        module_name,
+        export_name,
+        jobs,
+        |[
+            module,
+            module_bytes,
+            name,
+            name_bytes,
+            input,
+            input_bytes,
+            output,
+            output_bytes,
+        ]| {
+            raw::run_batch_to(
+                module,
+                module_bytes,
+                name,
+                name_bytes,
+                input,
+                input_bytes,
+                output,
+                output_bytes,
+            )
+        },
+    )
+}
+
+#[cfg(feature = "alloc")]
+pub fn run_batch_to_with_mode(
+    module_name: &str,
+    export_name: &str,
+    jobs: &[crate::job_batch::BatchJob<'_>],
+    mode: i32,
+) -> Result<alloc::vec::Vec<crate::job_batch::OwnedJobResult>> {
+    run_batch_impl(
+        module_name,
+        export_name,
+        jobs,
+        |[
+            module,
+            module_bytes,
+            name,
+            name_bytes,
+            input,
+            input_bytes,
+            output,
+            output_bytes,
+        ]| {
+            raw::run_batch_to_with_mode(
+                module,
+                module_bytes,
+                name,
+                name_bytes,
+                input,
+                input_bytes,
+                output,
+                output_bytes,
+                mode,
+            )
+        },
+    )
+}
+
+#[cfg(feature = "alloc")]
+fn run_batch_impl(
+    module_name: &str,
+    export_name: &str,
+    jobs: &[crate::job_batch::BatchJob<'_>],
+    call: impl FnOnce([i32; 8]) -> i64,
+) -> Result<alloc::vec::Vec<crate::job_batch::OwnedJobResult>> {
     if module_name.len() > 256 || export_name.is_empty() || export_name.len() > 256 {
         return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
     }
@@ -65,7 +159,7 @@ pub fn run_batch_to(
     let (name, name_bytes) = wasm_slice_parts(export_name.as_bytes())?;
     let (input, input_bytes) = wasm_slice_parts(&input)?;
     let (pointer, output_bytes) = crate::wasm_mut_slice_parts(&mut output)?;
-    let packed = raw::run_batch_to(
+    let packed = call([
         module,
         module_bytes,
         name,
@@ -74,7 +168,7 @@ pub fn run_batch_to(
         input_bytes,
         pointer,
         output_bytes,
-    ) as u64;
+    ]) as u64;
     let status = (packed >> 32) as i32;
     if status != 0 {
         return Err(ApiError::new(status));
@@ -115,8 +209,51 @@ pub fn submit(export_name: &str, input: &[u8]) -> Result<JobId> {
 /// environment. Workers in every world are forbidden from calling host imports.
 #[inline]
 pub fn submit_to(module_name: &str, export_name: &str, input: &[u8]) -> Result<JobId> {
-    if module_name.is_empty()
-        || module_name.len() > 256
+    if module_name.is_empty() {
+        return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
+    }
+    submit_to_impl(
+        module_name,
+        export_name,
+        input,
+        |[module, module_bytes, name, name_bytes, input, input_bytes]| {
+            raw::submit_to(module, module_bytes, name, name_bytes, input, input_bytes)
+        },
+    )
+}
+
+/// An empty module name targets the submitting module.
+pub fn submit_to_with_mode(
+    module_name: &str,
+    export_name: &str,
+    input: &[u8],
+    mode: i32,
+) -> Result<JobId> {
+    submit_to_impl(
+        module_name,
+        export_name,
+        input,
+        |[module, module_bytes, name, name_bytes, input, input_bytes]| {
+            raw::submit_to_with_mode(
+                module,
+                module_bytes,
+                name,
+                name_bytes,
+                input,
+                input_bytes,
+                mode,
+            )
+        },
+    )
+}
+
+fn submit_to_impl(
+    module_name: &str,
+    export_name: &str,
+    input: &[u8],
+    call: impl FnOnce([i32; 6]) -> i64,
+) -> Result<JobId> {
+    if module_name.len() > 256
         || export_name.is_empty()
         || export_name.len() > 256
         || input.len() > 1024 * 1024
@@ -126,7 +263,7 @@ pub fn submit_to(module_name: &str, export_name: &str, input: &[u8]) -> Result<J
     let (module, module_bytes) = wasm_slice_parts(module_name.as_bytes())?;
     let (name, name_bytes) = wasm_slice_parts(export_name.as_bytes())?;
     let (input, input_bytes) = wasm_slice_parts(input)?;
-    let packed = raw::submit_to(module, module_bytes, name, name_bytes, input, input_bytes) as u64;
+    let packed = call([module, module_bytes, name, name_bytes, input, input_bytes]) as u64;
     let status = (packed >> 32) as i32;
     if status != 0 {
         return Err(ApiError::new(status));

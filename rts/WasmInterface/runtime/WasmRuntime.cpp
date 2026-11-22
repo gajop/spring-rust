@@ -608,7 +608,7 @@ WasmNanCanonicalization NanCanonicalizationFromEnvironment()
 }
 
 #if defined(RECOIL_WASMTIME_AVAILABLE)
-wasm_engine_t* NewEngine(const WasmRuntimeConfig& config, bool canonicalizeAll)
+wasm_engine_t* NewEngine(const WasmRuntimeConfig& config, bool canonicalizeAll, bool pooledJobs = false)
 {
 	wasm_config_t* wasmtimeConfig = wasm_config_new();
 	if (wasmtimeConfig == nullptr)
@@ -638,6 +638,25 @@ wasm_engine_t* NewEngine(const WasmRuntimeConfig& config, bool canonicalizeAll)
 	wasmtime_config_cranelift_nan_canonicalization_set(wasmtimeConfig, canonicalizeAll);
 	wasmtime_config_wasm_multi_value_set(wasmtimeConfig, true);
 	wasmtime_config_wasm_bulk_memory_set(wasmtimeConfig, true);
+#if defined(WASMTIME_FEATURE_POOLING_ALLOCATOR)
+	if (pooledJobs) {
+		// Slots bound concurrent instances, not the number of jobs in a batch.
+		// The native pool is capped at 32 threads including the caller.
+		constexpr std::uint32_t slots = 64;
+		auto* pool = wasmtime_pooling_allocation_config_new();
+		wasmtime_pooling_allocation_config_total_core_instances_set(pool, slots);
+		wasmtime_pooling_allocation_config_total_memories_set(pool, slots);
+		wasmtime_pooling_allocation_config_total_tables_set(pool, slots);
+		wasmtime_pooling_allocation_config_total_stacks_set(pool, 0);
+		wasmtime_pooling_allocation_config_total_component_instances_set(pool, 0);
+		wasmtime_pooling_allocation_config_max_memory_size_set(pool, std::size_t(config.maxMemoryPages) * 65536);
+		wasmtime_pooling_allocation_config_table_elements_set(pool, config.maxTableElements);
+		wasmtime_pooling_allocation_strategy_set(wasmtimeConfig, pool);
+		wasmtime_pooling_allocation_config_delete(pool);
+	}
+#else
+	(void)pooledJobs;
+#endif
 	return wasm_engine_new_with_config(wasmtimeConfig);
 }
 
@@ -733,6 +752,15 @@ WasmRuntime::WasmRuntime(WasmRuntimeConfig config)
 	// disable external runtime dependencies. It never executes guest code.
 	backend = WasmRuntimeBackend::Unavailable;
 #endif
+}
+
+void* WasmRuntime::NewPooledJobEngine(const WasmRuntimeConfig& config, bool canonicalizeAll)
+{
+#if defined(RECOIL_WASMTIME_AVAILABLE) && defined(WASMTIME_FEATURE_POOLING_ALLOCATOR)
+	if (sizeof(void*) >= 8)
+		return NewEngine(config, canonicalizeAll, true);
+#endif
+	return nullptr;
 }
 
 void* WasmRuntime::PrepareSyncedModule(const std::vector<std::uint8_t>& original,

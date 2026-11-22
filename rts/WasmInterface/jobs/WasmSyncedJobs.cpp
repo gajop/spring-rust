@@ -36,12 +36,12 @@ struct JobClock {
 		return std::uint64_t(std::chrono::duration_cast<std::chrono::nanoseconds>(b - a).count());
 	}
 	WasmJobResult Run(const WasmJobProgram& program, std::string_view exportName,
-		std::span<const std::uint8_t> input, std::size_t maxOutputBytes) {
+		std::span<const std::uint8_t> input, std::size_t maxOutputBytes, WasmJobInstanceMode instanceMode) {
 		if (!on)
-			return program.Run(exportName, input, nullptr, maxOutputBytes);
+			return program.Run(exportName, input, nullptr, maxOutputBytes, instanceMode);
 		WasmJobTiming timing;
 		const auto start = Clock::now();
-		auto result = program.Run(exportName, input, &timing, maxOutputBytes);
+		auto result = program.Run(exportName, input, &timing, maxOutputBytes, instanceMode);
 		const auto total = Ns(start, Clock::now());
 		jobs.fetch_add(1, std::memory_order_relaxed);
 		instantiateNs.fetch_add(timing.instantiateNs, std::memory_order_relaxed);
@@ -98,6 +98,7 @@ struct WasmSyncedJobs::State {
 		std::string exportName;
 		std::vector<std::uint8_t> input;
 		std::uint64_t inputHash;
+		WasmJobInstanceMode instanceMode;
 #if defined(TRACY_ENABLE)
 		std::string_view profileOwner;
 #endif
@@ -146,7 +147,7 @@ WasmSyncedJobs::~WasmSyncedJobs() { state->Wait(); }
 
 std::uint32_t WasmSyncedJobs::Submit(void* owner,
 	std::shared_ptr<const WasmJobProgram> program, std::string exportName,
-	std::span<const std::uint8_t> input
+	std::span<const std::uint8_t> input, WasmJobInstanceMode instanceMode
 #if defined(TRACY_ENABLE)
 	, std::string_view profileOwner
 #endif
@@ -163,7 +164,7 @@ std::uint32_t WasmSyncedJobs::Submit(void* owner,
 	if (ZoneIsActive)
 		ZoneTextF("frame=%d job=%u export=%s input=%zu", state->frame, id, exportName.c_str(), input.size());
 	state->pending.push_back({owner, id, state->frame, std::move(program),
-		std::move(exportName), {input.begin(), input.end()}, 0
+		std::move(exportName), {input.begin(), input.end()}, 0, instanceMode
 #if defined(TRACY_ENABLE)
 		, profileOwner
 #endif
@@ -238,7 +239,7 @@ void WasmSyncedJobs::FailBatch(std::exception_ptr failure)
 
 WasmSyncedJobs::BatchStatus WasmSyncedJobs::RunBatch(void* owner,
 	std::shared_ptr<const WasmJobProgram> program, std::string exportName,
-	std::vector<WasmJobBatchInput> inputs, std::vector<WasmJobResult>& results) try
+	std::vector<WasmJobBatchInput> inputs, std::vector<WasmJobResult>& results, WasmJobInstanceMode instanceMode) try
 {
 	if (!Accepting() || state->frame < 0)
 		return BatchStatus::InvalidState;
@@ -286,7 +287,7 @@ WasmSyncedJobs::BatchStatus WasmSyncedJobs::RunBatch(void* owner,
 		ZoneScopedN("Wasm::Jobs::BatchWorker");
 		ZoneValue(index);
 		try {
-			completed[index] = Timing().Run(*program, exportName, inputs[index].bytes, inputs[index].maxOutputBytes);
+			completed[index] = Timing().Run(*program, exportName, inputs[index].bytes, inputs[index].maxOutputBytes, instanceMode);
 		} catch (...) {
 			exceptions[index] = std::current_exception();
 		}
@@ -380,7 +381,7 @@ void WasmSyncedJobs::State::Seal()
 				job.id, ThreadPool::GetThreadNum(), static_cast<int>(job.profileOwner.size()), job.profileOwner.data(),
 				job.exportName.c_str(), job.program->Identity().c_str(), job.input.size());
 		try {
-			batch->results[index] = Timing().Run(*job.program, job.exportName, job.input, 1024 * 1024);
+			batch->results[index] = Timing().Run(*job.program, job.exportName, job.input, 1024 * 1024, job.instanceMode);
 		} catch (...) {
 			batch->exceptions[index] = std::current_exception();
 		}
@@ -454,6 +455,8 @@ std::uint64_t WasmSyncedJobs::StateHash(void* owner) const
 		addWord(job.input.size());
 		addWord(static_cast<std::uint32_t>(job.inputHash));
 		addWord(static_cast<std::uint32_t>(job.inputHash >> 32));
+		if (job.instanceMode != WasmJobInstanceMode::Fresh)
+			addWord(static_cast<std::uint32_t>(job.instanceMode));
 	};
 	for (const auto& batch: state->active)
 		for (const auto& job: batch->jobs) addJob(job);

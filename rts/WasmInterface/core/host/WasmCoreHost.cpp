@@ -298,7 +298,8 @@ WasmCoreCallin WasmCoreHost::ResolveCallin(std::string_view name)
 	return static_cast<WasmCoreCallin>(ResolveCallinOrdinal(name));
 }
 
-std::uint64_t WasmCoreHost::SubmitJob(std::string exportName, std::span<const std::uint8_t> input, std::string_view workerModule)
+std::uint64_t WasmCoreHost::SubmitJob(std::string exportName, std::span<const std::uint8_t> input,
+	std::string_view workerModule, WasmJobInstanceMode mode)
 {
 	using recoil::wasm::core::PackU32;
 	using recoil::wasm::core::Status;
@@ -324,7 +325,7 @@ std::uint64_t WasmCoreHost::SubmitJob(std::string exportName, std::span<const st
 	ZoneScopedN("Wasm::Jobs::SubmitImport");
 	if (ZoneIsActive)
 		ZoneTextF("owner=%s worker=%s environment=%s", moduleName.c_str(), worker->moduleName.c_str(), WasmEnvironmentMatrix::Name(environment));
-	const auto id = jobs->Submit(this, worker->backend->jobProgram, std::move(exportName), input
+	const auto id = jobs->Submit(this, worker->backend->jobProgram, std::move(exportName), input, mode
 #if defined(TRACY_ENABLE)
 		, moduleName
 #endif
@@ -338,7 +339,7 @@ std::uint64_t WasmCoreHost::SubmitJob(std::string exportName, std::span<const st
 
 std::int32_t WasmCoreHost::RunJobBatch(std::string exportName,
 	std::vector<WasmJobBatchInput> inputs, std::vector<WasmJobResult>& results,
-	std::string_view workerModule)
+	std::string_view workerModule, WasmJobInstanceMode mode)
 {
 	using namespace recoil::wasm::core;
 	if (!backend || backend->hot.faulted)
@@ -362,7 +363,7 @@ std::int32_t WasmCoreHost::RunJobBatch(std::string exportName,
 	// owner. Do not hold the registry lock, call guest exports or mutate callback,
 	// CUS or UI nesting flags while workers run. The caller's import stays active
 	// until this direct return; no result callback can re-enter its application.
-	switch (jobs->RunBatch(this, std::move(program), std::move(exportName), std::move(inputs), results)) {
+	switch (jobs->RunBatch(this, std::move(program), std::move(exportName), std::move(inputs), results, mode)) {
 		case WasmSyncedJobs::BatchStatus::Ok: return static_cast<std::int32_t>(Status::Ok);
 		case WasmSyncedJobs::BatchStatus::InvalidState: return static_cast<std::int32_t>(Status::InvalidState);
 		case WasmSyncedJobs::BatchStatus::InvalidArgument: return static_cast<std::int32_t>(Status::InvalidArgument);

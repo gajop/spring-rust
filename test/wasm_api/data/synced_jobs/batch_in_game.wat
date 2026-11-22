@@ -3,12 +3,15 @@
 ;; overlapping input/output, atomic descriptor rejection and deferred boundary.
 (module
   (import "spring:jobs" "run-batch-to" (func $batch (param i32 i32 i32 i32 i32 i32 i32 i32) (result i64)))
+  (import "spring:jobs" "run-batch-to-with-mode" (func $batch_mode (param i32 i32 i32 i32 i32 i32 i32 i32 i32) (result i64)))
+  (import "spring:jobs" "submit-to-with-mode" (func $submit_mode (param i32 i32 i32 i32 i32 i32 i32) (result i64)))
   (import "spring:jobs" "submit" (func $submit (param i32 i32 i32 i32) (result i64)))
   (import "spring:messages" "echo" (func $echo (param i32 i32 i32 i32) (result i64)))
   (memory (export "memory") 2 2)
   (global $calls (mut i32) (i32.const 0))
   (global $delivered (mut i32) (i32.const 0))
   (data (i32.const 256) "work")
+  (data (i32.const 264) "pure-work")
   (data (i32.const 320) "WASM_BATCH_IMPORT_PASSED")
   (data (i32.const 2048)
     "\01\00\00\00\06\00\00\00"
@@ -18,6 +21,7 @@
     "\08\00\00\00\0c\00\00\00\fd\ff\ff\ff\00\00\00\00"
     "\08\00\00\00\0c\00\00\00\0d\00\00\00\03\00\00\00"
     "\08\00\00\00\0b\00\00\00\0e\00\00\00\00\00\00\00")
+  (data (i32.const 3072) "\01\00\00\00\01\00\00\00\08\00\00\00\0c\00\00\00\11\00\00\00\05\00\00\00")
   (func (export "SPRING_ENV_MASK") (result i32) i32.const 1)
   (func (export "SPRING_JOB_INPUT_BUFFER") (result i32) i32.const 1024)
   (func (export "SPRING_JOB_INPUT_CAPACITY") (result i32) i32.const 16)
@@ -30,7 +34,7 @@
       local.get $v i32.const 1664525 i32.mul i32.const 1013904223 i32.add local.set $v
       local.get $n i32.const 1 i32.sub local.set $n br $loop
     end end local.get $v)
-  (func (export "work") (param $ptr i32) (param i32) (result i64)
+  (func $work (export "work") (param $ptr i32) (param i32) (result i64)
     (local $v i32)
     local.get $ptr i32.load local.set $v
     local.get $v i32.const -1 i32.eq if unreachable end
@@ -43,6 +47,15 @@
     i32.const 36 global.get $calls i32.store
     i32.const 40 local.get $v i32.store
     i64.const 51539607584)
+  (func (export "pure-work") (param i32 i32) (result i64)
+    i32.const 0 global.set $calls
+    local.get 0 local.get 1 call $work)
+  (func $run_mode (param $mode i32) (result i64)
+    i32.const 0 i32.const 0 i32.const 264 i32.const 9
+    i32.const 3072 i32.const 24 i32.const 4096 i32.const 28 local.get $mode call $batch_mode)
+  (func $queue_mode (param $mode i32) (result i64)
+    i32.const 0 i32.const 0 i32.const 264 i32.const 9
+    i32.const 1024 i32.const 8 local.get $mode call $submit_mode)
   (func $run (param $capacity i32) (result i64)
     i32.const 0 i32.const 0 i32.const 256 i32.const 4
     i32.const 2048 i32.const 104 i32.const 2048 local.get $capacity call $batch)
@@ -79,19 +92,28 @@
       i32.const 2120 i32.load i32.const 4 i32.eq call $assert
       global.get $calls i32.eqz call $assert
       global.get $delivered i32.eqz call $assert
+      ;; Select pooled or reusable instances at runtime with identical pure work.
+      i32.const -1 call $run_mode i64.const 32 i64.shr_u i64.const 1 i64.eq call $assert
+      i32.const 1 call $run_mode i64.const 28 i64.eq call $assert
+      i32.const 4112 i32.load i32.const 17 i32.const 5 call $lcg i32.eq call $assert
+      i32.const 2 call $run_mode i64.const 28 i64.eq call $assert
+      i32.const 4112 i32.load i32.const 17 i32.const 5 call $lcg i32.eq call $assert
       ;; Ordinary imports and deferred submission still work in this callback.
       i32.const 1024 i32.const 17 i32.store
       i32.const 1028 i32.const 5 i32.store
       i32.const 256 i32.const 4 i32.const 1024 i32.const 8 call $submit
       i64.const 1 i64.eq call $assert
+      i32.const 3 call $queue_mode i64.const 32 i64.shr_u i64.const 1 i64.eq call $assert
+      i32.const 1 call $queue_mode i64.const 2 i64.eq call $assert
+      i32.const 2 call $queue_mode i64.const 3 i64.eq call $assert
     end
     local.get $frame i32.const 1 i32.eq if
-      global.get $delivered i32.const 1 i32.eq call $assert
+      global.get $delivered i32.const 3 i32.eq call $assert
       i32.const 320 i32.const 24 i32.const 0 i32.const 0 call $echo
       i64.const 32 i64.shr_u i64.eqz call $assert
     end)
   (func (export "spring:jobs/result") (param $id i32) (param $status i32) (param $ptr i32) (param $len i32)
-    local.get $id i32.const 1 i32.eq call $assert
+    local.get $id global.get $delivered i32.const 1 i32.add i32.eq call $assert
     local.get $status i32.eqz call $assert
     local.get $len i32.const 12 i32.eq call $assert
     local.get $ptr i32.load i32.const 17 i32.const 5 call $lcg i32.eq call $assert

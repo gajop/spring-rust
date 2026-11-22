@@ -121,6 +121,41 @@ struct StopThreads {
 };
 }
 
+TEST_CASE("Wasm job allocation modes can change between submissions")
+{
+	StopThreads stop;
+	ThreadPool::SetThreadCount(1);
+	auto config = FixtureConfig();
+	config.instructionFuel = 1000;
+	std::shared_ptr<WasmJobProgram> program;
+	{
+		WasmRuntime runtime(config);
+		program = Program(runtime);
+	}
+
+	const auto input = Input(7, 28);
+	const auto run = [&](WasmJobInstanceMode mode, unsigned expectedCount) {
+		const auto result = program->Run("warm-or-trap", input, nullptr, 16, mode);
+		REQUIRE(result.status == WasmJobStatus::Ok);
+		REQUIRE(result.bytes.size() == 16);
+		CHECK(Word(result.bytes, 0) == Work(7, 28));
+		CHECK(Word(result.bytes, 4) == expectedCount);
+		CHECK(Word(result.bytes, 12) == expectedCount);
+	};
+	run(WasmJobInstanceMode::Reuse, 1);
+	run(WasmJobInstanceMode::Pooled, 1);
+	run(WasmJobInstanceMode::Fresh, 1);
+	run(WasmJobInstanceMode::Pooled, 1);
+	// Repeated calls exhaust a 1000-instruction budget unless fuel is reset.
+	for (unsigned count = 2; count <= 6; ++count)
+		run(WasmJobInstanceMode::Reuse, count);
+
+	const auto trapped = program->Run("warm-or-trap", Input(0xffffffffu, 0),
+		nullptr, 16, WasmJobInstanceMode::Reuse);
+	CHECK(trapped.status == WasmJobStatus::Trapped);
+	run(WasmJobInstanceMode::Reuse, 1);
+}
+
 TEST_CASE("Synchronous Wasm batches join ordered fresh jobs without consuming deferred delivery")
 {
 	StopThreads stop;

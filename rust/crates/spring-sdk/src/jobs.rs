@@ -4,7 +4,7 @@
 //! `export_jobs!`. Use `spring.jobs().run_this_tick(...)` for ordered results
 //! before returning, or `run_next_tick(...)` for delivery to `Module::job_result`
 //! before the next tick. Workers must not read mutable globals or use engine
-//! imports. Wasm runs each job in a fresh instance; native runs a plain function
+//! imports. Wasm defaults to a fresh instance; native runs a plain function
 //! on a bounded thread pool. Pass every input explicitly, including random seeds.
 //!
 //! Export GameFrame for synced modules and Update for other environments. Work
@@ -56,6 +56,24 @@ impl Worker {
         self.wasm_module = Some(name);
         self
     }
+}
+
+/// Select Wasm worker instantiation per submission. Native workers use the same
+/// function calls regardless of the mode.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[repr(i32)]
+pub enum InstanceMode {
+    /// A fresh store and instance with the ordinary allocator.
+    #[default]
+    Fresh = 0,
+    /// A fresh store and instance backed by recycled allocations when available.
+    Pooled = 1,
+    /// Allow a live instance to be reused for the same worker export.
+    ///
+    /// Memory, globals and tables can retain mutations. Results and failures
+    /// must depend solely on the current input, even after arbitrary previous
+    /// jobs or when the engine runs the job in a fresh instance.
+    Reuse = 2,
 }
 
 pub struct Jobs<'a, 'call, E: Environment>(&'a Spring<'call, E>);
@@ -129,6 +147,66 @@ impl<E: Environment> Jobs<'_, '_, E> {
         #[cfg(not(target_arch = "wasm32"))]
         let result = self.0.engine.owner.jobs.borrow_mut().submit(worker, input);
         self.0.engine.finish(result)
+    }
+
+    /// Like [`Self::run_this_tick`], with an explicit Wasm instance mode.
+    /// Using this method in Wasm requires an engine with the instance-mode API.
+    pub fn run_this_tick_with_mode(
+        &self,
+        worker: Worker,
+        jobs: &[BatchJob<'_>],
+        mode: InstanceMode,
+    ) -> Result<Vec<OwnedJobResult>> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            self.0.engine.check()?;
+            if worker.wasm_module == Some("") {
+                return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
+            }
+            self.0
+                .engine
+                .finish(spring_sdk_internal::jobs::run_batch_to_with_mode(
+                    worker.wasm_module.unwrap_or(""),
+                    worker.name,
+                    jobs,
+                    mode as i32,
+                ))
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = mode;
+            self.run_this_tick(worker, jobs)
+        }
+    }
+
+    /// Like [`Self::run_next_tick`], with an explicit Wasm instance mode.
+    /// Using this method in Wasm requires an engine with the instance-mode API.
+    pub fn run_next_tick_with_mode(
+        &self,
+        worker: Worker,
+        input: &[u8],
+        mode: InstanceMode,
+    ) -> Result<JobId> {
+        #[cfg(target_arch = "wasm32")]
+        {
+            self.0.engine.check()?;
+            if worker.wasm_module == Some("") {
+                return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
+            }
+            self.0
+                .engine
+                .finish(spring_sdk_internal::jobs::submit_to_with_mode(
+                    worker.wasm_module.unwrap_or(""),
+                    worker.name,
+                    input,
+                    mode as i32,
+                ))
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = mode;
+            self.run_next_tick(worker, input)
+        }
     }
 
     /// Compatibility alias for [`Self::run_next_tick`].

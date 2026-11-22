@@ -127,6 +127,8 @@ private:
 
 	struct BackendState;
 	void* BackendEngine() const;
+	// Owned engine handle for a job program, or nullptr when pooling is unavailable.
+	static void* NewPooledJobEngine(const WasmRuntimeConfig& config, bool canonicalizeAll);
 	// The bytes and engine a synced Core module compiles with. Leaves `rewritten`
 	// empty when the original bytes are compiled. `sha512` is the module's
 	// identity, which keys a cache of rewrites. `note` describes the rewrite;

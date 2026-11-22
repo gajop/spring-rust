@@ -158,9 +158,9 @@ public:
 	// Drain and cancel before the engine stops/recreates its worker pool.
 	static void ShutdownSyncedJobs();
 	std::uint64_t SubmitJob(std::string exportName, std::span<const std::uint8_t> input,
-		std::string_view workerModule = {});
+		std::string_view workerModule, WasmJobInstanceMode mode);
 	std::int32_t RunJobBatch(std::string exportName, std::vector<WasmJobBatchInput> inputs,
-		std::vector<WasmJobResult>& results, std::string_view workerModule = {});
+		std::vector<WasmJobResult>& results, std::string_view workerModule, WasmJobInstanceMode mode);
 	void FailJobBatch(std::exception_ptr failure);
 
 	// NativeUnitScriptBackend implementation for CUS instances owned by this
