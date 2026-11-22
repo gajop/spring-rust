@@ -1,4 +1,6 @@
+/* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include "../TempDirectory.h"
 #include "System/Log/ILog.h"
 #include "System/Log/FileSink.h"
 #include "System/Log/StreamSink.h"
@@ -26,7 +28,7 @@ LOG_REGISTER_SECTION(LOG_SECTION_ONE_TIME_0)
 namespace {
 	struct LogStream {
 		LogStream() {
-			logFile = GetTempLogFile();
+			logFile = (tempDirectory.Path() / "log.txt").string();
 			printf("\tNOTE: logging to temporary log file: %s\n", logFile.c_str());
 			log_file_addLogFile(logFile.c_str());
 			log_sink_stream_setLogStream(&logStream);
@@ -37,13 +39,7 @@ namespace {
 			remove(logFile.c_str());
 		}
 
-		std::string GetTempLogFile() {
-
-			char* tmpName = tmpnam(NULL);
-			assert(tmpName != NULL);
-			return tmpName;
-		}
-
+		spring::test::TempDirectory tempDirectory{"recoil-log-"};
 		std::stringstream logStream;
 		std::string logFile;
 	};

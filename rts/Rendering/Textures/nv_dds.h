@@ -246,6 +246,9 @@ namespace nv_dds
 			#endif
 
             void clear();
+            /// BC7 (linear or sRGB) always loads as stored, including every mip and cubemap face.
+            /// A requested BC7 flip logs informational authoring guidance; pre-flip the asset
+            /// when its consumer needs it. Other formats still honour flipImage.
             bool load(std::string filename, bool flipImage = true);
             bool save(std::string filename, bool flipImage = true) const;
 

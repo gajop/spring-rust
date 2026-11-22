@@ -95,6 +95,10 @@ from textures into a Lua texture.
  * add `ProjectileDrawThreadedFill` boolean springsetting, default true. Adds multi-threading to particle drawing. Toggleable mostly just in case it causes threading trouble.
  * add `ProjectileDrawReuseWaterPasses` boolean springsetting, default true. Reuses below- and above water particle rendering passes, since they contain the same geometry. Toggleable mostly just in case it causes trouble.
  * support loading DX10 DDS textures (BC4, BC5, BC7).
+BC7 (linear and sRGB) loads in its stored orientation, including all mips and cubemap faces;
+author it pre-flipped when the consumer needs a vertical flip. A requested BC7 flip prints
+one informational authoring reminder per load instead of a warning. Other DDS formats keep
+their existing flip behaviour, including the `unitpics` exception.
 
 ### Misc
  * LuaGaia entry points (`LuaGaia/main.lua`, `LuaGaia/draw.lua`) are now loaded by the engine with `VFS.GAME .. VFS.MAP` load mode, from `VFS.MAP`.

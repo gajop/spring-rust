@@ -13,6 +13,7 @@
 #include "System/Config/ConfigHandler.h"
 #include "System/LoadSave/DemoFileExtension.h"
 #include "System/LoadSave/demofile.h"
+#include "../TempDirectory.h"
 
 // Minimal ConfigHandler stub — just enough for GetDemoFileExtensions()
 class StubConfigHandler : public ConfigHandler {
@@ -43,11 +44,12 @@ protected:
 ConfigHandler* configHandler = nullptr;
 
 struct TempGzFile {
+	spring::test::TempDirectory directory{"recoil-demo-"};
 	std::string path;
 
 	explicit TempGzFile(const void* data, int len)
 	{
-		path = std::tmpnam(nullptr);
+		path = (directory.Path() / "replay.sdfz").string();
 		gzFile f = gzopen(path.c_str(), "wb");
 		REQUIRE(f != nullptr);
 		if (len > 0)

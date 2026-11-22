@@ -510,7 +510,8 @@ bool CDDSImage::load(string filename, bool flipImage)
 	}
 
 	if (flipImage && (m_format == GL_COMPRESSED_RGBA_BPTC_UNORM || m_format == GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM)) {
-		LOG_L(L_WARNING, "[nv_dds] cannot vertically flip BC7 image \"%s\", author it pre-flipped", filename.c_str());
+		// BC7's stored orientation is the loader contract: there is no BC7 block flipper.
+		LOG_L(L_INFO, "[nv_dds] loading BC7 image \"%s\" as stored; author it pre-flipped when a vertical flip is needed", filename.c_str());
 		flipImage = false;
 	}
 
