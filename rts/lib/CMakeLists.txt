@@ -14,15 +14,16 @@ if (USE_MIMALLOC)
 	set(MI_BUILD_TESTS OFF CACHE BOOL "Disable mimalloc tests" FORCE)
 	set(MI_BUILD_SHARED OFF CACHE BOOL "Disable mimalloc shared library" FORCE)
 	set(MI_BUILD_STATIC ON CACHE BOOL "Enable mimalloc static library" FORCE)
+	set(MI_BUILD_OBJECT OFF CACHE BOOL "Disable unused mimalloc object library" FORCE)
 
 	# Integrate ASAN/Valgrind tracking with mimalloc
-	# When the engine is built with USE_ASAN, enable MI_TRACK_ASAN for mimalloc
-	# When the engine is built with USE_VALGRIND, enable MI_TRACK_VALGRIND for mimalloc
+	# mimalloc 3.7 selects tracking through MI_TRACK (the old booleans are deprecated).
 	if (USE_ASAN)
-		set(MI_TRACK_ASAN ON CACHE BOOL "Enable mimalloc ASAN support" FORCE)
-	endif()
-	if (VALGRIND_FOUND)
-		set(MI_TRACK_VALGRIND ON CACHE BOOL "Enable mimalloc Valgrind support" FORCE)
+		set(MI_TRACK ASAN CACHE STRING "Enable mimalloc ASAN support" FORCE)
+	elseif (VALGRIND_FOUND)
+		set(MI_TRACK VALGRIND CACHE STRING "Enable mimalloc Valgrind support" FORCE)
+	else()
+		set(MI_TRACK OFF CACHE STRING "Disable mimalloc tracking" FORCE)
 	endif()
 
 	if(MINGW)
@@ -35,6 +36,13 @@ if (USE_MIMALLOC)
 	endif()
 
 	ADD_SUBDIRECTORY(mimalloc)
+	if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
+		CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13 AND
+		CMAKE_C_COMPILER_VERSION VERSION_LESS 14)
+		# GCC 13's automatic small-function inlining diagnoses null atomic accesses in
+		# upstream 3.7's profiler. Keep explicit inline fast paths and warnings enabled.
+		target_compile_options(mimalloc-static PRIVATE "$<$<COMPILE_LANGUAGE:C>:-fno-inline-small-functions>")
+	endif()
 
 	if(MINGW)
 		# Restore _WIN32_WINNT definition after mimalloc

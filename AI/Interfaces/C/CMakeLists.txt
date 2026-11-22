@@ -27,7 +27,7 @@ macro    (configure_native_skirmish_ai mySourceDirRel_var additionalSources_var 
 		set(BUILD_THIS_SKIRMISHAI TRUE)
 	else  (BUILD_C_AIINTERFACE AND NOT myName MATCHES "${AI_EXCLUDE_REGEX}")
 		set(BUILD_THIS_SKIRMISHAI FALSE)
-		message("warning: ${myName} Skirmish AI will not be built!")
+		message(STATUS "Skipping disabled Skirmish AI: ${myName}")
 	endif (BUILD_C_AIINTERFACE AND NOT myName MATCHES "${AI_EXCLUDE_REGEX}")
 
 	# Compile and install
