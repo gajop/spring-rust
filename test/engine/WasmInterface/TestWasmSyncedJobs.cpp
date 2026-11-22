@@ -156,6 +156,84 @@ TEST_CASE("Wasm job allocation modes can change between submissions")
 	run(WasmJobInstanceMode::Reuse, 1);
 }
 
+TEST_CASE("Multi-frame synced jobs deliver at fixed frame + delayTicks without blocking earlier frames")
+{
+	StopThreads stop;
+	std::shared_ptr<WasmJobProgram> program;
+	{
+		WasmRuntime runtime(FixtureConfig());
+		program = Program(runtime);
+	}
+	int owner = 0;
+	for (int threads: {1, 4}) {
+		ThreadPool::SetThreadCount(threads);
+		WasmSyncedJobs queue;
+		queue.BeginFrame(0);
+		// Invalid delays rejected deterministically.
+		CHECK(queue.Submit(&owner, program, "work", Input(1, 5), WasmJobInstanceMode::Fresh, 0) == 0);
+		CHECK(queue.Submit(&owner, program, "work", Input(1, 5), WasmJobInstanceMode::Fresh, WasmSyncedJobs::MAX_DELAY_TICKS + 1) == 0);
+
+		// Frame 0: submit delay=5 (id 1), delay=1 (id 2), delay=3 (id 3).
+		const auto id5 = queue.Submit(&owner, program, "work", Input(50, 200), WasmJobInstanceMode::Reuse, 5);
+		const auto id1 = queue.Submit(&owner, program, "work", Input(10, 20), WasmJobInstanceMode::Pooled, 1);
+		const auto id3 = queue.Submit(&owner, program, "work", Input(30, 60), WasmJobInstanceMode::Fresh, 3);
+		REQUIRE(id5 == 1);
+		REQUIRE(id1 == 2);
+		REQUIRE(id3 == 3);
+		queue.EndFrame();
+
+		// Frame 1: only delay=1 (id 2) arrives; submit delay=2 (id 4) also due at frame 3.
+		auto d1 = queue.BeginFrame(1);
+		REQUIRE(d1.size() == 1);
+		CHECK(d1[0].id == id1);
+		CHECK(d1[0].submittedFrame == 0);
+		CHECK(Word(d1[0].result.bytes, 0) == Work(10, 20));
+		const auto id1_to_3 = queue.Submit(&owner, program, "work", Input(31, 40), WasmJobInstanceMode::Reuse, 2);
+		REQUIRE(id1_to_3 == 4);
+		queue.EndFrame();
+
+		// Frame 2: nothing due; frame 0's delay=5 is still in flight.
+		CHECK(queue.BeginFrame(2).empty());
+		queue.EndFrame();
+
+		// Frame 3: both frame-0 delay=3 (id 3) and frame-1 delay=2 (id 4) arrive in global id order.
+		auto d3 = queue.BeginFrame(3);
+		REQUIRE(d3.size() == 2);
+		CHECK(d3[0].id == id3);
+		CHECK(d3[0].submittedFrame == 0);
+		CHECK(Word(d3[0].result.bytes, 0) == Work(30, 60));
+		CHECK(d3[1].id == id1_to_3);
+		CHECK(d3[1].submittedFrame == 1);
+		CHECK(Word(d3[1].result.bytes, 0) == Work(31, 40));
+		queue.EndFrame();
+
+		// Frame 4: empty.
+		CHECK(queue.BeginFrame(4).empty());
+		queue.EndFrame();
+
+		// Frame 5: frame-0 delay=5 (id 1) arrives.
+		auto d5 = queue.BeginFrame(5);
+		REQUIRE(d5.size() == 1);
+		CHECK(d5[0].id == id5);
+		CHECK(d5[0].submittedFrame == 0);
+		CHECK(Word(d5[0].result.bytes, 0) == Work(50, 200));
+
+		// CancelOwner drains in-flight multi-frame batches cleanly.
+		REQUIRE(queue.Submit(&owner, program, "work", Input(99, 10), WasmJobInstanceMode::Reuse, 5) != 0);
+		queue.EndFrame();
+		queue.CancelOwner(&owner);
+		for (int f = 6; f <= 10; ++f) {
+			CHECK(queue.BeginFrame(f).empty());
+			queue.EndFrame();
+		}
+	}
+
+	// Local Update queues only allow delayTicks == 1.
+	WasmSyncedJobs local(WasmSyncedJobs::Mode::Update);
+	CHECK(local.Submit(&owner, program, "echo", Input(1, 0), WasmJobInstanceMode::Fresh, 2) == 0);
+	CHECK(local.Submit(&owner, program, "echo", Input(1, 0), WasmJobInstanceMode::Fresh, 1) == 1);
+}
+
 TEST_CASE("Synchronous Wasm batches join ordered fresh jobs without consuming deferred delivery")
 {
 	StopThreads stop;

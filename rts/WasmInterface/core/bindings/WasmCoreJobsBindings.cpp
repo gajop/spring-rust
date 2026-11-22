@@ -16,18 +16,20 @@ wasm_trap_t* Submit(void* environment, wasmtime_caller_t*,
 	wasmtime_val_raw_t* slots, std::size_t count)
 {
 	auto* state = static_cast<HostState*>(environment);
-	if (!state || !state->host || !slots || (count != 4 && count != 6 && count != 7))
+	if (!state || !state->host || !slots || (count != 4 && count != 6 && count != 7 && count != 8))
 		return generated::Trap("Wasm job submission ABI or host is unavailable");
 	generated::ImportGuard guard(state, 1);
 	if (!guard.Ok()) return generated::Trap(guard.Error());
-	const auto mode = count == 7 ? static_cast<WasmJobInstanceMode>(slots[6].i32) : WasmJobInstanceMode::Fresh;
+	const auto mode = count >= 7 ? static_cast<WasmJobInstanceMode>(slots[6].i32) : WasmJobInstanceMode::Fresh;
+	const auto delayTicks = count == 8 ? static_cast<std::uint32_t>(slots[7].i32) : 1u;
 	const std::size_t start = count == 4 ? 0 : 2;
 	const auto workerBytes = start != 0 ? static_cast<std::uint32_t>(slots[1].i32) : 0;
 	const auto namePointer = static_cast<std::uint32_t>(slots[start].i32);
 	const auto nameBytes = static_cast<std::uint32_t>(slots[start + 1].i32);
 	const auto inputPointer = static_cast<std::uint32_t>(slots[start + 2].i32);
 	const auto inputBytes = static_cast<std::uint32_t>(slots[start + 3].i32);
-	if (mode > WasmJobInstanceMode::Reuse || workerBytes > 256 || nameBytes == 0 || nameBytes > 256 || inputBytes > WasmSyncedJobs::MAX_INPUT_BYTES) {
+	if (mode > WasmJobInstanceMode::Reuse || delayTicks == 0 || delayTicks > WasmSyncedJobs::MAX_DELAY_TICKS ||
+		workerBytes > 256 || nameBytes == 0 || nameBytes > 256 || inputBytes > WasmSyncedJobs::MAX_INPUT_BYTES) {
 		slots[0].i64 = PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument));
 		return nullptr;
 	}
@@ -42,7 +44,8 @@ wasm_trap_t* Submit(void* environment, wasmtime_caller_t*,
 	try {
 		slots[0].i64 = state->host->SubmitJob(
 			std::string(reinterpret_cast<const char*>(name.data()), name.size()), input,
-			worker.empty() ? std::string_view{} : std::string_view(reinterpret_cast<const char*>(worker.data()), worker.size()), mode);
+			worker.empty() ? std::string_view{} : std::string_view(reinterpret_cast<const char*>(worker.data()), worker.size()),
+			mode, delayTicks);
 	} catch (...) {
 		return generated::Trap("Host failed to allocate Wasm job submission");
 	}
@@ -129,6 +132,7 @@ bool RegisterJobsImports(wasmtime_linker_t* linker, HostState* state, std::strin
 		{"submit-to", 6, Submit},
 		{"run-batch-to", 8, RunBatch},
 		{"submit-to-with-mode", 7, Submit},
+		{"submit-to-after-ticks", 8, Submit},
 		{"run-batch-to-with-mode", 9, RunBatch},
 	};
 	for (const auto& [name, arity, callback]: imports) {

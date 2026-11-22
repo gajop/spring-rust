@@ -43,6 +43,17 @@ mod raw {
             input_bytes: i32,
             mode: i32,
         ) -> i64;
+        #[link_name = "submit-to-after-ticks"]
+        pub safe fn submit_to_after_ticks(
+            module: i32,
+            module_bytes: i32,
+            name: i32,
+            name_bytes: i32,
+            input: i32,
+            input_bytes: i32,
+            mode: i32,
+            delay_ticks: i32,
+        ) -> i64;
         #[cfg(feature = "alloc")]
         #[link_name = "run-batch-to"]
         pub safe fn run_batch_to(
@@ -242,6 +253,37 @@ pub fn submit_to_with_mode(
                 input,
                 input_bytes,
                 mode,
+            )
+        },
+    )
+}
+
+/// An empty module name targets the submitting module.
+/// Delivers deterministically at `submitted_frame + delay_ticks` (`1..=300`; unsynced queues only allow `1`).
+pub fn submit_to_after_ticks(
+    module_name: &str,
+    export_name: &str,
+    input: &[u8],
+    mode: i32,
+    delay_ticks: u32,
+) -> Result<JobId> {
+    if delay_ticks == 0 || delay_ticks > 300 {
+        return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
+    }
+    submit_to_impl(
+        module_name,
+        export_name,
+        input,
+        |[module, module_bytes, name, name_bytes, input, input_bytes]| {
+            raw::submit_to_after_ticks(
+                module,
+                module_bytes,
+                name,
+                name_bytes,
+                input,
+                input_bytes,
+                mode,
+                delay_ticks as i32,
             )
         },
     )

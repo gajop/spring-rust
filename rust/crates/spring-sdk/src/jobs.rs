@@ -22,6 +22,8 @@ pub struct JobId(pub u32);
 pub type JobResult<'a> = core::result::Result<&'a [u8], JobError>;
 
 pub const MAX_BYTES: usize = 1024 * 1024;
+/// Maximum fixed tick delay accepted by [`Jobs::run_after_ticks`].
+pub const MAX_DELAY_TICKS: u32 = 300;
 #[cfg(not(target_arch = "wasm32"))]
 const MAX_JOBS: usize = 256;
 #[cfg(not(target_arch = "wasm32"))]
@@ -209,6 +211,63 @@ impl<E: Environment> Jobs<'_, '_, E> {
         }
     }
 
+    /// Queue a pure worker to deliver its result to `Module::job_result`
+    /// before `submitted_tick + delay_ticks` (in global submission order).
+    /// Synced modules allow `1..=MAX_DELAY_TICKS`; unsynced modules only allow `1`.
+    /// Using this method in Wasm requires an engine with `submit-to-after-ticks`.
+    pub fn run_after_ticks(&self, worker: Worker, input: &[u8], delay_ticks: u32) -> Result<JobId> {
+        self.run_after_ticks_with_mode(worker, input, delay_ticks, InstanceMode::Fresh)
+    }
+
+    /// Like [`Self::run_after_ticks`], with an explicit Wasm instance mode.
+    /// Using this method in Wasm requires an engine with `submit-to-after-ticks`.
+    pub fn run_after_ticks_with_mode(
+        &self,
+        worker: Worker,
+        input: &[u8],
+        delay_ticks: u32,
+        mode: InstanceMode,
+    ) -> Result<JobId> {
+        self.0.engine.check()?;
+        let synced = E::MASK == crate::RulesSynced::MASK || E::MASK == crate::GaiaSynced::MASK;
+        if delay_ticks == 0
+            || delay_ticks > MAX_DELAY_TICKS
+            || (!synced && delay_ticks != 1)
+            || worker.name.is_empty()
+            || worker.name.len() > 256
+            || input.len() > MAX_BYTES
+            || worker
+                .wasm_module
+                .is_some_and(|name| name.is_empty() || name.len() > 256)
+        {
+            return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            self.0
+                .engine
+                .finish(spring_sdk_internal::jobs::submit_to_after_ticks(
+                    worker.wasm_module.unwrap_or(""),
+                    worker.name,
+                    input,
+                    mode as i32,
+                    delay_ticks,
+                ))
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let _ = mode;
+            let result =
+                self.0
+                    .engine
+                    .owner
+                    .jobs
+                    .borrow_mut()
+                    .submit_after(worker, input, delay_ticks);
+            self.0.engine.finish(result)
+        }
+    }
+
     /// Compatibility alias for [`Self::run_next_tick`].
     #[deprecated(note = "use run_next_tick for explicit result delivery timing")]
     pub fn submit(&self, worker: Worker, input: &[u8]) -> Result<JobId> {
@@ -346,11 +405,12 @@ pub(crate) mod native {
     }
 
     pub(crate) struct State {
-        pending: Vec<(JobId, Worker, Vec<u8>)>,
-        active: Vec<(JobId, mpsc::Receiver<Outcome>)>,
+        pending: Vec<(u32, JobId, Worker, Vec<u8>)>,
+        active: Vec<(u64, JobId, mpsc::Receiver<Outcome>)>,
         pool: Option<Pool>,
         bytes: usize,
         next_id: u32,
+        tick: u64,
         in_tick: bool,
         batch_jobs: usize,
         batch_bytes: usize,
@@ -364,6 +424,7 @@ pub(crate) mod native {
                 pool: None,
                 bytes: 0,
                 next_id: 1,
+                tick: 0,
                 in_tick: false,
                 batch_jobs: 0,
                 batch_bytes: 0,
@@ -383,6 +444,17 @@ pub(crate) mod native {
             self.in_tick
         }
         pub(crate) fn submit(&mut self, worker: Worker, input: &[u8]) -> Result<JobId> {
+            self.submit_after(worker, input, 1)
+        }
+        pub(crate) fn submit_after(
+            &mut self,
+            worker: Worker,
+            input: &[u8],
+            delay_ticks: u32,
+        ) -> Result<JobId> {
+            if delay_ticks == 0 || delay_ticks > MAX_DELAY_TICKS {
+                return Err(ApiError::new(ErrorCode::InvalidArgument as i32));
+            }
             if self.next_id == 0
                 || self.pending.len() + self.batch_jobs >= MAX_JOBS
                 || input.len() > MAX_BATCH_BYTES - self.bytes - self.batch_bytes
@@ -391,7 +463,7 @@ pub(crate) mod native {
             }
             let id = JobId(self.next_id);
             self.next_id = self.next_id.wrapping_add(1);
-            self.pending.push((id, worker, input.to_vec()));
+            self.pending.push((delay_ticks, id, worker, input.to_vec()));
             self.bytes += input.len();
             Ok(id)
         }
@@ -456,9 +528,20 @@ pub(crate) mod native {
                 return Err(ApiError::new(ErrorCode::InvalidState as i32));
             }
             self.in_tick = true;
-            self.active
-                .drain(..)
-                .map(|(id, receiver)| {
+            let now = self.tick;
+            let mut due = Vec::new();
+            let mut later = Vec::new();
+            for item in self.active.drain(..) {
+                if item.0 <= now {
+                    due.push(item);
+                } else {
+                    later.push(item);
+                }
+            }
+            self.active = later;
+            due.sort_by_key(|(_, id, _)| *id);
+            due.into_iter()
+                .map(|(_, id, receiver)| {
                     let outcome = receiver
                         .recv()
                         .map_err(|_| ApiError::new(ErrorCode::InvalidState as i32))?;
@@ -467,13 +550,19 @@ pub(crate) mod native {
                 .collect()
         }
         pub(crate) fn end(&mut self) -> Result<()> {
-            if !self.in_tick || !self.active.is_empty() {
+            if !self.in_tick
+                || self
+                    .active
+                    .iter()
+                    .any(|(deliver, _, _)| *deliver <= self.tick)
+            {
                 return Err(ApiError::new(ErrorCode::InvalidState as i32));
             }
             if !self.pending.is_empty() && self.pool.is_none() {
                 self.pool = Some(Pool::new()?);
             }
-            for (id, worker, input) in self.pending.drain(..) {
+            let now = self.tick;
+            for (delay, id, worker, input) in self.pending.drain(..) {
                 let (sender, receiver) = mpsc::sync_channel(1);
                 self.pool
                     .as_ref()
@@ -488,8 +577,9 @@ pub(crate) mod native {
                         max_output_bytes: MAX_BYTES,
                     })
                     .map_err(|_| ApiError::new(ErrorCode::InvalidState as i32))?;
-                self.active.push((id, receiver));
+                self.active.push((now + delay as u64, id, receiver));
             }
+            self.tick += 1;
             self.bytes = 0;
             self.batch_jobs = 0;
             self.batch_bytes = 0;
@@ -596,6 +686,42 @@ mod tests {
         queue.begin().unwrap();
         queue.end().unwrap();
         assert_eq!(queue.run_batch(DOUBLE, &[job]).unwrap(), [Ok(vec![6])]);
+    }
+
+    #[test]
+    fn multi_frame_deferred_jobs_deliver_at_fixed_tick_in_id_order() {
+        let mut queue = native::State::default();
+        assert!(queue.submit_after(DOUBLE, &[1], 0).is_err());
+        assert!(
+            queue
+                .submit_after(DOUBLE, &[1], MAX_DELAY_TICKS + 1)
+                .is_err()
+        );
+
+        queue.begin().unwrap();
+        let id5 = queue.submit_after(DOUBLE, &[5], 5).unwrap();
+        let id1 = queue.submit_after(DOUBLE, &[1], 1).unwrap();
+        let id3 = queue.submit_after(DOUBLE, &[3], 3).unwrap();
+        queue.end().unwrap();
+
+        assert_eq!(queue.begin().unwrap(), [(id1, Ok(vec![2]))]);
+        let id1_to_3 = queue.submit_after(DOUBLE, &[4], 2).unwrap();
+        queue.end().unwrap();
+
+        assert!(queue.begin().unwrap().is_empty());
+        queue.end().unwrap();
+
+        assert_eq!(
+            queue.begin().unwrap(),
+            [(id3, Ok(vec![6])), (id1_to_3, Ok(vec![8]))]
+        );
+        queue.end().unwrap();
+
+        assert!(queue.begin().unwrap().is_empty());
+        queue.end().unwrap();
+
+        assert_eq!(queue.begin().unwrap(), [(id5, Ok(vec![10]))]);
+        queue.end().unwrap();
     }
 
     #[test]

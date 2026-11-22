@@ -299,7 +299,7 @@ WasmCoreCallin WasmCoreHost::ResolveCallin(std::string_view name)
 }
 
 std::uint64_t WasmCoreHost::SubmitJob(std::string exportName, std::span<const std::uint8_t> input,
-	std::string_view workerModule, WasmJobInstanceMode mode)
+	std::string_view workerModule, WasmJobInstanceMode mode, std::uint32_t delayTicks)
 {
 	using recoil::wasm::core::PackU32;
 	using recoil::wasm::core::Status;
@@ -307,6 +307,8 @@ std::uint64_t WasmCoreHost::SubmitJob(std::string exportName, std::span<const st
 		return PackU32(0, static_cast<std::int32_t>(Status::InvalidState));
 #if defined(RECOIL_WASMTIME_AVAILABLE)
 	const bool synced = WasmEnvironmentMatrix::Policy(environment).synced;
+	if (delayTicks == 0 || delayTicks > WasmSyncedJobs::MAX_DELAY_TICKS || (!synced && delayTicks != 1))
+		return PackU32(0, static_cast<std::int32_t>(Status::InvalidArgument));
 	auto* jobs = synced ? &SyncedJobs() : backend->localJobs.get();
 	if (!jobs)
 		return PackU32(0, static_cast<std::int32_t>(Status::NotAvailable));
@@ -324,8 +326,8 @@ std::uint64_t WasmCoreHost::SubmitJob(std::string exportName, std::span<const st
 		return PackU32(0, static_cast<std::int32_t>(Status::NotAvailable));
 	ZoneScopedN("Wasm::Jobs::SubmitImport");
 	if (ZoneIsActive)
-		ZoneTextF("owner=%s worker=%s environment=%s", moduleName.c_str(), worker->moduleName.c_str(), WasmEnvironmentMatrix::Name(environment));
-	const auto id = jobs->Submit(this, worker->backend->jobProgram, std::move(exportName), input, mode
+		ZoneTextF("owner=%s worker=%s environment=%s delay=%u", moduleName.c_str(), worker->moduleName.c_str(), WasmEnvironmentMatrix::Name(environment), delayTicks);
+	const auto id = jobs->Submit(this, worker->backend->jobProgram, std::move(exportName), input, mode, delayTicks
 #if defined(TRACY_ENABLE)
 		, moduleName
 #endif
