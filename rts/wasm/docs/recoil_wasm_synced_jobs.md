@@ -72,12 +72,17 @@ submission. The existing `run_this_tick` and `run_next_tick` methods keep using
 use spring_sdk::jobs::InstanceMode;
 let results = spring.jobs().run_this_tick_with_mode(WORKER, &batch, InstanceMode::Reuse)?;
 let id = spring.jobs().run_next_tick_with_mode(WORKER, &input, InstanceMode::Pooled)?;
+let id_later = spring.jobs().run_after_ticks_with_mode(WORKER, &input, 5, InstanceMode::Reuse)?;
 ```
 
 Native SDK builds use the same native execution path for all three modes.
 On Wasm these methods use the additive `spring:jobs` imports
-`run-batch-to-with-mode` and `submit-to-with-mode`. Each appends one `i32` to the
-existing named-module import's parameters (`0` fresh, `1` pooled, `2` reuse).
+`run-batch-to-with-mode`, `submit-to-with-mode`, and `submit-to-after-ticks`.
+`submit-to-after-ticks` appends both `mode` (`0` fresh, `1` pooled, `2` reuse) and
+`delay_ticks` (`1..=300` for synced modules; local Update queues only allow `1`).
+Results are grouped per fixed delivery frame (`submitted_frame + delay_ticks`) so
+earlier frames never block on longer-horizon jobs, and all jobs due on the same
+frame are delivered in global submission (`JobId`) order.
 An empty module name targets the submitting module. Guests that import these
 new functions require an engine that supports them.
 

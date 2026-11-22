@@ -10,6 +10,7 @@
 #include <exception>
 #include <functional>
 #include <limits>
+#include <map>
 #include <stdexcept>
 
 #include "System/Log/ILog.h"
@@ -94,6 +95,7 @@ struct WasmSyncedJobs::State {
 		void* owner;
 		std::uint32_t id;
 		int frame;
+		int deliverFrame;
 		std::shared_ptr<const WasmJobProgram> program;
 		std::string exportName;
 		std::vector<std::uint8_t> input;
@@ -108,14 +110,24 @@ struct WasmSyncedJobs::State {
 		std::vector<WasmJobResult> results;
 		std::vector<std::exception_ptr> exceptions;
 	};
+	struct ActiveBucket {
+		std::vector<std::shared_ptr<Batch>> batches;
+#if defined(THREADPOOL)
+		using Work = std::function<void(int)>;
+		std::vector<std::shared_ptr<ForBackgroundTaskGroup<Work>>> background;
+#endif
+	};
 	std::vector<Job> pending;
-	// Sealed batches of this window in submission order; Flush seals early ones.
-	std::vector<std::shared_ptr<Batch>> active;
+	// Sealed batches grouped by fixed delivery frame; Flush seals early ones.
+	std::map<int, ActiveBucket> activeByFrame;
 	std::uint32_t nextId = 1;
 	std::size_t inputBytes = 0;
 	// Admission already sealed by Flush this window, so quotas match one batch.
 	std::size_t sealedJobs = 0;
 	std::size_t sealedInputBytes = 0;
+	// Total in-flight jobs and input bytes across all future delivery buckets.
+	std::size_t activeJobs = 0;
+	std::size_t activeInputBytes = 0;
 	std::size_t batchJobs = 0;
 	std::size_t batchInputBytes = 0;
 	std::size_t batchOutputBytes = 0;
@@ -123,18 +135,21 @@ struct WasmSyncedJobs::State {
 	std::exception_ptr batchFailure;
 	int frame = -1;
 	bool accepting = false;
-#if defined(THREADPOOL)
-	using Work = std::function<void(int)>;
-	std::vector<std::shared_ptr<ForBackgroundTaskGroup<Work>>> background;
-#endif
 
-	void Wait()
+	static void WaitBucket(ActiveBucket& bucket)
 	{
 #if defined(THREADPOOL)
-		for (auto& group: background)
+		for (auto& group: bucket.background)
 			wait_for_mt_background(group);
-		background.clear();
+		bucket.background.clear();
+#else
+		(void)bucket;
 #endif
+	}
+	void WaitAll()
+	{
+		for (auto& [_, bucket]: activeByFrame)
+			WaitBucket(bucket);
 	}
 	void Seal();
 };
@@ -143,11 +158,11 @@ WasmSyncedJobs::WasmSyncedJobs(Mode mode): state(std::make_unique<State>(mode))
 {
 	if (mode == Mode::Update) BeginFrame(0);
 }
-WasmSyncedJobs::~WasmSyncedJobs() { state->Wait(); }
+WasmSyncedJobs::~WasmSyncedJobs() { state->WaitAll(); }
 
 std::uint32_t WasmSyncedJobs::Submit(void* owner,
 	std::shared_ptr<const WasmJobProgram> program, std::string exportName,
-	std::span<const std::uint8_t> input, WasmJobInstanceMode instanceMode
+	std::span<const std::uint8_t> input, WasmJobInstanceMode instanceMode, std::uint32_t delayTicks
 #if defined(TRACY_ENABLE)
 	, std::string_view profileOwner
 #endif
@@ -155,15 +170,20 @@ std::uint32_t WasmSyncedJobs::Submit(void* owner,
 {
 	ZoneScopedN("Wasm::Jobs::Admission");
 	if (!Accepting() || state->frame < 0 || owner == nullptr || !program || exportName.empty() || exportName.size() > 256 ||
+		delayTicks == 0 || delayTicks > MAX_DELAY_TICKS || (state->mode == Mode::Update && delayTicks != 1) ||
+		state->frame > std::numeric_limits<int>::max() - static_cast<int>(delayTicks) ||
 		state->nextId == 0 || state->pending.size() + state->sealedJobs + state->batchJobs >= MAX_JOBS_PER_FRAME ||
+		state->pending.size() + state->activeJobs >= MAX_IN_FLIGHT_JOBS ||
 		input.size() > MAX_INPUT_BYTES ||
-		input.size() > MAX_FRAME_INPUT_BYTES - state->inputBytes - state->sealedInputBytes - state->batchInputBytes)
+		input.size() > MAX_FRAME_INPUT_BYTES - state->inputBytes - state->sealedInputBytes - state->batchInputBytes ||
+		input.size() > MAX_IN_FLIGHT_INPUT_BYTES - state->inputBytes - state->activeInputBytes)
 		return 0;
 	const auto id = state->nextId++;
+	const int deliverFrame = state->frame + static_cast<int>(delayTicks);
 	ZoneValue(id);
 	if (ZoneIsActive)
-		ZoneTextF("frame=%d job=%u export=%s input=%zu", state->frame, id, exportName.c_str(), input.size());
-	state->pending.push_back({owner, id, state->frame, std::move(program),
+		ZoneTextF("frame=%d deliver=%d job=%u export=%s input=%zu", state->frame, deliverFrame, id, exportName.c_str(), input.size());
+	state->pending.push_back({owner, id, state->frame, deliverFrame, std::move(program),
 		std::move(exportName), {input.begin(), input.end()}, 0, instanceMode
 #if defined(TRACY_ENABLE)
 		, profileOwner
@@ -182,42 +202,56 @@ std::vector<WasmSyncedJobs::Delivery> WasmSyncedJobs::BeginFrame(int frame)
 	if (state->runningBatch)
 		throw std::logic_error("Cannot advance Wasm jobs during a synchronous batch");
 	if (state->batchFailure) std::rethrow_exception(state->batchFailure);
+	if (!state->activeByFrame.empty() && state->activeByFrame.begin()->first < frame)
+		throw std::logic_error("Wasm job missed its fixed delivery boundary");
+	auto dueIt = state->activeByFrame.find(frame);
+	const bool hasDue = dueIt != state->activeByFrame.end();
 	{
-		ZoneNamedN(barrier, "Wasm::Jobs::Barrier", !state->active.empty());
+		ZoneNamedN(barrier, "Wasm::Jobs::Barrier", hasDue);
 		ZoneValueV(barrier, frame);
 		const auto start = JobClock::Clock::now();
-		state->Wait();
+		if (hasDue)
+			State::WaitBucket(dueIt->second);
 		if (Timing().on && state->mode == Mode::Synced) {
 			Timing().barrierNs += JobClock::Ns(start, JobClock::Clock::now());
 			Timing().Report(frame);
 		}
 	}
-	ZoneNamedN(collect, "Wasm::Jobs::Collect", !state->active.empty());
+	ZoneNamedN(collect, "Wasm::Jobs::Collect", hasDue);
 	ZoneValueV(collect, frame);
 	if (!state->pending.empty() && (state->mode != Mode::Update ||
 		std::any_of(state->pending.begin(), state->pending.end(), [frame](const auto& job) { return job.frame != frame; })))
 		throw std::logic_error("Wasm job submissions were not sealed at the prior frame boundary");
 	std::vector<Delivery> deliveries;
-	// Complete the whole barrier before publishing any result. Host resource
-	// failure terminates simulation instead of silently becoming game state.
-	for (const auto& batch: state->active) {
-		for (std::size_t i = 0; i < batch->jobs.size(); ++i) {
-			if (batch->jobs[i].frame + 1 != frame)
-				throw std::logic_error("Wasm job missed its fixed next-frame delivery boundary");
-			if (batch->exceptions[i])
-				std::rethrow_exception(batch->exceptions[i]);
-			if (batch->results[i].status == WasmJobStatus::RuntimeFailure)
-				throw std::runtime_error("Wasm job host failure: " + batch->results[i].diagnostic);
+	if (hasDue) {
+		auto bucket = std::move(dueIt->second);
+		state->activeByFrame.erase(dueIt);
+		// Complete the whole barrier before publishing any result. Host resource
+		// failure terminates simulation instead of silently becoming game state.
+		for (const auto& batch: bucket.batches) {
+			for (std::size_t i = 0; i < batch->jobs.size(); ++i) {
+				if (batch->jobs[i].deliverFrame != frame)
+					throw std::logic_error("Wasm job missed its fixed delivery boundary");
+				if (batch->exceptions[i])
+					std::rethrow_exception(batch->exceptions[i]);
+				if (batch->results[i].status == WasmJobStatus::RuntimeFailure)
+					throw std::runtime_error("Wasm job host failure: " + batch->results[i].diagnostic);
+			}
 		}
-	}
-	for (const auto& batch: state->active) {
-		for (std::size_t i = 0; i < batch->jobs.size(); ++i) {
-			auto& job = batch->jobs[i];
-			LogFailure("next-frame", job.id, job.frame, job.exportName, job.input.size(), batch->results[i]);
-			deliveries.push_back({job.owner, job.id, job.frame, std::move(batch->results[i])});
+		for (const auto& batch: bucket.batches) {
+			state->activeJobs -= batch->jobs.size();
+			for (std::size_t i = 0; i < batch->jobs.size(); ++i) {
+				auto& job = batch->jobs[i];
+				state->activeInputBytes -= job.input.size();
+				LogFailure("deferred", job.id, job.frame, job.exportName, job.input.size(), batch->results[i]);
+				deliveries.push_back({job.owner, job.id, job.frame, std::move(batch->results[i])});
+			}
 		}
+		// Multi-frame jobs submitted on earlier frames may share this delivery frame
+		// with later submissions; deliver in strict global submission order (`id`).
+		std::sort(deliveries.begin(), deliveries.end(),
+			[](const Delivery& a, const Delivery& b) { return a.id < b.id; });
 	}
-	state->active.clear();
 	state->sealedJobs = 0;
 	state->sealedInputBytes = 0;
 	state->frame = frame;
@@ -337,7 +371,7 @@ void WasmSyncedJobs::EndFrame()
 		throw std::logic_error("Cannot seal Wasm jobs during a synchronous batch");
 	if (state->batchFailure) std::rethrow_exception(state->batchFailure);
 	state->accepting = false;
-	if (!state->active.empty() && state->active.front()->jobs.front().frame != state->frame)
+	if (!state->activeByFrame.empty() && state->activeByFrame.begin()->first <= state->frame)
 		throw std::logic_error("Prior Wasm job batch was not consumed");
 	state->Seal();
 }
@@ -349,9 +383,9 @@ void WasmSyncedJobs::Flush()
 	state->Seal();
 }
 
-// Dispatch what is pending as one background batch. Results still wait for the
-// next BeginFrame and arrive in submission order, so when a batch is sealed only
-// moves its work earlier in wall time.
+// Dispatch what is pending as background batches grouped by fixed delivery frame.
+// Results wait only for their own delivery frame's BeginFrame and arrive in global
+// submission order, so when a batch is sealed only moves its work earlier in wall time.
 void WasmSyncedJobs::State::Seal()
 {
 	if (pending.empty())
@@ -361,39 +395,48 @@ void WasmSyncedJobs::State::Seal()
 	if (ZoneIsActive)
 		ZoneTextF("frame=%d jobs=%zu input=%zu threads=%d", frame,
 		pending.size(), inputBytes, ThreadPool::GetNumThreads());
-	auto batch = std::make_shared<Batch>();
-	batch->jobs = std::move(pending);
-	pending.clear();
-	sealedJobs += batch->jobs.size();
+	std::map<int, std::vector<Job>> byDeliver;
+	for (auto& job: pending)
+		byDeliver[job.deliverFrame].push_back(std::move(job));
+	sealedJobs += pending.size();
 	sealedInputBytes += inputBytes;
+	activeJobs += pending.size();
+	activeInputBytes += inputBytes;
+	pending.clear();
 	inputBytes = 0;
-	batch->results.resize(batch->jobs.size());
-	batch->exceptions.resize(batch->jobs.size());
-	active.push_back(batch);
-	// The queue owns this batch until Wait completes. Do not capture a shared
-	// pointer: the engine pools 256 task groups and retains their last callable.
-	std::function<void(int)> work = [batch = batch.get()](int index) {
-		const auto& job = batch->jobs[index];
-		ZoneScopedN("Wasm::Jobs::Worker");
-		ZoneValue(job.id);
-		if (ZoneIsActive)
-			ZoneTextF("frame=%d job=%u worker=%d owner=%.*s export=%s module=%.12s input=%zu", job.frame,
-				job.id, ThreadPool::GetThreadNum(), static_cast<int>(job.profileOwner.size()), job.profileOwner.data(),
-				job.exportName.c_str(), job.program->Identity().c_str(), job.input.size());
-		try {
-			batch->results[index] = Timing().Run(*job.program, job.exportName, job.input, 1024 * 1024, job.instanceMode);
-		} catch (...) {
-			batch->exceptions[index] = std::current_exception();
-		}
-		if (ZoneIsActive)
-			ZoneTextF("status=%u output=%zu exception=%d", static_cast<unsigned>(batch->results[index].status),
-				batch->results[index].bytes.size(), int(batch->exceptions[index] != nullptr));
-	};
+	for (auto& [deliverFrame, jobs]: byDeliver) {
+		auto batch = std::make_shared<Batch>();
+		batch->jobs = std::move(jobs);
+		batch->results.resize(batch->jobs.size());
+		batch->exceptions.resize(batch->jobs.size());
+		auto& bucket = activeByFrame[deliverFrame];
+		bucket.batches.push_back(batch);
+		// The queue owns this batch until WaitBucket completes. Do not capture a shared
+		// pointer: the engine pools 256 task groups and retains their last callable.
+		std::function<void(int)> work = [batch = batch.get()](int index) {
+			const auto& job = batch->jobs[index];
+			ZoneScopedN("Wasm::Jobs::Worker");
+			ZoneValue(job.id);
+			if (ZoneIsActive)
+				ZoneTextF("frame=%d deliver=%d job=%u worker=%d owner=%.*s export=%s module=%.12s input=%zu",
+					job.frame, job.deliverFrame, job.id, ThreadPool::GetThreadNum(),
+					static_cast<int>(job.profileOwner.size()), job.profileOwner.data(),
+					job.exportName.c_str(), job.program->Identity().c_str(), job.input.size());
+			try {
+				batch->results[index] = Timing().Run(*job.program, job.exportName, job.input, 1024 * 1024, job.instanceMode);
+			} catch (...) {
+				batch->exceptions[index] = std::current_exception();
+			}
+			if (ZoneIsActive)
+				ZoneTextF("status=%u output=%zu exception=%d", static_cast<unsigned>(batch->results[index].status),
+					batch->results[index].bytes.size(), int(batch->exceptions[index] != nullptr));
+		};
 #if defined(THREADPOOL)
-	background.push_back(for_mt_background(0, batch->jobs.size(), 1, std::move(work)));
+		bucket.background.push_back(for_mt_background(0, batch->jobs.size(), 1, std::move(work)));
 #else
-	for (int i = 0; i < batch->jobs.size(); ++i) work(i);
+		for (int i = 0; i < batch->jobs.size(); ++i) work(i);
 #endif
+	}
 }
 
 void WasmSyncedJobs::CancelOwner(void* owner)
@@ -402,26 +445,37 @@ void WasmSyncedJobs::CancelOwner(void* owner)
 		throw std::logic_error("Cannot remove a Wasm batch caller during its active callback");
 	// Drain before removing this owner's result slots. Workers never read the
 	// owner pointer; their programs independently retain the runtime engine.
-	state->Wait();
+	state->WaitAll();
 	std::erase_if(state->pending, [owner](const auto& job) { return job.owner == owner; });
 	state->inputBytes = 0;
 	for (const auto& job: state->pending) state->inputBytes += job.input.size();
-	for (const auto& batch: state->active) {
-		for (std::size_t i = batch->jobs.size(); i-- > 0;) {
-			if (batch->jobs[i].owner != owner) continue;
-			batch->jobs.erase(batch->jobs.begin() + i);
-			batch->results.erase(batch->results.begin() + i);
-			batch->exceptions.erase(batch->exceptions.begin() + i);
+	state->activeJobs = 0;
+	state->activeInputBytes = 0;
+	for (auto it = state->activeByFrame.begin(); it != state->activeByFrame.end();) {
+		auto& batches = it->second.batches;
+		for (const auto& batch: batches) {
+			for (std::size_t i = batch->jobs.size(); i-- > 0;) {
+				if (batch->jobs[i].owner != owner) continue;
+				batch->jobs.erase(batch->jobs.begin() + i);
+				batch->results.erase(batch->results.begin() + i);
+				batch->exceptions.erase(batch->exceptions.begin() + i);
+			}
+			state->activeJobs += batch->jobs.size();
+			for (const auto& job: batch->jobs) state->activeInputBytes += job.input.size();
 		}
+		std::erase_if(batches, [](const auto& batch) { return batch->jobs.empty(); });
+		if (batches.empty())
+			it = state->activeByFrame.erase(it);
+		else
+			++it;
 	}
-	std::erase_if(state->active, [](const auto& batch) { return batch->jobs.empty(); });
 }
 
 void WasmSyncedJobs::Reset()
 {
 	if (state->runningBatch)
 		throw std::logic_error("Cannot reset Wasm jobs during a synchronous batch");
-	state->Wait();
+	state->WaitAll();
 	state = std::make_unique<State>(state->mode);
 	if (state->mode == Mode::Update) BeginFrame(0);
 }
@@ -457,9 +511,12 @@ std::uint64_t WasmSyncedJobs::StateHash(void* owner) const
 		addWord(static_cast<std::uint32_t>(job.inputHash >> 32));
 		if (job.instanceMode != WasmJobInstanceMode::Fresh)
 			addWord(static_cast<std::uint32_t>(job.instanceMode));
+		if (job.deliverFrame != job.frame + 1)
+			addWord(static_cast<std::uint32_t>(job.deliverFrame));
 	};
-	for (const auto& batch: state->active)
-		for (const auto& job: batch->jobs) addJob(job);
+	for (const auto& [_, bucket]: state->activeByFrame)
+		for (const auto& batch: bucket.batches)
+			for (const auto& job: batch->jobs) addJob(job);
 	for (const auto& job: state->pending) addJob(job);
 	return hash;
 }

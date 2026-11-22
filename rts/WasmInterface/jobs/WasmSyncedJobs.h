@@ -20,6 +20,9 @@ public:
 	static constexpr std::size_t MAX_JOBS_PER_FRAME = WasmJobBatch::MAX_JOBS;
 	static constexpr std::size_t MAX_INPUT_BYTES = WasmJobBatch::MAX_BYTES;
 	static constexpr std::size_t MAX_FRAME_INPUT_BYTES = WasmJobBatch::MAX_TOTAL_BYTES;
+	static constexpr std::uint32_t MAX_DELAY_TICKS = 300;
+	static constexpr std::size_t MAX_IN_FLIGHT_JOBS = MAX_JOBS_PER_FRAME * 8;
+	static constexpr std::size_t MAX_IN_FLIGHT_INPUT_BYTES = MAX_FRAME_INPUT_BYTES * 4;
 	struct Delivery {
 		void* owner;
 		std::uint32_t id;
@@ -31,9 +34,12 @@ public:
 	~WasmSyncedJobs();
 	// Returns zero for a bounded admission rejection; never depends on worker
 	// completion, queue readiness, wall time or worker count.
+	// `delayTicks` selects the fixed delivery boundary `submittedFrame + delayTicks`
+	// (default 1 = next frame; local Update queues only allow 1).
 	std::uint32_t Submit(void* owner, std::shared_ptr<const WasmJobProgram> program,
 		std::string exportName, std::span<const std::uint8_t> input,
-		WasmJobInstanceMode instanceMode = WasmJobInstanceMode::Fresh
+		WasmJobInstanceMode instanceMode = WasmJobInstanceMode::Fresh,
+		std::uint32_t delayTicks = 1
 #if defined(TRACY_ENABLE)
 		// Immutable owner name, valid until this queue drains; not synced data.
 		, std::string_view profileOwner = "native"
