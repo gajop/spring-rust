@@ -8,13 +8,25 @@
 
 #include "errorhandler.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <string>
 #include <functional>
+
+#ifdef _WIN32
+	#include <process.h>
+	#define GETPID _getpid
+#else
+	#include <unistd.h>
+	#define GETPID getpid
+#endif
 
 #include "System/SpringExitCode.h"
 #include "System/Log/ILog.h"
 #include "System/Log/LogSinkHandler.h"
 #include "System/Threading/SpringThreading.h"
+#include "System/FileSystem/DataDirLocater.h"
 
 #if !defined(DEDICATED)
 	#include "System/SpringApp.h"
@@ -27,6 +39,52 @@
 	#include "Net/GameServer.h"
 	#include "System/SafeUtil.h"
 #endif
+
+
+/**
+ * With SPRING_FATAL_LOG=<file> set, appends one line per fatal error to it:
+ * time (UTC), pid, caption, message (newlines as \\n) and the write-dir.
+ * The file is moved to <file>.1 once it passes 256 KiB, so it stays small.
+ * Meant for unattended runs whose own directories are deleted afterwards.
+ */
+static void AppendFatalLog(const char* msg, const char* caption)
+{
+	const char* path = std::getenv("SPRING_FATAL_LOG");
+
+	if (path == nullptr || path[0] == '\0')
+		return;
+
+	if (FILE* f = std::fopen(path, "rb")) {
+		std::fseek(f, 0, SEEK_END);
+		const long size = std::ftell(f);
+		std::fclose(f);
+
+		if (size > 256 * 1024) {
+			const std::string old = std::string(path) + ".1";
+			std::remove(old.c_str());
+			std::rename(path, old.c_str());
+		}
+	}
+
+	FILE* f = std::fopen(path, "ab");
+
+	if (f == nullptr)
+		return;
+
+	char stamp[32] = "";
+	const std::time_t now = std::time(nullptr);
+	std::strftime(stamp, sizeof(stamp), "%Y-%m-%dT%H:%M:%SZ", std::gmtime(&now));
+
+	std::string text = std::string(caption) + " | " + msg;
+
+	for (char& c: text) {
+		if (c == '\n' || c == '\r')
+			c = ' ';
+	}
+
+	std::fprintf(f, "%s pid=%d caption+message=\"%s\" writedir=\"%s\"\n", stamp, int(GETPID()), text.c_str(), dataDirLocater.GetWriteDirPath().c_str());
+	std::fclose(f);
+}
 
 
 static void ExitSpringProcessAux(bool waitForExit, bool exitSuccess)
@@ -50,6 +108,7 @@ static void ExitSpringProcessAux(bool waitForExit, bool exitSuccess)
 static void ExitSpringProcess(const char* msg, const char* caption, unsigned int flags)
 {
 	LOG_L(L_ERROR, "[%s] errorMsg=\"%s\" msgCaption=\"%s\"", __func__, msg, caption);
+	AppendFatalLog(msg, caption);
 
 	spring::SafeDelete(gameServer);
 	ExitSpringProcessAux(false, true);
@@ -60,6 +119,7 @@ static void ExitSpringProcess(const char* msg, const char* caption, unsigned int
 static void ExitSpringProcess(const char* msg, const char* caption, unsigned int flags)
 {
 	LOG_L(L_FATAL, "[%s] errorMsg=\"%s\" msgCaption=\"%s\" mainThread=%d", __func__, msg, caption, Threading::IsMainThread());
+	AppendFatalLog(msg, caption);
 
 	switch (SpringApp::PostKill(Threading::Error(caption, msg, flags))) {
 		case -1: {
