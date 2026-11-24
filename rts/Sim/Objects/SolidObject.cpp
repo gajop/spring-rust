@@ -5,6 +5,7 @@
 #include "Map/ReadMap.h"
 #include "Map/Ground.h"
 #include "Sim/Misc/CollisionVolume.h"
+#include "Sim/Misc/QuadField.h"
 #include "Sim/Misc/DamageArray.h"
 #include "Sim/Misc/GroundBlockingObjectMap.h"
 #include "Sim/MoveTypes/MoveDefHandler.h"
@@ -95,6 +96,9 @@ void CSolidObject::PostLoad()
 	RECOIL_DETAILED_TRACY_ZONE;
 	// not saved (custom palette colors are not either), so start from the team color again
 	paletteIndex = static_cast<uint16_t>(team);
+	quadField.TrackSolidMidPosOffset(relMidPos);
+	// Saved world positions may include drift from independent float additions.
+	quadField.TrackSolidMidPosOffset(midPos - pos);
 
 	if ((model = GetDef()->LoadModel()) == nullptr)
 		return;
@@ -157,6 +161,8 @@ void CSolidObject::Move(const float3& v, bool relative)
 	pos    += dv;
 	midPos += dv;
 	aimPos += dv;
+	// Independent float additions can grow the actual centre offset over time.
+	quadField.TrackSolidMidPosOffset(midPos - pos);
 
 	CondUpdatePrevTransform();
 }
@@ -540,4 +546,15 @@ float CSolidObject::CalcFootPrintMaxInteriorRadius(float scale) const { return (
 float CSolidObject::CalcFootPrintAxisStretchFactor() const
 {
 	return (std::abs(xsize - zsize) * 1.0f / (xsize + zsize));
+}
+
+void CSolidObject::SetMidPos(const float3& mp, bool relative)
+{
+	if (relative) {
+		relMidPos = mp; midPos = GetMidPos();
+	} else {
+		midPos = mp; relMidPos = midPos - pos;
+	}
+	// Rotation can move a vertical model offset into the XZ plane.
+	quadField.TrackSolidMidPosOffset(relMidPos);
 }

@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include "GameHelper.h"
+#include "NearestUnitQuery.h"
 
 #include <cmath>
 
@@ -403,7 +404,7 @@ static bool HasEligibleQuadUnits(TFilter& filter, const float3& pos, float radiu
 	return false;
 }
 
-template<bool rejectEmptyTeams = false, typename TFilter, typename TQuery>
+template<bool rejectEmptyTeams = false, bool nearestRings = false, typename TFilter, typename TQuery>
 static inline void QueryUnits(TFilter filter, TQuery& query)
 {
 	if constexpr (rejectEmptyTeams) {
@@ -411,6 +412,32 @@ static inline void QueryUnits(TFilter filter, TQuery& query)
 			// Keep the original query generation, including for an empty search.
 			gs->GetTempNum();
 			return;
+		}
+	}
+
+	if constexpr (nearestRings) {
+		QuadFieldUnitQueryRectangle area;
+		if (query.pos.x >= 0 && query.pos.x <= float3::maxxpos && query.pos.z >= 0 && query.pos.z <= float3::maxzpos
+			&& QuadFieldGetUnitQueryRectangle(quadField, query.pos, query.radius, area)) {
+			const int tempNum = gs->GetTempNum();
+			VisitNearestUnitQuads(quadField, query.pos, query.radius, area, quadField.GetMaxSolidMidPosOffset(), [&](int qi) {
+				const auto& quad = quadField.GetQuad(qi);
+				for (int t = 0; t < teamHandler.ActiveAllyTeams(); ++t) {
+					if (!filter.Team(t)) continue;
+					for (CUnit* u: quad.teamUnits[t]) {
+						if (u->tempNum == tempNum) continue;
+						u->tempNum = tempNum;
+						if (!query.Reject(u) && filter.Unit(u)) query.AddUnit(u);
+					}
+				}
+			}, [&] { return query.closeSqDist; });
+			if (!query.tied)
+				return;
+			// Equal distances depend on legacy team / quad / insertion order.
+			// Replay that order only when the final minimum is shared.
+			query.closeSqDist = query.sqRadius;
+			query.closeUnit = nullptr;
+			query.tied = false;
 		}
 	}
 
@@ -545,22 +572,15 @@ namespace {
 		/**
 		 * Return the closest unit.
 		 */
-		struct ClosestUnit : public Base
+		struct ClosestUnit : public Base, public NearestUnitResult<CUnit>
 		{
-		protected:
-			float closeSqDist;
-			CUnit* closeUnit;
-
 		public:
 			ClosestUnit(const float3& pos, float searchRadius) :
-				Base(pos, searchRadius), closeSqDist(sqRadius), closeUnit(nullptr) {}
+				Base(pos, searchRadius), NearestUnitResult<CUnit>(sqRadius) {}
 
 			void AddUnit(CUnit* u) {
 				const float sqDist = (pos - u->midPos).SqLength2D();
-				if (sqDist <= closeSqDist) {
-					closeSqDist = sqDist;
-					closeUnit = u;
-				}
+				Consider(u, sqDist);
 			}
 
 			/**
@@ -591,8 +611,7 @@ namespace {
 			void AddUnit(CUnit* u) {
 				const float sqDist = (pos - u->midPos).SqLength2D();
 				if (sqDist <= closeSqDist && cai->IsValidTarget(u, nullptr)) {
-					closeSqDist = sqDist;
-					closeUnit = u;
+					Consider(u, sqDist);
 				}
 			}
 		};
@@ -679,8 +698,7 @@ namespace {
 				const float sqDist = (pos - u->midPos).SqLength2D();
 
 				if (sqDist <= closeSqDist && (!checkSightDist || sqDist <= Square(u->losRadius))) {
-					closeSqDist = sqDist;
-					closeUnit = u;
+					Consider(u, sqDist);
 				}
 			}
 		};
@@ -862,7 +880,7 @@ CUnit* CGameHelper::GetClosestEnemyUnit(const CUnit* excludeUnit, const float3& 
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	Query::ClosestUnit q(pos, searchRadius);
-	QueryUnits<true>(Filter::Enemy_InLos(excludeUnit, searchAllyteam), q);
+	QueryUnits<true, true>(Filter::Enemy_InLos(excludeUnit, searchAllyteam), q);
 	return q.GetClosestUnit();
 }
 
@@ -870,7 +888,7 @@ CUnit* CGameHelper::GetClosestValidTarget(const float3& pos, float searchRadius,
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	Query::ClosestValidTarget q(pos, searchRadius, cai);
-	QueryUnits<true>(Filter::Enemy_InLos(nullptr, searchAllyteam), q);
+	QueryUnits<true, true>(Filter::Enemy_InLos(nullptr, searchAllyteam), q);
 	return q.GetClosestUnit();
 }
 
@@ -893,7 +911,7 @@ CUnit* CGameHelper::GetClosestEnemyUnitNoLosTest(
 	} else {
 		// excludes target radius
 		Query::ClosestUnit_InLos_Cylinder q(searchPos, searchRadius, checkSightDist);
-		QueryUnits<true>(Filter::Enemy(excludeUnit, searchAllyteam), q);
+		QueryUnits<true, true>(Filter::Enemy(excludeUnit, searchAllyteam), q);
 		closestUnit = q.GetClosestUnit();
 	}
 
@@ -904,7 +922,7 @@ CUnit* CGameHelper::GetClosestFriendlyUnit(const CUnit* excludeUnit, const float
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	Query::ClosestUnit q(pos, searchRadius);
-	QueryUnits(Filter::Friendly(excludeUnit, searchAllyteam), q);
+	QueryUnits<false, true>(Filter::Friendly(excludeUnit, searchAllyteam), q);
 	return q.GetClosestUnit();
 }
 
@@ -912,7 +930,7 @@ CUnit* CGameHelper::GetClosestEnemyAircraft(const CUnit* excludeUnit, const floa
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	Query::ClosestUnit q(pos, searchRadius);
-	QueryUnits(Filter::EnemyAircraft(excludeUnit, searchAllyteam), q);
+	QueryUnits<false, true>(Filter::EnemyAircraft(excludeUnit, searchAllyteam), q);
 	return q.GetClosestUnit();
 }
 

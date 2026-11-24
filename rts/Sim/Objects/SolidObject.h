@@ -308,13 +308,7 @@ public:
 	virtual void SetMass(float newMass);
 
 private:
-	void SetMidPos(const float3& mp, bool relative) {
-		if (relative) {
-			relMidPos = mp; midPos = GetMidPos();
-		} else {
-			midPos = mp; relMidPos = midPos - pos;
-		}
-	}
+	void SetMidPos(const float3& mp, bool relative);
 	void SetAimPos(const float3& ap, bool relative) {
 		if (relative) {
 			relAimPos = ap; aimPos = GetAimPos();

@@ -31,6 +31,7 @@ CR_REG_METADATA(CQuadField, (
 	CR_MEMBER(quadSizeX),
 	CR_MEMBER(quadSizeZ),
 	CR_MEMBER(invQuadSize),
+	CR_MEMBER(maxSolidMidPosOffsetSq),
 
 	CR_IGNORED(tempUnits),
 	CR_IGNORED(tempFeatures),
@@ -153,6 +154,7 @@ void CQuadField::Quad::PostLoad()
 void CQuadField::Init(int2 mapDims, int quadSize, bool sparse)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	maxSolidMidPosOffsetSq = 0.0f;
 	quadSizeX = quadSize;
 	quadSizeZ = quadSize;
 	numQuadsX = (mapDims.x * SQUARE_SIZE) / quadSize;
@@ -274,7 +276,6 @@ int CQuadField::WorldPosToQuadFieldIdx(const float3 p) const
 }
 
 
-#ifndef UNIT_TEST // ClampInBounds() is not linked
 void CQuadField::GetQuads(QuadFieldQuery& qfq, float3 pos, float radius)
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -329,7 +330,6 @@ void CQuadField::GetQuadsRectangle(QuadFieldQuery& qfq, const float3& mins, cons
 
 	return;
 }
-#endif // UNIT_TEST
 
 
 /// note: this function got an UnitTest, check the tests/ folder!

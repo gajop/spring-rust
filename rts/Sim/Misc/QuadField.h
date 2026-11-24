@@ -266,6 +266,11 @@ public:
 	int GetNumQuadsX() const { return numQuadsX; }
 	int GetNumQuadsZ() const { return numQuadsZ; }
 
+	// A conservative high-water bound; features may enlarge it too. It only
+	// changes query work, never the result or quad membership.
+	void TrackSolidMidPosOffset(const float3& offset) { maxSolidMidPosOffsetSq = std::max(maxSolidMidPosOffsetSq, offset.SqLength()); }
+	float GetMaxSolidMidPosOffset() const { return math::sqrt(maxSolidMidPosOffsetSq); }
+
 	int GetQuadSizeX() const { return quadSizeX; }
 	int GetQuadSizeZ() const { return quadSizeZ; }
 
@@ -289,6 +294,8 @@ private:
 
 	int numQuadsX;
 	int numQuadsZ;
+
+	float maxSolidMidPosOffsetSq = 0.0f;
 
 	int quadSizeX;
 	int quadSizeZ;

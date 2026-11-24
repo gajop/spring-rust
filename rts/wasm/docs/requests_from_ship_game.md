@@ -36,17 +36,3 @@ ships in Home show, and the line from them reaches across the gap.
 every queue line segment (and skip its icons) to the rectangle, in the world pass. The minimap
 keeps its own rectangle (`minimap view`) as now. Ship Game already keeps its own selection
 markers, routes and rally lines to the shown system.
-
-## 2026-10-12 · Nearest-enemy search costs its circle's area
-
-Found profiling a 1,000-a-side battle (`tools/launch.py check perf-combined` in Ship Game; report
-`docs/ai/reports/battle-scale-2026-10-12.md` there).
-
-**Nearest-enemy search.** `CGameHelper::GetClosestEnemyUnit` (`QueryUnits`) gathers every
-128-elmo quad its circle touches and walks each enemy ally team's units in them, nearest or not,
-so its cost follows the circle's area rather than what is near. Ship Game's Lancers search within
-8,400 elmos, about 17,000 quads a search; 600 of them searching every frame took a third of the
-rules frame. Ship Game now searches once a second per ship and when the enemy is lost; what
-remains is still 7% of the rules time. Request: for the closest-unit queries, visit quads in
-rings outward from the centre and stop once a ring's nearest edge is farther than the best unit
-found. Cost then follows the distance to the nearest enemy.
