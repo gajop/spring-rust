@@ -151,6 +151,9 @@ void CShadowHandler::ConfigNotify(const std::string& key, const std::string& val
 
 void CShadowHandler::Update()
 {
+	if (!shadowsLoaded || shadowConfig <= 0 || shadowGenBits == SHADOWGEN_BIT_NONE)
+		return;
+
 	CCamera* playCam = CCameraHandler::GetCamera(CCamera::CAMTYPE_PLAYER);
 	CCamera* shadCam = CCameraHandler::GetCamera(CCamera::CAMTYPE_SHADOW);
 
@@ -979,9 +982,9 @@ float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, co
 	constexpr float SHRINK_STEPS = 2.0f;
 	constexpr float MIN_DIAMETER = 256.0f;
 
-	// On maps where ground/water receives shadows, keep the frustum fit so terrain
-	// and water retain full shadow coverage.
-	if (GroundReceivesShadows())
+	// On maps where ground/water receives shadows (or when model shadows are disabled),
+	// keep the frustum fit and skip scanning units/features.
+	if (GroundReceivesShadows() || shadowConfig <= 0 || (shadowGenBits & SHADOWGEN_BIT_MODEL) == 0)
 		return GetStableProjectedFrustumDiameter(playerCam, lightViewMat, centerPos);
 
 	const float3 xDir = lightViewMat.GetX();
@@ -1063,8 +1066,14 @@ float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, co
 	const float texelSize = stableProjDiameter / texels;
 	const float cx = std::round((xbounds.x + xbounds.y) * 0.5f / texelSize) * texelSize;
 	const float cy = std::round((ybounds.x + ybounds.y) * 0.5f / texelSize) * texelSize;
-	// Center light-space depth on the actual receiver/caster Z envelope and expand depthSpan
-	// above 2*mapBoundingRadius whenever elevated objects near map edges exceed the flat map span.
+	// Union the active unit/feature light-space Z envelope with the full map-centered
+	// +/-mapBoundingRadius slab so neither elevated receivers near map corners nor
+	// lightward projectiles/custom-callin casters clip.
+	const float3 mapCenter(mapDims.mapx * SQUARE_SIZE * 0.5f, readMap->GetCurrAvgHeight(), mapDims.mapy * SQUARE_SIZE * 0.5f);
+	const float mapZ = mapCenter.dot(zDir);
+	const float mapRadius = readMap->GetBoundingRadius();
+	zbounds.x = std::min(zbounds.x, mapZ - mapRadius);
+	zbounds.y = std::max(zbounds.y, mapZ + mapRadius);
 	const float cz = std::round((zbounds.x + zbounds.y) * 0.5f);
 	depthSpan = std::max(maxDiameter, (zbounds.y - zbounds.x) + 64.0f);
 

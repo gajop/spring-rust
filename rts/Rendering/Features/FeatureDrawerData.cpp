@@ -90,18 +90,40 @@ void CFeatureDrawerData::ConfigNotify(const std::string& key, const std::string&
 	LOG_L(L_INFO, "[FeatureDrawer::%s] {draw,fade}distance set to {%f,%f}", __func__, featureDrawDistance, featureFadeDistance);
 }
 
+void CFeatureDrawerData::UpdateDrawAlpha(CFeature* f, const CCamera* playerCam) const
+{
+	if (!f->alphaFade) {
+		f->drawAlpha = 1.0f;
+		return;
+	}
+	const float camDist = (f->drawPos - playerCam->GetPos()).Length();
+	if (camDist > featureDrawDistance) {
+		f->drawAlpha = 0.0f;
+	} else if (camDist < featureFadeDistance) {
+		f->drawAlpha = 1.0f;
+	} else if (featureDrawDistance == featureFadeDistance) {
+		f->drawAlpha = 0.0f;
+	} else {
+		f->drawAlpha = std::max(0.0f, 1.0f - (camDist - featureFadeDistance) / (featureDrawDistance - featureFadeDistance));
+	}
+}
+
 void CFeatureDrawerData::UpdatePoses()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	const CCamera* playerCam = CCameraHandler::GetCamera(CCamera::CAMTYPE_PLAYER);
 	if (mtModelDrawer) {
-		for_mt_chunk(0, unsortedObjects.size(), [this](const int k) {
+		for_mt_chunk(0, unsortedObjects.size(), [this, playerCam](const int k) {
 			CFeature* f = unsortedObjects[k];
 			UpdateDrawPos(f);
+			UpdateDrawAlpha(f, playerCam);
 		}, CModelDrawerDataConcept::MT_CHUNK_OR_MIN_CHUNK_SIZE_UPDT);
 	}
 	else {
-		for (CFeature* f : unsortedObjects)
+		for (CFeature* f : unsortedObjects) {
 			UpdateDrawPos(f);
+			UpdateDrawAlpha(f, playerCam);
+		}
 	}
 	posesUpdated = true;
 }
@@ -111,18 +133,23 @@ void CFeatureDrawerData::Update()
 	RECOIL_DETAILED_TRACY_ZONE;
 	const bool needPoses = !posesUpdated;
 	posesUpdated = false;
+	const CCamera* playerCam = CCameraHandler::GetCamera(CCamera::CAMTYPE_PLAYER);
 	if (mtModelDrawer) {
-		for_mt_chunk(0, unsortedObjects.size(), [this, needPoses](const int k) {
+		for_mt_chunk(0, unsortedObjects.size(), [this, needPoses, playerCam](const int k) {
 			CFeature* f = unsortedObjects[k];
-			if (needPoses)
+			if (needPoses) {
 				UpdateDrawPos(f);
+				UpdateDrawAlpha(f, playerCam);
+			}
 			UpdateCommon(f);
 		}, CModelDrawerDataConcept::MT_CHUNK_OR_MIN_CHUNK_SIZE_UPDT);
 	}
 	else {
 		for (CFeature* f : unsortedObjects) {
-			if (needPoses)
+			if (needPoses) {
 				UpdateDrawPos(f);
+				UpdateDrawAlpha(f, playerCam);
+			}
 			UpdateCommon(f);
 		}
 	}

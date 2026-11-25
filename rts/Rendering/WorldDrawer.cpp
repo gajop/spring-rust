@@ -214,9 +214,13 @@ void CWorldDrawer::Kill()
 
 
 
-void CWorldDrawer::UpdatePoses() const
+void CWorldDrawer::UpdatePoses()
 {
 	SCOPED_TIMER("Update::WorldDrawer::Poses");
+	// Keep unsynced terrain heights current before CUnitDrawer::UpdatePosesStatic()
+	// raycasts them for icon zoom distance.
+	readMap->UpdateDraw(numUpdates == 0);
+	readMapDrawUpdated = true;
 	CUnitDrawer::UpdatePosesStatic();
 	CFeatureDrawer::UpdatePosesStatic();
 }
@@ -226,7 +230,9 @@ void CWorldDrawer::Update(bool newSimFrame)
 	SCOPED_TIMER("Update::WorldDrawer");
 
 	LuaObjectDrawer::Update(numUpdates == 0);
-	readMap->UpdateDraw(numUpdates == 0);
+	if (!readMapDrawUpdated)
+		readMap->UpdateDraw(numUpdates == 0);
+	readMapDrawUpdated = false;
 
 	if (globalRendering->drawGround) {
 		ZoneScopedN("GroundDrawer::Update");

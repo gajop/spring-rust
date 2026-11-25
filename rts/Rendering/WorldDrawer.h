@@ -10,7 +10,7 @@ public:
 	void InitPost() const;
 	void Kill();
 
-	void UpdatePoses() const;
+	void UpdatePoses();
 	void Update(bool newSimFrame);
 	void Draw(unsigned int worldFBO = 0) const;
 
@@ -25,6 +25,7 @@ private:
 
 private:
 	unsigned int numUpdates = 0;
+	bool readMapDrawUpdated = false;
 };
 
 #endif // _WORLD_DRAWER_H

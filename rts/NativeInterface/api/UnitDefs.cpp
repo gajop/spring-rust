@@ -8,6 +8,9 @@
 #include "Sim/Weapons/WeaponDef.h"
 #include "Lua/LuaUnitDefs.h"
 #include "Lua/LuaDefs.h"
+#include "Rendering/Models/IModelParser.h"
+#include "System/FileSystem/FileSystem.h"
+#include "System/StringUtil.h"
 #include <cstring>
 #include <string>
 #include <vector>
@@ -26,6 +29,7 @@ static thread_local std::vector<int32_t> unitWeaponIDs;
 static thread_local std::vector<int32_t> unitBuildableIDs;
 static thread_local std::vector<UnitDefWeaponMount> unitWeaponMounts;
 static thread_local std::vector<const char*> unitCustomParamKeys;
+static thread_local std::string unitDefParamStringBuf;
 
 // Static errors
 static const Error INVALID_UNITDEF_ERROR = { .code = native_error::InvalidId, .message = "Invalid unit def ID" };
@@ -142,6 +146,36 @@ static bool IsClassifyKey(const char* key) {
 	return found;
 }
 
+// The computed model string accessors, by the same names Lua uses (LuaUnitDefs.cpp,
+// ModelName/ModelPath/ModelType), so GetUnitDefParamString can serve them alongside
+// offset-based string fields.
+static bool IsModelStringKey(const char* key) {
+	if (key == nullptr)
+		return false;
+	return std::strcmp(key, "modelname") == 0
+		|| std::strcmp(key, "modelpath") == 0
+		|| std::strcmp(key, "modeltype") == 0;
+}
+
+static bool ModelStringByName(const UnitDef* ud, const char* key, std::string& out) {
+	if (key == nullptr)
+		return false;
+	if (std::strcmp(key, "modelname") == 0) {
+		out = ud->modelName;
+		return true;
+	}
+	if (std::strcmp(key, "modelpath") == 0) {
+		out = modelLoader.FindModelPath(ud->modelName);
+		return true;
+	}
+	if (std::strcmp(key, "modeltype") == 0) {
+		const std::string modelPath = modelLoader.FindModelPath(ud->modelName);
+		out = StringToLower(FileSystem::GetExtensionLowerCase(modelPath));
+		return true;
+	}
+	return false;
+}
+
 static void NativeGetUnitDefParamKeys(const GetUnitDefParamKeysQuery* query, GetUnitDefParamKeysResult* result) {
 	bufferPos = 0;
 	result->error = nullptr;
@@ -155,9 +189,15 @@ static void NativeGetUnitDefParamKeys(const GetUnitDefParamKeysQuery* query, Get
 		if (pair.first == "next" || pair.first == "pairs")
 			continue;
 
+		int32_t type = ParamTypeOf(&pair.second);
+		if (IsClassifyKey(pair.first.c_str()))
+			type = UNIT_DEF_PARAM_BOOL;
+		else if (IsModelStringKey(pair.first.c_str()))
+			type = UNIT_DEF_PARAM_STRING;
+
 		unitDefParamKeys.push_back({
 			.name = pair.first.c_str(),
-			.type = IsClassifyKey(pair.first.c_str()) ? UNIT_DEF_PARAM_BOOL : ParamTypeOf(&pair.second),
+			.type = type,
 		});
 	}
 
@@ -171,6 +211,10 @@ static void NativeGetUnitDefParamType(const GetUnitDefParamTypeQuery* query, Get
 
 	if (IsClassifyKey(query->key)) {
 		result->type = UNIT_DEF_PARAM_BOOL;
+		return;
+	}
+	if (IsModelStringKey(query->key)) {
+		result->type = UNIT_DEF_PARAM_STRING;
 		return;
 	}
 
@@ -250,6 +294,11 @@ static void NativeGetUnitDefParamString(const GetUnitDefParamStringQuery* query,
 	const UnitDef* ud = unitDefHandler->GetUnitDefByID(query->unitDefID);
 	if (ud == nullptr) {
 		result->error = &INVALID_UNITDEF_ERROR;
+		return;
+	}
+
+	if (ModelStringByName(ud, query->key, unitDefParamStringBuf)) {
+		result->value = unitDefParamStringBuf.c_str();
 		return;
 	}
 
