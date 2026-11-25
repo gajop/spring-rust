@@ -118,7 +118,7 @@ static DECL_ARRAY(std::vector<const CSolidObject*>, objectBuckets, MAX_TEAMS);
 
 CONFIG(bool, ModelDepthPrepass)
 	.defaultValue(false)
-	.description("Draw the opaque models' depth before shading them, through programs with a recoilDepthPrepass uniform (or a minimal Z-only shader when the program declares recoilDepthPrepassSolid): a model close up then shades each pixel once. Read every frame.");
+	.description("Draw the opaque models' depth before shading them, through programs with a recoilDepthPrepass uniform (or a minimal Z-only shader when the program has an active recoilDepthPrepassSolid uniform, useCamera=true, and no material preList/postList): a model close up then shades each pixel once. Read every frame.");
 
 namespace {
 GLuint solidDepthPrepassProg = 0;
@@ -466,10 +466,13 @@ const LuaMaterial* LuaObjectDrawer::DrawDepthPrepass(const std::vector<LuaMatBin
 		if (!shader.IsCustomType() || shader.openglID == 0 || bin->HasDrawCall())
 			continue;
 
-		// Fast path: a shader declaring `recoilDepthPrepassSolid` uses standard MVP
+		// Fast path: a material with standard camera transforms, no material-level
+		// preList/postList, and an active `recoilDepthPrepassSolid` uniform uses standard MVP
 		// vertex positions with no fragment discard, so a minimal Z-only program runs
 		// without binding textures, per-object uniforms, or the full fragment shader.
-		const GLint solidLoc = glGetUniformLocation(shader.openglID, "recoilDepthPrepassSolid");
+		const GLint solidLoc = (bin->useCamera && bin->preList == 0 && bin->postList == 0)
+			? glGetUniformLocation(shader.openglID, "recoilDepthPrepassSolid")
+			: -1;
 		if (solidLoc >= 0) {
 			const GLuint zProg = GetSolidDepthPrepassProgram();
 			if (zProg != 0) {

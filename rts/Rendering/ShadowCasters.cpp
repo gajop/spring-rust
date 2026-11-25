@@ -24,7 +24,7 @@
 CONFIG(bool, ShadowCasterLOD).defaultValue(false).description("Shadow-pass models take the level of detail that matches the length one shadow-map texel covers (times LODScaleShadow), or one screen pixel at the model (times LODScale) where coarser. Off: the shadow camera's projected distance.");
 CONFIG(float, ShadowCasterMinTexels).defaultValue(0.0f).minimumValue(0.0f).description("Models whose diameter spans fewer shadow-map texels than this cast no shadow.");
 CONFIG(float, ShadowReceiverMinPixels).defaultValue(0.0f).minimumValue(0.0f).description("Models whose projected diameter spans fewer screen pixels than this do not demand shadows as receivers.");
-CONFIG(bool, ShadowCasterReceivers).defaultValue(false).description("A model casts only if it is in the player's view or its shadow reaches a unit or feature in the player's view. For games whose models are the only shadow receivers: the map loses the shadows of models left out.");
+CONFIG(bool, ShadowCasterReceivers).defaultValue(false).description("A model casts only if it is in the player's view or its shadow reaches a unit or feature in the player's view. For games whose models are the only shadow receivers: the map loses the shadows of models left out, and on void/non-ground maps with zero visible model receivers the shadow pass is skipped after clearing the shadow map once.");
 
 namespace {
 
@@ -81,8 +81,6 @@ void AddReceiver(const CSolidObject* o, bool isIcon = false) {
 	if (!o->HasDrawFlag(DrawFlags::SO_OPAQUE_FLAG) && !o->HasDrawFlag(DrawFlags::SO_ALPHAF_FLAG))
 		return;
 	const float r = o->GetDrawRadius();
-	if (s.minTexels > 0.0f && 2.0f * r < s.minTexels * s.texel)
-		return;
 	if (s.minRecvPixels > 0.0f && s.cam != nullptr) {
 		const float pixel = std::max(s.cam->ProjectedDistance(o->drawMidPos), 0.0f) * s.camLpp;
 		if (2.0f * r < s.minRecvPixels * pixel)

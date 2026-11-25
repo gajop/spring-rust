@@ -678,12 +678,11 @@ void CShadowHandler::ResetShadowTexSamplerRaw() const
 
 void CShadowHandler::CreateShadows()
 {
-	// Fast path: when no ground receives shadows and receiver-based culling finds zero
+	// Fast path: when no ground/water receives shadows and receiver-based culling finds zero
 	// visible 3D shadow receivers (e.g. zoomed out to 2D tactical icons on a space map),
-	// keep the shadow map cleared once to 1.0 (unshadowed) and skip the full 4096^2 pass.
+	// keep the shadow map cleared once to 1.0 (unshadowed) and skip the full pass.
 	const bool groundReceives =
 		globalRendering->drawGround &&
-		((shadowGenBits & SHADOWGEN_BIT_MAP) != 0) &&
 		!readMap->HasOnlyVoidWater();
 	const bool modelPass = (shadowGenBits & SHADOWGEN_BIT_MODEL) != 0;
 	const bool hasLight = ISky::GetSky()->GetLight()->GetLightIntensity() > 0.0f;
@@ -981,18 +980,22 @@ float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, co
 	constexpr float SHRINK_STEPS = 2.0f;
 	constexpr float MIN_DIAMETER = 256.0f;
 
+	// On maps where ground/water receives shadows, keep the frustum fit so terrain
+	// and water retain full shadow coverage.
+	if (globalRendering->drawGround && !readMap->HasOnlyVoidWater())
+		return GetStableProjectedFrustumDiameter(playerCam, lightViewMat, centerPos);
+
 	const float3 xDir = lightViewMat.GetX();
 	const float3 yDir = lightViewMat.GetY();
 	const float3 zDir = lightViewMat.GetZ();
 
-	const float minRecvPixels = configHandler->GetFloat("ShadowReceiverMinPixels");
+	const float minRecvPixels = std::max(configHandler->GetFloat("ShadowReceiverMinPixels"), 0.0f);
 	const float camLpp = playerCam->GetLPPScale();
 	const bool fullView = gu->spectatingFullView;
 	const int myAllyTeam = gu->myAllyTeam;
 
 	float2 xbounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
 	float2 ybounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
-	float2 zbounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
 	bool any = false;
 
 	auto addReceiver = [&](const float3& p, float r) {
@@ -1005,30 +1008,27 @@ float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, co
 		}
 		const float x = p.dot(xDir);
 		const float y = p.dot(yDir);
-		const float z = p.dot(zDir);
 		xbounds.x = std::min(xbounds.x, x - r);
 		xbounds.y = std::max(xbounds.y, x + r);
 		ybounds.x = std::min(ybounds.x, y - r);
 		ybounds.y = std::max(ybounds.y, y + r);
-		zbounds.x = std::min(zbounds.x, z - r);
-		zbounds.y = std::max(zbounds.y, z + r);
 		any = true;
 	};
 
 	for (const CUnit* u : unitHandler.GetActiveUnits()) {
-		if (u->noDraw || u->GetIsIcon())
+		if (u->noDraw || u->GetIsIcon() || u->IsInVoid())
 			continue;
 		if (!fullView && !(u->losStatus[myAllyTeam] & LOS_INLOS))
 			continue;
-		addReceiver(u->midPos, u->GetDrawRadius());
+		addReceiver(u->drawMidPos, u->GetDrawRadius());
 	}
 	for (const int id : featureHandler.GetActiveFeatureIDs()) {
 		const CFeature* f = featureHandler.GetFeature(id);
-		if (f == nullptr || f->noDraw)
+		if (f == nullptr || f->noDraw || f->IsInVoid() || f->drawAlpha <= 0.0f)
 			continue;
 		if (!fullView && !f->IsInLosForAllyTeam(myAllyTeam))
 			continue;
-		addReceiver(f->midPos, f->GetDrawRadius());
+		addReceiver(f->drawMidPos, f->GetDrawRadius());
 	}
 
 	if (!any)
@@ -1051,7 +1051,10 @@ float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, co
 	const float texelSize = stableProjDiameter / texels;
 	const float cx = std::round((xbounds.x + xbounds.y) * 0.5f / texelSize) * texelSize;
 	const float cy = std::round((ybounds.x + ybounds.y) * 0.5f / texelSize) * texelSize;
-	const float cz = std::round((zbounds.x + zbounds.y) * 0.5f);
+	// Keep depth centered on the map (matching Mode 3) so the 2*mapBoundingRadius span
+	// never clips lightward casters casting long shadows onto visible receivers.
+	const float3 mapCenter(mapDims.mapx * SQUARE_SIZE * 0.5f, readMap->GetCurrAvgHeight(), mapDims.mapy * SQUARE_SIZE * 0.5f);
+	const float cz = std::round(mapCenter.dot(zDir));
 
 	centerPos = xDir * cx + yDir * cy + zDir * cz;
 
