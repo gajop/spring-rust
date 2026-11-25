@@ -676,14 +676,17 @@ void CShadowHandler::ResetShadowTexSamplerRaw() const
 }
 
 
+static bool GroundReceivesShadows()
+{
+	return globalRendering->drawGround && !readMap->IsNullMap() && !readMap->HasOnlyVoidWater();
+}
+
 void CShadowHandler::CreateShadows()
 {
 	// Fast path: when no ground/water receives shadows and receiver-based culling finds zero
 	// visible 3D shadow receivers (e.g. zoomed out to 2D tactical icons on a space map),
 	// keep the shadow map cleared once to 1.0 (unshadowed) and skip the full pass.
-	const bool groundReceives =
-		globalRendering->drawGround &&
-		!readMap->HasOnlyVoidWater();
+	const bool groundReceives = GroundReceivesShadows();
 	const bool modelPass = (shadowGenBits & SHADOWGEN_BIT_MODEL) != 0;
 	const bool hasLight = ISky::GetSky()->GetLight()->GetLightIntensity() > 0.0f;
 	bool castersReady = false;
@@ -779,6 +782,10 @@ float4 CShadowHandler::GetShadowProjectionScales(CCamera* playerCam, const CMatr
 	//   become less sharp as the viewing volume increases (through eg.camera
 	//   rotations) and geometry can be omitted in some cases
 	//
+	// prefer slightly tighter fixed bounds; Mode 4 may expand depthSpan to cover elevated receivers/casters
+	projScales.z = 0.0f;
+	projScales.w = readMap->GetBoundingRadius() * 2.0f;
+
 	switch (shadowProMode) {
 		case SHADOWPROMODE_CAM_CENTER: {
 			projScales.x = GetOrthoProjectedFrustumRadius(playerCam, lightViewMat, projMidPos[2]);
@@ -798,7 +805,7 @@ float4 CShadowHandler::GetShadowProjectionScales(CCamera* playerCam, const CMatr
 			projScales.x = GetStableProjectedFrustumDiameter(playerCam, lightViewMat, projMidPos[2]);
 		} break;
 		case SHADOWPROMODE_RECEIVERS_STABLE: {
-			projScales.x = GetStableProjectedReceiversDiameter(playerCam, lightViewMat, projMidPos[2]);
+			projScales.x = GetStableProjectedReceiversDiameter(playerCam, lightViewMat, projMidPos[2], projScales.w);
 		} break;
 		default: {
 			projScales.x = GetOrthoProjectedFrustumRadius(playerCam, lightViewMat, projMidPos[2]);
@@ -806,14 +813,6 @@ float4 CShadowHandler::GetShadowProjectionScales(CCamera* playerCam, const CMatr
 	}
 
 	projScales.y = projScales.x;
-	#if 0
-	projScales.z = cam->GetNearPlaneDist();
-	projScales.w = cam->GetFarPlaneDist();
-	#else
-	// prefer slightly tighter fixed bounds
-	projScales.z = 0.0f;
-	projScales.w = readMap->GetBoundingRadius() * 2.0f;
-	#endif
 	return projScales;
 }
 
@@ -974,7 +973,7 @@ float CShadowHandler::GetStableProjectedFrustumDiameter(CCamera* playerCam, cons
 // light-space axes, with the same 2^(1/8) diameter hysteresis and whole-texel center
 // snapping as SHADOWPROMODE_CAM_STABLE. Falls back to the frustum fit when no receivers
 // are visible.
-float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, const CMatrix44f& lightViewMat, float3& centerPos)
+float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, const CMatrix44f& lightViewMat, float3& centerPos, float& depthSpan)
 {
 	constexpr float STEPS_PER_OCTAVE = 8.0f;
 	constexpr float SHRINK_STEPS = 2.0f;
@@ -982,7 +981,7 @@ float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, co
 
 	// On maps where ground/water receives shadows, keep the frustum fit so terrain
 	// and water retain full shadow coverage.
-	if (globalRendering->drawGround && !readMap->HasOnlyVoidWater())
+	if (GroundReceivesShadows())
 		return GetStableProjectedFrustumDiameter(playerCam, lightViewMat, centerPos);
 
 	const float3 xDir = lightViewMat.GetX();
@@ -996,7 +995,14 @@ float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, co
 
 	float2 xbounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
 	float2 ybounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
+	float2 zbounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
 	bool any = false;
+
+	auto addZ = [&](const float3& p, float r) {
+		const float z = p.dot(zDir);
+		zbounds.x = std::min(zbounds.x, z - r);
+		zbounds.y = std::max(zbounds.y, z + r);
+	};
 
 	auto addReceiver = [&](const float3& p, float r) {
 		if (!playerCam->InView(p, r))
@@ -1016,19 +1022,25 @@ float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, co
 	};
 
 	for (const CUnit* u : unitHandler.GetActiveUnits()) {
-		if (u->noDraw || u->GetIsIcon() || u->IsInVoid())
+		if (u->noDraw || u->IsInVoid())
+			continue;
+		const float r = u->GetDrawRadius();
+		addZ(u->drawMidPos, r);
+		if (u->GetIsIcon())
 			continue;
 		if (!fullView && !(u->losStatus[myAllyTeam] & LOS_INLOS))
 			continue;
-		addReceiver(u->drawMidPos, u->GetDrawRadius());
+		addReceiver(u->drawMidPos, r);
 	}
 	for (const int id : featureHandler.GetActiveFeatureIDs()) {
 		const CFeature* f = featureHandler.GetFeature(id);
 		if (f == nullptr || f->noDraw || f->IsInVoid() || f->drawAlpha <= 0.0f)
 			continue;
+		const float r = f->GetDrawRadius();
+		addZ(f->drawMidPos, r);
 		if (!fullView && !f->IsInLosForAllyTeam(myAllyTeam))
 			continue;
-		addReceiver(f->drawMidPos, f->GetDrawRadius());
+		addReceiver(f->drawMidPos, r);
 	}
 
 	if (!any)
@@ -1051,10 +1063,10 @@ float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, co
 	const float texelSize = stableProjDiameter / texels;
 	const float cx = std::round((xbounds.x + xbounds.y) * 0.5f / texelSize) * texelSize;
 	const float cy = std::round((ybounds.x + ybounds.y) * 0.5f / texelSize) * texelSize;
-	// Keep depth centered on the map (matching Mode 3) so the 2*mapBoundingRadius span
-	// never clips lightward casters casting long shadows onto visible receivers.
-	const float3 mapCenter(mapDims.mapx * SQUARE_SIZE * 0.5f, readMap->GetCurrAvgHeight(), mapDims.mapy * SQUARE_SIZE * 0.5f);
-	const float cz = std::round(mapCenter.dot(zDir));
+	// Center light-space depth on the actual receiver/caster Z envelope and expand depthSpan
+	// above 2*mapBoundingRadius whenever elevated objects near map edges exceed the flat map span.
+	const float cz = std::round((zbounds.x + zbounds.y) * 0.5f);
+	depthSpan = std::max(maxDiameter, (zbounds.y - zbounds.x) + 64.0f);
 
 	centerPos = xDir * cx + yDir * cy + zDir * cz;
 

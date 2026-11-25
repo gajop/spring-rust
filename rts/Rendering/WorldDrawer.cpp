@@ -214,6 +214,13 @@ void CWorldDrawer::Kill()
 
 
 
+void CWorldDrawer::UpdatePoses() const
+{
+	SCOPED_TIMER("Update::WorldDrawer::Poses");
+	CUnitDrawer::UpdatePosesStatic();
+	CFeatureDrawer::UpdatePosesStatic();
+}
+
 void CWorldDrawer::Update(bool newSimFrame)
 {
 	SCOPED_TIMER("Update::WorldDrawer");

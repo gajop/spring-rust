@@ -10,6 +10,7 @@ public:
 	void InitPost() const;
 	void Kill();
 
+	void UpdatePoses() const;
 	void Update(bool newSimFrame);
 	void Draw(unsigned int worldFBO = 0) const;
 

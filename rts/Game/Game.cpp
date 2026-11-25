@@ -1542,6 +1542,10 @@ bool CGame::UpdateUnsynced(const spring_time currentTime)
 		unitTracker.SetCam();
 
 	camera->Update();
+	// Update drawn unit/feature poses and unit icon state before ShadowHandler fits the
+	// shadow frustum to visible 3D receivers, while keeping shadow-frustum draw flags in
+	// worldDrawer.Update() after shadowHandler.Update().
+	worldDrawer.UpdatePoses();
 	shadowHandler.Update();
 	{
 		worldDrawer.Update(newSimFrame);

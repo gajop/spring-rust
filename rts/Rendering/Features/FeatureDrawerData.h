@@ -24,12 +24,14 @@ public:
 public:
 	void ConfigNotify(const std::string& key, const std::string& value);
 public:
+	void UpdatePoses();
 	void Update() override;
 	bool IsAlpha(const CFeature* co) const override;
 protected:
 	void UpdateObjectDrawFlags(CSolidObject* o) const override;
 private:
 	static void UpdateDrawPos(CFeature* f);
+	bool posesUpdated = false;
 public:
 	float featureDrawDistance;
 	float featureFadeDistance;

@@ -90,19 +90,39 @@ void CFeatureDrawerData::ConfigNotify(const std::string& key, const std::string&
 	LOG_L(L_INFO, "[FeatureDrawer::%s] {draw,fade}distance set to {%f,%f}", __func__, featureDrawDistance, featureFadeDistance);
 }
 
-void CFeatureDrawerData::Update()
+void CFeatureDrawerData::UpdatePoses()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	if (mtModelDrawer) {
 		for_mt_chunk(0, unsortedObjects.size(), [this](const int k) {
 			CFeature* f = unsortedObjects[k];
 			UpdateDrawPos(f);
+		}, CModelDrawerDataConcept::MT_CHUNK_OR_MIN_CHUNK_SIZE_UPDT);
+	}
+	else {
+		for (CFeature* f : unsortedObjects)
+			UpdateDrawPos(f);
+	}
+	posesUpdated = true;
+}
+
+void CFeatureDrawerData::Update()
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	const bool needPoses = !posesUpdated;
+	posesUpdated = false;
+	if (mtModelDrawer) {
+		for_mt_chunk(0, unsortedObjects.size(), [this, needPoses](const int k) {
+			CFeature* f = unsortedObjects[k];
+			if (needPoses)
+				UpdateDrawPos(f);
 			UpdateCommon(f);
 		}, CModelDrawerDataConcept::MT_CHUNK_OR_MIN_CHUNK_SIZE_UPDT);
 	}
 	else {
 		for (CFeature* f : unsortedObjects) {
-			UpdateDrawPos(f);
+			if (needPoses)
+				UpdateDrawPos(f);
 			UpdateCommon(f);
 		}
 	}

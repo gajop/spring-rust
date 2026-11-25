@@ -216,15 +216,10 @@ void CUnitDrawerData::ConfigNotify(const std::string& key, const std::string& va
 	sortUnitIconsByDepth = configHandler->GetBool("UnitIconsSortedByDepth");
 }
 
-void CUnitDrawerData::Update()
+void CUnitDrawerData::UpdatePoses()
 {
 	RECOIL_DETAILED_TRACY_ZONE;
 	iconSizeBase = std::max(1.0f, std::max(globalRendering->viewSizeX, globalRendering->viewSizeY) * iconSizeMult * iconScale);
-
-	for (int modelType = MODELTYPE_3DO; modelType < MODELTYPE_CNT; modelType++) {
-		UpdateTempDrawUnits(savedData.tempOpaqueUnits[modelType]);
-		UpdateTempDrawUnits(savedData.tempAlphaUnits[modelType]);
-	}
 
 	const float3 camPos = (camHandler->GetCurrentController()).GetPos();
 	const float3 camDir = (camHandler->GetCurrentController()).GetDir();
@@ -234,41 +229,63 @@ void CUnitDrawerData::Update()
 
 	iconZoomDist = dist;
 
+	if ((useDistToGroundForIcons = (camHandler->GetCurrentController()).GetUseDistToGroundForIcons())) {
+		const float3& viewCamPos = camera->GetPos();
+		// use the middle between the highest and lowest position on the map as average
+		const float groundHeight = readMap->GetCurrAvgHeight();
+		const float overGround = viewCamPos.y - groundHeight;
+
+		sqCamDistToGroundForIcons = overGround * overGround;
+	}
+
 	const UnitIconProjection iconProjection(camera->GetViewProjectionMatrix(), camera->GetRight(), camera->viewport[2]);
-	const auto updateBody = [this, &iconProjection](CUnit* u) {
+	const auto updatePoseBody = [this, &iconProjection](CUnit* u) {
 		UpdateDrawPos(u);
 
 		if (useScreenIcons)
 			UpdateUnitIconStateScreen(u, iconProjection);
 		else
 			UpdateUnitIconState(u);
-
-		UpdateCommon(u);
 	};
 
 	if (mtModelDrawer) {
-		for_mt_chunk(0, unsortedObjects.size(), [this, &updateBody](const int k) {
+		for_mt_chunk(0, unsortedObjects.size(), [this, &updatePoseBody](const int k) {
 			CUnit* unit = unsortedObjects[k];
-			updateBody(unit);
+			updatePoseBody(unit);
 		}, CModelDrawerDataConcept::MT_CHUNK_OR_MIN_CHUNK_SIZE_UPDT);
 	}
 	else {
 		for (CUnit* unit : unsortedObjects)
-			updateBody(unit);
+			updatePoseBody(unit);
+	}
+
+	posesUpdated = true;
+}
+
+void CUnitDrawerData::Update()
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	if (!posesUpdated)
+		UpdatePoses();
+	posesUpdated = false;
+
+	for (int modelType = MODELTYPE_3DO; modelType < MODELTYPE_CNT; modelType++) {
+		UpdateTempDrawUnits(savedData.tempOpaqueUnits[modelType]);
+		UpdateTempDrawUnits(savedData.tempAlphaUnits[modelType]);
+	}
+
+	if (mtModelDrawer) {
+		for_mt_chunk(0, unsortedObjects.size(), [this](const int k) {
+			CUnit* unit = unsortedObjects[k];
+			UpdateCommon(unit);
+		}, CModelDrawerDataConcept::MT_CHUNK_OR_MIN_CHUNK_SIZE_UPDT);
+	}
+	else {
+		for (CUnit* unit : unsortedObjects)
+			UpdateCommon(unit);
 	}
 
 	UpdateLiveGhostTransforms();
-
-	if ((useDistToGroundForIcons = (camHandler->GetCurrentController()).GetUseDistToGroundForIcons())) {
-		const float3& camPos = camera->GetPos();
-		// use the height at the current camera position
-		//const float groundHeight = CGround::GetHeightAboveWater(camPos.x, camPos.z, false);
-		// use the middle between the highest and lowest position on the map as average
-		const float groundHeight = readMap->GetCurrAvgHeight();
-		const float overGround = camPos.y - groundHeight;
-
-		sqCamDistToGroundForIcons = overGround * overGround;
-	}
 }
 
 void CUnitDrawerData::UpdateGhostedBuildings()

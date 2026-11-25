@@ -142,6 +142,7 @@ public:
 	void SetUnitDefImage(const UnitDef* unitDef, unsigned int texID, int xsize, int ysize);
 	uint32_t GetUnitDefImage(const UnitDef* unitDef);
 public:
+	void UpdatePoses();
 	void Update() override;
 	bool IsAlpha(const CUnit* co) const override { return co->IsCloaked(); }
 public:
@@ -233,6 +234,7 @@ private:
 	// icons
 	bool useDistToGroundForIcons;
 	float sqCamDistToGroundForIcons;
+	bool posesUpdated = false;
 
 	// IconsAsUI
 	static constexpr float iconSizeMult = 0.005f; // 1/200

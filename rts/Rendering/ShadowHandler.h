@@ -117,7 +117,7 @@ private:
 	float GetOrthoProjectedMapRadius(const float3&, float3&);
 	float GetOrthoProjectedFrustumRadius(CCamera*, const CMatrix44f&, float3&);
 	float GetStableProjectedFrustumDiameter(CCamera*, const CMatrix44f&, float3&);
-	float GetStableProjectedReceiversDiameter(CCamera*, const CMatrix44f&, float3&);
+	float GetStableProjectedReceiversDiameter(CCamera*, const CMatrix44f&, float3&, float&);
 
 public:
 	int shadowConfig;

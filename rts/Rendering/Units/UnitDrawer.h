@@ -85,6 +85,7 @@ public:
 	static void UnitLeavesGhostChanged(const CUnit* unit, const bool leaveDeadGhost) { modelDrawerData->UnitLeavesGhostChanged(unit, leaveDeadGhost); }
 
 	static void UpdateCurrentUnitIcon(const CUnit* unit) { modelDrawerData->UpdateCurrentUnitIcon(unit); }
+	static void UpdatePosesStatic() { if (modelDrawerData != nullptr) modelDrawerData->UpdatePoses(); }
 public:
 	// DrawUnit*
 	virtual void DrawUnitNoTrans(const CUnit* unit, uint32_t preList, uint32_t postList, bool lodCall, bool noLuaCall) const = 0;
