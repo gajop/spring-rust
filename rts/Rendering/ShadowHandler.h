@@ -46,10 +46,11 @@ public:
 		SHADOWGEN_BIT_TREE  = 16,
 	};
 	enum ShadowProjectionMode {
-		SHADOWPROMODE_MAP_CENTER = 0, // use center of map-geometry as projection target (constant res.)
-		SHADOWPROMODE_CAM_CENTER = 1, // use center of camera-frustum as projection target (variable res.)
-		SHADOWPROMODE_MIX_CAMMAP = 2, // use whichever mode maximizes resolution this frame
-		SHADOWPROMODE_CAM_STABLE = 3, // camera-frustum fit with light-fixed axes, texel-snapped center and stepped size
+		SHADOWPROMODE_MAP_CENTER       = 0, // use center of map-geometry as projection target (constant res.)
+		SHADOWPROMODE_CAM_CENTER       = 1, // use center of camera-frustum as projection target (variable res.)
+		SHADOWPROMODE_MIX_CAMMAP       = 2, // use whichever mode maximizes resolution this frame
+		SHADOWPROMODE_CAM_STABLE       = 3, // camera-frustum fit with light-fixed axes, texel-snapped center and stepped size
+		SHADOWPROMODE_RECEIVERS_STABLE = 4, // visible 3D receivers fit with light-fixed axes, texel-snapped center and stepped size
 	};
 	enum ShadowMapSizes {
 		MIN_SHADOWMAP_SIZE =   512,
@@ -103,7 +104,7 @@ private:
 	void FreeFBOAndTextures();
 	bool InitFBOAndTextures();
 
-	void DrawShadowPasses();
+	void DrawShadowPasses(bool castersReady = false);
 	void LoadProjectionMatrix(const CCamera* shadowCam);
 	void LoadShadowGenShaders();
 
@@ -116,6 +117,7 @@ private:
 	float GetOrthoProjectedMapRadius(const float3&, float3&);
 	float GetOrthoProjectedFrustumRadius(CCamera*, const CMatrix44f&, float3&);
 	float GetStableProjectedFrustumDiameter(CCamera*, const CMatrix44f&, float3&);
+	float GetStableProjectedReceiversDiameter(CCamera*, const CMatrix44f&, float3&);
 
 public:
 	int shadowConfig;
@@ -128,6 +130,7 @@ private:
 	bool shadowsLoaded = false;
 	bool inShadowPass = false;
 	bool debugFrustum = false;
+	bool emptyShadowMapCleared = false;
 
 	inline static bool firstInit = true;
 	inline static bool shadowsSupported = false;

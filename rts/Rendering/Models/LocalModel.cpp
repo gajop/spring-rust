@@ -3,6 +3,7 @@
 #include "LocalModel.hpp"
 
 #include "3DModel.hpp"
+#include "3DModelMisc.hpp"
 #include "3DModelPiece.hpp"
 #include "3DModelDefs.hpp"
 #include "System/Misc/TracyDefs.h"
@@ -28,9 +29,18 @@ CR_REG_METADATA(LocalModel, (
 void LocalModel::DrawPieces() const
 {
 	RECOIL_DETAILED_TRACY_ZONE;
+	bool vboBound = false;
 	for (const auto& p : pieces) {
-		p.Draw();
+		if (!p.GetScriptVisible() || !p.original->HasGeometryData())
+			continue;
+		if (!vboBound) {
+			S3DModelHelpers::BindLegacyAttrVBOs();
+			vboBound = true;
+		}
+		p.DrawNoBind();
 	}
+	if (vboBound)
+		S3DModelHelpers::UnbindLegacyAttrVBOs();
 }
 
 void LocalModel::DrawPiecesLOD(uint32_t lod) const
@@ -39,9 +49,12 @@ void LocalModel::DrawPiecesLOD(uint32_t lod) const
 	if (!luaMaterialData.ValidLOD(lod))
 		return;
 
+	bool vboBound = false;
 	for (const auto& p: pieces) {
-		p.DrawLOD(lod);
+		p.DrawLOD(lod, vboBound);
 	}
+	if (vboBound)
+		S3DModelHelpers::UnbindLegacyAttrVBOs();
 }
 
 void LocalModel::SetLODCount(uint32_t lodCount)

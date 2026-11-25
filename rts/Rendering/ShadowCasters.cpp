@@ -23,6 +23,7 @@
 
 CONFIG(bool, ShadowCasterLOD).defaultValue(false).description("Shadow-pass models take the level of detail that matches the length one shadow-map texel covers (times LODScaleShadow), or one screen pixel at the model (times LODScale) where coarser. Off: the shadow camera's projected distance.");
 CONFIG(float, ShadowCasterMinTexels).defaultValue(0.0f).minimumValue(0.0f).description("Models whose diameter spans fewer shadow-map texels than this cast no shadow.");
+CONFIG(float, ShadowReceiverMinPixels).defaultValue(0.0f).minimumValue(0.0f).description("Models whose projected diameter spans fewer screen pixels than this do not demand shadows as receivers.");
 CONFIG(bool, ShadowCasterReceivers).defaultValue(false).description("A model casts only if it is in the player's view or its shadow reaches a unit or feature in the player's view. For games whose models are the only shadow receivers: the map loses the shadows of models left out.");
 
 namespace {
@@ -35,8 +36,11 @@ struct State {
 	bool levels = false;
 	bool receivers = false;
 	float minTexels = 0.0f;
+	float minRecvPixels = 0.0f;
 
 	float texel = 0.0f;
+	const CCamera* cam = nullptr;
+	float camLpp = 0.0f;
 
 	// light space: x, y across the light, z toward it
 	float3 lx, ly, lz;
@@ -71,11 +75,20 @@ void LightBasis() {
 	s.ly = s.lx.cross(s.lz).SafeANormalize();
 }
 
-void AddReceiver(const CSolidObject* o) {
+void AddReceiver(const CSolidObject* o, bool isIcon = false) {
+	if (isIcon)
+		return;
 	if (!o->HasDrawFlag(DrawFlags::SO_OPAQUE_FLAG) && !o->HasDrawFlag(DrawFlags::SO_ALPHAF_FLAG))
 		return;
-	const float3& p = o->drawMidPos;
 	const float r = o->GetDrawRadius();
+	if (s.minTexels > 0.0f && 2.0f * r < s.minTexels * s.texel)
+		return;
+	if (s.minRecvPixels > 0.0f && s.cam != nullptr) {
+		const float pixel = std::max(s.cam->ProjectedDistance(o->drawMidPos), 0.0f) * s.camLpp;
+		if (2.0f * r < s.minRecvPixels * pixel)
+			return;
+	}
+	const float3& p = o->drawMidPos;
 	s.recv.push_back({p.dot(s.lx), p.dot(s.ly), p.dot(s.lz), r});
 	s.maxR = std::max(s.maxR, r);
 }
@@ -162,7 +175,10 @@ void ShadowCasters::Begin()
 	s.levels = configHandler->GetBool("ShadowCasterLOD");
 	s.receivers = configHandler->GetBool("ShadowCasterReceivers");
 	s.minTexels = configHandler->GetFloat("ShadowCasterMinTexels");
+	s.minRecvPixels = configHandler->GetFloat("ShadowReceiverMinPixels");
 	s.texel = shadowHandler.GetTexelWorldSize();
+	s.cam = CCameraHandler::GetCamera(CCamera::CAMTYPE_PLAYER);
+	s.camLpp = (s.cam != nullptr) ? s.cam->GetLPPScale() : 0.0f;
 	stats.on = StatsWanted();
 
 	s.recv.clear();
@@ -173,7 +189,7 @@ void ShadowCasters::Begin()
 
 	LightBasis();
 	for (const CUnit* u: unitHandler.GetActiveUnits())
-		AddReceiver(u);
+		AddReceiver(u, u->GetIsIcon());
 	for (const int id: featureHandler.GetActiveFeatureIDs()) {
 		if (const CFeature* f = featureHandler.GetFeature(id); f != nullptr)
 			AddReceiver(f);
@@ -197,7 +213,17 @@ void ShadowCasters::End()
 	stats.on = true;
 }
 
-bool ShadowCasters::Wanted(const CSolidObject* obj)
+bool ShadowCasters::ReceiversActive()
+{
+	return s.receivers;
+}
+
+bool ShadowCasters::HasReceivers()
+{
+	return !s.recv.empty();
+}
+
+bool ShadowCasters::Wanted(const CSolidObject* obj, bool isIcon)
 {
 	stats.considered += stats.on;
 	const float r = obj->GetDrawRadius();
@@ -208,8 +234,8 @@ bool ShadowCasters::Wanted(const CSolidObject* obj)
 	}
 	if (!s.receivers)
 		return true;
-	// in view itself: it shadows at least itself
-	if (obj->HasDrawFlag(DrawFlags::SO_OPAQUE_FLAG) || obj->HasDrawFlag(DrawFlags::SO_ALPHAF_FLAG))
+	// in view itself: it shadows at least itself (unless drawn as a 2D icon, which receives no shadow)
+	if (!isIcon && (obj->HasDrawFlag(DrawFlags::SO_OPAQUE_FLAG) || obj->HasDrawFlag(DrawFlags::SO_ALPHAF_FLAG)))
 		return true;
 
 	const float3& p = obj->drawMidPos;

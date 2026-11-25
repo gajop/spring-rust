@@ -7,6 +7,7 @@
 #include "Game/Camera.h"
 #include "Game/CameraHandler.h"
 #include "Game/GameVersion.h"
+#include "Game/GlobalUnsynced.h"
 #include "Map/BaseGroundDrawer.h"
 #include "Map/Ground.h"
 #include "Map/MapInfo.h"
@@ -22,6 +23,10 @@
 #include "Rendering/Shaders/ShaderHandler.h"
 #include "Rendering/Shaders/Shader.h"
 #include "Rendering/GL/RenderBuffers.h"
+#include "Sim/Features/Feature.h"
+#include "Sim/Features/FeatureHandler.h"
+#include "Sim/Units/Unit.h"
+#include "Sim/Units/UnitHandler.h"
 #include "System/Config/ConfigHandler.h"
 #include "System/EventHandler.h"
 #include "System/Matrix44f.h"
@@ -33,7 +38,7 @@
 
 CONFIG(int, Shadows).defaultValue(2).headlessValue(-1).minimumValue(-1).safemodeValue(-1).description("Sets whether shadows are rendered.\n-1:=forceoff, 0:=off, 1:=full, 2:=fast (skip terrain)"); //FIXME document bitmask
 CONFIG(int, ShadowMapSize).defaultValue(CShadowHandler::DEF_SHADOWMAP_SIZE).minimumValue(32).description("Sets the resolution of shadows. Higher numbers increase quality at the cost of performance.");
-CONFIG(int, ShadowProjectionMode).defaultValue(CShadowHandler::SHADOWPROMODE_CAM_CENTER).minimumValue(CShadowHandler::SHADOWPROMODE_MAP_CENTER).maximumValue(CShadowHandler::SHADOWPROMODE_CAM_STABLE).description("How the shadow map is fitted.\n0:=whole map, 1:=camera frustum, 2:=whichever is smaller, 3:=camera frustum with axes fixed to the light, center snapped to whole texels and size in steps (edges do not crawl as the camera moves). Applies live.");
+CONFIG(int, ShadowProjectionMode).defaultValue(CShadowHandler::SHADOWPROMODE_CAM_CENTER).minimumValue(CShadowHandler::SHADOWPROMODE_MAP_CENTER).maximumValue(CShadowHandler::SHADOWPROMODE_RECEIVERS_STABLE).description("How the shadow map is fitted.\n0:=whole map, 1:=camera frustum, 2:=whichever is smaller, 3:=camera frustum with axes fixed to the light, center snapped to whole texels and size in steps (edges do not crawl as the camera moves), 4:=visible 3D receivers with light-fixed axes, texel-snapped center and stepped size (tightest fit for space/non-terrain maps). Applies live.");
 CONFIG(bool, ShadowColorMode).defaultValue(true).description("Whether the colorbuffer of shadowmap FBO is RGB vs greyscale(to conserve some VRAM)");
 
 CShadowHandler shadowHandler;
@@ -56,7 +61,7 @@ void CShadowHandler::Reload(const char* argv)
 	configHandler->Set("ShadowMapSize", std::clamp(nextShadowMapSize, int(MIN_SHADOWMAP_SIZE), int(MAX_SHADOWMAP_SIZE)));
 	// only store a mode that was asked for: one set for this session (an overlay) stays unsaved
 	if (nextShadowProMode != shadowProMode)
-		configHandler->Set("ShadowProjectionMode", std::clamp(nextShadowProMode, int(SHADOWPROMODE_MAP_CENTER), int(SHADOWPROMODE_CAM_STABLE)));
+		configHandler->Set("ShadowProjectionMode", std::clamp(nextShadowProMode, int(SHADOWPROMODE_MAP_CENTER), int(SHADOWPROMODE_RECEIVERS_STABLE)));
 	configHandler->Set("ShadowColorMode", static_cast<bool>(nextShadowColorMode));
 
 	Kill();
@@ -135,7 +140,7 @@ void CShadowHandler::Kill()
 
 void CShadowHandler::ConfigNotify(const std::string& key, const std::string& value)
 {
-	const int nextShadowProMode = std::clamp(configHandler->GetInt("ShadowProjectionMode"), int(SHADOWPROMODE_MAP_CENTER), int(SHADOWPROMODE_CAM_STABLE));
+	const int nextShadowProMode = std::clamp(configHandler->GetInt("ShadowProjectionMode"), int(SHADOWPROMODE_MAP_CENTER), int(SHADOWPROMODE_RECEIVERS_STABLE));
 
 	if (nextShadowProMode != shadowProMode)
 		LOG("[%s] shadow projection mode %d", __func__, nextShadowProMode);
@@ -448,11 +453,12 @@ bool CShadowHandler::InitFBOAndTextures()
 
 	// revert to FBO = 0 default
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	emptyShadowMapCleared = false;
 
 	return status;
 }
 
-void CShadowHandler::DrawShadowPasses()
+void CShadowHandler::DrawShadowPasses(bool castersReady)
 {
 	inShadowPass = true;
 
@@ -475,7 +481,8 @@ void CShadowHandler::DrawShadowPasses()
 		projectileDrawer->DrawShadowOpaque();
 	}
 	if ((shadowGenBits & SHADOWGEN_BIT_MODEL) != 0) {
-		ShadowCasters::Begin();
+		if (!castersReady)
+			ShadowCasters::Begin();
 		unitDrawer->DrawShadowPass();
 		featureDrawer->DrawShadowPass();
 		ShadowCasters::End();
@@ -569,7 +576,10 @@ static CMatrix44f ComposeScaleMatrix(const float4 scales)
 
 void CShadowHandler::SetShadowMatrix(CCamera* playerCam, CCamera* shadowCam)
 {
-	const CMatrix44f lightMatrix = (shadowProMode == SHADOWPROMODE_CAM_STABLE)?
+	const bool fixedLightAxes =
+		(shadowProMode == SHADOWPROMODE_CAM_STABLE) ||
+		(shadowProMode == SHADOWPROMODE_RECEIVERS_STABLE);
+	const CMatrix44f lightMatrix = fixedLightAxes?
 		ComposeFixedLightMatrix(ISky::GetSky()->GetLight()):
 		ComposeLightMatrix(playerCam, ISky::GetSky()->GetLight());
 	const CMatrix44f scaleMatrix = ComposeScaleMatrix(shadowProjScales = GetShadowProjectionScales(playerCam, lightMatrix));
@@ -668,6 +678,36 @@ void CShadowHandler::ResetShadowTexSamplerRaw() const
 
 void CShadowHandler::CreateShadows()
 {
+	// Fast path: when no ground receives shadows and receiver-based culling finds zero
+	// visible 3D shadow receivers (e.g. zoomed out to 2D tactical icons on a space map),
+	// keep the shadow map cleared once to 1.0 (unshadowed) and skip the full 4096^2 pass.
+	const bool groundReceives =
+		globalRendering->drawGround &&
+		((shadowGenBits & SHADOWGEN_BIT_MAP) != 0) &&
+		!readMap->HasOnlyVoidWater();
+	const bool modelPass = (shadowGenBits & SHADOWGEN_BIT_MODEL) != 0;
+	const bool hasLight = ISky::GetSky()->GetLight()->GetLightIntensity() > 0.0f;
+	bool castersReady = false;
+	if (modelPass && !groundReceives && hasLight) {
+		ShadowCasters::Begin();
+		castersReady = true;
+		if (ShadowCasters::ReceiversActive() && !ShadowCasters::HasReceivers()) {
+			ShadowCasters::End();
+			if (!emptyShadowMapCleared) {
+				smOpaqFBO.Bind();
+				glDepthMask(GL_TRUE);
+				glClear(GL_DEPTH_BUFFER_BIT);
+				EnableColorOutput(true);
+				glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+				glClear(GL_COLOR_BUFFER_BIT);
+				glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+				emptyShadowMapCleared = true;
+			}
+			return;
+		}
+	}
+	emptyShadowMapCleared = false;
+
 	// NOTE:
 	//   we unbind later in WorldDrawer::GenerateIBLTextures() to save render
 	//   context switches (which are one of the slowest OpenGL operations!)
@@ -691,8 +731,10 @@ void CShadowHandler::CreateShadows()
 
 	CCamera* prvCam = CCameraHandler::GetSetActiveCamera(CCamera::CAMTYPE_SHADOW);
 
-	if (ISky::GetSky()->GetLight()->GetLightIntensity() > 0.0f)
-		DrawShadowPasses();
+	if (hasLight)
+		DrawShadowPasses(castersReady);
+	else if (castersReady)
+		ShadowCasters::End();
 
 	CCameraHandler::SetActiveCamera(prvCam->GetCamType());
 	prvCam->Update();
@@ -755,6 +797,9 @@ float4 CShadowHandler::GetShadowProjectionScales(CCamera* playerCam, const CMatr
 		} break;
 		case SHADOWPROMODE_CAM_STABLE: {
 			projScales.x = GetStableProjectedFrustumDiameter(playerCam, lightViewMat, projMidPos[2]);
+		} break;
+		case SHADOWPROMODE_RECEIVERS_STABLE: {
+			projScales.x = GetStableProjectedReceiversDiameter(playerCam, lightViewMat, projMidPos[2]);
 		} break;
 		default: {
 			projScales.x = GetOrthoProjectedFrustumRadius(playerCam, lightViewMat, projMidPos[2]);
@@ -919,6 +964,94 @@ float CShadowHandler::GetStableProjectedFrustumDiameter(CCamera* playerCam, cons
 	const float cy = std::round((ybounds.x + ybounds.y) * 0.5f / texelSize) * texelSize;
 	// depth along the light only shifts every depth value alike; whole elmos keep it steady
 	const float cz = std::round(frustumCenter.dot(zDir));
+
+	centerPos = xDir * cx + yDir * cy + zDir * cz;
+
+	return stableProjDiameter;
+}
+
+// Fits the shadow map tightly to visible 3D shadow receivers (units and features in the
+// player's frustum, excluding 2D tactical icons and sub-threshold receivers) in fixed
+// light-space axes, with the same 2^(1/8) diameter hysteresis and whole-texel center
+// snapping as SHADOWPROMODE_CAM_STABLE. Falls back to the frustum fit when no receivers
+// are visible.
+float CShadowHandler::GetStableProjectedReceiversDiameter(CCamera* playerCam, const CMatrix44f& lightViewMat, float3& centerPos)
+{
+	constexpr float STEPS_PER_OCTAVE = 8.0f;
+	constexpr float SHRINK_STEPS = 2.0f;
+	constexpr float MIN_DIAMETER = 256.0f;
+
+	const float3 xDir = lightViewMat.GetX();
+	const float3 yDir = lightViewMat.GetY();
+	const float3 zDir = lightViewMat.GetZ();
+
+	const float minRecvPixels = configHandler->GetFloat("ShadowReceiverMinPixels");
+	const float camLpp = playerCam->GetLPPScale();
+	const bool fullView = gu->spectatingFullView;
+	const int myAllyTeam = gu->myAllyTeam;
+
+	float2 xbounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
+	float2 ybounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
+	float2 zbounds = {std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()};
+	bool any = false;
+
+	auto addReceiver = [&](const float3& p, float r) {
+		if (!playerCam->InView(p, r))
+			return;
+		if (minRecvPixels > 0.0f) {
+			const float pixel = std::max(playerCam->ProjectedDistance(p), 0.0f) * camLpp;
+			if (2.0f * r < minRecvPixels * pixel)
+				return;
+		}
+		const float x = p.dot(xDir);
+		const float y = p.dot(yDir);
+		const float z = p.dot(zDir);
+		xbounds.x = std::min(xbounds.x, x - r);
+		xbounds.y = std::max(xbounds.y, x + r);
+		ybounds.x = std::min(ybounds.x, y - r);
+		ybounds.y = std::max(ybounds.y, y + r);
+		zbounds.x = std::min(zbounds.x, z - r);
+		zbounds.y = std::max(zbounds.y, z + r);
+		any = true;
+	};
+
+	for (const CUnit* u : unitHandler.GetActiveUnits()) {
+		if (u->noDraw || u->GetIsIcon())
+			continue;
+		if (!fullView && !(u->losStatus[myAllyTeam] & LOS_INLOS))
+			continue;
+		addReceiver(u->midPos, u->GetDrawRadius());
+	}
+	for (const int id : featureHandler.GetActiveFeatureIDs()) {
+		const CFeature* f = featureHandler.GetFeature(id);
+		if (f == nullptr || f->noDraw)
+			continue;
+		if (!fullView && !f->IsInLosForAllyTeam(myAllyTeam))
+			continue;
+		addReceiver(f->midPos, f->GetDrawRadius());
+	}
+
+	if (!any)
+		return GetStableProjectedFrustumDiameter(playerCam, lightViewMat, centerPos);
+
+	const float texels = std::max(float(shadowMapSize), 1.0f);
+	const float maxDiameter = readMap->GetBoundingRadius() * 2.0f;
+	const float needDiameter = std::clamp(
+		std::max(xbounds.y - xbounds.x, ybounds.y - ybounds.x) * (1.0f + 4.0f / texels),
+		MIN_DIAMETER,
+		maxDiameter
+	);
+
+	const float stepped = std::exp2(std::ceil(std::log2(needDiameter) * STEPS_PER_OCTAVE) / STEPS_PER_OCTAVE);
+	const float shrinkBelow = stableProjDiameter * std::exp2(-SHRINK_STEPS / STEPS_PER_OCTAVE);
+
+	if (stableProjDiameter <= 0.0f || needDiameter > stableProjDiameter || needDiameter < shrinkBelow)
+		stableProjDiameter = stepped;
+
+	const float texelSize = stableProjDiameter / texels;
+	const float cx = std::round((xbounds.x + xbounds.y) * 0.5f / texelSize) * texelSize;
+	const float cy = std::round((ybounds.x + ybounds.y) * 0.5f / texelSize) * texelSize;
+	const float cz = std::round((zbounds.x + zbounds.y) * 0.5f);
 
 	centerPos = xDir * cx + yDir * cy + zDir * cz;
 

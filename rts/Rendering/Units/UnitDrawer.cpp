@@ -277,7 +277,7 @@ bool CUnitDrawer::ShouldDrawUnitShadow(CUnit* u)
 	if (!u->HasDrawFlag(DrawFlags::SO_SHOPAQ_FLAG))
 		return false;
 
-	if (!ShadowCasters::Wanted(u))
+	if (!ShadowCasters::Wanted(u, u->GetIsIcon()))
 		return false;
 
 	if (LuaObjectDrawer::AddShadowMaterialObject(u, LUAOBJ_UNIT))

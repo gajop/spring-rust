@@ -42,7 +42,9 @@ struct LocalModelPiece
 	uint32_t GetScriptPieceIndex() const { return scriptPieceIndex; }
 
 	void Draw() const;
+	void DrawNoBind() const;
 	void DrawLOD(uint32_t lod) const;
+	void DrawLOD(uint32_t lod, bool& vboBound) const;
 	void SetLODCount(uint32_t count);
 
 

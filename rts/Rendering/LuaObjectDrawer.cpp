@@ -118,7 +118,75 @@ static DECL_ARRAY(std::vector<const CSolidObject*>, objectBuckets, MAX_TEAMS);
 
 CONFIG(bool, ModelDepthPrepass)
 	.defaultValue(false)
-	.description("Draw the opaque models' depth before shading them, through programs with a recoilDepthPrepass uniform: a model close up then shades each pixel once. Read every frame.");
+	.description("Draw the opaque models' depth before shading them, through programs with a recoilDepthPrepass uniform (or a minimal Z-only shader when the program declares recoilDepthPrepassSolid): a model close up then shades each pixel once. Read every frame.");
+
+namespace {
+GLuint solidDepthPrepassProg = 0;
+bool solidDepthPrepassTried = false;
+
+GLuint GetSolidDepthPrepassProgram()
+{
+	if (solidDepthPrepassTried)
+		return solidDepthPrepassProg;
+	solidDepthPrepassTried = true;
+
+	static constexpr const char* kVert =
+		"#version 120\n"
+		"invariant gl_Position;\n"
+		"void main() {\n"
+		"	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
+		"}\n";
+	static constexpr const char* kFrag =
+		"#version 120\n"
+		"void main() {}\n";
+
+	const GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+	const GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+	if (vs == 0 || fs == 0) {
+		if (vs != 0) glDeleteShader(vs);
+		if (fs != 0) glDeleteShader(fs);
+		return 0;
+	}
+	glShaderSource(vs, 1, &kVert, nullptr);
+	glCompileShader(vs);
+	glShaderSource(fs, 1, &kFrag, nullptr);
+	glCompileShader(fs);
+
+	GLint okVs = GL_FALSE, okFs = GL_FALSE;
+	glGetShaderiv(vs, GL_COMPILE_STATUS, &okVs);
+	glGetShaderiv(fs, GL_COMPILE_STATUS, &okFs);
+	if (!okVs || !okFs) {
+		glDeleteShader(vs);
+		glDeleteShader(fs);
+		return 0;
+	}
+
+	const GLuint prog = glCreateProgram();
+	glAttachShader(prog, vs);
+	glAttachShader(prog, fs);
+	glLinkProgram(prog);
+	glDeleteShader(vs);
+	glDeleteShader(fs);
+
+	GLint okLink = GL_FALSE;
+	glGetProgramiv(prog, GL_LINK_STATUS, &okLink);
+	if (!okLink) {
+		glDeleteProgram(prog);
+		return 0;
+	}
+	solidDepthPrepassProg = prog;
+	return solidDepthPrepassProg;
+}
+
+void KillSolidDepthPrepassProgram()
+{
+	if (solidDepthPrepassProg != 0) {
+		glDeleteProgram(solidDepthPrepassProg);
+		solidDepthPrepassProg = 0;
+	}
+	solidDepthPrepassTried = false;
+}
+} // namespace
 
 static float GetLODFloat(const std::string& name)
 {
@@ -272,6 +340,8 @@ void LuaObjectDrawer::Kill()
 	featureDrawFuncs[false] = nullptr;
 	featureDrawFuncs[ true] = nullptr;
 
+	KillSolidDepthPrepassProgram();
+
 	assert(geomBuffer != nullptr);
 	spring::SafeDelete(geomBuffer);
 }
@@ -389,14 +459,59 @@ const LuaMaterial* LuaObjectDrawer::DrawDepthPrepass(const std::vector<LuaMatBin
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(1.0f, 1.0f);
+
+	bool usingSolid = false;
 	for (const auto& bin: bins) {
 		const LuaMatShader& shader = bin->shaders[false];
 		if (!shader.IsCustomType() || shader.openglID == 0 || bin->HasDrawCall())
 			continue;
+
+		// Fast path: a shader declaring `recoilDepthPrepassSolid` uses standard MVP
+		// vertex positions with no fragment discard, so a minimal Z-only program runs
+		// without binding textures, per-object uniforms, or the full fragment shader.
+		const GLint solidLoc = glGetUniformLocation(shader.openglID, "recoilDepthPrepassSolid");
+		if (solidLoc >= 0) {
+			const GLuint zProg = GetSolidDepthPrepassProgram();
+			if (zProg != 0) {
+				if (!usingSolid) {
+					if (prevMat != &LuaMaterial::defMat) {
+						LuaMaterial::defMat.Execute(*prevMat, false);
+						prevMat = &LuaMaterial::defMat;
+					}
+					glUseProgram(zProg);
+					usingSolid = true;
+				}
+				if (bin->cullingMode != 0) {
+					glEnable(GL_CULL_FACE);
+					glCullFace(bin->cullingMode);
+				} else {
+					glDisable(GL_CULL_FACE);
+				}
+				for (const CSolidObject* obj: bin->GetObjects(objType)) {
+					const LuaObjectLODMaterial* lodMat = obj->GetLuaMaterialData()->GetLuaLODMaterial(matType);
+					const unsigned int preList  = lodMat->preDisplayList;
+					const unsigned int postList = lodMat->postDisplayList;
+					if (objType == LUAOBJ_UNIT) {
+						const auto udFunc = unitDrawFuncs[true];
+						CALL_FUNC_VA(unitDrawer, udFunc, static_cast<const CUnit*>(obj), preList, postList, true, false);
+					} else if (objType == LUAOBJ_FEATURE) {
+						const auto fdFunc = featureDrawFuncs[true];
+						CALL_FUNC_VA(featureDrawer, fdFunc, static_cast<const CFeature*>(obj), preList, postList, true, false);
+					}
+				}
+				continue;
+			}
+		}
+
 		// Asked each frame: a program id can be reused by a new program.
 		const GLint location = glGetUniformLocation(shader.openglID, "recoilDepthPrepass");
 		if (location < 0)
 			continue;
+		if (usingSolid) {
+			glUseProgram(0);
+			glDisable(GL_CULL_FACE);
+			usingSolid = false;
+		}
 		bin->Execute(*prevMat, false);
 		prevMat = bin;
 		glUniform1f(location, 1.0f);
@@ -405,6 +520,10 @@ const LuaMaterial* LuaObjectDrawer::DrawDepthPrepass(const std::vector<LuaMatBin
 			DrawBinObject(obj, objType, lodMat, bin, false, false, true, false);
 		}
 		glUniform1f(location, 0.0f);
+	}
+	if (usingSolid) {
+		glUseProgram(0);
+		glDisable(GL_CULL_FACE);
 	}
 	glPolygonOffset(0.0f, 0.0f);
 	glDisable(GL_POLYGON_OFFSET_FILL);

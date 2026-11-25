@@ -302,6 +302,23 @@ Transform LocalModelPiece::CalcPieceSpaceTransform(const float3& p, const float3
 	return CalcPieceSpaceTransformOrig(p, r, s);
 }
 
+void LocalModelPiece::DrawNoBind() const
+{
+	RECOIL_DETAILED_TRACY_ZONE;
+	if (!scriptSetVisible)
+		return;
+
+	if (!original->HasGeometryData())
+		return;
+
+	assert(original);
+
+	glPushMatrix();
+	glMultMatrixf(GetModelSpaceMatrix());
+	original->DrawElements();
+	glPopMatrix();
+}
+
 void LocalModelPiece::Draw() const
 {
 	RECOIL_DETAILED_TRACY_ZONE;
@@ -323,6 +340,14 @@ void LocalModelPiece::Draw() const
 
 void LocalModelPiece::DrawLOD(uint32_t lod) const
 {
+	bool vboBound = false;
+	DrawLOD(lod, vboBound);
+	if (vboBound)
+		S3DModelHelpers::UnbindLegacyAttrVBOs();
+}
+
+void LocalModelPiece::DrawLOD(uint32_t lod, bool& vboBound) const
+{
 	RECOIL_DETAILED_TRACY_ZONE;
 	if (!scriptSetVisible)
 		return;
@@ -333,10 +358,16 @@ void LocalModelPiece::DrawLOD(uint32_t lod) const
 	glPushMatrix();
 	glMultMatrixf(GetModelSpaceMatrix());
 	if (const auto ldl = lodDispLists[lod]; ldl == 0) {
-		S3DModelHelpers::BindLegacyAttrVBOs();
+		if (!vboBound) {
+			S3DModelHelpers::BindLegacyAttrVBOs();
+			vboBound = true;
+		}
 		original->DrawElements();
-		S3DModelHelpers::UnbindLegacyAttrVBOs();
 	} else {
+		if (vboBound) {
+			S3DModelHelpers::UnbindLegacyAttrVBOs();
+			vboBound = false;
+		}
 		glCallList(ldl);
 	}
 	glPopMatrix();

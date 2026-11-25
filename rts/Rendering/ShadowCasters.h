@@ -26,8 +26,13 @@ namespace ShadowCasters {
 	void Begin();
 	void End();
 
-	// Whether `obj` (flagged for the shadow pass) casts at all.
-	bool Wanted(const CSolidObject* obj);
+	// Whether receiver-based culling is active and at least one 3D receiver is in view.
+	bool ReceiversActive();
+	bool HasReceivers();
+
+	// Whether `obj` (flagged for the shadow pass) casts at all. `isIcon` marks a unit drawn
+	// as a 2D tactical icon rather than a 3D model, so it receives no shadow itself.
+	bool Wanted(const CSolidObject* obj, bool isIcon = false);
 
 	// With ShadowCasterLOD, the length per texel that chooses `obj`'s level; otherwise < 0.
 	float LevelLength(const CSolidObject* obj, int objType);
