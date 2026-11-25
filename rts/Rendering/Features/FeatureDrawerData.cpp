@@ -90,22 +90,31 @@ void CFeatureDrawerData::ConfigNotify(const std::string& key, const std::string&
 	LOG_L(L_INFO, "[FeatureDrawer::%s] {draw,fade}distance set to {%f,%f}", __func__, featureDrawDistance, featureFadeDistance);
 }
 
-void CFeatureDrawerData::UpdateDrawAlpha(CFeature* f, const CCamera* playerCam) const
+DrawFlags CFeatureDrawerData::UpdateDrawAlpha(CFeature* f, const CCamera* playerCam) const
 {
+	// special case for non-fading features
 	if (!f->alphaFade) {
 		f->drawAlpha = 1.0f;
-		return;
+		return DrawFlags::SO_OPAQUE_FLAG;
 	}
 	const float camDist = (f->drawPos - playerCam->GetPos()).Length();
+	// too far, don't draw at all
 	if (camDist > featureDrawDistance) {
 		f->drawAlpha = 0.0f;
-	} else if (camDist < featureFadeDistance) {
-		f->drawAlpha = 1.0f;
-	} else if (featureDrawDistance == featureFadeDistance) {
-		f->drawAlpha = 0.0f;
-	} else {
-		f->drawAlpha = std::max(0.0f, 1.0f - (camDist - featureFadeDistance) / (featureDrawDistance - featureFadeDistance));
+		return DrawFlags::SO_NODRAW_FLAG;
 	}
+	// close enough to draw solid
+	if (camDist < featureFadeDistance) {
+		f->drawAlpha = 1.0f;
+		return DrawFlags::SO_OPAQUE_FLAG;
+	}
+	// fading is disabled, just don't draw
+	if (featureDrawDistance == featureFadeDistance) {
+		f->drawAlpha = 0.0f;
+		return DrawFlags::SO_NODRAW_FLAG;
+	}
+	f->drawAlpha = std::max(0.0f, 1.0f - (camDist - featureFadeDistance) / (featureDrawDistance - featureFadeDistance));
+	return DrawFlags::SO_ALPHAF_FLAG;
 }
 
 void CFeatureDrawerData::UpdatePoses()
@@ -195,40 +204,12 @@ void CFeatureDrawerData::UpdateObjectDrawFlags(CSolidObject* o) const
 		switch (camType)
 			{
 			case CCamera::CAMTYPE_PLAYER: {
-				const float camDist = (f->drawPos - cam->GetPos()).Length();
-
-				// special case for non-fading features
-				if (!f->alphaFade) {
-					f->SetDrawFlag(DrawFlags::SO_OPAQUE_FLAG);
-					f->drawAlpha = 1.0f;
+				const DrawFlags flag = UpdateDrawAlpha(f, cam);
+				if (flag == DrawFlags::SO_NODRAW_FLAG)
 					continue;
-				}
 
-				// too far, don't draw at all
-				if (camDist > featureDrawDistance) {
-					f->drawAlpha = 0.0f;
-					continue;
-				}
-
-				// close enough to draw solid
-				if (camDist < featureFadeDistance) {
-					f->drawAlpha = 1.0f;
-					f->SetDrawFlag(DrawFlags::SO_OPAQUE_FLAG);
-					if (f->IsInWater())
-						f->AddDrawFlag(DrawFlags::SO_REFRAC_FLAG);
-
-					continue;
-				}
-
-				// fading is disabled, just don't draw
-				if (featureDrawDistance == featureFadeDistance) {
-					f->drawAlpha = 0.0f;
-					continue;
-				}
-
-				f->drawAlpha = std::max(0.0f, 1.0f - (camDist - featureFadeDistance) / (featureDrawDistance - featureFadeDistance));
-				f->SetDrawFlag(DrawFlags::SO_ALPHAF_FLAG);
-				if (f->IsInWater())
+				f->SetDrawFlag(flag);
+				if (f->alphaFade && f->IsInWater())
 					f->AddDrawFlag(DrawFlags::SO_REFRAC_FLAG);
 			} break;
 

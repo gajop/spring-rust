@@ -31,7 +31,7 @@ protected:
 	void UpdateObjectDrawFlags(CSolidObject* o) const override;
 private:
 	static void UpdateDrawPos(CFeature* f);
-	void UpdateDrawAlpha(CFeature* f, const CCamera* playerCam) const;
+	DrawFlags UpdateDrawAlpha(CFeature* f, const CCamera* playerCam) const;
 	bool posesUpdated = false;
 public:
 	float featureDrawDistance;
