@@ -175,6 +175,11 @@ public:
 		return lastLOD;
 	}
 
+	// `lod` made `coarser` levels coarser, at most the last level.
+	unsigned int Coarser(unsigned int lod, unsigned int coarser) const {
+		return (lodCount == 0) ? lod : std::min(lod + coarser, lodCount - 1);
+	}
+
 	unsigned int SetCurrentLOD(unsigned int lod) { return (currentLOD = lod); }
 
 	unsigned int GetLODCount() const { return lodCount; }
@@ -208,12 +213,12 @@ public:
 	}
 
 
-	bool AddObjectForLOD(CSolidObject* o, LuaObjType objType, LuaMatType matType, float lodDist) {
+	bool AddObjectForLOD(CSolidObject* o, LuaObjType objType, LuaMatType matType, float lodDist, unsigned int coarser = 0) {
 		if (!Enabled())
 			return false;
 
 		LuaObjectMaterial* objMat = GetLuaMaterial(matType);
-		LuaObjectLODMaterial* lodMat = objMat->GetMaterial(SetCurrentLOD(CalcCurrentLOD(objType, lodDist, objMat->GetLastLOD())));
+		LuaObjectLODMaterial* lodMat = objMat->GetMaterial(SetCurrentLOD(Coarser(CalcCurrentLOD(objType, lodDist, objMat->GetLastLOD()), coarser)));
 
 		if ((lodMat != nullptr) && lodMat->IsActive()) {
 			switch (objType) {
@@ -229,12 +234,12 @@ public:
 	}
 
 	// As AddObjectForLOD, with the length per pixel (or texel) given outright.
-	bool AddObjectForLength(CSolidObject* o, LuaObjType objType, LuaMatType matType, float length) {
+	bool AddObjectForLength(CSolidObject* o, LuaObjType objType, LuaMatType matType, float length, unsigned int coarser = 0) {
 		if (!Enabled())
 			return false;
 
 		LuaObjectMaterial* objMat = GetLuaMaterial(matType);
-		LuaObjectLODMaterial* lodMat = objMat->GetMaterial(SetCurrentLOD(CalcLODForLength(length, objMat->GetLastLOD())));
+		LuaObjectLODMaterial* lodMat = objMat->GetMaterial(SetCurrentLOD(Coarser(CalcLODForLength(length, objMat->GetLastLOD()), coarser)));
 
 		if ((lodMat != nullptr) && lodMat->IsActive()) {
 			switch (objType) {

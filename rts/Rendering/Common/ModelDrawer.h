@@ -356,6 +356,11 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawOpaquePassImpl(bool defe
 	constexpr static auto zone_name = spring::Concat(spring::TypeToCharN<TDrawer>().str, "::DrawOpaquePass");
 	SCOPED_TIMER(zone_name.str);
 
+	// The Lua-material bins below take each object's level of detail from the pass's LOD factor
+	// as they are filled, so set it before filling them, not only before drawing them: set late,
+	// a pass inherited the previous pass's factor (the camera pass took LODScaleShadow).
+	LuaObjectDrawer::SetDrawPassGlobalLODFactor(lot);
+
 	SetupOpaqueDrawing(deferredPass);
 
 	for (int modelType = MODELTYPE_3DO; modelType < MODELTYPE_CNT; ++modelType) {
@@ -386,6 +391,11 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawAlphaPassImpl(bool drawR
 {
 	constexpr static auto zone_name = spring::Concat(spring::TypeToCharN<TDrawer>().str, "::DrawAlphaPass");
 	SCOPED_TIMER(zone_name.str);
+
+	// The Lua-material bins below take each object's level of detail from the pass's LOD factor
+	// as they are filled, so set it before filling them, not only before drawing them: set late,
+	// a pass inherited the previous pass's factor (the camera pass took LODScaleShadow).
+	LuaObjectDrawer::SetDrawPassGlobalLODFactor(lot);
 
 	SetupAlphaDrawing(false);
 
@@ -427,6 +437,11 @@ inline void CModelDrawerBase<TDrawerData, TDrawer>::DrawShadowPassImpl() const
 		glAlphaFunc(GL_GREATER, 0.5f);
 		glEnable(GL_ALPHA_TEST);
 	}
+
+	// The Lua-material bins below take each object's level of detail from the pass's LOD factor
+	// as they are filled, so set it before filling them, not only before drawing them: set late,
+	// a pass inherited the previous pass's factor (the camera pass took LODScaleShadow).
+	LuaObjectDrawer::SetDrawPassGlobalLODFactor(lot);
 
 	CShadowHandler::ShadowGenProgram shadowGenProgram;
 	if constexpr (legacy)

@@ -22,6 +22,7 @@
 #include "System/Log/ILog.h"
 
 CONFIG(bool, ShadowCasterLOD).defaultValue(false).description("Shadow-pass models take the level of detail that matches the length one shadow-map texel covers (times LODScaleShadow), or one screen pixel at the model (times LODScale) where coarser. Off: the shadow camera's projected distance.");
+CONFIG(int, ShadowLODOffset).defaultValue(0).minimumValue(0).description("Shadow-pass Lua-material models are drawn this many levels of detail coarser than the level the pass chose, at most their last level.");
 CONFIG(float, ShadowCasterMinTexels).defaultValue(0.0f).minimumValue(0.0f).description("Models whose diameter spans fewer shadow-map texels than this cast no shadow.");
 CONFIG(float, ShadowReceiverMinPixels).defaultValue(0.0f).minimumValue(0.0f).description("Models whose projected diameter spans fewer screen pixels than this do not demand shadows as receivers.");
 CONFIG(bool, ShadowCasterReceivers).defaultValue(false).description("A model casts only if it is in the player's view or its shadow reaches a unit or feature in the player's view. For games whose models are the only shadow receivers: the map loses the shadows of models left out, and on void/non-ground maps with zero visible model receivers the shadow pass is skipped after clearing the shadow map once.");
@@ -34,6 +35,7 @@ struct Receiver {
 
 struct State {
 	bool levels = false;
+	unsigned int levelOffset = 0;
 	bool receivers = false;
 	float minTexels = 0.0f;
 	float minRecvPixels = 0.0f;
@@ -171,6 +173,7 @@ bool Shadows(float x, float y, float z, float r) {
 void ShadowCasters::Begin()
 {
 	s.levels = configHandler->GetBool("ShadowCasterLOD");
+	s.levelOffset = static_cast<unsigned int>(std::max(0, configHandler->GetInt("ShadowLODOffset")));
 	s.receivers = configHandler->GetBool("ShadowCasterReceivers");
 	s.minTexels = configHandler->GetFloat("ShadowCasterMinTexels");
 	s.minRecvPixels = configHandler->GetFloat("ShadowReceiverMinPixels");
@@ -251,6 +254,11 @@ float ShadowCasters::LevelLength(const CSolidObject* obj, int objType)
 	const CCamera* cam = CCameraHandler::GetCamera(CCamera::CAMTYPE_PLAYER);
 	const float pixel = std::max(cam->ProjectedDistance(obj->pos), 0.0f) * cam->GetLPPScale() * LuaObjectDrawer::GetLODScale(objType);
 	return std::max(s.texel * LuaObjectDrawer::GetLODScaleShadow(objType), pixel);
+}
+
+unsigned int ShadowCasters::LevelOffset()
+{
+	return s.levelOffset;
 }
 
 void ShadowCasters::CountLevel(unsigned int level)

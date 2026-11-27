@@ -12,6 +12,8 @@ class CSolidObject;
 //   (times LODScale) where that is coarser: a silhouette finer than either is lost in the map or
 //   on screen. Off: the shadow camera's own projected distance, which for an orthographic light
 //   camera centred on the ground is zero or negative for anything above it (the finest level).
+// - ShadowLODOffset: a Lua-material model casts this many levels coarser than the level chosen
+//   above (at most its last level), so the shadow can use a lighter mesh than the camera.
 // - ShadowCasterMinTexels: a model whose diameter spans fewer texels than this does not cast.
 // - ShadowCasterReceivers: a model casts only if it is in the player's view itself, or if its
 //   shadow, swept away from the light, reaches a unit or feature in the player's view. For a
@@ -36,6 +38,9 @@ namespace ShadowCasters {
 
 	// With ShadowCasterLOD, the length per texel that chooses `obj`'s level; otherwise < 0.
 	float LevelLength(const CSolidObject* obj, int objType);
+
+	// ShadowLODOffset: how many levels coarser a Lua-material caster is drawn.
+	unsigned int LevelOffset();
 
 	// Counts the level a Lua-material caster was drawn at (stats only).
 	void CountLevel(unsigned int level);

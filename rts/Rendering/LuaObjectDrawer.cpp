@@ -818,14 +818,16 @@ bool LuaObjectDrawer::AddShadowMaterialObject(CSolidObject* obj, LuaObjType objT
 	const LuaMatType matType = GetDrawPassShadowMat();
 	const float      length  = ShadowCasters::LevelLength(obj, objType);
 
+	const unsigned int coarser = ShadowCasters::LevelOffset();
+
 	if (length >= 0.0f) {
-		const bool added = matData->AddObjectForLength(obj, objType, matType, length);
+		const bool added = matData->AddObjectForLength(obj, objType, matType, length, coarser);
 		ShadowCasters::CountLevel(matData->GetCurrentLOD());
 		return added;
 	}
 
 	const float lodDist = camera->ProjectedDistance(obj->pos);
-	const bool  added   = matData->AddObjectForLOD(obj, objType, matType, lodDist);
+	const bool  added   = matData->AddObjectForLOD(obj, objType, matType, lodDist, coarser);
 	ShadowCasters::CountLevel(matData->GetCurrentLOD());
 	return added;
 }
